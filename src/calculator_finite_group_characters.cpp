@@ -86,9 +86,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
   this->ownerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdMatrix(this->GetDim());
+  this->theElementImageS[0].MakeIdMatrix(this->getDimension());
   ElementWeylGroup currentElt;
-  int theRank = this->ownerGroup->GetDim();
+  int theRank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
   ElementsExplored.addOnTop(currentElt);
   List<ElementWeylGroup> theGens;
@@ -99,7 +99,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
     int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
       currentElt = theGens[j]* ElementsExplored[i];
-      if (!ElementsExplored.Contains(currentElt)) {
+      if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
@@ -123,9 +123,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   auto ElementsExplored = this->ownerGroup->theElements;
-  ElementsExplored.Clear();
+  ElementsExplored.clear();
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdMatrix(this->GetDim());
+  this->theElementImageS[0].MakeIdMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
@@ -136,7 +136,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
     int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
       currentElt = theGens[j] * ElementsExplored[i];
-      if (!ElementsExplored.Contains(currentElt)) {
+      if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
@@ -235,7 +235,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
     if (theReport.TickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
-      theReport.Report(reportStream.str());
+      theReport.report(reportStream.str());
     }
     Matrix<coefficient>::MatrixInBasis(this->generatorS[i], output.generatorS[i], output.basis, output.gramMatrixInverted);
   }
@@ -247,7 +247,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
         std::stringstream reportStream;
         reportStream << "Restricting class function matrix " << i + 1 << " out of "
         << this->classFunctionMatrices.size;
-        theReport.Report(reportStream.str());
+        theReport.report(reportStream.str());
       }
       Matrix<coefficient>::MatrixInBasis
       (this->classFunctionMatrices[i], output.classFunctionMatrices[i], output.vectorSpaceBasis,
@@ -483,7 +483,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   const Expression& vectorNode = input[2];
   DynkinType theType;
   if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra*>()) {
-    SemisimpleLieAlgebra* theAlgebra = theSSalgebraNode.GetValue<SemisimpleLieAlgebra*>();
+    SemisimpleLieAlgebra* theAlgebra = theSSalgebraNode.getValue<SemisimpleLieAlgebra*>();
     theType = theAlgebra->theWeyl.theDynkinType;
   } else {
     if (!CalculatorConversions::functionDynkinType(
@@ -665,7 +665,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
         currentWeight -= theWeyl.rho;
       }
       differenceVector = outputOrbit[i] - currentWeight;
-      bool isGood = !differenceVector.IsEqualToZero();
+      bool isGood = !differenceVector.isEqualToZero();
       for (int k = 0; k < differenceVector.size; k++) {
         if (!differenceVector[k].IsConstant(&currentCoordDifference)) {
           isGood = false;
@@ -747,7 +747,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(
     return false;
   }
   WeylGroupData& theGroup = output.GetValueNonConst<WeylGroupData>();
-  if (theGroup.GetDim() > 8) {
+  if (theGroup.getDimension() > 8) {
     theCommands << "Computing character table disabled for rank >= 8, modify file " << __FILE__
     << " line "  << __LINE__ << " to change that. ";
     return false;
@@ -766,7 +766,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(
     return false;
   }
   WeylGroupData& theGroup = output.GetValueNonConst<WeylGroupData>();
-  if (theGroup.GetDim() > 8) {
+  if (theGroup.getDimension() > 8) {
     theCommands << "Conjugacy classes computation disabled for rank greater than 8. "
     << "Modify source code "
     << "file " << __FILE__ << " line " << __LINE__
@@ -805,17 +805,17 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   WeylGroupAutomorphisms theAutomorphismGroup;
   theAutomorphismGroup.theWeyl = &theGroupData;
   theAutomorphismGroup.ComputeOuterAutoGenerators();
-  groupNoOuterAutos.generators.setSize(theGroupData.GetDim());
+  groupNoOuterAutos.generators.setSize(theGroupData.getDimension());
   Vector<Rational> simpleRoot;
-  for (int i = 0; i < theGroupData.GetDim(); i ++) {
-    simpleRoot.MakeEi(theGroupData.GetDim(), i);
+  for (int i = 0; i < theGroupData.getDimension(); i ++) {
+    simpleRoot.MakeEi(theGroupData.getDimension(), i);
     theGroupData.GetMatrixReflection(simpleRoot, groupNoOuterAutos.generators[i]);
   }
   //if (false)
   Matrix<Rational> currentAuto;
   List<Matrix<Rational> > outerAutos;
   for (int i = 0; i < theAutomorphismGroup.theOuterAutos.theGenerators.size; i ++) {
-    theAutomorphismGroup.theOuterAutos.theGenerators[i].GetMatrix(currentAuto, theGroupData.GetDim());
+    theAutomorphismGroup.theOuterAutos.theGenerators[i].GetMatrix(currentAuto, theGroupData.getDimension());
     outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
@@ -844,7 +844,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
       conjugatedMat *= invertedOuterAuto;
       int found = - 1;
       for (int k = 0; k<groupNoOuterAutos.conjugacyClasseS.size; k ++) {
-        if (groupNoOuterAutos.conjugacyClasseS[k].theElements.Contains(conjugatedMat)) {
+        if (groupNoOuterAutos.conjugacyClasseS[k].theElements.contains(conjugatedMat)) {
           found = k;
           break;
         }
@@ -863,10 +863,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     return false;
   }
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
-  if (theGroupData.GetDim() > 7) {
+  if (theGroupData.getDimension() > 7) {
     theCommands << "<hr>Loaded Dynkin type "
     << theGroupData.theDynkinType.toString() << " of rank "
-    << theGroupData.GetDim() << " but I've been told "
+    << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
@@ -888,9 +888,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   }
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
   theGroupData.CheckConsistency();
-  if (theGroupData.GetDim() > 8) {
+  if (theGroupData.getDimension() > 8) {
     return theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
-    << " of rank " << theGroupData.GetDim() << " but I've been told "
+    << " of rank " << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
   theGroupData.CheckConsistency();
@@ -1043,8 +1043,8 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(
     return false;
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep =
-  leftE.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  outputRep *= rightE.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
+  leftE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
+  outputRep *= rightE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -1501,7 +1501,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
     if (KNcache != nullptr) {
       int ancestorIndex = KNcache->getIndex(ancestor);
       if (ancestorIndex != - 1) {
-        ancestor = KNcache->GetElement(ancestorIndex);
+        ancestor = KNcache->getElement(ancestorIndex);
       } else if (!ancestor.Compute(KNcache, comments)) {
         return false;
       } else {
@@ -1543,8 +1543,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
     out << partitionPairs[i].Object1.toString()
     << "," << partitionPairs[i].Object2.toString() << "<br>";
   }
-  partitionPairs.QuickSortAscending();
-  partitionsParabolics.QuickSortAscending();
+  partitionPairs.quickSortAscending();
+  partitionsParabolics.quickSortAscending();
   Matrix<Rational> theMultTable;
   theMultTable.init(partitionPairs.size, partitionsParabolics.size);
   for (int j = 0; j < partitionPairs.size; j ++) {
@@ -1842,7 +1842,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
     return false;
   }
   WeylGroupData& theWeyl = output.GetValueNonConst<WeylGroupData>();
-  if (theWeyl.GetDim() > 12) {
+  if (theWeyl.getDimension() > 12) {
     return theCommands << "<hr>Computing sign signatures restricted up to rank 12.";
   }
   char type = 'X';
@@ -1886,7 +1886,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
     return false;
   }
   WeylGroupData& theWeyl = output.GetValueNonConst<WeylGroupData>();
-  if (theWeyl.GetDim() > 8) {
+  if (theWeyl.getDimension() > 8) {
     theCommands << "<hr>Computing sign signatures restricted up to rank 8.";
     return false;
   }
@@ -1914,7 +1914,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
       for (int i = 0; i < currentSGs->size; i ++) {
         currentTauSig.Object1 = (*currentSGs)[i].theDynkinType.toString();
         currentTauSig.Object2 = (*currentSGs)[i].tauSignature;
-        if (!tauSigPairs.Contains(currentTauSig)) {
+        if (!tauSigPairs.contains(currentTauSig)) {
           tauSigPairs.addOnTop(currentTauSig);
           finalSubGroups.addOnTop((*currentSGs)[i]);
         }
@@ -2046,7 +2046,7 @@ MonomialMacdonald::~MonomialMacdonald() {
 
 void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
   MacroRegisterFunctionWithName("MonomialMacdonald::GenerateMyOrbit");
-  output.Clear();
+  output.clear();
   output.addOnTop(*this);
   MonomialMacdonald currentMon;
   Rational tempRat;
@@ -2066,7 +2066,7 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
   Vector<Rational> currentV;
   for (int i = 0; i < inputRoots.size; i ++) {
     currentV = inputRoots[i];
-    if (currentV.IsNegative()) {
+    if (currentV.isNegative()) {
       currentV *= - 1;
     }
     int indexInRoots = inputOwner.theWeyl.RootSystem.getIndex(currentV);
@@ -2089,7 +2089,7 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
   for (int i = 0; i <originalSel.CardinalitySelection; i ++) {
     currentV = this->owner->theWeyl.RootSystem[originalSel.elements[i]];
     this->owner->theWeyl.SimpleReflection(indexSimpleReflection, currentV);
-    if (currentV.IsNegative()) {
+    if (currentV.isNegative()) {
       currentV *= - 1;
       outputMultiple *= - 1;
     }
@@ -2469,7 +2469,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
       std::stringstream reportStream;
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
       reportStream << "<br>Evaluating: " << theProduct.toString();
-      theReport.Report(reportStream.str());
+      theReport.report(reportStream.str());
       theCommands.EvaluateExpression(theCommands, theProduct, evaluatedProduct);
       //if (evaluatedProduct == theSet[0])
       //{
@@ -2489,7 +2489,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
   output.reset(theCommands, theSet.size + 1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i = 0; i < theSet.size; i ++) {
-    output.AddChildOnTop(theSet[i]);
+    output.addChildOnTop(theSet[i]);
   }
   return true;
 }

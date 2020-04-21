@@ -26,7 +26,7 @@ bool Calculator::innerOperationBinary(
   if (theOperation.IsZeroPointer()) {
     return false;
   }
-  List<Function>& handlers = theOperation.GetElement().handlers;
+  List<Function>& handlers = theOperation.getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     if (handlers[i].inputFitsMyInnerType(input)) {
       if (handlers[i].theFunction(theCommands, input, output)) {
@@ -49,11 +49,11 @@ bool Calculator::outerExtractBaseMultiplication(
   //handle Anything * Rational = Rational * Anything
   output = input;
   if (output[2].IsOfType<Rational>()) {
-    output.children.SwapTwoIndices(1, 2);
+    output.children.swapTwoIndices(1, 2);
     result = true;
   }
   if (output[2].IsOfType<double>() && !output[1].IsOfType<Rational>()) {
-    output.children.SwapTwoIndices(1, 2);
+    output.children.swapTwoIndices(1, 2);
     result = true;
   }
   if (output[2].IsListStartingWithAtom(theCommands.opTimes())) {
@@ -77,7 +77,7 @@ bool Calculator::outerExtractBaseMultiplication(
     }
   }
   //handle 0 * anything = 0
-  if (output[1].IsEqualToZero()) {
+  if (output[1].isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
   return result;
@@ -247,7 +247,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     }
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
   }
-  if (rightAN.IsEqualToZero()) {
+  if (rightAN.isEqualToZero()) {
     return output.MakeError("Division by zero. ", theCommands);
   }
   leftAN /= rightAN;
@@ -376,7 +376,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR)) {
     return false;
   }
-  if (rightR.IsEqualToZero()) {
+  if (rightR.isEqualToZero()) {
     return output.MakeError("Division by zero.", theCommands);
   }
   return output.AssignValue(leftR / rightR, theCommands);
@@ -426,8 +426,8 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
     return false;
   }
   ElementTensorsGeneralizedVermas<RationalFunction> resultTensor;
-  resultTensor = inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
-  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >());
+  resultTensor = inputConverted[1].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  resultTensor.TensorOnTheRight(inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >());
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
 
@@ -485,7 +485,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   if (!inputConverted[1].IsOfType<ElementWeylGroup>()) {
     return false;
   }
-  ElementWeylGroup theElt = inputConverted[1].GetValue<ElementWeylGroup>();
+  ElementWeylGroup theElt = inputConverted[1].getValue<ElementWeylGroup>();
   if (theElt.owner != &theWeight.owner->theWeyl) {
     return theCommands << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
@@ -557,7 +557,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
     return false;
   }
   SemisimpleLieAlgebra& theSSalg =
-  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerSS();
+  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerSS();
   Expression leftE;
   inputConverted[1].CheckConsistency();
   input[1].CheckConsistency();
@@ -566,16 +566,16 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFunction>& rightEltETGVM =
-  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
   ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
-  if (rightEltETGVM.IsEqualToZero()) {
+  if (rightEltETGVM.isEqualToZero()) {
     output = inputConverted[2];
     return true;
   }
   theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
   if (!rightEltETGVM.MultiplyOnTheLeft(
-    leftE.GetValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
+    leftE.getValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
   )) {
     return false;
   }
@@ -596,15 +596,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
     return false;
   }
   if (
-    inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
-    inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation()
+    inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
+    inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation()
   ) {
     return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].toString()
     << " by " << inputContextsMerged[2].toString() << ": "
     << "one of the two differential operators has differential operator exponent that is not a small integer. ";
   }
-  ElementWeylAlgebra<Rational> result = inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
-  result *= inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
+  ElementWeylAlgebra<Rational> result = inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >();
+  result *= inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -691,8 +691,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   )) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction> result = inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunction> >();
-  result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunction> >();
+  ElementUniversalEnveloping<RationalFunction> result = inputContextsMerged[1].getValue<ElementUniversalEnveloping<RationalFunction> >();
+  result *= inputContextsMerged[2].getValue<ElementUniversalEnveloping<RationalFunction> >();
   result.simplify();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
@@ -712,9 +712,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
     return false;
   }
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon =
-  output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  output.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon =
-  rightCopy.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  rightCopy.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> result;
   result = leftMon;
   result *= rightMon;
@@ -745,15 +745,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.IsOfType<LittelmannPath>()) {
     return false;
   }
-  LittelmannPath result = rightCopy.GetValue<LittelmannPath>();
+  LittelmannPath result = rightCopy.getValue<LittelmannPath>();
   WeylGroupData& theWeyl = *result.owner;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO;
-  theLRO = output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  theLRO = output.getValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   for (int i = theLRO.generatorsIndices.size - 1; i >= 0; i --) {
     if (
       theLRO.generatorsIndices[i] == 0 ||
-      theLRO.generatorsIndices[i] < - theWeyl.GetDim() ||
-      theLRO.generatorsIndices[i] > theWeyl.GetDim()
+      theLRO.generatorsIndices[i] < - theWeyl.getDimension() ||
+      theLRO.generatorsIndices[i] > theWeyl.getDimension()
     ) {
       std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value "
@@ -835,7 +835,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(
   if (!input[1].IsOfType(&base) || !input[2].IsSmallInteger(&thePower)) {
     return false;
   }
-  if (base.IsEqualToZero() && thePower <= 0) {
+  if (base.isEqualToZero() && thePower <= 0) {
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   }
   if (thePower < 0) {
@@ -1034,7 +1034,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(
   if (thePower < 0) {
     return false;
   }
-  if (base.IsEqualToZero() && thePower <= 0) {
+  if (base.isEqualToZero() && thePower <= 0) {
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   }
   base.RaiseToPower(thePower);
@@ -1145,10 +1145,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   if (!input[2].IsSmallInteger(&thePower)) {
     return false;
   }
-  if (base.IsEqualToZero() && thePower < 0) {
+  if (base.isEqualToZero() && thePower < 0) {
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   }
-  if (base.IsEqualToZero() && thePower == 0) {
+  if (base.isEqualToZero() && thePower == 0) {
     return output.AssignValue(1, theCommands);
   }
   if (thePower < 0) {
@@ -1207,7 +1207,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
 
-  if (base.IsEqualToZero()) {
+  if (base.isEqualToZero()) {
     if (thePower < 0) {
       return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
     }
@@ -1283,7 +1283,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   }
   MonomialUniversalEnveloping<RationalFunction> theMon;
   theMon = theUE[0];
-  theMon.Powers[0] *= exponentConverted.GetValue<RationalFunction>();
+  theMon.Powers[0] *= exponentConverted.getValue<RationalFunction>();
   ElementUniversalEnveloping<RationalFunction> outputUE;
   outputUE.makeZero(*theUE.owner);
   outputUE.AddMonomial(theMon, 1);
@@ -1665,7 +1665,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
   Expression tempProduct;
   for (int i = 1; i < input[2].size(); i ++) {
     tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
-    output.AddChildOnTop(tempProduct);
+    output.addChildOnTop(tempProduct);
   }
   return true;
 }
@@ -1819,7 +1819,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(
     return false;
   }
   MatrixTensor<Rational> result;
-  result.AssignTensorProduct(leftE.GetValue<MatrixTensor<Rational> >(), rightE.GetValue<MatrixTensor<Rational> >());
+  result.AssignTensorProduct(leftE.getValue<MatrixTensor<Rational> >(), rightE.getValue<MatrixTensor<Rational> >());
   return output.AssignValue(result, theCommands);
 }
 
@@ -1974,7 +1974,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     if (!leftE.ConvertInternally<RationalFunction>(leftErfForm)) {
       return theCommands << "Failed to convert " << leftE.toString() << " to rational function. ";
     }
-    RationalFunction theScalar = leftErfForm.GetValue<RationalFunction>();
+    RationalFunction theScalar = leftErfForm.getValue<RationalFunction>();
     rightMat *= theScalar;
     ExpressionContext contextE = leftE.GetContext();
     return output.AssignMatrix(rightMat, theCommands, &contextE);
@@ -2004,15 +2004,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
   }
   Rational theScalar;
   if (leftE.IsOfType<Rational>(&theScalar)) {
-    MatrixTensor<Rational> result = rightE.GetValue<MatrixTensor<Rational> >();
+    MatrixTensor<Rational> result = rightE.getValue<MatrixTensor<Rational> >();
     result *= theScalar;
     return output.AssignValue(result, theCommands);
   }
   if (!leftE.IsOfType<MatrixTensor<Rational> >()) {
     return false;
   }
-  const MatrixTensor<Rational>& rightMat = rightE.GetValue<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result = leftE.GetValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& rightMat = rightE.getValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result = leftE.getValue<MatrixTensor<Rational> >();
   result *= rightMat;
   return output.AssignValue(result, theCommands);
 }
@@ -2082,8 +2082,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
     rightE.IsOfType<ElementUniversalEnveloping<RationalFunction> >()
   ) {
     ElementUniversalEnveloping<RationalFunction> result;
-    leftE.GetValue<ElementUniversalEnveloping<RationalFunction> >().LieBracketOnTheRight(
-      rightE.GetValue<ElementUniversalEnveloping<RationalFunction> >(), result
+    leftE.getValue<ElementUniversalEnveloping<RationalFunction> >().LieBracketOnTheRight(
+      rightE.getValue<ElementUniversalEnveloping<RationalFunction> >(), result
     );
     result.simplify();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
@@ -2124,7 +2124,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
   if (!input.StartsWith(theCommands.opLieBracket(), 3)) {
     return false;
   }
-  if (input[1].IsEqualToZero() || input[2].IsEqualToZero()) {
+  if (input[1].isEqualToZero() || input[2].isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
   if (input[2] > input[1]) {
@@ -2174,8 +2174,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
     theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
-  ElementWeylAlgebra<Rational> resultE = rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
-  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >());
+  ElementWeylAlgebra<Rational> resultE = rightConverted.getValue<ElementWeylAlgebra<Rational> >();
+  resultE.LieBracketOnTheLeft(leftConverted.getValue<ElementWeylAlgebra<Rational> >());
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
 
@@ -2381,11 +2381,11 @@ bool CalculatorFunctionsBinaryOps::innerSetMinus(
     resultEs.addOnTop(leftSetE[i]);
   }
   for (int i = 1; i < rightSetE.children.size; i ++) {
-    if (resultEs.Contains(rightSetE[i])) {
+    if (resultEs.contains(rightSetE[i])) {
       resultEs.RemoveIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
     }
   }
-  resultEs.QuickSortAscending();
+  resultEs.quickSortAscending();
   return output.MakeSequence(theCommands, &resultEs);
 }
 
@@ -2436,8 +2436,8 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(
   if (!rightE.IsOfType<MatrixTensor<Rational> >()|| !leftE.IsOfType<MatrixTensor<Rational> >()) {
     return false;
   }
-  const MatrixTensor<Rational>& rightMat = rightE.GetValue<MatrixTensor<Rational> >();
-  const MatrixTensor<Rational>& leftMat = leftE.GetValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& rightMat = rightE.getValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& leftMat = leftE.getValue<MatrixTensor<Rational> >();
   MatrixTensor<Rational> result = leftMat;
   result += rightMat;
   return output.AssignValue(result, theCommands);
@@ -2451,7 +2451,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(
     return false;
   }
   Expression tempE = input;
-  tempE.children.SwapTwoIndices(1, 2);
+  tempE.children.swapTwoIndices(1, 2);
   return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(theCommands, tempE, output);
 }
 
@@ -2479,7 +2479,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {
     tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
-    output.AddChildOnTop(tempSum);
+    output.addChildOnTop(tempSum);
   }
   return true;
 }

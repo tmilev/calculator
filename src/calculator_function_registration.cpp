@@ -8371,7 +8371,7 @@ void Calculator::addOneStringHandler(
   Expression::ToStringHandler handler,
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
 ) {
-  if (handlerCollection.Contains(atom)) {
+  if (handlerCollection.contains(atom)) {
     if (handlerCollection.getValueNoFail(
       atom) != handler
     ) {

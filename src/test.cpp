@@ -47,7 +47,7 @@ const std::string Test::Suites::build = "build";
 
 void Test::Run() {
   MacroRegisterFunctionWithName("Test::Run");
-  global << "Testing ..." << logger::endL;
+  global << "Testing ..." << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->ShouldTest(Test::Suites::database)) {
     Database::Test::All();
@@ -87,22 +87,22 @@ void Test::Run() {
   if (this->ShouldTest(Test::Suites::build)) {
     GlobalVariables::Test::All();
   }
-  global << logger::green << "All tests passed. " << logger::endL;
+  global << Logger::green << "All tests passed. " << Logger::endL;
 }
 
 bool Test::ShouldTest(const std::string& testSuite) {
   if (this->flagTestAll) {
     return true;
   }
-  return this->inputs.Contains(testSuite);
+  return this->inputs.contains(testSuite);
 }
 
 void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
-  global << "Input arguments: " << inputArguments.ToStringCommaDelimited() << logger::endL;
+  global << "Input arguments: " << inputArguments.ToStringCommaDelimited() << Logger::endL;
   if (
     this->inputs.size == 0 ||
-    this->inputs.Contains(Test::Suites::all)
+    this->inputs.contains(Test::Suites::all)
   ) {
     this->flagTestAll = true;
   } else {

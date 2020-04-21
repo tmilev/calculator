@@ -30,7 +30,7 @@ public:
     }
     Marker(): offset(- 1), length(- 1) {
     }
-    JSData ToJSON();
+    JSData toJSON();
     std::string toString() const;
   };
   class WriterIntegerWithMarker {

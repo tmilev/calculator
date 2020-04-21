@@ -41,11 +41,11 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
             reportStream << ", ";
           }
         }
-        theReport.Report(reportStream.str());
+        theReport.report(reportStream.str());
       }
     }
     for (int j = i + 1; j < dim; j ++) {
-      if (!this->elements[j][i].IsEqualToZero()) {
+      if (!this->elements[j][i].isEqualToZero()) {
         tempRat = this->elements[j][i];
         tempRat.Minus();
         this->AddTwoRows (i, j, i, tempRat);
@@ -54,7 +54,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
             std::stringstream reportStream;
             reportStream << "Computing large determinant: pivot " << i + 1 << ", row " << j << " out of "
             << dim <<  " times  " << dim << " total.";
-            theReport2.Report(reportStream.str());
+            theReport2.report(reportStream.str());
           }
         }
       }
@@ -73,7 +73,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
   int lastMatRowIndexToHide = theMat.NumRows;
   int firstMatColIndexToHide = theMat.NumCols;
   int lastMatColIndexToHide = theMat.NumCols;
-  FormatExpressions& theFormat = global.theDefaultFormat.GetElement();
+  FormatExpressions& theFormat = global.theDefaultFormat.getElement();
   if (theFormat.flagSuppressLongMatrices) {
     if (theMat.NumRows > theFormat.MaxMatrixDisplayedRows) {
       firstMatRowIndexToHide = theFormat.MaxMatrixDisplayedRows / 2;
@@ -142,7 +142,7 @@ void MathRoutines::RaiseToPower(
     std::stringstream reportStream;
     reportStream << "Raising " << theElement.toString()
     << " to power: " << thePowerCopy;
-    reportOne.Report(reportStream.str());
+    reportOne.report(reportStream.str());
   }
   theElement = theRingUnit;
   while (thePowerCopy > 0) {
@@ -152,7 +152,7 @@ void MathRoutines::RaiseToPower(
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Multiplying " << theElement.toString()
         << " by " << squares.toString();
-        reportTwo.Report(reportStream2.str());
+        reportTwo.report(reportStream2.str());
       }
       theElement *= squares;
     }
@@ -162,7 +162,7 @@ void MathRoutines::RaiseToPower(
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Squaring: " << squares.toString();
-        reportTwo.Report(reportStream2.str());
+        reportTwo.report(reportStream2.str());
       }
       squares *= squares;
     }
@@ -177,7 +177,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   templateMonomial& bufferMon
 ) const {
   MacroRegisterFunctionWithName("ElementMonomialAlgebra::MultiplyBy");
-  if (other.IsEqualToZero()) {
+  if (other.isEqualToZero()) {
     output.makeZero();
     return;
   }
@@ -199,7 +199,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     reportStream << "Large polynomial computation: " << this->size() << " x "
     << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
     << this->toString() << " times " << other.toString();
-    theReport1.Report(reportStream.str());
+    theReport1.report(reportStream.str());
   }
   bufferPoly.makeZero();
   bufferPoly.setExpectedSize(maxNumMonsFinal);
@@ -213,7 +213,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
         reportStream2 << "Multiplying monomials: "
         << i + 1 << " out of " << other.size() << " by " << j + 1
         << " out of " << this->size() << ". ";
-        theReport2.Report(reportStream2.str());
+        theReport2.report(reportStream2.str());
       }
       bufferMon = (*this)[j];
       bufferMon *= other[i];
@@ -260,7 +260,7 @@ void MatrixTensor<coefficient>::operator*=(
   const MatrixTensor<coefficient>& other
 ) {
   MacroRegisterFunctionWithName("MatrixTensor::MultiplyBy");
-  if (other.IsEqualToZero()) {
+  if (other.isEqualToZero()) {
     this->makeZero();
     return;
   }
@@ -279,7 +279,7 @@ void MatrixTensor<coefficient>::operator*=(
     reportStream << "Large matrix monomial computation: " << this->size() << " x "
     << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
     << this->toString() << " times " << other.toString();
-    theReport1.Report(reportStream.str());
+    theReport1.report(reportStream.str());
   }
   MatrixTensor<coefficient> result;
   result.setExpectedSize(maxNumMonsFinal);
@@ -292,7 +292,7 @@ void MatrixTensor<coefficient>::operator*=(
         reportStream2 << "Multiplying monomials: "
         << i + 1 << " out of " << other.size() << " by " << j + 1
         << " out of " << this->size() << ". ";
-        theReport2.Report(reportStream2.str());
+        theReport2.report(reportStream2.str());
       }
       currentMonomial = (*this)[j];
       currentMonomial *= other[i];
@@ -327,14 +327,14 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   while (row < this->NumRows && col < this->NumCols) {
     int foundPivotRow = - 1;
     for (int i = row; i < this->NumRows; i ++) {
-      if (!this->elements[i][col].IsEqualToZero()) {
+      if (!this->elements[i][col].isEqualToZero()) {
         foundPivotRow = i;
         break;
       }
     }
     if (foundPivotRow != - 1) {
       this->SwitchTwoRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
-      if (this->elements[row][col].IsNegative()) {
+      if (this->elements[row][col].isNegative()) {
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       }
       int ExploringRow = row + 1;
@@ -343,11 +343,11 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
           std::stringstream out;
           out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
           << ExploringRow + 1 << "; total rows: " << this->NumRows;
-          theReport.Report(out.str());
+          theReport.report(out.str());
         }
         coefficient& PivotElt = this->elements[row][col];
         coefficient& otherElt = this->elements[ExploringRow][col];
-        if (otherElt.IsNegative()) {
+        if (otherElt.isNegative()) {
           this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         }
         bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? PivotElt <= otherElt :
@@ -358,7 +358,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
           tempElt.AssignFloor();
           this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
         }
-        if (this->elements[ExploringRow][col].IsEqualToZero()) {
+        if (this->elements[ExploringRow][col].isEqualToZero()) {
           ExploringRow ++;
         } else {
           this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
@@ -370,7 +370,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
         tempElt /= PivotElt;
         tempElt.AssignFloor();
         this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
-        if (this->elements[i][col].IsNegative()) {
+        if (this->elements[i][col].isNegative()) {
           this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
         }
       }
@@ -398,7 +398,7 @@ template <class coefficient>
 void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   Selection BufferSel;
   Matrix<coefficient> Buffer;
-  if (this->size != 0 && theDim != this->GetDim()) {
+  if (this->size != 0 && theDim != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
   int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
@@ -449,7 +449,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... " ;
-    reportTask.Report(reportStream.str());
+    reportTask.report(reportStream.str());
   }
   Matrix<coefficient> theMat;
   int MaxNumRows = MathRoutines::Minimum(input.size, theDim);
@@ -476,7 +476,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... done. " ;
-    reportProgress.Report(reportStream.str());
+    reportProgress.report(reportStream.str());
   }
 }
 
@@ -490,7 +490,7 @@ void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int Start
     if (theReport.TickAndWantReport()) {
       std::stringstream out;
       out << "Processing row, element " << i + 1 << " out of " << this->NumCols;
-      theReport.Report(out.str());
+      theReport.report(out.str());
     }
     this->elements[ToRowIndex][i] += tempElement;
   }
@@ -596,7 +596,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     }
     for (int j = 0; j < this->NumRows; j ++) {
       if (j != NumFoundPivots) {
-        if (!this->elements[j][i].IsEqualToZero()) {
+        if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
           tempElement.Minus();
           if (theReport.TickAndWantReport()) {
@@ -604,7 +604,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
             reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols
             << "): column " << i + 1 << " out of " << this->NumCols
             << ".\n<br>Pivot row: " << NumFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->NumRows;
-            theReport.Report(reportStream.str());
+            theReport.report(reportStream.str());
           }
           this->AddTwoRows(NumFoundPivots, j, i, tempElement);
           if (carbonCopyMat != 0) {

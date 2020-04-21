@@ -45,7 +45,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand = 0;
       newRight = Accum;
       newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.Powers[i] - 1);
-      RemainingWeight.makeZero(theWeyl.GetDim());
+      RemainingWeight.makeZero(theWeyl.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
         newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.Powers[j]);
         RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.Powers[j];
@@ -56,7 +56,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand /= theWeyl.CartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
       summand += 1;
       summand -= oldRight.Powers[i];
-      if (!summand.IsEqualToZero()) {
+      if (!summand.isEqualToZero()) {
         summand *= this->hwTrace(
           newPair, theProgressReport
         );
@@ -75,7 +75,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
     std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size
     << " at recursion depth " << global.CustomStackTrace.size;
-    theProgressReport->Report(tempStream.str());
+    theProgressReport->report(tempStream.str());
   }
   return result;
 }
@@ -110,7 +110,7 @@ Rational ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly(
   if (theProgressReport != nullptr) {
     std::stringstream tempStream;
     tempStream << this->cachedPairs.size << " total cached pairs";
-    theProgressReport->Report(tempStream.str());
+    theProgressReport->report(tempStream.str());
   }
   return result;
 }
@@ -129,7 +129,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
   }
   List<MonomialUniversalEnveloping<coefficient> > oldGeneratingWordsNonReduced;
   oldGeneratingWordsNonReduced = this->theGeneratingWordsNonReduced;
-  this->theGeneratingWordsNonReduced.Clear();
+  this->theGeneratingWordsNonReduced.clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++) {
     oldGeneratingWordsNonReduced[i].Substitution(theSub);
     this->theGeneratingWordsNonReduced.addOnTop(oldGeneratingWordsNonReduced[i]);
@@ -247,7 +247,7 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt(
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
-  std::string* Report,
+  std::string* report,
   charSSAlgMod& output,
   const Selection& splittingParSel,
   const Selection& ParSelFDInducingPart,
@@ -289,8 +289,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != nullptr) {
-        *Report = tempS;
+      if (report != nullptr) {
+        *report = tempS;
       }
       return false;
     }
@@ -312,8 +312,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).toString();
-      if (Report != nullptr) {
-        *Report = out.str();
+      if (report != nullptr) {
+        *report = out.str();
       }
       return false;
     }
@@ -327,7 +327,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   output.makeZero();
   out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(remainingCharDominantLevi.toString());
   Vector<coefficient> simpleGeneratorBaseField;
-  while (!remainingCharDominantLevi.IsEqualToZero()) {
+  while (!remainingCharDominantLevi.isEqualToZero()) {
     localHighest = *remainingCharDominantLevi.theMonomials.LastObject();
     for (bool Found = true; Found; ) {
       Found = false;
@@ -335,7 +335,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
         tempMon = localHighest;
         simpleGeneratorBaseField = outputWeylSub.simpleRootsInner[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordS += this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
-        if (remainingCharDominantLevi.theMonomials.Contains(tempMon)) {
+        if (remainingCharDominantLevi.theMonomials.contains(tempMon)) {
           localHighest = tempMon;
           Found = true;
         }
@@ -346,8 +346,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != nullptr) {
-        *Report = tempS;
+      if (report != nullptr) {
+        *report = tempS;
       }
       return false;
     }
@@ -360,7 +360,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     }
   }
   out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(output.toString());
-  if (Report != nullptr) {
+  if (report != nullptr) {
     DrawingVariables theDV;
     std::string tempS;
     this->DrawMeNoMults(tempS, theDV, 10000);
@@ -376,15 +376,15 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
       tempStream << output.coefficients[i].toString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
-    out << "<hr>" << theDV.GetHtmlDiv(theWeyL.GetDim());
-    *Report = out.str();
+    out << "<hr>" << theDV.GetHtmlDiv(theWeyL.getDimension());
+    *report = out.str();
   }
   return true;
 }
 
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::SplitOverLevi(
-  std::string* Report,
+  std::string* report,
   Selection& splittingParSel,
   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
   Vectors<coefficient>* outputWeightsFundCoords,
@@ -394,11 +394,11 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitOverLevi");
   this->CheckInitialization();
   if (this->theChaR.size() != 1) {
-    if (Report != nullptr) {
+    if (report != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
       out << " Instead I got the character " << this->theChaR.toString() << " (" << this->theChaR.size() << " monomials)";
-      *Report = out.str();
+      *report = out.str();
     }
     return;
   }
@@ -410,13 +410,13 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
   MemorySaving<charSSAlgMod<coefficient> > buffer;
-  charSSAlgMod<coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.GetElement() : *outputChar;
+  charSSAlgMod<coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.getElement() : *outputChar;
   this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight(
-    Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi, subWeyl
+    report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi, subWeyl
   );
   std::stringstream out;
-  if (Report != nullptr) {
-    out << *Report;
+  if (report != nullptr) {
+    out << *report;
   }
   Selection splittingParSelectedInLevi;
   splittingParSelectedInLevi = splittingParSel;
@@ -426,8 +426,8 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     << " The parabolic has root of Levi given by " << splittingParSel.toString()
     << " while the ambient parabolic subalgebra has root of Levi given by "
     << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
-    if (Report != nullptr) {
-      *Report = out.str();
+    if (report != nullptr) {
+      *report = out.str();
     }
     return;
   }
@@ -437,15 +437,15 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   eigenSpacesPerSimpleGenerator.setSize(splittingParSelectedInLevi.CardinalitySelection);
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
-  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.GetElement() : *outputEigenSpace;
+  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.getElement() : *outputEigenSpace;
   //WeylGroup& theWeyL = this->theAlgebra.theWeyl;
-  theFinalEigenSpace.MakeEiBasis(this->GetDim());
+  theFinalEigenSpace.MakeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.CardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
     this->GetOwner().GetRank() + this->GetOwner().GetNumPosRoots();
     MatrixTensor<coefficient>& currentOp = this->GetActionGeneratorIndeX(theGenIndex);
     Matrix<coefficient> currentOpMat;
-    currentOp.GetMatrix(currentOpMat, this->GetDim());
+    currentOp.GetMatrix(currentOpMat, this->getDimension());
     currentOpMat.GetZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1 = theFinalEigenSpace;
     tempSpace2 = eigenSpacesPerSimpleGenerator[i];
@@ -468,7 +468,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     Vector<coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
-      if (!(currentVect[i].IsEqualToZero())) {
+      if (!(currentVect[i].isEqualToZero())) {
         tempElt.makeZero(this->GetOwner());
         tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
@@ -491,7 +491,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     if (outputWeightsFundCoords != 0) {
       outputWeightsFundCoords->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.theDefaultFormat.GetElement());
+    out << currentElt.toString(&global.theDefaultFormat.getElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -503,8 +503,8 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-  if (Report != nullptr) {
-    *Report = out.str();
+  if (report != nullptr) {
+    *report = out.str();
   }
 }
 
@@ -579,7 +579,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     << selNonSelectedAreElementsLevi.MaxSize << ". " << global.fatal;
   }
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
-  this->cachedPairs.Clear();
+  this->cachedPairs.clear();
   this->cachedTraces.setSize(0);
 
   this->parabolicSelectionNonSelectedAreElementsLevi = selNonSelectedAreElementsLevi;
@@ -627,7 +627,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     }
     return false;
   }
-  this->theModuleWeightsSimpleCoords.Clear();
+  this->theModuleWeightsSimpleCoords.clear();
   Weight<coefficient> tempCharMon;
   tempCharMon.owner = nullptr;
   this->theCharOverH.makeZero();
@@ -636,7 +636,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     tempCharMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.LastObject());
     this->theCharOverH.AddMonomial(tempCharMon, 1);
   }
-  this->theModuleWeightsSimpleCoords.QuickSortAscending();
+  this->theModuleWeightsSimpleCoords.quickSortAscending();
   std::stringstream out2;
   this->theGeneratingWordsGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
   this->theGeneratingWordsIntGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
@@ -673,9 +673,9 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     this->theGeneratingWordsGrouppedByWeight[theIndex].addOnTop(currentNonReducedElement);
     this->theGeneratingWordsIntGrouppedByWeight[theIndex].addOnTop(tempMonInt);
   }
-  this->theGeneratingWordsNonReduced.Clear();
+  this->theGeneratingWordsNonReduced.clear();
   this->theGeneratingWordsNonReduced.setExpectedSize(this->thePaths.size);
-  this->theGeneratingWordsNonReducedInt.Clear();
+  this->theGeneratingWordsNonReducedInt.clear();
   this->theGeneratingWordsNonReducedInt.setExpectedSize(this->thePaths.size);
   this->theGeneratingWordsNonReduced.size = 0;
   this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
@@ -683,8 +683,8 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
-    currentList.QuickSortDescending();
-    currentListInt.QuickSortDescending();
+    currentList.quickSortDescending();
+    currentListInt.quickSortDescending();
     for (int j = 0; j < currentList.size; j ++) {
       //wordCounter ++;
       this->theGeneratingWordsNonReduced.addOnTop(currentList[j]);
@@ -726,16 +726,16 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
           }
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport != nullptr) {
-            out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.theDefaultFormat.GetElement());
+            out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.theDefaultFormat.getElement());
           }
           MatrixTensor<coefficient>& theMatrix = this->GetActionGeneratorIndeX(theIndex);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2 * k - 1) * (j + 1) << " ... ";
-          theReport.Report(tempStream.str());
+          theReport.report(tempStream.str());
           tempStream << " done!";
-          theReport.Report(tempStream.str());
+          theReport.report(tempStream.str());
           if (outputReport != nullptr) {
-            if (this->GetDim() < 50) {
+            if (this->getDimension() < 50) {
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::GetMathMouseHover(theMatrix.toString(), 5000);
             } else {
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.toString();
@@ -760,7 +760,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     *outputReport = out2.str();
   }
   this->flagIsInitialized = true;
-  theReport.Report("Done with module generation");
+  theReport.report("Done with module generation");
   return true;
 }
 
@@ -793,7 +793,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW(
         << " between indices " << i + 1 << " and " << j + 1 << " out of " << currentWordList.size;
         numScalarProducts ++;
         currentBF.elements[i][j] = this->hwtaabfSimpleGensOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
-        theReport.Report(tempStream.str());
+        theReport.report(tempStream.str());
         if (i != j) {
           currentBF.elements[j][i] = currentBF.elements[i][j];
         }
@@ -803,7 +803,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW(
     tempMat = currentBF;
     coefficient tempRat;
     tempMat.ComputeDeterminantOverwriteMatrix(tempRat, theRingUnit, theRingZero);
-    if (!tempRat.IsEqualToZero()) {
+    if (!tempRat.isEqualToZero()) {
       this->theBilinearFormsInverted[l] = currentBF;
       this->theBilinearFormsInverted[l].Invert();
       if (!currentBF.IsNonNegativeAllEntries()) {
@@ -833,7 +833,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
   int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators == nullptr) {
-    outputListOfGenerators = &tempList.GetElement();
+    outputListOfGenerators = &tempList.getElement();
   }
   outputListOfGenerators->setSize(0);
   outputListOfGenerators->Reserve(ownerSS.GetNumPosRoots());
@@ -849,7 +849,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
         ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[i]] >
         ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[j]]
       ) {
-        outputListOfGenerators->SwapTwoIndices(i, j);
+        outputListOfGenerators->swapTwoIndices(i, j);
       }
     }
   }
@@ -882,7 +882,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
       }
       diffMat = otherOutput;
       diffMat -= output;
-      if (!diffMat.IsEqualToZero()) {
+      if (!diffMat.isEqualToZero()) {
         global.fatal
         << "<br>[" << left.toString() << ", " << right.toString() << "] = "
         << output.toString() << "<br> [" << leftGen.toString()
@@ -897,7 +897,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
         tempStream << "tested index " << i + 1
         << " out of " << this->GetOwner().GetNumGenerators()
         << ", " << j + 1 << " out of " << this->GetOwner().GetNumGenerators();
-        theReport.Report(tempStream.str());
+        theReport.report(tempStream.str());
       }
     }
   }
@@ -969,12 +969,12 @@ void ModuleSSalgebra<coefficient>::reset() {
   this->actionsGeneratorS.setSize(0);
   this->ComputedGeneratorActions.init(0);
   this->owner = nullptr;
-  this->theGeneratingWordsNonReduced.Clear();
+  this->theGeneratingWordsNonReduced.clear();
   // Note: for some reason, the linker fails to resolve without the explicit template
   // specialization below.
   // [Update:] made a bug report on this in the gcc bug tracker.
   // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
-  this->theGeneratingWordsNonReducedInt.Clear();
+  this->theGeneratingWordsNonReducedInt.clear();
   this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
   this->thePaths.setSize(0);
   this->theGeneratingWordsGrouppedByWeight.setSize(0);
@@ -992,7 +992,7 @@ void ModuleSSalgebra<coefficient>::reset() {
   this->theHWFDpartSimpleCoordS.setSize(0);
   this->theHWFDpartFundamentalCoordS.setSize(0);
   //List<List<Matrix<coefficient> > >
-  this->theModuleWeightsSimpleCoords.Clear();
+  this->theModuleWeightsSimpleCoords.clear();
   this->theCharOverH.makeZero();
   this->theChaR.makeZero();
   this->parabolicSelectionNonSelectedAreElementsLevi.init(0);
@@ -1001,7 +1001,7 @@ void ModuleSSalgebra<coefficient>::reset() {
   //Note: for some reason, the linker fails to resolve without the
   //explicit template specialization below.
   //[Update:] This is now a recognized gcc bug.
-  this->cachedPairs.Clear();
+  this->cachedPairs.clear();
   this->cachedTraces.setSize(0);
   this->flagIsInitialized = false;
   this->flagConjectureBholds = true;
@@ -1037,7 +1037,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
       << generatorString << " on weight layer " << i + 1
       << " out of " << this->theGeneratingWordsGrouppedByWeight.size
       << ", word " << j + 1 << " out of " << currentWordList.size << "...";
-      theReport.Report(progressStream.str());
+      theReport.report(progressStream.str());
       ElementUniversalEnveloping<coefficient>& currentOutputWord = outputCurrentList[j];
       if (theIndex == - 1) {
         currentOutputWord.makeZero(*this->theAlgebras, this->indexAlgebra);
@@ -1049,7 +1049,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
         );
       }
       progressStream << " done!";
-      theReport.Report(progressStream.str());
+      theReport.report(progressStream.str());
     }
   }
 }
@@ -1202,7 +1202,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight(
   const ElementTensorsGeneralizedVermas<coefficient>& right
 ) {
   MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
-  if (right.IsEqualToZero()) {
+  if (right.isEqualToZero()) {
     this->makeZero();
     return;
   }
@@ -1255,7 +1255,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
   } else {
     out << this->theCharOverH.toString();
   }
-  out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
+  out << "<br>Dimensionn of the finite dimensional part of the module: " << this->getDimension();
   out << "<br>A module basis follows.";
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
   ElementWeylGroup tempWelt;
@@ -1272,7 +1272,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
-      << currentList[j].toString(&global.theDefaultFormat.GetElement())
+      << currentList[j].toString(&global.theDefaultFormat.getElement())
       << "  v_\\lambda</td><td>" << tempWelt.toString() << "</td> </tr>";
     }
   }
@@ -1294,9 +1294,9 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
       << HtmlRoutines::GetMathMouseHover(tempSSElt.toString(theFormat))
       << "</td>";
       out << "<td>";
-      if (this->GetDim() < 28) {
+      if (this->getDimension() < 28) {
         Matrix<coefficient> outputMat;
-        this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
+        this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->getDimension());
         out
         << HtmlRoutines::GetMathMouseHover(outputMat.toString(&latexFormat), 5000)
         << " = ";
@@ -1311,7 +1311,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
   DrawingVariables theDV;
   this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
-  << theDV.GetHtmlDiv(theWeyl.GetDim());
+  << theDV.GetHtmlDiv(theWeyl.getDimension());
 
   bool isBad = false;
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {
@@ -1322,10 +1322,10 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<coefficient>& currentElt = currentList[i];
       out << "<br>monomial " << i + 1 << ": "
-      << currentElt.toString(&global.theDefaultFormat.GetElement());
+      << currentElt.toString(&global.theDefaultFormat.getElement());
     }
     out << "; Matrix of Shapovalov form associated to current weight level: <br> "
-    << theBF.toString(&global.theDefaultFormat.GetElement());
+    << theBF.toString(&global.theDefaultFormat.getElement());
 /*    if (!theBF.IsPositiveDefinite()) {
       monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds = false;
@@ -1339,7 +1339,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
     }
     out << " corresonding inverted matrix:<br>";
     if (theBFinverted.NumRows > 0) {
-      out << theBFinverted.toString(&global.theDefaultFormat.GetElement());
+      out << theBFinverted.toString(&global.theDefaultFormat.getElement());
     } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad = true;
@@ -1351,9 +1351,9 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
   }
   out << "<br>Cached Shapovalov products before generator action computation: "
   << this->cachedPairs.size << ". Dimension : "
-  << this->GetDim();
+  << this->getDimension();
   out << "<br>Cached Shapovalov products final: "
-  << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  << this->cachedPairs.size << "; dimension : " << this->getDimension();
   return out.str();
 }
 #endif

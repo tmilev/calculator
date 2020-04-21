@@ -56,9 +56,9 @@ public:
   void makeOne();
   void AddUInt(unsigned int x);
   void makeZero();
-  bool IsEqualToZero() const;
+  bool isEqualToZero() const;
   bool IsEven() const;
-  bool IsPositive() const;
+  bool isPositive() const;
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
   bool IsCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
   bool IsPossiblyPrime(int MmillerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
@@ -190,30 +190,30 @@ public:
     return tempS;
   }
   bool IsIntegerFittingInInt(int* whichInt);
-  bool IsPositive() const {
-    return this->sign == 1 && (this->value.IsPositive());
+  bool isPositive() const {
+    return this->sign == 1 && (this->value.isPositive());
   }
-  bool IsNegative() const {
-    return this->sign == - 1 && (this->value.IsPositive());
+  bool isNegative() const {
+    return this->sign == - 1 && (this->value.isPositive());
   }
   bool BeginsWithMinus() {
-    return this->IsNegative();
+    return this->isNegative();
   }
-  bool IsPositiveOrZero() const {
-    return !this->IsNegative();
+  bool isPositiveOrZero() const {
+    return !this->isNegative();
   }
   bool IsNonPositive() const {
-    return !this->IsPositive();
+    return !this->isPositive();
   }
   static LargeInteger zero();
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
+  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;
   }
   bool operator==(const LargeInteger& x) const;
-  bool IsEqualToZero() const {
-    return this->value.IsEqualToZero();
+  bool isEqualToZero() const {
+    return this->value.isEqualToZero();
   }
   bool IsEven() const;
   bool IsEqualToOne() const {
@@ -271,7 +271,7 @@ public:
     this->sign = 1;
   }
   void operator*=(const LargeIntegerUnsigned& other) {
-    if (other.IsEqualToZero()) {
+    if (other.isEqualToZero()) {
       this->makeZero();
       return;
     }
@@ -284,7 +284,7 @@ public:
     this->MultiplyByInt(x);
   }
   inline void Minus() {
-    if (!this->IsEqualToZero()) {
+    if (!this->isEqualToZero()) {
       this->sign *= - 1;
     }
   }
@@ -307,13 +307,13 @@ public:
     return !(other<*this);
   }
   inline bool operator<(const LargeInteger& other) const {
-    if (other.IsPositiveOrZero()) {
-      if (this->IsPositiveOrZero()) {
+    if (other.isPositiveOrZero()) {
+      if (this->isPositiveOrZero()) {
         return this->value<other.value;
       }
       return true;
     }
-    if (this->IsNegative()) {
+    if (this->isNegative()) {
       return other.value < this->value;
     }
     return false;
@@ -342,7 +342,7 @@ public:
   LargeInteger operator/(int x) const;
   LargeInteger operator/(LargeInteger& x) const;
   void operator/=(const LargeInteger& other) {
-    if (this->IsEqualToZero()) {
+    if (this->isEqualToZero()) {
       return;
     }
     this->sign*= other.sign;
@@ -354,13 +354,13 @@ public:
     return other < *this;
   }
   void operator%=(const LargeInteger& other) {
-    if (this->IsEqualToZero()) {
+    if (this->isEqualToZero()) {
       return;
     }
     LargeIntegerUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
     this->value = remainder;
-    if (this->IsNegative()) {
+    if (this->isNegative()) {
       *this += other.value;
     }
   }
@@ -469,12 +469,12 @@ public:
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
-    return this->IsNegative();
+    return this->isNegative();
   }
-  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
+  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;
-    //return this->IsNegative();
+    //return this->isNegative();
   }
   bool GetSquareRootIfRational(Rational& output) const;
   // Scales a vector of rationals so as to make all coordinates
@@ -614,28 +614,28 @@ public:
       return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
     }
   }
-  inline bool IsEqualToZero() const {
+  inline bool isEqualToZero() const {
     if (this->Extended == nullptr) {
       return this->NumShort == 0;
     } else {
-      return this->Extended->num.IsEqualToZero();
+      return this->Extended->num.isEqualToZero();
     }
   }
   inline bool operator<=(const Rational& other) const {
     return !(other < *this);
   }
-  inline bool IsPositiveOrZero() const {
+  inline bool isPositiveOrZero() const {
     if (this->Extended == nullptr) {
       return this->NumShort >= 0;
     } else {
-      return this->Extended->num.IsPositiveOrZero();
+      return this->Extended->num.isPositiveOrZero();
     }
   }
-  bool IsNegative() const {
+  bool isNegative() const {
     if (this->Extended == nullptr) {
       return this->NumShort < 0;
     } else {
-      return this->Extended->num.IsNegative();
+      return this->Extended->num.isNegative();
     }
   }
   bool IsNonPositive() const {
@@ -645,11 +645,11 @@ public:
       return this->Extended->num.IsNonPositive();
     }
   }
-  bool IsPositive() const {
+  bool isPositive() const {
     if (this->Extended == nullptr) {
       return this->NumShort > 0;
     } else {
-      return this->Extended->num.IsPositive();
+      return this->Extended->num.isPositive();
     }
   }
   void simplify();
@@ -682,7 +682,7 @@ public:
   void ReadFromFile(std::istream& input);
   void DrawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
-    if (this->IsNegative()) {
+    if (this->isNegative()) {
       this->Minus();
     }
   }
@@ -772,7 +772,7 @@ public:
   void operator=(const Polynomial<Rational>& other);
   bool operator==(const int other) const {
     if (other == 0) {
-      return this->IsEqualToZero();
+      return this->isEqualToZero();
     }
     return this->IsEqualTo(other);
   }

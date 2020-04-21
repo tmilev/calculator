@@ -60,7 +60,7 @@ void Weight<coefficient>::AccountSingleWeight(
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
   for (int i = 0; i < theWeyl.RootsOfBorel.size; i ++) {
-    if (theWeyl.RootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).IsEqualToZero()) {
+    if (theWeyl.RootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).isEqualToZero()) {
       return;
     }
   }
@@ -295,7 +295,7 @@ void SemisimpleLieAlgebra::LieBracket(
     return;
   }
   output.makeZero();
-  if (g1.IsEqualToZero() || g2.IsEqualToZero()) {
+  if (g1.isEqualToZero() || g2.isEqualToZero()) {
     return;
   }
   int maxNumMonsFinal = g1.size() * g2.size();
@@ -325,7 +325,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe(
 template <class coefficient>
 Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() const {
   Vector<coefficient> result;
-  if (this->IsEqualToZero()) {
+  if (this->isEqualToZero()) {
     result.makeZero(0);
     return result;
   }
@@ -350,7 +350,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
 
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output) const {
-  if (this->IsEqualToZero()) {
+  if (this->isEqualToZero()) {
     output.makeZero(0);
     return;
   }
@@ -454,7 +454,7 @@ template <class coefficient>
 void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
   WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars
 ) const {
-  if (actualAmbientWeyl.GetDim() < 2) {
+  if (actualAmbientWeyl.getDimension() < 2) {
     return;
   }
   Vector<coefficient> actualWeight;
@@ -514,9 +514,9 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
-  std::string* Report, charSSAlgMod& output, branchingData& inputData
+  std::string* report, charSSAlgMod& output, branchingData& inputData
 ) {
-  if (this->IsEqualToZero()) {
+  if (this->isEqualToZero()) {
     return false;
   }
   this->CheckNonZeroOwner();
@@ -544,8 +544,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
       tempS,
       10000
     )) {
-      if (Report != nullptr) {
-        *Report = tempS;
+      if (report != nullptr) {
+        *report = tempS;
       }
       return false;
     }
@@ -570,8 +570,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
     )) {
       out << "Failed to generate the complement-sub-Weyl-orbit of weight "
       << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).toString();
-      if (Report != nullptr) {
-        *Report = out.str();
+      if (report != nullptr) {
+        *report = out.str();
       }
       return false;
     }
@@ -591,10 +591,10 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.makeZero();
   Vector<coefficient> fundCoordsSmaller, inSimpleCoords;
-  fundCoordsSmaller.setSize(WeylFDSmall.AmbientWeyl->GetDim());
+  fundCoordsSmaller.setSize(WeylFDSmall.AmbientWeyl->getDimension());
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
     inSimpleCoords = theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
-    for (int j = 0; j < WeylFDSmall.AmbientWeyl->GetDim(); j ++) {
+    for (int j = 0; j < WeylFDSmall.AmbientWeyl->getDimension(); j ++) {
       fundCoordsSmaller[j] = theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
       fundCoordsSmaller[j] /= WeylFDSmall.AmbientWeyl->CartanSymmetric(j, j) / 2;
     }
@@ -604,7 +604,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   }
   Vector<coefficient> simpleGeneratorBaseField;
   output.makeZero();
-  while (!remainingCharProjected.IsEqualToZero()) {
+  while (!remainingCharProjected.isEqualToZero()) {
     localHighest = *remainingCharProjected.theMonomials.LastObject();
     for (bool Found = true; Found;) {
       Found = false;
@@ -614,7 +614,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
         tempMon.weightFundamentalCoordS += WeylFDSmall.AmbientWeyl->GetFundamentalCoordinatesFromSimple(
           simpleGeneratorBaseField
         );
-        if (remainingCharProjected.theMonomials.Contains(tempMon)) {
+        if (remainingCharProjected.theMonomials.contains(tempMon)) {
           localHighest = tempMon;
           Found = true;
         }
@@ -625,8 +625,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != nullptr) {
-        *Report = tempS;
+      if (report != nullptr) {
+        *report = tempS;
       }
       return false;
     }
@@ -642,7 +642,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
   << HtmlRoutines::GetMathSpanPure(output.toString(&theFormat));
-  if (Report != nullptr) {
+  if (report != nullptr) {
     DrawingVariables theDV1;
     std::string tempS;
     output.DrawMeNoMults(tempS, theDV1, 10000);
@@ -662,8 +662,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.GetHtmlDiv(WeylFDSmall.AmbientWeyl->GetDim());
-    *Report = out.str();
+    out << "<hr>" << theDV1.GetHtmlDiv(WeylFDSmall.AmbientWeyl->getDimension());
+    *report = out.str();
   }
   return true;
 }

@@ -18,7 +18,7 @@ private:
 public:
   void operator=(const MemorySaving<Object>& other) {
     if (!other.IsZeroPointer()) {
-      this->GetElement() = other.GetElementConst();
+      this->getElement() = other.GetElementConst();
     } else {
       this->FreeMemory();
     }
@@ -29,7 +29,7 @@ public:
     }
     return *this->theValue;
   }
-  Object& GetElement()  {
+  Object& getElement()  {
     if (this->theValue == 0) {
       this->theValue = new Object;
       #ifdef AllocationLimitsSafeguard

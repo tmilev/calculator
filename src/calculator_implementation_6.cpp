@@ -292,7 +292,7 @@ bool CalculatorHTML::Test::BuiltInMultiple(
     reportStream << "Testing problems, round "
     << i + 1 << " out of " << numberOfRepetitions
     << ", starting random seed: " << randomSeeds[i] << ". ";
-    theReport.Report(reportStream.str());
+    theReport.report(reportStream.str());
     CalculatorHTML::Test tester;
     if (!tester.BuiltIn(inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i])) {
       if (comments != nullptr) {
@@ -369,24 +369,24 @@ bool CalculatorHTML::Test::BuiltIn(
     << this->randomSeed << ".";
 
     if (global.flagRunningConsoleTest) {
-      global << reportStream.str() << logger::endL;
+      global << reportStream.str() << Logger::endL;
     }
-    theReport.Report(reportStream.str());
+    theReport.report(reportStream.str());
     if (!currentTest.Run()) {
       result = false;
     }
     if (!currentTest.flagSuccess) {
       badSoFar ++;
       if (global.flagRunningConsoleTest) {
-        global << logger::red << "Failure @ index: " << i << ". "
+        global << Logger::red << "Failure @ index: " << i << ". "
         << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
-        << logger::endL;        
+        << Logger::endL;        
       }
     } else {
       if (global.flagRunningConsoleTest) {
-        global << logger::green << "Success @ index: " << i << ". "
+        global << Logger::green << "Success @ index: " << i << ". "
         << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
-        << logger::endL;
+        << Logger::endL;
       }
     }
   }
@@ -648,10 +648,10 @@ bool CalculatorFunctions::innerGetSummand(
     }
     output.reset(theCommands);
     output.AddChildAtomOnTop("GetSummand");
-    output.AddChildOnTop(theSums[0]);
+    output.addChildOnTop(theSums[0]);
     Expression shiftE;
     shiftE.AssignValue(theSummands.size, theCommands);
-    return output.AddChildOnTop(input[2] - shiftE);
+    return output.addChildOnTop(input[2] - shiftE);
   }
   List<Expression> theMultiplicands;
   theExpression.GetMultiplicandsRecursive(theMultiplicands);
@@ -682,8 +682,8 @@ bool CalculatorFunctions::innerGetSummand(
   theSub.SetChilD(2, valueToSubWith);
   Expression theCommandSequence(theCommands);
   theCommandSequence.AddChildAtomOnTop(theCommands.opEndStatement());
-  theCommandSequence.AddChildOnTop(theSub);
-  theCommandSequence.AddChildOnTop(theCoeff * theSum[2]);
+  theCommandSequence.addChildOnTop(theSub);
+  theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.ETwo());
 }
 
@@ -773,13 +773,13 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     thePlotObj.variablesInPlay.addOnTop(xE);
   }
   if (thePlotObj.variablesInPlay.size == 1) {
-    if (thePlotObj.variablesInPlay.Contains(xE)) {
+    if (thePlotObj.variablesInPlay.contains(xE)) {
       thePlotObj.variablesInPlay.addOnTop(yE);
     } else {
       thePlotObj.variablesInPlay.addOnTop(xE);
     }
   }
-  thePlotObj.variablesInPlay.QuickSortAscending();
+  thePlotObj.variablesInPlay.quickSortAscending();
   thePlotObj.variablesInPlayJS.setSize(thePlotObj.variablesInPlay.size);
   for (int i = 0; i < thePlotObj.variablesInPlay.size; i ++) {
     thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].toString();
@@ -1179,7 +1179,7 @@ bool CalculatorFunctions::innerIsPower(
   if (!input[1].IsInteger(&toBeFactored)) {
     return false;
   }
-  if (toBeFactored.IsEqualToZero()) {
+  if (toBeFactored.isEqualToZero()) {
     return false;
   }
   List<int> theMults;
@@ -1227,7 +1227,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
   } else if (!input.IsInteger(&integer)) {
     return false;
   }
-  if (integer.IsEqualToZero()) {
+  if (integer.isEqualToZero()) {
     return false;
   }
   List<LargeInteger> primeFactors;
@@ -1265,7 +1265,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
     factorNext.reset(theCommands);
     factorNext.AddChildAtomOnTop(opFactorInteger);
     numberLast.AssignValue(Rational(primeFactors[primeFactors.size - 1]), theCommands);
-    factorNext.AddChildOnTop(numberLast);
+    factorNext.addChildOnTop(numberLast);
     return output.MakeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
   }
 }
@@ -1281,7 +1281,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (!theCommands.functionCollectSummands(theCommands, input[1], theV)) {
     return theCommands << "Failed to extract summands from: " << input[1].toString();
   }
-  if (theV.IsEqualToZero()) {
+  if (theV.isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
   Rational theCF = theV.scaleNormalizeLeadingMonomial();
@@ -1322,7 +1322,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   Expression theSubbed, toBeSubbed, subbedSimplified;
   toBeSubbed.reset(theCommands);
   toBeSubbed.AddChildAtomOnTop(theCommands.opBind());
-  toBeSubbed.AddChildOnTop(boundVars[0]);
+  toBeSubbed.addChildOnTop(boundVars[0]);
   List<Expression> theList;
   for (int i = 1; i < input[1].size(); i ++) {
     theSubbed = input[2];
@@ -1350,8 +1350,8 @@ bool CalculatorFunctions::innerApplyToList(Calculator& theCommands, const Expres
   result.setSize(input[2].size() - 1);
   for (int i = 1; i < input[2].size(); i ++) {
     result[i - 1].reset(theCommands);
-    result[i - 1].AddChildOnTop(theFun);
-    result[i - 1].AddChildOnTop(input[2][i]);
+    result[i - 1].addChildOnTop(theFun);
+    result[i - 1].addChildOnTop(input[2][i]);
   }
   return output.MakeSequence(theCommands, &result);
 }
@@ -1369,7 +1369,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   computation.flagStoreQuotients = true;
   computation.theBasiS.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].IsEqualToZero()) {
+    if (polynomialsRational[i].isEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
     computation.theBasiS[i - 1] = polynomialsRational[i];
@@ -1383,7 +1383,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     currentE.reset(theCommands);
     currentE.AddChildAtomOnTop("MakeExpression");
     thePolyE.AssignValueWithContext(computation.theQuotients[i], theContext, theCommands);
-    currentE.AddChildOnTop(thePolyE);
+    currentE.addChildOnTop(thePolyE);
     theList.addOnTop(currentE);
   }
   if (theList.size == 1) {
@@ -1564,11 +1564,11 @@ bool CalculatorFunctions::innerMatchesPattern(
       matchedExpressions.theKeys[i][1],
       matchedExpressions.theValues[i]
     );
-    commandList.AddChildOnTop(currentCommand);
+    commandList.addChildOnTop(currentCommand);
   }
   output.reset(theCommands);
   output.AddChildAtomOnTop(theCommands.opCommandEnclosure());
-  return output.AddChildOnTop(commandList);
+  return output.addChildOnTop(commandList);
 }
 
 bool CalculatorFunctions::innerDegreesToRadians(
@@ -1597,8 +1597,8 @@ bool CalculatorFunctions::innerLessThanOrEqualTo(
   }
   Expression result(theCommands);
   result.AddChildAtomOnTop("\\geq");
-  result.AddChildOnTop(input[2]);
-  result.AddChildOnTop(input[1]);
+  result.addChildOnTop(input[2]);
+  result.addChildOnTop(input[1]);
   output = result;
   return true;
 }
@@ -1659,9 +1659,9 @@ bool CalculatorFunctions::innerLessThan(Calculator& theCommands, const Expressio
     return false;
   }
   Expression swappedE(theCommands);
-  swappedE.AddChildOnTop(input[0]);
-  swappedE.AddChildOnTop(input[2]);
-  swappedE.AddChildOnTop(input[1]);
+  swappedE.addChildOnTop(input[0]);
+  swappedE.addChildOnTop(input[2]);
+  swappedE.addChildOnTop(input[1]);
   return CalculatorFunctions::innerGreaterThan(theCommands, swappedE, output);
 }
 
@@ -2032,7 +2032,7 @@ bool CalculatorFunctions::innerNormalizeIntervals(
     return false;
   }
   List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
-  outputList.QuickSortAscending(&order);
+  outputList.quickSortAscending(&order);
   return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
 }
 
@@ -2079,8 +2079,8 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
     return output.AssignValue(0, theCommands);
   }
   List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
-  leftList.QuickSortAscending(&order);
-  rightList.QuickSortAscending(&order);
+  leftList.quickSortAscending(&order);
+  rightList.quickSortAscending(&order);
   for (int i = 0; i < leftList.size; i ++) {
     if (leftList[i] == rightList[i]) {
       continue;
@@ -2704,7 +2704,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
     << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
-    theReport.Report(reportStream.str());
+    theReport.report(reportStream.str());
     SemisimpleLieAlgebra theAlgebra;
     theAlgebra.theWeyl.MakeFromDynkinType(theTypes[i]);
     theAlgebra.ComputeChevalleyConstants();

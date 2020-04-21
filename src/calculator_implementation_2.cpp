@@ -3,19 +3,19 @@
 #include "calculator.h"
 #include "string_constants.h"
 
-JSData Calculator::OperationHandlers::ToJSON() {
+JSData Calculator::OperationHandlers::toJSON() {
   JSData result;
   JSData currentFunctionListDirect;
   currentFunctionListDirect.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
-    currentFunctionListDirect.theList.addOnTop(currentHandler.ToJSON());
+    currentFunctionListDirect.theList.addOnTop(currentHandler.toJSON());
   }
   JSData currentFunctionListComposite;
   currentFunctionListComposite.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
-    currentFunctionListComposite.theList.addOnTop(currentHandler.ToJSON());
+    currentFunctionListComposite.theList.addOnTop(currentHandler.toJSON());
   }
   result["regular"] = currentFunctionListDirect;
   result["composite"] = currentFunctionListComposite;
@@ -31,8 +31,8 @@ JSData Calculator::ToJSONFunctionHandlers() {
       continue;
     }
     const std::string& operationName = this->operations.theKeys[i];
-    Calculator::OperationHandlers& handlers = this->operations.theValues[i].GetElement();
-    output[operationName] = handlers.ToJSON();
+    Calculator::OperationHandlers& handlers = this->operations.theValues[i].getElement();
+    output[operationName] = handlers.toJSON();
   }
   return output;
 }
@@ -139,7 +139,7 @@ std::string Calculator::ToStringRuleStatusUser() {
     if (this->operations.theValues[i].IsZeroPointer()) {
       continue;
     }
-    out << this->operations.theValues[i].GetElement().ToStringRuleStatusUser();
+    out << this->operations.theValues[i].getElement().ToStringRuleStatusUser();
   }
   return out.str();
 }
@@ -277,7 +277,7 @@ bool Calculator::outerStandardHandler(
   if (theCommands.operations.theValues[operationIndex].IsZeroPointer()) {
     return false;
   }
-  const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
+  const List<Function>& handlers = theCommands.operations.theValues[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.Apply(
@@ -348,7 +348,7 @@ bool Calculator::ExpressionMatchesPattern(
 //    return false;
   int opVarB = this->opBind();
   if (thePattern.IsListStartingWithAtom(opVarB)) {
-    if (!matchedExpressions.Contains(thePattern)) {
+    if (!matchedExpressions.contains(thePattern)) {
       matchedExpressions.SetKeyValue(thePattern, input);
     }
     if (matchedExpressions.GetValueCreate(thePattern) != input) {
@@ -398,7 +398,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   if (this->owner == nullptr) {
     global.fatal << "StackMaintainerCalculator has zero owner. " << global.fatal;
   }
-  this->owner->RuleStack.AddChildOnTop(theRule);
+  this->owner->RuleStack.addChildOnTop(theRule);
   std::string currentRule;
   if (
     theRule.StartsWith(this->owner->opRulesOn()) ||
@@ -408,7 +408,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
       if (!theRule[j].IsOfType(&currentRule)) {
         continue;
       }
-      if (!this->owner->namedRules.Contains(currentRule)) {
+      if (!this->owner->namedRules.contains(currentRule)) {
         continue;
       }
       this->owner->GetFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
@@ -450,7 +450,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
         if (!theRuleStack[i][j].IsOfType<std::string>(&currentRuleName)) {
           continue;
         }
-        if (!this->owner->namedRules.Contains(currentRuleName)) {
+        if (!this->owner->namedRules.contains(currentRuleName)) {
           continue;
         }
         Function& currentRule = this->owner->GetFunctionHandlerFromNamedRule(currentRuleName);
@@ -464,14 +464,14 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
       if (theRuleStack[i].StartsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
-            theRuleStack[i][j].GetValue<std::string>()
+            theRuleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = false;
         }
       } else if (theRuleStack[i].StartsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
-            theRuleStack[i][j].GetValue<std::string>()
+            theRuleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = true;
         }
@@ -486,7 +486,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
 Expression Calculator::GetNewBoundVar() {
   Expression result(*this);
   result.AddChildAtomOnTop(this->opBind());
-  result.AddChildOnTop(this->GetNewAtom());
+  result.addChildOnTop(this->GetNewAtom());
   return result;
 }
 
@@ -500,7 +500,7 @@ Expression Calculator::GetNewAtom() {
       if (candidate == "d") {
         continue;
       }
-      if (!this->operations.Contains(candidate)) {
+      if (!this->operations.contains(candidate)) {
         Expression result;
         result.MakeAtom(candidate, *this);
         return result;
@@ -597,7 +597,7 @@ void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
     indexE,
     childHistory
   );
-  this->history->AddChildOnTop(incomingHistory);
+  this->history->addChildOnTop(incomingHistory);
 }
 
 void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::string& info) {
@@ -637,7 +637,7 @@ void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::stri
     extraInformation
   );
   incomingHistory.CheckConsistency();
-  this->history->AddChildOnTop(incomingHistory);
+  this->history->addChildOnTop(incomingHistory);
 }
 
 bool Calculator::EvaluateLoop::SetOutput(
@@ -657,7 +657,7 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
   this->numberOfTransformations ++;
   std::string atomValue;
   if (this->outpuT->IsOperation(&atomValue)) {
-    if (this->owner->atomsThatMustNotBeCached.Contains(atomValue)) {
+    if (this->owner->atomsThatMustNotBeCached.contains(atomValue)) {
       this->flagIsNonCacheable = true;
     }
   }
@@ -725,7 +725,7 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
   }
   reportStream << "<br>Evaluating:<br><b>"
   << StringRoutines::StringShortenInsertDots(output[childIndex].toString(), 100) << "</b>";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
 }
 
 bool Calculator::EvaluateLoop::EvaluateChildren(
@@ -886,7 +886,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   theExpressionWithContext.reset(*this->owner, 3);
   theExpressionWithContext.AddChildAtomOnTop(this->owner->opSequence());
   theExpressionWithContext.AddChildValueOnTop(this->owner->RuleStackCacheIndex);
-  theExpressionWithContext.AddChildOnTop(*(this->outpuT));
+  theExpressionWithContext.addChildOnTop(*(this->outpuT));
   this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
   if (this->indexInCache != - 1) {
     if (this->owner->flagLogCache) {
@@ -944,7 +944,7 @@ bool Calculator::EvaluateExpression(
     theCommands.stats.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
-    state.theReport.Report(reportStream.str());
+    state.theReport.report(reportStream.str());
   }
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
@@ -963,7 +963,7 @@ bool Calculator::EvaluateExpression(
     theCommands.flagAbortComputationASAP = true;
     return true;
   }
-  if (theCommands.EvaluatedExpressionsStack.Contains(input)) {
+  if (theCommands.EvaluatedExpressionsStack.contains(input)) {
     std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
     << input.toString()
@@ -1051,7 +1051,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expressio
   MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind())) {
-    if (matchedPairs.Contains(toBeSubbedIn)) {
+    if (matchedPairs.contains(toBeSubbedIn)) {
       toBeSubbedIn = matchedPairs.GetValueCreate(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
       return;
@@ -1161,7 +1161,7 @@ void Calculator::EvaluateCommands() {
     if (!global.flagRunningConsoleRegular) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
-      out << logger::consoleRed() << "Syntax errors encountered: " << logger::consoleNormal();
+      out << Logger::consoleRed() << "Syntax errors encountered: " << Logger::consoleNormal();
     }
     this->outputJS[WebAPI::result::syntaxErrors] = this->syntaxErrors;
     out << this->syntaxErrors;
@@ -1172,7 +1172,7 @@ void Calculator::EvaluateCommands() {
   this->Comments.clear();
   ProgressReport theReport;
   if (!global.flagRunningConsoleRegular) {
-    theReport.Report("Evaluating expressions, current expression stack:\n");
+    theReport.report("Evaluating expressions, current expression stack:\n");
   }
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH != 0) {
@@ -1180,24 +1180,24 @@ void Calculator::EvaluateCommands() {
     << "depth before evaluation was 0, but after evaluation it is "
     << this->RecursionDeptH << "." << global.fatal;
   }
-  global.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex = true;
-  global.theDefaultFormat.GetElement().flagUseLatex = true;
-  global.theDefaultFormat.GetElement().flagExpressionNewLineAllowed = true;
-  global.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
-  global.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
-  global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+  global.theDefaultFormat.getElement().flagMakingExpressionTableWithLatex = true;
+  global.theDefaultFormat.getElement().flagUseLatex = true;
+  global.theDefaultFormat.getElement().flagExpressionNewLineAllowed = true;
+  global.theDefaultFormat.getElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
+  global.theDefaultFormat.getElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
+  global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
   if (global.flagRunningConsoleRegular) {
-    global.theDefaultFormat.GetElement().flagUseQuotes = false;
-    global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+    global.theDefaultFormat.getElement().flagUseQuotes = false;
+    global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
     if (global.programArguments.size > 1) {
-      out << "Input: " << logger::consoleYellow()
-      << StartingExpression.toString(&global.theDefaultFormat.GetElement()) << std::endl;
+      out << "Input: " << Logger::consoleYellow()
+      << StartingExpression.toString(&global.theDefaultFormat.getElement()) << std::endl;
     }
-    global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+    global.theDefaultFormat.getElement().flagExpressionIsFinal = true;
     this->theObjectContainer.resetSliders();
-    out << logger::consoleNormal() << "Output: " << logger::consoleGreen()
-    << this->theProgramExpression.toString(&global.theDefaultFormat.GetElement())
-    << logger::consoleNormal() << std::endl;
+    out << Logger::consoleNormal() << "Output: " << Logger::consoleGreen()
+    << this->theProgramExpression.toString(&global.theDefaultFormat.getElement())
+    << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {
@@ -1214,7 +1214,7 @@ void Calculator::EvaluateCommands() {
     JSData result;
     result.theType = JSData::token::tokenObject;
     std::string resultString = this->theProgramExpression.toString(
-      &global.theDefaultFormat.GetElement(), &StartingExpression, true, &result
+      &global.theDefaultFormat.getElement(), &StartingExpression, true, &result
     );
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;

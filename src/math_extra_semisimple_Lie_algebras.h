@@ -143,7 +143,7 @@ public:
   std::string ToHTMLCalculator(bool Verbose, bool writeToHD, bool flagWriteLatexPlots);
   std::string GetStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat) const;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex) {
-    return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
+    return !this->theLiebrackets.elements[leftIndex][rightIndex].isEqualToZero();
   }
   std::string ToStringLieAlgebraNameFullHTML() const;
   std::string ToStringLieAlgebraName() const;
@@ -207,7 +207,7 @@ public:
     }
     int left = this->GetRootIndexFromGenerator(leftIndex);
     int right = this->GetRootIndexFromGenerator(rightIndex);
-    return (this->theWeyl.RootSystem[left] + this->theWeyl.RootSystem[right]).IsEqualToZero();
+    return (this->theWeyl.RootSystem[left] + this->theWeyl.RootSystem[right]).isEqualToZero();
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight);
   void ComputeChevalleyConstants();
@@ -361,7 +361,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
       << "which is not allowed at by the calling function. " << global.fatal;
     }
   }
-  bool IsEqualToZero() {
+  bool isEqualToZero() {
     return this->size() == 0;
   }
   unsigned int hashFunction() const {
@@ -373,7 +373,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   void GetDual(charSSAlgMod<coefficient>& output) const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
   bool SplitCharOverRedSubalg(
-    std::string* Report,
+    std::string* report,
     charSSAlgMod& output,
     branchingData& inputData
   );
@@ -405,7 +405,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   }
   bool DrawMe(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight(
-    std::string* Report,
+    std::string* report,
     charSSAlgMod& output,
     const Selection& splittingParSel,
     const Selection& ParSelFDInducingPart,

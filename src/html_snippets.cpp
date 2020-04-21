@@ -84,7 +84,7 @@ void HtmlRoutines::LoadStrings() {
 }
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
-  if (HtmlRoutines::preLoadedFiles().Contains("AceEditor")) {
+  if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
     return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
   }
   std::stringstream out;
@@ -113,8 +113,8 @@ const std::string& HtmlRoutines::GetFile(
   if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
-    global << logger::red << "File: "
-    << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
+    global << Logger::red << "File: "
+    << fileNameVirtual << " not found. " << commentsOnFailure.str() << Logger::endL;
     out << "<b style =\"color:red\">Failed to load file: [" << fileNameVirtual
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
@@ -346,7 +346,7 @@ bool HtmlRoutines::AccountOneInputCGIString(
     return true;
   }
   (void) commentsOnFailure;
-//  if (fieldValue != "" && outputMap.Contains(fieldName))
+//  if (fieldValue != "" && outputMap.contains(fieldName))
 //    if (outputMap.GetValueCreateIfNotPresent(fieldName) != fieldValue &&
 //        outputMap.GetValueCreateIfNotPresent(fieldName) != "")
 //    { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
@@ -363,7 +363,7 @@ bool HtmlRoutines::ChopCGIString(
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
-  outputMap.Clear();
+  outputMap.clear();
   outputMap.setExpectedSize(15);
   return HtmlRoutines::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
 }

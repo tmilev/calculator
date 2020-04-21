@@ -129,8 +129,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
   }
-  theType result = inputContextsMerged[1].GetValue<theType>();
-  result *= inputContextsMerged[2].GetValue<theType>();
+  theType result = inputContextsMerged[1].getValue<theType>();
+  result *= inputContextsMerged[2].getValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -145,8 +145,8 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
     return false;
   }
   theType result;
-  result = inputContextsMerged[1].GetValue<theType>();
-  result += inputContextsMerged[2].GetValue<theType>();
+  result = inputContextsMerged[1].getValue<theType>();
+  result += inputContextsMerged[2].getValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -160,11 +160,11 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
   }
-  if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero()) {
+  if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
     return output.MakeError("Division by zero. ", theCommands);
   }
-  theType result = inputContextsMerged[1].GetValue<theType>();
-  result /= inputContextsMerged[2].GetValue<theType>();
+  theType result = inputContextsMerged[1].getValue<theType>();
+  result /= inputContextsMerged[2].getValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -211,7 +211,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     input.IsListStartingWithAtom(theCommands.opPlus())
   ) {
     theComputed.reset(theCommands, input.size());
-    theComputed.AddChildOnTop(input[0]);
+    theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
       if (!CalculatorConversions::functionPolynomial<coefficient>(
         theCommands, input[i], theConverted
@@ -219,7 +219,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
         return theCommands << "<hr>Failed to extract polynomial from "
         << input[i].toString();
       }
-      theComputed.AddChildOnTop(theConverted);
+      theComputed.addChildOnTop(theConverted);
     }
     if (input.IsListStartingWithAtom(theCommands.opTimes())) {
       return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(
@@ -233,7 +233,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   }
   if (input.StartsWith(theCommands.opMinus(), 3)) {
     theComputed.reset(theCommands, input.size());
-    theComputed.AddChildOnTop(input[0]);
+    theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < 3; i ++) {
       Expression summand = input[i];
       if (i == 2) {
@@ -242,7 +242,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, summand, theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << summand.toString();
       }
-      theComputed.AddChildOnTop(theConverted);
+      theComputed.addChildOnTop(theConverted);
     }
     return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
   }
@@ -255,7 +255,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
         << "<hr>Failed to extract polynomial from "
         << input[1].toString() << ".";
       }
-      Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
+      Polynomial<coefficient> resultP = theConverted.getValue<Polynomial<coefficient> >();
       if (thePower < 0) {
         coefficient theConst;
         if (!resultP.IsConstant(&theConst)) {

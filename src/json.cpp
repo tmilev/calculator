@@ -7,13 +7,13 @@
 void JSData::operator=(const LargeInteger& other) {
   this->reset();
   this->theType = JSData::token::tokenLargeInteger;
-  this->theInteger.GetElement() = other;
+  this->theInteger.getElement() = other;
 }
 
 void JSData::operator=(int other) {
   this->reset();
   this->theType = JSData::token::tokenLargeInteger;
-  this->theInteger.GetElement() = other;
+  this->theInteger.getElement() = other;
 }
 
 void JSData::operator=(const bool other) {
@@ -57,7 +57,7 @@ JSData& JSData::operator[](int i) {
   return this->theList[i];
 }
 
-JSData JSData::GetValue(const std::string& key) {
+JSData JSData::getValue(const std::string& key) {
   int theIndex = this->GetKeyIndex(key);
   if (theIndex != - 1) {
     return this->objects.theValues[theIndex];
@@ -85,13 +85,13 @@ bool JSData::HasCompositeKeyOfType(
   )) {
     return false;
   }
-  if (container.theInteger.GetElement() < 0) {
+  if (container.theInteger.getElement() < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error: integer is negative. ";
     }
     return false;
   }
-  output = container.theInteger.GetElement().value;
+  output = container.theInteger.getElement().value;
   return true;
 }
 
@@ -224,7 +224,7 @@ void JSData::operator=(const List<unsigned char>& other) {
   this->theType = JSData::token::tokenString;
   this->theString = other.ToStringConcatenate();
   this->theList.setSize(0); ;
-  this->objects.Clear();
+  this->objects.clear();
 }
 
 void JSData::operator=(const List<JSData>& other) {
@@ -233,17 +233,17 @@ void JSData::operator=(const List<JSData>& other) {
   for (int i = 0; i < other.size; i ++) {
     this->theList[i] = other[i];
   }
-  this->objects.Clear();
+  this->objects.clear();
 }
 
 void JSData::operator=(int64_t input) {
   this->theType = JSData::token::tokenLargeInteger;
-  this->theInteger.GetElement().AssignInt64(input);
+  this->theInteger.getElement().AssignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->theType == JSData::token::tokenLargeInteger) {
-    return this->theInteger.GetElement().IsIntegerFittingInInt(whichInteger);
+    return this->theInteger.getElement().IsIntegerFittingInInt(whichInteger);
   }
   if (this->theType == JSData::token::tokenFloat) {
     double floatRounded = static_cast<double>(static_cast<int>(this->theFloat));
@@ -350,7 +350,7 @@ bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
         LargeInteger theInt;
         if (parser.IsInteger(&theInt)) {
           this->theType = JSData::token::tokenLargeInteger;
-          this->theInteger.GetElement() = theInt;
+          this->theInteger.getElement() = theInt;
           this->theString = "";
           return true;
         }
@@ -548,7 +548,7 @@ bool JSData::MergeInMe(const JSData& input, std::stringstream* commentsOnFailure
   for (int i = 0; i < input.objects.size(); i ++) {
     const std::string& key = input.objects.theKeys[i];
     const JSData& value = input.objects.theValues[i];
-    if (!this->objects.Contains(key)) {
+    if (!this->objects.contains(key)) {
       (*this)[key] = value;
     } else {
       if (
@@ -922,10 +922,10 @@ void JSData::reset(char inputType) {
   this->theFloat = 0;
   this->theString = "";
   this->theList.setSize(0);
-  this->objects.Clear();
+  this->objects.clear();
   this->theInteger.FreeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {
-    this->theInteger.GetElement().AssignInt(0);
+    this->theInteger.getElement().AssignInt(0);
   }
 }
 

@@ -90,10 +90,10 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   << global.PhysicalPathProjectBase
   << "database-backups/dbBackup"
   << global.GetDateForLogFiles() << ".mongo";
-  global << logger::orange << "Backing up database with command: " << logger::endL;
-  global << commandStream.str() << logger::endL;
+  global << Logger::orange << "Backing up database with command: " << Logger::endL;
+  global << commandStream.str() << Logger::endL;
   global.externalCommandReturnOutput(commandStream.str());
-  global << logger::green << "Backing up completed. " << logger::endL;
+  global << Logger::green << "Backing up completed. " << Logger::endL;
   this->timeAtLastBackup = global.GetElapsedSeconds();
 }
 
@@ -109,12 +109,12 @@ void WebServerMonitor::Monitor(int pidServer) {
   // global.server().WebServerPingIntervalInSeconds=1000;
   int microsecondsToSleep = 1000000 * global.server().WebServerPingIntervalInSeconds;//
   if (global.server().WebServerPingIntervalInSeconds > 30) {
-    global << logger::red << "**********WARNING**************"
-    << logger::endL
-    << logger::red << " The ping interval: "
+    global << Logger::red << "**********WARNING**************"
+    << Logger::endL
+    << Logger::red << " The ping interval: "
     << global.server().WebServerPingIntervalInSeconds
     << " is set to a large value. "
-    << "Set the ping interval to less than 30 seconds to remove this message. " << logger::endL;
+    << "Set the ping interval to less than 30 seconds to remove this message. " << Logger::endL;
   }
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
@@ -125,11 +125,11 @@ void WebServerMonitor::Monitor(int pidServer) {
   theFile.close();
   WebCrawler theCrawler;
   theCrawler.init();
-  global << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
+  global << Logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep / 1000000) << " second(s). "
-  << logger::endL;
-  global << logger::red << "Please beware that the server will restart and you will lose all computations "
-  << "if " << maxNumPingFailures << " consecutive pings fail. " << logger::endL;
+  << Logger::endL;
+  global << Logger::red << "Please beware that the server will restart and you will lose all computations "
+  << "if " << maxNumPingFailures << " consecutive pings fail. " << Logger::endL;
   int numConsecutiveFailedPings = 0;
   int numPings = 0;
   TimeWrapper now;
@@ -141,13 +141,13 @@ void WebServerMonitor::Monitor(int pidServer) {
     if (theCrawler.lastTransactionErrors != "") {
       now.AssignLocalTime();
       numConsecutiveFailedPings ++;
-      global << logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
+      global << Logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
       << ". " << "Errors: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
-      << ". " << logger::endL;
+      << ". " << Logger::endL;
     } else {
       std::cout << "Connection monitor: ping #" << numPings << ": received " << theCrawler.lastNumBytesRead << " bytes. " << std::endl;
       numConsecutiveFailedPings = 0;
@@ -161,8 +161,8 @@ void WebServerMonitor::Monitor(int pidServer) {
 void WebServerMonitor::Restart() {
   TimeWrapper now;
   now.AssignLocalTime();
-  global << logger::red << "Server stopped responding (probably locked pipe?)"
-  << ", restarting. " << logger::endL;
+  global << Logger::red << "Server stopped responding (probably locked pipe?)"
+  << ", restarting. " << Logger::endL;
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
@@ -172,11 +172,11 @@ void WebServerMonitor::Restart() {
   theFile.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
-  global << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
+  global << "Terminating server children with command: " << killServerChildrenCommand.str() << Logger::endL;
   global.externalCommandNoOutput(killServerChildrenCommand.str(), true);
-  global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
+  global << Logger::red << "Terminating server with pid: " << this->pidServer << Logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
-  global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
+  global << Logger::red << "Restarting monitor. " << this->pidServer << Logger::endL;
   global.server().StopKillAll();
 }
 
@@ -286,7 +286,7 @@ void WebCrawler::PingCalculatorStatus() {
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        global << logger::red << failStream.str() << logger::endL;
+        global << Logger::red << failStream.str() << Logger::endL;
         reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
         connectionResult = - 1;
       } else {
@@ -411,7 +411,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        global << logger::red << failStream.str() << logger::endL;
+        global << Logger::red << failStream.str() << Logger::endL;
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << failStream.str()
           << "Could not connect through port. Select returned: " << numSelected;
@@ -691,7 +691,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   }
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
-    global << logger::red << "Could not fetch the google public keys ..." << logger::endL;
+    global << Logger::red << "Could not fetch the google public keys ..." << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
@@ -706,14 +706,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
-    global << logger::red << "Failed to create google keys file name. " << logger::endL;
+    global << Logger::red << "Failed to create google keys file name. " << Logger::endL;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
-  global << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
+  global << Logger::green << "Updated public key file: " << googleKeysFileName << Logger::endL;
   googleKeysFile << this->bodyReceiveD;
   googleKeysDebugFile
   << "Expected body length: " << this->expectedLength.toString() << "\n";
@@ -772,7 +772,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   }
   if (header.theType == JSData::token::tokenObject) {
     if (header.HasKey("kid")) {
-      keyIDstring = header.GetValue("kid").theString;
+      keyIDstring = header.getValue("kid").theString;
     }
   }
   if (keyIDstring == "") {
@@ -890,7 +890,7 @@ bool WebCrawler::VerifyRecaptcha(
     return false;
   }
   JSData theSuccess;
-  theSuccess = theJSparser.GetValue("success");
+  theSuccess = theJSparser.getValue("success");
   if (theSuccess.theType != JSData::token::tokenBool || theSuccess.theBoolean != true) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">"
@@ -1093,9 +1093,9 @@ bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCra
   return true;
 }
 
-void GlobalVariables::Response::Report(const std::string &input) {
+void GlobalVariables::Response::report(const std::string &input) {
   MutexLockGuard guard(global.MutexReturnBytes);
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::Report");
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::report");
   return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
 }
 

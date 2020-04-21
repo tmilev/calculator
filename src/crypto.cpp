@@ -1131,7 +1131,7 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
       result = false;
     }
     output += currentChar;
-    if (output.IsEqualToZero()) {
+    if (output.isEqualToZero()) {
       numberOfLeadingZeroes ++;
     }
   }
@@ -1464,16 +1464,16 @@ bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFail
   this->theModulusString = "";
   this->theExponentString = "";
   if (input.HasKey("alg")) {
-    this->algorithm = input.GetValue("alg").theString;
+    this->algorithm = input.getValue("alg").theString;
   }
   if (input.HasKey("kid")) {
-    this->keyid = input.GetValue("kid").theString;
+    this->keyid = input.getValue("kid").theString;
   }
   if (input.HasKey("n")) {
-    this->theModulusString = input.GetValue("n").theString;
+    this->theModulusString = input.getValue("n").theString;
   }
   if (input.HasKey("e")) {
-    this->theExponentString = input.GetValue("e").theString;
+    this->theExponentString = input.getValue("e").theString;
   }
   return this->LoadFromModulusAndExponentStrings(commentsOnFailure);
 }
@@ -1506,7 +1506,7 @@ bool Crypto::LoadOneKnownCertificate(
   bool isGood = false;
   if (certificateJSON.theType == JSData::token::tokenObject) {
     if (certificateJSON.HasKey("keys")) {
-      JSData theKeys = certificateJSON.GetValue("keys");
+      JSData theKeys = certificateJSON.getValue("keys");
       if (theKeys.theType == JSData::token::tokenArray) {
         isGood = true;
         for (int i = 0; i < theKeys.theList.size; i ++) {

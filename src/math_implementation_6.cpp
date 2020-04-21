@@ -23,7 +23,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
     }
     return false;
   }
-  if (this->current.IsEqualToZero()) {
+  if (this->current.isEqualToZero()) {
     return false;
   }
   if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
@@ -101,7 +101,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
     return false;
   }
   output.setSize(0);
-  if (this->minimalNumberOfVariables() == 0 || this->IsEqualToZero()) {
+  if (this->minimalNumberOfVariables() == 0 || this->isEqualToZero()) {
     return true;
   }
   Polynomial<Rational> myCopy;
@@ -236,7 +236,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
     theArgument[0] = AllPointsOfEvaluation[i];
     theValuesAtPoints[i] = this->current.Evaluate(theArgument);
-    if (theValuesAtPoints[i].IsEqualToZero()) {
+    if (theValuesAtPoints[i].isEqualToZero()) {
       Polynomial<Rational> incomingFactor;
       incomingFactor.makeDegreeOne(1, 0, 1, - theArgument[0]);
       this->output->accountReducedFactor(incomingFactor);
@@ -281,7 +281,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       std::stringstream report;
       report << "Trying divisor combination "
       << theReport.ticks << " out of " << total.toString();
-      theReport.Report(report.str());
+      theReport.report(report.str());
     }
     theValuesAtPointsLeft.makeZero(theValuesAtPoints.size);
     Rational firstValue;
@@ -308,7 +308,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       continue;
     }
     for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
-      if (theValuesAtPointsLeft[j].IsEqualToZero()) {
+      if (theValuesAtPointsLeft[j].isEqualToZero()) {
         isGood = false;
         break;
       }

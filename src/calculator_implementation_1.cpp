@@ -32,19 +32,19 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   }
   for (int j = 0; j < matb.NumRows; j ++) {
     GlobalGoal += matb.elements[j][0];
-    if (matb.elements[j][0].IsNegative()) {
+    if (matb.elements[j][0].isNegative()) {
       global.fatal << "Constraint index " << j << " is negative: "
       << matb.elements[j][0] << " which is not allowed. " << global.fatal;
     }
   }
-  if (GlobalGoal.IsEqualToZero()) {
+  if (GlobalGoal.isEqualToZero()) {
     return false;
   }
   int NumTrueVariables = matA.NumCols;
   //tempMatb.Assign(matb);
   tempMatA.init(matA.NumRows, NumTrueVariables + matA.NumRows);
   HashedList<Selection> VisitedVertices;
-  VisitedVertices.Clear();
+  VisitedVertices.clear();
   BaseVariables.init(tempMatA.NumCols);
   tempMatA.makeZero();
   matX.makeZero(tempMatA.NumCols);
@@ -61,7 +61,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Rational ChangeGradient; //Change, PotentialChange;
   int EnteringVariable = 0;
   bool WeHaveNotEnteredACycle = true;
-  while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive()) {
+  while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.isPositive()) {
     EnteringVariable = - 1; ChangeGradient.makeZero();
     for (int i = 0; i < tempMatA.NumCols; i ++) {
       if (!BaseVariables.selected[i]) {
@@ -82,7 +82,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables
       );
       Rational tempRat, tempTotalChange;
-      if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero()) {
+      if (tempMatA.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
@@ -97,8 +97,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       tempTotalChange.Assign(MaxMovement);
       tempTotalChange.MultiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
-      if (!tempTotalChange.IsEqualToZero()) {
-        VisitedVertices.Clear();
+      if (!tempTotalChange.isEqualToZero()) {
+        VisitedVertices.clear();
         GlobalGoal.Subtract(tempTotalChange);
       } else {
         int tempI = VisitedVertices.getIndex(BaseVariables);
@@ -109,7 +109,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         }
       }
       for (int i = 0; i < tempMatA.NumRows; i ++) {
-        if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i != LeavingVariableRow) {
+        if (!tempMatA.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.MultiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
@@ -121,7 +121,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           matX[BaseVariables.elements[i]] = 0;
         }
       }
-      if (!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero()) {
+      if (!matX[BaseVariables.elements[LeavingVariableRow]].isEqualToZero()) {
         global.fatal << "Leaving variable coefficient not allowed to be zero. " << global.fatal;
       }
       BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]] = false;
@@ -136,7 +136,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     }
   }
   for (int i = NumTrueVariables; i < matX.size; i ++) {
-    if (matX[i].IsPositive()) {
+    if (matX[i].isPositive()) {
       return false;
     }
   }
@@ -201,7 +201,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   for (int i = 0; i < numVars; i ++) {
     theVars.addOnTop(theContextStart.getVariable(i));
   }
-  theVars.QuickSortAscending();
+  theVars.quickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.setSize(numVars);
   for (int i = 0; i < theSub.size; i ++) {
@@ -436,7 +436,7 @@ bool Calculator::innerPrintSSSubalgebras(
       << "Use the following printouts on your own risk.</b><br>";
     }
   } else {
-    ownerSSPointer = input[1].GetValue<SemisimpleSubalgebras>().owner;
+    ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
   }
   if (ownerSSPointer == nullptr) {
     global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
@@ -657,7 +657,7 @@ bool Calculator::innerGroebner(
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.getFormat(theGroebnerComputation.theFormat);
-  theContext.getFormat(global.theDefaultFormat.GetElement());
+  theContext.getFormat(global.theDefaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
     tempElt.MakeMOne(static_cast<unsigned>(theMod));
@@ -1812,7 +1812,7 @@ bool Expression::IsSuitableForRecursion() const {
 }
 
 void Expression::SubstituteRecursively(MapList<Expression, Expression>& theSubs) {
-  if (theSubs.Contains(*this)) {
+  if (theSubs.contains(*this)) {
     (*this) = theSubs.GetValueCreate(*this);
     return;
   }
@@ -1825,7 +1825,7 @@ void Expression::SubstituteRecursivelyInChildren(MapList<Expression, Expression>
   }
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
-    if (theSubs.Contains((*this)[i])) {
+    if (theSubs.contains((*this)[i])) {
       this->SetChilD(i, theSubs.GetValueCreate((*this)[i]));
     } else {
       tempE = (*this)[i];
@@ -1938,14 +1938,14 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       return output.AssignValue(out.str(), theCommands);
     }
     hasDoubleValue = true;
-    theDoubleValue = input.GetValue<Rational>().GetDoubleValue();
+    theDoubleValue = input.getValue<Rational>().GetDoubleValue();
   }
   if (input.IsOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.getValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
   }
   if (input.IsOfType<double>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.GetValue<double>();
+    theDoubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
     out << " " << FloatingPoint::DoubleToString(theDoubleValue);
@@ -2050,7 +2050,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     for (int i = 0; i < coneNonStrictGens.size; i ++) {
       checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     }
-    if (!checkVector.IsEqualToZero()) {
+    if (!checkVector.isEqualToZero()) {
       global.fatal << "<br>This is a programming error: the output linear combination " << outputIntersection.toString()
       << " corresponds to the cone intersection " << checkVector.toString()
       << " and is not equal to zero! Here is the cone output so far: "
@@ -2095,14 +2095,14 @@ bool Calculator::functionReverseOrderRecursively(
     return true;
   }
   output.reset(theCommands, input.size());
-  output.AddChildOnTop(input[0]);
+  output.addChildOnTop(input[0]);
   for (int i = input.size() - 1; i >= 1; i --) {
     Expression currentE = input[i];
     Expression reversedCurrentE;
     if (!theCommands.functionReverseOrderRecursively(theCommands,  currentE, reversedCurrentE)) {
       return false;
     }
-    output.AddChildOnTop(reversedCurrentE);
+    output.addChildOnTop(reversedCurrentE);
   }
   return true;
 }
@@ -2124,9 +2124,9 @@ bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& in
     toReverse.SetChildAtomValue(0, theCommands.opSequence());
   }
   output.reset(theCommands, toReverse.size());
-  output.AddChildOnTop(toReverse[0]);
+  output.addChildOnTop(toReverse[0]);
   for (int i = toReverse.size() - 1; i >= 1; i --) {
-    output.AddChildOnTop(toReverse[i]);
+    output.addChildOnTop(toReverse[i]);
   }
   return true;
 }
@@ -2136,7 +2136,7 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
   const ElementUniversalEnveloping<coefficient>& right
 ) const {
   MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
-  if (this->IsEqualToZero()) {
+  if (this->isEqualToZero()) {
     return 0;
   }
   coefficient result = 0;
@@ -2197,7 +2197,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   ) {
     return false;
   }
-  if (left.IsEqualToZero() || right.IsEqualToZero()) {
+  if (left.isEqualToZero() || right.isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
   if (&left.GetOwner() != &right.GetOwner()) {
@@ -2233,7 +2233,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     if (!theCommands.GetVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
       return false;
     }
-    if (!theWeyl.RootSystem.Contains(currentRoot)) {
+    if (!theWeyl.RootSystem.contains(currentRoot)) {
       return output.MakeError("Input vector " + currentRoot.toString() + " is not a root. ", theCommands);
     }
     outputRoots.addOnTop(currentRoot);
@@ -2353,9 +2353,9 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   this->output.setSize(0);
   // this->rulesDisplayNames.setSize(0);
   this->rulesNames.setSize(0);
-  // this->rulesToBeIgnored.Clear();
+  // this->rulesToBeIgnored.clear();
   // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
-  // this->rulesDisplayNamesMap.Clear();
+  // this->rulesDisplayNamesMap.clear();
   // this->rulesDisplayNamesMap.SetKeyValue("Minus", "");
   // this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication", "");
   // this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals", "");
@@ -2396,7 +2396,7 @@ Expression ExpressionHistoryEnumerator::GetExpression(
   result.reset(*this->owner);
   for (int i = 0; i < currentNode.children.size; i ++) {
     Expression currentE = this->GetExpression(currentNode.GetChild(i), outputRuleNames);
-    result.AddChildOnTop(currentE);
+    result.addChildOnTop(currentE);
   }
   return result;
 }

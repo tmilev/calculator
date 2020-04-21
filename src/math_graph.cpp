@@ -41,7 +41,7 @@ List<List<int> > GraphOLD::DestructivelyGetConnectedComponents() {
     }
   }
   for (int i = 0; i < outerl.size; i ++) {
-    outerl[i].QuickSortAscending();
+    outerl[i].quickSortAscending();
   }
   return outerl;
 }
@@ -50,7 +50,7 @@ void GraphOLD::TreeRecurseCopyDelete(List<int>& l, int v, int m) {
   for (int i = 0; i < m; i ++) {
     if (this->data[v * m + i] != - 1) {
       int w = this->data[v * m + i];
-      if (!l.Contains(w)) {
+      if (!l.contains(w)) {
         l.addOnTop(w);
       }
       this->data[v * m + i] = - 1;

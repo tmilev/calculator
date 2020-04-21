@@ -88,7 +88,7 @@ Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& in
     Vectors<coefficient> theBasisVectorForm;
     this->basis.GetVectorsFromRows(theBasisVectorForm);
     Vector<coefficient> output;
-    input.GetCoordsInBasiS(theBasisVectorForm, output);
+    input.getCoordinatesInBasis(theBasisVectorForm, output);
     return output;
   } else {
     if (!haveGramMatrix) {
@@ -171,7 +171,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
       v[jjj] += x * fastbasis.elements[i][jjj];
     }
   }
-  if (v.IsEqualToZero()) {
+  if (v.isEqualToZero()) {
     return false;
   }
   // this should take the same amount of time either way
@@ -199,7 +199,7 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v) {
 template <typename coefficient>
 bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const {
   out.makeZero(this->rank);
-  if (v.IsEqualToZero()) {
+  if (v.isEqualToZero()) {
     if (this->rank == 0) {
       return false;
     }
@@ -229,7 +229,7 @@ bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& 
     for (int k = 0; k < this->degree; k ++) {
       v[k] -= this->fastbasis(i, k) * c;
     }
-    if (v.IsEqualToZero()) {
+    if (v.isEqualToZero()) {
       return true;
     }
   }

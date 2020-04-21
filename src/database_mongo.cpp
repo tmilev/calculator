@@ -46,7 +46,7 @@ bool Database::Mongo::initialize() {
   if (this->flagInitialized) {
     return true;
   }
-  global << logger::blue << "Initializing mongoDB. " << logger::endL;
+  global << Logger::blue << "Initializing mongoDB. " << Logger::endL;
   if (!global.flagServerForkedIntoWorker) {
     global.fatal << "MongoDB not allowed to run before server fork. " << global.fatal;
   }
@@ -223,17 +223,17 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    global << logger::red << "While removing: "
+    global << Logger::red << "While removing: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << logger::endL;
+    << this->theError.message << Logger::endL;
     return false;
   }
   //char* bufferOutpurStringFormat = 0;
   //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   //std::string updateResultString(bufferOutpurStringFormat);
   //bson_free(bufferOutpurStringFormat);
-  //global << logger::red << "Update result: " << updateResultString << logger::endL;
+  //global << Logger::red << "Update result: " << updateResultString << Logger::endL;
   return true;
 }
 
@@ -273,17 +273,17 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    global << logger::red << "While updating: "
+    global << Logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << logger::endL;
+    << this->theError.message << Logger::endL;
     return false;
   }
   // char* bufferOutpurStringFormat = 0;
   // bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   // std::string updateResultString(bufferOutpurStringFormat);
   // bson_free(bufferOutpurStringFormat);
-  // global << logger::red << "Update result: " << updateResultString << logger::endL;
+  // global << Logger::red << "Update result: " << updateResultString << Logger::endL;
   return true;
 }
 
@@ -334,17 +334,17 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    global << logger::red << "While updating: "
+    global << Logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << logger::endL;
+    << this->theError.message << Logger::endL;
     return false;
   }
   // char* bufferOutpurStringFormat = 0;
   // bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   // std::string updateResultString(bufferOutpurStringFormat);
   // bson_free(bufferOutpurStringFormat);
-  // global << logger::red << "Update result: " << updateResultString << logger::endL;
+  // global << Logger::red << "Update result: " << updateResultString << Logger::endL;
   return true;
 }
 
@@ -405,10 +405,10 @@ bool MongoQuery::FindMultiple(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    global << logger::red << "While finding: "
+    global << Logger::red << "While finding: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
-    << this->theError.message << logger::endL;
+    << this->theError.message << Logger::endL;
     return false;
   }
   if (this->options != nullptr) {
@@ -426,7 +426,7 @@ bool MongoQuery::FindMultiple(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << this->theError.message;
       }
-      global << logger::red << "Mongo error: " << this->theError.message << logger::endL;
+      global << Logger::red << "Mongo error: " << this->theError.message << Logger::endL;
       return false;
     }
   }
@@ -437,7 +437,7 @@ bool MongoQuery::FindMultiple(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad mongoDB cursor. ";
     }
-    global << logger::red << "Mongo error: bad mongoDB cursor. " << logger::endL;
+    global << Logger::red << "Mongo error: bad mongoDB cursor. " << Logger::endL;
     return false;
   }
   this->totalItems = 0;
@@ -460,11 +460,11 @@ bool MongoQuery::FindMultiple(
   for (int i = 0; i < outputString.size; i ++) {
     JSData encoded;
     if (!encoded.readstring(outputString[i], commentsOnFailure)) {
-      global << logger::red << "Mongo/JSData error: failed to parse JSON. " << logger::endL;
+      global << Logger::red << "Mongo/JSData error: failed to parse JSON. " << Logger::endL;
       return false;
     }
     if (!Database::ConvertJSONMongoToJSON(encoded, output[i], commentsOnFailure)) {
-      global << logger::red << "Mongo/JSData error: failed to convert mongo JSON to JSON. " << logger::endL;
+      global << Logger::red << "Mongo/JSData error: failed to convert mongo JSON to JSON. " << Logger::endL;
       return false;
     }
   }
@@ -549,7 +549,7 @@ bool Database::FindFromString(
   MacroRegisterFunctionWithName("Database::FindFromString");
 #ifdef MACRO_use_MongoDB
   JSData theData;
-  //global << logger::blue << "Query input: " << findQuery << logger::endL;
+  //global << Logger::blue << "Query input: " << findQuery << Logger::endL;
   if (!theData.readstring(findQuery, commentsOnFailure)) {
     return false;
   }
@@ -573,7 +573,7 @@ void QueryResultOptions::MakeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
-JSData QueryResultOptions::ToJSON() const {
+JSData QueryResultOptions::toJSON() const {
   JSData result, fields;
   result.reset(JSData::token::tokenObject);
   bool found = false;
@@ -656,11 +656,11 @@ bool Database::FindFromJSONWithOptions(
   query.collectionName = collectionName;
   query.findQuery = findQuery.toString(nullptr);
   query.maxOutputItems = maxOutputItems;
-  global << logger::blue << "Query input JSON: " << query.ToStringDebug()
-  << ", options: " << options.ToJSON().toString()
-  << logger::endL;
+  global << Logger::blue << "Query input JSON: " << query.ToStringDebug()
+  << ", options: " << options.toJSON().toString()
+  << Logger::endL;
   bool result = query.FindMultiple(
-    output, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
+    output, options.toJSON(), commentsOnFailure, commentsGeneralNonSensitive
   );
   if (totalItems != nullptr) {
     *totalItems = query.totalItems;
@@ -727,7 +727,7 @@ bool Database::Mongo::GetOrFindQuery(
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
   for (int i = 0; i < input.size; i ++) {
-    queryStream << input[i].ToJSON().toString(nullptr);
+    queryStream << input[i].toJSON().toString(nullptr);
     if (i < input.size - 1) {
       queryStream << ", ";
     }
@@ -747,11 +747,11 @@ bool Database::Mongo::FindOneWithOptions(
 #ifdef MACRO_use_MongoDB
   MongoQuery mongoQuery;
   mongoQuery.collectionName = query.collection;
-  mongoQuery.findQuery = query.ToJSON().toString();
+  mongoQuery.findQuery = query.toJSON().toString();
   mongoQuery.maxOutputItems = 1;
   List<JSData> outputList;
   mongoQuery.FindMultiple(
-    outputList, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
+    outputList, options.toJSON(), commentsOnFailure, commentsGeneralNonSensitive
   );
   if (outputList.size == 0) {
     return false;
@@ -909,7 +909,7 @@ bool Database::DeleteOneEntryById(
   if (!this->FindOne(findQuery, foundItem, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query: "
-      << findQuery.ToJSON().toString(nullptr) << " returned no hits in table: "
+      << findQuery.toJSON().toString(nullptr) << " returned no hits in table: "
       << findQuery.collection;
     }
     return false;
@@ -922,7 +922,7 @@ bool Database::DeleteOneEntryById(
     return false;
   }
   MongoQuery query;
-  query.findQuery = findQuery.ToJSON().toString(nullptr);
+  query.findQuery = findQuery.toJSON().toString(nullptr);
   query.collectionName = findQuery.collection;
   return query.RemoveOne(commentsOnFailure);
 #else
@@ -958,7 +958,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
 
   if (!didFindItem) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Query: " << findQuery.ToJSON().toString(nullptr)
+      *commentsOnFailure << "Query: " << findQuery.toJSON().toString(nullptr)
       << " returned no hits in table: "
       << findQuery.collection;
     }
@@ -975,7 +975,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
     return false;
   }
   MongoQuery query;
-  query.findQuery = findQuery.ToJSON().toString(nullptr);
+  query.findQuery = findQuery.toJSON().toString(nullptr);
   query.collectionName = findQuery.collection;
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
@@ -1130,7 +1130,7 @@ bool Database::Mongo::UpdateOne(
   }
   if (!Database::Mongo::UpdateOneFromQueryString(
     findQuery.collection,
-    findQuery.ToJSON().toString(nullptr),
+    findQuery.toJSON().toString(nullptr),
     updateQueryJSON.toString(nullptr),
     commentsOnFailure
   )) {
@@ -1138,7 +1138,7 @@ bool Database::Mongo::UpdateOne(
       *commentsOnFailure << "Failed to update one element. ";
     }
     global << "Failed to update element found by: "
-    << findQuery.ToJSON().toString(nullptr)
+    << findQuery.toJSON().toString(nullptr)
     << " with: " << updateQuery.ToStringDebug();
   }
   return true;
@@ -1244,8 +1244,8 @@ bool Database::FetchTable(
   for (int i = 0; i < rowsJSON.size; i ++) {
     outputRows[i].setSize(theLabels.size);
     for (int j = 0; j < theLabels.size; j ++) {
-      if (rowsJSON[i].objects.Contains(theLabels[j])) {
-        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).toString(nullptr);
+      if (rowsJSON[i].objects.contains(theLabels[j])) {
+        outputRows[i][j] = rowsJSON[i].getValue(theLabels[j]).toString(nullptr);
       } else {
         outputRows[i][j] = "";
       }

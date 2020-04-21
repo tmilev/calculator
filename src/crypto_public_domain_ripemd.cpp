@@ -352,7 +352,7 @@ static void ripemd160_compress(Ripemd160State* self) {
   self->h[4] = self->h[0] + BL + CR;
   self->h[0] = T;
 
-  /* Clear the buffer and wipe the temporary variables */
+  /* clear the buffer and wipe the temporary variables */
   T = AL = BL = CL = DL = EL = AR = BR = CR = DR = ER = 0;
   memset(&self->buf, 0, sizeof(self->buf));
   self->bufpos = 0;

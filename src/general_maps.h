@@ -17,7 +17,7 @@ public:
   int getIndexNoFail(const key& input) const {
     return this->theKeys.getIndexNoFail(input);
   }
-  bool Contains(const key& inputKey) const {
+  bool contains(const key& inputKey) const {
     return this->getIndex(inputKey) != - 1;
   }
   void RemoveKey(const key& theKey) {
@@ -35,7 +35,7 @@ public:
     }
     return this->theValues[theIndex];
   }
-  value GetValue(const key& input, const value& resultIfMissing) {
+  value getValue(const key& input, const value& resultIfMissing) {
     int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       return resultIfMissing;
@@ -62,7 +62,7 @@ public:
     return this->theValues[theIndex];
   }
   void SetKeyValue(const key& inputKey, const value& inputValue) {
-    if (this->Contains(inputKey)) {
+    if (this->contains(inputKey)) {
       this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
       return;
     }
@@ -73,8 +73,8 @@ public:
     this->theKeys.setExpectedSize(theSize);
     this->theValues.setExpectedSize(theSize);
   }
-  void Clear() {
-    this->theKeys.Clear();
+  void clear() {
+    this->theKeys.clear();
     this->theValues.setSize(0);
   }
   int size() const {
@@ -114,7 +114,7 @@ public:
   int getIndex(const key& input) const {
     return this->theKeys.getIndex(input);
   }
-  bool Contains(const key& input) const {
+  bool contains(const key& input) const {
     return this->getIndex(input) != - 1;
   }
   value& GetValueCreateIfNotPresent(const key& input) {
@@ -127,7 +127,7 @@ public:
     return this->theValues[theIndex];
   }
   void SetValue(const value& inputValue, const key& inputKey) {
-    if (this->Contains(inputKey)) {
+    if (this->contains(inputKey)) {
       this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
       return;
     }
@@ -138,8 +138,8 @@ public:
     this->theKeys.setExpectedSize(theSize);
     this->theValues.setExpectedSize(theSize);
   }
-  void Clear() {
-    this->theKeys.Clear();
+  void clear() {
+    this->theKeys.clear();
     this->theValues.setSize(0);
   }
   value& operator[](int i) const {

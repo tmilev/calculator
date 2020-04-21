@@ -55,8 +55,8 @@ public:
   int GetDimFirstDimensionDependentOperation();
   int GetDimFromBilinearForm();
   void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
-    X1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[0]);
-    Y1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[1]);
+    X1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[0]);
+    Y1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[1]);
     X1 = X1 * this->GraphicsUnit + this->centerX;
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
   }
@@ -142,12 +142,12 @@ public:
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
   void ScaleToUnitLength(Vector<double>& theRoot) {
-    double theLength = this->theBilinearForm.ScalarProduct(theRoot, theRoot);
+    double theLength = this->theBilinearForm.scalarProduct(theRoot, theRoot);
     theLength = FloatingPoint::Sqrt(theLength);
     theRoot /= theLength;
   }
   void RotateOutOfPlane(
-    std::stringstream& logger,
+    std::stringstream& Logger,
     Vector<double>& input,
     Vector<double>& output,
     Vector<double>& orthoBasis1,

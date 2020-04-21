@@ -119,12 +119,12 @@ bool QueryExact::isEmpty() const {
   return false;
 }
 
-JSData QueryExact::ToJSON() const {
+JSData QueryExact::toJSON() const {
   JSData result;
   JSData encodedKeys;
   if (!Database::ConvertJSONToJSONMongo(this->value, encodedKeys)) {
-    global << logger::red
-    << "Failed to convert find query to mongoDB encoding. " << logger::endL;
+    global << Logger::red
+    << "Failed to convert find query to mongoDB encoding. " << Logger::endL;
     result.theType = JSData::token::tokenNull;
     return result;
   }
@@ -390,9 +390,9 @@ bool Database::initializeServer() {
   if (global.flagDatabaseCompiled) {
     return true;
   }
-  global << logger::red << "Calculator compiled without (mongoDB) database support. "
-  << logger::green << "Using " << logger::red
-  << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
+  global << Logger::red << "Calculator compiled without (mongoDB) database support. "
+  << Logger::green << "Using " << Logger::red
+  << "**SLOW** " << Logger::green << "fall-back JSON storage." << Logger::endL;
   this->theFallBack.initialize();
   return true;
 }
@@ -470,7 +470,7 @@ bool ProblemDataAdministrative::GetWeightFromCoursE(
   const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor
 ) {
   MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
-  if (!this->problemWeightsPerCoursE.Contains(theCourseNonURLed)) {
+  if (!this->problemWeightsPerCoursE.contains(theCourseNonURLed)) {
     return false;
   }
   std::string tempString;
@@ -696,8 +696,8 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   return true;
 }
 
-JSData UserCalculatorData::ToJSON() {
-  MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
+JSData UserCalculatorData::toJSON() {
+  MacroRegisterFunctionWithName("UserCalculatorData::toJSON");
   JSData result;
   result[DatabaseStrings::labelUserId                            ] = this->userId                                ;
   result[DatabaseStrings::labelUsername                          ] = this->username                              ;
@@ -709,7 +709,7 @@ JSData UserCalculatorData::ToJSON() {
   result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
   if (this->problemDataJSON.theType == JSData::token::tokenUndefined) {
     result[DatabaseStrings::labelProblemDataJSON].theType = JSData::token::tokenObject;
-    result[DatabaseStrings::labelProblemDataJSON].objects.Clear();
+    result[DatabaseStrings::labelProblemDataJSON].objects.clear();
   }
   result[DatabaseStrings::labelPassword                          ] = this->actualHashedSaltedPassword            ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
@@ -1002,12 +1002,12 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.UserRequestRequiresLoadingRealExamData()) {
-    if (theMap.Contains(WebAPI::problem::randomSeed)) {
+    if (theMap.contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
-  this->theAnswers.Clear();
+  this->theAnswers.clear();
   bool result = true;
   MapList<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
@@ -1023,15 +1023,15 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
       << currentQuestion << ". ";
       continue;
     }
-    if (currentQuestionMap.Contains("numCorrectSubmissions")) {
+    if (currentQuestionMap.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
       atoi(currentQuestionMap.GetValueCreate("numCorrectSubmissions").c_str());
     }
-    if (currentQuestionMap.Contains("numSubmissions")) {
+    if (currentQuestionMap.contains("numSubmissions")) {
       currentA.numSubmissions =
       atoi(currentQuestionMap.GetValueCreate("numSubmissions").c_str());
     }
-    if (currentQuestionMap.Contains("firstCorrectAnswer")) {
+    if (currentQuestionMap.contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
@@ -1050,14 +1050,14 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.UserRequestRequiresLoadingRealExamData()) {
-    if (inputData.objects.Contains(WebAPI::problem::randomSeed)) {
+    if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<unsigned>(atoi(
         inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).theString.c_str()
       ));
       this->flagRandomSeedGiven = true;
     }
   }
-  this->theAnswers.Clear();
+  this->theAnswers.clear();
   bool result = true;
   for (int i = 0; i < inputData.objects.size(); i ++) {
     if (inputData.objects.theKeys[i] == WebAPI::problem::randomSeed) {
@@ -1066,15 +1066,15 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.LastObject();
     JSData currentQuestionJSON = inputData.objects.theValues[i];
-    if (currentQuestionJSON.objects.Contains("numCorrectSubmissions")) {
+    if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
       atoi(currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").theString.c_str());
     }
-    if (currentQuestionJSON.objects.Contains("numSubmissions")) {
+    if (currentQuestionJSON.objects.contains("numSubmissions")) {
       currentA.numSubmissions =
       atoi(currentQuestionJSON.objects.getValueNoFail("numSubmissions").theString.c_str());
     }
-    if (currentQuestionJSON.objects.Contains("firstCorrectAnswer")) {
+    if (currentQuestionJSON.objects.contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").theString;
       currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
@@ -1092,7 +1092,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure)) {
     return false;
   }
-  this->theProblemData.Clear();
+  this->theProblemData.clear();
   this->theProblemData.setExpectedSize(theMap.size());
   bool result = true;
   ProblemData reader;
@@ -1113,7 +1113,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
 
 bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
-  this->theProblemData.Clear();
+  this->theProblemData.clear();
   this->theProblemData.setExpectedSize(theData.objects.size());
   bool result = true;
   ProblemData reader;
@@ -1283,7 +1283,7 @@ bool UserCalculator::StoreProblemData(
   const std::string& fileNamE, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::StoreProblemData");
-  if (!this->theProblemData.Contains(fileNamE)) {
+  if (!this->theProblemData.contains(fileNamE)) {
     global.fatal << "I was asked to store fileName: "
     << fileNamE << " but I have no record of it in my problem data map. " << global.fatal;
   }
@@ -1364,7 +1364,7 @@ bool Database::User::AddUsersFromEmails(
       outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
       QuerySet setUser;
-      setUser.value = currentUser.ToJSON();
+      setUser.value = currentUser.toJSON();
       if (!this->owner->UpdateOneFromSome(
         findUser, setUser, &comments
       )) {
@@ -1475,7 +1475,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   global << "Sending email via "
   << "https://api.mailgun.net/v3/mail2."
   << hostnameToSendEmailFrom
-  << "/messages " << logger::endL;
+  << "/messages " << Logger::endL;
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey
   << "' ";
@@ -1606,14 +1606,14 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!theData.readstring(theToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
-  if (theData.GetValue("email").theType != JSData::token::tokenString) {
+  if (theData.getValue("email").theType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find email entry in the json data "
       << theData.toString(nullptr);
     }
     return false;
   }
-  userWrapper.email = theData.GetValue("email").theString;
+  userWrapper.email = theData.getValue("email").theString;
   userWrapper.username = "";
   if (!userWrapper.Iexist(commentsOnFailure)) {
     if (commentsGeneral != nullptr) {
@@ -1737,11 +1737,11 @@ bool Database::User::LoginViaDatabase(
         *commentsOnFailure << "<b>First login of user default "
         << "(= default administator account): setting password.</b> ";
       }
-      global << logger::yellow << "First login of user default: setting password." << logger::endL;
+      global << Logger::yellow << "First login of user default: setting password." << Logger::endL;
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = UserCalculator::Roles::administator;
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
-        global << logger::red << "Failed to store default's pass to database. ";
+        global << Logger::red << "Failed to store default's pass to database. ";
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Failed to store default's pass to database. ";
           global << commentsOnFailure->str();
@@ -1779,7 +1779,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
     this->ComputeHashedSaltedPassword();
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
-  JSData setUser = this->ToJSON();
+  JSData setUser = this->toJSON();
   return Database::get().UpdateOne(
     findUser, setUser, commentsOnFailure
   );

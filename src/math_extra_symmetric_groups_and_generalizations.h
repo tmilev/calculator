@@ -836,9 +836,9 @@ public:
           break;
         case firstout:
           if (stack[frame_pointer].c % 2!= 0) {
-            l.SwapTwoIndices(l.size - 1 - stack[frame_pointer].loop_i, l.size - 1 - stack[frame_pointer].c);
+            l.swapTwoIndices(l.size - 1 - stack[frame_pointer].loop_i, l.size - 1 - stack[frame_pointer].c);
           } else {
-            l.SwapTwoIndices(l.size - 1, l.size - 1 - stack[frame_pointer].c);
+            l.swapTwoIndices(l.size - 1, l.size - 1 - stack[frame_pointer].c);
           }
           stack[frame_pointer].loop_i ++;
           stack[frame_pointer].program_counter = pcpositions::loop;
@@ -898,7 +898,7 @@ public:
 
   void Initialize(const List<int>& l) {
     replacements = l;
-    replacements.QuickSortAscending();
+    replacements.quickSortAscending();
     pads.Initialize(l.size);
   }
 

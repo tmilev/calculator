@@ -15,7 +15,7 @@ void ElementWeylGroup::MakeFromReadableReflections(
       global.fatal << "Bad reflection list." << global.fatal;
     }
     this->generatorsLastAppliedFirst[i].index --;
-    if (this->generatorsLastAppliedFirst[i].index < 0 || this->generatorsLastAppliedFirst[i].index >= input.GetDim()) {
+    if (this->generatorsLastAppliedFirst[i].index < 0 || this->generatorsLastAppliedFirst[i].index >= input.getDimension()) {
       global.fatal << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].toString() << global.fatal;
     }
   }
@@ -1151,7 +1151,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     readerSubgroup.generatingSimpleRoots.setSize(0);
     for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
       int theInt = 0;
-      currentSGdata.theList[0].theList[2].theList[j].theInteger.GetElement().IsIntegerFittingInInt(&theInt);
+      currentSGdata.theList[0].theList[2].theList[j].theInteger.getElement().IsIntegerFittingInInt(&theInt);
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
@@ -1180,7 +1180,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     readerSubgroup.tauSignature.setSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
-      readerSubgroup.tauSignature[j] = currentSGdata.theList[1].theList[j].theInteger.GetElement();
+      readerSubgroup.tauSignature[j] = currentSGdata.theList[1].theList[j].theInteger.getElement();
     }
     outputSubgroups.addOnTop(readerSubgroup);
   }
@@ -1490,7 +1490,7 @@ bool WeylGroupData::LoadCharTable() {
 }
 
 bool LoadGAPRootSystemF1_4(HashedList<Vector<Rational> >& outputRootSystem) {
-  outputRootSystem.Clear();
+  outputRootSystem.clear();
   Vector<Rational> theRoot;
   theRoot.AssignString("[ 1, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
   theRoot.AssignString("[ 0, 1, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
@@ -1520,7 +1520,7 @@ bool LoadGAPRootSystemF1_4(HashedList<Vector<Rational> >& outputRootSystem) {
 }
 
 bool LoadGAPRootSystemE1_6(HashedList<Vector<Rational> >& outputRootSystem) {
-  outputRootSystem.Clear();
+  outputRootSystem.clear();
   Vector<Rational> theRoot;
   theRoot.AssignString("[ 1, 0, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
   theRoot.AssignString("[ 0, 1, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
@@ -1562,7 +1562,7 @@ bool LoadGAPRootSystemE1_6(HashedList<Vector<Rational> >& outputRootSystem) {
 }
 
 bool LoadGAPRootSystemE1_7(HashedList<Vector<Rational> >& outputRootSystem) {
-  outputRootSystem.Clear();
+  outputRootSystem.clear();
   Vector<Rational> theRoot;
   theRoot.AssignString("[ 1, 0, 0, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
   theRoot.AssignString("[ 0, 1, 0, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
@@ -1631,7 +1631,7 @@ bool LoadGAPRootSystemE1_7(HashedList<Vector<Rational> >& outputRootSystem) {
 }
 
 bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem) {
-  outputRootSystem.Clear();
+  outputRootSystem.clear();
   Vector<Rational> theRoot;
   theRoot.AssignString("[ 1, 0, 0, 0, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
   theRoot.AssignString("[ 0, 1, 0, 0, 0, 0, 0, 0 ]"); outputRootSystem.addOnTop(theRoot);
@@ -1777,7 +1777,7 @@ bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPosit
     global.fatal << "Wrong number of GAP roots! " << global.fatal;
   }
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    if (!outputPositiveRootSystem.Contains(this->RootsOfBorel[i])) {
+    if (!outputPositiveRootSystem.contains(this->RootsOfBorel[i])) {
       global.fatal << " Positive root " << outputPositiveRootSystem[i].toString() << " is not a GAP root. " << global.fatal;
     }
   }

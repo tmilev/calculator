@@ -31,8 +31,8 @@ void ParallelComputing::CheckPointerCounters() {
 
 void MutexRecursiveWrapper::CheckConsistency() {
   if (this->flagDeallocated) {
-    global << logger::red << "Use after free of mutex. "
-    << global.fatal.GetStackTraceEtcErrorMessageConsole() << logger::endL;
+    global << Logger::red << "Use after free of mutex. "
+    << global.fatal.GetStackTraceEtcErrorMessageConsole() << Logger::endL;
     assert(false);
   }
 }
@@ -82,11 +82,11 @@ void MutexRecursiveWrapper::LockMe() {
     if (this->flagUnsafeFlagForDebuggingIsLocked) {
       int currentThreadId = ThreadData::getCurrentThreadId();
       if (currentThreadId == this->lastLockerThread) {
-        global << logger::red << "Fatal: about to self-lock: ["
+        global << Logger::red << "Fatal: about to self-lock: ["
         << this->mutexName << "] thread: "
         << currentThreadId
-        << "." << logger::endL
-        << global.ToStringProgressReportConsole() << logger::endL;
+        << "." << Logger::endL
+        << global.ToStringProgressReportConsole() << Logger::endL;
       }
     }
     static_cast<std::mutex*>(this->theMutexImplementation)->lock();

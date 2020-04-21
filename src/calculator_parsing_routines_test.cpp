@@ -41,7 +41,7 @@ bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
     if (operationPointer.IsZeroPointer()) {
       continue;
     }
-    Calculator::OperationHandlers& operationHandlers = operationPointer.GetElement();
+    Calculator::OperationHandlers& operationHandlers = operationPointer.getElement();
     List<Function> handlers = operationHandlers.mergeHandlers();
     for (int i = 0; i < handlers.size; i ++) {
       Function& currentHandler = handlers[i];

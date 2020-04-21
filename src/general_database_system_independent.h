@@ -76,7 +76,7 @@ class UserCalculatorData {
   bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
   bool LoadFromJSON(JSData& input);
-  JSData ToJSON();
+  JSData toJSON();
   UserCalculatorData();
   bool ComputeCourseInfo();
   void reset();

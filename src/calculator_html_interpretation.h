@@ -168,7 +168,7 @@ public:
   bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   std::string toString() const;
-  JSData ToJSON(CalculatorHTML& owner);
+  JSData toJSON(CalculatorHTML& owner);
   void ComputeSlides(CalculatorHTML& owner);
   JSData ComputeSlidesJSON(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
@@ -508,7 +508,7 @@ public:
   void reset();
   std::string courseTopicsWithFolder();
   std::string toString() const;
-  JSData ToJSON() const;
+  JSData toJSON() const;
 };
 
 class CourseList {
@@ -518,7 +518,7 @@ public:
   bool LoadFromString(const std::string& input);
   std::string ToHtml();
   bool Load();
-  JSData ToJSON();
+  JSData toJSON();
 };
 
 #endif

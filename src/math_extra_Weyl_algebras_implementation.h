@@ -370,12 +370,12 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
         }
         for (; numDiff > 0; numDiff --) {
           coeff *= resultMon[k];
-          if (coeff.IsEqualToZero()) {
+          if (coeff.isEqualToZero()) {
             break;
           }
           resultMon.multiplyByVariable(k, -1);
         }
-        if (coeff.IsEqualToZero()) {
+        if (coeff.isEqualToZero()) {
           break;
         }
       }

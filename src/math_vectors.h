@@ -88,7 +88,7 @@ public:
     return this->ToStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
-  static void ScalarProduct(
+  static void scalarProduct(
     const Vector<coefficient>& r1,
     const Vector<coefficient>& r2,
     const Matrix<otherType>& TheBilinearForm,
@@ -115,11 +115,11 @@ public:
     }
   }
   template <class otherType>
-  static coefficient ScalarProduct(
+  static coefficient scalarProduct(
     const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm
   ) {
     coefficient result;
-    Vector<coefficient>::ScalarProduct(r1, r2, TheBilinearForm, result);
+    Vector<coefficient>::scalarProduct(r1, r2, TheBilinearForm, result);
     return result;
   }
   void PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors);
@@ -127,14 +127,14 @@ public:
     const Vectors<Rational>& NonStrictConeNonPositiveScalar,
     const List<Vector<Rational> >& VectorsToBeInGeneralPosition
   );
-  coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const {
-    return ScalarProduct(*this, r2, form);
+  coefficient scalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const {
+    return scalarProduct(*this, r2, form);
   }
-  bool IsPositive() {
-    return this->IsPositiveOrZero() && !this->IsEqualToZero();
+  bool isPositive() {
+    return this->isPositiveOrZero() && !this->isEqualToZero();
   }
-  bool IsNegative() {
-    return this->IsNegativeOrZero() && !this->IsEqualToZero();
+  bool isNegative() {
+    return this->isNegativeOrZero() && !this->isEqualToZero();
   }
   Vector<Rational> GetVectorRational() const {
     Vector<Rational> result;
@@ -165,7 +165,7 @@ public:
     output.MakeEi(theDimension, theIndex);
     return output;
   }
-  bool IsNegativeOrZero() {
+  bool isNegativeOrZero() {
     for (int i = 0; i < this->size; i ++) {
       if (this->theObjects[i] > 0) {
         return false;
@@ -173,7 +173,7 @@ public:
     }
     return true;
   }
-  bool IsPositiveOrZero() const {
+  bool isPositiveOrZero() const {
     for (int i = 0; i < this->size; i ++) {
       if (this->theObjects[i] < 0) {
         return false;
@@ -295,7 +295,7 @@ public:
   int GetNumNonZeroCoords() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].IsEqualToZero()) {
+      if (!this->theObjects[i].isEqualToZero()) {
         result ++;
       }
     }
@@ -322,7 +322,7 @@ public:
     }
   }
   bool ProjectToAffineSpace(Vector<coefficient> &output) {
-    if (this->theObjects[this->size - 1].IsEqualToZero()) {
+    if (this->theObjects[this->size - 1].isEqualToZero()) {
       return false;
     }
     output.setSize(this->size - 1);
@@ -335,7 +335,7 @@ public:
   bool MakeAffineProjectionFromNormal(affineHyperplane<Rational>& output);
   int GetIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].IsEqualToZero()) {
+      if (!this->theObjects[i].isEqualToZero()) {
         return i;
       }
     }
@@ -343,7 +343,7 @@ public:
   }
   int getIndexLastNonZeroCoordinate() {
     for (int i = this->size - 1; i >= 0; i --) {
-      if (!this->theObjects[i].IsEqualToZero()) {
+      if (!this->theObjects[i].isEqualToZero()) {
         return i;
       }
     }
@@ -422,14 +422,14 @@ public:
   bool FindIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex) {
     theIndex = - 1;
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].IsEqualToZero()) {
+      if (!this->theObjects[i].isEqualToZero()) {
         theIndex = i;
         return true;
       }
     }
     return false;
   }
-  bool GetCoordsInBasiS(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output) const;
+  bool getCoordinatesInBasis(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output) const;
   Vector<coefficient> GetProjectivizedNormal(Vector<coefficient>& affinePoint);
   Vector<coefficient> operator*(const coefficient& other) const {
     Vector<coefficient> result;
@@ -441,7 +441,7 @@ public:
     return result;
   }
   Vector<coefficient> operator/(const coefficient& other) const {
-    if (other.IsEqualToZero()) {
+    if (other.isEqualToZero()) {
       global.fatal << "This is a programming error: division by zero. "
       << "Division by zero error are supposed to be handled at an earlier level. " << global.fatal;
     }
@@ -557,9 +557,9 @@ public:
   bool operator!=(const Vector<coefficient>& other) const {
     return !(*this == other);
   }
-  bool IsEqualToZero() const {
+  bool isEqualToZero() const {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].IsEqualToZero()) {
+      if (!this->theObjects[i].isEqualToZero()) {
         return false;
       }
     }
@@ -570,26 +570,6 @@ public:
     result = *this;
     result -= other;
     return result;
-  }
-  void ReadFromFile(std::fstream& input) {
-    std::string tempS;
-    input >> tempS;
-    if (tempS != "root_dim:") {
-      global.fatal << "Failed to read vector from file. " << global.fatal;
-    }
-    int tempI;
-    input >> tempI;
-    this->setSize(tempI);
-    for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].ReadFromFile(input);
-    }
-  }
-  void WriteToFile(std::fstream& output) {
-    output << "root_dim: " << this->size << " ";
-    for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].WriteToFile(output);
-      output << " ";
-    }
   }
 };
 
@@ -605,10 +585,10 @@ void Vector<coefficient>::ScaleNormalizeFirstNonZero() {
 template <class coefficient>
 void Vector<coefficient>::ScaleToFirstNonZeroCoordinatePositive() {
   for (int i = 0; i < this->size; i ++) {
-    if ((*this)[i].IsPositive()) {
+    if ((*this)[i].isPositive()) {
       return;
     }
-    if ((*this)[i].IsNegative()) {
+    if ((*this)[i].isNegative()) {
       this->Minus();
       return;
     }
@@ -625,13 +605,13 @@ bool Vector<coefficient>::IsProportionalTo(
   }
   int IndexFirstNonZero = - 1;
   for (int i = 0; i < this->size; i ++) {
-    if (!this->theObjects[i].IsEqualToZero()) {
+    if (!this->theObjects[i].isEqualToZero()) {
       IndexFirstNonZero = i;
       break;
     }
   }
   if (IndexFirstNonZero == - 1) {
-    if (input.IsEqualToZero()) {
+    if (input.isEqualToZero()) {
       outputTimesMeEqualsInput.makeZero();
       return true;
     }
@@ -770,7 +750,7 @@ class Vectors: public List<Vector<coefficient> > {
   }
   bool HasAnElementWithPositiveScalarProduct(const Vector<coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).IsPositive()) {
+      if (input.ScalarEuclidean(this->theObjects[i]).isPositive()) {
         return true;
       }
     }
@@ -778,7 +758,7 @@ class Vectors: public List<Vector<coefficient> > {
   }
   bool HasAnElementWithNegativeScalarProduct(const Vector<coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).IsNegative()) {
+      if (input.ScalarEuclidean(this->theObjects[i]).isNegative()) {
         return true;
       }
     }
@@ -786,7 +766,7 @@ class Vectors: public List<Vector<coefficient> > {
   }
   bool HasAnElementPerpendicularTo(const Vector<coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).IsEqualToZero()) {
+      if (input.ScalarEuclidean(this->theObjects[i]).isEqualToZero()) {
         return true;
       }
     }
@@ -948,7 +928,7 @@ class Vectors: public List<Vector<coefficient> > {
     tempList.setExpectedSize(this->size);
     tempList = *this;
     for (int i = 0; i < this->size; i ++) {
-      if (tempList.Contains(- this->theObjects[i])) {
+      if (tempList.contains(- this->theObjects[i])) {
         return true;
       }
     }
@@ -975,7 +955,7 @@ class Vectors: public List<Vector<coefficient> > {
       }
     }
   }
-  int GetDim() const {
+  int getDimension() const {
     if (this->size > 0) {
       return this->theObjects[0].size;
     }
@@ -1027,11 +1007,11 @@ bool Vector<coefficient>::AssignString(const std::string& input) {
 }
 
 template <class coefficient>
-bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output) const {
+bool Vector<coefficient>::getCoordinatesInBasis(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output) const {
   if (inputBasis.size == 0) {
     return false;
   }
-  MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
+  MacroRegisterFunctionWithName("Vector::getCoordinatesInBasis");
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size != inputBasis[0].size) {
@@ -1094,7 +1074,7 @@ bool Vectors<coefficient>::GetCoordsInBasis(
   //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << global.fatal;
   outputCoords.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i]))) {
+    if (!(this->operator[](i).getCoordinatesInBasis(inputBasis, outputCoords[i]))) {
       return false;
     }
   }
@@ -1131,12 +1111,12 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
   int col = 0;
   for (int i = 0; i < inputBasis.size; i ++) {
     for (; col < theDim; col ++) {
-      if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero()) {
+      if (!bufferMatGaussianElimination.elements[i][col].isEqualToZero()) {
         break;
       }
     }
     if (col >= theDim) {
-       break;
+      break;
     }
     bufferMatGaussianElimination.GetVectorFromRow(i, tempRoot);
     output[i] = this->theObjects[col];
@@ -1144,7 +1124,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
     tempRoot *= output[i];
     theCombination -= tempRoot;
   }
-  if (!theCombination.IsEqualToZero()) {
+  if (!theCombination.isEqualToZero()) {
     return false;
   }
   bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output);
@@ -1157,7 +1137,7 @@ void Vectors<coefficient>::GetGramMatrix(Matrix<coefficient>& output, const Matr
   for (int i = 0; i < this->size; i ++) {
     for (int j = i; j < this->size; j ++) {
       if (theBilinearForm != nullptr) {
-        Vector<coefficient>::ScalarProduct(this->theObjects[i], this->theObjects[j], *theBilinearForm, output.elements[i][j]);
+        Vector<coefficient>::scalarProduct(this->theObjects[i], this->theObjects[j], *theBilinearForm, output.elements[i][j]);
       } else {
         output(i, j) = (*this)[i].ScalarEuclidean((*this)[j]);
       }
@@ -1173,7 +1153,7 @@ bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(
   const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm
 ) {
   for (int i = 0; i < this->size; i ++) {
-    if (!Vector<coefficient>::ScalarProduct(this->theObjects[i], input, theBilinearForm).IsEqualToZero()) {
+    if (!Vector<coefficient>::scalarProduct(this->theObjects[i], input, theBilinearForm).isEqualToZero()) {
       return true;
     }
   }
@@ -1194,7 +1174,7 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
     if (newRank == oldRank) {
       tempRoots.RemoveIndexSwapWithLast(tempRoots.size - 1);
     } else {
-      this->SwapTwoIndices(oldRank, i);
+      this->swapTwoIndices(oldRank, i);
       if (oldRank + 1 != newRank) {
         global.fatal << "Old rank plus one must equal new rank. " << global.fatal;
       }
@@ -1285,15 +1265,15 @@ template <class coefficient>
 bool affineHyperplane<coefficient>::HasACommonPointWithPositiveTwoToTheNth_ant() {
   Rational tempRat;
   tempRat = this->normal.ScalarEuclidean(this->affinePoint);
-  if (tempRat.IsEqualToZero()) {
+  if (tempRat.isEqualToZero()) {
     return true;
   }
   for (int i = 0; i < this->normal.size; i ++) {
     Rational& tempRat2 = this->normal[i];
-    if (tempRat.IsNegative() && tempRat2.IsNegative()) {
+    if (tempRat.isNegative() && tempRat2.isNegative()) {
       return true;
     }
-    if (tempRat.IsPositive() && tempRat2.IsPositive()) {
+    if (tempRat.isPositive() && tempRat2.isPositive()) {
       return true;
     }
   }

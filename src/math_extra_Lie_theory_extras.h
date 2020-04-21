@@ -222,8 +222,8 @@ public:
     }
   }
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
-  bool IsEqualToZero() const {
-    return this->Coefficient.IsEqualToZero();
+  bool isEqualToZero() const {
+    return this->Coefficient.isEqualToZero();
   }
   bool CommutingLeftIndexAroundRightIndexAllowed(
     coefficient& theLeftPower,
@@ -307,7 +307,7 @@ public:
     this->toString(tempS, PolyFormatLocal);
     return tempS;
   }
-  bool NeedsParenthesisForMultiplication() const {
+  bool needsParenthesisForMultiplication() const {
     return this->size > 1;
   }
   void ComputeDebugString() {
@@ -345,7 +345,7 @@ public:
     const coefficient& theRingUnit = 1,
     const coefficient& theRingZero = 0
   );
-  bool IsEqualToZero() const {
+  bool isEqualToZero() const {
     return this->size == 0;
   }
   bool GetElementUniversalEnveloping(
@@ -493,10 +493,10 @@ public:
   void toString(std::string& output) const {
     output = this->toString();
   }
-  bool IsEqualToZero() const {
-    return this->theElT.IsEqualToZero();
+  bool isEqualToZero() const {
+    return this->theElT.isEqualToZero();
   }
-  bool NeedsParenthesisForMultiplication() const;
+  bool needsParenthesisForMultiplication() const;
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
     ElementUniversalEnvelopingOrdered<coefficient>& input,
     const ElementVermaModuleOrdered<coefficient>& theRingZero,

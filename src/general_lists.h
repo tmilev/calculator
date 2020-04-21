@@ -157,6 +157,9 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
+// Do not use for cryptographic purposes.
+// Intended use:
+// generate random numbers for mathematical problems/education.
 class UnsecurePseudoRandomGenerator {
 public:
   int randomSeed;
@@ -296,7 +299,7 @@ public:
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input) {
-    if (!input.NeedsParenthesisForMultiplication()) {
+    if (!input.needsParenthesisForMultiplication()) {
       return input.toString();
     }
     std::string result;
@@ -307,7 +310,7 @@ public:
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
-    if (!input.NeedsParenthesisForMultiplication()) {
+    if (!input.needsParenthesisForMultiplication()) {
       return input.toString(theFormat);
     }
     std::string result;
@@ -434,7 +437,7 @@ public:
     }
     return - 1;
   }
-  bool Contains(const Object& o) {
+  bool contains(const Object& o) {
     return this->IndexInList(o) != - 1;
   }
   void setSize(int theSize);
@@ -647,15 +650,15 @@ private:
   bool QuickSortAscendingCustomRecursive(
     int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy
   );
-  void QuickSortDescending(int BottomIndex, int TopIndex);
+  void quickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly() {
     this->theObjects = 0;
-    this->ActualSize = 0;
+    this->actualSize = 0;
     this->size = 0;
     this->flagDeallocated = false;
     MacroIncrementCounter(ParallelComputing::NumListsCreated);
   }
-  int ActualSize;
+  int actualSize;
 public:
   bool flagDeallocated;
   Object* theObjects;
@@ -701,7 +704,7 @@ public:
   }
   void setExpectedSize(int theSize) {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
-    if ((this->ActualSize * 5 / 6) < theSize) {
+    if ((this->actualSize * 5 / 6) < theSize) {
       this->Reserve(this->GetNewSizeRelativeToExpectedSize(theSize));
     }
   }
@@ -764,8 +767,8 @@ public:
   void RemoveObjectsShiftDown(const List<Object>& theList) {
     int currentIndex = 0;
     for (int i = 0; i < this->size; i ++) {
-      if (!theList.Contains((*this)[i])) {
-        theList.SwapTwoIndices(i, currentIndex);
+      if (!theList.contains((*this)[i])) {
+        theList.swapTwoIndices(i, currentIndex);
         currentIndex ++;
       }
     }
@@ -805,26 +808,26 @@ public:
   }
   // The function below is required to reserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
-  // If comparison function is not specified, QuickSortAscending uses operator >, else it uses the given
+  // If comparison function is not specified, quickSortAscending uses operator >, else it uses the given
   // comparison function
   template <class otherType = Object>
-  void QuickSortAscending(
+  void quickSortAscending(
     const List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::QuickSortAscending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
+    List<Object>::quickSortAscending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
   }
 
   template <class otherType = Object>
-  void QuickSortDescending(
+  void quickSortDescending(
     const List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    List<Object>::QuickSortDescending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
+    List<Object>::quickSortDescending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
   }
 
   template <class templateList, class otherList>
-  static void QuickSortAscending(
+  static void quickSortAscending(
     templateList& theList,
     const typename List<Object>::Comparator* order = nullptr,
     otherList* carbonCopy = nullptr
@@ -847,21 +850,21 @@ public:
       }
     }
     if (order == nullptr) {
-      List<Object>::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
+      List<Object>::quickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
     } else {
-      List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+      List<Object>::quickSortAscendingOrder<templateList, otherList>(
         theList, 0, theList.size - 1, *order, carbonCopy
       );
     }
   }
 
   template <class templateList, class otherList>
-  static void QuickSortDescending(
+  static void quickSortDescending(
     templateList& theList,
     const List<Object>::Comparator* order = nullptr,
     otherList* carbonCopy = 0
   ) {
-    List<Object>::QuickSortAscending<templateList, otherList>(theList, order, carbonCopy);
+    List<Object>::quickSortAscending<templateList, otherList>(theList, order, carbonCopy);
     theList.ReverseOrderElements();
     if (carbonCopy != 0) {
       carbonCopy->ReverseOrderElements();
@@ -869,7 +872,7 @@ public:
   }
 
   template <class templateList, class otherList>
-  static void QuickSortAscendingOrder(
+  static void quickSortAscendingOrder(
     templateList& theList,
     int BottomIndex,
     int TopIndex,
@@ -882,9 +885,9 @@ public:
     int HighIndex = TopIndex;
     for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (order.greaterThan(theList[LowIndex], (theList[BottomIndex]))) {
-        theList.SwapTwoIndices(LowIndex, HighIndex);
+        theList.swapTwoIndices(LowIndex, HighIndex);
         if (carbonCopy != 0) {
-          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+          carbonCopy->swapTwoIndices(LowIndex, HighIndex);
         }
         LowIndex --;
         HighIndex --;
@@ -903,19 +906,19 @@ public:
       }
       HighIndex --;
     }
-    theList.SwapTwoIndices(BottomIndex, HighIndex);
+    theList.swapTwoIndices(BottomIndex, HighIndex);
     if (carbonCopy != 0) {
-      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+      carbonCopy->swapTwoIndices(BottomIndex, HighIndex);
     }
-    List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+    List<Object>::quickSortAscendingOrder<templateList, otherList>(
       theList, BottomIndex, HighIndex - 1, order, carbonCopy
     );
-    List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+    List<Object>::quickSortAscendingOrder<templateList, otherList>(
       theList, HighIndex + 1, TopIndex, order, carbonCopy
     );
   }
   template <class templateList, class otherList>
-  static void QuickSortAscendingNoOrder(
+  static void quickSortAscendingNoOrder(
     templateList& theList,
     int BottomIndex,
     int TopIndex,
@@ -927,9 +930,9 @@ public:
     int HighIndex = TopIndex;
     for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
       if (theList[LowIndex] > theList[BottomIndex]) {
-        theList.SwapTwoIndices(LowIndex, HighIndex);
+        theList.swapTwoIndices(LowIndex, HighIndex);
         if (carbonCopy != 0) {
-          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+          carbonCopy->swapTwoIndices(LowIndex, HighIndex);
         }
         LowIndex --;
         HighIndex --;
@@ -938,15 +941,15 @@ public:
     if (theList[HighIndex] > theList[BottomIndex]) {
       HighIndex --;
     }
-    theList.SwapTwoIndices(BottomIndex, HighIndex);
+    theList.swapTwoIndices(BottomIndex, HighIndex);
     if (carbonCopy != 0) {
-      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+      carbonCopy->swapTwoIndices(BottomIndex, HighIndex);
     }
-    List<Object>::QuickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
-    List<Object>::QuickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
   }
   bool HasACommonElementWith(List<Object>& right);
-  void SwapTwoIndices(int index1, int index2);
+  void swapTwoIndices(int index1, int index2);
   void CycleIndices(const List<int>& cycle);
   void PermuteIndices(const List<List<int> >& cycles);
   std::string ToStringConcatenate() const;
@@ -958,12 +961,12 @@ public:
     output = this->toString(theFormat);
   }
   int getIndex(const Object& o) const;
-  bool Contains(const Object& o) const {
+  bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;
   }
   bool ContainsAtLeastOneCopyOfEach(const List<Object>& other) const {
     for (int i = 0; i < other.size; i ++) {
-      if (!this->Contains(other[i])) {
+      if (!this->contains(other[i])) {
         return false;
       }
     }
@@ -1223,7 +1226,7 @@ class ListZeroAfterUse {
   public:
   List<Object> data;
   ~ListZeroAfterUse() {
-    for (int i = 0; i < this->data.ActualSize; i ++) {
+    for (int i = 0; i < this->data.actualSize; i ++) {
       // We zero the underlying buffer:
       // this->data[i] may be out of bounds if
       // the actual size does not equal the size.
@@ -1298,7 +1301,7 @@ public:
     result %= this->TheHashedArrays.size;
     return result;
   }
-  void Clear() {
+  void clear() {
     // If the hashed list is somewhat sparse, and the index is somewhat large,
     // (above 20 entries), we clear the hash by finding the occupied hashes and
     // nullifying them one by one.
@@ -1377,7 +1380,8 @@ public:
 
           commentsOnCrash << "<hr>This is a programming error: the hashed element in position "
           << theIndex << " is recorded in hash array of index "
-          << i << ", however its hash value is instead " << this->GetHash((*this)[theIndex]) << ". The hash size is "
+          << i << ", however its hash value is instead "
+          << this->GetHash((*this)[theIndex]) << ". The hash size is "
           << this->TheHashedArrays.size << "<br>hashes of objects: ";
           for (int l = 0; l < this->size; l ++) {
             commentsOnCrash << this->GetHash((*this)[l]) << "= " << this->GetHash((*this)[l]) % this->TheHashedArrays.size << ", ";
@@ -1484,7 +1488,7 @@ public:
     this->TheHashedArrays[hashIndexTop].addOnTop(index);
     this->TemplateList::RemoveIndexSwapWithLast(index);
   }
-  void SwapTwoIndices(int i1, int i2) {
+  void swapTwoIndices(int i1, int i2) {
     Object tempO;
     int i1Hash = this->GetHash(this->theObjects[i1]);
     int i2Hash = this->GetHash(this->theObjects[i2]);
@@ -1496,10 +1500,10 @@ public:
     this->TheHashedArrays[i1Hash].addOnTop(i2);
     this->TheHashedArrays[i2Hash].addOnTop(i1);
   }
-  bool Contains(const Object& o) const {
+  bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;
   }
-  bool Contains(const List<Object>& theList) const {
+  bool contains(const List<Object>& theList) const {
     for (int i = 0; i < theList.size; i ++) {
       if (this->getIndex(theList[i]) == - 1) {
         return false;
@@ -1592,23 +1596,23 @@ public:
     }
   }
   template<typename otherType = int>
-  void QuickSortAscending(
+  void quickSortAscending(
     typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> theList;
     theList = *this;
-    theList.QuickSortAscending(theOrder, carbonCopy);
+    theList.quickSortAscending(theOrder, carbonCopy);
     this->operator=(theList);
   }
   template<typename otherType>
-  void QuickSortDescending(
+  void quickSortDescending(
     typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> theList;
     theList = *this;
-    theList.QuickSortDescending(theOrder, carbonCopy);
+    theList.quickSortDescending(theOrder, carbonCopy);
     this->operator=(theList);
   }
   void initHashesToOne() {
@@ -1632,7 +1636,7 @@ public:
     if (&From == this) {
       return;
     }
-    this->Clear();
+    this->clear();
     this->SetHashSizE(From.TheHashedArrays.size);
     this->::List<Object>::operator=(From);
     if (From.IsSparse()) {
@@ -1648,14 +1652,14 @@ public:
   const Object& operator[](int i) const {
     return TemplateList::operator[](i);
   }
-  Object& GetElement(int theObjectIndex) const {
+  Object& getElement(int theObjectIndex) const {
     return TemplateList::operator[](theObjectIndex);
   }
   void operator=(const TemplateList& other) {
     if (this == &other) {
       return;
     }
-    this->Clear();
+    this->clear();
     this->setExpectedSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->addOnTop(other.theObjects[i]);
@@ -1692,14 +1696,14 @@ public:
   void addOnTop(const List<Object>& theList) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(theList);
   }
-  bool Contains(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(o);
+  bool contains(const Object& o) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
   }
-  bool Contains(const List<Object>& theList) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(theList);
+  bool contains(const List<Object>& theList) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(theList);
   }
-  Object& GetElement(int theObjectIndex) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::GetElement(theObjectIndex);
+  Object& getElement(int theObjectIndex) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::getElement(theObjectIndex);
   }
   void SetObjectAtIndex(int index, const Object& theObject) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::SetObjectAtIndex(index, theObject);
@@ -1720,18 +1724,18 @@ public:
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
   template <typename otherType = int>
-  void QuickSortAscending(
+  void quickSortAscending(
     typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortAscending(theOrder, carbonCopy);
   }
   template <typename otherType = int>
-  void QuickSortDescending(
+  void quickSortDescending(
     typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::quickSortDescending(theOrder, carbonCopy);
   }
   void setExpectedSize(int expectedSize) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(expectedSize);
@@ -1770,7 +1774,7 @@ public:
   // the string operations required to generate a progress report
   // would are expected to cost more than the mathematical computations
   // they are reporting.
-  void Report(const std::string& theReport);
+  void report(const std::string& theReport);
   bool TickAndWantReport();
   void init();
   ProgressReport() {
@@ -1783,7 +1787,7 @@ public:
   }
   ProgressReport(const std::string& theReport) {
     this->init();
-    this->Report(theReport);
+    this->report(theReport);
   }
   ~ProgressReport();
 };
@@ -1834,9 +1838,9 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
       this->theObjects[LowIndex], this->theObjects[BottomIndex]
     )) {
       if (carbonCopy != nullptr) {
-        carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+        carbonCopy->swapTwoIndices(LowIndex, HighIndex);
       }
-      this->SwapTwoIndices(LowIndex, HighIndex);
+      this->swapTwoIndices(LowIndex, HighIndex);
       LowIndex --;
       HighIndex --;
     }
@@ -1845,9 +1849,9 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
     HighIndex --;
   }
   if (carbonCopy != nullptr) {
-    carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+    carbonCopy->swapTwoIndices(BottomIndex, HighIndex);
   }
-  this->SwapTwoIndices(BottomIndex, HighIndex);
+  this->swapTwoIndices(BottomIndex, HighIndex);
   if (!this->QuickSortAscendingCustomRecursive(BottomIndex, HighIndex - 1, theCompareror, carbonCopy)) {
     return false;
   }
@@ -1868,7 +1872,7 @@ void List<Object>::addListOnTop(const List<Object>& theList) {
 }
 
 template<class Object>
-void List<Object>::SwapTwoIndices(int index1, int index2) {
+void List<Object>::swapTwoIndices(int index1, int index2) {
   if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
@@ -1954,7 +1958,7 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
 
 template <class Object>
 int List<Object>::SizeWithoutObjects() const {
-  return sizeof(this->ActualSize) + sizeof(this->size) + sizeof(this->theObjects);
+  return sizeof(this->actualSize) + sizeof(this->size) + sizeof(this->theObjects);
 }
 
 template <class Object>
@@ -2097,8 +2101,8 @@ void List<Object>::AssignLight(const ListLight<Object>& From) {
 template <class Object>
 void List<Object>::Reserve(int theSize) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (this->ActualSize < theSize) {
-    this->ExpandArrayOnTop(theSize - this->ActualSize);
+  if (this->actualSize < theSize) {
+    this->ExpandArrayOnTop(theSize - this->actualSize);
   }
 }
 
@@ -2211,21 +2215,21 @@ void List<Object>::ReleaseMemory() {
   this->size = 0;
   this->theObjects = 0;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->ActualSize;
+  ParallelComputing::GlobalPointerCounter -= this->actualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
-  this->ActualSize = 0;
+  this->actualSize = 0;
 }
 
 template <class Object>
 List<Object>::~List() {
   delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->ActualSize;
+  ParallelComputing::GlobalPointerCounter -= this->actualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
   this->size = 0;
-  this->ActualSize = 0;
+  this->actualSize = 0;
   this->flagDeallocated = true;
 }
 
@@ -2238,15 +2242,15 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   MacroIncrementCounter(ParallelComputing::NumListResizesTotal);
   Object* newArray = 0;
   try {
-    newArray = new Object[this->ActualSize + increase];
+    newArray = new Object[this->actualSize + increase];
   } catch (std::bad_alloc&) {
     std::stringstream commentsOnCrash;
     commentsOnCrash << "Memory allocation failure: failed to allocate "
-    << this->ActualSize + increase << " objects. ";
+    << this->actualSize + increase << " objects. ";
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += this->ActualSize + increase;
+  ParallelComputing::GlobalPointerCounter += this->actualSize + increase;
   ParallelComputing::CheckPointerCounters();
 #endif
   for (int i = 0; i < this->size; i ++) {
@@ -2260,17 +2264,17 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   // on our list exactly between the two instructions above
   // we are safe with this implementation.
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->ActualSize;
+  ParallelComputing::GlobalPointerCounter -= this->actualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
-  this->ActualSize += increase;
+  this->actualSize += increase;
 }
 
 template <class Object>
 void List<Object>::ReverseOrderElements() {
   int tempI = this->size / 2;
   for (int i = 0; i < tempI; i ++) {
-    this->SwapTwoIndices(i, this->size - i - 1);
+    this->swapTwoIndices(i, this->size - i - 1);
   }
 }
 
@@ -2286,16 +2290,16 @@ void List<Object>::ReverseRange(int rangeBegin, int rangeEnd) {
 template <class Object>
 void List<Object>::addOnTop(const Object& o) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
-  if (this->size > this->ActualSize) {
+  if (this->size > this->actualSize) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "This is a programming error: the actual size of the list is "
-    << this->ActualSize << " but this->size equals " << this->size
+    << this->actualSize << " but this->size equals " << this->size
     << ". ";
     fatalCrash(commentsOnCrash.str());
   }
-  if (this->size == this->ActualSize) {
-    this->ExpandArrayOnTop(this->GetNewSizeRelativeToExpectedSize(this->ActualSize + 1) - this->size);
+  if (this->size == this->actualSize) {
+    this->ExpandArrayOnTop(this->GetNewSizeRelativeToExpectedSize(this->actualSize + 1) - this->size);
   }
   this->theObjects[size] = o;
   this->size ++;

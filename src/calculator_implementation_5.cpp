@@ -406,7 +406,7 @@ bool MeshTriangles::ComputePoints(
   if (!this->theFun.GetFreeVariables(theFreeVars, true)) {
     return theCommands << "Failed to extract free variables from: " << this->theFun.toString();
   }
-  theFreeVars.QuickSortAscending();
+  theFreeVars.quickSortAscending();
   if (theFreeVars.size > 2) {
     return theCommands << "I got that your curve depends on " << theFreeVars.size << " expressions, namely: "
     << theFreeVars.ToStringCommaDelimited()
@@ -526,7 +526,7 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
     return false;
   }
-  if (!b.IsEqualToZero()) {
+  if (!b.isEqualToZero()) {
     return false;
   }
   if (!a.IsNegativeConstant()) {
@@ -635,7 +635,7 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c)) {
     return false;
   }
-  if (!b.IsEqualToZero()) {
+  if (!b.isEqualToZero()) {
     return false;
   }
   if (!a.IsPositiveNumber()) {
@@ -705,19 +705,19 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   }
   Expression theSubTop(theCommands), theSubBottom(theCommands);
   theSubTop.AddChildAtomOnTop(theCommands.opDefine());
-  theSubTop.AddChildOnTop(theVariableE);
+  theSubTop.addChildOnTop(theVariableE);
   theSubBottom = theSubTop;
-  theSubBottom.AddChildOnTop(theSetE[1]);
-  theSubTop.AddChildOnTop(theSetE[2]);
+  theSubBottom.addChildOnTop(theSetE[1]);
+  theSubTop.addChildOnTop(theSetE[2]);
   Expression theTopCommands(theCommands), theBottomCommands(theCommands);
   theTopCommands.AddChildAtomOnTop(theCommands.opEndStatement());
   theBottomCommands.AddChildAtomOnTop(theCommands.opEndStatement());
 
-  theTopCommands.AddChildOnTop(theSubTop);
-  theBottomCommands.AddChildOnTop(theSubBottom);
+  theTopCommands.addChildOnTop(theSubTop);
+  theBottomCommands.addChildOnTop(theSubBottom);
 
-  theTopCommands.AddChildOnTop(solvedIntegral);
-  theBottomCommands.AddChildOnTop(solvedIntegral);
+  theTopCommands.addChildOnTop(solvedIntegral);
+  theBottomCommands.addChildOnTop(solvedIntegral);
   Expression theTop, theBottom;
   theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.ETwo());
   theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.ETwo());
@@ -748,21 +748,21 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
     theArg.StartsWith(theCommands.opSin())
   ) {
     output.reset(theCommands);
-    output.AddChildOnTop(input[1]);
+    output.addChildOnTop(input[1]);
     Expression theRecursivelyModifiedE(theCommands), nextE(theCommands);
-    theRecursivelyModifiedE.AddChildOnTop(theArg[0]);
+    theRecursivelyModifiedE.addChildOnTop(theArg[0]);
     nextE.AddChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
-    nextE.AddChildOnTop(input[1]);
+    nextE.addChildOnTop(input[1]);
     for (int i = 1; i < theArg.size(); i ++) {
       nextE.children.setSize(2);
-      nextE.AddChildOnTop(theArg[i]);
-      theRecursivelyModifiedE.AddChildOnTop(nextE);
+      nextE.addChildOnTop(theArg[i]);
+      theRecursivelyModifiedE.addChildOnTop(nextE);
     }
-    return output.AddChildOnTop(theRecursivelyModifiedE);
+    return output.addChildOnTop(theRecursivelyModifiedE);
   }
   output.reset(theCommands);
-  output.AddChildOnTop(input[1]);
-  output.AddChildOnTop(theArg);
+  output.addChildOnTop(input[1]);
+  output.addChildOnTop(theArg);
   return true;
 }
 
@@ -842,7 +842,7 @@ bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
   }
   output = input[0];
   if (input.size() == 2) {
-    return output.AddChildOnTop(input[1]);
+    return output.addChildOnTop(input[1]);
   }
   List<Expression> theRemaining;
   for (int i = 1; i < input.size(); i ++) {
@@ -850,7 +850,7 @@ bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
   }
   Expression argumentE;
   argumentE.MakeSequence(theCommands, &theRemaining);
-  return output.AddChildOnTop(argumentE);
+  return output.addChildOnTop(argumentE);
 }
 
 bool CalculatorFunctions::innerSumTimesExpressionToSumOf(
@@ -871,16 +871,16 @@ bool CalculatorFunctions::innerSumTimesExpressionToSumOf(
       return false;
     }
     output = input[1];
-    return output.AddChildOnTop(input[2]);
+    return output.addChildOnTop(input[2]);
   }
   if (input[1].StartsWith(theCommands.opSum(), 3)) {
     if (!input[1][1].StartsWith(theCommands.opLimitBoundary())) {
       return false;
     }
     Expression theSummed(theCommands);
-    theSummed.AddChildOnTop(input[0]);
-    theSummed.AddChildOnTop(input[1][2]);
-    theSummed.AddChildOnTop(input[2]);
+    theSummed.addChildOnTop(input[0]);
+    theSummed.addChildOnTop(input[1][2]);
+    theSummed.addChildOnTop(input[2]);
     output = input[1];
     return output.SetChilD(2,theSummed);
   }
@@ -944,13 +944,13 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
   }
   std::stringstream out;
   theExpression.GetFreeVariables(presentFreeVars, true);
-  if (!allowedFreeVars.Contains(presentFreeVars)) {
+  if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
-      if (!allowedFreeVars.Contains(presentFreeVars[i])) {
+      if (!allowedFreeVars.contains(presentFreeVars[i])) {
         if (found) {
           out << ", ";
         }
@@ -1002,7 +1002,7 @@ bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& i
   for (int i = 1; i < toBeSorted->size(); i ++) {
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
-  sortedExpressions.QuickSortAscending();
+  sortedExpressions.quickSortAscending();
   return output.MakeSequence(theCommands, &sortedExpressions);
 }
 
@@ -1027,7 +1027,7 @@ bool CalculatorFunctions::innerSortDescending(
   for (int i = 1; i < toBeSorted->size(); i ++) {
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
-  sortedExpressions.QuickSortDescending();
+  sortedExpressions.quickSortDescending();
   return output.MakeSequence(theCommands, &sortedExpressions);
 }
 
@@ -1076,13 +1076,13 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   presentFreeVars.setExpectedSize(input.size() - 2);
   theExpression.GetFreeVariables(presentFreeVars, excludeNamedConstants);
   std::stringstream out;
-  if (!presentFreeVars.Contains(mandatoryFreeVars)) {
+  if (!presentFreeVars.contains(mandatoryFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>is required to contain the variables:</b><br><b>";
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++) {
-      if (!presentFreeVars.Contains(mandatoryFreeVars[i])) {
+      if (!presentFreeVars.contains(mandatoryFreeVars[i])) {
         if (found) {
           out << ", ";
         }
@@ -1093,13 +1093,13 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
     out << "</b>.";
     out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.ToStringCommaDelimited() << ". ";
   }
-  if (!allowedFreeVars.Contains(presentFreeVars)) {
+  if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
-      if (!allowedFreeVars.Contains(presentFreeVars[i])) {
+      if (!allowedFreeVars.contains(presentFreeVars[i])) {
         if (found) {
           out << ", ";
         }
@@ -1263,9 +1263,9 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     Expression sqrtDiscriminant;
     sqrtDiscriminant.MakeSqrt(theCommands, theDiscriminant, 2);
     currentRoot = (b * (- 1) - sqrtDiscriminant) / (a * 2);
-    output.AddChildOnTop(currentRoot);
+    output.addChildOnTop(currentRoot);
     currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
-    output.AddChildOnTop(currentRoot);
+    output.addChildOnTop(currentRoot);
     return true;
   }
   return false;
@@ -1291,9 +1291,9 @@ bool CalculatorFunctions::innerOperatorBounds(
     output.AddChildAtomOnTop(theIntegralOp);
     theLimitsE.reset(theCommands);
     theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
-    theLimitsE.AddChildOnTop(input[2]);
+    theLimitsE.addChildOnTop(input[2]);
     theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
-    output.AddChildOnTop(theLimitsE);
+    output.addChildOnTop(theLimitsE);
     return true;
   }
   if (
@@ -1306,7 +1306,7 @@ bool CalculatorFunctions::innerOperatorBounds(
   theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
   for (int i = 1; i < 3; i ++) {
     if (i < baseE[1].size()) {
-      theLimitsE.AddChildOnTop(baseE[1][i]);
+      theLimitsE.addChildOnTop(baseE[1][i]);
     } else {
       theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
     }
@@ -1416,10 +1416,10 @@ bool CalculatorFunctions::innerSqrt(
     theExponent.AssignValue(thePowerRat, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
   }
-  if (thePower > 0 && input[2].IsEqualToZero()) {
+  if (thePower > 0 && input[2].isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
-  if (thePower == 0 && input[2].IsEqualToZero()) {
+  if (thePower == 0 && input[2].isEqualToZero()) {
     return output.AssignValue(1, theCommands);
   }
   Rational rationalValue;
@@ -1427,7 +1427,7 @@ bool CalculatorFunctions::innerSqrt(
     return false;
   }
   if (thePower < 0) {
-    if (rationalValue.IsEqualToZero()) {
+    if (rationalValue.isEqualToZero()) {
       return output.MakeError("Division by zero in expression: " + input.toString(), theCommands);
     }
     thePower *= - 1;
@@ -1602,10 +1602,10 @@ bool CalculatorFunctions::innerPlotMarkSegment(Calculator& theCommands, const Ex
   Expression rightPt = midPt + theOrthoV / 25;
   output.reset(theCommands);
   output.AddChildAtomOnTop("PlotSegment");
-  output.AddChildOnTop(leftPt);
-  output.AddChildOnTop(rightPt);
+  output.addChildOnTop(leftPt);
+  output.addChildOnTop(rightPt);
   for (int i = 4; i < input.size(); i ++) {
-    output.AddChildOnTop(input[i]);
+    output.addChildOnTop(input[i]);
   }
   return true;
 }
@@ -1919,14 +1919,14 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   double theDoubleValue = - 1;
   if (input.IsOfType<Rational>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.GetValue<Rational>().GetDoubleValue();
+    theDoubleValue = input.getValue<Rational>().GetDoubleValue();
   }
   if (input.IsOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.getValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
   }
   if (input.IsOfType<double>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.GetValue<double>();
+    theDoubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
     std::string theDoubleString = FloatingPoint::DoubleToString(theDoubleValue);
@@ -2126,7 +2126,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   uE.MakeAtom("u", theCommands);
   vE.MakeAtom("v", theCommands);
   if (thePlot.variablesInPlay.size == 1) {
-    if (thePlot.variablesInPlay.Contains(vE)) {
+    if (thePlot.variablesInPlay.contains(vE)) {
       thePlot.variablesInPlay.addOnTop(uE);
     } else {
       thePlot.variablesInPlay.addOnTop(vE);
@@ -2136,7 +2136,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     thePlot.variablesInPlay.addOnTop(uE);
     thePlot.variablesInPlay.addOnTop(vE);
   }
-  thePlot.variablesInPlay.QuickSortAscending();
+  thePlot.variablesInPlay.quickSortAscending();
   thePlot.coordinateFunctionsE.setSize(thePlot.manifoldImmersion.size() - 1);
   thePlot.coordinateFunctionsJS.setSize(thePlot.coordinateFunctionsE.size);
   thePlot.theVarRangesJS.setSize(2);
@@ -2188,10 +2188,10 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   if (CalculatorConversions::innerLoadKeysFromStatementLisT(
     theCommands, input, theKeys, &theCommands.Comments, true
   )) {
-    if (theKeys.Contains("color1")) {
+    if (theKeys.contains("color1")) {
       thePlot.colorUV = theKeys.GetValueCreate("color1").toString();
     }
-    if (theKeys.Contains("color2")) {
+    if (theKeys.contains("color2")) {
       thePlot.colorVU = theKeys.GetValueCreate("color2").toString();
     }
     MapList<std::string, std::string, MathRoutines::HashString> keysToConvert;
@@ -2199,7 +2199,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     keysToConvert.GetValueCreate("numSegments2");
     keysToConvert.GetValueCreate("lineWidth");
     for (int i = 0; i < keysToConvert.size(); i ++) {
-      if (!theKeys.Contains(keysToConvert.theKeys[i])) {
+      if (!theKeys.contains(keysToConvert.theKeys[i])) {
         continue;
       }
       Expression expressionToConvert = theKeys.GetValueCreate(keysToConvert.theKeys[i]);
@@ -2261,7 +2261,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].IsEqualToZero()) {
+    if (polynomialsRational[i].isEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 1] = polynomialsRational[i];
@@ -2273,7 +2273,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   thePolyE.AssignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
   output.AddChildAtomOnTop("MakeExpression");
-  output.AddChildOnTop(thePolyE);
+  output.addChildOnTop(thePolyE);
   return true;
 }
 
@@ -2344,7 +2344,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].IsEqualToZero()) {
+    if (polynomialsRational[i].isEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 1] = polynomialsRational[i];
@@ -2385,7 +2385,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
   std::stringstream out;
   bool found = false;
   int countMons = 0;
-  if (thePoly.IsEqualToZero()) {
+  if (thePoly.isEqualToZero()) {
     if (useColumnSeparator) {
       for (int i = 0; i < this->allMonomials.size * 2 - 1; i ++) {
         out << "&";
@@ -2522,9 +2522,9 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
       currentSlideNumber ++;
     }
   }
-  for (int i = 0; i < this->intermediateHighlightedMons.GetElement()[remainderIndex].size; i ++) {
+  for (int i = 0; i < this->intermediateHighlightedMons.getElement()[remainderIndex].size; i ++) {
     int theMonIndex = this->allMonomials.getIndex(
-      this->intermediateHighlightedMons.GetElement()[remainderIndex][i]
+      this->intermediateHighlightedMons.getElement()[remainderIndex][i]
     );
     this->additionalHighlightRemainders[remainderIndex][theMonIndex] = currentSlideNumber;
     this->additionalHighlightFinalRemainder[theMonIndex] = currentSlideNumber;
@@ -2534,12 +2534,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   MonomialP constMon;
   constMon.makeOne();
   int zeroMonIndex = this->allMonomials.getIndex(constMon);
-  if (this->intermediateRemainders.GetElement()[remainderIndex].IsEqualToZero()) {
+  if (this->intermediateRemainders.getElement()[remainderIndex].isEqualToZero()) {
     this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] = currentSlideNumber;
     this->additionalHighlightFinalRemainder[zeroMonIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
-  if (remainderIndex == this->intermediateRemainders.GetElement().size - 1) {
+  if (remainderIndex == this->intermediateRemainders.getElement().size - 1) {
     for (int i = 0; i < this->theBasiS.size; i ++) {
       this->uncoverAllMonsQuotients[i] = currentSlideNumber;
       for (int j = 0; j < this->allMonomials.size; j ++) {
@@ -2549,11 +2549,11 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     currentSlideNumber ++;
     this->highlightAllMonsFinalRemainder = currentSlideNumber;
   }
-  if (remainderIndex >= this->intermediateSelectedDivisors.GetElement().size) {
+  if (remainderIndex >= this->intermediateSelectedDivisors.getElement().size) {
     return;
   }
-  Polynomial<coefficient>& currentRemainder = this->intermediateRemainders.GetElement()[remainderIndex];
-  int indexCurrentDivisor = this->intermediateSelectedDivisors.GetElement()[remainderIndex];
+  Polynomial<coefficient>& currentRemainder = this->intermediateRemainders.getElement()[remainderIndex];
+  int indexCurrentDivisor = this->intermediateSelectedDivisors.getElement()[remainderIndex];
   Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
@@ -2603,10 +2603,10 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   addOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
-  this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
+  this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]);
   Polynomial<coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
   int indexCurrentQuotientMoN = currentQuotient.theMonomials.getIndex(
-    this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]
+    this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
   currentSlideNumber ++;
@@ -2644,45 +2644,45 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
     this->fcAnswerMonsSubtracands[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
   }
-  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
+  for (int i = 0; i < this->intermediateSubtractands.getElement()[remainderIndex].size(); i ++) {
     this->fcAnswerMonsSubtracands[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.getElement()[remainderIndex][i])
     ] = currentSlideNumber;
   }
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
+  for (int i = 0; i < this->intermediateRemainders.getElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.getElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
-  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
+  for (int i = 0; i < this->intermediateSubtractands.getElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.getElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
   this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
   << currentSlideNumber + 1 << "| handout:0>{Subtract last two polynomials.}";
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
+  for (int i = 0; i < this->intermediateRemainders.getElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.getElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
-  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
+  for (int i = 0; i < this->intermediateSubtractands.getElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
-      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.getElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
-  if (remainderIndex + 1 >= this->intermediateRemainders.GetElement().size) {
+  if (remainderIndex + 1 >= this->intermediateRemainders.getElement().size) {
     global.fatal << "Something is wrong: not enough intermediate remainders. " << global.fatal;
   }
-  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex + 1].size(); i ++) {
+  for (int i = 0; i < this->intermediateRemainders.getElement()[remainderIndex + 1].size(); i ++) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
-      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex + 1][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.getElement()[remainderIndex + 1][i])
     ] = currentSlideNumber;
   }
-  if (this->intermediateRemainders.GetElement()[remainderIndex + 1].IsEqualToZero()) {
+  if (this->intermediateRemainders.getElement()[remainderIndex + 1].isEqualToZero()) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][zeroMonIndex] = currentSlideNumber;
   }
   currentSlideNumber ++;
@@ -2692,12 +2692,12 @@ template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionLaTeXSlide");
   std::stringstream out;
-  List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
-  List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
+  List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.getElement();
+  List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
   this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
-  this->allMonomials.Clear();
-  this->allMonomials.addOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  this->allMonomials.clear();
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
   }
@@ -2710,12 +2710,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   for (int i = 0; i < this->theQuotients.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].theMonomials);
   }
-  if (this->remainderDivision.IsEqualToZero()) {
+  if (this->remainderDivision.isEqualToZero()) {
     MonomialP constMon;
     constMon.makeOne();
     this->allMonomials.addOnTopNoRepetition(constMon);
   }
-  this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.theMonOrder);
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.setSize(this->allMonomials.size);
@@ -2902,7 +2902,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.setSize(polynomialsRational.size - 2);
   for (int i = 2; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].IsEqualToZero()) {
+    if (polynomialsRational[i].isEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 2] = polynomialsRational[i];
@@ -2960,7 +2960,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   if (!converted.IsOfTypeWithContext(&polynomial)) {
     return theCommands << "Failed to extract modular polynomial. ";
   }
-  if (polynomial.content.IsEqualToZero()) {
+  if (polynomial.content.isEqualToZero()) {
     return theCommands << "Factoring zero not allowed. ";
   }
   LargeInteger thePrime = polynomial.content.coefficients[0].theModulus;

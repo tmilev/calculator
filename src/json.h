@@ -55,7 +55,7 @@ public:
   void operator=(const char* other);
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
-  JSData GetValue(const std::string& key);
+  JSData getValue(const std::string& key);
   bool MergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
   bool HasKey(const std::string& key) const;
   bool HasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;

@@ -16,7 +16,7 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
   Vector<Rational> v = vv;
   for (int i = rightReflectionsActFirst.size - 1; i >= 0; i --) {
     Rational x = 0;
-    for (int j = 0; j < this->GetDim(); j ++) {
+    for (int j = 0; j < this->getDimension(); j ++) {
       x += v[j] * CartanSymmetric(rightReflectionsActFirst[i], j);
     }
     //CartanSymmetric(i, j) is slower than CartanSymmetric.elements[i][j] but includes index checking
@@ -28,7 +28,7 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
 
 void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const {
   MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
-  int rank = this->GetDim();
+  int rank = this->getDimension();
   output.MakeIdMatrix(rank);
   for (int j = 0; j < rank; j ++) {
     output(indexSimpleRoot, j) -= (this->CartanSymmetric(indexSimpleRoot, j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
@@ -515,7 +515,7 @@ void UDPolynomial<coefficient>::SquareFree() {
 
 template <typename coefficient>
 bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient> v) {
-  if (v.IsEqualToZero()) {
+  if (v.isEqualToZero()) {
     if (V.size == 0) {
       return false;
     }
@@ -538,7 +538,7 @@ bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient> v) 
       i ++;
     }
     v -= V[i] * v[vi] / V[i][vi];
-    if (v.IsEqualToZero()) {
+    if (v.isEqualToZero()) {
       return true;
     }
   }
@@ -577,7 +577,7 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
     for (int j = 0; j < d; j ++) {
       v[j] = M.elements[i][j];
     }
-    if (v.IsEqualToZero()) {
+    if (v.isEqualToZero()) {
       break;
     }
     output.addOnTop(v);
@@ -678,7 +678,7 @@ List<Vector<coefficient> > orthogonal_complement(
     for (int j = 0; j < d; j ++) {
       v[j] = outm.elements[i][j];
     }
-    if (v.IsEqualToZero()) {
+    if (v.isEqualToZero()) {
       return out;
     }
     out.addOnTop(v);
@@ -709,7 +709,7 @@ List<int> factorpoly(List<coefficient> p, int maxfac) {
     for (int i2 = 1; i2 >= - 1; i2 -= 2) {
       int i = i1 * i2;
       while (pdiv(p, i)) {
-        if (!factors.Contains(i)) {
+        if (!factors.contains(i)) {
           factors.addOnTop(i);
         }
         if (p.size == 1) {
@@ -1072,7 +1072,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   this->flagIsParabolic = true;
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
-  EiBasis.MakeEiBasis(G.GetDim());
+  EiBasis.MakeEiBasis(G.getDimension());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.CardinalitySelection;
   this->SubCartanSymmetric.init(d, d);
@@ -1159,7 +1159,7 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection sel;
-  sel.init(this->GetDim());
+  sel.init(this->getDimension());
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
@@ -1188,11 +1188,11 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
-  parSelrootsAreInLevi.init(this->GetDim() + 1);
+  parSelrootsAreInLevi.init(this->getDimension() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
-  extendedBasis.MakeEiBasis(this->GetDim());
+  extendedBasis.MakeEiBasis(this->getDimension());
   extendedBasis.addOnTop(this->RootSystem[0]);
-  outputSubgroups.setExpectedSize(MathRoutines::TwoToTheNth(this->GetDim()));
+  outputSubgroups.setExpectedSize(MathRoutines::TwoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;
   do {

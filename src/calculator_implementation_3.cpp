@@ -45,7 +45,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
     << "Whether or not this is a mistake, I am crashing. " << global.fatal;
     return false;
   }
-  return !tempRF.ratValue.IsNegative();
+  return !tempRF.ratValue.isNegative();
 }
 
 template <>
@@ -53,7 +53,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
   const Vector<Rational>& theWeight, int generatorIndex
 ) {
   this->CheckInitialization();
-  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).IsNegative();
+  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
 }
 
 template <>
@@ -62,7 +62,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction>(
 ) {
   Vector<Rational> tempVect;
   RationalFunction tempRF;
-  tempVect.MakeEi(this->GetDim(), generatorIndex);
+  tempVect.MakeEi(this->getDimension(), generatorIndex);
   tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
     global.fatal << "This might or might not be a programming mistake: "
@@ -84,12 +84,12 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction>(
     << global.fatal;
     return false;
   }
-  return !tempRF.ratValue.IsNegative();
+  return !tempRF.ratValue.isNegative();
 }
 
 template <>
 bool WeylGroupData::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex) {
-  return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).IsNegative();
+  return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).isNegative();
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MakeParabolicFromSelectionSimpleRoots(
@@ -111,7 +111,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim= this->AmbientWeyl->GetDim();
+  int theDim= this->AmbientWeyl->getDimension();
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
@@ -130,7 +130,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
   }
-  outputWeightsSimpleCoords.Clear();
+  outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
   int numPosRoots = this->AmbientWeyl->RootsOfBorel.size;
@@ -154,7 +154,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
           this->AmbientWeyl->RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
-          if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero()) {
+          if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
             int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().NumShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
@@ -167,7 +167,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     }
     outputWeightsSimpleCoords.addOnTop(currentHashes);
     outputWeightsSimpleCoords.AdjustHashes();
-    currentHashes.Clear();
+    currentHashes.clear();
   }
   out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
   if (numTotalWeightsFound >= upperBoundDominantWeights) {
@@ -256,7 +256,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
 
-  ElementUniversalEnveloping<RationalFunction> argument = output.GetValue<ElementUniversalEnveloping<RationalFunction> >();
+  ElementUniversalEnveloping<RationalFunction> argument = output.getValue<ElementUniversalEnveloping<RationalFunction> >();
   ElementUniversalEnveloping<RationalFunction> outputUE;
   if (!theHmm.ApplyHomomorphism(argument, outputUE)) {
     return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
@@ -307,9 +307,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << animated.GetHtmlDiv(this->owner->GetDim());
+  out << animated.GetHtmlDiv(this->owner->getDimension());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << collapsed.GetHtmlDiv(this->owner->GetDim());
+  out << collapsed.GetHtmlDiv(this->owner->getDimension());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";
@@ -338,7 +338,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     tempPath.ActByEalpha(nextInd);
     out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.toString() << ") =</td>" << "<td>"
     << tempPath.toString() << "</td>";
-    for (int j = 0; j < this->owner->GetDim(); j ++) {
+    for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j + 1 << "("
@@ -358,15 +358,15 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     out << "<tr><td>" << tempMon.toString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
     << tempPath.toString() << "</td><td>";
-    for (int j = 0; j < this->owner->GetDim(); j ++) {
+    for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = theOrbit[i];
       tempPath.ActByEFDisplayIndex(j + 1);
-      if (!tempPath.IsEqualToZero()) {
+      if (!tempPath.isEqualToZero()) {
         out << "e_{" << j + 1 << "}, ";
       }
       tempPath = theOrbit[i];
       tempPath.ActByEFDisplayIndex(- j - 1);
-      if (!tempPath.IsEqualToZero()) {
+      if (!tempPath.isEqualToZero()) {
         out << "e_{" << - j - 1 << "}, ";
       }
     }
@@ -406,7 +406,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().ToStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoordS.toString();
   ProgressReport theReport;
-  theReport.Report(tempStream1.str());
+  theReport.report(tempStream1.str());
   List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
@@ -414,10 +414,10 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.CardinalitySelection);
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
-  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.GetElement() : *outputEigenSpace;
+  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
   theFinalEigenSpace.setSize(0);
   if (InvertedLeviInSmall.CardinalitySelection == 0) {
-    theFinalEigenSpace.MakeEiBasis(this->GetDim());
+    theFinalEigenSpace.MakeEiBasis(this->getDimension());
   }
   for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
@@ -432,12 +432,12 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     std::stringstream tempStream3;
     double timeAtStart1 = global.GetElapsedSeconds();
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
-    theReport.Report(tempStream3.str());
+    theReport.report(tempStream3.str());
     Matrix<coefficient> currentOpMat;
-    currentOp.GetMatrix(currentOpMat, this->GetDim());
+    currentOp.GetMatrix(currentOpMat, this->getDimension());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
     tempStream3 << " done in " << global.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
-    theReport.Report(tempStream3.str());
+    theReport.report(tempStream3.str());
     if (i == 0) {
       theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
@@ -445,11 +445,11 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
       double timeAtStart2 = global.GetElapsedSeconds();
       tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
       tempSpace1 = theFinalEigenSpace;
-      theReport.Report(tempStream4.str());
+      theReport.report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
       tempStream4 << " done in " << global.GetElapsedSeconds() - timeAtStart2 << " seconds. ";
-      theReport.Report(tempStream4.str());
+      theReport.report(tempStream4.str());
     }
   }
   out << "<br>Eigenvectors: <table>";
@@ -472,7 +472,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     Vector<coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
-      if (!(currentVect[i].IsEqualToZero())) {
+      if (!(currentVect[i].isEqualToZero())) {
         tempElt.makeZero(this->GetOwner());
         tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
@@ -494,7 +494,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     if (outputWeightsFundCoords != nullptr) {
       outputWeightsFundCoords->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.theDefaultFormat.GetElement());
+    out << currentElt.toString(&global.theDefaultFormat.getElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -506,7 +506,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-  theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
+  theReport.report("SplitFDpartOverFKLeviRedSubalg done!");
   if (comments != nullptr) {
     *comments << out.str();
   }
@@ -596,7 +596,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   for (int i = 0; i < theHWs.size; i ++) {
     theG2B3Data.theWeightFundCoords = theHWs[i];
     theCommands.innerSplitFDpartB3overG2inner(theCommands, theG2B3Data, tempExpression);
-    timeReport << tempExpression.GetValue<std::string>();
+    timeReport << tempExpression.getValue<std::string>();
     RationalFunction numEigenVectors;
     numEigenVectors = rfZero;
     for (int j = 0; j < theG2B3Data.theSmallCharFDpart.size(); j ++) {
@@ -827,7 +827,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     out << "<td>";
     theg2b3data.theFormat.CustomPlusSign = "\\oplus ";
     Vector<RationalFunction> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
-    theCentralChars.Clear();
+    theCentralChars.clear();
     for (int i = 0; i < outputChar.size(); i ++) {
       if (!outputChar.coefficients[i].IsEqualToOne()) {
         out << outputChar.coefficients[i].toString() << " x ";
@@ -845,7 +845,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       for (int j = 0; j < outputChar.size(); j ++) {
         rightWeightSimple = smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         rightWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
-        if ((rightWeightSimple - leftWeightSimple).IsPositive()) {
+        if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
           theCentralCharacter = theCasimir;
           resultChar.ModOutVermaRelations(&rightWeightDual);
@@ -893,7 +893,7 @@ void branchingData::resetOutputData() {
   this->outputEigenWords.setSize(0);
   this->g2Weights.setSize(0);
   this->outputWeightsFundCoordS.setSize(0);
-  this->theCharacterDifferences.Clear();
+  this->theCharacterDifferences.clear();
 }
 
 template<class coefficient>
@@ -989,7 +989,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     Vector<RationalFunction>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
     theG2CasimirCopy.ModOutVermaRelations(&currentG2DualWeight, 1, 0);
-    if (theG2CasimirCopy.IsEqualToZero()) {
+    if (theG2CasimirCopy.isEqualToZero()) {
       theG2B3Data.theChars[i] = 0;
     } else {
       theG2B3Data.theChars[i] = theG2CasimirCopy.coefficients[0];
@@ -1024,7 +1024,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     if (theG2B3Data.selInducing.CardinalitySelection > 0) {
       for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
-        if (weightDifference.IsPositive()) {
+        if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
           tempElt.MakeConst(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
           theG2CasimirCopy -= tempElt;
@@ -1116,7 +1116,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
       out << "<br>" << tmpWt.ToStringLetterFormat("\\alpha");
       counter ++;
     }
-    if (!(theHW - theWeight).IsPositive() || i > rootsBorel.size) {
+    if (!(theHW - theWeight).isPositive() || i > rootsBorel.size) {
       if (i <= rootsBorel.size) {
         theWeight -= rootsBorel[i - 1] * thePartition[i - 1];
         thePartition[i - 1] = 0;
@@ -1144,13 +1144,13 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
   }
   HashedList<Vector<Rational> > output;
   Vector<Rational> current;
-  current.makeZero(this->GetDim());
+  current.makeZero(this->getDimension());
   output.addOnTop(current);
   Rational theDim;
   Rational dimBound = inputDimBound + 1;
   for (int i = 0; i < output.size; i ++) {
     current = output[i];
-    for (int k = 0; k < this->GetDim(); k ++) {
+    for (int k = 0; k < this->getDimension(); k ++) {
       current[k] += 1;
       theDim = this->WeylDimFormulaFundamentalCoords(current);
       if (theDim < dimBound) {
@@ -1245,7 +1245,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
       << currentHW.toString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
-      theReport.Report(reportStream.str());
+      theReport.report(reportStream.str());
       latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
       hwPath.MakeFromWeightInSimpleCoords(
@@ -1259,7 +1259,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       );
       reportStream << "\nPath orbit size = " << theStrings.size
       << " generated in " << global.GetElapsedSeconds() << " seconds. ";
-      theReport.Report(reportStream.str());
+      theReport.report(reportStream.str());
       for (int k = 0; k < theStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
         tempMon = theStrings[k];
@@ -1300,7 +1300,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       else {
         latexReport << " & \\textbf{BAD}";
         out << "<td><b>Is bad!!!!</b></td>";
-        theReport.Report("BAD BAD BAD!!!");
+        theReport.report("BAD BAD BAD!!!");
         foundBad = true;
         break;
       }*/
@@ -1416,9 +1416,9 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
     polynomialE.AssignValueWithContext(
       factorization.reduced[i], polynomial.context, theCommands
     );
-    expressionE.children.Clear();
+    expressionE.children.clear();
     expressionE.AddChildAtomOnTop("MakeExpression");
-    expressionE.AddChildOnTop(polynomialE);
+    expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
   }
   return output.MakeSequence(theCommands, &resultSequence);
@@ -1437,7 +1437,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   if (!right.IsInteger(&base)) {
     return false;
   }
-  if (base.IsEqualToZero()) {
+  if (base.isEqualToZero()) {
     return false;
   }
   LargeIntegerUnsigned theGCD;
@@ -1525,14 +1525,14 @@ bool Expression::AssignMatrixExpressions(
     }
     this->MakeSequence(owner);
     for (int i = 0; i < input.NumCols; i ++) {
-      this->AddChildOnTop(input(0, i));
+      this->addChildOnTop(input(0, i));
     }
     return true;
   }
   this->reset(owner, input.NumRows + 1);
   Expression theMatType(owner);
   theMatType.AddChildAtomOnTop(owner.opMatriX());
-  this->AddChildOnTop(theMatType);
+  this->addChildOnTop(theMatType);
   enum mType{typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
   mType outType = typeUnknown;
   Expression currentRow;
@@ -1541,7 +1541,7 @@ bool Expression::AssignMatrixExpressions(
     currentRow.children.Reserve(input.NumCols + 1);
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j = 0; j < input.NumCols; j ++) {
-      currentRow.AddChildOnTop(input(i, j));
+      currentRow.addChildOnTop(input(i, j));
       mType inType;
       if (input(i, j).IsOfType<Rational>()) {
         inType = typeRat;
@@ -1607,7 +1607,7 @@ bool Expression::AssignMatrixExpressions(
         outType = inType;
       }
     }
-    this->AddChildOnTop(currentRow);
+    this->addChildOnTop(currentRow);
   }
   switch(outType) {
     case typeRat:
@@ -1752,22 +1752,22 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
 
 bool Calculator::Test::ProcessOneTest(JSData& input) {
   if (input["input"].theType != JSData::token::tokenString) {
-    global << logger::red << "Input command is missing. " << logger::endL;
+    global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;
   }
   std::string command = input["input"].theString;
-  if (!this->commands.Contains(command)) {
+  if (!this->commands.contains(command)) {
     std::stringstream reportStream;
     reportStream << "Command " << command
     << " not recognized. "
     << "If the testing commands have recently changed, this is OK, "
     << "otherwise, it isn't.";
-    global << logger::red << reportStream.str() << logger::endL;
+    global << Logger::red << reportStream.str() << Logger::endL;
     return false;
   }
   if (input["output"].theType != JSData::token::tokenString) {
-    global << logger::red << "Command: " << command
-    << " is missing its expected output. " << logger::endL;
+    global << Logger::red << "Command: " << command
+    << " is missing its expected output. " << Logger::endL;
     return false;
   }
   Calculator::Test::OneTest& currentTest = this->commands.GetValueCreate(command);
@@ -1887,7 +1887,7 @@ bool Calculator::Test::ProcessResults() {
   std::stringstream commentsOnFailure, out;
 
   if (!this->LoadTestStrings(&commentsOnFailure)) {
-    global << logger::red << "Failed to load test strings. " << logger::endL
+    global << Logger::red << "Failed to load test strings. " << Logger::endL
     << commentsOnFailure.str();
     out << "<b style='color:red'>Failed to load test strings. </b>" << commentsOnFailure.str();
   }
@@ -1896,7 +1896,7 @@ bool Calculator::Test::ProcessResults() {
     << WebAPI::calculator::testFileNameVirtual << ". </b>";
     std::stringstream commentsOnFailure2;
     if (!this->WriteTestStrings(&commentsOnFailure2)) {
-      global << logger::red << "Failed to write test strings. " << logger::endL
+      global << Logger::red << "Failed to write test strings. " << Logger::endL
       << commentsOnFailure2.str();
       out << "<b style='color:red'>Write file failed. </b>" << commentsOnFailure2.str();
     }
@@ -1972,19 +1972,19 @@ bool Calculator::Test::ProcessResults() {
     << " and rerun the present test to store the expected results. "
     ;
     out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
-    global << logger::red << "There were " << this->inconsistencies << " inconsistencies. " << logger::endL;
-    global << badCommandsConsole.str() << logger::endL;
+    global << Logger::red << "There were " << this->inconsistencies << " inconsistencies. " << Logger::endL;
+    global << badCommandsConsole.str() << Logger::endL;
   }
   if (this->unknown > 0) {
     out << "<b style = 'color:orange'>There were " << this->unknown
     << " commands with no previous recorded results. </b>";
-    global << logger::orange << "There were " << this->unknown
-    << " commands with no previous recorded results." << logger::endL;
+    global << Logger::orange << "There were " << this->unknown
+    << " commands with no previous recorded results." << Logger::endL;
     if (this->flagTestResultsExist) {
       out
       << "<b>Erase file " << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.</b>";
-      global << logger::yellow << "Erase file " << WebAPI::calculator::testFileNameVirtual
+      global << Logger::yellow << "Erase file " << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.";
     }
     out << "<table>" << unknownCommands.str() << "</table>";
@@ -2005,7 +2005,7 @@ int Calculator::GetNumBuiltInFunctions() {
     if (current.IsZeroPointer()) {
       continue;
     }
-    result += current.GetElement().handlers.size + current.GetElement().compositeHandlers.size;
+    result += current.getElement().handlers.size + current.getElement().compositeHandlers.size;
   }
   return result;
 }

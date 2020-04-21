@@ -159,7 +159,7 @@ bool CodeFormatter::ProcessCharacterInQuotes() {
 
 void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement& output) {
   output.content = input;
-  if (this->builtInTypes.Contains(input)) {
+  if (this->builtInTypes.contains(input)) {
     output.type = this->builtInTypes.getValueNoFail(input);
   } else {
     output.type = "";

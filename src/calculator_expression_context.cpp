@@ -18,7 +18,7 @@ void ExpressionContext::initialize(Calculator& inputOwner) {
   this->owner = &inputOwner;
   this->checkInitialization();
   this->indexAmbientSemisimpleLieAlgebra = - 1;
-  this->variables.Clear();
+  this->variables.clear();
   this->differentialOperatorVariables.setSize(0);
 }
 
@@ -62,13 +62,13 @@ Expression ExpressionContext::toExpression() const {
   Expression result(*this->owner);
   result.AddChildAtomOnTop(this->owner->opContext());
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
-    result.AddChildOnTop(this->toExpressionSemisimpleLieAlgebra());
+    result.addChildOnTop(this->toExpressionSemisimpleLieAlgebra());
   }
   if (this->variables.size > 0) {
-    result.AddChildOnTop(this->toExpressionPolynomialVariables());
+    result.addChildOnTop(this->toExpressionPolynomialVariables());
   }
   if (this->differentialOperatorVariables.size > 0) {
-    result.AddChildOnTop(this->toExpressionDifferntialOperators());
+    result.addChildOnTop(this->toExpressionDifferntialOperators());
   }
   return result;
 }
@@ -76,7 +76,7 @@ Expression ExpressionContext::toExpression() const {
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
   Expression algebraContext(*this->owner);
   algebraContext.AddChildAtomOnTop(this->owner->opSemisimpleLieAlgebrA());
-  algebraContext.AddChildOnTop(this->indexAmbientSemisimpleLieAlgebra);
+  algebraContext.addChildOnTop(this->indexAmbientSemisimpleLieAlgebra);
   return algebraContext;
 }
 
@@ -84,7 +84,7 @@ Expression ExpressionContext::toExpressionDifferntialOperators() const {
   Expression diffVarsE(*this->owner);
   diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
-    diffVarsE.AddChildOnTop(this->differentialOperatorVariables[i]);
+    diffVarsE.addChildOnTop(this->differentialOperatorVariables[i]);
   }
   return diffVarsE;
 }
@@ -94,7 +94,7 @@ Expression ExpressionContext::toExpressionPolynomialVariables() const {
   polynomialVariables.reset(*this->owner);
   polynomialVariables.AddChildAtomOnTop(this->owner->opPolynomialVariables());
   for (int i = 0; i < this->variables.size; i ++) {
-    polynomialVariables.AddChildOnTop(this->variables[i]);
+    polynomialVariables.addChildOnTop(this->variables[i]);
   }
   return polynomialVariables;
 }
@@ -115,7 +115,7 @@ bool ExpressionContext::setVariables(
 bool ExpressionContext::setVariablesFromStrings(
   const List<std::string>& inputVariables
 ) {
-  this->variables.Clear();
+  this->variables.clear();
   for (int i = 0; i < inputVariables.size; i ++) {
     Expression current;
     current.MakeAtom(inputVariables[i], *this->owner);
@@ -216,10 +216,10 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
   diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
-  diffVarsE.AddChildOnTop(theDiffOpVar);
+  diffVarsE.addChildOnTop(theDiffOpVar);
   polyVarsE.reset(*this->owner, 2);
   polyVarsE.AddChildAtomOnTop(this->owner->opPolynomialVariables());
-  polyVarsE.AddChildOnTop(thePolyVar);
+  polyVarsE.addChildOnTop(thePolyVar);
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
@@ -232,10 +232,10 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
     }
   }
   if (!foundPolyVarsE) {
-    this->AddChildOnTop(polyVarsE);
+    this->addChildOnTop(polyVarsE);
   }
   if (!foundDiffVarsE) {
-    this->AddChildOnTop(diffVarsE);
+    this->addChildOnTop(diffVarsE);
   }
   return true;
 }
@@ -328,7 +328,7 @@ bool ExpressionContext::mergeVariables(
 ) {
   outputContext.variables.addOnTopNoRepetition(this->variables);
   outputContext.variables.addOnTopNoRepetition(other.variables);
-  outputContext.variables.QuickSortAscending();
+  outputContext.variables.quickSortAscending();
   return true;
 }
 
@@ -371,8 +371,8 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
     differentialOperator.AddChildAtomOnTop("\\partial");
     Expression variableIndex;
     variableIndex.AssignValue(i, *this->owner);
-    differentialOperator.AddChildOnTop(variableIndex);
-    if (outputContext.differentialOperatorVariables.Contains(
+    differentialOperator.addChildOnTop(variableIndex);
+    if (outputContext.differentialOperatorVariables.contains(
       differentialOperator
     )) {
       return *this->owner << "<hr>Failed to merge context "
@@ -542,21 +542,21 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   if (this->IsOfType<ElementWeylGroup>()) {
     return this->AssignValueWithContext(
-      this->GetValue<ElementWeylGroup>(), inputOutputMinContext, *this->owner
+      this->getValue<ElementWeylGroup>(), inputOutputMinContext, *this->owner
     );
   }
   if (this->IsOfType<AlgebraicNumber>()) {
     return this->SetChilD(1, inputOutputMinContext.toExpression());
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> > ()) {
-    ElementUniversalEnveloping<RationalFunction> newUE = this->GetValue<ElementUniversalEnveloping<RationalFunction> >();
+    ElementUniversalEnveloping<RationalFunction> newUE = this->getValue<ElementUniversalEnveloping<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
     newUE.Substitution(subPolyPart);
     return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> newPoly = this->GetValue<Polynomial<Rational> >();
+    Polynomial<Rational> newPoly = this->getValue<Polynomial<Rational> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
     if (!newPoly.Substitution(subPolyPart)) {
@@ -565,7 +565,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
-    Polynomial<AlgebraicNumber> newPoly = this->GetValue<Polynomial<AlgebraicNumber> >();
+    Polynomial<AlgebraicNumber> newPoly = this->getValue<Polynomial<AlgebraicNumber> >();
     PolynomialSubstitution<AlgebraicNumber> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<AlgebraicNumber>(newContext, subPolyPart);
     if (!newPoly.Substitution(subPolyPart)) {
@@ -577,7 +577,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     PolynomialSubstitution<Rational> subEWApart;
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialAndWeylAlgebraSubstitutionNoFailure(newContext, subPolyPart, subEWApart);
-    ElementWeylAlgebra<Rational> outputEWA = this->GetValue<ElementWeylAlgebra<Rational> >();
+    ElementWeylAlgebra<Rational> outputEWA = this->getValue<ElementWeylAlgebra<Rational> >();
     if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
       this->owner->Comments << "<hr>Failed to convert "
       << outputEWA.toString() << ": failed to carry out substitution "
@@ -587,7 +587,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<RationalFunction>()) {
-    RationalFunction newRF = this->GetValue<RationalFunction>();
+    RationalFunction newRF = this->getValue<RationalFunction>();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
     newRF.Substitution(subPolyPart);
@@ -595,7 +595,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     ElementTensorsGeneralizedVermas<RationalFunction> newETGV;
-    newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+    newETGV = this->getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
     newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
@@ -604,7 +604,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitution(newContext, subPolyPart);
-    Weight<Polynomial<Rational> > theWeight = this->GetValue<Weight<Polynomial<Rational> > >();
+    Weight<Polynomial<Rational> > theWeight = this->getValue<Weight<Polynomial<Rational> > >();
     for (int i = 0; i < theWeight.weightFundamentalCoordS.size; i ++) {
       theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
     }

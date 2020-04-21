@@ -123,7 +123,7 @@ template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex) {
   Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
-    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero()) {
+    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
       return true;
     }
   }
@@ -309,17 +309,17 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         << tempQDO.toString(theFormat) << "<br> with element <br>"
         << theEltsConverted[j].toString(theFormat) << " to get <br>";
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
-        theReport.Report(report.str());
+        theReport.report(report.str());
         report << tempQDO.toString(theFormat);
-        theReport.Report(report.str());
+        theReport.report(report.str());
         theEltsConverted.addOnTop(tempQDO);
         quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;
-        if (!theEltsConverted.LastObject()->IsEqualToZero()) {
+        if (!theEltsConverted.LastObject()->isEqualToZero()) {
           foundNew = true;
         }
         for (int k = theEltsConverted.size - 1; k >= 0; k --) {
-          if (theEltsConverted[k].IsEqualToZero()) {
+          if (theEltsConverted[k].isEqualToZero()) {
             theEltsConverted.RemoveIndexSwapWithLast(k);
           } else {
             break;
@@ -470,7 +470,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       );
       exponentContribution *= oneIndexContribution;
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialP::orderDefault());
-      if (!tempP1.IsEqualToZero()) {
+      if (!tempP1.isEqualToZero()) {
         global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
         << global.fatal;
@@ -606,8 +606,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         tempstream3 << theFinalXletter << "_" << k-numStartingVars + 1;
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars + 1 << "}";
         if (
-          theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) ||
-          theWeylFormat.polyAlphabeT.Contains(tempstream3.str())
+          theWeylFormat.polyAlphabeT.contains(tempstream2.str()) ||
+          theWeylFormat.polyAlphabeT.contains(tempstream3.str())
         ) {
           return output.MakeError(
             "Error: the variable " +
@@ -652,7 +652,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     << "}{*}{$" << theSSalgebra.ToStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
-    latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
       currentTime = global.GetElapsedSeconds();
@@ -679,7 +679,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";
-    if (theMod.GetDim() == 1) {
+    if (theMod.getDimension() == 1) {
       ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
       reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
@@ -746,7 +746,7 @@ bool Calculator::innerHWVCommon(
   RFZero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
-  //= theElementData.theElementTensorGenVermas.GetElement();
+  //= theElementData.theElementTensorGenVermas.getElement();
   ListReferences<ModuleSSalgebra<RationalFunction> >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule = - 1;
 
@@ -808,8 +808,8 @@ bool Calculator::CheckOperationHandlers() {
     if (current.IsZeroPointer()) {
       continue;
     }
-    current.GetElement().CheckConsisitency();
-    Calculator::OperationHandlers& allHandlers = current.GetElement();
+    current.getElement().CheckConsisitency();
+    Calculator::OperationHandlers& allHandlers = current.getElement();
     for (int j = 0; j < allHandlers.compositeHandlers.size; j ++) {
       allHandlers.compositeHandlers[j].CheckConsistency();
     }
@@ -886,9 +886,9 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
       leftIE.AssignValue(i + 1, theCommands);
       rightIE.AssignValue(j + 1, theCommands);
       resultMat.elements[i][j].reset(theCommands, 3);
-      resultMat.elements[i][j].AddChildOnTop(leftE);
-      resultMat.elements[i][j].AddChildOnTop(leftIE);
-      resultMat.elements[i][j].AddChildOnTop(rightIE);
+      resultMat.elements[i][j].addChildOnTop(leftE);
+      resultMat.elements[i][j].addChildOnTop(leftIE);
+      resultMat.elements[i][j].addChildOnTop(rightIE);
     }
   }
   return output.AssignMatrixExpressions(resultMat, theCommands, true, true);
@@ -1242,7 +1242,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
       if ((*right)[1] == (*left)) {
         bool isGood = true;
         if ((*right)[2].IsOfType<Rational>()) {
-          if (!(*right)[2].GetValue<Rational>().IsInteger()) {
+          if (!(*right)[2].getValue<Rational>().IsInteger()) {
             Rational ratBase;
             if ((*right)[1].IsRational(&ratBase)) {
               if (ratBase > 0) {
@@ -1328,8 +1328,8 @@ bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const 
   if (!input.StartsWith(theCommands.opDivide(), 3)) {
     return false;
   }
-  if (input[1].IsEqualToZero()) {
-    if (!input[2].IsEqualToZero()) {
+  if (input[1].isEqualToZero()) {
+    if (!input[2].isEqualToZero()) {
       return output.AssignValue(0, theCommands);
     }
   }
@@ -1393,9 +1393,9 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   output.SetChildAtomValue(0, theCommands.opDefine());
   ////
   if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    if (withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
+    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
       MonomialGeneralizedVerma<RationalFunction>& theElt =
-      withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
+      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
       theElt.GetOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }
@@ -1664,7 +1664,7 @@ bool Calculator::functionCollectSummands(
   double coeffDouble = 1;
   bool hasNAN = false;
   for (int i = 0; i < summands.size; i ++) {
-    if (summands[i].IsEqualToZero()) {
+    if (summands[i].isEqualToZero()) {
       continue;
     }
     if (summands[i].StartsWith(theCommands.opTimes(), 3)) {
@@ -1692,19 +1692,19 @@ bool Calculator::functionCollectSummands(
       outputSum.AddMonomial(summands[i], 1);
     }
   }
-  if (!sumOverDoubles.IsEqualToZero() && !hasNAN) {
-    sumOverDoubles.QuickSortDescending();
+  if (!sumOverDoubles.isEqualToZero() && !hasNAN) {
+    sumOverDoubles.quickSortDescending();
     Expression doubleSum;
     doubleSum.makeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
-  if (!sumOverAlgebraicNumbers.IsEqualToZero()) {
-    sumOverAlgebraicNumbers.QuickSortDescending();
+  if (!sumOverAlgebraicNumbers.isEqualToZero()) {
+    sumOverAlgebraicNumbers.quickSortDescending();
     Expression algebraicSum;
     algebraicSum.makeSum(theCommands, sumOverAlgebraicNumbers);
     outputSum.AddMonomial(algebraicSum, 1);
   }
-  outputSum.QuickSortDescending();
+  outputSum.quickSortDescending();
   return !hasNAN;
 }
 
@@ -1773,8 +1773,8 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   for (int i = input.size - 3; i >= 0; i --) {
     result.reset(owner, 3);
     result.AddChildAtomOnTop(theOp);
-    result.AddChildOnTop(input[i]);
-    result.AddChildOnTop(*this);
+    result.addChildOnTop(input[i]);
+    result.addChildOnTop(*this);
     *this = result;
   }
   return true;
@@ -1796,7 +1796,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
   if (!theCommands.functionCollectSummands(theCommands, input, theSum)) {
     return false;
   }
-  theSum.QuickSortDescending();
+  theSum.quickSortDescending();
   if (theSum.size() < 5) {
     for (int i = 0; i < theSum.size(); i ++) {
       for (int j = i; j < theSum.size(); j ++) {
@@ -1827,7 +1827,7 @@ bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Ex
     output = input[2];
     return true;
   }
-  if (conditionRat.IsEqualToZero()) {
+  if (conditionRat.isEqualToZero()) {
     output = input[3];
     return true;
   }
@@ -2059,12 +2059,12 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
   if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified)) {
     return false;
   }
-  if (differenceEsimplified.IsEqualToZero()) {
+  if (differenceEsimplified.isEqualToZero()) {
     return true;
   }
   if (differenceEsimplified.IsSequenceNElementS()) {
     for (int i = 1; i < differenceEsimplified.size(); i ++) {
-      if (!differenceEsimplified[i].IsEqualToZero()) {
+      if (!differenceEsimplified[i].isEqualToZero()) {
         return false;
       }
     }
@@ -2125,7 +2125,7 @@ void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
 }
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
-  if (this->operations.Contains(theOpName)) {
+  if (this->operations.contains(theOpName)) {
     global.fatal << "This is a programming error: operation "
     << theOpName << " already created. " << global.fatal;
   }
@@ -2209,7 +2209,7 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
     << " operations total." << global.fatal;
   }
   MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.theValues[indexOp];
-  Calculator::OperationHandlers& handler = handlerPointer.GetElement();
+  Calculator::OperationHandlers& handler = handlerPointer.getElement();
   handler.CheckConsisitency();
   if (theFun.options.flagIsCompositeHandler) {
     theFun.indexInOperationHandlers = handler.compositeHandlers.size;
@@ -2313,7 +2313,7 @@ std::string Function::ToStringShort() const {
   std::stringstream out;
   out << this->owner->operations.theKeys[this->indexOperation];
   MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->owner->operations.theValues[this->indexOperation];
-  Calculator::OperationHandlers& handler = handlerPointer.GetElement();
+  Calculator::OperationHandlers& handler = handlerPointer.getElement();
   if (this->options.flagIsCompositeHandler) {
     out << " (composite) ("
     << this->indexInOperationHandlers + 1 << " out of "
@@ -2359,8 +2359,8 @@ bool Function::ShouldBeApplied(int parentOpIfAvailable) {
   return true;
 }
 
-JSData Function::ToJSON() const {
-  MacroRegisterFunctionWithName("Function::ToJSON");
+JSData Function::toJSON() const {
+  MacroRegisterFunctionWithName("Function::toJSON");
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->owner == nullptr) {
@@ -2372,7 +2372,7 @@ JSData Function::ToJSON() const {
   } else {
     result["visible"] = "false";
   }
-  Calculator::OperationHandlers& operationHandlers = this->owner->operations.theValues[this->indexOperation].GetElement();
+  Calculator::OperationHandlers& operationHandlers = this->owner->operations.theValues[this->indexOperation].getElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
     result["composite"] = "true";
@@ -2763,7 +2763,7 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
 SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
   bool needToInit = false;
-  if (!this->semisimpleLieAlgebras.Contains(input)) {
+  if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
   SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.GetValueCreateNoInit(input);
@@ -2881,49 +2881,49 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
 
 void ObjectContainer::reset() {
   MacroRegisterFunctionWithName("ObjectContainer::reset");
-  this->theWeylGroupElements.Clear();
-  this->theWeylGroupReps.Clear();
-  this->theWeylGroupVirtualReps.Clear();
+  this->theWeylGroupElements.clear();
+  this->theWeylGroupReps.clear();
+  this->theWeylGroupVirtualReps.clear();
   this->theCategoryOmodules.setSize(0);
-  this->semisimpleLieAlgebras.Clear();
-  this->semisimpleLieAlgebraPointers.Clear();
-  this->theSSSubalgebraS.Clear();
-  this->theTensorElts.Clear();
-  this->polynomialsRational.Clear();
-  this->polynomialsAlgebraic.Clear();
-  this->polynomialsModular.Clear();
-  this->theWeylAlgebraElements.Clear();
-  this->theUEs.Clear();
-  this->theRFs.Clear();
-  this->theRationals.Clear();
-  this->theCharsSSLieAlgFD.Clear();
-  this->theDoubles.Clear();
+  this->semisimpleLieAlgebras.clear();
+  this->semisimpleLieAlgebraPointers.clear();
+  this->theSSSubalgebraS.clear();
+  this->theTensorElts.clear();
+  this->polynomialsRational.clear();
+  this->polynomialsAlgebraic.clear();
+  this->polynomialsModular.clear();
+  this->theWeylAlgebraElements.clear();
+  this->theUEs.clear();
+  this->theRFs.clear();
+  this->theRationals.clear();
+  this->theCharsSSLieAlgFD.clear();
+  this->theDoubles.clear();
   this->theDoubles.addOnTop(std::nan(""));
-  this->theStrings.Clear();
-  this->ExpressionNotation.Clear();
-  this->ExpressionWithNotation.Clear();
-  this->theLSpaths.Clear();
-  //this->theMatRats.Clear();
-  this->theMatTensorRats.Clear();
-  //this->theMatRFs.Clear();
-  this->theEltsModP.Clear();
+  this->theStrings.clear();
+  this->ExpressionNotation.clear();
+  this->ExpressionWithNotation.clear();
+  this->theLSpaths.clear();
+  //this->theMatRats.clear();
+  this->theMatTensorRats.clear();
+  //this->theMatRFs.clear();
+  this->theEltsModP.clear();
   this->thePlots.setSize(0);
   this->theAlgebraicClosure.reset();
-  this->theAlgebraicNumbers.Clear();
-  this->theLittelmannOperators.Clear();
+  this->theAlgebraicNumbers.clear();
+  this->theLittelmannOperators.clear();
   this->theSltwoSAs.setSize(0);
   //this->theMatDoubles.setSize(0);
-  //this->theMatsAlgebraic.Clear();
-  //this->theMatPolyRational.Clear();
-  this->theWeights.Clear();
-  this->theWeightsPoly.Clear();
+  //this->theMatsAlgebraic.clear();
+  //this->theMatPolyRational.clear();
+  this->theWeights.clear();
+  this->theWeightsPoly.clear();
   this->theHyperOctahedralGroups.setSize(0);
-  this->theElementsHyperOctGroup.Clear();
+  this->theElementsHyperOctGroup.clear();
   this->CurrentRandomSeed = static_cast<int>(time(nullptr));
-  this->theUserInputTextBoxesWithValues.Clear();
-  this->graphicsScripts.Clear();
-  this->EllipticCurveElementsZmodP.Clear();
-  this->EllipticCurveElementsRational.Clear();
+  this->theUserInputTextBoxesWithValues.clear();
+  this->graphicsScripts.clear();
+  this->EllipticCurveElementsZmodP.clear();
+  this->EllipticCurveElementsRational.clear();
    //Setting up a random seed.
   global.unsecurePseudoRandomGenerator.SetRandomSeed(this->CurrentRandomSeed);
   this->canvasPlotCounter = 0;
@@ -3112,7 +3112,7 @@ bool Expression::MergeContextsMyAruments(
     }
   }
   output.reset(*this->owner, this->size());
-  output.AddChildOnTop((*this)[0]);
+  output.addChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
@@ -3121,7 +3121,7 @@ bool Expression::MergeContextsMyAruments(
       << convertedE.toString() << " to context " << commonContext.toString();
       return false;
     }
-    output.AddChildOnTop(convertedE);
+    output.addChildOnTop(convertedE);
   }
   return true;
 }
@@ -3183,15 +3183,15 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.IsMeltable()) {
-      output.AddChildOnTop(input[i]);
+      output.addChildOnTop(input[i]);
       continue;
     }
     if (!currentChild[1].StartsWith(theCommands.opEndStatement())) {
-      output.AddChildOnTop(currentChild[1]);
+      output.addChildOnTop(currentChild[1]);
       continue;
     }
     for (int j = 1; j < currentChild[1].children.size; j ++) {
-      output.AddChildOnTop(currentChild[1][j]);
+      output.addChildOnTop(currentChild[1][j]);
     }
   }
   return true;

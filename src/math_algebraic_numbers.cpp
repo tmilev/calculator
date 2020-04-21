@@ -143,7 +143,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
       }
     }
   }
-  radicalsNew.QuickSortAscending();
+  radicalsNew.quickSortAscending();
   if (radicalsNew.size > 16) {
     global.Comments << "Computing with fields whose dimension over the "
     << "rationals is greater than 2^16 is not allowed. "
@@ -378,7 +378,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     Rational coefficientLastColumn = - smallestFactor.GetMonomialCoefficient(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.AddMonomial(termInLastColumn, coefficientLastColumn);
-    if (coefficientLastColumn != 0 && generatorProjected.IsEqualToZero()) {
+    if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
       global.fatal << "We shouldn't have zero generator. " << global.fatal;
     }
   }
@@ -564,7 +564,7 @@ unsigned int AlgebraicNumber::hashFunction() const {
 }
 
 bool AlgebraicNumber::operator==(const Rational& other) const {
-  if (this->element.IsEqualToZero()) {
+  if (this->element.isEqualToZero()) {
     return other == 0;
   }
   if (this->element.size() != 1) {
@@ -576,7 +576,7 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
   return this->element.coefficients[0] == other;
 }
 
-bool AlgebraicNumber::NeedsParenthesisForMultiplication(
+bool AlgebraicNumber::needsParenthesisForMultiplication(
   FormatExpressions* unused
 ) const {
   (void) unused;
@@ -633,7 +633,7 @@ void AlgebraicClosureRationals::reset() {
   this->basisInjections.setSize(1);
   this->basisInjections[0].setSize(1);
   this->basisInjections[0][0].MaKeEi(0);
-  this->theQuadraticRadicals.Clear();
+  this->theQuadraticRadicals.clear();
   this->DisplayNamesBasisElements.setSize(1);
   this->DisplayNamesBasisElements[0] = "";
   this->GeneratingElementTensorForm.MakeId(1);
@@ -681,7 +681,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub.setSize(1);
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
-  if (!algNumPoly.IsEqualToZero()) {
+  if (!algNumPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
     << " was just adjoined to a quadratic radical extension of the rationals; z "
     << "was given by requesting that it has minimial polynomial " << algNumPoly.toString()
@@ -837,7 +837,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   Polynomial<AlgebraicNumber> substitutedMinPoly;
   substitutedMinPoly = minPoly;
   substitutedMinPoly.Substitution(theSub);
-  if (!substitutedMinPoly.IsEqualToZero()) {
+  if (!substitutedMinPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = "
     << outputRoot.toString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
@@ -854,7 +854,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
 void AlgebraicNumber::invert() {
   MacroRegisterFunctionWithName("AlgebraicNumber::invert");
   if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
+    if (this->element.isEqualToZero()) {
       global.fatal << "This is a programming error: division by zero. " << global.fatal;
     }
     bool isGood = (this->element.size() == 1);
@@ -991,7 +991,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   }
   this->CheckConsistency();
   if (other.owner == nullptr) {
-    if (other.IsEqualToZero()) {
+    if (other.isEqualToZero()) {
       this->element.makeZero();
       return;
     }
@@ -999,7 +999,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     return;
   }
   if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
+    if (this->element.isEqualToZero()) {
       return;
     }
     Rational tempRat = this->element.GetMonomialCoefficient(MonomialVector(0));
@@ -1014,7 +1014,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     reportStream << "Large multiplication:<br>"
     << this->toString() << "\n<br>by<br>\n" << other.toString()
     << "\n<br>...";
-    theReport.Report(reportStream.str());
+    theReport.report(reportStream.str());
   }
   this->CheckCommonOwner(other);
   MatrixTensor<Rational> leftMat, rightMat;
@@ -1296,7 +1296,7 @@ AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
       indexNonZeroRational = allCoefficients.size - 1;
       for (int j = 0; j < current.size; j ++) {
         indexNonZeroRational ++;
-        if (!current[j].IsEqualToZero()) {
+        if (!current[j].isEqualToZero()) {
           break;
         }
       }
@@ -1338,7 +1338,7 @@ std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) co
 }
 
 bool AlgebraicNumber::IsRational(Rational* whichRational) const {
-  if (this->IsEqualToZero()) {
+  if (this->isEqualToZero()) {
     if (whichRational != nullptr) {
       *whichRational = 0;
     }
@@ -1354,13 +1354,13 @@ bool AlgebraicNumber::IsRational(Rational* whichRational) const {
   return true;
 }
 
-bool AlgebraicNumber::IsEqualToZero() const {
-  return this->element.IsEqualToZero();
+bool AlgebraicNumber::isEqualToZero() const {
+  return this->element.isEqualToZero();
 }
 
 std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
+    if (this->element.isEqualToZero()) {
       return "0";
     }
     return this->element.coefficients[0].toString(theFormat);
@@ -1382,7 +1382,7 @@ std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
 
 std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
+    if (this->element.isEqualToZero()) {
       return "0";
     }
     return this->element.coefficients[0].toString(theFormat);
@@ -1447,7 +1447,7 @@ void AlgebraicNumber::operator=(const Rational& other) {
   this->basisIndex = 0;
 }
 
-bool ElementZmodP::NeedsParenthesisForMultiplication(
+bool ElementZmodP::needsParenthesisForMultiplication(
   FormatExpressions* theFormat
 ) const {
   if (theFormat == nullptr) {
@@ -1501,7 +1501,7 @@ ElementZmodP ElementZmodP::operator*(const Rational& other) const {
 }
 
 unsigned int ElementZmodP::hashFunction() const {
-  if (this->theValue.IsEqualToZero()) {
+  if (this->theValue.isEqualToZero()) {
     return 0;
   }
   return this->theValue.hashFunction() * SomeRandomPrimes[0] +
@@ -1509,7 +1509,7 @@ unsigned int ElementZmodP::hashFunction() const {
 }
 
 void ElementZmodP::CheckIamInitialized() const {
-  if (this->theModulus.IsEqualToZero()) {
+  if (this->theModulus.isEqualToZero()) {
     global.fatal << "Programming error: computing with non-initialized "
     << "element the ring Z mod p (the number p has not been initialized!)."
     << global.fatal;
@@ -1652,7 +1652,7 @@ void ElementZmodP::operator*=(int other) {
 
 void ElementZmodP::operator*=(const LargeInteger& other) {
   this->theValue *= other.value;
-   if (other.IsNegative()) {
+   if (other.isNegative()) {
      this->theValue *= this->theModulus - 1;
    }
    this->theValue %= this->theModulus;
@@ -1718,7 +1718,7 @@ bool ElementZmodP::AssignRational(const Rational& other) {
   ElementZmodP denominator;
   denominator.theModulus = this->theModulus;
   denominator.theValue = other.GetDenominator();
-  if (denominator.IsEqualToZero()) {
+  if (denominator.isEqualToZero()) {
     return false;
   }
   return (*this /= denominator);
@@ -1737,7 +1737,7 @@ bool ElementZmodP::operator/=(const LargeInteger& other) {
 bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->CheckIamInitialized();
   this->CheckEqualModuli(other);
-  if (other.IsEqualToZero()) {
+  if (other.isEqualToZero()) {
     global.fatal << "Division by zero in ElementZmodP." << global.fatal;
   }
   LargeInteger theInverted, otherValue, theMod;

@@ -77,7 +77,7 @@ public:
   bool HasFreeAction(int generatorIndex) const {
     Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++) {
-      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative()) {
+      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isNegative()) {
         return true;
       }
     }
@@ -86,7 +86,7 @@ public:
   bool HasZeroActionFDpart(int generatorIndex) const {
     Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++) {
-      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive()) {
+      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isPositive()) {
         return true;
       }
     }
@@ -120,7 +120,7 @@ public:
     }
     return result;
   }
-  int GetDim() const {
+  int getDimension() const {
     return this->theGeneratingWordsNonReduced.size;
   }
   bool CheckInitialization() const {
@@ -185,7 +185,7 @@ public:
     //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(theFormat) + ")";
   }
   void SplitOverLevi(
-    std::string* Report,
+    std::string* report,
     Selection& splittingParSel,
     List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = nullptr,
     Vectors<coefficient>* outputWeightsFundCoords = nullptr,

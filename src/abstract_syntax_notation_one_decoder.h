@@ -73,8 +73,8 @@ public:
   bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse) const;
   std::string InterpretAsObjectIdentifier() const;
   std::string InterpretAsObjectIdentifierGetNameAndId() const;
-  void ToJSON(JSData& output) const;
-  JSData ToJSON() const;
+  void toJSON(JSData& output) const;
+  JSData toJSON() const;
   void WriteAnnotations(List<Serialization::Marker>& output);
   std::string toString() const;
   bool isComposite() const;

@@ -51,7 +51,7 @@ public:
     }
     return *this->theReferences[i];
   }
-  bool Contains(const Object& theObject) const {
+  bool contains(const Object& theObject) const {
     for (int i = 0; i < this->size; i ++) {
       if ((*this)[i] == theObject) {
         return true;
@@ -66,14 +66,14 @@ public:
     this->theReferences[this->size - 1] = 0;
     this->size --;
   }
-  void SwapTwoIndices(int index1, int index2) {
-    this->theReferences.SwapTwoIndices(index1, index2);
+  void swapTwoIndices(int index1, int index2) {
+    this->theReferences.swapTwoIndices(index1, index2);
   }
   void AllocateElements(int newSize);
   void Reserve(int desiredSize) {
     this->AllocateElements(desiredSize);
   }
-  void Clear() {
+  void clear() {
     this->setSize(0);
   }
   void setSize(int newSize) {
@@ -134,8 +134,8 @@ public:
     return (*this)[this->size - 1];
   }
   template <class otherList = List<Object> >
-  void QuickSortAscending(const typename List<Object>::Comparator* order = nullptr, otherList* carbonCopy = nullptr) {
-    List<Object>::QuickSortAscending(*this, order, carbonCopy);
+  void quickSortAscending(const typename List<Object>::Comparator* order = nullptr, otherList* carbonCopy = nullptr) {
+    List<Object>::quickSortAscending(*this, order, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0) {
   }
@@ -217,14 +217,14 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline void addOnTop(const List<Object>& theList) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(theList);
   }
-  inline bool Contains(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(o);
+  inline bool contains(const Object& o) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(o);
   }
-  inline bool Contains(const List<Object>& theList) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(theList);
+  inline bool contains(const List<Object>& theList) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(theList);
   }
-  Object& GetElement(int theObjectIndex) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetElement(theObjectIndex);
+  Object& getElement(int theObjectIndex) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getElement(theObjectIndex);
   }
   int getIndex(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndex(o);

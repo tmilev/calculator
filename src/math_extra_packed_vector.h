@@ -27,7 +27,7 @@ public:
   PackedVector<scalar> operator*(scalar x) const;
   PackedVector<scalar> operator+(const PackedVector<scalar>& w) const;
   void operator+=(const PackedVector<scalar>& w);
-  scalar ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const;
+  scalar scalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const;
 
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const PackedVector<scalar>& in);
@@ -227,7 +227,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   for (int rvi = 0; rvi < rank; rvi ++) {
     templateVector vi;
     vi.MakeEi(rank, rvi);
-    if (this->RootSystem.Contains(vi)) {
+    if (this->RootSystem.contains(vi)) {
       continue;
     }
     this->RootSystem.addOnTop(vi);
@@ -248,7 +248,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   }
   global.Comments << "root system is" << "\n";
   global.Comments << this->RootSystem << "\n";
-  this->RootSystem.QuickSortAscending();
+  this->RootSystem.quickSortAscending();
   this->twiceRho.makeZero(rank);
   for (int i = 0; i < this->RootSystem.size; i ++) {
     bool usethis = true;
@@ -312,7 +312,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   global.Comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
     if (!Accounted[i]) {
-      theStack.Clear();
+      theStack.clear();
       theStack.addOnTop(i);
       for (int j = 0; j < theStack.size; j ++)
         for (int k = 0; k < theRank; k ++) {
@@ -325,11 +325,11 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
           Accounted[accountedIndex] = true;
         }
       this->conjugacyClasses.addOnTop(theStack);
-      this->conjugacyClasses.LastObject()->QuickSortAscending();
+      this->conjugacyClasses.LastObject()->quickSortAscending();
       global.Comments << this->ConjugacyClassCount() << " ";
     }
   }
-  this->conjugacyClasses.QuickSortAscending();
+  this->conjugacyClasses.quickSortAscending();
   global.Comments << this->ConjugacyClassCount() << "\n";
 }
 
@@ -376,9 +376,9 @@ int AnotherWeylGroup<scalar, templateVector>::GetRank() const {
 
 template <typename scalar, typename templateVector>
 int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const {
-  scalar x = this->RootSystem[i].ScalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
+  scalar x = this->RootSystem[i].scalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
   x *= - 2;
-  x /= this->RootSystem[i].ScalarProduct(this->RootSystem[i],this->unrationalCartanSymmetric);
+  x /= this->RootSystem[i].scalarProduct(this->RootSystem[i],this->unrationalCartanSymmetric);
   return this->rhoOrbit.getIndexNoFail(twiceRho+this->RootSystem[i] * x);
 }
 
@@ -519,7 +519,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     global.Comments << x2 << "\n";
   }
 
-  chars.QuickSortAscending(/*&CharacterComparator*/);
+  chars.quickSortAscending(/*&CharacterComparator*/);
   for (int i = 0; i < chars.size; i ++) {
     for (int j = i; j < chars.size; j ++) {
       if (chars[i] > chars[j]) {
@@ -699,14 +699,14 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
     representatives.theList[i].theList.setSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
       representatives.theList[i].theList[j].theType = JSData::token::tokenLargeInteger;
-      representatives.theList[i].theList[j].theInteger.GetElement() = reprefs[j];
+      representatives.theList[i].theList[j].theInteger.getElement() = reprefs[j];
     }
   }
   sizes.theType = JSData::token::tokenArray;
   sizes.theList.setSize(G.ConjugacyClassCount());
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
     sizes.theList[i].theType = JSData::token::tokenLargeInteger;
-    sizes.theList[i].theInteger.GetElement() = G.conjugacyClasseS[i].size;
+    sizes.theList[i].theInteger.getElement() = G.conjugacyClasseS[i].size;
   }
   characters.theType = JSData::token::tokenArray;
   characters.theList.setSize(G.characterTable.size);

@@ -153,12 +153,12 @@ private:
   void reset(Calculator& newBoss, int numExpectedChildren = 0) {
     this->owner = &newBoss;
     this->theData = 0;
-    this->children.Clear();
+    this->children.clear();
     this->children.setExpectedSize(numExpectedChildren);
   }
   static Expression zero();
   bool AddChildRationalOnTop(const Rational& inputRat);
-  bool AddChildOnTop(const Expression& inputChild);
+  bool addChildOnTop(const Expression& inputChild);
   bool AddChildAtomOnTop(const std::string& theOperationString);
   bool AddChildAtomOnTop(int theOp);
   void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const;
@@ -282,7 +282,7 @@ private:
   bool IsError(std::string* outputErrorMessage = nullptr) const;
   bool IsContext() const;
   bool NeedsParenthesisForBaseOfExponent() const;
-  bool NeedsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForAddition() const;
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
@@ -337,7 +337,7 @@ private:
     if (whichElement == 0) {
       return true;
     }
-    *whichElement = this->GetValue<theType>();
+    *whichElement = this->getValue<theType>();
     return true;
   }
   template <class theType>
@@ -356,11 +356,11 @@ private:
       return true;
     }
     whichElement->context = this->GetContext();
-    whichElement->content = this->GetValue<theType>();
+    whichElement->content = this->getValue<theType>();
     return true;
   }
   template <class theType>
-  const theType& GetValue() const {
+  const theType& getValue() const {
     return this->GetValueNonConst<theType>();
   }
   template <class theType>
@@ -385,7 +385,7 @@ private:
     Expression tempE;
     tempE.AssignValue(inputValue, *this->owner);
     tempE.CheckConsistency();
-    return this->AddChildOnTop(tempE);
+    return this->addChildOnTop(tempE);
   }
   template <class theType>
   bool AssignValueWithContextToChild(
@@ -416,7 +416,7 @@ private:
   const SemisimpleLieAlgebra* GetAmbientSSAlgebra() const {
     return this->GetAmbientSSAlgebraNonConstUseWithCaution();
   }
-  bool IsEqualToZero() const;
+  bool isEqualToZero() const;
   bool IsEqualToOne() const;
   bool IsEqualToTwo() const;
   bool IsEqualToHalf() const;
@@ -857,7 +857,7 @@ class Function {
   std::string ToStringShort() const;
   std::string ToStringSummary() const;
   std::string toStringFull() const;
-  JSData ToJSON() const;
+  JSData toJSON() const;
   bool ShouldBeApplied(int parentOpIfAvailable);
   bool operator==(const Function& other) const {
     return
@@ -1177,7 +1177,7 @@ public:
     ~OperationHandlers();
     List<Function> mergeHandlers();
     bool CheckConsisitency();
-    JSData ToJSON();
+    JSData toJSON();
     std::string ToStringRuleStatusUser();
   };
 
@@ -2884,7 +2884,7 @@ bool Calculator::GetVector(const Expression& input,
   }
   output.setSize(convertedEs.size);
   for (int i = 0; i < convertedEs.size; i ++) {
-    output[i] = convertedEs[i].GetValue<theType>();
+    output[i] = convertedEs[i].getValue<theType>();
   }
   return true;
 }
@@ -2897,7 +2897,7 @@ bool CalculatorConversions::functionExpressionFromPoly(
   if (!input.IsOfType<Polynomial<coefficient> >()) {
     return false;
   }
-  const Polynomial<coefficient>& thePoly = input.GetValue<Polynomial<coefficient> >();
+  const Polynomial<coefficient>& thePoly = input.getValue<Polynomial<coefficient> >();
   ExpressionContext context = input.GetContext();
   return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &context);
 }
@@ -2997,7 +2997,7 @@ bool Calculator::functionGetMatrix(
   outputMat.init(convertedEs.NumRows, convertedEs.NumCols);
   for (int i = 0; i < convertedEs.NumRows; i ++) {
     for (int j = 0; j < convertedEs.NumCols; j ++) {
-      outputMat(i, j) = convertedEs(i, j).GetValue<theType>();
+      outputMat(i, j) = convertedEs(i, j).getValue<theType>();
     }
   }
   if (inputOutputStartingContext != nullptr) {
@@ -3014,7 +3014,7 @@ bool Expression::makeSum(
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
-  if (theSum.IsEqualToZero()) {
+  if (theSum.isEqualToZero()) {
     return this->AssignValue<Rational>(0, theCommands);
   }
   List<Expression> summandsWithCoeff;
@@ -3027,7 +3027,7 @@ bool Expression::makeSum(
       current.reset(theCommands, 3);
       current.AddChildAtomOnTop(theCommands.opTimes());
       current.AddChildValueOnTop(theSum.coefficients[i]);
-      current.AddChildOnTop(theSum[i]);
+      current.addChildOnTop(theSum[i]);
     } else {
       current = theSum[i];
     }
@@ -3066,7 +3066,7 @@ bool Expression::AssignValueWithContext(
 ) {
   this->reset(owner, 3);
   this->AddChildAtomOnTop(this->getTypeOperation<theType>());
-  this->AddChildOnTop(theContext.toExpression());
+  this->addChildOnTop(theContext.toExpression());
   return this->AddChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
 }
 
@@ -3112,7 +3112,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
     return false;
   }
   output.reset(*this->owner, this->children.size);
-  output.AddChildOnTop((*this)[0]);
+  output.addChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i = 1; i < mergedContexts.children.size; i ++) {
     if (!mergedContexts[i].ConvertInternally<theType>(convertedE)) {
@@ -3122,7 +3122,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
       }
       return false;
     }
-    output.AddChildOnTop(convertedE);
+    output.addChildOnTop(convertedE);
   }
   return true;
 }
@@ -3165,7 +3165,7 @@ bool Calculator::GetTypeWeight(
     << middleE.toString() << ".";
     return false;
   }
-  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(
+  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
@@ -3249,7 +3249,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
       }
     }
   }
-  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(
+  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "

@@ -35,7 +35,7 @@ PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const {
 }
 
 template <typename scalar>
-scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
+scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
   PackedVector<scalar> Bv;
   Bv.makeZero(B.NumRows);
   for (int i = 0; i < B.NumRows; i ++) {
@@ -51,7 +51,7 @@ scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const 
 }
 /*
 template <typename scalar>
-scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const {
+scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const {
   PackedVector<scalar> Bv;
   Bv.makeZero();
   for (int i = 0; i < this->size; i ++)

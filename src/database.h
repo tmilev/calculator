@@ -20,7 +20,7 @@ class QueryExact {
   std::string getCollectionAndLabel() const;
   std::string getLabel() const;
   static std::string getLabelFromNestedLabels(const List<std::string>& nestedLabels);
-  JSData ToJSON() const;
+  JSData toJSON() const;
   bool isEmpty() const;
 };
 
@@ -39,7 +39,7 @@ class QueryResultOptions {
 public:
   List<std::string> fieldsToProjectTo;
   List<std::string> fieldsProjectedAway;
-  JSData ToJSON() const;
+  JSData toJSON() const;
   void MakeProjection(const List<std::string>& fields);
 
 };

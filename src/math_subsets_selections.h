@@ -499,10 +499,10 @@ int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, S
   MemorySaving<Matrix<coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
   if (buffer == nullptr) {
-    buffer = &emergencyMatBuf.GetElement();
+    buffer = &emergencyMatBuf.getElement();
   }
   if (bufferSelection == nullptr) {
-    bufferSelection = &emergencySelBuf.GetElement();
+    bufferSelection = &emergencySelBuf.getElement();
   }
   this->GaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
   return (theDimension - bufferSelection->CardinalitySelection);

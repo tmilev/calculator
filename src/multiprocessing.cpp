@@ -92,7 +92,7 @@ bool PipePrimitive::CreateMe(
 ) {
   this->name = inputPipeName;
   if (pipe(this->pipeEnds.theObjects) < 0) {
-    global << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
+    global << Logger::red << "FAILED to create pipe: " << this->name << ". " << Logger::endL;
     this->Release();
     global.server().StopKillAll();
     // return false;
@@ -131,7 +131,7 @@ bool MutexProcess::ResetNoAllocation() {
   ) {
     return true;
   }
-  global << logger::red << this->toString() << ": failed to reset without allocation. " << logger::endL;
+  global << Logger::red << this->toString() << ": failed to reset without allocation. " << Logger::endL;
   return false;
 }
 
@@ -140,12 +140,12 @@ bool MutexProcess::Lock() {
   if (this->flagLockHeldByAnotherThread) {
     global.fatal << "MutexProcess about to deadlock itself. " << global.fatal;
   }
-  MutexLockGuard guard(this->lockThreads.GetElement()); // <- lock out other threads
+  MutexLockGuard guard(this->lockThreads.getElement()); // <- lock out other threads
   this->flagLockHeldByAnotherThread = true;
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(true);
   if (!success) {
-    global << logger::red << "Error: " << this->currentProcessName
-    << " failed to lock pipe " << this->toString() << logger::endL;
+    global << Logger::red << "Error: " << this->currentProcessName
+    << " failed to lock pipe " << this->toString() << Logger::endL;
   }
   this->flagLockHeldByAnotherThread = false;
   return success;
@@ -155,8 +155,8 @@ bool MutexProcess::Unlock() {
   MacroRegisterFunctionWithName("MutexProcess::Unlock");
   bool success = this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, true);
   if (!success) {
-    global << logger::red << "Error: " << this->currentProcessName
-    << " failed to unlock pipe " << this->toString() << logger::endL;
+    global << Logger::red << "Error: " << this->currentProcessName
+    << " failed to unlock pipe " << this->toString() << Logger::endL;
   }
   return success;
 }
@@ -279,9 +279,9 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
   int counter = 0;
   while (fcntl(this->pipeEnds[whichEnd], F_SETFL, inputFlags) < 0) {
     std::string theError = strerror(errno);
-    global << logger::purple << "Failed to fcntl pipe end with file descriptor: "
+    global << Logger::purple << "Failed to fcntl pipe end with file descriptor: "
     << this->pipeEnds[whichEnd] << ": "
-    << theError << ". " << logger::endL;
+    << theError << ". " << Logger::endL;
     if (++ counter > 100) {
       if (!dontCrashOnFail) {
         global.fatal << "fcntl failed more than 100 times on "
@@ -338,12 +338,12 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
     }
     if (result < 0) {
       if (errno == EINTR) {
-        global << logger::red << "Write operation interrupted, repeating. " << logger::endL;
+        global << Logger::red << "Write operation interrupted, repeating. " << Logger::endL;
         numAttempts ++;
         if (numAttempts > 100) {
-          global << logger::red
+          global << Logger::red
           << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
-          << logger::endL;
+          << Logger::endL;
           return - 1;
         }
         continue;
@@ -417,7 +417,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->toString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
-  global << logger::red << errorStream.str() << logger::endL;
+  global << Logger::red << errorStream.str() << Logger::endL;
   if (!dontCrashOnFail) {
     global.fatal << "Failed write on: " << this->toString() << numBadAttempts << " or more times. Last error: "
     << strerror(errno) << ". " << global.fatal;
@@ -432,7 +432,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
 ) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
-    global << logger::yellow << "WARNING: " << this->toString()
+    global << Logger::yellow << "WARNING: " << this->toString()
     << " writing on non-initialized pipe. ";
     return false;
   }
@@ -471,8 +471,8 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
     return false;
   }
   if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
-    global << logger::red << this->toString() << ": wrote only "
-    << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
+    global << Logger::red << this->toString() << ": wrote only "
+    << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << Logger::endL;
   }
   return true;
 }
@@ -506,7 +506,7 @@ bool Pipe::ResetNoAllocation() {
   ) {
     return true;
   }
-  global << logger::red << this->toString() << ": failed to reset without allocation. " << logger::endL;
+  global << Logger::red << this->toString() << ": failed to reset without allocation. " << Logger::endL;
   return false;
 }
 
@@ -572,9 +572,9 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
     }
     counter ++;
     if (counter > 100) {
-      global << logger::red << this->toString()
+      global << Logger::red << this->toString()
       << ": more than 100 iterations of read resulted in an error. "
-      << logger::endL;
+      << Logger::endL;
       if (!dontCrashOnFail) {
         global.fatal << this->toString()
         << ": more than 100 iterations of read resulted in an error. "
@@ -587,8 +587,8 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
     }
   }
   if (numReadBytes > 150000) {
-    global << logger::red << this->toString()
-    << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
+    global << Logger::red << this->toString()
+    << "This is not supposed to happen: pipe read more than 150000 bytes. " << Logger::endL;
   }
   if (numReadBytes > 0) {
     this->buffer.setSize(numReadBytes);
@@ -622,25 +622,25 @@ void Pipe::ReadOnce(bool dontCrashOnFail) {
   this->theMutexPipe.Unlock();
 }
 
-logger::logger() {
+Logger::Logger() {
   this->flagInitialized = false;
   this->theFileName = "";
-  this->currentColor = logger::normalColor;
+  this->currentColor = Logger::normalColor;
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = true;
   this->flagResetLogFileWhenTooLarge = true;
 }
 
-void logger::initializeIfNeeded() {
+void Logger::initializeIfNeeded() {
   if (!this->flagInitialized) {
     this->reset();
   }
 }
 
-void logger::reset() {
+void Logger::reset() {
   this->flagInitialized = true;
-  this->currentColor = logger::normalColor;
+  this->currentColor = Logger::normalColor;
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = false;
@@ -657,7 +657,7 @@ void logger::reset() {
     this->theFile, this->theFileName, false, true, false, true
   );
   if (!this->theFile.is_open()) {
-    this->currentColor = logger::red;
+    this->currentColor = Logger::red;
     std::string computedFileName;
     FileOperations::GetPhysicalFileNameFromVirtual(
       this->theFileName, computedFileName, true, false, nullptr
@@ -671,13 +671,13 @@ void logger::reset() {
   this->theFile.seekp(0);
 }
 
-void logger::CheckLogSize() {
+void Logger::CheckLogSize() {
   this->initializeIfNeeded();
   if (theFile.tellp() > this->MaxLogSize) {
     if (this->flagResetLogFileWhenTooLarge) {
       this->reset();
       if (this->MaxLogSize > 1000) {
-        *this << logger::endL << "Log file reset. " << logger::endL;
+        *this << Logger::endL << "Log file reset. " << Logger::endL;
       }
     } else {
       this->flagStopWritingToFile = true;
@@ -685,34 +685,34 @@ void logger::CheckLogSize() {
   }
 }
 
-void logger::flush() {
+void Logger::flush() {
   this->initializeIfNeeded();
   std::cout.flush();
   theFile.flush();
   theFile.clear();
 }
 
-std::string logger::consoleBlue() {
+std::string Logger::consoleBlue() {
   return "\x1b[1;34m";
 }
 
-std::string logger::consoleYellow() {
+std::string Logger::consoleYellow() {
   return "\x1b[1;33m";
 }
 
-std::string logger::consoleGreen() {
+std::string Logger::consoleGreen() {
   return "\x1b[1;32m";
 }
 
-std::string logger::consoleRed() {
+std::string Logger::consoleRed() {
   return "\x1b[1;31m";
 }
 
-std::string logger::consoleNormal() {
+std::string Logger::consoleNormal() {
   return "\x1b[0m";
 }
 
-std::string logger::closeTagConsole() {
+std::string Logger::closeTagConsole() {
   if (!this->flagTagColorConsoleOpened) {
     return "";
   }
@@ -720,7 +720,7 @@ std::string logger::closeTagConsole() {
   return "\x1b[0m";
 }
 
-std::string logger::closeTagHtml() {
+std::string Logger::closeTagHtml() {
   if (!this->flagTagColorHtmlOpened) {
     return "";
   }
@@ -728,35 +728,35 @@ std::string logger::closeTagHtml() {
   return "</span>";
 }
 
-std::string logger::openTagConsole() {
+std::string Logger::openTagConsole() {
   std::stringstream out;
-  out << logger::closeTagConsole();
+  out << Logger::closeTagConsole();
   switch (this->currentColor) {
-    case logger::red:
+    case Logger::red:
       out << "\x1b[1;31m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::green:
+    case Logger::green:
       out << "\x1b[1;32m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::yellow:
+    case Logger::yellow:
       out << "\x1b[1;33m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::blue:
+    case Logger::blue:
       out << "\x1b[1;34m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::purple:
+    case Logger::purple:
       out << "\x1b[1;35m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::cyan:
+    case Logger::cyan:
       out << "\x1b[1;36m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
-    case logger::orange:
+    case Logger::orange:
       out << "\x1b[0;33m";
       this->flagTagColorConsoleOpened = true;
       return out.str();
@@ -765,31 +765,31 @@ std::string logger::openTagConsole() {
   }
 }
 
-std::string logger::openTagHtml() {
+std::string Logger::openTagHtml() {
   std::stringstream out;
-  out << logger::closeTagHtml();
+  out << Logger::closeTagHtml();
   switch (this->currentColor) {
-    case logger::red:
+    case Logger::red:
       out << "<span style =\"color:red\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
-    case logger::green:
+    case Logger::green:
       out << "<span style =\"color:green\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
-    case logger::blue:
+    case Logger::blue:
       out << "<span style =\"color:blue\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
-    case logger::yellow:
+    case Logger::yellow:
       out << "<span style =\"color:yellow\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
-    case logger::orange:
+    case Logger::orange:
       out << "<span style =\"color:orange\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
-    case logger::purple:
+    case Logger::purple:
       out << "<span style =\"color:purple\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
@@ -798,7 +798,7 @@ std::string logger::openTagHtml() {
   }
 }
 
-std::string logger::getStampShort() {
+std::string Logger::getStampShort() {
   if (global.logs.logType == GlobalVariables::LogData::type::daemon) {
     return "[daemon] ";
   }
@@ -816,7 +816,7 @@ std::string logger::getStampShort() {
   return out.str();
 }
 
-std::string logger::getStamp() {
+std::string Logger::getStamp() {
   std::stringstream out;
   out << global.logs.ToStringProcessType() << ", ";
   out
@@ -830,29 +830,29 @@ std::string logger::getStamp() {
   return out.str();
 }
 
-void logger::StringHighligher::reset() {
+void Logger::StringHighligher::reset() {
   this->sections.setSize(0);
 }
 
-logger::StringHighligher::Section::Section(int inputLength) {
+Logger::StringHighligher::Section::Section(int inputLength) {
   this->theType = "";
   this->length = inputLength;
 }
 
-logger::StringHighligher::Section::Section(const std::string& input) {
+Logger::StringHighligher::Section::Section(const std::string& input) {
   this->theType = input;
   this->length = 0;
 }
 
-logger::StringHighligher::Section::Section() {
+Logger::StringHighligher::Section::Section() {
   this->theType = "";
   this->length = 0;
 }
 
-logger::StringHighligher::StringHighligher() {
+Logger::StringHighligher::StringHighligher() {
 }
 
-logger::StringHighligher::StringHighligher(const std::string& input) {
+Logger::StringHighligher::StringHighligher(const std::string& input) {
   List<char> delimiters;
   delimiters.addOnTop(',');
   delimiters.addOnTop('(');
@@ -863,7 +863,7 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
   StringRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
     std::string current = StringRoutines::StringTrimWhiteSpace(inputStrings[i]);
-    logger::StringHighligher::Section incoming;
+    Logger::StringHighligher::Section incoming;
     if (current == "|") {
       incoming.theType = "|";
       this->sections.addOnTop(incoming);
@@ -922,12 +922,12 @@ bool MathRoutines::ParseListInt(
   return true;
 }
 
-logger& logger::operator<<(const logger::StringHighligher& input) {
+Logger& Logger::operator<<(const Logger::StringHighligher& input) {
   this->nextHighlighter.sections = input.sections;
   return *this;
 }
 
-logger& logger::operator<<(const std::string& input) {
+Logger& Logger::operator<<(const std::string& input) {
   if (input.size() == 0) {
     return *this;
   }
@@ -941,7 +941,7 @@ logger& logger::operator<<(const std::string& input) {
     i < this->nextHighlighter.sections.size && indexLastNonShownByte < static_cast<signed>(input.size());
     i ++
   ) {
-    logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
+    Logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
     if (currentSection.theType != "") {
       chunks.addOnTop(currentSection.theType);
       continue;
@@ -964,13 +964,13 @@ logger& logger::operator<<(const std::string& input) {
     int colorIndex = i % 3;
     switch(colorIndex) {
     case 0:
-      *this << logger::blue;
+      *this << Logger::blue;
       break;
     case 1:
-      *this << logger::red;
+      *this << Logger::red;
       break;
     case 2:
-      *this << logger::green;
+      *this << Logger::green;
       break;
     default:
       break;
@@ -981,7 +981,7 @@ logger& logger::operator<<(const std::string& input) {
   return *this;
 }
 
-logger& logger::operator<<(const loggerSpecialSymbols& input) {
+Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->CheckLogSize();
   bool doUseColors =
@@ -990,14 +990,14 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
     global.flagRunningConsoleTest
   ;
   switch (input) {
-    case logger::endL:
+    case Logger::endL:
       std::cout << this->getStampShort() << this->bufferStandardOutput;
       this->bufferStandardOutput.clear();
       if (doUseColors) {
         std::cout << this->closeTagConsole() << std::endl;
       }
       std::cout.flush();
-      this->currentColor = logger::normalColor;
+      this->currentColor = Logger::normalColor;
       if (this->flagStopWritingToFile) {
         return *this;
       }
@@ -1006,13 +1006,13 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
       this->bufferFile = "";
       theFile.flush();
       return *this;
-    case logger::red:
-    case logger::blue:
-    case logger::yellow:
-    case logger::green:
-    case logger::purple:
-    case logger::orange:
-    case logger::cyan:
+    case Logger::red:
+    case Logger::blue:
+    case Logger::yellow:
+    case Logger::green:
+    case Logger::purple:
+    case Logger::orange:
+    case Logger::cyan:
       this->currentColor = input;
       if (doUseColors) {
         this->bufferStandardOutput += this->openTagConsole();
@@ -1022,11 +1022,11 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
       }
       this->theFile << this->openTagHtml();
       return *this;
-    case logger::normalColor:
+    case Logger::normalColor:
       if (doUseColors) {
         this->bufferStandardOutput += this->closeTagConsole();
       }
-      this->currentColor = logger::normalColor;
+      this->currentColor = Logger::normalColor;
       if (this->flagStopWritingToFile) {
         return *this;
       }

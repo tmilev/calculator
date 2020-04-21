@@ -197,7 +197,7 @@ CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(i
   if (inputId == 0) {
     global.fatal << "Zero cipher suite specification not allowed here. " << global.fatal;
   }
-  if (!this->cipherSuiteNames.Contains(inputId)) {
+  if (!this->cipherSuiteNames.contains(inputId)) {
     global.fatal << "Unknown cipher suite specification not allowed here. " << global.fatal;
   }
   CipherSuiteSpecification result;
@@ -355,16 +355,16 @@ std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutp
 std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
 std::string TransportLayerSecurityServer::JSLabels::session = "session";
 
-JSData TransportLayerSecurityServer::ToJSON() {
+JSData TransportLayerSecurityServer::toJSON() {
   JSData result;
   if (this->spoofer.flagDoSpoof) {
-    result[TransportLayerSecurityServer::JSLabels::spoofer] = this->spoofer.ToJSON();
+    result[TransportLayerSecurityServer::JSLabels::spoofer] = this->spoofer.toJSON();
   }
-  result[TransportLayerSecurityServer::JSLabels::session] = this->session.ToJSON();
+  result[TransportLayerSecurityServer::JSLabels::session] = this->session.toJSON();
   return result;
 }
 
-JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
+JSData TransportLayerSecurityServer::NetworkSpoofer::toJSON() {
   JSData result, inputMessage, outputMessages, inErrors, outErrors;
   result.theType = JSData::token::tokenArray;
   inputMessage.theType = JSData::token::tokenArray;
@@ -372,7 +372,7 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
   inErrors.theType = JSData::token::tokenArray;
   outErrors.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->incomingMessages.size; i ++) {
-    inputMessage[i] = this->incomingMessages[i].ToJSON();
+    inputMessage[i] = this->incomingMessages[i].toJSON();
   }
   inErrors = this->errorsOnIncoming;
   outErrors = this->errorsOnOutgoing;
@@ -380,7 +380,7 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
     JSData currentOutputMessages;
     currentOutputMessages.theType = JSData::token::tokenArray;
     for (int j = 0; j < this->outgoingMessages[i].size; j ++) {
-      currentOutputMessages[j] = this->outgoingMessages[i][j].ToJSON();
+      currentOutputMessages[j] = this->outgoingMessages[i][j].toJSON();
     }
     outputMessages[i] = currentOutputMessages;
   }
@@ -394,8 +394,8 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
 bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
   std::stringstream* commentsOnError
 ) {
-  global << logger::red
-  << "Transport layer security server is spoofing the network. " << logger::endL;
+  global << Logger::red
+  << "Transport layer security server is spoofing the network. " << Logger::endL;
   if (
     this->currentInputMessageIndex < 0 ||
     this->currentInputMessageIndex >= this->incomingMessages.size
@@ -432,7 +432,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
     this->incomingBytes.setSize(numBytesInBuffer);
   }
   global << "Read bytes:\n"
-  << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << logger::endL;
+  << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << Logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -460,8 +460,8 @@ SSLContent::SSLContent() {
   this->resetExceptOwner();
 }
 
-logger::StringHighligher SSLContent::getStringHighlighter() {
-  logger::StringHighligher result("2,4,4,2,6,4,64,2,64,4,||");
+Logger::StringHighligher SSLContent::getStringHighlighter() {
+  Logger::StringHighligher result("2,4,4,2,6,4,64,2,64,4,||");
   for (int i = 0; i < this->owner->owner->session.incomingCiphers.size; i ++) {
     result.sections.addOnTop(4);
   }
@@ -503,8 +503,8 @@ std::string SSLContent::JSLabels::renegotiate                       = "renegotia
 std::string SSLContent::JSLabels::OCSPrequest                       = "OCSPrequest"                      ;
 std::string SSLContent::JSLabels::signedCertificateTimestampRequest = "signedCertificateTimestampRequest";
 
-JSData SSLContent::ToJSON() const {
-  MacroRegisterFunctionWithName("SSLHello::ToJSON");
+JSData SSLContent::toJSON() const {
+  MacroRegisterFunctionWithName("SSLHello::toJSON");
   JSData result;
   result[SSLContent::JSLabels::version] = this->ToStringVersion();
   result[SSLContent::JSLabels::length] = this->length;
@@ -515,7 +515,7 @@ JSData SSLContent::ToJSON() const {
   JSData extensionsObject;
   extensionsObject.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
-    extensionsObject.theList.addOnTop(this->extensions[i].ToJSON());
+    extensionsObject.theList.addOnTop(this->extensions[i].toJSON());
   }
   result[SSLContent::JSLabels::extensions] = extensionsObject;
   result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
@@ -544,7 +544,7 @@ bool CipherSuiteSpecification::CheckInitialization() const {
 bool CipherSuiteSpecification::ComputeName() {
   MacroRegisterFunctionWithName("CipherSuiteSpecification::ComputeName");
   this->CheckInitialization();
-  if (!this->owner->cipherSuiteNames.Contains(this->id)) {
+  if (!this->owner->cipherSuiteNames.contains(this->id)) {
     // GREASE = deliberately invalid cipher suite code.
     // [Generate Random Extensions and Sustain Extensibility]
     this->name = "unknown/GREASE";
@@ -992,7 +992,7 @@ bool SSLHelloExtension::CheckInitialization() {
   return true;
 }
 
-JSData SSLHelloExtension::ToJSON() {
+JSData SSLHelloExtension::toJSON() {
   JSData result;
   result.theType = JSData::token::tokenObject;
   result["name"] = this->Name();
@@ -1005,7 +1005,7 @@ JSData SSLHelloExtension::ToJSON() {
 
 std::string SSLHelloExtension::Name() {
   this->CheckInitialization();
-  if (this->owner->owner->owner->extensionNames.Contains(this->theType)) {
+  if (this->owner->owner->owner->extensionNames.contains(this->theType)) {
     return this->owner->owner->owner->extensionNames.getValueNoFail(this->theType);
   }
   return "unknown";
@@ -1432,7 +1432,7 @@ std::string Serialization::Marker::toString() const {
   return out.str();
 }
 
-JSData Serialization::Marker::ToJSON() {
+JSData Serialization::Marker::toJSON() {
   JSData result;
   result.theType = JSData::token::tokenObject;
   result[Serialization::JSLabels::offset] = this->offset;
@@ -1447,7 +1447,7 @@ std::string SSLRecord::ToHtml(int id) {
   out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displaySSLRecord('"
-  << spanId.str() << "', " << this->ToJSON() << ");"
+  << spanId.str() << "', " << this->toJSON() << ");"
   << "</script>";
   return out.str();
 }
@@ -1456,13 +1456,13 @@ std::string SSLRecord::JSLabels::type = "type";
 std::string SSLRecord::JSLabels::content = "content";
 std::string SSLRecord::JSLabels::session = "session";
 
-JSData SSLRecord::ToJSON() {
-  MacroRegisterFunctionWithName("SSLRecord::ToJSON");
+JSData SSLRecord::toJSON() {
+  MacroRegisterFunctionWithName("SSLRecord::toJSON");
   JSData result;
   result[Serialization::JSLabels::serialization] = this->ToJSONSerialization();
   result[SSLRecord::JSLabels::type] = this->ToStringType();
-  result[SSLRecord::JSLabels::content] = this->content.ToJSON();
-  result[SSLRecord::JSLabels::session] = this->owner->session.ToJSON();
+  result[SSLRecord::JSLabels::content] = this->content.toJSON();
+  result[SSLRecord::JSLabels::session] = this->owner->session.toJSON();
   return result;
 }
 
@@ -1517,7 +1517,7 @@ std::string SignatureAlgorithmSpecification::ToHex() {
   return Crypto::ConvertUintToHex(this->value, 2);
 }
 
-JSData SignatureAlgorithmSpecification::ToJSON() {
+JSData SignatureAlgorithmSpecification::toJSON() {
   JSData result;
   result[SignatureAlgorithmSpecification::JSLabels::valueHex] = this->ToHex();
   result[SignatureAlgorithmSpecification::JSLabels::hash] = static_cast<int>(this->hash);
@@ -1540,7 +1540,7 @@ std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId    
 std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                 = "ellipticCurveName"                ;
 std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign                       = "bytesToSign"                      ;
 
-JSData TransportLayerSecurityServer::Session::ToJSON() {
+JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData result;
   result.theType = JSData::token::tokenArray;
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher                     ] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
@@ -1562,7 +1562,7 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   JSData algorithmSpecifications;
   algorithmSpecifications.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
-    algorithmSpecifications.theList.addOnTop(this->incomingAlgorithmSpecifications[i].ToJSON());
+    algorithmSpecifications.theList.addOnTop(this->incomingAlgorithmSpecifications[i].toJSON());
   }
   result[TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications] = algorithmSpecifications;
   result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] = ciphers;
@@ -1585,7 +1585,7 @@ JSData SSLRecord::ToJSONSerialization() {
   JSData jsMarkers;
   jsMarkers.theType = JSData::token::tokenArray;
   for (int i = 0; i < markers.size; i ++) {
-    jsMarkers.theList.addOnTop(markers[i].ToJSON());
+    jsMarkers.theList.addOnTop(markers[i].toJSON());
   }
   result[Serialization::JSLabels::markers] = jsMarkers;
   result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization);
@@ -1618,7 +1618,7 @@ std::string SSLRecord::toString() const {
   result["incomingBytes"] = Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
   result["type"] = this->ToStringType();
   if (this->theType == SSLRecord::tokens::handshake) {
-    result["hello"] = this->content.ToJSON();
+    result["hello"] = this->content.toJSON();
   }
   std::string hexVersion;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
@@ -1844,7 +1844,7 @@ void SSLRecord::PrepareServerHello2Certificate() {
 
 bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLRecord::PrepareServerHello3SecretExchange");
-  if (this->owner->privateKey.thePublicKey.theModulus.IsEqualToZero()) {
+  if (this->owner->privateKey.thePublicKey.theModulus.isEqualToZero()) {
     if (!this->owner->privateKey.ComputeFromTwoPrimes(
       this->owner->privateKey.primeOne,
       this->owner->privateKey.primeTwo,
@@ -1886,7 +1886,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(
     }
     return false;
   }
-  global << "Wrote ssl records successfully. " << logger::endL;
+  global << "Wrote ssl records successfully. " << Logger::endL;
   return true;
 }
 
@@ -1943,7 +1943,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
     ] = this->lastReaD;
   }
   if (!success) {
-    global << logger::red << commentsOnFailure->str() << logger::endL;
+    global << Logger::red << commentsOnFailure->str() << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnIncoming.addOnTop(commentsOnFailure->str());
     }
@@ -1951,7 +1951,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
   }
   success = TransportLayerSecurityServer::ReplyToClientHello(inputSocketID, commentsOnFailure);
   if (!success) {
-    global << logger::red << commentsOnFailure->str() << logger::endL;
+    global << Logger::red << commentsOnFailure->str() << Logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnOutgoing.addOnTop(commentsOnFailure->str());
     }

@@ -22,18 +22,18 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   Vector<Rational> theWeight = this->GetWeightOfGenerator(generatorIndex);
   outputMultiplyLieBracketsToGetGenerator = 1;
   Vector<Rational> genWeight, newWeight;
-  while (!theWeight.IsEqualToZero()) {
+  while (!theWeight.isEqualToZero()) {
     for (int i = 0; i < this->GetRank(); i ++) {
       genWeight.MakeEi(this->GetRank(), i);
-      if (theWeight.IsPositive()) {
+      if (theWeight.isPositive()) {
         genWeight.Minus();
       }
       newWeight = theWeight + genWeight;
-      if (newWeight.IsEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
+      if (newWeight.isEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
         theWeight = newWeight;
         int theIndex = this->GetGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
-        if (!theWeight.IsEqualToZero()) {
+        if (!theWeight.isEqualToZero()) {
           int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
           theIndex = this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
@@ -101,7 +101,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   if (this->owner == nullptr) {
     global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
-  if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {
+  if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
     global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
   }
   if (this->Waypoints.size == 0) {
@@ -183,7 +183,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha) {
   if (this->owner == nullptr) {
     global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
-  if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {
+  if (indexAlpha < 0 || indexAlpha >= this->owner->getDimension()) {
     global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
   }
   Rational theMin = 0;
@@ -263,7 +263,7 @@ void LittelmannPath::simplify() {
     d11 = d1.ScalarEuclidean(d1);
     d12 = d1.ScalarEuclidean(d2);
     d22 = d2.ScalarEuclidean(d2);
-    bool isBad = ((d11 * d22 - d12 * d12).IsEqualToZero() && (d12 <= 0));
+    bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0));
     if (!isBad) {
       leftIndex ++;
       this->Waypoints[leftIndex] = middle;
@@ -286,7 +286,7 @@ bool LittelmannPath::MinimaAreIntegral() {
   }
   List<Rational> theMinima;
   WeylGroupData& theWeyl = *this->owner;
-  int theDim = theWeyl.GetDim();
+  int theDim = theWeyl.getDimension();
   theMinima.setSize(theDim);
   for (int i = 0; i < theDim; i ++) {
     theMinima[i] = theWeyl.GetScalarProdSimpleRoot(this->Waypoints[0], i) * 2 / theWeyl.CartanSymmetric.elements[i][i];
@@ -309,7 +309,7 @@ bool LittelmannPath::MinimaAreIntegral() {
 void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
   this->owner = &theOwner;
   this->Waypoints.setSize(2);
-  this->Waypoints[0].makeZero(theOwner.GetDim());
+  this->Waypoints[0].makeZero(theOwner.getDimension());
   this->Waypoints[1] = weightInSimpleCoords;
   this->simplify();
 }
@@ -339,7 +339,7 @@ bool LittelmannPath::GenerateOrbit(
 ) {
   HashedList<LittelmannPath> hashedOutput;
   hashedOutput.addOnTop(*this);
-  int theDim = this->owner->GetDim();
+  int theDim = this->owner->getDimension();
   outputOperators.setSize(1);
   outputOperators[0].setSize(0);
   List<int> currentSequence;
@@ -369,7 +369,7 @@ bool LittelmannPath::GenerateOrbit(
         while (found) {
           found = false;
           currentPath.ActByEalpha(theIndex);
-          if (!currentPath.IsEqualToZero()) {
+          if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(theIndex);
@@ -387,7 +387,7 @@ bool LittelmannPath::GenerateOrbit(
         while (found) {
           found = false;
           currentPath.ActByFalpha(theIndex);
-          if (!currentPath.IsEqualToZero()) {
+          if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(- theIndex - 1);
@@ -441,7 +441,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
       return false;
     }
     ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[IndexCurrentGenerator];
-    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size() > 1) {
+    if (!currentElt.GetCartanPart().isEqualToZero() || currentElt.size() > 1) {
       return false;
     }
     int thePower = 0;
@@ -454,7 +454,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
       currentWeight += currentRoot;
       testWeight = currentWeight;
       theWeyl.RaiseToDominantWeight(testWeight);
-      if (!(theHWsimpleCoordsTrue - testWeight).IsPositiveOrZero()) {
+      if (!(theHWsimpleCoordsTrue - testWeight).isPositiveOrZero()) {
         this->makeZero(theRingZero, *this->owner);
         return true;
       }
@@ -501,7 +501,7 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis(
   Vector<coefficient> tempRoot;
   tempRoot = *tempCoords.LastObject();
   tempCoords.setSize(theBasis.size);
-  return tempRoot.GetCoordsInBasiS(tempCoords, output);
+  return tempRoot.getCoordinatesInBasis(tempCoords, output);
 }
 
 template<class coefficient>
@@ -564,9 +564,9 @@ void ElementUniversalEnveloping<coefficient>::ModToMinDegreeFormFDRels(
   while (Found) {
     Found = false;
     for (int j = numPosRoots - 1; j >= 0; j --) {
-      this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
+      this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
       this->simplify(theRingUnit);
-      this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
+      this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
       if (this->ModOutFDRelationsExperimental(theHWinSimpleCoords, theRingUnit, theRingZero)) {
         Found = true;
       }
@@ -631,15 +631,15 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeConst();
   if (logStream != nullptr) {
-    *logStream << "backtraced elt: " << MTright.toString(&global.theDefaultFormat.GetElement()) << "<br>";
-    *logStream << "this element: " << this->toString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "backtraced elt: " << MTright.toString(&global.theDefaultFormat.getElement()) << "<br>";
+    *logStream << "this element: " << this->toString(&global.theDefaultFormat.getElement()) << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
     intermediateAccum.simplify(global, theRingUnit, theRingZero);
     if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
-      << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+      << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
     }
     intermediateAccum.ModOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<coefficient>& rightMon = MTright[j];
@@ -653,22 +653,22 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
           if (logStream != nullptr) {
             *logStream << "tempElt before mult: " << tempElt.toString(&global.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
         }
       } else {
@@ -683,7 +683,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.GetElement());
+    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.getElement());
   }
   return true;
 }
@@ -705,14 +705,14 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
       theElt *= theOrbit[i];
       theElt.simplify(theRingUnit);
       theElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
-      if (!theElt.IsEqualToZero()) {
+      if (!theElt.isEqualToZero()) {
         theOrbit.addOnTop(theElt);
       }
     }
   }
   for (int i = 0; i < theOrbit.size; i ++) {
     ElementUniversalEnveloping<coefficient>& current = theOrbit[i];
-    out << "<br>" << current.toString(&global.theDefaultFormat.GetElement());
+    out << "<br>" << current.toString(&global.theDefaultFormat.getElement());
   }
   return out.str();
 }
@@ -745,12 +745,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->WeylFDSmallAsSubInLarge.AmbientWeyl = &this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl = &this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl = &this->theHmm.theRange().theWeyl;
-  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->GetDim());
+  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->getDimension());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
     this->generatorsSmallSub.addOnTop(currentV);
     for (int j = 0; j < currentV.size; j ++) {
-      if (!currentV[j].IsEqualToZero() && this->selInducing.selected[j]) {
+      if (!currentV[j].isEqualToZero() && this->selInducing.selected[j]) {
         this->generatorsSmallSub.RemoveLastObject();
         this->selSmallParSel.AddSelectionAppendNewIndex(i);
         break;
@@ -774,7 +774,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selInducing.CardinalitySelection; k ++) {
-      if (!currentWeight[this->selInducing.elements[k]].IsEqualToZero()) {
+      if (!currentWeight[this->selInducing.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;
       }
@@ -790,7 +790,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     const Vector<Rational>& currentWeight = theSmallWeyl.RootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selSmallParSel.CardinalitySelection; k ++) {
-      if (!currentWeight[this->selSmallParSel.elements[k]].IsEqualToZero()) {
+      if (!currentWeight[this->selSmallParSel.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;
       }
@@ -858,7 +858,7 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {
     weightDifference = this->g2Weights[i] - this->g2Weights[theIndex];
-    if (weightDifference.IsPositive() && !accountedDiffs.Contains(weightDifference)) {
+    if (weightDifference.isPositive() && !accountedDiffs.contains(weightDifference)) {
       accountedDiffs.addOnTop(weightDifference);
       if (additionalMultiple != 1) {
         formulaStream1 << additionalMultiple.toString(&this->theFormat);
@@ -888,12 +888,12 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
     for (int k = 0; k < theString.Powers[i]; k ++) {
       tempPath.ActByEalpha(- theString.generatorsIndices[i] - 1);
     }
-    if (tempPath.IsEqualToZero()) {
+    if (tempPath.isEqualToZero()) {
       return false;
     }
     tempPath2 = tempPath;
     tempPath2.ActByEalpha(- theString.generatorsIndices[i] - 1);
-    if (!tempPath2.IsEqualToZero()) {
+    if (!tempPath2.isEqualToZero()) {
       return false;
     }
   }
@@ -950,15 +950,15 @@ std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool 
   }
   if (includeDominance) {
     out << " ";
-    for (int i = 0; i < this->owner->GetDim(); i ++) {
+    for (int i = 0; i < this->owner->getDimension(); i ++) {
       LittelmannPath tempP = *this;
       tempP.ActByEFDisplayIndex(i + 1);
-      if (!tempP.IsEqualToZero()) {
+      if (!tempP.isEqualToZero()) {
         out << "e_{" << i + 1 << "}";
       }
       tempP = *this;
       tempP.ActByEFDisplayIndex(- i - 1);
-      if (!tempP.IsEqualToZero()) {
+      if (!tempP.isEqualToZero()) {
         out << "e_{" << - i - 1 << "},";
       }
     }

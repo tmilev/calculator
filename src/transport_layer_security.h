@@ -206,7 +206,7 @@ public:
   unsigned int hash;
   unsigned int signatureAlgorithm;
   SignatureAlgorithmSpecification();
-  JSData ToJSON();
+  JSData toJSON();
   void processValue();
   std::string ToHex();
   std::string GetHashName();
@@ -223,7 +223,7 @@ public:
   int theType;
   std::string Name();
   SSLHelloExtension();
-  JSData ToJSON();
+  JSData toJSON();
   bool CheckInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
   bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
@@ -316,7 +316,7 @@ public:
   void resetExceptOwner();
   TransportLayerSecurityServer& GetServer() const;
   bool CheckInitialization() const;
-  logger::StringHighligher getStringHighlighter();
+  Logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
@@ -329,7 +329,7 @@ public:
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
   bool PrepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError);
 
-  JSData ToJSON() const;
+  JSData toJSON() const;
 
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
@@ -409,7 +409,7 @@ public:
   std::string toString() const;
   std::string ToStringType() const;
   JSData ToJSONSerialization();
-  JSData ToJSON();
+  JSData toJSON();
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
   bool PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure);
@@ -442,7 +442,7 @@ public:
     NetworkSpoofer();
     bool ReadBytesOnce(std::stringstream* commentsOnError);
     bool WriteSSLRecords(List<SSLRecord>& input);
-    JSData ToJSON();
+    JSData toJSON();
   };
   NetworkSpoofer spoofer;
   class Session {
@@ -480,7 +480,7 @@ public:
     List<unsigned char> serverName;
     List<CipherSuiteSpecification> incomingCiphers;
     std::string ToStringChosenCipher();
-    JSData ToJSON();
+    JSData toJSON();
     Session();
     bool ComputeAndSignEphemerealKey(std::stringstream* commentsOnError);
     bool ChooseCipher(std::stringstream* commentsOnFailure);
@@ -528,7 +528,7 @@ public:
   bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
   bool WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure);
   bool WriteSSLRecords(List<SSLRecord>& input, std::stringstream* commentsOnFailure);
-  JSData ToJSON();
+  JSData toJSON();
 };
 
 class TransportLayerSecurity {

@@ -28,7 +28,7 @@ public:
   ~ThreadData();
 };
 
-class logger {
+class Logger {
   public:
   class StringHighligher {
     public:
@@ -40,7 +40,7 @@ class logger {
       Section(int inputLength);
       Section(const std::string& input);
     };
-    List<logger::StringHighligher::Section> sections;
+    List<Logger::StringHighligher::Section> sections;
     StringHighligher();
     StringHighligher(const std::string& input);
     void reset();
@@ -57,7 +57,7 @@ class logger {
   bool flagTagColorHtmlOpened;
   bool flagTagColorConsoleOpened;
   bool flagResetLogFileWhenTooLarge;
-  logger();
+  Logger();
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   static std::string consoleRed();
@@ -76,16 +76,16 @@ class logger {
   std::string openTagHtml();
   void initializeIfNeeded();
   void reset();
-  logger& operator<<(const logger::StringHighligher& input);
-  logger& operator<<(const std::string& input);
-  logger& operator<<(const loggerSpecialSymbols& input);
+  Logger& operator<<(const Logger::StringHighligher& input);
+  Logger& operator<<(const std::string& input);
+  Logger& operator<<(const loggerSpecialSymbols& input);
   void flush();
   template <typename theType>
-  logger& operator<<(const theType& toBePrinted) {
+  Logger& operator<<(const theType& toBePrinted) {
     return this->doTheLogging(toBePrinted);
   }
   template <typename theType>
-  logger& doTheLogging(const theType& toBePrinted);
+  Logger& doTheLogging(const theType& toBePrinted);
 };
 
 // All global objects are either
@@ -147,11 +147,11 @@ public:
       static const int daemon = 3;
     };
     int logType;
-    logger server;
-    logger serverMonitor;
-    logger worker;
+    Logger server;
+    Logger serverMonitor;
+    Logger worker;
     // Logger daemon currently logs to stdout only (no file backup).
-    logger daemon;
+    Logger daemon;
     LogData() {
       this->logType = LogData::type::server;
     }
@@ -283,7 +283,7 @@ public:
     };
     // Respond functions start here.
     // The functions below lock one another out.
-    void Report(const std::string& input);
+    void report(const std::string& input);
     void Initiate(const std::string& message);
     // Respond functions end here.
 
@@ -398,14 +398,14 @@ public:
   public:
     template <typename theType>
     CommentsCurrentConnection& operator<<(const theType& comment) {
-      this->container.GetElement() << comment;
+      this->container.getElement() << comment;
       return *this;
     }
     void resetComments() {
       this->container.FreeMemory();
     }
     std::string getCurrentReset() {
-      std::string result = this->container.GetElement().str();
+      std::string result = this->container.getElement().str();
       this->resetComments();
       return result;
     }
@@ -469,7 +469,7 @@ public:
 };
 
 template <typename theType>
-logger& logger::doTheLogging(const theType& toBePrinted) {
+Logger& Logger::doTheLogging(const theType& toBePrinted) {
   this->initializeIfNeeded();
   std::stringstream out;
   out << toBePrinted;

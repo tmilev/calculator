@@ -19,7 +19,7 @@ class LaTeXCrawler {
     std::string fileName;
     bool isSolution;
     bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
-    JSData ToJSON();
+    JSData toJSON();
     FileWithOption();
     FileWithOption(const std::string& input);
   };
@@ -28,7 +28,7 @@ class LaTeXCrawler {
     std::string title;
     List<LaTeXCrawler::FileWithOption> filesToCrawl;
     void AddSlidesOnTop(const List<std::string>& input);
-    JSData ToJSON();
+    JSData toJSON();
     bool FromJSON(JSData& input, std::stringstream* commentsOnFailure);
     bool FromString(const std::string& input, std::stringstream* commentsOnFailure);
   };

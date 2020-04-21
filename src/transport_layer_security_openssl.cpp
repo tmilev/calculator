@@ -59,11 +59,11 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   SSL_load_error_strings();
   int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
-    global << logger::red << commentsOnError.str() << logger::endL;
+    global << Logger::red << commentsOnError.str() << Logger::endL;
     global.fatal << "Failed to add ssl algorithms. " << global.fatal;
   }
   if (commentsOnError.str() != "") {
-    global << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
+    global << Logger::red << "OpenSSL initialization comments: " << Logger::blue << commentsOnError.str() << Logger::endL;
   }
 #endif // MACRO_use_open_ssl
 }
@@ -80,8 +80,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   ) {
     return true;
   }
-  global << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
-  global << logger::green << "Let me try to create those files for you." << logger::endL;
+  global << Logger::red << "SSL is available but CERTIFICATE files are missing." << Logger::endL;
+  global << Logger::green << "Let me try to create those files for you." << Logger::endL;
   std::stringstream theCommand;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::GetPhysicalFileNameFromVirtual(
@@ -100,8 +100,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
     theCommand << "-subj " << global.configuration["openSSLSubject"].theString;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
-  global << "About to generate key files with the following command. " << logger::endL;
-  global << logger::green << theCommand.str() << logger::endL;
+  global << "About to generate key files with the following command. " << Logger::endL;
+  global << Logger::green << theCommand.str() << Logger::endL;
   global.externalCommandNoOutput(theCommand.str(), true);
   return true;
 }
@@ -162,7 +162,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->context = SSL_CTX_new(this->theSSLMethod);
 
   if (this->context == nullptr) {
-    global << logger::red << "Failed to create ssl context. " << logger::endL;
+    global << Logger::red << "Failed to create ssl context. " << Logger::endL;
     ERR_print_errors_fp(stderr);
     global.fatal << "Openssl context error.\n" << commentsOnError.str() << global.fatal;
   }
@@ -222,11 +222,11 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
 #ifdef MACRO_use_open_ssl
-  global << logger::green << "SSL is available." << logger::endL;
+  global << Logger::green << "SSL is available." << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->context, 1);
   if (SSL_CTX_use_certificate_chain_file(this->context, signedFileCertificate3Physical.c_str()) <= 0) {
-    global << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
-    << logger::endL;
+    global << Logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
+    << Logger::endL;
     if (SSL_CTX_use_certificate_file(this->context, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
       exit(3);
@@ -236,7 +236,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       exit(4);
     }
   } else {
-    global << logger::green << "Found officially signed certificate... " << logger::endL;
+    global << Logger::green << "Found officially signed certificate... " << Logger::endL;
     //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
@@ -256,7 +256,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     global.fatal << "Private key does not match the certificate public key. " << global.fatal;
   }
 #else
-  global << logger::red << "Openssl not available." << logger::endL;
+  global << Logger::red << "Openssl not available." << Logger::endL;
 #endif // MACRO_use_open_ssl
 }
 
@@ -377,7 +377,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   this->sslData = SSL_new(this->context);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
-    global << logger::red << "Failed to allocate ssl. " << logger::endL;
+    global << Logger::red << "Failed to allocate ssl. " << Logger::endL;
     global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
   }
   this->SetSocketAddToStack(inputSocketID);
@@ -432,13 +432,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
         maxNumHandshakeTries = 1;
         break;
       //case SSL_ERROR_WANT_ASYNC:
-      //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. <br>"
-      //  << logger::endL;
+      //  logOpenSSL << Logger::red << "Asynchronous engine is still processing data. <br>"
+      //  << Logger::endL;
       //  break;
       case SSL_ERROR_SYSCALL:
         if (commentsOnFailure != nullptr)
-          *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
-          << logger::endL;
+          *commentsOnFailure << Logger::red << "Error: some I/O error occurred. <br>"
+          << Logger::endL;
         maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
@@ -664,8 +664,8 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(
           maxNumHandshakeTries = 1;
           break;
         // case SSL_ERROR_WANT_ASYNC:
-        //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
-        //  << logger::endL;
+        //  logOpenSSL << Logger::red << "Asynchronous engine is still processing data. "
+        //  << Logger::endL;
         //  break;
         case SSL_ERROR_SYSCALL:
           if (commentsOnFailure != nullptr) {

@@ -70,7 +70,7 @@ void Partition::FromListInt(const List<int>& in, int lastElement) {
     this->p.addOnTop(in[i]);
   }
   if (needsSorting) {
-    p.QuickSortDescending();
+    p.quickSortDescending();
   }
 }
 
@@ -670,7 +670,7 @@ void PermutationR2::GetCycleStructure(Partition& out, int n_in_Sn) const {
   for (int i = 0; i < this->cycles.size; i ++) {
     out.p[i] = this->cycles[i].size;
   }
-  out.p.QuickSortDescending();
+  out.p.quickSortDescending();
 }
 
 void PermutationR2::MakeFromTableauRows(const Tableau& in) {
@@ -873,7 +873,7 @@ void PermutationGroupData::ComputeSpechtModules() {
   this->theGroup->irreps.setSize(ps.size);
   for (int i = 0; i < ps.size; i ++)
     this->SpechtModuleOfPartition(ps[i], this->theGroup->irreps[i]);
-  this->theGroup->irreps.QuickSortAscending();
+  this->theGroup->irreps.quickSortAscending();
 }
 
 /*
@@ -1373,7 +1373,7 @@ void HyperoctahedralGroup::AllSpechtModules() {
       }
     }
   }
-  this->irreps.QuickSortAscending();
+  this->irreps.quickSortAscending();
   global.Comments << this->PrettyPrintCharacterTable() << '\n';
   RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }*/

@@ -205,7 +205,7 @@ bool CalculatorConversions::functionDynkinType(
     }
     output.AddMonomial(simpleComponent, theMultiplicity);
   }
-  return !theType.IsEqualToZero();
+  return !theType.isEqualToZero();
 }
 
 bool CalculatorConversions::functionSemisimpleLieAlgebra(
@@ -233,7 +233,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
-  bool newlyCreated = !theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(theDynkinType);
+  bool newlyCreated = !theCommands.theObjectContainer.semisimpleLieAlgebras.contains(theDynkinType);
   outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->CheckConsistency();
   output.AssignValue(outputPointer, theCommands);
@@ -243,7 +243,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     theCommands.functionWriteToHDOrPrintSSLieAlgebra(
       theCommands, output, tempE, false, false
     );
-    theCommands << tempE.GetValue<std::string>();
+    theCommands << tempE.getValue<std::string>();
   }
   return true;
 }
@@ -344,7 +344,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theE, eltE, *output.owner)) {
     return theCommands << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
   }
-  if (eltE.IsEqualToZero() || eltF.IsEqualToZero()) {
+  if (eltE.isEqualToZero() || eltF.isEqualToZero()) {
     return theCommands << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: "
     << eltE.toString()
     << ", " << eltF.toString() << ". ";
@@ -383,7 +383,7 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
   }
   if (input.IsOfType<Rational>()) {
     AlgebraicNumber theNum;
-    theNum = input.GetValue<Rational>();
+    theNum = input.getValue<Rational>();
     return output.AssignValue(theNum, theCommands);
   }
   return false;
@@ -403,7 +403,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   )) {
     return false;
   }
-  output.Clear();
+  output.clear();
   std::string keyName;
   for (int i = 0; i < outputExpressionFormat.theKeys.size; i ++) {
     if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName)) {
@@ -422,7 +422,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   bool allowFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
-  output.Clear();
+  output.clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opDefine(), 3)) {
       output.SetKeyValue(input[i][1], input[i][2]);
@@ -484,11 +484,11 @@ bool CalculatorConversions::innerStoreCandidateSA(
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
         theCommands, input.theNegGens[i], currentE
       );
-      listGenerators.AddChildOnTop(currentE);
+      listGenerators.addChildOnTop(currentE);
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
         theCommands, input.thePosGens[i], currentE
       );
-      listGenerators.AddChildOnTop(currentE);
+      listGenerators.addChildOnTop(currentE);
     }
     keys.addOnTop("generators");
     values.addOnTop(listGenerators);
@@ -508,7 +508,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   ProgressReport theReport;
   std::stringstream reportStream;
   reportStream << "Loading precomputed semisimple subalgebra. ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   Expression DynkinTypeE, ElementsCartanE, generatorsE;
   if (
     !CalculatorConversions::innerLoadKey(theCommands, input, "DynkinType", DynkinTypeE) ||
@@ -517,7 +517,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     return false;
   }
   reportStream << "Extracted types: " << DynkinTypeE.toString() << ". ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   outputSubalgebra.owner = &owner;
   DynkinType theNonEmbeddedDynkinType;
   if (!CalculatorConversions::functionDynkinType(
@@ -528,21 +528,21 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     << DynkinTypeE.toString() << "<hr>";
   }
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->GetRank();
   reportStream << "Extracting matrix of Cartan elements. ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   Matrix<Rational> theHs;
   if (!theCommands.functionGetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
     << outputSubalgebra.theWeylNonEmbedded->theDynkinType << "<hr>";
   }
-  if (theHs.NumRows != outputSubalgebra.theWeylNonEmbedded->GetDim()) {
+  if (theHs.NumRows != outputSubalgebra.theWeylNonEmbedded->getDimension()) {
     return theCommands << "<hr>Failed to load Cartan elements: I expected "
-    << outputSubalgebra.theWeylNonEmbedded->GetDim() << " elements, but failed to get them.";
+    << outputSubalgebra.theWeylNonEmbedded->getDimension() << " elements, but failed to get them.";
   }
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetLettersTypesMults(nullptr, &theRanks, &theMults, nullptr);
@@ -563,7 +563,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     }
   }
   reportStream << "Extracting generators ... ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   outputSubalgebra.thePosGens.setSize(0);
   outputSubalgebra.theNegGens.setSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE)) {
@@ -639,7 +639,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   ProgressReport theReport;
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
     theCommands, theAmbientTypeE, tempE, ownerSemisimple
   )) {
@@ -647,35 +647,35 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << "failed to extract ambient semisimple Lie algebra. ";
   }
   reportStream << " type: " << ownerSemisimple->theWeyl.theDynkinType.toString() << ". ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
 
   SemisimpleSubalgebras& theSAs =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
   theSAs.theSubalgebrasNonEmbedded = &theCommands.theObjectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   theSAsE.Sequencefy();
   theSAs.theSubalgebras.setExpectedSize(theSAsE.children.size - 1);
-  theSAs.theSubalgebras.Clear();
+  theSAs.theSubalgebras.clear();
   theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagComputeModuleDecomposition = true;
   theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
-  theReport.Report("Got to here pt 3");
+  theReport.report("Got to here pt 3");
   theSAs.millisecondsComputationStart = global.GetElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
 
   for (int i = 1; i < theSAsE.children.size; i ++) {
     std::stringstream reportStream2;
     reportStream2 << reportStream.str() << "Subalgebra "
     << i << " is being loaded from expression "
     << theSAsE[i].toString() << ".";
-    theReport.Report(reportStream2.str());
+    theReport.report(reportStream2.str());
     CandidateSSSubalgebra currentCandidate;
     if (!CalculatorConversions::innerCandidateSAPrecomputed(
       theCommands, theSAsE[i], tempE, currentCandidate, theSAs
@@ -687,7 +687,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     }
 
     currentCandidate.CheckFullInitializatioN();
-    if (theSAs.theSubalgebras.Contains(currentCandidate.theHs)) {
+    if (theSAs.theSubalgebras.contains(currentCandidate.theHs)) {
       theCommands << "<hr>Did not load subalgebra of type "
       << currentCandidate.theWeylNonEmbedded->toString()
       << " because I've already loaded a subalgebra with "
@@ -699,7 +699,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   }
   reportStream << "Subalgebra loading done, total "
   << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
-  theReport.Report(reportStream.str());
+  theReport.report(reportStream.str());
   theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments)) {
     return false;
@@ -722,7 +722,7 @@ std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(Semisimp
   MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
   Expression tempE;
   FormatExpressions theFormat;
-  CalculatorConversions::innerStoreSemisimpleSubalgebras(global.calculator().GetElement(), input, tempE);
+  CalculatorConversions::innerStoreSemisimpleSubalgebras(global.calculator().getElement(), input, tempE);
   theFormat.flagUseHTML = true;
   return tempE.toString(&theFormat);
 }
@@ -746,7 +746,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   currentChainE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentSubalgebraChain.size; i ++) {
     numericalConvertorE = input.currentSubalgebraChain[i].indexInOwner;
-    currentChainE.AddChildOnTop(numericalConvertorE);
+    currentChainE.addChildOnTop(numericalConvertorE);
   }
   theKeys.addOnTop("CurrentChain");
   theValues.addOnTop(currentChainE);
@@ -754,7 +754,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   numTypesExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumLargerTypesExplored.size; i ++) {
     numericalConvertorE = input.currentNumLargerTypesExplored[i];
-    numTypesExploredE.AddChildOnTop(numericalConvertorE);
+    numTypesExploredE.addChildOnTop(numericalConvertorE);
   }
   theKeys.addOnTop("NumExploredTypes");
   theValues.addOnTop(numTypesExploredE);
@@ -762,7 +762,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   numHsExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumHcandidatesExplored.size; i ++) {
     numericalConvertorE = input.currentNumHcandidatesExplored[i];
-    numHsExploredE.AddChildOnTop(numericalConvertorE);
+    numHsExploredE.addChildOnTop(numericalConvertorE);
   }
   theKeys.addOnTop("NumExploredHs");
   theValues.addOnTop(numHsExploredE);
@@ -773,7 +773,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
     if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras.theValues[i], candidateE)) {
       return false;
     }
-    subalgebrasListE.AddChildOnTop(candidateE);
+    subalgebrasListE.addChildOnTop(candidateE);
   }
   theKeys.addOnTop("Subalgebras");
   theValues.addOnTop(subalgebrasListE);
@@ -1067,7 +1067,7 @@ bool CalculatorConversions::innerExpressionFromRF(
   if (!input.IsOfType<RationalFunction>()) {
     return false;
   }
-  const RationalFunction& theRF = input.GetValue<RationalFunction>();
+  const RationalFunction& theRF = input.getValue<RationalFunction>();
   ExpressionContext context = input.GetContext();
   return CalculatorConversions::innerExpressionFromRF(
     theCommands, theRF, output, &context
@@ -1138,9 +1138,9 @@ bool CalculatorConversions::functionRationalFunction(
       << " and " << input[2].toString() << " returned error(s): "
       << leftE.toString() << " and " << rightE.toString();
     }
-    intermediate.AddChildOnTop(input[0]);
-    intermediate.AddChildOnTop(leftE);
-    intermediate.AddChildOnTop(rightE);
+    intermediate.addChildOnTop(input[0]);
+    intermediate.addChildOnTop(leftE);
+    intermediate.addChildOnTop(rightE);
     if (input.StartsWith(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
         theCommands, intermediate, output
@@ -1169,7 +1169,7 @@ bool CalculatorConversions::functionRationalFunction(
       if (leftE.IsError()) {
         return theCommands << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
       }
-      RationalFunction theRF = leftE.GetValue<RationalFunction>();
+      RationalFunction theRF = leftE.getValue<RationalFunction>();
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
@@ -1187,7 +1187,7 @@ bool CalculatorConversions::functionRationalFunction(
     return input.ConvertInternally<RationalFunction>(output);
   }
   if (input.IsOfType<AlgebraicNumber>()) {
-    AlgebraicNumber theNumber = input.GetValue<AlgebraicNumber>();
+    AlgebraicNumber theNumber = input.getValue<AlgebraicNumber>();
     Rational theRat;
     if (theNumber.IsRational(&theRat)) {
       Expression tempE;
@@ -1386,7 +1386,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   for (int i = 2; i < input.children.size; i ++) {
     if (input[i].IsEqualToOne()) {
       theElement.k.ToggleBit(i - 2);
-    } else if (!input[i].IsEqualToZero()) {
+    } else if (!input[i].isEqualToZero()) {
       return theCommands << "Your input: " << input.toString()
       << " had bit values that were not ones and zeroes.";
     }

@@ -34,9 +34,9 @@ void WebServer::ComputeActiveWorkerId() {
   worker.workerId = Crypto::ConvertListUnsignedCharsToHex(incomingId);
   this->workerIds.SetKeyValue(worker.workerId, this->activeWorker);
   if (this->workerIds.size() > 2 * this->theWorkers.size) {
-    global << logger::red
+    global << Logger::red
     << "Warning: worker ids exceeds twice the number of workers. "
-    << "This may be a memory leak. " << logger::endL;
+    << "This may be a memory leak. " << Logger::endL;
   }
 }
 
@@ -83,7 +83,7 @@ int WebServer::Fork() {
     // this will not work.
     int success = prctl(PR_SET_PDEATHSIG, SIGKILL);
     if (success == -1) {
-      global << logger::red << "Failed to set parent death signal. " << logger::endL;
+      global << Logger::red << "Failed to set parent death signal. " << Logger::endL;
       exit(1);
     }
   }

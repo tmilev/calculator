@@ -50,7 +50,7 @@ bool Database::FallBack::UpdateOne(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
     }
-    global << "Failed to read and index database. " << logger::endL;
+    global << "Failed to read and index database. " << Logger::endL;
     return false;
   }
   if (!this->UpdateOneNoLocks(findQuery, dataToMerge, commentsOnFailure)) {
@@ -156,7 +156,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
     return false;
   }
   std::string key = query.getCollectionAndLabel();
-  if (!this->indices.Contains(key)) {
+  if (!this->indices.contains(key)) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "Finding by non-indexed key: "
       << key << " not allowed. Indices allowed: "
@@ -205,7 +205,7 @@ bool Database::FallBack::HasCollection(
   const std::string& collection, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::HasCollection");
-  if (Database::FallBack::knownCollectionS.Contains(collection)) {
+  if (Database::FallBack::knownCollectionS.contains(collection)) {
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;
   }
@@ -270,7 +270,7 @@ bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailu
       this->IndexOneRecord(currentCollection.theList[i], i, collection);
     }
   }
-  // global << "Database indexed. " << this->ToStringIndices() << logger::endL;
+  // global << "Database indexed. " << this->ToStringIndices() << Logger::endL;
   return true;
 }
 
@@ -282,7 +282,7 @@ void Database::FallBack::IndexOneRecord(
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
     std::string indexLabel = Database::FallBack::Index::collectionAndLabelStatic(collection, entry.objects.theKeys[i]);
-    if (!this->indices.Contains(indexLabel)) {
+    if (!this->indices.contains(indexLabel)) {
       continue;
     }
     const JSData& keyToIndexBy = entry.objects.theValues[i];
@@ -317,12 +317,12 @@ bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
       false,
       commentsOnFailure
     )) {
-      global << logger::green << "Fallback database file does not exist. Creating ..." << logger::endL;
+      global << Logger::green << "Fallback database file does not exist. Creating ..." << Logger::endL;
       this->reader.theType = JSData::token::tokenObject;
       return true;
     }
     return false;
   }
-  global << "Database size: " << logger::blue << theDatabase.size() << logger::endL;
+  global << "Database size: " << Logger::blue << theDatabase.size() << Logger::endL;
   return this->reader.readstring(theDatabase, commentsOnFailure);
 }

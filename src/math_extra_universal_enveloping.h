@@ -130,7 +130,7 @@ public:
     const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
   ) const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
-  bool IsEqualToZero() const {
+  bool isEqualToZero() const {
     return this->size() == 0;
   }
   bool HWMTAbilinearForm(

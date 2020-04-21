@@ -48,7 +48,7 @@ class AlgebraicNumber {
     return this->AssignCosRationalTimesPi(rHalf - input, inputOwner);
   }
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
-  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
   bool CheckConsistency() const;
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
@@ -60,22 +60,22 @@ class AlgebraicNumber {
   static AlgebraicNumber scaleNormalizeIndex(
     List<AlgebraicNumber>& output, int indexNonZeroElement
   );
-  bool IsPositive() {
+  bool isPositive() {
     Rational ratPart;
     if (this->IsRational(&ratPart)) {
-      return ratPart.IsPositive();
+      return ratPart.isPositive();
     }
     return false;
   }
   bool IsRational(Rational* whichRational = nullptr) const;
-  bool IsNegative() const {
+  bool isNegative() const {
     Rational theRationalValue;
     if (this->IsRational(&theRationalValue)) {
-      return theRationalValue.IsNegative();
+      return theRationalValue.isNegative();
     }
     return false;
   }
-  bool IsEqualToZero() const;
+  bool isEqualToZero() const;
   bool IsEqualToOne() const {
     return (*this) == 1;
   }
@@ -287,8 +287,8 @@ public:
   }
   void CheckIamInitialized() const;
   void invert();
-  bool IsEqualToZero() const {
-    return this->theValue.IsEqualToZero();
+  bool isEqualToZero() const {
+    return this->theValue.isEqualToZero();
   }
   // Returns the number by which the vector was multiplied.
   static ElementZmodP scaleNormalizeIndex(
@@ -324,7 +324,7 @@ public:
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  bool NeedsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
+  bool needsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
   static void convertModuloIntegerAfterScalingToIntegral(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,

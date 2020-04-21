@@ -199,7 +199,7 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> reader(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!reader) {
-    global << logger::red << "Failed to create pipe. " << logger::endL;
+    global << Logger::red << "Failed to create pipe. " << Logger::endL;
     return - 1;
   }
   const int bufferSize = 20000;
@@ -213,7 +213,7 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
   }
   int result = pclose(reader.get());
   if (result != 0) {
-    global << logger::red << strerror(errno) << logger::endL;
+    global << Logger::red << strerror(errno) << Logger::endL;
   }
   return result;
 }
@@ -221,7 +221,7 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
 void CallChDirWrapper(const std::string& theDir) {
   int systemOutput = chdir(theDir.c_str());
   if (systemOutput != 0) {
-    global << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
-    << ". " << logger::endL;
+    global << Logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
+    << ". " << Logger::endL;
   }
 }

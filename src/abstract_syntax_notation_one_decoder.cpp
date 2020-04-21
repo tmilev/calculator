@@ -220,7 +220,7 @@ std::string ASNElement::InterpretAsObjectIdentifierGetNameAndId() const {
   std::stringstream out;
   out << "[" << this->InterpretAsObjectIdentifier();
   out << "]: ";
-  if (!ASNObject::ObjectIdsToNames().Contains(this->ASNAtom)) {
+  if (!ASNObject::ObjectIdsToNames().contains(this->ASNAtom)) {
     out << "[unknown]";
   } else {
     out << ASNObject::ObjectIdsToNames().GetValueCreate(this->ASNAtom).name;
@@ -484,7 +484,7 @@ bool ASNElement::isTime() const {
 }
 
 std::string ASNElement::toString() const {
-  return this->ToJSON().toString(&JSData::PrintOptions::HexEncodeNonASCII());
+  return this->toJSON().toString(&JSData::PrintOptions::HexEncodeNonASCII());
 }
 
 void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
@@ -513,9 +513,9 @@ void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
   }
 }
 
-JSData ASNElement::ToJSON() const {
+JSData ASNElement::toJSON() const {
   JSData result;
-  this->ToJSON(result);
+  this->toJSON(result);
   return result;
 }
 
@@ -542,7 +542,7 @@ int ASNElement::GetLengthLengthEncoding() {
   return lengthEncoding.size;
 }
 
-void ASNElement::ToJSON(JSData& output) const {
+void ASNElement::toJSON(JSData& output) const {
   output.reset();
   output[ASNElement::JSLabels::tag] = StringRoutines::ConvertByteToHex(this->tag);
   output[ASNElement::JSLabels::startByteOriginal] = StringRoutines::ConvertByteToHex(this->startByte);
@@ -573,7 +573,7 @@ void ASNElement::ToJSON(JSData& output) const {
     children.theList.Reserve(this->theElements.size);
     for (int i = 0; i < this->theElements.size; i ++) {
       JSData incoming;
-      this->theElements[i].ToJSON(incoming);
+      this->theElements[i].toJSON(incoming);
       children.theList.addOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
@@ -960,15 +960,15 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   }
   int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
-    global << logger::red << "Wrong number of reserved bytes for sequence writer. "
-    << "This is non-fatal but affects negatively performance. " << logger::endL;
+    global << Logger::red << "Wrong number of reserved bytes for sequence writer. "
+    << "This is non-fatal but affects negatively performance. " << Logger::endL;
     this->outputPointer->ShiftUpExpandOnTopRepeated(
       this->offset + 1, actualBytesNeededForLength - this->reservedBytesForLength
     );
   }
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
-    global << logger::red << "Wrong number of reserved bytes for sequence writer. "
-    << "This is non-fatal but affects negatively performance. " << logger::endL;
+    global << Logger::red << "Wrong number of reserved bytes for sequence writer. "
+    << "This is non-fatal but affects negatively performance. " << Logger::endL;
     this->outputPointer->RemoveIndicesShiftDown(
       this->offset + 1, this->reservedBytesForLength - actualBytesNeededForLength
     );
@@ -1163,10 +1163,10 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
 int ASNObject::LoadField(
   const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName
 ) {
-  if (!ASNObject::NamesToObjectIdsNonThreadSafe().Contains(fieldName)) {
+  if (!ASNObject::NamesToObjectIdsNonThreadSafe().contains(fieldName)) {
     global.fatal << "Field " << fieldName << " is hard-coded but is yet unknown. " << global.fatal;
   }
-  if (!inputFields.Contains(fieldName)) {
+  if (!inputFields.contains(fieldName)) {
     this->name = fieldName;
     this->objectId.ASNAtom.setSize(0);
     return 0;
@@ -1213,7 +1213,7 @@ bool ASNObject::LoadFieldsFromASNSequence(
   std::stringstream *commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ASNObject::LoadFieldsFromASNSequence");
-  output.Clear();
+  output.clear();
   if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input is not array. ";
@@ -1272,7 +1272,7 @@ bool ASNObject::LoadFromASN(
     }
     return false;
   }
-  if (!ASNObject::ObjectIdsToNames().Contains(this->objectId.ASNAtom)) {
+  if (!ASNObject::ObjectIdsToNames().contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::ObjectIdsToNames().theKeys.size;
     }
@@ -1642,7 +1642,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   List<unsigned char> inputHashedPadded;
   this->HashAndPadPKCS1(input, hash, inputHashedPadded);
   ElementZmodP theElement, theOne;
-  if (this->thePublicKey.theModulus.IsEqualToZero()) {
+  if (this->thePublicKey.theModulus.isEqualToZero()) {
     global.fatal << "Public key modulus is zero. " << global.fatal;
   }
   theElement.theModulus = this->thePublicKey.theModulus;

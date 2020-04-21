@@ -33,7 +33,7 @@ bool Database::Test::All() {
 bool Database::Test::DeleteDatabase() {
   std::stringstream commentsOnFailure;
   if (!Database::get().DeleteDatabase(&commentsOnFailure)) {
-    global << logger::red << "Failed to delete database: " << commentsOnFailure.str() << logger::endL;
+    global << Logger::red << "Failed to delete database: " << commentsOnFailure.str() << Logger::endL;
   }
   return true;
 }

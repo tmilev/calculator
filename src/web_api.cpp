@@ -176,7 +176,7 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
 bool WebAPIResponse::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCalculatorExamplesJSON");
   global.theResponse.WriteResponse(
-    global.calculator().GetElement().ToJSONFunctionHandlers(), false
+    global.calculator().getElement().ToJSONFunctionHandlers(), false
   );
   return true;
 }
@@ -233,7 +233,7 @@ bool WebAPIResponse::ProcessPauseWorker() {
 bool WebAPIResponse::ProcessComputationIndicator() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessComputationIndicator");
   this->owner->SetHeaderOKNoContentLength("");
-  global << "Processing get request indicator." << logger::endL;
+  global << "Processing get request indicator." << Logger::endL;
   JSData result = this->owner->ProcessComputationIndicatorJSData();
   return global.theResponse.WriteResponse(result, false);
 }
@@ -342,7 +342,7 @@ bool WebAPIResponse::ProcessCompute() {
   } else {
     global.theResponse.flagReportDesired = true;
   }
-  Calculator& theCalculator = global.calculator().GetElement();
+  Calculator& theCalculator = global.calculator().getElement();
 
   theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput(WebAPI::request::calculatorInput),
@@ -573,7 +573,7 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
 
 bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFailure) {
   LaTeXCrawler::Slides theSlides;
-  std::string slideSpecification = global.webArguments.GetValue(WebAPI::request::slides::content, "");
+  std::string slideSpecification = global.webArguments.getValue(WebAPI::request::slides::content, "");
   if (!theSlides.FromString(slideSpecification, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to initialize slides from global inputs: key: " << WebAPI::request::slides::content << " is missing. ";

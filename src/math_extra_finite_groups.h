@@ -35,8 +35,8 @@ public:
   ClassFunction(): G(nullptr) {
   }
   void makeZero(someFiniteGroup& inputWeyl);
-  bool IsEqualToZero() const {
-    return this->data.IsEqualToZero();
+  bool isEqualToZero() const {
+    return this->data.isEqualToZero();
   }
   coefficient InnerProduct(const ClassFunction& other) const;
   coefficient Norm() const;
@@ -342,7 +342,7 @@ void FiniteGroup<elementSomeGroup>::init() {
   this->generators.setSize(0);
   this->conjugacyClasseS.setSize(0);
   this->squaresCCReps.setSize(0);
-  this->theElements.Clear();
+  this->theElements.clear();
   this->flagAllElementsAreComputed = false;
   this->flagCCsComputed = false;
   this->flagCCRepresentativesComputed = false;
@@ -532,7 +532,7 @@ class FinitelyGeneratedMatrixMonoid {
 template <class coefficient>
 bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBoundNonPositiveMeansNoLimit) {
   MacroRegisterFunctionWithName("FinitelyGeneratedMatrixMonoid::GenerateElements");
-  this->theElements.Clear();
+  this->theElements.clear();
   this->theElements.addOnTopNoRepetition(theGenerators);
   MatrixTensor<coefficient> currentElement;
   for (int i = 0; i < this->theElements.size; i ++) {
@@ -702,10 +702,10 @@ public:
   template <class coefficient>
   Vector<coefficient> GetDualCoordinatesFromFundamental(const Vector<coefficient>& inputInFundamentalCoords) {
     Vector<coefficient> result = inputInFundamentalCoords;
-    if (result.size != this->GetDim()) {
+    if (result.size != this->getDimension()) {
       global.fatal << "This is a programming error. The input fundamental weight has "
       << result.size << " coordinates, while the rank of the Weyl group is "
-      << this->GetDim() << ". " << global.fatal;
+      << this->getDimension() << ". " << global.fatal;
     }
     for (int i = 0; i < result.size; i ++) {
       result[i] *= this->CartanSymmetric.elements[i][i] / 2;
@@ -714,12 +714,12 @@ public:
   }
   template <class coefficient>
   coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot) const {
-    if (indexSimpleRoot < 0 || indexSimpleRoot >= this->GetDim()) {
+    if (indexSimpleRoot < 0 || indexSimpleRoot >= this->getDimension()) {
       global.fatal << "This is a programming error. "
       << "Attempting to take scalar product with simple root of index "
       << indexSimpleRoot
       << " which is impossible, as the rank of the Weyl group is "
-      << this->GetDim() << ". " << global.fatal;
+      << this->getDimension() << ". " << global.fatal;
     }
     coefficient result, buffer;
     result = 0;
@@ -777,7 +777,7 @@ public:
   void GetEpsilonCoords(const Vector<coefficient>& input, Vector<coefficient>& output) {
     this->ComputeEpsilonMatrix();
     output = input;
-    this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
+    this->MatrixSendsSimpleVectorsToEpsilonVectors.getElement().ActOnVectorColumn(output);
   }
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
   template <class coefficient>
@@ -813,7 +813,7 @@ public:
   );
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
-  int GetDim() const {
+  int getDimension() const {
     return this->CartanSymmetric.NumRows;
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
@@ -821,7 +821,7 @@ public:
   static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
   static LargeInteger SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input) const {
-    return this->RootSystem.Contains(input);
+    return this->RootSystem.contains(input);
   }
   void GenerateRootSubsystem(Vectors<Rational>& theRoots);
   template <class coefficient>
@@ -893,7 +893,7 @@ public:
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt);
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input);
   void GetCoxeterElement(ElementWeylGroup& outputWeylElt) {
-    outputWeylElt.generatorsLastAppliedFirst.setSize(this->GetDim());
+    outputWeylElt.generatorsLastAppliedFirst.setSize(this->getDimension());
     for (int i = 0; i < outputWeylElt.generatorsLastAppliedFirst.size; i ++) {
       outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
     }
@@ -963,7 +963,7 @@ public:
   void SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const Vector<Rational>& input, const Vector<Rational>& theH) {
-    return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero();
+    return this->RootScalarCartanRoot(input, theH).isPositiveOrZero();
   }
   template<class coefficient>
   void ReflectBetaWRTAlpha(
@@ -973,16 +973,16 @@ public:
   template <class leftType, class rightType>
   void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const;
   double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2) const {
-    if (r1.size != r2.size || r1.size != this->GetDim()) {
+    if (r1.size != r2.size || r1.size != this->getDimension()) {
       global.fatal << "This is a programming error: attempting to take the root system scalar product of "
       << "vectors of different dimension or of dimension different "
       << "from that of the ambient Lie algebra. The two input vectors were "
-      << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->GetDim() << ". ";
+      << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->getDimension() << ". ";
       global.fatal << global.fatal;
     }
     double result = 0;
-    for (int i = 0; i < this->GetDim(); i ++) {
-      for (int j = 0; j < this->GetDim(); j ++) {
+    for (int i = 0; i < this->getDimension(); i ++) {
+      for (int j = 0; j < this->getDimension(); j ++) {
         result += this->CartanSymmetric.elements[i][j].GetDoubleValue() * r1[i] * r2[j];
       }
     }
@@ -1016,11 +1016,11 @@ public:
 
 template<class leftType, class rightType>
 void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
-  if (r1.size != r2.size || r1.size != this->GetDim()) {
+  if (r1.size != r2.size || r1.size != this->getDimension()) {
     global.fatal << "This is a programming error: attempting to get the scalar product of the weight "
     << r1 << " (dimension " << r1.size
     << ") with the weight " << r2 << " (dimension " << r2.size
-    << "), while the dimension of the ambient Weyl group is " << this->GetDim()
+    << "), while the dimension of the ambient Weyl group is " << this->getDimension()
     << ". ";
     global.fatal << global.fatal;
   }
@@ -1426,7 +1426,7 @@ public:
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat);
   void ClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat);
-  int GetDim() const;
+  int getDimension() const;
   void Restrict(
     const Vectors<coefficient>& VectorSpaceBasisSubrep,
     const ClassFunction<somegroup, Rational>& remainingCharacter,
@@ -2430,7 +2430,7 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   theClass.representative = theRepresentative;
   Polynomial<Rational> theCharPoly;
   theClass.representative.GetCharacteristicPolyStandardRepresentation(theCharPoly);
-  if (this->CCsStandardRepCharPolys.Contains(theCharPoly)) {
+  if (this->CCsStandardRepCharPolys.contains(theCharPoly)) {
     const List<int>& indicesPossibleConjugates =
     this->CCsStandardRepCharPolys.GetHashArray(this->CCsStandardRepCharPolys.GetHash(theCharPoly));
     for (int i = 0; i < indicesPossibleConjugates.size; i ++) {
@@ -2451,7 +2451,7 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   this->conjugacyClasseS.addOnTop(theClass);
   this->CCsStandardRepCharPolys.addOnTop(theCharPoly);
   this->sizePrivate += theClass.size;
-  this->conjugacyClasseS.QuickSortAscending();
+  this->conjugacyClasseS.quickSortAscending();
   return true;
 }
 
@@ -2496,7 +2496,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const 
     return false;
   }
   for (int i = 0; i < this->irreps.size; i ++) {
-    if (this->irreps[i].theCharacteR.data.IsEqualToZero()) {
+    if (this->irreps[i].theCharacteR.data.isEqualToZero()) {
       global.fatal << "This is a programming error: irrep number " << i + 1 << " has zero character!" << global.fatal;
       return false;
     }

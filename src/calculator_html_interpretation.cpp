@@ -592,7 +592,7 @@ std::string WebAPIResponse::GetApp(bool appendBuildHash) {
   return theInterpretation.htmlJSbuild;
 }
 
-JSData Course::ToJSON() const {
+JSData Course::toJSON() const {
   JSData result;
   result["title"] = this->title;
   result[WebAPI::problem::courseHome] = Configuration::courseTemplates + this->courseTemplate;
@@ -683,7 +683,7 @@ bool CourseList::Load() {
   return this->LoadFromString(theTopicFile);
 }
 
-JSData CourseList::ToJSON() {
+JSData CourseList::toJSON() {
   JSData output;
   if (this->errorMessage != "") {
     output[WebAPI::result::error] = this->errorMessage;
@@ -691,7 +691,7 @@ JSData CourseList::ToJSON() {
   output["courses"].theType = JSData::token::tokenArray;
   for (int i = 0; i < this->theCourses.size; i ++) {
     Course& currentCourse = this->theCourses[i];
-    output["courses"].theList.addOnTop(currentCourse.ToJSON());
+    output["courses"].theList.addOnTop(currentCourse.toJSON());
   }
   return output;
 }
@@ -700,7 +700,7 @@ JSData WebAPIResponse::GetSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetSelectCourseJSON");
   CourseList theCourses;
   theCourses.Load();
-  return theCourses.ToJSON();
+  return theCourses.toJSON();
 }
 
 std::string WebAPIResponse::GetHtmlTagWithManifest() {
@@ -1543,7 +1543,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
       theFormat.flagUseQuotes = false;
       theFormat.flagUseLatex = true;
       if (currentE[j].IsOfType<std::string>()) {
-        out << currentE[j].GetValue<std::string>();
+        out << currentE[j].getValue<std::string>();
       } else {
         out << "\\(\\displaystyle " << currentE[j].toString(&theFormat) << "\\)";
       }
@@ -1745,7 +1745,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     )) {
       continue;
     }
-    if (!theSections.Contains(currentUser.sectionInDB)) {
+    if (!theSections.contains(currentUser.sectionInDB)) {
       std::stringstream currentSectionInfo;
       currentSectionInfo << "<b>Section: </b>" << currentUser.sectionInDB
       << ", <b>Course: </b>" << currentUser.courseInDB
@@ -1754,7 +1754,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
       sectionDescriptions.addOnTop(currentSectionInfo.str());
     }
   }
-  theSections.QuickSortAscending(nullptr, &sectionDescriptions);
+  theSections.quickSortAscending(nullptr, &sectionDescriptions);
   activatedAccountBucketsBySection.setSize(theSections.size);
   nonActivatedAccountBucketsBySection.setSize(theSections.size);
   preFilledLinkBucketsBySection.setSize(theSections.size);
@@ -1835,13 +1835,13 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     }
   }
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
-    nonActivatedAccountBucketsBySection[i].QuickSortAscending();
+    nonActivatedAccountBucketsBySection[i].quickSortAscending();
   }
   for (int i = 0; i < activatedAccountBucketsBySection.size; i ++) {
-    activatedAccountBucketsBySection[i].QuickSortAscending();
+    activatedAccountBucketsBySection[i].quickSortAscending();
   }
   for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++) {
-    preFilledLinkBucketsBySection[i].QuickSortAscending();
+    preFilledLinkBucketsBySection[i].quickSortAscending();
   }
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
@@ -1970,27 +1970,27 @@ int ProblemData::getExpectedNumberOfAnswers(
       }
     }
   }
-  if (global.problemExpectedNumberOfAnswers.Contains(problemName)) {
+  if (global.problemExpectedNumberOfAnswers.contains(problemName)) {
     return global.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
   }
-  global << logger::yellow << "Couldn't find problem info in DB for: "
-  << problemName << ", trying to read problem from hd. " << logger::endL;
+  global << Logger::yellow << "Couldn't find problem info in DB for: "
+  << problemName << ", trying to read problem from hd. " << Logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
   if (!problemParser.LoadMe(false, "", &commentsOnFailure)) {
-    global << logger::yellow << WebAPI::problem::failedToLoadProblem
-    << commentsOnFailure.str() << logger::endL;
+    global << Logger::yellow << WebAPI::problem::failedToLoadProblem
+    << commentsOnFailure.str() << Logger::endL;
     return 0;
   }
   if (!problemParser.ParseHTML(&commentsOnFailure)) {
-    global << logger::red << "<b>Failed to parse file: "
+    global << Logger::red << "<b>Failed to parse file: "
     << problemParser.fileName
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;
   }
   this->knownNumberOfAnswersFromHD = problemParser.theProblemData.theAnswers.size();
-  global << logger::yellow << "Loaded problem: " << problemName
-  << "; number of answers: " << this->knownNumberOfAnswersFromHD << logger::endL;
+  global << Logger::yellow << "Loaded problem: " << problemName
+  << "; number of answers: " << this->knownNumberOfAnswersFromHD << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
   JSData newDBentry;
   QueryExact findEntry(
@@ -2028,7 +2028,7 @@ void UserCalculator::ComputePointsEarned(
   }
   for (int i = 0; i < this->theProblemData.size(); i ++) {
     const std::string problemName = this->theProblemData.theKeys[i];
-    if (!gradableProblems.Contains(problemName)) {
+    if (!gradableProblems.contains(problemName)) {
       continue;
     }
     ProblemData& currentP = this->theProblemData.theValues[i];
@@ -2055,7 +2055,7 @@ void UserCalculator::ComputePointsEarned(
       }
     }
     if (theTopics != nullptr) {
-      if (theTopics->Contains(problemName)) {
+      if (theTopics->contains(problemName)) {
         TopicElement& currentElt = theTopics->GetValueCreate(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
@@ -2183,7 +2183,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       &theProblem.topics.theTopics,
       comments
     );
-    this->scoresBreakdown.LastObject()->Clear();
+    this->scoresBreakdown.LastObject()->clear();
     for (int j = 0; j < theProblem.topics.theTopics.size(); j ++) {
       TopicElement& currentTopic = theProblem.topics.theTopics.theValues[j];
       Rational currentPts = currentTopic.totalPointsEarned;
@@ -2359,7 +2359,7 @@ std::string WebAPIResponse::ToStringUserScores() {
       ) {
         continue;
       }
-      if (theScores.scoresBreakdown[i].Contains(
+      if (theScores.scoresBreakdown[i].contains(
         theScores.theProblem.topics.theTopics.theKeys[j]
       )) {
         out << "<td>"

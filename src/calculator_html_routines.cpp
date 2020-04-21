@@ -13,11 +13,11 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, input, theArguments, &theCommands.Comments)) {
     return false;
   }
-  if (!theArguments.Contains("name")) {
+  if (!theArguments.contains("name")) {
     return theCommands << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
+  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
     return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   }
   InputBox newBox;
@@ -93,14 +93,14 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   )) {
     return false;
   }
-  if (!theArguments.Contains("name")) {
+  if (!theArguments.contains("name")) {
     return theCommands << "User input name not specified in: " << input.toString();
   }
-  if (!theArguments.Contains("value")) {
+  if (!theArguments.contains("value")) {
     return theCommands << "Input box value not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
+  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
     return theCommands << "Input box with name: " << boxName << " already has value.";
   }
   InputBox& theBox =
@@ -122,7 +122,7 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, theBox, theArguments)) {
     return "corrupt-box";
   }
-  if (!theArguments.Contains("name")) {
+  if (!theArguments.contains("name")) {
     return "box-without-name";
   }
   std::string theBoxName = "faultyBoxName";

@@ -2096,9 +2096,9 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
 
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
   const Calculator::NamedRuleLocation& current =
-  this->namedRules.GetValueConstCrashIfNotPresent(inputNamedRule);
+  this->namedRules.getValueNoFail(inputNamedRule);
   const MemorySaving<Calculator::OperationHandlers>& currentOperation =
-  this->operations.GetValueConstCrashIfNotPresent(current.containerOperation);
+  this->operations.getValueNoFail(current.containerOperation);
   if (currentOperation.IsZeroPointer()) {
     global.fatal << "Named rule " << inputNamedRule
     << " registered with operation " << current.containerOperation

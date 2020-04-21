@@ -1365,24 +1365,24 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
-  GroebnerBasisComputation<AlgebraicNumber> theGB;
-  theGB.flagStoreQuotients = true;
-  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  GroebnerBasisComputation<AlgebraicNumber> computation;
+  computation.flagStoreQuotients = true;
+  computation.theBasiS.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].IsEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = polynomialsRational[i];
+    computation.theBasiS[i - 1] = polynomialsRational[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  theGB.initializeForDivision(theGB.theBasiS);
-  theGB.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
+  computation.initializeForDivision(computation.theBasiS);
+  computation.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
-  for (int i = 0; i < theGB.theQuotients.size; i ++) {
+  for (int i = 0; i < computation.theQuotients.size; i ++) {
     currentE.reset(theCommands);
     currentE.AddChildAtomOnTop("MakeExpression");
-    thePolyE.AssignValueWithContext(theGB.theQuotients[i], theContext, theCommands);
+    thePolyE.AssignValueWithContext(computation.theQuotients[i], theContext, theCommands);
     currentE.AddChildOnTop(thePolyE);
     theList.addOnTop(currentE);
   }

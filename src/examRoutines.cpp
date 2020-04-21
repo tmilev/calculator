@@ -831,7 +831,7 @@ std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey) const {
   if (!this->properties.Contains(theKey)) {
     return "";
   }
-  return this->properties.GetValueConstCrashIfNotPresent(theKey);
+  return this->properties.getValueNoFail(theKey);
 }
 
 void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue) {
@@ -3392,7 +3392,7 @@ void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
   } else {
     std::stringstream out;
     out << elementIndex << ". ";
-    out << "[" << owner.elementNames.GetValueConstCrashIfNotPresent(this->type) << "] ";
+    out << "[" << owner.elementNames.getValueNoFail(this->type) << "] ";
     out << this->title;
     this->id = out.str();
   }

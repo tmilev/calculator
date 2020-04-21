@@ -51,206 +51,206 @@ FormatExpressions::GetMonOrder<Expression>() {
   return nullptr;
 }
 
-//Expression::GetTypeOperation specializations follow
+//Expression::getTypeOperation specializations follow
 template < >
-int Expression::GetTypeOperation<ElementEllipticCurve<Rational> >() const {
+int Expression::getTypeOperation<ElementEllipticCurve<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opEllipticCurveElementsRational();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
+int Expression::getTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
   this->CheckInitialization();
   return this->owner->opEllipticCurveElementsZmodP();
 }
 
 template < >
-int Expression::GetTypeOperation<RationalFunction>() const {
+int Expression::getTypeOperation<RationalFunction>() const {
   this->CheckInitialization();
   return this->owner->opRationalFunction();
 }
 
 template < >
-int Expression::GetTypeOperation<InputBox>() const {
+int Expression::getTypeOperation<InputBox>() const {
   this->CheckInitialization();
   return this->owner->opUserInputTextBox();
 }
 
 template < >
-int Expression::GetTypeOperation<Rational>() const {
+int Expression::getTypeOperation<Rational>() const {
   this->CheckInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementHyperoctahedralGroupR2>() const {
+int Expression::getTypeOperation<ElementHyperoctahedralGroupR2>() const {
   this->CheckInitialization();
   return this->owner->opElementHyperOctahedral();
 }
 
 template < >
-int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >() const {
+int Expression::getTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >() const {
   this->CheckInitialization();
   return this->owner->opHyperoctahedralGroupRep();
 }
 
 template < >
-int Expression::GetTypeOperation<std::string>() const {
+int Expression::getTypeOperation<std::string>() const {
   this->CheckInitialization();
   return this->owner->opString();
 }
 
 template < >
-int Expression::GetTypeOperation<AlgebraicNumber>() const {
+int Expression::getTypeOperation<AlgebraicNumber>() const {
   this->CheckInitialization();
   return this->owner->opAlgNumber();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementZmodP>() const {
+int Expression::getTypeOperation<ElementZmodP>() const {
   this->CheckInitialization();
   return this->owner->opEltZmodP();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunction> >() const {
+int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFunction> >() const {
   this->CheckInitialization();
   return this->owner->opElementUEoverRF();
 }
 
 template < >
-int Expression::GetTypeOperation<Weight<Rational> >() const {
+int Expression::getTypeOperation<Weight<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opWeightLieAlg();
 }
 
 template < >
-int Expression::GetTypeOperation<Weight<Polynomial<Rational> > >() const {
+int Expression::getTypeOperation<Weight<Polynomial<Rational> > >() const {
   this->CheckInitialization();
   return this->owner->opWeightLieAlgPoly();
 }
 
 template < >
-int Expression::GetTypeOperation<MatrixTensor<Rational> >() const {
+int Expression::getTypeOperation<MatrixTensor<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opMatTensorRat();
 }
 
 template < >
-int Expression::GetTypeOperation<int>() const {
+int Expression::getTypeOperation<int>() const {
   this->CheckInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::GetTypeOperation<LargeIntegerUnsigned>() const {
+int Expression::getTypeOperation<LargeIntegerUnsigned>() const {
   this->CheckInitialization();
   return this->owner->opRational();
 }
 
 template < >
-int Expression::GetTypeOperation<double>() const {
+int Expression::getTypeOperation<double>() const {
   this->CheckInitialization();
   return this->owner->opDouble();
 }
 
 template < >
-int Expression::GetTypeOperation<Polynomial<Rational> >() const {
+int Expression::getTypeOperation<Polynomial<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opPolynomialRational();
 }
 
 template < >
-int Expression::GetTypeOperation<Polynomial<AlgebraicNumber> >() const {
+int Expression::getTypeOperation<Polynomial<AlgebraicNumber> >() const {
   this->CheckInitialization();
   return this->owner->opPolynomialAlgebraicNumbers();
 }
 
 template < >
-int Expression::GetTypeOperation<Polynomial<ElementZmodP> >() const {
+int Expression::getTypeOperation<Polynomial<ElementZmodP> >() const {
   this->CheckInitialization();
   return this->owner->opPolynomialModuloInteger();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylAlgebra<Rational> >() const {
+int Expression::getTypeOperation<ElementWeylAlgebra<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opElementWeylAlgebra();
 }
 
 template < >
-int Expression::GetTypeOperation<SemisimpleLieAlgebra*>() const {
+int Expression::getTypeOperation<SemisimpleLieAlgebra*>() const {
   this->CheckInitialization();
   return this->owner->opSemisimpleLieAlgebrA();
 }
 
 template < >
-int Expression::GetTypeOperation<LittelmannPath>() const {
+int Expression::getTypeOperation<LittelmannPath>() const {
   this->CheckInitialization();
   return this->owner->opLittelmannPath();
 }
 
 template < >
-int Expression::GetTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() const {
+int Expression::getTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() const {
   this->CheckInitialization();
   return this->owner->opLRO();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementTensorsGeneralizedVermas<RationalFunction> >() const {
+int Expression::getTypeOperation<ElementTensorsGeneralizedVermas<RationalFunction> >() const {
   this->CheckInitialization();
   return this->owner->opElementTensorGVM();
 }
 
 template < >
-int Expression::GetTypeOperation<charSSAlgMod<Rational> >() const {
+int Expression::getTypeOperation<charSSAlgMod<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opCharSSAlgMod();
 }
 
 template < >
-int Expression::GetTypeOperation<Plot>() const {
+int Expression::getTypeOperation<Plot>() const {
   this->CheckInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
-int Expression::GetTypeOperation<PlotObject>() const {
+int Expression::getTypeOperation<PlotObject>() const {
   this->CheckInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
-int Expression::GetTypeOperation<SemisimpleSubalgebras>() const {
+int Expression::getTypeOperation<SemisimpleSubalgebras>() const {
   this->CheckInitialization();
   return this->owner->opSemisimpleSubalgebras();
 }
 
 template < >
-int Expression::GetTypeOperation<WeylGroupData>() const {
+int Expression::getTypeOperation<WeylGroupData>() const {
   this->CheckInitialization();
   return this->owner->opWeylGroup();
 }
 
 template < >
-int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
+int Expression::getTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupRep();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylGroup>() const {
+int Expression::getTypeOperation<ElementWeylGroup>() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupElement();
 }
 
 template < >
-int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
+int Expression::getTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
   this->CheckInitialization();
   return this->owner->opWeylGroupVirtualRep();
 }
 
-// Expression::GetTypeOperation specializations end.
+// Expression::getTypeOperation specializations end.
 // Expression::ConvertsInternally specializations follow.
 template < >
 bool Expression::ConvertsInternally(
@@ -2060,18 +2060,483 @@ bool Expression::GreaterThanNoCoeff(const Expression& other) const {
   return false;
 }
 
-bool Expression::toStringData(std::string& output, FormatExpressions* theFormat) const {
+template<>
+bool Expression::toStringBuiltIn<std::string>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool useQuotes = theFormat == nullptr ? false : theFormat->flagUseQuotes;
+  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  if (!useQuotes) {
+    if (isFinal) {
+      out
+      << StringRoutines::ConvertStringToCalculatorDisplay(input.GetValue<std::string>());
+    } else {
+      out << HtmlRoutines::ConvertStringToHtmlString(input.GetValue<std::string>(), false);
+    }
+  } else {
+    out << "\"" << StringRoutines::ConvertStringToJavascriptString(input.GetValue<std::string>()) << "\"";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<Rational>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  if (input.hasNonEmptyContext()) {
+    out << "Rational{}(" << input[1].toString() << ", ";
+  }
+  if (!input.owner->flagUseFracInRationalLaTeX) {
+    out << input.GetValue<Rational>().toString();
+  } else {
+    out << input.GetValue<Rational>().ToStringFrac();
+  }
+  if (input.hasNonEmptyContext()) {
+    out << ")";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementEllipticCurve<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagUseFrac = true;
+  out << input.GetValue<ElementEllipticCurve<Rational> >().toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementEllipticCurve<ElementZmodP> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagUseFrac = true;
+  out << input.GetValue<ElementEllipticCurve<ElementZmodP> >().toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementZmodP>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  out << input.GetValue<ElementZmodP>().toString();
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<InputBox>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  out << input.GetValue<InputBox>().GetUserInputBox();
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  out << input.GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().toString();
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementHyperoctahedralGroupR2>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  out << input.GetValue<ElementHyperoctahedralGroupR2>().toString(theFormat);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<Polynomial<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagUseFrac = true;
+  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
+    out << "Polynomial{}(";
+  }
+  out << input.GetValue<Polynomial<Rational> >().toString(&format);
+  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
+    out << ")";
+  }
+  if (showContext) {
+    out << "[" << input.GetContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<Polynomial<AlgebraicNumber> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  format.flagUseFrac = true;
+  out << "PolynomialAlgebraicNumbers{}(";
+  std::string currentString = input.GetValue<Polynomial<AlgebraicNumber> >().toString(&format);
+  if (currentString.size() > 0) {
+    if (currentString[0] == '-') {
+      currentString = currentString.substr(1);
+      out << "-";
+    }
+  }
+  if (input.owner->flagUseNumberColors) {
+    out << "\\color{red}{";
+  }
+  out << currentString;
+  if (input.owner->flagUseNumberColors) {
+    out << "}";
+  }
+  out << ")";
+  if (showContext) {
+    out << "[" << input.GetContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<RationalFunction>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagUseFrac = true;
+  out << "MakeRationalFunction{}("
+  << input.GetValue<RationalFunction>().toString(&format) << ")";
+  if (showContext) {
+    out << "[" << input.GetContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<Weight<Polynomial<Rational> > >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagFormatWeightAsVectorSpaceIndex = false;
+  out << input.GetValue<Weight<Polynomial<Rational> > >().toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<SemisimpleLieAlgebra*>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  out << "SSLieAlg{}("
+  << input.GetValue<SemisimpleLieAlgebra*>()->ToStringLieAlgebraName()
+  << ")";
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFunction> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  out << "UEE{}(" //<< input.GetContext().toString() << ", "
+  << input.GetValue<ElementUniversalEnveloping<RationalFunction> >().toString(&format)
+  << ")";
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  if (input.GetValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
+    out << "MatrixRationalsTensorForm{}("
+    << input.GetValue<MatrixTensor<Rational> > ().toStringMatrixForm(&format)
+    << ")";
+  } else {
+    out << input.GetValue<MatrixTensor<Rational> >().toString();
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFunction> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  out << "ETGVM{}(";
+  out << input.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().toString(&format);
+  out << ")";
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<Plot>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
+  if (isFinal) {
+    Plot& thePlot = input.GetValueNonConst<Plot>();
+    thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == nullptr) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
+    thePlot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
+    out << thePlot.GetPlotHtml(*input.owner);
+    if (input.owner->flagWriteLatexPlots) {
+      out << input.owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), nullptr, true);
+      out << "<br><b>LaTeX code used to generate the output. </b><br>"
+      << thePlot.GetPlotStringAddLatexCommands(true);
+    }
+  } else {
+    out << "(plot not shown)";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<WeylGroupData>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  WeylGroupData& theGroup = input.GetValueNonConst<WeylGroupData>();
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.flagUseReflectionNotation = true;
+  out << theGroup.toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementWeylGroup >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  const ElementWeylGroup& theElt = input.GetValue<ElementWeylGroup>();
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.flagUseReflectionNotation = true;
+  out << theElt.toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+  input.GetValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.flagUseReflectionNotation = true;
+  out << theElt.toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  input.GetContext().getFormat(format);
+  const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
+  input.GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
+  format.flagUseLatex = true;
+  format.flagUseHTML = false;
+  format.flagUseReflectionNotation = true;
+  out << theElt.toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<charSSAlgMod<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  charSSAlgMod<Rational> theElt = input.GetValue<charSSAlgMod<Rational> >();
+  out << theElt.toString();
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<SemisimpleSubalgebras>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  SemisimpleSubalgebras& theSubalgebras = input.GetValueNonConst<SemisimpleSubalgebras>();
+  format.flagUseLatex = true;
+  format.flagUseHTML = true;
+  format.flagCandidateSubalgebraShortReportOnly = false;
+  format.flagIncludeMutableInformation = false;
+  format.flagUseMathSpanPureVsMouseHover = false;
+  out << theSubalgebras.toString(&format);
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<double>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  std::string currentString = FloatingPoint::DoubleToString(input.GetValue<double>());
+  if (currentString.size() > 0) {
+    if (currentString[0] == '-') {
+      currentString = currentString.substr(1);
+      out << "-";
+    }
+  }
+  if (input.owner->flagUseNumberColors) {
+    out << "\\color{blue}{";
+  }
+  out << currentString;
+  if (input.owner->flagUseNumberColors) {
+    out << "}";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<AlgebraicNumber>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  if (input.owner->flagUseFracInRationalLaTeX) {
+    format.flagUseFrac = true;
+  }
+  std::string currentString = input.GetValue<AlgebraicNumber>().toString(&format);
+  if (currentString.size() > 0) {
+    if (currentString[0] == '-') {
+      currentString = currentString.substr(1);
+      out << "-";
+    }
+  }
+  if (input.owner->flagUseNumberColors) {
+    out << "\\color{red}{";
+  }
+  out << currentString;
+  if (input.owner->flagUseNumberColors) {
+    out << "}";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<LittelmannPath>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  out << input.GetValue<LittelmannPath>().toString();
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  FormatExpressions format;
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  input.GetContext().getFormat(format);
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
+  out << "ElementWeylAlgebra{}(";
+  out << input.GetValue<ElementWeylAlgebra<Rational> >().toString(&format);
+  out << ")";
+  if (showContext) {
+    out << "[" << input.GetContext().toString() << "]";
+  }
+  return true;
+}
+
+bool Expression::toStringData(std::stringstream& out, FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::toStringData");
   if (this->owner == nullptr) {
-    output = "(non-initialized)";
+    out << "(non-initialized)";
     return true;
   }
-  std::stringstream out;
-  bool result = false;
-  bool isFinal = theFormat == nullptr ? true : theFormat->flagExpressionIsFinal;
-  bool useQuotes = theFormat == nullptr ? false : theFormat->flagUseQuotes;
-  MemorySaving<FormatExpressions> contextFormat;
-  bool showContext = this->owner == nullptr ? false : owner->flagDisplayContext;
   if (this->IsAtom()) {
     if (this->IsOperationGiven(this->owner->opDifferential())) {
       out << "{\\text{d}}";
@@ -2084,259 +2549,39 @@ bool Expression::toStringData(std::string& output, FormatExpressions* theFormat)
     } else {
       out << "[unknown atom of value " << this->theData << "]";
     }
-    result = true;
-  } else if (this->IsOfType<std::string>()) {
-    if (!useQuotes) {
-      if (isFinal) {
-        out
-        << StringRoutines::ConvertStringToCalculatorDisplay(this->GetValue<std::string>());
-      } else {
-        out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
-      }
-    } else {
-      out << "\"" << StringRoutines::ConvertStringToJavascriptString(this->GetValue<std::string>()) << "\"";
-    }
-    result = true;
-  } else if (this->IsOfType<Rational>()) {
-    if (this->hasNonEmptyContext()) {
-      out << "Rational{}(" << (*this)[1].toString() << ", ";
-    }
-    if (!this->owner->flagUseFracInRationalLaTeX) {
-      out << this->GetValue<Rational>().toString();
-    } else {
-      out << this->GetValue<Rational>().ToStringFrac();
-    }
-    if (this->hasNonEmptyContext()) {
-      out << ")";
-    }
-    result = true;
-  } else if (this->IsOfType<ElementEllipticCurve<Rational> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseFrac = true;
-    out << this->GetValue<ElementEllipticCurve<Rational> >().toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseFrac = true;
-    out << this->GetValue<ElementEllipticCurve<ElementZmodP> >().toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<ElementZmodP>()) {
-    out << this->GetValue<ElementZmodP>().toString();
-    result = true;
-  } else if (this->IsOfType<InputBox>()) {
-    out << this->GetValue<InputBox>().GetUserInputBox();
-    result = true;
-  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
-    out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().toString();
-    result = true;
-  } else if (this->IsOfType<ElementHyperoctahedralGroupR2>()) {
-    out << this->GetValue<ElementHyperoctahedralGroupR2>().toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<Polynomial<Rational> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseFrac = true;
-    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
-      out << "Polynomial{}(";
-    }
-    out << this->GetValue<Polynomial<Rational> >().toString(&contextFormat.GetElement());
-    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
-      out << ")";
-    }
-    if (showContext) {
-      out << "[" << this->GetContext().toString() << "]";
-    }
-    result = true;
-  } else if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseFrac = true;
-    out << "PolynomialAlgebraicNumbers{}(";
-    std::string currentString = this->GetValue<Polynomial<AlgebraicNumber> >().toString(&contextFormat.GetElement());
-    if (currentString.size() > 0) {
-      if (currentString[0] == '-') {
-        currentString = currentString.substr(1);
-        out << "-";
-      }
-    }
-    if (this->owner->flagUseNumberColors) {
-      out << "\\color{red}{";
-    }
-    out << currentString;
-    if (this->owner->flagUseNumberColors) {
-      out << "}";
-    }
-    out << ")";
-    if (showContext) {
-      out << "[" << this->GetContext().toString() << "]";
-    }
-    result = true;
-  } else if (this->IsOfType<RationalFunction>()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseFrac = true;
-    out << "MakeRationalFunction{}("
-    << this->GetValue<RationalFunction>().toString(&contextFormat.GetElement()) << ")";
-    if (showContext) {
-      out << "[" << this->GetContext().toString() << "]";
-    }
-    result = true;
-  } else if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagFormatWeightAsVectorSpaceIndex = false;
-    out << this->GetValue<Weight<Polynomial<Rational> > >().toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<SemisimpleLieAlgebra*>()) {
-    out << "SSLieAlg{}("
-    << this->GetValue<SemisimpleLieAlgebra*>()->ToStringLieAlgebraName()
-    << ")";
-    result = true;
-  } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    out << "UEE{}(" //<< this->GetContext().toString() << ", "
-    << this->GetValue<ElementUniversalEnveloping<RationalFunction> >().toString(&contextFormat.GetElement())
-    << ")";
-    result = true;
-  } else if (this->IsOfType<MatrixTensor<Rational> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    if (this->GetValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
-      out << "MatrixRationalsTensorForm{}("
-      << this->GetValue<MatrixTensor<Rational> > ().toStringMatrixForm(&contextFormat.GetElement())
-      << ")";
-    } else {
-      out << this->GetValue<MatrixTensor<Rational> >().toString();
-    }
-    result = true;
-  } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    out << "ETGVM{}(";
-    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().toString(&contextFormat.GetElement());
-    out << ")";
-    result = true;
-  } else if (this->IsOfType<Plot>()) {
-    if (isFinal) {
-      Plot& thePlot = this->GetValueNonConst<Plot>();
-      thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == nullptr) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
-      thePlot.flagPlotShowJavascriptOnly = this->owner->flagPlotShowJavascriptOnly;
-      out << thePlot.GetPlotHtml(*this->owner);
-      if (this->owner->flagWriteLatexPlots) {
-        out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), nullptr, true);
-        out << "<br><b>LaTeX code used to generate the output. </b><br>"
-        << thePlot.GetPlotStringAddLatexCommands(true);
-      }
-    } else {
-      out << "(plot not shown)";
-    }
-    result = true;
-  } else if (this->IsOfType<WeylGroupData>()) {
-    WeylGroupData& theGroup = this->GetValueNonConst<WeylGroupData>();
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theGroup.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<ElementWeylGroup>()) {
-    const ElementWeylGroup& theElt = this->GetValue<ElementWeylGroup>();
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
-    const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
-    this->GetValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
-    const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
-    this->GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<charSSAlgMod<Rational> >()) {
-    charSSAlgMod<Rational> theElt = this->GetValue<charSSAlgMod<Rational> >();
-    out << theElt.toString();
-    result = true;
-  } else if (this->IsOfType<SemisimpleSubalgebras>()) {
-    SemisimpleSubalgebras& theSubalgebras = this->GetValueNonConst<SemisimpleSubalgebras>();
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = true;
-    contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly = false;
-    contextFormat.GetElement().flagIncludeMutableInformation = false;
-    contextFormat.GetElement().flagUseMathSpanPureVsMouseHover = false;
-    out << theSubalgebras.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<double>()) {
-    std::string currentString = FloatingPoint::DoubleToString(this->GetValue<double>());
-    if (currentString.size() > 0) {
-      if (currentString[0] == '-') {
-        currentString = currentString.substr(1);
-        out << "-";
-      }
-    }
-    if (this->owner->flagUseNumberColors) {
-      out << "\\color{blue}{";
-    }
-    out << currentString;
-    if (this->owner->flagUseNumberColors) {
-      out << "}";
-    }
-    result = true;
-  } else if (this->IsOfType<AlgebraicNumber>()) {
-    if (this->owner->flagUseFracInRationalLaTeX) {
-      contextFormat.GetElement().flagUseFrac = true;
-    }
-    std::string currentString = this->GetValue<AlgebraicNumber>().toString(&contextFormat.GetElement());
-    if (currentString.size() > 0) {
-      if (currentString[0] == '-') {
-        currentString = currentString.substr(1);
-        out << "-";
-      }
-    }
-    if (this->owner->flagUseNumberColors) {
-      out << "\\color{red}{";
-    }
-    out << currentString;
-    if (this->owner->flagUseNumberColors) {
-      out << "}";
-    }
-    result = true;
-  } else if (this->IsOfType<LittelmannPath>()) {
-    out << this->GetValue<LittelmannPath>().toString();
-    result = true;
-  } else if (this->IsMatrixOfType<RationalFunction>()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseLatex = true;
+    return true;
+  }
+  if (this->IsMatrixOfType<RationalFunction>()) {
+    FormatExpressions format;
+    this->GetContext().getFormat(format);
+    format.flagUseHTML = false;
+    format.flagUseLatex = true;
     Matrix<RationalFunction> theMat;
     this->owner->functionGetMatrix(*this, theMat);
-    out << theMat.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
-    this->GetContext().getFormat(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseHTML = false;
-    contextFormat.GetElement().flagUseLatex = true;
-    out << "ElementWeylAlgebra{}(";
-    out << this->GetValue<ElementWeylAlgebra<Rational> >().toString(&contextFormat.GetElement());
-    out << ")";
-    if (showContext) {
-      out << "[" << this->GetContext().toString() << "]";
-    }
-    result = true;
+    out << theMat.toString(&format);
+    return true;
   }
-  output = out.str();
-  return result;
+  int theType = - 1;
+  if (!this->IsBuiltInTypE(&theType)) {
+    return false;
+  }
+  Calculator& commands = *this->owner;
+  // The following handlers are initialized in Calculator::initializeToStringHandlers.
+  if (!commands.toStringDataHandlers.Contains(theType)) {
+    return false;
+  }
+  // handler must hold the function pointer:
+  // Expression::toStringBuiltIn<builtInType>,
+  // where builtInType is one of the types registered in
+  // Calculator::initializeToStringHandlers.
+  Expression::ToStringHandler handler = commands.toStringDataHandlers.getValueNoFail(theType);
+  return handler(*this, out, theFormat);
 }
 
 std::string Expression::toStringSemiFull() const {
   std::stringstream out;
-  std::string tempS;
-  if (this->toStringData(tempS)) {
-    out << tempS << " ";
+  if (this->toStringData(out)) {
+    out << " ";
   } else {
     if (this->children.size > 0) {
       out << "(";
@@ -2803,16 +3048,16 @@ std::string Expression::toStringTreeHtml(int depth) const {
     out << "<br>...";
     return out.str();
   }
-  std::string data;
+  std::stringstream data;
   if (this->toStringData(data)) {
     out << "<br>";
     for (int i = 0; i < depth; i ++) {
       out << "_";
     }
-    if (data == "" && this->IsOfType<std::string>()) {
+    if (data.str() == "" && this->IsOfType<std::string>()) {
       out << "[empty string]";
     }
-    out << data;
+    out << data.str();
     return out.str();
   }
   for (int i = 0; i < this->size(); i ++) {
@@ -4018,7 +4263,7 @@ bool Expression::toStringWithAtomHandler(
   int atom = (*this)[0].theData;
   if (this->owner->toStringHandlersAtoms.Contains(atom)) {
     Expression::ToStringHandler handler =
-    this->owner->toStringHandlersAtoms.GetValueConstCrashIfNotPresent(atom);
+    this->owner->toStringHandlersAtoms.getValueNoFail(atom);
     return handler(*this, out, theFormat);
   }
   return false;
@@ -4040,7 +4285,7 @@ bool Expression::toStringWithCompositeHandler(
   int atom = (*this)[0][0].theData;
   if (this->owner->toStringHandlersComposite.Contains(atom)) {
     Expression::ToStringHandler handler =
-    this->owner->toStringHandlersComposite.GetValueConstCrashIfNotPresent(atom);
+    this->owner->toStringHandlersComposite.getValueNoFail(atom);
     return handler(*this, out, theFormat);
   }
   return false;
@@ -4091,12 +4336,10 @@ std::string Expression::toString(
       theFormat->flagUseQuotes = false;
     }
   }
-  std::string tempS;
   if (outputJS != nullptr) {
     outputJS->reset();
   }
-  if (this->toStringData(tempS, theFormat)) {
-    out << tempS;
+  if (this->toStringData(out, theFormat)) {
   } else if (this->toStringWithAtomHandler(out, theFormat)) {
   } else if (this->toStringWithCompositeHandler(out, theFormat)) {
   } else if (this->toStringEndStatement(out, startingExpression, outputJS, theFormat)) {
@@ -4125,9 +4368,9 @@ std::string Expression::Lispify() const {
   if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
     return "(error: max recursion depth ...)";
   }
-  std::string tempS;
-  if (this->toStringData(tempS)) {
-    return tempS;
+  std::stringstream dataStream;
+  if (this->toStringData(dataStream)) {
+    return dataStream.str();
   }
   if (this->children.size == 0) {
     return this->toString();
@@ -4422,7 +4665,7 @@ bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
   if (!(*this)[0].IsOperation(&tempS)) {
     return false;
   }
-  if (this->owner->GetBuiltInTypes().Contains(tempS)) {
+  if (this->owner->getBuiltInTypes().Contains(tempS)) {
     if (outputWhichOperation != nullptr) {
       *outputWhichOperation = tempS;
     }

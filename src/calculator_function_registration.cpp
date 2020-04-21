@@ -35,32 +35,21 @@ void Calculator::initAdminFunctions() {
     "MongoFind",
     adminDefault
   );
-  this->AddOperationHandler(
-    "RepairDatabaseEmailRecords",
-    CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords,
-    "",
-    "Repairs username/email mismatches. Administrator use only. ",
-    "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)",
-    "DatabaseRoutines::innerRepairDatabaseEmailRecords",
-    "RepairDatabaseEmailRecords",
-    adminDefault
-  );
 }
 
 void Calculator::initCalculusTestingFunctions() {
   this->initAdminFunctions();
 }
 
-///////////////
-/// \brief Calculator::initPredefinedInnerFunctions
-/// Naming conventions: please start all built-in calculator functions with capital letter.
-/// Exceptions are made for
-/// 1) functions that have mathematical names
-/// starting with small letters (example: \\sin, logical operations, etc.)
-/// Those typically start with a backslash.
-/// 2) functions that have already been assigned keywords starting with non-capital letter
-/// and have been used too often.
-///
+// Calculator::initPredefinedInnerFunctions
+// Naming conventions: please start all built-in calculator functions with capital letter.
+// Exceptions are made for the following.
+// 1) Functions that have mathematical names
+// starting with small letters (example: \\sin, logical operations, etc.)
+// Those typically start with a backslash.
+// 2) Exceptions (desired or otherwise) are made for functions that have already
+// been assigned keywords starting with non-capital letter
+// and have been used too often.
 void Calculator::initPredefinedInnerFunctions() {
   Function::Options innerStandard;
   innerStandard.flagIsInner = true;
@@ -8367,13 +8356,23 @@ void Calculator::addOneStringCompositeHandler(
   this->addOneStringHandler(atom, handler, this->toStringHandlersComposite);
 }
 
+template <class builtInType>
+void Calculator::addOneBuiltInHandler() {
+  Expression typeConverter(*this);
+  this->addOneStringHandler(
+    typeConverter.getTypeOperation<builtInType>(),
+    Expression::toStringBuiltIn<builtInType>,
+    this->toStringDataHandlers
+  );
+}
+
 void Calculator::addOneStringHandler(
   int atom,
   Expression::ToStringHandler handler,
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
 ) {
   if (handlerCollection.Contains(atom)) {
-    if (handlerCollection.GetValueConstCrashIfNotPresent(
+    if (handlerCollection.getValueNoFail(
       atom) != handler
     ) {
       global.fatal << "More than one toStringHandler for atom "
@@ -8436,6 +8435,35 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opError()                 , Expression::toStringError                       );
 
   this->addOneStringCompositeHandler(this->opMatriX()           , Expression::toStringMatrix                      );
+
+  this->addOneBuiltInHandler<std::string                                                              >();
+  this->addOneBuiltInHandler<Rational                                                                 >();
+  this->addOneBuiltInHandler<ElementEllipticCurve<Rational>                                           >();
+  this->addOneBuiltInHandler<ElementEllipticCurve<ElementZmodP>                                       >();
+  this->addOneBuiltInHandler<ElementZmodP                                                             >();
+  this->addOneBuiltInHandler<InputBox                                                                 >();
+  this->addOneBuiltInHandler<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>();
+  this->addOneBuiltInHandler<ElementHyperoctahedralGroupR2                                            >();
+  this->addOneBuiltInHandler<Polynomial<Rational>                                                     >();
+  this->addOneBuiltInHandler<Polynomial<AlgebraicNumber>                                              >();
+  this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
+  this->addOneBuiltInHandler<RationalFunction                                                         >();
+  this->addOneBuiltInHandler<Weight<Polynomial<Rational> >                                            >();
+  this->addOneBuiltInHandler<SemisimpleLieAlgebra*                                                    >();
+  this->addOneBuiltInHandler<ElementUniversalEnveloping<RationalFunction>                             >();
+  this->addOneBuiltInHandler<MatrixTensor<Rational>                                                   >();
+  this->addOneBuiltInHandler<ElementTensorsGeneralizedVermas<RationalFunction>                        >();
+  this->addOneBuiltInHandler<Plot                                                                     >();
+  this->addOneBuiltInHandler<WeylGroupData                                                            >();
+  this->addOneBuiltInHandler<ElementWeylGroup                                                         >();
+  this->addOneBuiltInHandler<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>             >();
+  this->addOneBuiltInHandler<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>           >();
+  this->addOneBuiltInHandler<charSSAlgMod<Rational>                                                   >();
+  this->addOneBuiltInHandler<SemisimpleSubalgebras                                                    >();
+  this->addOneBuiltInHandler<double                                                                   >();
+  this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
+  this->addOneBuiltInHandler<LittelmannPath                                                           >();
+  this->addOneBuiltInHandler<ElementWeylAlgebra<Rational>                                             >();
 }
 
 void Calculator::initializePredefinedWordSplits() {

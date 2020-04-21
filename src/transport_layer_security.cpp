@@ -550,7 +550,7 @@ bool CipherSuiteSpecification::ComputeName() {
     this->name = "unknown/GREASE";
     return false;
   }
-  this->name = this->owner->cipherSuiteNames.GetValueConstCrashIfNotPresent(this->id);
+  this->name = this->owner->cipherSuiteNames.getValueNoFail(this->id);
   return true;
 }
 
@@ -1006,7 +1006,7 @@ JSData SSLHelloExtension::ToJSON() {
 std::string SSLHelloExtension::Name() {
   this->CheckInitialization();
   if (this->owner->owner->owner->extensionNames.Contains(this->theType)) {
-    return this->owner->owner->owner->extensionNames.GetValueConstCrashIfNotPresent(this->theType);
+    return this->owner->owner->owner->extensionNames.getValueNoFail(this->theType);
   }
   return "unknown";
 }
@@ -1470,7 +1470,7 @@ std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
   if (this->chosenCipher == 0) {
     return "unknown";
   }
-  return this->owner->cipherSuiteNames.GetValueConstCrashIfNotPresent(this->chosenCipher);
+  return this->owner->cipherSuiteNames.getValueNoFail(this->chosenCipher);
 }
 
 std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";

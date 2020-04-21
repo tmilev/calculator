@@ -199,7 +199,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       }
       return false;
     }
-    currentData = &currentData->objects.GetValueConstCrashIfNotPresent(keys[i]);
+    currentData = &currentData->objects.getValueNoFail(keys[i]);
   }
   if (whichValue != nullptr) {
     *whichValue = *currentData;

@@ -299,7 +299,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
+    if (!this->StartsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
@@ -328,7 +328,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
+    if (!this->StartsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
@@ -346,7 +346,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
+    if (!this->StartsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
@@ -366,10 +366,10 @@ private:
   template <class theType>
   theType& GetValueNonConst() const;
   template<class theType>
-  int GetTypeOperation() const;
+  int getTypeOperation() const;
   template<class theType>
   int AddObjectReturnIndex(const theType& inputValue) const;
-  //note: the following always returns true:
+  // note: the following always returns true:
   template <class theType>
   bool AssignValue(const theType& inputValue, Calculator& owner);
   // note: the following always returns true:
@@ -479,14 +479,19 @@ private:
     this->SetChilD(childIndex, tempE);
   }
   std::string Lispify() const;
-  bool toStringData(std::string& output, FormatExpressions* theFormat = nullptr) const;
+  bool toStringData(std::stringstream& out, FormatExpressions* theFormat = nullptr) const;
+
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
   std::string toStringAllSlidersInExpression() const;
   std::string toUTF8String(FormatExpressions* theFormat = nullptr) const;
 
   template <class builtIn>
-  static bool toStringBuiltIn(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool toStringBuiltIn(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* theFormat
+  );
 
   bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* theFormat) const;
   bool toStringWithCompositeHandler(std::stringstream& out, FormatExpressions* theFormat) const;
@@ -1412,7 +1417,7 @@ public:
   const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
     return this->operations.theKeys;
   }
-  const HashedList<std::string, MathRoutines::HashString>& GetBuiltInTypes() {
+  const HashedList<std::string, MathRoutines::HashString>& getBuiltInTypes() {
     return this->builtInTypes;
   }
   const List<Function>* GetOperationHandlers(int theOp);
@@ -2614,6 +2619,8 @@ public:
     int atom,
     Expression::ToStringHandler handler
   );
+  template <class builtInType>
+  void addOneBuiltInHandler();
   void addOneStringHandler(
     int atom,
     Expression::ToStringHandler handler,
@@ -2903,7 +2910,7 @@ bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2)) {
     return false;
   }
-  if (!(*this)[0][1].IsOperationGiven(this->GetTypeOperation<theType>())) {
+  if (!(*this)[0][1].IsOperationGiven(this->getTypeOperation<theType>())) {
     return false;
   }
   const Expression& rows = (*this)[1];
@@ -3058,14 +3065,14 @@ bool Expression::AssignValueWithContext(
   Calculator& owner
 ) {
   this->reset(owner, 3);
-  this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
+  this->AddChildAtomOnTop(this->getTypeOperation<theType>());
   this->AddChildOnTop(theContext.toExpression());
   return this->AddChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
 }
 
 template<class theType>
-int Expression::GetTypeOperation() const {
-  global.fatal << "Please implement GetTypeOperation for the current type. " << global.fatal;
+int Expression::getTypeOperation() const {
+  global.fatal << "Please implement getTypeOperation for the current type. " << global.fatal;
   return - 1;
 }
 
@@ -3075,7 +3082,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
   tempE.owner = &owner;
   // std::stringstream comments;
   // comments << inputValue;
-  int curType = tempE.GetTypeOperation<theType>();
+  int curType = tempE.getTypeOperation<theType>();
   if (
     curType == owner.opPolynomialRational() ||
     curType == owner.opRationalFunction() ||

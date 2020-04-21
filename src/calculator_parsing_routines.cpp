@@ -142,9 +142,10 @@ void Calculator::initialize() {
 
   this->formatVisibleStrings.flagExpressionIsFinal = true;
 
-  //operation List is the very first operation. It signifies a non-atomic expression.
-  //operation List is signified by the empty string
-  //operation List must always have index 0.
+  // Operation List is the very first operation.
+  // It signifies a non-atomic expression.
+  // Operation List is signified by the empty string.
+  // Operation List has index 0.
   this->AddOperationNoRepetitionAllowed("");
 
   this->AddOperationNoRepetitionAllowed("=");
@@ -189,7 +190,6 @@ void Calculator::initialize() {
   this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
   this->AddOperationNoRepetitionAllowed("LogBase");
-  this->AddOperationNoRepetitionAllowed("userInputTextBox");
   this->AddOperationNoRepetitionAllowed("\\int");
 
   this->AddOperationBuiltInType("Rational");
@@ -227,10 +227,12 @@ void Calculator::initialize() {
   this->AddOperationBuiltInType("weightLieAlgPoly");
   this->AddOperationBuiltInType("EllipticCurveElementsRational");
   this->AddOperationBuiltInType("EllipticCurveElementsZmodP");
+  this->AddOperationBuiltInType("userInputTextBox");
 
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
 
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
+  // Empty token comes first.
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
   this->controlSequences.addOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences

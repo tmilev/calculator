@@ -1093,7 +1093,7 @@ bool LargeIntegerUnsigned::factor(
         *commentsOnFailure
         << "The largest remaining factor "
         << toBeFactored
-        << " is known not to be prime (Miller-Rabin test) "
+        << " is known to be composite (Miller-Rabin test) "
         << "but I could not factor it. "
         << "I checked all factors smaller than or equal to: "
         << maximumDivisorToTry << ". ";

@@ -1171,7 +1171,7 @@ int ASNObject::LoadField(
     this->objectId.ASNAtom.setSize(0);
     return 0;
   }
-  *this = inputFields.GetValueConstCrashIfNotPresent(fieldName);
+  *this = inputFields.getValueNoFail(fieldName);
   return 1;
 }
 
@@ -1204,7 +1204,7 @@ std::string ASNObject::ToStringAllRecognizedObjectIds() {
 }
 
 const List<unsigned char>& ASNObject::ObjectIdFromNameNoFail(const std::string& input) {
-  return ASNObject::NamesToObjectIdsNonThreadSafe().GetValueConstCrashIfNotPresent(input).objectId.ASNAtom;
+  return ASNObject::NamesToObjectIdsNonThreadSafe().getValueNoFail(input).objectId.ASNAtom;
 }
 
 bool ASNObject::LoadFieldsFromASNSequence(
@@ -1725,7 +1725,7 @@ void PrivateKeyRSA::HashAndPadPKCS1(
   switch (hash) {
   case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
     Crypto::computeSha256(input, inputHashed);
-    hashObject = ASNObject::NamesToObjectIdsNonThreadSafe().GetValueConstCrashIfNotPresent(ASNObject::names::sha256);
+    hashObject = ASNObject::NamesToObjectIdsNonThreadSafe().getValueNoFail(ASNObject::names::sha256);
     break;
   default:
     global.fatal << "Non-allowed or non-implemented value for the hash algorithm. " << global.fatal;

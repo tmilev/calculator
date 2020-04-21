@@ -28,7 +28,7 @@ public:
     this->theKeys.RemoveIndexSwapWithLast(theIndex);
     this->theValues.RemoveIndexSwapWithLast(theIndex);
   }
-  const value& GetValueConstCrashIfNotPresent(const key& input) const {
+  const value& getValueNoFail(const key& input) const {
     int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       fatalCrash("Map does not contain key at a place where that is not allowed. ");

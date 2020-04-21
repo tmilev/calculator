@@ -844,7 +844,7 @@ bool Database::isDeleteable(
   }
   List<std::string> theLabels;
   if (!Database::getLabels(
-    theEntry.objects.GetValueConstCrashIfNotPresent("fields"), theLabels, commentsOnFailure
+    theEntry.objects.getValueNoFail("fields"), theLabels, commentsOnFailure
   )) {
     return false;
   }
@@ -868,7 +868,7 @@ bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* comment
   }
   List<std::string> theLabels;
   if (!Database::getLabels(
-    theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelFields),
+    theEntry.objects.getValueNoFail(DatabaseStrings::labelFields),
     theLabels,
     commentsOnFailure
   )) {

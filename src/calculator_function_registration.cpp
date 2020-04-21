@@ -8445,6 +8445,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>>();
   this->addOneBuiltInHandler<ElementHyperoctahedralGroupR2                                            >();
   this->addOneBuiltInHandler<Polynomial<Rational>                                                     >();
+  this->addOneBuiltInHandler<Polynomial<ElementZmodP>                                                 >();
   this->addOneBuiltInHandler<Polynomial<AlgebraicNumber>                                              >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
   this->addOneBuiltInHandler<RationalFunction                                                         >();

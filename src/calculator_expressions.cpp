@@ -2198,6 +2198,35 @@ bool Expression::toStringBuiltIn<Polynomial<Rational> >(
 }
 
 template<>
+bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  (void) theFormat;
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  FormatExpressions format;
+  format.flagSuppressModP = true;
+  const Polynomial<ElementZmodP>& polynomial = input.GetValue<Polynomial<ElementZmodP> >();
+  if (!polynomial.IsEqualToZero()) {
+    format.suffixLinearCombination = "(" + polynomial.coefficients[0].toStringModP() + ")" ;
+  }
+  input.GetContext().getFormat(format);
+  format.flagUseFrac = true;
+  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
+    out << "Polynomial{}(";
+  }
+  out << polynomial.toString(&format);
+  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
+    out << ")";
+  }
+  if (showContext) {
+    out << "[" << input.GetContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
 bool Expression::toStringBuiltIn<Polynomial<AlgebraicNumber> >(
   const Expression& input,
   std::stringstream& out,

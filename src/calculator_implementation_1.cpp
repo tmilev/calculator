@@ -1773,7 +1773,7 @@ bool Expression::AssignStringParsed(
     this->AssignValue(outputSyntacticErrors, owner);
     return false;
   }
-  if (commands.StartsWith(owner.opEndStatement(), 2)) {
+  if (commands.startsWith(owner.opEndStatement(), 2)) {
     result = commands[1];
   } else {
     result = commands;
@@ -1782,7 +1782,7 @@ bool Expression::AssignStringParsed(
     MapList<Expression, Expression> theSubs;
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression theSubbed;
-      theSubbed.MakeAtom(substitutions->theKeys[i], owner);
+      theSubbed.makeAtom(substitutions->theKeys[i], owner);
       theSubs.SetKeyValue(theSubbed, substitutions->theValues[i]);
     }
     result.SubstituteRecursively(theSubs);
@@ -1795,7 +1795,7 @@ bool Expression::IsSuitableForSubstitution() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind())) {
+  if (this->IsBuiltInTypE() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
@@ -1805,7 +1805,7 @@ bool Expression::IsSuitableForRecursion() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsAtom() || this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind())) {
+  if (this->IsAtom() || this->IsBuiltInTypE() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
@@ -2010,7 +2010,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
 
 bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size - 1 << " instead. ";
   }
   Matrix<Rational> coneNonStrictMatForm;
@@ -2082,7 +2082,7 @@ bool Calculator::innerReverseOrderRecursivelY(Calculator& theCommands, const Exp
     toReverse = input[1];
   } else {
     toReverse = input;
-    toReverse.SetChildAtomValue(0, theCommands.opSequence());
+    toReverse.setChildAtomValue(0, theCommands.opSequence());
   }
   return theCommands.functionReverseOrderRecursively(theCommands, toReverse, output);
 }
@@ -2121,7 +2121,7 @@ bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& in
     toReverse = input[1];
   } else {
     toReverse = input;
-    toReverse.SetChildAtomValue(0, theCommands.opSequence());
+    toReverse.setChildAtomValue(0, theCommands.opSequence());
   }
   output.reset(theCommands, toReverse.size());
   output.addChildOnTop(toReverse[0]);
@@ -2178,7 +2178,7 @@ coefficient SemisimpleLieAlgebra::GetKillingForm(
 
 bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKillingForm");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return false;
   }
   Expression leftE = input[1];
@@ -2420,7 +2420,7 @@ bool ExpressionHistoryEnumerator::ComputeRecursively(
     }
     return false;
   }
-  if (!this->theHistory.StartsWith(this->owner->opExpressionHistory())) {
+  if (!this->theHistory.startsWith(this->owner->opExpressionHistory())) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Corrupt expression history does not start with the expected atom: "
@@ -2432,7 +2432,7 @@ bool ExpressionHistoryEnumerator::ComputeRecursively(
   int firstNonAccountedChildIndex = - 1;
   for (int i = 1; i < this->theHistory.size(); i ++) {
     const Expression& current = this->theHistory[i];
-    if (current.StartsWith(this->owner->opExpressionHistorySetChild())) {
+    if (current.startsWith(this->owner->opExpressionHistorySetChild())) {
       if (childrenToAccount == 0) {
         firstNonAccountedChildIndex = i;
       }
@@ -2525,7 +2525,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
 bool ExpressionHistoryEnumerator::ProcessTransformation(
   const Expression& current, std::stringstream* commentsOnFailure
 ) {
-  if (!current.StartsWith(this->owner->opExpressionHistorySet())) {
+  if (!current.startsWith(this->owner->opExpressionHistorySet())) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad first atom in history child : " << current.toString();
     }
@@ -2615,7 +2615,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
     argument = input[1];
   } else {
     argument = input;
-    argument.SetChildAtomValue(0, theCommands.opSequence());
+    argument.setChildAtomValue(0, theCommands.opSequence());
   }
   Expression outputTransformation;
   bool notUsed = false;

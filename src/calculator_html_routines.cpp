@@ -10,7 +10,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapList<std::string, Expression, MathRoutines::HashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, input, theArguments, &theCommands.Comments)) {
+  if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, input, theArguments, &theCommands.comments)) {
     return false;
   }
   if (!theArguments.contains("name")) {
@@ -89,7 +89,7 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapList<std::string, Expression, MathRoutines::HashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
-    theCommands, input, theArguments, &theCommands.Comments
+    theCommands, input, theArguments, &theCommands.comments
   )) {
     return false;
   }

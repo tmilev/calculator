@@ -87,8 +87,8 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   }
   if (!global.flagNotAllocated) {
     if (!global.calculator().IsZeroPointer()) {
-      if (global.calculator().getElement().Comments.str() != "") {
-        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator().getElement().Comments.str();
+      if (global.calculator().getElement().comments.str() != "") {
+        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator().getElement().comments.str();
       }
     }
     std::fstream theFile;
@@ -1801,7 +1801,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLoExt = this->theLinearOperatorsExtended[i];
     for (int j = 0; j < currentLoExt.numberOfRows; j ++) {
       for (int k = 0; k < currentLoExt.numberOfColumns; k ++) {
-        tempMatPoly.elements[j][k].MakeConst(currentLoExt.elements[j][k], tempVect.size);
+        tempMatPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k], tempVect.size);
       }
     }
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);

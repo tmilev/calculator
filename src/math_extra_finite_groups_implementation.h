@@ -1200,7 +1200,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->RootsOfBorel.LastObject()->SumCoords().NumShort;
+  int topHeightRootSystem = this->RootsOfBorel.LastObject()->SumCoords().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1228,7 +1228,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
         if (this->IsDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].SumCoords().NumShort;
+          int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
@@ -1627,7 +1627,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
+  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1653,7 +1653,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
         if (this->IsDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].SumCoords().NumShort;
+          int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;

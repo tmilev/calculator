@@ -108,7 +108,6 @@ class ParallelComputing {
 public:
   static long long GlobalPointerCounter;
   static long long PointerCounterPeakRamUse;
-  static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
   static unsigned int NumListsCreated;
@@ -116,9 +115,6 @@ public:
   static unsigned int NumHashResizes;
 
   static void CheckPointerCounters();
-  inline static void SafePointDontCallMeFromDestructors() {
-    ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SafePointDontCallMeFromDestructors();
-  }
 };
 
 #endif // header_vpfHeader1General2Mutexes_already_Defined

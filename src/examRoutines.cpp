@@ -699,7 +699,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
   theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.CurrentRandomSeed);
-  theProblem.InterpretHtml(&theCommands.Comments);
+  theProblem.InterpretHtml(&theCommands.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
@@ -1823,16 +1823,16 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
       result = false;
       continue;
     }
-    if (!theInterpreter.theProgramExpression[currentElt.commandIndex].StartsWith(theInterpreter.opCommandEnclosure())) {
+    if (!theInterpreter.theProgramExpression[currentElt.commandIndex].startsWith(theInterpreter.opCommandEnclosure())) {
       global.fatal << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].toString()
       << " in " << theInterpreter.theProgramExpression.toString()
       << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
     }
     Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
-    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2) {
+    if (currentExpr.startsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2) {
       currentExpr = currentExpr[1];
     }
-    if (currentExpr.StartsWith(theInterpreter.opEndStatement())) {
+    if (currentExpr.startsWith(theInterpreter.opEndStatement())) {
       currentElt.flagUseMathMode = false;
     }
     theFormat.flagUseQuotes = false;
@@ -2731,7 +2731,7 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
   if (!input.IsOfType<std::string>(&theFile.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.ParseHTML(&theCommands.Comments)) {
+  if (!theFile.ParseHTML(&theCommands.comments)) {
     return false;
   }
   return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);

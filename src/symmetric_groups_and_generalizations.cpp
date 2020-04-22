@@ -1031,7 +1031,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
   Matrix<Rational> M;
   int n = this->SmallestN();
   if (n == 0) // this is the identity element.  it thinks it lives in the zero group, because it lives in all the groups
-  { out.MakeConst(1);
+  { out.makeConstant(1);
     return;
   }
   M.init(n, n);

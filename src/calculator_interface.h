@@ -156,7 +156,8 @@ private:
     this->children.clear();
     this->children.setExpectedSize(numExpectedChildren);
   }
-  static Expression zero();
+  Expression zero();
+  static Expression zeroStatic();
   bool AddChildRationalOnTop(const Rational& inputRat);
   bool addChildOnTop(const Expression& inputChild);
   bool addChildAtomOnTop(const std::string& theOperationString);
@@ -168,8 +169,8 @@ private:
   void GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
   void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
-  bool SetChildAtomValue(int childIndex, const std::string& theAtom);
-  bool SetChildAtomValue(int childIndex, int TheAtomValue);
+  bool setChildAtomValue(int childIndex, const std::string& theAtom);
+  bool setChildAtomValue(int childIndex, int TheAtomValue);
   int size() const {
     return this->children.size;
   }
@@ -194,9 +195,9 @@ private:
     this->operator=(tempExp);
     return true;
   }
-  bool IsLisT() const;
-  bool IsListNElements(int N = - 1) const {
-    if (!this->IsLisT()) {
+  bool isList() const;
+  bool isListNElements(int N = - 1) const {
+    if (!this->isList()) {
       return false;
     }
     if (N == - 1) {
@@ -207,11 +208,11 @@ private:
   bool StartsWithBuiltInAtom() const;
   bool StartsWithFunctionWithComplexRange() const;
   bool StartsWithArithmeticOperation() const;
-  bool StartsWith(int theOp = - 1, int N = - 1) const;
+  bool startsWith(int theOp = - 1, int N = - 1) const;
 
   bool StartsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
   bool IsListStartingWithAtom(int theOp = - 1) const {
-    if (!this->IsLisT()) {
+    if (!this->isList()) {
       return false;
     }
     if (!(*this)[0].IsAtom()) {
@@ -299,7 +300,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->getTypeOperation<theType>())) {
+    if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
@@ -328,7 +329,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->getTypeOperation<theType>())) {
+    if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
@@ -346,7 +347,7 @@ private:
     if (this->owner == nullptr) {
       return false;
     }
-    if (!this->StartsWith(this->getTypeOperation<theType>())) {
+    if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
     if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
@@ -429,13 +430,13 @@ private:
     const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon,
     Calculator& newBoss
   );
-  bool MakeAtom(int input, Calculator& newBoss) {
+  bool makeAtom(int input, Calculator& newBoss) {
     this->reset(newBoss);
     this->theData = input;
     return true;
   }
   // TODO(tmilev): rename to MakeOperation
-  bool MakeAtom(const std::string& atomName, Calculator& newBoss);
+  bool makeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound() const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   bool MakeIntegral(
@@ -897,7 +898,7 @@ class Function {
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
-  bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function **outputHandler);
+  bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
   bool checkConsistency() const;
 };
 
@@ -1163,7 +1164,7 @@ public:
 class Calculator {
   template<typename anyType>
   friend Calculator& operator << (Calculator& output, const anyType& any) {
-    output.Comments << any;
+    output.comments << any;
     return output;
   }
 public:
@@ -1384,7 +1385,7 @@ public:
   int numOutputFileS;
   std::string userLabel;
   // List<std::string> logEvaluationSteps;
-  std::stringstream Comments;
+  std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
   std::string ToStringRuleStatusUser();
@@ -2126,7 +2127,7 @@ public:
       return false;
     }
     if (!theFun(*this, input, output)) {
-      this->Comments << "<hr>Conversion function failed on " << input.toString() << ". ";
+      this->comments << "<hr>Conversion function failed on " << input.toString() << ". ";
       return false;
     }
     return output.IsOfType<theType>();
@@ -2350,8 +2351,8 @@ public:
     Expression::FunctionAddress conversionFunction = nullptr
   ) {
     Expression tempE = input;
-    if (tempE.IsLisT()) {
-      tempE.SetChildAtomValue(0, this->opSequence());
+    if (tempE.isList()) {
+      tempE.setChildAtomValue(0, this->opSequence());
     }
     return this->getVector(
       tempE,
@@ -2908,7 +2909,7 @@ bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (!this->IsMatrix()) {
     return false;
   }
-  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2)) {
+  if (!(*this)[0].startsWith(this->owner->opMatriX(), 2)) {
     return false;
   }
   if (!(*this)[0][1].IsOperationGiven(this->getTypeOperation<theType>())) {
@@ -3190,7 +3191,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
   Expression::FunctionAddress ConversionFun
 ) {
-  if (!input.IsListNElements(4) && !input.IsListNElements(3)) {
+  if (!input.isListNElements(4) && !input.isListNElements(3)) {
     return output.MakeError(
       "Function TypeHighestWeightParabolic is "
       "expected to have two or three arguments: "
@@ -3223,7 +3224,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     << middleE.toString() << ".";
     return output.MakeError(tempStream.str(), theCommands);
   }
-  if (input.IsListNElements(4)) {
+  if (input.isListNElements(4)) {
     Vector<Rational> parabolicSel;
     const Expression& rightE = input[3];
     if (!theCommands.getVector<Rational>(

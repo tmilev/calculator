@@ -83,7 +83,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
   output.Reserve(input.size());
   output.setSize(0);
-  if (!input.IsSequenceNElementS() && !input.StartsWith(this->opIntervalOpen())) {
+  if (!input.IsSequenceNElementS() && !input.startsWith(this->opIntervalOpen())) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
         return *this << "<hr>getVector failure: target dim is "
@@ -143,7 +143,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   RationalFunction tempRF;
   output.makeZero(*this->theAlgebras, this->indexAlgebra);
   MonomialUniversalEnveloping<RationalFunction> tempMon;
-  tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
+  tempMon.makeConstant(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
     varShift = this->minimalNumberOfVariables();
@@ -405,7 +405,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
       << global.fatal;
     }
     currentMonContribution.Makexidj(i, i, 0);
-    currentMonContribution.RaiseToPower(powerMonCoeff);
+    currentMonContribution.raiseToPower(powerMonCoeff);
     outputDO *= currentMonContribution;
   }
   return true;
@@ -458,7 +458,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
         tempMat1.coefficients[k].GetNumerator(tempP1);
         tempMT.AddMonomial(tempMat1[k], tempP1);
       }
-      MathRoutines::RaiseToPower(tempMT, thePower, idMT);
+      MathRoutines::raiseToPower(tempMT, thePower, idMT);
       endoPart *= tempMT;
     }
     exponentContribution.makeOne();
@@ -857,7 +857,7 @@ bool Calculator::CheckConsistencyAfterInitialization() {
 
 bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
-  if (!input.IsListNElements(4)) {
+  if (!input.isListNElements(4)) {
     return false;
   }
   const Expression& leftE   = input[1];
@@ -1226,7 +1226,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
-  if (!input.StartsWith(theCommands.opTimes(), 3)) {
+  if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
   Expression constPower, thePower;
@@ -1238,7 +1238,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
     return true;
   }
   for (int i = 0; i < 2; i ++, MathRoutines::swap(left, right)) {
-    if (right->StartsWith(theCommands.opThePower(), 3)) {
+    if (right->startsWith(theCommands.opThePower(), 3)) {
       if ((*right)[1] == (*left)) {
         bool isGood = true;
         if ((*right)[2].IsOfType<Rational>()) {
@@ -1256,7 +1256,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           return output.MakeXOX(theCommands, theCommands.opThePower(), *left, thePower);
         }
       }
-      if (left->StartsWith(theCommands.opThePower(), 3)) {
+      if (left->startsWith(theCommands.opThePower(), 3)) {
         if ((*left)[1] == (*right)[1]) {
           bool isGood = (*left)[2].IsInteger() || (*right)[2].IsInteger();
           if (!isGood) {
@@ -1289,15 +1289,15 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
 }
 
 bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opPlus(), 3)) {
+  if (!input.startsWith(theCommands.opPlus(), 3)) {
     return false;
   }
   const Expression* quotientE = nullptr;
   const Expression* summandE = nullptr;
-  if (input[1].StartsWith(theCommands.opDivide(), 3)) {
+  if (input[1].startsWith(theCommands.opDivide(), 3)) {
     quotientE = &input[1];
     summandE = &input[2];
-  } else if (input[2].StartsWith(theCommands.opDivide(), 3)) {
+  } else if (input[2].startsWith(theCommands.opDivide(), 3)) {
     quotientE = &input[2];
     summandE = &input[1];
   } else {
@@ -1312,7 +1312,7 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
 }
 
 bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDefine(), 3)) {
+  if (!input.startsWith(theCommands.opDefine(), 3)) {
     return false;
   }
   if (input[1] != input[2]) {
@@ -1325,7 +1325,7 @@ bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input
 }
 
 bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDivide(), 3)) {
+  if (!input.startsWith(theCommands.opDivide(), 3)) {
     return false;
   }
   if (input[1].isEqualToZero()) {
@@ -1337,10 +1337,10 @@ bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const 
 }
 
 bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opTimes(), 3)) {
+  if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (!input[1].StartsWith(theCommands.opDivide(), 3)) {
+  if (!input[1].startsWith(theCommands.opDivide(), 3)) {
     return false;
   }
   if (input[1][2] == input[2]) {
@@ -1351,10 +1351,10 @@ bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const
 }
 
 bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opTimes(), 3)) {
+  if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (!input[2].StartsWith(theCommands.opDivide(), 3)) {
+  if (!input[2].startsWith(theCommands.opDivide(), 3)) {
     return false;
   }
   Expression newLeftE;
@@ -1364,11 +1364,11 @@ bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expr
 }
 
 bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(- 1, 3)) {
+  if (!input.startsWith(- 1, 3)) {
     return false;
   }
   int theOperation = input[0].theData;
-  if (!input[1].StartsWith(theOperation, 3)) {
+  if (!input[1].startsWith(theOperation, 3)) {
     return false;
   }
   Expression newRight;
@@ -1380,7 +1380,7 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
 bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!input.StartsWith(theCommands.opIsDenotedBy(), 3)) {
+  if (!input.startsWith(theCommands.opIsDenotedBy(), 3)) {
     return false;
   }
   const Expression& withNotation = input[2];
@@ -1390,7 +1390,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   theCommands.theObjectContainer.ExpressionNotation.addOnTop(theNotation.toString());
   theCommands.theObjectContainer.ExpressionWithNotation.addOnTop(withNotation);
   output = input;
-  output.SetChildAtomValue(0, theCommands.opDefine());
+  output.setChildAtomValue(0, theCommands.opDefine());
   ////
   if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
@@ -1448,7 +1448,7 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
 
 bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
-  if (!input.StartsWith(theCommands.opTimes())) {
+  if (!input.startsWith(theCommands.opTimes())) {
     return false;
   }
   if (input.size() < 2) {
@@ -1456,7 +1456,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   }
   const Expression& firstElt = input[1];
   if (!firstElt.IsBuiltInAtom()) {
-    if (!firstElt.StartsWith(theCommands.opThePower(), 3)) {
+    if (!firstElt.startsWith(theCommands.opThePower(), 3)) {
       return false;
     }
     if (!firstElt[1].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -1467,7 +1467,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
     return false;
   }
   const Expression& secondElt = input[2];
-  if (secondElt.IsSequenceNElementS() || secondElt.StartsWith(theCommands.opIntervalOpen())) {
+  if (secondElt.IsSequenceNElementS() || secondElt.startsWith(theCommands.opIntervalOpen())) {
     output = secondElt;
     return output.setChild(0, firstElt);
   }
@@ -1534,10 +1534,10 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
   if (theMultiplicativeOp == - 1) {
     theMultiplicativeOp = theCommands.opTimes();
   }
-  if (!input.StartsWith(theMultiplicativeOp, 3)) {
+  if (!input.startsWith(theMultiplicativeOp, 3)) {
     return false;
   }
-  if (!input[1].StartsWith(theAdditiveOp, 3)) {
+  if (!input[1].startsWith(theAdditiveOp, 3)) {
     return false;
   }
   if (constantsOnly) {
@@ -1566,10 +1566,10 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
   if (theMultiplicativeOp == - 1) {
     theMultiplicativeOp = theCommands.opTimes();
   }
-  if (!input.StartsWith(theMultiplicativeOp, 3)) {
+  if (!input.startsWith(theMultiplicativeOp, 3)) {
     return false;
   }
-  if (!input[2].StartsWith(theAdditiveOp, 3)) {
+  if (!input[2].startsWith(theAdditiveOp, 3)) {
     return false;
   }
   if (constantsOnly) {
@@ -1610,7 +1610,7 @@ bool Calculator::CollectCoefficientsPowersVar(
         found = true;
         break;
       }
-      if (currentE.StartsWith(theCommands.opThePower(), 3)) {
+      if (currentE.startsWith(theCommands.opThePower(), 3)) {
         int thePower;
         if (currentE[1] == theVariable) {
           if (currentE[2].IsSmallInteger(&thePower)) {
@@ -1638,7 +1638,7 @@ bool Calculator::CollectOpandsAccumulate(
   const Expression& input, int theOp, List<Expression>& outputOpands
 ) {
   MacroRegisterFunctionWithName("Calculator::CollectOpandsAccumulate");
-  if (!input.StartsWith(theOp)) {
+  if (!input.startsWith(theOp)) {
     outputOpands.addOnTop(input);
     return true;
   }
@@ -1667,7 +1667,7 @@ bool Calculator::functionCollectSummands(
     if (summands[i].isEqualToZero()) {
       continue;
     }
-    if (summands[i].StartsWith(theCommands.opTimes(), 3)) {
+    if (summands[i].startsWith(theCommands.opTimes(), 3)) {
       if (summands[i][1].IsOfType<Rational>(&coeffRat)) {
         outputSum.AddMonomial(summands[i][2], coeffRat);
         continue;
@@ -1711,10 +1711,10 @@ bool Calculator::functionCollectSummands(
 bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
   int opPower = theCommands.opThePower();
-  if (!input.StartsWith(opPower, 3)) {
+  if (!input.startsWith(opPower, 3)) {
     return false;
   }
-  if (!input[1].StartsWith(opPower, 3)) {
+  if (!input[1].startsWith(opPower, 3)) {
     return false;
   }
   bool isGood = false;
@@ -1743,11 +1743,11 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
 
 bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
-  if (!input.StartsWith(theCommands.opThePower(), 3)) {
+  if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
   if (
-    input[1].StartsWith(theCommands.opIntegral(), 2) ||
+    input[1].startsWith(theCommands.opIntegral(), 2) ||
     input[1].IsOperationGiven(theCommands.opIntegral())
   ) {
     return false;
@@ -1791,7 +1791,7 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss) {
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPlus");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.StartsWith(theCommands.opPlus())) {
+  if (!input.startsWith(theCommands.opPlus())) {
     return false;
   }
   LinearCombination<Expression, Rational> theSum;
@@ -1818,7 +1818,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
 }
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.StartsWith(theCommands.opDefineConditional(), 4)) {
+  if (!input.startsWith(theCommands.opDefineConditional(), 4)) {
     return output.MakeError("Error: operation :if = takes three arguments.", theCommands);
   }
   Rational conditionRat;
@@ -1837,7 +1837,7 @@ bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Ex
 }
 
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2))) {
+  if (!(input.startsWith(theCommands.opMinus(), 3) || input.startsWith(theCommands.opMinus(), 2))) {
     return false;
   }
   Expression tempE, minusOne;
@@ -2655,10 +2655,13 @@ std::string Calculator::toString() {
   }
   std::stringstream out;
   out2 << "<hr><b>Further calculator details.</b>";
-  out << "<br><b>Object container information</b>. "
-  << "The object container is the data structure storing all c++ built-in data types "
+  out
+  << "<br><b>Object container information</b>. "
+  << "The object container is the data "
+  << "structure storing all c++ built-in data types "
   << "requested by the user<br> " << this->theObjectContainer.toString();
-  out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
+  out << "<hr>Control sequences (" << this->controlSequences.size
+  << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
     out << openTag1 << this->controlSequences[i] << closeTag1;
     if (i != this->controlSequences.size) {
@@ -2709,7 +2712,9 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
   MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
   std::stringstream out;
   if ((*this->CurrentSyntacticStacK).size< this->numEmptyTokensStart) {
-    return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
+    return
+    "Error: this is a programming error: "
+    "not enough empty tokens in the start of the syntactic stack.";
   }
   bool isBad = ((*this->CurrentSyntacticStacK).size > this->numEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).LastObject();
@@ -2731,12 +2736,12 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
         currentElt.controlIndex == this->conExpression() ||
         currentElt.controlIndex == this->conSequenceStatements()
       ) {
-        if (currentElt.theData.StartsWith(this->opCommandEnclosure())) {
+        if (currentElt.theData.startsWith(this->opCommandEnclosure())) {
           continue;
         }
-        if (currentElt.theData.StartsWith(this->opEndStatement())) {
+        if (currentElt.theData.startsWith(this->opEndStatement())) {
           if (currentElt.theData.size() >= 2) {
-            if (currentElt.theData[1].StartsWith(this->opCommandEnclosure())) {
+            if (currentElt.theData[1].startsWith(this->opCommandEnclosure())) {
               continue;
             }
           }
@@ -3056,11 +3061,11 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
 
 bool Expression::IsMeltable(int* numResultingChildren) const {
   this->CheckInitialization();
-  if (!this->StartsWith(this->owner->opMelt(), 2)) {
+  if (!this->startsWith(this->owner->opMelt(), 2)) {
     return false;
   }
   if (numResultingChildren != nullptr) {
-    if (!(*this)[1].StartsWith(this->owner->opEndStatement())) {
+    if (!(*this)[1].startsWith(this->owner->opEndStatement())) {
       *numResultingChildren = 1;
     } else {
       *numResultingChildren = (*this)[1].children.size - 1;
@@ -3166,7 +3171,7 @@ bool Calculator::ConvertExpressionsToCommonContext(
 bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (!input.StartsWith(theCommands.opEndStatement())) {
+  if (!input.startsWith(theCommands.opEndStatement())) {
     return false;
   }
   int tempInt;
@@ -3190,7 +3195,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       output.addChildOnTop(input[i]);
       continue;
     }
-    if (!currentChild[1].StartsWith(theCommands.opEndStatement())) {
+    if (!currentChild[1].startsWith(theCommands.opEndStatement())) {
       output.addChildOnTop(currentChild[1]);
       continue;
     }

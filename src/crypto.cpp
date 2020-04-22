@@ -1599,7 +1599,7 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
   theOne.theValue = 1;
   theOne.theModulus = theModulus;
   theElt.AssignRational(theMessage);
-  MathRoutines::RaiseToPower(theElt, theExponent, theOne);
+  MathRoutines::raiseToPower(theElt, theExponent, theOne);
   return theElt.theValue;
 }
 

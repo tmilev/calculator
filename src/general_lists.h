@@ -266,7 +266,7 @@ public:
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
   template <class coefficient, typename theIntegerType>
-  static void RaiseToPower(
+  static void raiseToPower(
     coefficient& theElement,
     const theIntegerType& thePower,
     const coefficient& theRingUnit

@@ -485,7 +485,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
 }
 
 template <class coefficient>
-bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis(
+bool ElementUniversalEnveloping<coefficient>::getCoordinatesInBasis(
   List<ElementUniversalEnveloping<coefficient> >& theBasis,
   Vector<coefficient>& output,
   const coefficient& theRingUnit,
@@ -545,7 +545,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
   }
   Matrix<coefficient> bufferMat;
   Vectors<coefficient> bufferVectors;
-  outputCoordsBeforeReduction.GetCoordsInBasis(
+  outputCoordsBeforeReduction.getCoordinatesInBasis(
     basisCoordForm, outputCoords, bufferVectors, bufferMat, theFieldUnit, theFieldZero
   );
   return true;
@@ -629,7 +629,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   ElementUniversalEnveloping<coefficient> Accum, intermediateAccum, tempElt;
   Accum.makeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<coefficient> constMon;
-  constMon.MakeConst();
+  constMon.makeConstant();
   if (logStream != nullptr) {
     *logStream << "backtraced elt: " << MTright.toString(&global.theDefaultFormat.getElement()) << "<br>";
     *logStream << "this element: " << this->toString(&global.theDefaultFormat.getElement()) << "<br>";

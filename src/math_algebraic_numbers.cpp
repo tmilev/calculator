@@ -387,7 +387,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   newBasis[1] = generatorProjected;
   for (int i = 2; i < smallestFactorDegree; i ++) {
     newBasis[i] = generatorProjected;
-    newBasis[i].RaiseToPower(i);
+    newBasis[i].raiseToPower(i);
   }
   this->latestBasis = newBasis;
   MatrixTensor<Rational> injection;
@@ -679,7 +679,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   //Check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
-  checkSub[0].MakeConst(outputRoot);
+  checkSub[0].makeConstant(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
@@ -833,7 +833,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   // Sanity check code here:
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.setSize(1);
-  theSub[0].MakeConst(outputRoot);
+  theSub[0].makeConstant(outputRoot);
   Polynomial<AlgebraicNumber> substitutedMinPoly;
   substitutedMinPoly = minPoly;
   substitutedMinPoly.Substitution(theSub);
@@ -1048,6 +1048,10 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
 }
 
 AlgebraicNumber AlgebraicNumber::zero() {
+  return AlgebraicNumber::zeroStatic();
+}
+
+AlgebraicNumber AlgebraicNumber::zeroStatic() {
   AlgebraicNumber result;
   return result;
 }
@@ -1160,7 +1164,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     if (theMults[i] % 2 == 1) {
       squareFreeInput *= primeFactors[i];
     }
-    primeFactors[i].RaiseToPower(theMults[i] / 2);
+    primeFactors[i].raiseToPower(theMults[i] / 2);
     squareRootRationalPart *= primeFactors[i];
   }
   if (!squareFreeInput.IsEqualToOne()) {
@@ -1541,9 +1545,22 @@ bool ElementZmodP::operator>(const ElementZmodP& other) const {
   return this->theValue > other.theValue;
 }
 
-ElementZmodP ElementZmodP::zero() {
+ElementZmodP ElementZmodP::zeroStatic() {
   ElementZmodP result;
   result.theModulus = 1;
+  return result;
+}
+
+ElementZmodP ElementZmodP::zero() {
+  ElementZmodP result;
+  result.theModulus = this->theModulus;
+  return result;
+}
+
+ElementZmodP ElementZmodP::one() {
+  ElementZmodP result;
+  result.theModulus = this->theModulus;
+  result.theValue = 1;
   return result;
 }
 

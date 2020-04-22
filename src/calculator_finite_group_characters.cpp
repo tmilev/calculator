@@ -476,7 +476,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   }
   const Expression& theSSalgebraNode = input[1];
@@ -589,7 +589,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   bool useRho
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylOrbit");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;

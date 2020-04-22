@@ -17,7 +17,6 @@
 long long ParallelComputing::cgiLimitRAMuseNumPointersInList = 2000000000;
 #endif
 
-ControllerStartsRunning ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly;
 bool ParallelComputing::flagUngracefulExitInitiated = false;
 
 long long ParallelComputing::GlobalPointerCounter = 0;
@@ -3148,7 +3147,7 @@ bool PartFraction::DecomposeFromLinRelation(
   theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
   if (this->flagAnErrorHasOccurredTimeToPanic) {
   }
-  ElongationGainingMultiplicityIndex = theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].NumShort;
+  ElongationGainingMultiplicityIndex = theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].numeratorShort;
   if (ElongationGainingMultiplicityIndex < 0) {
     ElongationGainingMultiplicityIndex = - ElongationGainingMultiplicityIndex;
   } else {
@@ -3160,7 +3159,7 @@ bool PartFraction::DecomposeFromLinRelation(
       int tempI = this->IndicesNonZeroMults[i];
       ParticipatingIndices.addOnTop(tempI);
       theGreatestElongations.addOnTop((*this)[tempI].GetLargestElongation());
-      theCoefficients.addOnTop(theLinearRelation.elements[i][0].NumShort);
+      theCoefficients.addOnTop(theLinearRelation.elements[i][0].numeratorShort);
     }
   }
   if (!flagUsingOSbasis) {
@@ -3294,7 +3293,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
         this->GetNElongationPolyWithMonomialContribution(
           startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim
         );
-        tempP.RaiseToPower(multiplicityChange);
+        tempP.raiseToPower(multiplicityChange, 1);
         ComputationalBufferCoefficient *= (tempP);
         LargeInteger tempInt;
         int tempI;
@@ -3349,7 +3348,6 @@ void PartFraction::ApplySzenesVergneFormulA(
         tempM.multiplyByVariable(k, incomingPower);
       }
     }
-    ParallelComputing::SafePointDontCallMeFromDestructors();
     CoefficientBuffer.MultiplyBy(tempM);
     this->GetNElongationPoly(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, theDim);
     CoefficientBuffer *= tempP;
@@ -3983,7 +3981,7 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
       }
       for (int k = 0; k <= StartMonomialPower - startDenominatorPower; k++) {
         tempMon = theExponent;
-        tempMon.RaiseToPower(k);
+        tempMon.raiseToPower(k);
         theCoeff = MathRoutines::parity(startDenominatorPower) * MathRoutines::NChooseK(
           StartMonomialPower - 1 - k, startDenominatorPower - 1
         );
@@ -3998,7 +3996,7 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
     } else {
       for (int k = 1; k <= - StartMonomialPower; k ++) {
         tempMon = theExponent;
-        tempMon.RaiseToPower(- k);
+        tempMon.raiseToPower(- k);
         theCoeff = MathRoutines::NChooseK(startDenominatorPower - StartMonomialPower - 1 - k, startDenominatorPower - 1);
         output.AddMonomial(tempMon, theCoeff);
       }
@@ -4521,7 +4519,7 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(
       }
       tempRat3 = CheckSumRoot[j];
       if (!tempRat3.isEqualToZero()) {
-        tempRat3.RaiseToPower((theExp[j] * this->Elongations[i]).NumShort);
+        tempRat3.raiseToPower((theExp[j] * this->Elongations[i]).numeratorShort);
       }
       tempRat2 *= tempRat3;
       if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
@@ -4532,7 +4530,7 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(
       tempS = tempRat.toString();
     }
     tempRat -= tempRat2;
-    tempRat.RaiseToPower(this->Multiplicities[i]);
+    tempRat.raiseToPower(this->Multiplicities[i]);
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
       tempS = tempRat.toString();
     }
@@ -5423,7 +5421,7 @@ LargeInteger DynkinType::GetWeylGroupSizeByFormula() const {
   LargeInteger tempLI;
   for (int i = 0; i < this->size(); i ++) {
     tempLI = WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
-    tempLI.RaiseToPower(this->GetMult(i));
+    tempLI.raiseToPower(this->GetMult(i));
     result *= tempLI;
   }
   if (result <= 0) {
@@ -6553,7 +6551,7 @@ void WeylGroupData::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, b
 }
 
 void WeylGroupData::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
-  int lengthA = this->CartanSymmetric.elements[index][index].NumShort;
+  int lengthA = this->CartanSymmetric.elements[index][index].numeratorShort;
   Polynomial<Rational> AscalarB, tempP;
   AscalarB.makeZero();
   for (int i = 0; i < this->CartanSymmetric.numberOfColumns; i ++) {
@@ -7430,7 +7428,7 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   Matrix<Rational> matCoxeterElt, tempMat;
   this->GetMatrixStandardRep(tempElt, matCoxeterElt);
   tempMat = matCoxeterElt;
-  int coxeterNumber = this->RootSystem.LastObject()->SumCoords().NumShort + 1;
+  int coxeterNumber = this->RootSystem.LastObject()->SumCoords().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
   }
@@ -9133,8 +9131,8 @@ void Lattice::IntersectWith(const Lattice& other) {
   Vectors<Rational> thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
   thisCommonBasis.AssignMatrixRows(thisLatticeIntersected.basisRationalForm);
   otherCommonBasis.AssignMatrixRows(otherLatticeIntersected.basisRationalForm);
-  thisCommonBasis.GetCoordsInBasis(commonBasis, thisCommonCoords);
-  otherCommonBasis.GetCoordsInBasis(commonBasis, otherCommonCoords);
+  thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoords);
+  otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoords);
   Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
   thisCommonCoordsLattice.MakeFromRoots(thisCommonCoords);
   otherCommonCoordsLattice.MakeFromRoots(otherCommonCoords);
@@ -9820,7 +9818,7 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   theBasis.addOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
   tempRoots.MakeEiBasis(theDimension);
-  tempRoots.GetCoordsInBasis(theBasis, tempRoots2);
+  tempRoots.getCoordinatesInBasis(theBasis, tempRoots2);
   theProjection.AssignVectorsToRows(tempRoots2);
   theProjection.Transpose();
   theProjection.Resize(theDimension - 1, theDimension, false);
@@ -10049,7 +10047,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
           thePF.GetNElongationPoly(
             this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension
           );
-          tempIP.RaiseToPower(currentFrac.Multiplicities[i]);
+          tempIP.raiseToPower(currentFrac.Multiplicities[i], 1);
           currentCoeff *= tempIP;
           currentFrac.AddMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
           currentFrac.AddMultiplicity(- currentFrac.Multiplicities[i], ElongationValue);

@@ -547,7 +547,7 @@ public:
     int tempI = MathRoutines::Minimum(someRandomPrimesSize, this->hCharacteristic.size);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
-      result += static_cast<unsigned>(this->hCharacteristic[i].NumShort) * someRandomPrimes[i];
+      result += static_cast<unsigned>(this->hCharacteristic[i].numeratorShort) * someRandomPrimes[i];
     }
     return result;
   }

@@ -189,8 +189,8 @@ std::string WebAPIResponse::GetSanitizedComment(
     return "";
   }
   if (
-    input.StartsWith(input.owner->opRulesOff()) ||
-    input.StartsWith(input.owner->opRulesOn())
+    input.startsWith(input.owner->opRulesOff()) ||
+    input.startsWith(input.owner->opRulesOn())
   ) {
     return "";
   }
@@ -210,7 +210,7 @@ std::string WebAPIResponse::GetCommentsInterpretation(
   }
   const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
   bool resultIsPlot = false;
-  if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement())) {
+  if (!currentE.startsWith(theInterpreterWithAdvice.opEndStatement())) {
     out << WebAPIResponse::GetSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
@@ -1104,7 +1104,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
       output << "<tr><td>Administrator view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
-      << "Comments: " << theInterpreter.Comments.str()
+      << "Comments: " << theInterpreter.comments.str()
       << "<hr>Input, no enclosures: <hr>"
       << completedProblemStreamNoEnclosures.str();
       output << "<hr>Input, full:<hr>"
@@ -1512,7 +1512,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   const Expression& currentE = theInterpreteR.theProgramExpression[
     theInterpreteR.theProgramExpression.size() - 1
   ][1];
-  if (!currentE.StartsWith(theInterpreteR.opEndStatement())) {
+  if (!currentE.startsWith(theInterpreteR.opEndStatement())) {
     out << "\\(\\displaystyle " << currentE.toString(&theFormat) << "\\)";
     if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.toString(&theFormat);
@@ -1524,8 +1524,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   } else {
     for (int j = 1; j < currentE.size(); j ++) {
       if (
-        currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
-        currentE[j].StartsWith(theInterpreteR.opRulesOn())
+        currentE[j].startsWith(theInterpreteR.opRulesOff()) ||
+        currentE[j].startsWith(theInterpreteR.opRulesOn())
       ) {
         continue;
       }

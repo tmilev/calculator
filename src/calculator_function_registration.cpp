@@ -7289,21 +7289,21 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible,
+    CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible,
     "",
     "Attempts to exponentiate matrix by a large power. ",
     "X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
-    "CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible",
+    "CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossible",
     "PowerMatrixNumbersByLargeIntegerIfPossible",
     innerStandard
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger,
+    CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger,
     "",
     "Attempts to exponentiate a matrix of expressions, if the exponent is small. ",
     "X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix}; X^{2}  ",
-    "CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger",
     "PowerMatrixNumbersBySmallIntegerIfPossible",
     innerStandard
   );
@@ -7347,23 +7347,35 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
+    CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger,
     this->opPolynomialRational(),
     this->opRational(),
     "Raises poly to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
-    "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger",
     "PowerPolynomialBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger,
+    CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger,
     this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
-    "Raises poly over algebraic numbers to small integer power. ",
+    "Raises polynomial over algebraic numbers to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
+    "PowerPolynomialAlgebraicNumbersBySmallInteger",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "^",
+    CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger,
+    this->opPolynomialModuloInteger(),
+    this->opRational(),
+    "Raises polynomial modulo an integer to a small integer power. ",
+    "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
+    "a^20",
+    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
     "PowerPolynomialAlgebraicNumbersBySmallInteger",
     innerStandard
   );
@@ -8300,7 +8312,7 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
 void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
   this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
   Expression theConstantE;
-  theConstantE.MakeAtom(theConstantName, *this);
+  theConstantE.makeAtom(theConstantName, *this);
   this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
   this->knownDoubleConstantValues.addOnTop(theConstantValue);
 }

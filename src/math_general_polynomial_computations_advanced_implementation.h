@@ -844,7 +844,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
       if (this->flagUsingAlgebraicClosuRe && this->theAlgebraicClosurE != 0) {
         if (this->GetOneVarPolySolution(tempP, theCF)) {
           outputSub.MakeIdSubstitution(numVars);
-          outputSub[oneVarIndex].MakeConst(theCF);
+          outputSub[oneVarIndex].makeConstant(theCF);
           //check our work:
           tempP.Substitution(outputSub);
           if (!tempP.isEqualToZero()) {
@@ -1628,7 +1628,7 @@ template <class coefficient, class oneFactorFinder>
 bool PolynomialFactorization<coefficient, oneFactorFinder>::checkFactorization() const {
   MacroRegisterFunctionWithName("Polynomial::checkFactorization");
   Polynomial<coefficient> checkComputations;
-  checkComputations.MakeConst(this->constantFactor);
+  checkComputations.makeConstant(this->constantFactor);
   for (int i = 0; i < this->nonReduced.size; i ++) {
     checkComputations *= nonReduced[i];
   }

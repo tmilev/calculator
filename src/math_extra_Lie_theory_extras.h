@@ -239,7 +239,7 @@ public:
     MonomialUniversalEnvelopingOrdered<coefficient>& output,
     const coefficient& theRingZero = 0
   );
-  void MakeConst(const coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner) {
+  void makeConstant(const coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner) {
     this->generatorsIndices.size = 0;
     this->Powers.size = 0;
     this->Coefficient = theConst;
@@ -353,10 +353,10 @@ public:
   );
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
-  void MakeConst(const coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {
+  void makeConstant(const coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {
     this->makeZero(theOwner);
     MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
-    tempMon.MakeConst(coeff, theOwner);
+    tempMon.makeConstant(coeff, theOwner);
     this->AddMonomial(tempMon);
   }
   void simplify(const coefficient& theRingUnit = 1,  const coefficient& theRingZero = 0);
@@ -393,7 +393,7 @@ public:
     Vectors<Polynomial<coefficient> >& outputCoordinates,
     List<ElementUniversalEnvelopingOrdered>& outputTheBasis
   );
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis,
     Vector<coefficient>& output,
     const coefficient& theRingUnit,
@@ -409,7 +409,7 @@ public:
     Vector<Polynomial<coefficient> >& input,
     SemisimpleLieAlgebraOrdered& owner
   );
-  void RaiseToPower(int thePower, const coefficient& theRingUnit);
+  void raiseToPower(int thePower, const coefficient& theRingUnit);
   bool IsAPowerOfASingleGenerator() {
     if (this->size != 1) {
       return false;
@@ -515,7 +515,7 @@ public:
     const RationalFunction& RFOne,
     const RationalFunction& RFZero
   );
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     const List<ElementVermaModuleOrdered<coefficient> >& theBasis,
     Vector<coefficient>& output,
     const coefficient& theRingUnit,

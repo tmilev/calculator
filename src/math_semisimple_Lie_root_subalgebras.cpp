@@ -48,7 +48,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.LastObject();
     Vector<Rational> lastRootInSimpleCoords;
     lastRoot.getCoordinatesInBasis(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
-    coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
+    coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().numeratorShort, coxeterNumber);
   }
   Complex<double> theEigenValue;
   theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
@@ -2061,7 +2061,7 @@ void rootSubalgebra::KEnumerationsToLinComb() {
       linComb *= - x;
       bool foundBadCombination = true;
       for (int i = 0; i < theDimension; i ++) {
-        if (linComb[i].NumShort == - 1 || linComb[i].NumShort == 1) {
+        if (linComb[i].numeratorShort == - 1 || linComb[i].numeratorShort == 1) {
           foundBadCombination = false;
           break;
         }
@@ -2616,7 +2616,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   Vectors<Rational> rootsZeroChar;
   rootsZeroChar.Reserve(selectionRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem;
-  this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem);
+  this->PositiveRootsK.getCoordinatesInBasis(this->SimpleBasisK, relativeRootSystem);
   slTwoSubalgebra theSl2;
   theSl2.container = &output;
   theSl2.owner = &this->GetOwnerSSalg();

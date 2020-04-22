@@ -88,7 +88,7 @@ public:
   void operator=(List<int>& other) {
     this->generatorsIndices.Reserve(other.size);
     this->Powers.Reserve(other.size);
-    this->MakeConst();
+    this->makeConstant();
     for (int i = 0; i < other.size; i ++) {
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
     }
@@ -139,7 +139,7 @@ public:
   static unsigned int hashFunction(const MonomialTensor<coefficient, inputHashFunction>& input) {
     return input.hashFunction();
   }
-  void MakeConst() {
+  void makeConstant() {
     this->generatorsIndices.size = 0;
     this->Powers.size = 0;
   }
@@ -398,7 +398,7 @@ public:
     return true;
   }
   template <class coefficient>
-  bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const;
+  bool Substitution(const List<Polynomial<coefficient> >& theSubstitution, Polynomial<coefficient>& output) const;
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGCD();
@@ -457,7 +457,7 @@ public:
     }
   }
   bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
-  void RaiseToPower(const Rational& thePower);
+  void raiseToPower(const Rational& thePower);
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
   bool operator==(const MonomialP& other) const;
@@ -2266,7 +2266,10 @@ public:
   coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
     int theIndex = this->theMonomials.getIndex(inputMon);
     if (theIndex == - 1) {
-      return coefficient::zero();
+      if (this->coefficients.size > 0) {
+        return this->coefficients[0].zero();
+      }
+      return coefficient::zeroStatic();
     }
     return this->coefficients[theIndex];
   }
@@ -2401,13 +2404,13 @@ public:
     output += other;
     return output;
   }
-  void MakeConst(const coefficient& coeff) {
+  void makeConstant(const coefficient& coeff) {
     templateMonomial tempM;
     tempM.makeOne();
     this->AddMonomial(tempM, coeff);
   }
   void makeOne() {
-    this->MakeConst(1);
+    this->makeConstant(1);
   }
   void operator+=(const coefficient& other) {
     templateMonomial tempM;
@@ -2581,18 +2584,18 @@ class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coeffic
   void operator*=(const coefficient& other) {
     this->::LinearCombination<templateMonomial, coefficient>::operator*=(other);
   }
-  void RaiseToPower(
+  void raiseToPower(
     int d,
     ElementMonomialAlgebra<templateMonomial, coefficient>& output,
     const coefficient& theRingUniT
   );
-  void RaiseToPower(int d) {
+  void raiseToPower(int d) {
     if (d == 1) {
       return;
     }
     ElementMonomialAlgebra<templateMonomial, coefficient> theOne;
-    theOne.MakeConst(1);
-    MathRoutines::RaiseToPower(*this, d, theOne);
+    theOne.makeConstant(1);
+    MathRoutines::raiseToPower(*this, d, theOne);
   }
 };
 
@@ -2611,7 +2614,7 @@ class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient> {
 public:
   friend std::iostream& operator<< <coefficient>(std::iostream& output, const Polynomial<coefficient>& input);
   Polynomial(int x) {
-    this->MakeConst(x, 0);
+    this->makeConstant(x, 0);
   }
   Polynomial(){}
   Polynomial(const Polynomial<coefficient>& other) {
@@ -2698,7 +2701,7 @@ public:
   static Polynomial<coefficient> zero();
   Rational RationalValue();
   void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat);
-  void MakeConst(const coefficient& theConst, int ExpectedNumVars = 0) {
+  void makeConstant(const coefficient& theConst, int ExpectedNumVars = 0) {
     this->makeZero();
     MonomialP theConstMon;
     theConstMon.makeOne(ExpectedNumVars);
@@ -2749,7 +2752,7 @@ public:
   bool IsLinearNoConstantTerm();
   bool IsLinear();
   bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot);
-  void RaiseToPower(int d);
+  void raiseToPower(int d, const coefficient& one);
   bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot);
   Matrix<coefficient> EvaluateUnivariatePoly(const Matrix<coefficient>& input);//<-for univariate polynomials only
   coefficient Evaluate(const Vector<coefficient>& input);
@@ -3266,6 +3269,7 @@ public:
   bool FindOneVariableRationalRoots(List<Rational>& output);
   static RationalFunction one();
   static RationalFunction zero();
+  static RationalFunction zeroStatic();
   int minimalNumberOfVariables() const;
   bool Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other);
@@ -3273,7 +3277,7 @@ public:
   RationalFunction(int other);
   RationalFunction(const Rational& other);
   Rational RationalValue() const;
-  void RaiseToPower(int thePower);
+  void raiseToPower(int thePower);
   void ReduceMemory();
   void operator=(const Polynomial<Rational>& other);
   unsigned int hashFunction() const;
@@ -3325,7 +3329,7 @@ public:
     const Rational& Coeff = 1,
     int ExpectedNumVars = 0
   );
-  void MakeConst(const Rational& theCoeff) {
+  void makeConstant(const Rational& theCoeff) {
     this->makeZero();
     this->ratValue = theCoeff;
   }
@@ -3513,7 +3517,6 @@ void LinearCombination<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
   this->setExpectedSize(other.size() + this->size());
   coefficient tempCF;
   for (int i = 0; i < other.size(); i ++) {
-    ParallelComputing::SafePointDontCallMeFromDestructors();
     tempCF = other.coefficients[i];
     if (inputcf != nullptr) {
       tempCF *= *inputcf;
@@ -3529,7 +3532,6 @@ void LinearCombination<templateMonomial, coefficient>::AddOtherTimesConst(
   this->setExpectedSize(other.size() + this->size());
   coefficient tempCF;
   for (int i = 0; i < other.size(); i ++) {
-    ParallelComputing::SafePointDontCallMeFromDestructors();
     tempCF = theConst;
     tempCF *= other.coefficients[i];
     this->AddMonomial(other[i], tempCF);
@@ -3542,7 +3544,6 @@ void LinearCombination<templateMonomial, coefficient>::operator+=(
 ) {
   this->setExpectedSize(other.size() + this->size());
   for (int i = 0; i < other.size(); i ++) {
-    ParallelComputing::SafePointDontCallMeFromDestructors();
     this->AddMonomial(other[i], other.coefficients[i]);
   }
 }
@@ -3765,13 +3766,13 @@ int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCle
 }
 
 template <class templateMonomial, class coefficient>
-void ElementMonomialAlgebra<templateMonomial, coefficient>::RaiseToPower(
+void ElementMonomialAlgebra<templateMonomial, coefficient>::raiseToPower(
   int d, ElementMonomialAlgebra<templateMonomial, coefficient>& output, const coefficient& theRingUniT
 ) {
   ElementMonomialAlgebra<templateMonomial, coefficient> tempOne;
-  tempOne.MakeConst(theRingUniT);
+  tempOne.makeConstant(theRingUniT);
   output = *this;
-  MathRoutines::RaiseToPower(output, d, tempOne);
+  MathRoutines::raiseToPower(output, d, tempOne);
 }
 
 template <class coefficient>
@@ -4071,7 +4072,7 @@ public:
     const Vector<coefficient>& input,
     SemisimpleLieAlgebra& owner
   );
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output
   ) const;
   SemisimpleLieAlgebra* GetOwner() const {
@@ -4081,11 +4082,11 @@ public:
     }
     return (*this)[0].owner;
   }
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output
   ) const {
     Vector<Rational> tempVect;
-    if (!this->GetCoordsInBasis(theBasis, tempVect)) {
+    if (!this->getCoordinatesInBasis(theBasis, tempVect)) {
       return false;
     }
     output.setSize(tempVect.size);
@@ -4176,8 +4177,8 @@ int Matrix<coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated() {
   int result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      if (this->elements[i][j].NumShort != 0) {
-        result = Rational::gcdSigned(result, this->elements[i][j].NumShort);
+      if (this->elements[i][j].numeratorShort != 0) {
+        result = Rational::gcdSigned(result, this->elements[i][j].numeratorShort);
       }
     }
   }
@@ -6145,7 +6146,7 @@ public:
   }
   bool IsPolynomial(Polynomial<coefficient>* whichPoly = 0) const;
   bool HasNonSmallPositiveIntegerDerivation() const;
-  void RaiseToPower(int thePower);
+  void raiseToPower(int thePower);
   void MultiplyTwoMonomials(
     const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
   ) const;
@@ -6442,7 +6443,7 @@ public:
     return theMat.GetDeterminant();
   }
   void DirectSumWith(const MatrixTensor<coefficient>& other);
-  void RaiseToPower(int power);
+  void raiseToPower(int power);
   void operator*=(const MatrixTensor<coefficient>& other);
   void operator*=(const coefficient& other) {
     return this->::LinearCombination<MonomialMatrix, coefficient>::operator*=(other);
@@ -6834,7 +6835,7 @@ class MonomialGeneralizedVerma {
     }
     return this->GetOwner().getDimension() - 1 == this->indexFDVector;
   }
-  void MakeConst(ModuleSSalgebra<coefficient>& inputOwner) {
+  void makeConstant(ModuleSSalgebra<coefficient>& inputOwner) {
     this->owner = &inputOwner;
     this->theMonCoeffOne.makeOne(*inputOwner.owner);
   }
@@ -7300,7 +7301,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
   }
   if (indexCheck != - 1) {
     MonomialGeneralizedVerma<coefficient> basisMon;
-    basisMon.MakeConst(*this->owner);
+    basisMon.makeConstant(*this->owner);
     basisMon.indexFDVector = indexCheck;
     output.AddMonomial(basisMon, 1);
     return;
@@ -7335,7 +7336,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
       }
       tempMat2 = tempMat1;
       tempMat1 = theMod.GetActionGeneratorIndeX(theIndex);
-      tempMat1.RaiseToPower(thePower);
+      tempMat1.raiseToPower(thePower);
       tempMat1 *= tempMat2;
       currentMon.Powers.size --;
       currentMon.generatorsIndices.size --;
@@ -7444,7 +7445,7 @@ bool Matrix<coefficient>::IsPositiveDefinite() {
 }
 
 template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(
+bool ElementSemisimpleLieAlgebra<coefficient>::getCoordinatesInBasis(
   const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<coefficient>& output
 ) const {
   if (theBasis.size == 0) {
@@ -7454,7 +7455,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(
     output.makeZero(theBasis.size);
     return true;
   }
-  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::GetCoordsInBasis");
+  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
   Vectors<coefficient> tempBasis;
   Vector<coefficient> tempRoot;
   tempBasis.setSize(theBasis.size);

@@ -67,10 +67,10 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   this->degree = this->output->current.TotalDegreeInt();
   this->degreeUnknownFactor = this->degree / 2;
   LargeInteger power = modulus;
-  power.RaiseToPower(this->degreeUnknownFactor);
+  power.raiseToPower(this->degreeUnknownFactor);
   power -= 1;
   power /= 2;
-  MathRoutines::RaiseToPower(x, power, oneQuotientRing);
+  MathRoutines::raiseToPower(x, power, oneQuotientRing);
   if (commentsOnFailure != 0) {
     global.Comments << "Power x^{" << power << "} is: " << x.toString();
   }
@@ -188,7 +188,7 @@ void Polynomial<coefficient>::Interpolate(
   Polynomial<coefficient> theLagrangeInterpolator, accumulator;
   this->makeZero();
   for (int i = 0; i < thePoints.size; i ++) {
-    theLagrangeInterpolator.MakeConst(1, 1);
+    theLagrangeInterpolator.makeConstant(1, 1);
     for (int j = 0; j < thePoints.size; j ++) {
       if (i == j) {
         continue;
@@ -290,7 +290,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       currentPointContribution = 1;
       for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
         currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
-        currentPrimePowerContribution.RaiseToPower(divisorSelection[j][k].SelectedMult);
+        currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].SelectedMult);
         currentPointContribution *= currentPrimePowerContribution;
       }
       if (!isGood) {

@@ -206,6 +206,7 @@ public:
     return !this->isPositive();
   }
   static LargeInteger zero();
+  static LargeInteger zeroStatic();
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
@@ -364,7 +365,7 @@ public:
       *this += other.value;
     }
   }
-  void RaiseToPower(int thePower);
+  void raiseToPower(int thePower);
   LargeInteger operator%(const LargeInteger& other) const {
     LargeInteger result = *this;
     result %= other;
@@ -404,8 +405,8 @@ private:
 //  }
   struct LargeRationalExtended {
   public:
-    LargeInteger num;
-    LargeIntegerUnsigned den;
+    LargeInteger numerator;
+    LargeIntegerUnsigned denominator;
   };
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
@@ -422,34 +423,34 @@ private:
   bool TryToAddQuickly(int OtherNum, int OtherDen);
   bool TryToMultiplyQuickly(int OtherNum, int OtherDen);
   void AllocateExtended() {
-    if (this->Extended != nullptr) {
+    if (this->extended != nullptr) {
       return;
     }
-    this->Extended = new LargeRationalExtended;
+    this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
   ParallelComputing::CheckPointerCounters();
 #endif
   }
   bool InitExtendedFromShortIfNeeded() {
-    if (this->Extended != nullptr) {
+    if (this->extended != nullptr) {
       return false;
     }
-    this->Extended = new LargeRationalExtended;
+    this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
   ParallelComputing::CheckPointerCounters();
 #endif
-    this->Extended->den.AssignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
-    this->Extended->num.AssignInt(this->NumShort);
+    this->extended->denominator.AssignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
+    this->extended->numerator.AssignInt(this->numeratorShort);
     return true;
   }
   inline void FreeExtended() {
-    if (this->Extended == nullptr) {
+    if (this->extended == nullptr) {
       return;
     }
-    delete this->Extended;
-    this->Extended = nullptr;
+    delete this->extended;
+    this->extended = nullptr;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter ++;
   ParallelComputing::CheckPointerCounters();
@@ -457,11 +458,9 @@ private:
   }
   bool ShrinkExtendedPartIfPossible();
 public:
-  int NumShort;
-  //the requirement that the below be unsigned caused a huge problem, so I
-  //changed it back to int. Grrrrr.
+  int numeratorShort;
   int denominatorShort;
-  LargeRationalExtended *Extended;
+  LargeRationalExtended *extended;
   static unsigned long long int TotalSmallAdditions;
   static unsigned long long int TotalLargeAdditions;
   static unsigned long long int TotalSmallMultiplications;
@@ -503,12 +502,9 @@ public:
   void AssignLargeInteger(const LargeInteger& other);
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input);
-  static Rational zero() {
-    return 0;
-  }
-  static Rational one() {
-    return 1;
-  }
+  static Rational zero();
+  static Rational zeroStatic();
+  static Rational one();
   void AssignFracValue();
   void AssignFloor() {
     Rational tempRat = *this;
@@ -519,14 +515,14 @@ public:
   // The Hash function of zero must be equal to zero.
   // See Note on Hashes before the definition of someRandomPrimes;
   unsigned int hashFunction() const {
-    if (this->Extended == nullptr) {
-      if (this->NumShort == 0) {
+    if (this->extended == nullptr) {
+      if (this->numeratorShort == 0) {
         return 0;
       }
-      return static_cast<unsigned int>(this->NumShort) * someRandomPrimes[0] + static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
+      return static_cast<unsigned int>(this->numeratorShort) * someRandomPrimes[0] + static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
     }
-    return this->Extended->num.hashFunction() * someRandomPrimes[0] +
-    this->Extended->den.hashFunction() * someRandomPrimes[1];
+    return this->extended->numerator.hashFunction() * someRandomPrimes[0] +
+    this->extended->denominator.hashFunction() * someRandomPrimes[1];
   }
   static inline unsigned int hashFunction(const Rational& input) {
     return input.hashFunction();
@@ -546,14 +542,14 @@ public:
     return theInt.IsIntegerFittingInInt(whichInt);
   }
   bool IsSmallInteger(int* whichInteger = nullptr) const {
-    if (this->Extended != nullptr) {
+    if (this->extended != nullptr) {
       return false;
     }
     if (this->denominatorShort != 1) {
       return false;
     }
     if (whichInteger != nullptr) {
-      *whichInteger = this->NumShort;
+      *whichInteger = this->numeratorShort;
     }
     return true;
   }
@@ -563,7 +559,7 @@ public:
       d = - d;
       n = - n;
     }
-    this->NumShort = n;
+    this->numeratorShort = n;
     this->denominatorShort = d;
     this->FreeExtended();
     this->simplify();
@@ -582,19 +578,19 @@ public:
       return;
     }
     this->InitExtendedFromShortIfNeeded();
-    this->Extended->den.MultiplyByUInt(static_cast<unsigned int>(tempDen));
-    this->Extended->num.sign *= tempSign;
+    this->extended->denominator.MultiplyByUInt(static_cast<unsigned int>(tempDen));
+    this->extended->numerator.sign *= tempSign;
     this->simplify();
   }
   void DivideByLargeInteger(LargeInteger& x) {
     this->InitExtendedFromShortIfNeeded();
-    this->Extended->den.MultiplyBy(x.value);
-    this->Extended->num.sign *= x.sign;
+    this->extended->denominator.MultiplyBy(x.value);
+    this->extended->numerator.sign *= x.sign;
     this->simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntegerUnsigned& x) {
     this->InitExtendedFromShortIfNeeded();
-    this->Extended->den.MultiplyBy(x);
+    this->extended->denominator.MultiplyBy(x);
     this->simplify();
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -608,73 +604,73 @@ public:
     return tempRat.IsInteger();
   }
   inline bool IsEqualToOne() const {
-    if (this->Extended == nullptr) {
-      return (this->NumShort == 1 && this->denominatorShort == 1);
+    if (this->extended == nullptr) {
+      return (this->numeratorShort == 1 && this->denominatorShort == 1);
     } else {
-      return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
+      return (this->extended->numerator.IsEqualToOne() && this->extended->denominator.IsEqualToOne());
     }
   }
   inline bool isEqualToZero() const {
-    if (this->Extended == nullptr) {
-      return this->NumShort == 0;
+    if (this->extended == nullptr) {
+      return this->numeratorShort == 0;
     } else {
-      return this->Extended->num.isEqualToZero();
+      return this->extended->numerator.isEqualToZero();
     }
   }
   inline bool operator<=(const Rational& other) const {
     return !(other < *this);
   }
   inline bool isPositiveOrZero() const {
-    if (this->Extended == nullptr) {
-      return this->NumShort >= 0;
+    if (this->extended == nullptr) {
+      return this->numeratorShort >= 0;
     } else {
-      return this->Extended->num.isPositiveOrZero();
+      return this->extended->numerator.isPositiveOrZero();
     }
   }
   bool isNegative() const {
-    if (this->Extended == nullptr) {
-      return this->NumShort < 0;
+    if (this->extended == nullptr) {
+      return this->numeratorShort < 0;
     } else {
-      return this->Extended->num.isNegative();
+      return this->extended->numerator.isNegative();
     }
   }
   bool IsNonPositive() const {
-    if (this->Extended == nullptr) {
-      return this->NumShort <= 0;
+    if (this->extended == nullptr) {
+      return this->numeratorShort <= 0;
     } else {
-      return this->Extended->num.IsNonPositive();
+      return this->extended->numerator.IsNonPositive();
     }
   }
   bool isPositive() const {
-    if (this->Extended == nullptr) {
-      return this->NumShort > 0;
+    if (this->extended == nullptr) {
+      return this->numeratorShort > 0;
     } else {
-      return this->Extended->num.isPositive();
+      return this->extended->numerator.isPositive();
     }
   }
   void simplify();
   void invert();
   void Minus() {
-    if (this->Extended == nullptr) {
-      this->NumShort *= - 1;
+    if (this->extended == nullptr) {
+      this->numeratorShort *= - 1;
     } else {
-      this->Extended->num.sign *= - 1;
+      this->extended->numerator.sign *= - 1;
     }
   }
   double GetDoubleValue() const;
   int floorIfSmall();
   void makeZero() {
-    this->NumShort = 0;
+    this->numeratorShort = 0;
     this->denominatorShort = 1;
     this->FreeExtended();
   }
   void makeOne() {
-    this->NumShort = 1;
+    this->numeratorShort = 1;
     this->denominatorShort = 1;
     this->FreeExtended();
   }
   void MakeMOne() {
-    this->NumShort = - 1;
+    this->numeratorShort = - 1;
     this->denominatorShort = 1;
     this->FreeExtended();
   }
@@ -699,36 +695,32 @@ public:
   static Rational Factorial(int n);
   static Rational TwoToTheNth(int n);
   static Rational NtoTheKth(int n, int k);
-  void RaiseToPower(int x);
-  //don't ever call the below manually or you can get memory leak (extended must be nullified here by
-  //default!
+  void raiseToPower(int x);
+  // Calling the following constructor on an already initialized object will leak the
+  // extended pointer.
   Rational(int n, int d) {
-    this->Extended = nullptr;
+    this->extended = nullptr;
     this->AssignNumeratorAndDenominator(n, d);
-    ParallelComputing::SafePointDontCallMeFromDestructors();
   }
   Rational(const LargeInteger& other) {
-    this->Extended = nullptr;
+    this->extended = nullptr;
     *this = other;
   }
   Rational(const LargeIntegerUnsigned& other) {
-    this->Extended = nullptr;
+    this->extended = nullptr;
     *this = other;
   }
-  Rational(): NumShort(0), denominatorShort(0), Extended(nullptr) {
-    ParallelComputing::SafePointDontCallMeFromDestructors();
+  Rational(): numeratorShort(0), denominatorShort(0), extended(nullptr) {
   }
   Rational(int n) {
-    this->Extended = nullptr;
+    this->extended = nullptr;
     this->AssignNumeratorAndDenominator(n, 1);
-    ParallelComputing::SafePointDontCallMeFromDestructors();
   }
   Rational(const Rational& right) {
-    this->Extended = nullptr;
+    this->extended = nullptr;
     this->Assign(right);
-    ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(const std::string& input): NumShort(0), denominatorShort(0), Extended(nullptr) {
+  Rational(const std::string& input): numeratorShort(0), denominatorShort(0), extended(nullptr) {
     this->AssignString(input);
   }
   ~Rational() {
@@ -749,7 +741,7 @@ public:
     return Rational::gcd(a, b);
   }
   bool checkConsistency() {
-    if (this->Extended == nullptr) {
+    if (this->extended == nullptr) {
       return this->denominatorShort > 0;
     }
     return true;
@@ -775,8 +767,8 @@ public:
   }
   inline void operator+=(const Rational& r) {
     //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
-    if (r.Extended == nullptr && this->Extended == nullptr) {
-      if (this->TryToAddQuickly(r.NumShort, r.denominatorShort)) {
+    if (r.extended == nullptr && this->extended == nullptr) {
+      if (this->TryToAddQuickly(r.numeratorShort, r.denominatorShort)) {
         return;
       }
     }
@@ -790,11 +782,11 @@ public:
     tempRat.Assign(r);
     tempRat.InitExtendedFromShortIfNeeded();
     LargeInteger tempI;
-    tempI = tempRat.Extended->num;
-    tempI.value.MultiplyBy(this->Extended->den);
-    this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
-    this->Extended->num += (tempI);
-    this->Extended->den.MultiplyBy(tempRat.Extended->den);
+    tempI = tempRat.extended->numerator;
+    tempI.value.MultiplyBy(this->extended->denominator);
+    this->extended->numerator.value.MultiplyBy(tempRat.extended->denominator);
+    this->extended->numerator += (tempI);
+    this->extended->denominator.MultiplyBy(tempRat.extended->denominator);
     this->simplify();
   }
   inline void operator-=(const Rational& right) {

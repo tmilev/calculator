@@ -118,7 +118,7 @@ bool ExpressionContext::setVariablesFromStrings(
   this->variables.clear();
   for (int i = 0; i < inputVariables.size; i ++) {
     Expression current;
-    current.MakeAtom(inputVariables[i], *this->owner);
+    current.makeAtom(inputVariables[i], *this->owner);
     this->variables.addOnTop(current);
   }
   return true;
@@ -223,10 +223,10 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(this->owner->opWeylAlgebraVariables())) {
+    if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())) {
       this->setChild(i, diffVarsE);
       foundDiffVarsE = true;
-    } else if ((*this)[i].StartsWith(this->owner->opPolynomialVariables())) {
+    } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())) {
       this->setChild(i, polyVarsE);
       foundPolyVarsE = true;
     }
@@ -243,13 +243,13 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
 bool ExpressionContext::fromExpressionOneContext(
   const Expression& input
 ) {
-  if (input.StartsWith(this->owner->opPolynomialVariables())) {
+  if (input.startsWith(this->owner->opPolynomialVariables())) {
     return this->fromExpressionPolynomialVariables(input);
   }
-  if (input.StartsWith(this->owner->opWeylAlgebraVariables())) {
+  if (input.startsWith(this->owner->opWeylAlgebraVariables())) {
     return this->fromExpressionDifferentialOperatorVariables(input);
   }
-  if (input.StartsWith(this->owner->opSemisimpleLieAlgebrA())) {
+  if (input.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
     return this->fromExpressionSemisimpleLieAlgebra(input);
   }
   return *this->owner << "Uknown context type. ";
@@ -579,7 +579,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     oldContext.polynomialAndWeylAlgebraSubstitutionNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA = this->getValue<ElementWeylAlgebra<Rational> >();
     if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
-      this->owner->Comments << "<hr>Failed to convert "
+      this->owner->comments << "<hr>Failed to convert "
       << outputEWA.toString() << ": failed to carry out substitution "
       << subEWApart.toString() << ", " << subPolyPart.toString();
       return false;
@@ -625,7 +625,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     }
     return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
   }
-  this->owner->Comments << "Expression " << this->toString()
+  this->owner->comments << "Expression " << this->toString()
   << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";
   return false;
 }

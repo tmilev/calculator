@@ -547,7 +547,7 @@ bool Calculator::ReplaceOXXByEXX() {
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceOXXByEXX]";
   }
-  left.theData.MakeAtom(this->GetOperationIndexFromControlIndex(left.controlIndex), *this);
+  left.theData.makeAtom(this->GetOperationIndexFromControlIndex(left.controlIndex), *this);
   left.controlIndex = this->conExpression();
   return true;
 }
@@ -644,7 +644,7 @@ bool Calculator::ReplaceXByCon(int theCon) {
 
 bool Calculator::ReplaceXByO(int theOperation) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].controlIndex = this->conExpression();
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].theData.MakeAtom(theOperation, *this);
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].theData.makeAtom(theOperation, *this);
   return true;
 }
 
@@ -909,7 +909,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       output.addOnTop(currentElement);
     } else {
       currentElement.controlIndex = this->controlSequences.getIndex("Variable");
-      currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
+      currentElement.theData.makeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
       output.addOnTop(currentElement);
     }
     current = "";
@@ -937,7 +937,7 @@ bool Calculator::ReplaceXXXbyE() {
 
 bool Calculator::ReplaCeOXdotsXbyEXdotsX(int numXs) {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1 - numXs];
-  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  theElt.theData.makeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     std::stringstream out;
     out << "[Rule: Calculator::ReplaCeOXdotsXbyEXdotsX: " << numXs << "]";
@@ -949,7 +949,7 @@ bool Calculator::ReplaCeOXdotsXbyEXdotsX(int numXs) {
 
 bool Calculator::ReplaceOXbyEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  theElt.theData.makeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceOXbyEX]";
   }
@@ -958,7 +958,7 @@ bool Calculator::ReplaceOXbyEX() {
 
 bool Calculator::ReplaCeObyE() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  theElt.theData.makeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceObyE]";
   }
@@ -1064,7 +1064,7 @@ bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
     theElt.theData.addChildAtomOnTop(this->opBind());
     theElt.theData.addChildAtomOnTop(theBoundVar);
   } else {
-    theElt.theData.MakeAtom(theBoundVar, *this);
+    theElt.theData.makeAtom(theBoundVar, *this);
     if (!this->IsNonBoundVarInContext(theBoundVar)) {
       this->NonBoundVariablesInContext.addOnTop(theBoundVar);
     }
@@ -1206,7 +1206,7 @@ bool Calculator::ReplaceIntegerDotIntegerByE() {
   std::string beforeDecimalPoint = left.GetIntegerStringCrashIfNot(*this);
   int powerOfTenToDivideBy = static_cast<int>(afterDecimalPoint.size());
   Rational denominator = 10;
-  denominator.RaiseToPower(powerOfTenToDivideBy);
+  denominator.raiseToPower(powerOfTenToDivideBy);
   Rational result;
   result.AssignString(beforeDecimalPoint);
   result *= denominator;
@@ -1392,7 +1392,7 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   << "(a single variable whose name contains the letters x and y). "
   ;
   for (int i = 0; i < theSplit.size; i ++) {
-    newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
+    newElt.theData.makeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
     newElt.controlIndex = this->controlSequences.getIndex(theSplit[i]);
     if (newElt.controlIndex == - 1) {
       newElt.controlIndex = this->conVariable();
@@ -1531,7 +1531,7 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots) {
 bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots) {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 1];
-  if (!left.theData.StartsWith(this->opEndStatement())) {
+  if (!left.theData.startsWith(this->opEndStatement())) {
     global.fatal << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX "
     << "called but left expression is not EndStatement." << global.fatal;
   }
@@ -1574,7 +1574,7 @@ bool Calculator::ReplaceEXEXByEX() {
 
 bool Calculator::ReplaceXXbyO(int theOperation) {
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  result.theData.MakeAtom(theOperation, *this);
+  result.theData.makeAtom(theOperation, *this);
   result.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXbyO]";
@@ -1584,7 +1584,7 @@ bool Calculator::ReplaceXXbyO(int theOperation) {
 
 bool Calculator::ReplaceXXYbyOY(int theOperation) {
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
-  result.theData.MakeAtom(theOperation, *this);
+  result.theData.makeAtom(theOperation, *this);
   result.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXXYbyOY]";
@@ -1993,7 +1993,7 @@ bool Calculator::ApplyOneRule() {
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "LogFull") {
-    this->Comments
+    this->comments
     << "<hr>Requested a full log of the evaluation process.<hr>";
     this->flagLogFullTreeCrunching = true;
     this->PopTopSyntacticStack();
@@ -2001,31 +2001,31 @@ bool Calculator::ApplyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "UseBracketForIntervals") {
     this->flagUseBracketsForIntervals = true;
-    this->Comments << "Using brackets for intervals. ";
+    this->comments << "Using brackets for intervals. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "DontUsePredefinedWordSplits") {
     this->flagUsePredefinedWordSplits = false;
-    this->Comments << "Using predefined word splits -for example xy is replaced by x y. ";
+    this->comments << "Using predefined word splits -for example xy is replaced by x y. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "WriteLatexDetails") {
     this->flagWriteLatexPlots = true;
-    this->Comments << "Creating LaTeX files.";
+    this->comments << "Creating LaTeX files.";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "PlotShowJavascriptOnly") {
     this->flagPlotShowJavascriptOnly = true;
-    this->Comments << "Plots show javascript only. ";
+    this->comments << "Plots show javascript only. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "PlotDetails") {
     this->flagPlotNoControls = false;
-    this->Comments << "Plot details on. ";
+    this->comments << "Plot details on. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -2040,7 +2040,7 @@ bool Calculator::ApplyOneRule() {
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "UseLnInsteadOfLog") {
-    this->Comments << "Displaying complex logarithms as ln. ";
+    this->comments << "Displaying complex logarithms as ln. ";
     this->flagUseLnInsteadOfLog = true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();

@@ -20,9 +20,9 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
     input.theGeneratorIndex >= input.owner->GetNumPosRoots() &&
     input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->GetRank()
   ) {
-    generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
+    generatorLetterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   } else {
-    generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
+    generatorLetterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   }
   generatorIndexE.AssignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
@@ -76,18 +76,18 @@ bool CalculatorConversions::functionDynkinSimpleType(
 ) {
   MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
-  if (input.StartsWith(theCommands.opUnderscore(), 3)) {
+  if (input.startsWith(theCommands.opUnderscore(), 3)) {
     rankE = input[2];
     typeLetterE = input[1];
-    if (typeLetterE.StartsWith(theCommands.opThePower(),3)) {
+    if (typeLetterE.startsWith(theCommands.opThePower(),3)) {
       scaleE = typeLetterE[2];
       typeLetterE = typeLetterE[1];
     } else {
       scaleE.AssignValue(1, theCommands);
     }
-  } else if (input.StartsWith(theCommands.opThePower(), 3)) {
+  } else if (input.startsWith(theCommands.opThePower(), 3)) {
     scaleE = input[2];
-    if (!input[1].StartsWith(theCommands.opUnderscore(), 3)) {
+    if (!input[1].startsWith(theCommands.opUnderscore(), 3)) {
       return theCommands << "<hr>Failed to extract rank, type from "
       << input[1].toString()
       << ". The expression does not have two children.";
@@ -255,7 +255,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS = input.theLetter;
-  letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
+  letterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
   indexE.AssignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
@@ -324,7 +324,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   Calculator& theCommands, const Expression& input, slTwoSubalgebra& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject slTwoSubalgebra");
-  if (!input.IsListNElements(4)) {
+  if (!input.isListNElements(4)) {
     return theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
   }
   const Expression& theOwnerE = input[1];
@@ -424,7 +424,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
   output.clear();
   for (int i = 1; i < input.size(); i ++) {
-    if (input[i].StartsWith(theCommands.opDefine(), 3)) {
+    if (input[i].startsWith(theCommands.opDefine(), 3)) {
       output.SetKeyValue(input[i][1], input[i][2]);
     } else if (!allowFailure) {
       if (commentsOnFailure != nullptr) {
@@ -446,9 +446,9 @@ bool CalculatorConversions::innerLoadKey(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
   Expression theKeyE;
-  theKeyE.MakeAtom(inputKey, theCommands);
+  theKeyE.makeAtom(inputKey, theCommands);
   for (int i = 0; i < inputStatementList.children.size; i ++) {
-    if (inputStatementList[i].StartsWith(theCommands.opDefine(), 3)) {
+    if (inputStatementList[i].startsWith(theCommands.opDefine(), 3)) {
       if (inputStatementList[i][1] == theKeyE) {
         output = inputStatementList[i][2];
         return true;
@@ -701,7 +701,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
   theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
-  if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments)) {
+  if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.comments)) {
     return false;
   }
   theSAs.flagAttemptToAdjustCentralizers = false;
@@ -880,7 +880,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       << input.toString() << ".<hr>";
     }
     Expression singleChevGenE = theContext.getVariable(theGenIndex);
-    if (!singleChevGenE.StartsWith(theCommands.opUnderscore(), 3)) {
+    if (!singleChevGenE.startsWith(theCommands.opUnderscore(), 3)) {
       return theCommands << "<hr>Failed to convert: "
       << singleChevGenE.toString()
       << "(summand of: "
@@ -952,7 +952,7 @@ bool CalculatorConversions::innerElementUE(
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < theP.size(); j ++) {
     const MonomialP& currentMon = theP[j];
-    currentSummand.MakeConst(theP.coefficients[j], owner);
+    currentSummand.makeConstant(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
       int thePower = - 1;
@@ -966,7 +966,7 @@ bool CalculatorConversions::innerElementUE(
         continue;
       }
       Expression singleChevGenE = theContext.getVariable(i);
-      if (!singleChevGenE.IsListNElements(2)) {
+      if (!singleChevGenE.isListNElements(2)) {
         return theCommands << "<hr>Failed to convert "
         << input[1].toString() << " to polynomial.<hr>";
       }
@@ -1002,7 +1002,7 @@ bool CalculatorConversions::innerElementUE(
       }
       if (isHonestElementUE) {
         currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
-        currentMultiplicand.RaiseToPower(thePower);
+        currentMultiplicand.raiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {
         int variableIndex = polynomialVariables.addNoRepetitionOrReturnIndexFirst(singleChevGenE);
@@ -1121,9 +1121,9 @@ bool CalculatorConversions::functionRationalFunction(
   MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
   Expression intermediate(theCommands);
   if (
-    input.StartsWith(theCommands.opPlus(), 3) ||
-    input.StartsWith(theCommands.opTimes(), 3) ||
-    input.StartsWith(theCommands.opDivide(), 3)
+    input.startsWith(theCommands.opPlus(), 3) ||
+    input.startsWith(theCommands.opTimes(), 3) ||
+    input.startsWith(theCommands.opDivide(), 3)
   ) {
     Expression leftE, rightE;
     if (
@@ -1141,17 +1141,17 @@ bool CalculatorConversions::functionRationalFunction(
     intermediate.addChildOnTop(input[0]);
     intermediate.addChildOnTop(leftE);
     intermediate.addChildOnTop(rightE);
-    if (input.StartsWith(theCommands.opPlus())) {
+    if (input.startsWith(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
         theCommands, intermediate, output
       );
     }
-    if (input.StartsWith(theCommands.opTimes())) {
+    if (input.startsWith(theCommands.opTimes())) {
       return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
         theCommands, intermediate, output
       );
     }
-    if (input.StartsWith(theCommands.opDivide())) {
+    if (input.startsWith(theCommands.opDivide())) {
       return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
         theCommands, intermediate, output
       );
@@ -1159,7 +1159,7 @@ bool CalculatorConversions::functionRationalFunction(
     global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
   int theSmallPower = - 1;
-  if (input.StartsWith(theCommands.opThePower(), 3) ) {
+  if (input.startsWith(theCommands.opThePower(), 3) ) {
     if (input[2].IsSmallInteger(&theSmallPower)) {
       Expression leftE;
       if (!CalculatorConversions::functionRationalFunction(theCommands, input[1], leftE)) {
@@ -1170,7 +1170,7 @@ bool CalculatorConversions::functionRationalFunction(
         return theCommands << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
       }
       RationalFunction theRF = leftE.getValue<RationalFunction>();
-      theRF.RaiseToPower(theSmallPower);
+      theRF.raiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
     theCommands << "<hr>Warning: failed to raise "
@@ -1269,7 +1269,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
     return true;
   }
   if (conversionAttempt.size() >= 1) {
-    if (conversionAttempt[0].StartsWith(theCommands.opMatriX())) {
+    if (conversionAttempt[0].startsWith(theCommands.opMatriX())) {
       if (conversionAttempt[0].size() > 1) {
         output = conversionAttempt;
         return true;
@@ -1345,7 +1345,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
   }
   std::string outputString;
   if (!FileOperations::LoadFileToStringVirtual(
-    theRelativeFileName, outputString, false, &theCommands.Comments
+    theRelativeFileName, outputString, false, &theCommands.comments
   )) {
     return false;
   }

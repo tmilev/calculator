@@ -112,10 +112,10 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
 }
 
 template <class coefficient, typename theIntegerType>
-void MathRoutines::RaiseToPower(
+void MathRoutines::raiseToPower(
   coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::RaiseToPower");
+  MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   theIntegerType thePowerCopy;
   thePowerCopy = thePower;
   if (thePowerCopy < 0) {
@@ -186,9 +186,9 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   }
   this->checkConsistency();
   other.checkConsistency();
-  int maxNumMonsFinal = this->size() * other.size();
-  if (maxNumMonsFinal > 2000000) {
-    maxNumMonsFinal = 2000000;
+  int maximumMonomials = this->size() * other.size();
+  if (maximumMonomials > 2000000) {
+    maximumMonomials = 2000000;
   }
   int totalMonPairs = 0;
   ProgressReport theReport1;
@@ -202,10 +202,10 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     theReport1.report(reportStream.str());
   }
   bufferPoly.makeZero();
-  bufferPoly.setExpectedSize(maxNumMonsFinal);
+  bufferPoly.setExpectedSize(maximumMonomials);
   bufferPoly.checkConsistency();
   bufferMon.checkConsistency();
-  coefficient theCoeff;
+  coefficient current;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
       if (theReport2.tickAndWantReport()) {
@@ -217,10 +217,9 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
       }
       bufferMon = (*this)[j];
       bufferMon *= other[i];
-      theCoeff = this->coefficients[j];
-      theCoeff *= other.coefficients[i];
-      bufferPoly.AddMonomial(bufferMon, theCoeff);
-      ParallelComputing::SafePointDontCallMeFromDestructors();
+      current = this->coefficients[j];
+      current *= other.coefficients[i];
+      bufferPoly.AddMonomial(bufferMon, current);
     }
   }
   output = bufferPoly;
@@ -246,13 +245,13 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
 }
 
 template<class coefficient>
-void MatrixTensor<coefficient>::RaiseToPower(int power) {
+void MatrixTensor<coefficient>::raiseToPower(int power) {
   if (power <= 0) {
-    global.fatal << "MatrixTensor::RaiseToPower is currently implemented for positive integer power only. " << global.fatal;
+    global.fatal << "MatrixTensor::raiseToPower is currently implemented for positive integer power only. " << global.fatal;
   }
   MatrixTensor<coefficient> id;
   id.MakeIdSpecial();
-  MathRoutines::RaiseToPower(*this, power, id);
+  MathRoutines::raiseToPower(*this, power, id);
 }
 
 template <class coefficient>

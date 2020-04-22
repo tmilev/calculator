@@ -701,7 +701,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   output.makeZero(this->theRange());
   RationalFunction polyOne;
   polyOne = theCoeff.one();
-  output.MakeConst(theCoeff, this->theRange());
+  output.makeConstant(theCoeff, this->theRange());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
       return false;
@@ -938,7 +938,7 @@ void SemisimpleLieAlgebra::OrderNilradicalNilWeightAscending(const Selection& pa
   for (int i = 0; i < this->GetNumGenerators(); i ++) {
     Rational translationCoeff = this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->GetNumPosRoots();
     if (translationCoeff < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = i + translationCoeff.NumShort * this->GetNumGenerators() * 5;
+      this->UEGeneratorOrderIncludingCartanElts[i] = i + translationCoeff.numeratorShort * this->GetNumGenerators() * 5;
     }
   }
 }
@@ -949,7 +949,7 @@ void SemisimpleLieAlgebra::OrderNilradicalNilWeightDescending(const Selection& p
   for (int i = 0; i < this->GetNumGenerators(); i ++) {
     Rational translationCoeff = this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->GetNumPosRoots();
     if (translationCoeff < 0) {
-      this->UEGeneratorOrderIncludingCartanElts[i] = - i + translationCoeff.NumShort * this->GetNumGenerators() * 5;
+      this->UEGeneratorOrderIncludingCartanElts[i] = - i + translationCoeff.numeratorShort * this->GetNumGenerators() * 5;
     }
   }
 }
@@ -1230,11 +1230,11 @@ bool RationalFunction::ConvertToType(int theType) {
   }
   if (this->expressionType == this->typeRational && this->expressionType < theType) {
     this->expressionType = this->typePoly;
-    this->Numerator.getElement().MakeConst(this->ratValue);
+    this->Numerator.getElement().makeConstant(this->ratValue);
   }
   if (this->expressionType == this->typePoly && this->expressionType < theType) {
     this->expressionType = this->typeRationalFunction;
-    this->Denominator.getElement().MakeConst(1);
+    this->Denominator.getElement().makeConstant(1);
   }
   return true;
 }
@@ -1306,7 +1306,7 @@ bool RationalFunction::checkConsistency() const {
 
 void RationalFunction::operator/=(int other) {
   RationalFunction tempRF;
-  tempRF.MakeConst(other);
+  tempRF.makeConstant(other);
   *this /= tempRF;
 }
 
@@ -1338,7 +1338,7 @@ void RationalFunction::operator-=(const Rational& other) {
     global.fatal << "Corrupt rational function in operator-=(Rational). " << global.fatal;
   }
   RationalFunction tempRF;
-  tempRF.MakeConst(other);
+  tempRF.makeConstant(other);
   tempRF.Minus();
   this->operator+=(tempRF);
   if (!(this->checkConsistency())) {
@@ -1347,7 +1347,7 @@ void RationalFunction::operator-=(const Rational& other) {
 }
 
 void RationalFunction::makeOne() {
-  this->MakeConst(1);
+  this->makeConstant(1);
 }
 
 void RationalFunction::makeZero() {
@@ -1362,7 +1362,7 @@ void RationalFunction::makeZero() {
 
 void RationalFunction::operator+=(int theConstant) {
   RationalFunction tempRF;
-  tempRF.MakeConst(Rational(theConstant));
+  tempRF.makeConstant(Rational(theConstant));
   (*this) += tempRF;
 }
 
@@ -1397,6 +1397,10 @@ RationalFunction::RationalFunction(const RationalFunction& other): expressionTyp
 }
 
 RationalFunction RationalFunction::zero() {
+  return RationalFunction::zeroStatic();
+}
+
+RationalFunction RationalFunction::zeroStatic() {
   RationalFunction tempRat;
   tempRat.makeZero();
   return tempRat;
@@ -1404,7 +1408,7 @@ RationalFunction RationalFunction::zero() {
 
 RationalFunction RationalFunction::one() {
   RationalFunction tempRat;
-  tempRat.MakeConst(1);
+  tempRat.makeConstant(1);
   return tempRat;
 }
 
@@ -1669,7 +1673,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   this->checkConsistency();
   other.checkConsistency();
   if (this == &other) {
-    this->RaiseToPower(2);
+    this->raiseToPower(2);
     return;
   }
   if (other.isEqualToZero() || this->isEqualToZero()) {
@@ -1976,7 +1980,7 @@ void SemisimpleLieAlgebraOrdered::init(
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i = 0; i < owner.GetNumGenerators(); i ++) {
     currentElt.MakeGenerator(i, owner);
-    currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis);
+    currentElt.getCoordinatesInBasis(this->theOrder, coordsInCurrentBasis);
     for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
       this->ChevalleyGeneratorsInCurrentCoords.elements[j][i] = coordsInCurrentBasis[j];
     }
@@ -2093,8 +2097,8 @@ bool RationalFunction::gcdQuick(
   return true;
 }
 
-void RationalFunction::RaiseToPower(int thePower) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::RaiseToPower");
+void RationalFunction::raiseToPower(int thePower) {
+  MacroRegisterFunctionWithName("RationalFunctionOld::raiseToPower");
   this->checkConsistency();
   if (thePower < 0) {
     this->invert();
@@ -2106,31 +2110,31 @@ void RationalFunction::RaiseToPower(int thePower) {
   }
   switch (this->expressionType) {
     case RationalFunction::typeRational:
-      this->ratValue.RaiseToPower(thePower);
+      this->ratValue.raiseToPower(thePower);
       break;
     case RationalFunction::typePoly:
-      this->Numerator.getElement().RaiseToPower(thePower);
+      this->Numerator.getElement().raiseToPower(thePower, 1);
       break;
     case RationalFunction::typeRationalFunction:
-      this->Numerator.getElement().RaiseToPower(thePower);
-      this->Denominator.getElement().RaiseToPower(thePower);
+      this->Numerator.getElement().raiseToPower(thePower, 1);
+      this->Denominator.getElement().raiseToPower(thePower, 1);
       break;
   }
   this->checkConsistency();
 }
 
 void RationalFunction::ClearDenominators(RationalFunction& outputWasMultipliedBy) {
-  //outputWasMultipliedBy.MakeConst(this->NumVars, (Rational) 1, this->context);
+  //outputWasMultipliedBy.makeConstant(this->NumVars, (Rational) 1, this->context);
   Rational tempRat;
   switch(this->expressionType) {
     case RationalFunction::typeRational:
       tempRat = this->ratValue.GetDenominator();
-      outputWasMultipliedBy.MakeConst(tempRat);
+      outputWasMultipliedBy.makeConstant(tempRat);
       this->ratValue *= tempRat;
     break;
     case RationalFunction::typePoly:
       this->Numerator.getElement().ClearDenominators(tempRat);
-      outputWasMultipliedBy.MakeConst(tempRat);
+      outputWasMultipliedBy.makeConstant(tempRat);
     break;
     case RationalFunction::typeRationalFunction:
       RationalFunction tempRF;
@@ -2642,11 +2646,11 @@ unsigned int RationalFunction::hashFunction(const RationalFunction& input) {
 }
 
 void RationalFunction::operator=(int other) {
-  this->MakeConst(other);
+  this->makeConstant(other);
 }
 
 void RationalFunction::operator=(const Rational& other) {
-  this->MakeConst(other);
+  this->makeConstant(other);
 }
 
 void RationalFunction::SetNumVariables(int GoalNumVars) {
@@ -2656,7 +2660,7 @@ void RationalFunction::SetNumVariables(int GoalNumVars) {
 void RationalFunction::GetNumerator(Polynomial<Rational>& output) const {
   switch (this->expressionType) {
     case RationalFunction::typeRational:
-      output.MakeConst(this->ratValue);
+      output.makeConstant(this->ratValue);
       return;
     default:
       output = this->Numerator.GetElementConst();
@@ -2681,7 +2685,7 @@ void RationalFunction::GetDenominator(Polynomial<Rational>& output) const {
       output = this->Denominator.GetElementConst();
       return;
     default:
-      output.MakeConst(Rational(1));
+      output.makeConstant(Rational(1));
       return;
   }
 }
@@ -2979,7 +2983,7 @@ bool MonomialP::hasSmallIntegralPositivePowers(int* whichTotalDegree) const {
   return this->TotalDegree().IsIntegerFittingInInt(whichTotalDegree);
 }
 
-void MonomialP::RaiseToPower(const Rational& thePower) {
+void MonomialP::raiseToPower(const Rational& thePower) {
   for (int i = 0; i < this->monBody.size; i ++) {
     this->monBody[i] *= thePower;
   }

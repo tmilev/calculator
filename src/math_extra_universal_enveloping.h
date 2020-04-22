@@ -186,7 +186,7 @@ public:
   coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
   void makeZero(SemisimpleLieAlgebra& inputOwner);
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
-  void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
+  void makeConstant(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
     this->makeZero(inputOwner);
     MonomialUniversalEnveloping<coefficient> tempMon;
     tempMon.makeOne(inputOwner);
@@ -213,7 +213,7 @@ public:
     Vectors<coefficient>& outputCoordinates,
     ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials
   );
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     List<ElementUniversalEnveloping<coefficient> >& theBasis,
     Vector<coefficient>& output,
     const coefficient& theRingUnit,
@@ -236,7 +236,7 @@ public:
   void AssignFromCoordinateFormWRTBasis(
     List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner
   );
-  void RaiseToPower(int thePower);
+  void raiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator() const {
     if (this->size() != 1) {
       return false;
@@ -266,7 +266,7 @@ public:
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner) {
     Rational tempRat = coeff;
-    this->MakeConst(tempRat, numVars, &theOwner);
+    this->makeConstant(tempRat, numVars, &theOwner);
   }
   SemisimpleLieAlgebra& GetOwner() const {
     return *this->owner;
@@ -284,7 +284,7 @@ public:
     }
   }
   void operator=(const Rational& other) {
-    this->MakeConst(other, 0, *this->owner);
+    this->makeConstant(other, 0, *this->owner);
   }
   void operator=(const ElementUniversalEnveloping<coefficient>& other) {
     this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);

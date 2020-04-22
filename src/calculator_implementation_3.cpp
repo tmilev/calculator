@@ -123,7 +123,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
+  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -155,7 +155,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
           this->AmbientWeyl->RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().NumShort;
+            int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().numeratorShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
@@ -185,7 +185,7 @@ bool Calculator::innerAnimateLittelmannPaths(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
@@ -1026,7 +1026,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
           theG2CasimirCopy = imageCasimirInB3;
-          tempElt.MakeConst(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
+          tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
           theG2CasimirCopy -= tempElt;
           theG2CasimirCopy *= 12;
           currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
@@ -1165,7 +1165,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
 bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return output.MakeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
   }
   const Expression& rankE = input[1];
@@ -1254,7 +1254,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       hwPath.GenerateOrbit(
         tempList,
         theStrings,
-        MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort),
+        MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).numeratorShort),
         nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size
@@ -1402,7 +1402,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     polynomial.content,
-    &theCommands.Comments
+    &theCommands.comments
   )) {
     return false;
   }
@@ -1426,7 +1426,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
 
 bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerZmodP");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return false;
   }
   Rational left, right;
@@ -1484,7 +1484,7 @@ bool Calculator::innerPrintZnEnumeration(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return false;
   }
   int grade, dimension;
@@ -1641,11 +1641,11 @@ bool Calculator::GetMatrixExpressionsFromArguments(
   const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
 ) {
   MacroRegisterFunctionWithName("Calculator::GetMatrixExpressionsFromArguments");
-  if (!input.IsLisT()) {
+  if (!input.isList()) {
     return false;
   }
   Expression inputModified = input;
-  inputModified.SetChildAtomValue(0, this->opSequence());
+  inputModified.setChildAtomValue(0, this->opSequence());
   return this->GetMatrixExpressions(inputModified, output, desiredNumRows, desiredNumCols);
 }
 
@@ -1665,7 +1665,7 @@ bool Calculator::GetMatrixExpressions(
     }
     return false;
   }
-  if (!input[1].IsSequenceNElementS() && !input[1].StartsWith(this->opIntervalOpen())) {
+  if (!input[1].IsSequenceNElementS() && !input[1].startsWith(this->opIntervalOpen())) {
     if (desiredNumRows > 0) {
       if (desiredNumRows != 1) {
         return false;
@@ -1696,7 +1696,7 @@ bool Calculator::GetMatrixExpressions(
   for (int i = 1; i < input.size(); i ++) {
     if (
       input[i].IsSequenceNElementS(output.numberOfColumns) ||
-      input[i].StartsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
+      input[i].startsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
     ) {
       for (int j = 1; j < input[i].size(); j ++) {
         output(i - 1, j - 1) = input[i][j];
@@ -1710,7 +1710,7 @@ bool Calculator::GetMatrixExpressions(
 
 bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly) {
   MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
-  if (!input.IsListNElements(3)) {
+  if (!input.isListNElements(3)) {
     return false;
   }
   Vector<Polynomial<Rational> > inputPolForm;

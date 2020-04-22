@@ -649,7 +649,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   for (int i = 0; i < this->thePaths.size; i ++) {
     List<int>& currentPath = generatorsIndices[i];
     currentNonReducedElement.makeOne(this->GetOwner());
-    tempMonInt.MakeConst();
+    tempMonInt.makeConstant();
     for (int j = currentPath.size - 1; j >= 0; j --) {
       int theIndex = currentPath[j];
       if (theIndex > 0) {
@@ -1130,7 +1130,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MakeHWV(
   tensorMon.theMons.setSize(1);
   MonomialGeneralizedVerma<coefficient>& theMon = tensorMon.theMons[0];
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
-  theMon.MakeConst(theOwner);
+  theMon.makeConstant(theOwner);
   this->makeZero();
   this->AddMonomial(tensorMon, theRingUnit);
 }
@@ -1219,7 +1219,6 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight(
       theCoeff = this->coefficients[j];
       theCoeff *= right.coefficients[i];
       output.AddMonomial(bufferMon, theCoeff);
-      ParallelComputing::SafePointDontCallMeFromDestructors();
     }
   }
   *this = output;

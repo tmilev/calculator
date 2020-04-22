@@ -96,7 +96,7 @@ Expression Calculator::EMHalf() {
 
 Expression Calculator::EInfinity() {
   Expression result;
-  result.MakeAtom(this->opInfinity(), *this);
+  result.makeAtom(this->opInfinity(), *this);
   return result;
 }
 
@@ -191,11 +191,11 @@ bool Calculator::outerStandardCompositeHandler(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
-  if (!input.IsLisT()) {
+  if (!input.isList()) {
     return false;
   }
   const Expression& functionNameNode = input[0];
-  if (!functionNameNode.StartsWith()) {
+  if (!functionNameNode.startsWith()) {
     return false;
   }
   const List<Function>* theHandlers = theCommands.getOperationCompositeHandlers(functionNameNode[0].theData);
@@ -299,7 +299,7 @@ bool Calculator::outerStandardFunction(
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsLisT()) {
+  if (!input.isList()) {
     return false;
   }
   if (theCommands.outerStandardCompositeHandler(
@@ -375,7 +375,7 @@ bool Calculator::ExpressionMatchesPattern(
   }
 
   if (!isGoodRegularOrder) {
-    if (!input.StartsWith(thePattern.owner->opPlus())) {
+    if (!input.startsWith(thePattern.owner->opPlus())) {
       return false;
     }
     matchedExpressions.theValues.setSize(numMatchedExpressionsAtStart);
@@ -401,8 +401,8 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   this->owner->RuleStack.addChildOnTop(theRule);
   std::string currentRule;
   if (
-    theRule.StartsWith(this->owner->opRulesOn()) ||
-    theRule.StartsWith(this->owner->opRulesOff())
+    theRule.startsWith(this->owner->opRulesOn()) ||
+    theRule.startsWith(this->owner->opRulesOff())
   ) {
     for (int j = 1; j < theRule.size(); j ++) {
       if (!theRule[j].IsOfType(&currentRule)) {
@@ -412,7 +412,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
         continue;
       }
       this->owner->GetFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
-      theRule.StartsWith(this->owner->opRulesOff());
+      theRule.startsWith(this->owner->opRulesOff());
     }
   }
   this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->RuleStack);
@@ -443,8 +443,8 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   bool shouldUpdateRules = false;
   for (int i = this->startingRuleStackSize; i < theRuleStack.size(); i ++) {
     if (
-      theRuleStack[i].StartsWith(this->owner->opRulesOn()) ||
-      theRuleStack[i].StartsWith(this->owner->opRulesOff())
+      theRuleStack[i].startsWith(this->owner->opRulesOn()) ||
+      theRuleStack[i].startsWith(this->owner->opRulesOff())
     ) {
       for (int j = 1; j < theRuleStack[i].size(); j ++) {
         if (!theRuleStack[i][j].IsOfType<std::string>(&currentRuleName)) {
@@ -461,14 +461,14 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   }
   if (shouldUpdateRules) {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
-      if (theRuleStack[i].StartsWith(this->owner->opRulesOn())) {
+      if (theRuleStack[i].startsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
             theRuleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = false;
         }
-      } else if (theRuleStack[i].StartsWith(this->owner->opRulesOff())) {
+      } else if (theRuleStack[i].startsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
             theRuleStack[i][j].getValue<std::string>()
@@ -502,7 +502,7 @@ Expression Calculator::GetNewAtom() {
       }
       if (!this->operations.contains(candidate)) {
         Expression result;
-        result.MakeAtom(candidate, *this);
+        result.makeAtom(candidate, *this);
         return result;
       }
     }
@@ -527,7 +527,7 @@ bool Calculator::AccountRule(
   if (ruleE.size() <= 1) {
     return true;
   }
-  if (!ruleE[1].StartsWith(this->opEndStatement())) {
+  if (!ruleE[1].startsWith(this->opEndStatement())) {
     return this->AccountRule(ruleE[1], theRuleStackMaintainer);
   }
   for (int i = 1; i < ruleE[1].size(); i ++) {
@@ -715,8 +715,8 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
   reportStream << "Substitution rules so far:";
   for (int j = 1; j < childIndex; j ++) {
     if (
-      output[j].StartsWith(this->owner->opDefine()) ||
-      output[j].StartsWith(this->owner->opDefineConditional())
+      output[j].startsWith(this->owner->opDefine()) ||
+      output[j].startsWith(this->owner->opDefineConditional())
     ) {
       reportStream << "<br>" << StringRoutines::StringShortenInsertDots(
         output[j].toString(), 100
@@ -775,7 +775,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
       this->owner->flagAbortComputationASAP = true;
       return false;
     }
-    if (this->outpuT->StartsWith(this->owner->opEndStatement())) {
+    if (this->outpuT->startsWith(this->owner->opEndStatement())) {
       if (!this->owner->AccountRule((*this->outpuT)[i], maintainRuleStack)) {
         std::stringstream out;
         out
@@ -806,7 +806,7 @@ bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
       beforePatternMatch = *this->outpuT;
     }
     MapList<Expression, Expression> bufferPairs;
-    std::stringstream* theLog = this->owner->flagLogPatternMatching ? &this->owner->Comments : nullptr;
+    std::stringstream* theLog = this->owner->flagLogPatternMatching ? &this->owner->comments : nullptr;
     afterPatternMatch = *(this->outpuT);
     if (this->owner->ProcessOneExpressionOnePatternOneSub(
       currentPattern, afterPatternMatch, bufferPairs, theLog
@@ -1075,8 +1075,8 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (
-    !thePattern.StartsWith(this->opDefine(), 3) &&
-    !thePattern.StartsWith(this->opDefineConditional(), 4)
+    !thePattern.startsWith(this->opDefine(), 3) &&
+    !thePattern.startsWith(this->opDefineConditional(), 4)
   ) {
     return false;
   }
@@ -1087,7 +1087,7 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   theExpression.CheckInitialization();
   const Expression& currentPattern = thePattern[1];
   const Expression* theCondition = nullptr;
-  bool isConditionalDefine = thePattern.StartsWith(this->opDefineConditional(), 4);
+  bool isConditionalDefine = thePattern.startsWith(this->opDefineConditional(), 4);
   if (isConditionalDefine) {
     theCondition = &thePattern[2];
   }
@@ -1169,7 +1169,7 @@ void Calculator::EvaluateCommands() {
   }
   Expression StartingExpression = this->theProgramExpression;
   this->flagAbortComputationASAP = false;
-  this->Comments.clear();
+  this->comments.clear();
   ProgressReport theReport;
   if (!global.flagRunningConsoleRegular) {
     theReport.report("Evaluating expressions, current expression stack:\n");
@@ -1237,12 +1237,12 @@ void Calculator::EvaluateCommands() {
     commentsStream << "<b>Algebraic closure status.</b><br>"
     << this->theObjectContainer.theAlgebraicClosure.toString();
   }
-  if (this->Comments.str() != "") {
-    commentsStream << "<br><span>" << this->Comments.str() << "</span>";
+  if (this->comments.str() != "") {
+    commentsStream << "<br><span>" << this->comments.str() << "</span>";
   }
   this->outputCommentsString = commentsStream.str();
   this->outputJS[WebAPI::result::comments] = this->outputCommentsString;
-  if (global.flagRunningConsoleRegular && this->Comments.str() != "") {
+  if (global.flagRunningConsoleRegular && this->comments.str() != "") {
     this->outputString += this->outputCommentsString;
   }
 }

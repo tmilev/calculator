@@ -166,7 +166,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
   MatrixTensor<AlgebraicNumber> theMatTensor, theId;
   theMatTensor = theM;
   theId.MakeId(theM.numberOfRows);
-  MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
+  MathRoutines::raiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
   if (!theMatTensor.isEqualToZero()) {
     if (logStream != nullptr) {
       *logStream << "The input E element " << theE.toString()
@@ -2877,7 +2877,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
       reportStream << "Bracketing index " << j + 1 << " with input element. ";
       theReport.report(reportStream.str());
     }
-    bool tempbool = theLieBracket.GetCoordsInBasis(this->fullBasisByModules, coordsInFullBasis);
+    bool tempbool = theLieBracket.getCoordinatesInBasis(this->fullBasisByModules, coordsInFullBasis);
     if (!tempbool) {
       global.fatal << "This is a programming error: something has gone very wrong: my k-weight basis "
       << this->fullBasisByModules.toString()
@@ -4078,7 +4078,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
     PolynomialSubstitution<AlgebraicNumber> theSub;
     theSub.setSize(theComputation.systemSolution.getElement().size);
     for (int i = 0; i < theSub.size; i ++) {
-      theSub[i].MakeConst(theComputation.systemSolution.getElement()[i]);
+      theSub[i].makeConstant(theComputation.systemSolution.getElement()[i]);
     }
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > currentNegElt;
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > currentPosElt;
@@ -4827,7 +4827,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   List<int> BufferHighestWeights;
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis;
-  positiveRootsContainingRegularSA.GetCoordsInBasis(
+  positiveRootsContainingRegularSA.getCoordinatesInBasis(
     this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis
   );
   for (int k = 0; k < positiveRootsContainingRegularSA.size; k ++) {
@@ -4843,8 +4843,8 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
       << ". The affected sl(2) subalgebra is " << this->toString() << ". " << global.fatal;
       break;
     }
-    outputModuleDimensions[IndexZeroWeight + tempRat.NumShort] ++;
-    outputModuleDimensions[IndexZeroWeight - tempRat.NumShort] ++;
+    outputModuleDimensions[IndexZeroWeight + tempRat.numeratorShort] ++;
+    outputModuleDimensions[IndexZeroWeight - tempRat.numeratorShort] ++;
   }
   BufferHighestWeights = (outputModuleDimensions);
   outputHWs.setExpectedSize( positiveRootsContainingRegularSA.size * 2);

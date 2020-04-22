@@ -641,8 +641,11 @@ int Vector<coefficient>::FindLCMDenominatorsTruncateToInt() {
   int result = 1;
   for (int i = 0; i < this->size; i ++) {
     result = MathRoutines::lcm(result, this->theObjects[i].denominatorShort);
-    if ((*this)[i].Extended != 0) {
-      global.fatal << "Coefficient is large rational at a place where that is not allowed. " << global.fatal;
+    if ((*this)[i].extended != 0) {
+      global.fatal
+      << "Coefficient is large rational at a "
+      << "place where that is not allowed. "
+      << global.fatal;
     }
   }
   return result;
@@ -702,7 +705,10 @@ class Vectors: public List<Vector<coefficient> > {
   ) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool LinearAlgebraForVertexComputation(
-    Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
+    Selection& theSelection,
+    Vector<coefficient>& output,
+    Matrix<coefficient>& buffer,
+    Selection& NonPivotPointsBuffer
   );
   void GetVectorsDouble(Vectors<double>& output) const {
     output.setSize(this->size);
@@ -816,7 +822,7 @@ class Vectors: public List<Vector<coefficient> > {
       output += this->theObjects[i];
     }
   }
-  bool GetCoordsInBasis(
+  bool getCoordinatesInBasis(
     const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords
   ) const;
   bool GetIntegralCoordsInBasisIfTheyExist(
@@ -1065,10 +1071,10 @@ bool Vectors<coefficient>::LinSpanContainsVector(
 }
 
 template <class coefficient>
-bool Vectors<coefficient>::GetCoordsInBasis(
+bool Vectors<coefficient>::getCoordinatesInBasis(
   const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords
 ) const {
-  MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
+  MacroRegisterFunctionWithName("Vectors::getCoordinatesInBasis");
   //if (this == 0 || &outputCoords == 0 || this == &outputCoords)
   //  global.fatal << "This is a programming error: input and output addresses are zero or coincide. this address: "
   //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << global.fatal;

@@ -1650,7 +1650,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     inputHashedPadded, theElement.theValue
   );
-  MathRoutines::RaiseToPower(theElement, this->privateExponent, theOne);
+  MathRoutines::raiseToPower(theElement, this->privateExponent, theOne);
   output.setSize(0);
   theElement.theValue.WriteBigEndianBytes(output, false);
 }

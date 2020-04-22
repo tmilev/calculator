@@ -165,10 +165,10 @@ void ElementWeylAlgebra<coefficient>::operator*=(const ElementWeylAlgebra& stand
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::RaiseToPower(int thePower) {
+void ElementWeylAlgebra<coefficient>::raiseToPower(int thePower) {
   ElementWeylAlgebra WeylOne;
   WeylOne.makeOne(this->minimalNumberOfVariables());
-  MathRoutines::RaiseToPower(*this, thePower, WeylOne);
+  MathRoutines::raiseToPower(*this, thePower, WeylOne);
 }
 
 template <class coefficient>
@@ -301,10 +301,10 @@ bool ElementWeylAlgebra<coefficient>::Substitution(
   coefficient theNewCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart)) {
+    if (!currentMon.polynomialPart.Substitution(SubPolyPart, polyPart)) {
       return false;
     }
-    if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart)) {
+    if (!currentMon.differentialPart.Substitution(SubDiffPArt, DOpart)) {
       return false;
     }
     for (int j = 0; j < polyPart.size(); j ++) {

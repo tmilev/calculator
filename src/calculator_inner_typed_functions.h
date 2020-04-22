@@ -88,14 +88,16 @@ public:
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerMatNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerMatExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerMatNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRationalByInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerAlgebraicNumberPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
@@ -126,7 +128,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   theType result = inputContextsMerged[1].getValue<theType>();
@@ -141,7 +143,7 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   theType result;
@@ -157,7 +159,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
@@ -231,7 +233,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     }
     global.fatal << "Error, this line of code should never be reached. " << global.fatal;
   }
-  if (input.StartsWith(theCommands.opMinus(), 3)) {
+  if (input.startsWith(theCommands.opMinus(), 3)) {
     theComputed.reset(theCommands, input.size());
     theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < 3; i ++) {
@@ -248,7 +250,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   }
 
   int thePower = - 1;
-  if (input.StartsWith(theCommands.opThePower(), 3)) {
+  if (input.startsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
       if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], theConverted)) {
         return theCommands
@@ -273,7 +275,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
         thePower *= - 1;
         resultP = theConst;
       }
-      resultP.RaiseToPower(thePower);
+      resultP.raiseToPower(thePower, 1);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
   }

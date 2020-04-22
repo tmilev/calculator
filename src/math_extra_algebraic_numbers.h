@@ -40,6 +40,7 @@ class AlgebraicNumber {
     this->flagDeallocated = false;
   }
   static AlgebraicNumber zero();
+  static AlgebraicNumber zeroStatic();
   bool IsExpressedViaLatestBasis() const;
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
@@ -330,7 +331,9 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
-  static ElementZmodP zero();
+  ElementZmodP zero();
+  static ElementZmodP zeroStatic();
+  ElementZmodP one();
   bool operator>(const ElementZmodP& other) const;
   class Test {
   public:

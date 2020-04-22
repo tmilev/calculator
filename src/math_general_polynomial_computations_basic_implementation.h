@@ -6,41 +6,45 @@
 #include "math_general.h"
 
 template <class coefficient>
-bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const {
+bool MonomialP::Substitution(
+  const List<Polynomial<coefficient> >& theSubstitution,
+  Polynomial<coefficient>& output
+) const {
   MacroRegisterFunctionWithName("MonomialP::Substitution");
-  output.MakeConst(1);
+  output.makeConstant(1);
   if (this->IsConstant()) {
     return true;
   }
   Polynomial<coefficient> tempPoly;
   for (int i = 0; i < this->monBody.size; i ++) {
-    if (this->monBody[i] != 0) {
-      if (i >= TheSubstitution.size) {
-        global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
-        << this->toString()
-        << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
-        << TheSubstitution.size
-        << " variable images. More precisely, the input substitution is:  "
-        << TheSubstitution.toString() << ". " << global.fatal;
-      }
-      int theExponent = 0;
-      if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
-        if (TheSubstitution[i].IsMonomialCoeffOne()) {
-          MonomialP tempMon = TheSubstitution[i][0];
-          tempMon.RaiseToPower(this->monBody[i]);
-          output *= tempMon;
-          continue;
-        }
-        global.Comments << "This may or may not be a programming error. "
-        << "I cannot carry out a substitution in a monomial that has exponent "
-        << "which is not a small integer: it is " << this->monBody[i]
-        << " instead. " << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
-        return false;
-      }
-      tempPoly = TheSubstitution[i];
-      tempPoly.RaiseToPower(theExponent);
-      output *= tempPoly;
+    if (this->monBody[i] == 0) {
+      continue;
     }
+    if (i >= theSubstitution.size) {
+      global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
+      << this->toString()
+      << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
+      << theSubstitution.size
+      << " variable images. More precisely, the input substitution is:  "
+      << theSubstitution.toString() << ". " << global.fatal;
+    }
+    int theExponent = 0;
+    if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
+      if (theSubstitution[i].IsMonomialCoeffOne()) {
+        MonomialP tempMon = theSubstitution[i][0];
+        tempMon.raiseToPower(this->monBody[i]);
+        output *= tempMon;
+        continue;
+      }
+      global.Comments << "This may or may not be a programming error. "
+      << "I cannot carry out a substitution in a monomial that has exponent "
+      << "which is not a small integer: it is " << this->monBody[i]
+      << " instead. " << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
+      return false;
+    }
+    tempPoly = theSubstitution[i];
+    tempPoly.raiseToPower(theExponent, 1);
+    output *= tempPoly;
   }
   return true;
 }
@@ -165,7 +169,7 @@ bool Polynomial<coefficient>::Substitution(
   MacroRegisterFunctionWithName("Polynomial::Substitution");
   Polynomial<coefficient> Accum, TempPoly;
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].SubstitutioN(TheSubstitution, TempPoly)) {
+    if (!(*this)[i].Substitution(TheSubstitution, TempPoly)) {
       return false;
     }
     TempPoly *= this->coefficients[i];
@@ -177,7 +181,7 @@ bool Polynomial<coefficient>::Substitution(
 
 template <class coefficient>
 void Polynomial<coefficient>::makeOne(int ExpectedNumVars) {
-  this->MakeConst(1, ExpectedNumVars);
+  this->makeConstant(1, ExpectedNumVars);
 }
 
 template <class coefficient>
@@ -244,7 +248,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
         numCycles = - numCycles;
       }
       tempElt = input[j];
-      MathRoutines::RaiseToPower(tempElt, numCycles, static_cast<coefficient>(1));
+      MathRoutines::raiseToPower(tempElt, numCycles, static_cast<coefficient>(1));
       if (!isPositive) {
         tempElt.invert();
       }
@@ -413,7 +417,9 @@ bool Polynomial<coefficient>::IsLinearGetRootConstantTermLastCoordinate(Vector<c
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::RaiseToPower(int d) {
+void Polynomial<coefficient>::raiseToPower(
+  int d, const coefficient& one
+) {
   if (d == 1) {
     return;
   }
@@ -422,9 +428,9 @@ void Polynomial<coefficient>::RaiseToPower(int d) {
     << this->toString() << " to the negative power "
     << d << ". " << global.fatal;
   }
-  Polynomial<coefficient> theOne;
-  theOne.makeOne(this->minimalNumberOfVariables());
-  MathRoutines::RaiseToPower(*this, d, theOne);
+  Polynomial<coefficient> onePolynomial;
+  onePolynomial.makeConstant(one);
+  MathRoutines::raiseToPower(*this, d, onePolynomial);
 }
 
 template <class coefficient>
@@ -462,7 +468,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(
       numCycles = - numCycles;
     }
     tempElt = input;
-    MathRoutines::RaiseToPower(tempElt, numCycles, idMat);
+    MathRoutines::raiseToPower(tempElt, numCycles, idMat);
     if (!isPositive) {
       tempElt.Invert();
     }
@@ -673,14 +679,14 @@ void Polynomial<coefficient>::operator=(const Polynomial<otherType>& other) {
 
 template <class coefficient>
 void Polynomial<coefficient>::operator=(const coefficient& other) {
-  this->MakeConst(other);
+  this->makeConstant(other);
 }
 
 template <class coefficient>
 void Polynomial<coefficient>::operator=(int other) {
   coefficient tempCF;
   tempCF = other;
-  this->MakeConst(tempCF);
+  this->makeConstant(tempCF);
 }
 
 template <class coefficient>
@@ -834,7 +840,7 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
     << "should be changed, document why and "
     << "modify the present assertion. " << global.fatal;
   }
-  this->MakeConst(1);
+  this->makeConstant(1);
   Matrix<coefficient> acc = input;
   coefficient currenCF;
   for (int i = 1; i < n; i ++) {
@@ -892,7 +898,7 @@ template <class coefficient>
 int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
+    result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).numeratorShort);
     if (!(*this)[i](VariableIndex).IsSmallInteger()) {
       global.fatal << " This is a programming error: "
       << "GetMaxPowerOfVariableIndex called on a polynomial whose monomials "

@@ -203,7 +203,7 @@ int Expression::getTypeOperation<ElementTensorsGeneralizedVermas<RationalFunctio
 }
 
 template < >
-int Expression::getTypeOperation<charSSAlgMod<Rational> >() const {
+int Expression::getTypeOperation<CharacterSemisimpleLieAlgebraModule<Rational> >() const {
   this->CheckInitialization();
   return this->owner->opCharSSAlgMod();
 }
@@ -516,7 +516,7 @@ ElementTensorsGeneralizedVermas<RationalFunction>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-charSSAlgMod<Rational>
+CharacterSemisimpleLieAlgebraModule<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theCharsSSLieAlgFD
@@ -772,8 +772,8 @@ ElementTensorsGeneralizedVermas<RationalFunction>& Expression::GetValueNonConst(
 }
 
 template < >
-charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<charSSAlgMod<Rational> >()) {
+CharacterSemisimpleLieAlgebraModule<Rational>& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<CharacterSemisimpleLieAlgebraModule<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -2455,13 +2455,13 @@ bool Expression::toStringBuiltIn<VirtualRepresentation<FiniteGroup<ElementWeylGr
 }
 
 template<>
-bool Expression::toStringBuiltIn<charSSAlgMod<Rational> >(
+bool Expression::toStringBuiltIn<CharacterSemisimpleLieAlgebraModule<Rational> >(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* theFormat
 ) {
   (void) theFormat;
-  charSSAlgMod<Rational> theElt = input.getValue<charSSAlgMod<Rational> >();
+  CharacterSemisimpleLieAlgebraModule<Rational> theElt = input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
   out << theElt.toString();
   return true;
 }
@@ -4750,7 +4750,7 @@ bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression
     *this = theOpands[0];
     return true;
   }
-  *this = *theOpands.LastObject();
+  *this = *theOpands.lastObject();
   for (int i = theOpands.size - 2; i >= 0; i --) {
     this->MakeXOX(owner, theOp, theOpands[i], *this);
   }

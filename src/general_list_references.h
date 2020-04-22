@@ -70,7 +70,7 @@ public:
     this->theReferences.swapTwoIndices(index1, index2);
   }
   void AllocateElements(int newSize);
-  void Reserve(int desiredSize) {
+  void reserve(int desiredSize) {
     this->AllocateElements(desiredSize);
   }
   void clear() {
@@ -119,7 +119,7 @@ public:
       return;
     }
     this->KillAllElements();
-    this->Reserve(other.size);
+    this->reserve(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->addOnTop(other[i]);
     }
@@ -130,7 +130,7 @@ public:
       (*this)[i] = other[i];
     }
   }
-  Object& LastObject() const {
+  Object& lastObject() const {
     return (*this)[this->size - 1];
   }
   template <class otherList = List<Object> >

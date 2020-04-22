@@ -362,7 +362,7 @@ bool Crypto::ConvertBase64ToBitStream(
   std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
-  output.Reserve(static_cast<signed>((3 * input.size()) / 4 + 1));
+  output.reserve(static_cast<signed>((3 * input.size()) / 4 + 1));
   output.setSize(0);
   uint32_t theStack = 0, sixBitDigit = 0;
   int numBitsInStack = 0;
@@ -859,7 +859,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
-  inputStringUint32.Reserve(static_cast<signed>(inputStringPreprocessed.size() / 4));
+  inputStringUint32.reserve(static_cast<signed>(inputStringPreprocessed.size() / 4));
   convertorToUint32.setSize(4);
   for (unsigned i = 0; i < inputStringPreprocessed.size() / 4; i ++) {
     convertorToUint32[0] = static_cast<unsigned char>(inputStringPreprocessed[i * 4    ]);
@@ -1242,7 +1242,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
 ///////////////////////
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
-  inputStringUint32.Reserve(1 + inputPreprocessed.size / 4);
+  inputStringUint32.reserve(1 + inputPreprocessed.size / 4);
   convertorToUint32.setSize(4);
   for (int i = 0; i < inputPreprocessed.size / 4; i ++) {
     convertorToUint32[0] = inputPreprocessed[i * 4];
@@ -1331,7 +1331,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<unsigned char>
   List<uint64_t> output64;
   Crypto::computeSha512(input, output64);
   output.setSize(0);
-  output.Reserve(64);
+  output.reserve(64);
   for (int i = 0; i < output64.size; i ++) {
     Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(output64[i], output);
   }
@@ -1365,7 +1365,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   }
   Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(messageBitLength, inputPreprocessed);
   List<uint64_t> inputStringUint64;
-  inputStringUint64.Reserve(1 + inputPreprocessed.size / 8);
+  inputStringUint64.reserve(1 + inputPreprocessed.size / 8);
   for (int i = 0; i < inputPreprocessed.size; ) {
     uint64_t current = 0;
     for (int j = 0; j < 8; j ++) {
@@ -1660,7 +1660,7 @@ bool JSONWebToken::VerifyRSA256(
   Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
   bool result = (RSAresultInts == outputSha);
   if (!result) {
-    RSAresultInts.ReverseOrderElements();
+    RSAresultInts.reverseElements();
     result = (RSAresultInts == outputSha);
   }
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {

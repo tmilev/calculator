@@ -68,28 +68,28 @@ public:
   std::string ToStringFileNameNoPathSemisimpleSubalgebras() const;
   std::string ToStringFileNameNoPathRootSubalgebras() const;
   std::string ToStringFileNameRelativePathSlTwoSubalgebras() const;
-  template <class coefficient>
-  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0) {
+  template <class Coefficient>
+  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVar = 0) {
     output.makeZero();
     ChevalleyGenerator theGen;
-    Polynomial<coefficient> theCf;
+    Polynomial<Coefficient> theCf;
     for (int i = 0; i < this->GetRank(); i ++) {
       theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
       theCf.makeMonomial(indexFirstVar + i, 1, 1);
-      output.AddMonomial(theGen, theCf);
+      output.addMonomial(theGen, theCf);
     }
   }
-  template <class coefficient>
+  template <class Coefficient>
   void GetGenericElementNegativeBorelNilradical(
-    ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0
+    ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output, int indexFirstVar = 0
   ) {
     output.makeZero();
     ChevalleyGenerator theGen;
-    Polynomial<coefficient> theCf;
+    Polynomial<Coefficient> theCf;
     for (int i = 0; i < this->GetNumPosRoots(); i ++) {
       theGen.MakeGenerator(*this, i);
       theCf.makeMonomial(indexFirstVar + i, 1, 1);
-      output.AddMonomial(theGen, theCf);
+      output.addMonomial(theGen, theCf);
     }
   }
   int GetOppositeGeneratorIndex(int theIndex) {
@@ -110,16 +110,16 @@ public:
     this->flagDeallocated = true;
   }
   bool checkConsistency() const;
-  template <class coefficient>
-  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
+  template <class Coefficient>
+  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<Coefficient> >& inputOutputGenerators);
   void ComputeMultTable();
   bool IsOfSimpleType(char desiredType, int desiredRank) const {
     return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
   }
-  template <class coefficient>
+  template <class Coefficient>
   void GetCommonCentralizer(
-    const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize,
-    List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >& inputElementsToCentralize,
+    List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
   );
   void GetChevalleyGeneratorAsLieBracketsSimpleGens(
     int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
@@ -151,13 +151,13 @@ public:
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output);
   inline int GetNumGenerators() const {
-    return this->theWeyl.CartanSymmetric.numberOfRows + this->theWeyl.RootSystem.size;
+    return this->theWeyl.cartanSymmetric.numberOfRows + this->theWeyl.RootSystem.size;
   }
   inline int GetNumPosRoots() const {
     return this->theWeyl.RootsOfBorel.size;
   }
   inline int GetRank() const {
-    return this->theWeyl.CartanSymmetric.numberOfRows;
+    return this->theWeyl.cartanSymmetric.numberOfRows;
   }
   void OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
   void OrderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
@@ -211,21 +211,21 @@ public:
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight);
   void ComputeChevalleyConstants();
-  template<class coefficient>
-  coefficient GetKillingForm(
-    const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right
+  template<class Coefficient>
+  Coefficient getKillingForm(
+    const ElementSemisimpleLieAlgebra<Coefficient>& left, const ElementSemisimpleLieAlgebra<Coefficient>& right
   );
-  template <class coefficient>
-  coefficient GetKillingFormProductWRTLevi(
-    const ElementSemisimpleLieAlgebra<coefficient>& left,
-    const ElementSemisimpleLieAlgebra<coefficient>& right,
+  template <class Coefficient>
+  Coefficient GetKillingFormProductWRTLevi(
+    const ElementSemisimpleLieAlgebra<Coefficient>& left,
+    const ElementSemisimpleLieAlgebra<Coefficient>& right,
     const Selection& rootsNotInLevi
   );
-  template<class coefficient>
+  template<class Coefficient>
   void LieBracket(
-    const ElementSemisimpleLieAlgebra<coefficient>& g1,
-    const ElementSemisimpleLieAlgebra<coefficient>& g2,
-    ElementSemisimpleLieAlgebra<coefficient>& output
+    const ElementSemisimpleLieAlgebra<Coefficient>& g1,
+    const ElementSemisimpleLieAlgebra<Coefficient>& g2,
+    ElementSemisimpleLieAlgebra<Coefficient>& output
   );
   //Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
   //then the below function computes n_{-\epsilon, -\zeta}
@@ -273,10 +273,10 @@ public:
   );
   static void FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output);
   void GetSl2SubalgebraFromRootSA();
-  template<class coefficient>
-  void GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
-  template<class coefficient>
-  void GetAd(MatrixTensor<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
+  template<class Coefficient>
+  void GetAd(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
+  template<class Coefficient>
+  void GetAd(MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e);
   void MakeChevalleyTestReport(int i, int j, int k, int Total);
   bool IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight);
   void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational>& theHighestWeight);
@@ -290,12 +290,12 @@ public:
   }
 };
 
-template <class coefficient>
+template <class Coefficient>
 class Weight {
 public:
   SemisimpleLieAlgebra* owner;
-  Vector<coefficient> weightFundamentalCoordS;
-  friend std::ostream& operator << (std::ostream& output, const Weight<coefficient>& input) {
+  Vector<Coefficient> weightFundamentalCoordS;
+  friend std::ostream& operator << (std::ostream& output, const Weight<Coefficient>& input) {
     output << input.toString();
     return output;
   }
@@ -312,35 +312,35 @@ public:
     const Vector<Rational>& currentWeightSimpleCoords,
     const Vector<Rational>& otherHighestWeightSimpleCoords,
     Rational& theMult,
-    charSSAlgMod<coefficient>& outputAccum
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
   ) const;
-  std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const;
+  std::string TensorAndDecompose(const Weight<Coefficient>& other, CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordS.hashFunction();
   }
-  static inline unsigned int hashFunction(const Weight<coefficient>& input) {
+  static inline unsigned int hashFunction(const Weight<Coefficient>& input) {
     return input.hashFunction();
   }
-  void operator+=(const Weight<coefficient>& other) {
+  void operator+=(const Weight<Coefficient>& other) {
     if (this->owner != other.owner) {
       global.fatal << "Attempting to add weights with different owner algebras. " << global.fatal;
     }
     this->weightFundamentalCoordS += other.weightFundamentalCoordS;
   }
-  void operator*=(const coefficient& other) {
+  void operator*=(const Coefficient& other) {
     this->weightFundamentalCoordS *= other;
   }
-  inline bool operator==(const Weight<coefficient>& other) const {
+  inline bool operator==(const Weight<Coefficient>& other) const {
     return this->weightFundamentalCoordS == other.weightFundamentalCoordS && this->owner == other.owner;
   }
-  inline bool operator>(const Weight<coefficient>& other) const {
+  inline bool operator>(const Weight<Coefficient>& other) const {
     return this->weightFundamentalCoordS > other.weightFundamentalCoordS;
   }
 };
 
-template <class coefficient>
-class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> {
+template <class Coefficient>
+class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coefficient>, Coefficient> {
   public:
   void checkConsistency() const {
     if (this->size() == 0) {
@@ -349,7 +349,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
     const SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if ((*this)[i].owner != owner) {
-        global.fatal << "This is a programming error: charSSAlgMod contains "
+        global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule contains "
         << "elements belonging to different semisimple Lie algebras. " << global.fatal;
       }
     }
@@ -357,7 +357,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   void CheckNonZeroOwner() const {
     this->checkConsistency();
     if (this->GetOwner() == 0) {
-      global.fatal << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, "
+      global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
       << "which is not allowed at by the calling function. " << global.fatal;
     }
   }
@@ -367,31 +367,31 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  static unsigned int hashFunction(const charSSAlgMod<coefficient>& input) {
-    return input.::LinearCombination<Weight<coefficient>, coefficient>::hashFunction(input);
+  static unsigned int hashFunction(const CharacterSemisimpleLieAlgebraModule<Coefficient>& input) {
+    return input.::LinearCombination<Weight<Coefficient>, Coefficient>::hashFunction(input);
   }
-  void GetDual(charSSAlgMod<coefficient>& output) const;
-  void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
+  void GetDual(CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const;
+  void MakeFromWeight(const Vector<Coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
   bool SplitCharOverRedSubalg(
     std::string* report,
-    charSSAlgMod& output,
+    CharacterSemisimpleLieAlgebraModule& output,
     branchingData& inputData
   );
   bool GetDominantCharacterWRTsubalgebra(
-    charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, int upperBoundNumDominantWeights
+    CharacterSemisimpleLieAlgebraModule& outputCharOwnerSetToZero, std::string& outputDetails, int upperBoundNumDominantWeights
   );
   bool FreudenthalEvalMeDominantWeightsOnly(
-    charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
   );
   bool FreudenthalEvalMeFullCharacter(
-    charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
+    CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
   );
   std::string toStringFullCharacterWeightsTable();
   bool DrawMeNoMults(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
     return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, false);
   }
   int GetPosNstringSuchThatWeightMinusNalphaIsWeight(
-    const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords
+    const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
   );
   bool DrawMeWithMults(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
     return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, true);
@@ -406,23 +406,23 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   bool DrawMe(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight(
     std::string* report,
-    charSSAlgMod& output,
+    CharacterSemisimpleLieAlgebraModule& output,
     const Selection& splittingParSel,
     const Selection& ParSelFDInducingPart,
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
   );
   int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl) const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
-  std::string MultiplyBy(const charSSAlgMod& other);
-  std::string operator*=(const charSSAlgMod& other);
+  std::string multiplyBy(const CharacterSemisimpleLieAlgebraModule& other);
+  std::string operator*=(const CharacterSemisimpleLieAlgebraModule& other);
   std::string operator*=(const Weight<Rational>& other);
-  charSSAlgMod<coefficient> operator-(const charSSAlgMod<coefficient>& right) const {
-    charSSAlgMod<coefficient> output = *this;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> operator-(const CharacterSemisimpleLieAlgebraModule<Coefficient>& right) const {
+    CharacterSemisimpleLieAlgebraModule<Coefficient> output = *this;
     output -= right;
     return output;
   }
-  void operator*=(const coefficient& other) {
-    this->::LinearCombination<Weight<coefficient>, coefficient>::operator*=(other);
+  void operator*=(const Coefficient& other) {
+    this->::LinearCombination<Weight<Coefficient>, Coefficient>::operator*=(other);
   }
 };
 

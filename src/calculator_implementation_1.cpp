@@ -95,7 +95,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
       tempTotalChange.Assign(MaxMovement);
-      tempTotalChange.MultiplyBy(ChangeGradient);
+      tempTotalChange.multiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
       if (!tempTotalChange.isEqualToZero()) {
         VisitedVertices.clear();
@@ -111,7 +111,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-          tempRat.MultiplyBy(MaxMovement);
+          tempRat.multiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.Minus();
@@ -215,7 +215,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   }
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
-    currentP.Substitution(theSub);
+    currentP.substitution(theSub);
   }
   return outputContext.setVariables(theVars);
 }
@@ -568,7 +568,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   }
   SemisimpleLieAlgebra* ownerSS = algebra.content;
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
-  theOperators.Reserve(input.size() - 2);
+  theOperators.reserve(input.size() - 2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i = 2; i < input.size(); i ++) {
     if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS)) {
@@ -666,7 +666,7 @@ bool Calculator::innerGroebner(
       inputVectorZmodP[i].makeZero();
       for (int j = 0; j < inputVector[i].size(); j ++) {
         tempElt = inputVector[i].coefficients[j];
-        inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
+        inputVectorZmodP[i].addMonomial(inputVector[i][j], tempElt);
       }
     }
   }
@@ -1235,7 +1235,7 @@ std::string PlotObject::ToStringDebug() {
   std::stringstream out;
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
-  out << "Coord f-ns: " << this->coordinateFunctionsE.ToStringCommaDelimited() << "<br>";
+  out << "Coord f-ns: " << this->coordinateFunctionsE.toStringCommaDelimited() << "<br>";
   out << "Vars: " << this->variablesInPlay << "<br>";
   out << "Var ranges: " << this->theVarRangesJS << "<br>";
   return out.str();
@@ -2003,7 +2003,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   if (parSel.CardinalitySelection != 0) {
     return output.MakeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   }
-  charSSAlgMod<Rational> theElt;
+  CharacterSemisimpleLieAlgebraModule<Rational> theElt;
   theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
   return output.AssignValue(theElt, theCommands);
 }
@@ -2131,23 +2131,23 @@ bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& in
   return true;
 }
 
-template <class coefficient>
-coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
-  const ElementUniversalEnveloping<coefficient>& right
+template <class Coefficient>
+Coefficient ElementUniversalEnveloping<Coefficient>::GetKillingFormProduct(
+  const ElementUniversalEnveloping<Coefficient>& right
 ) const {
   MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
   if (this->isEqualToZero()) {
     return 0;
   }
-  coefficient result = 0;
-  ElementUniversalEnveloping<coefficient> adadAppliedToMon, tempElt;
+  Coefficient result = 0;
+  ElementUniversalEnveloping<Coefficient> adadAppliedToMon, tempElt;
   SemisimpleLieAlgebra* theOwner;
   theOwner = &this->GetOwner();
-  MonomialUniversalEnveloping<coefficient> baseGen;
+  MonomialUniversalEnveloping<Coefficient> baseGen;
   for (int i = 0; i < theOwner->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(i, *theOwner);
     adadAppliedToMon.makeZero(*theOwner);
-    adadAppliedToMon.AddMonomial(baseGen, 1);
+    adadAppliedToMon.addMonomial(baseGen, 1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.simplify();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
@@ -2157,18 +2157,18 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
   return result;
 }
 
-template <class coefficient>
-coefficient SemisimpleLieAlgebra::GetKillingForm(
-  const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right
+template <class Coefficient>
+Coefficient SemisimpleLieAlgebra::getKillingForm(
+  const ElementSemisimpleLieAlgebra<Coefficient>& left, const ElementSemisimpleLieAlgebra<Coefficient>& right
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
-  coefficient result = 0;
-  ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
+  Coefficient result = 0;
+  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, tempElt;
   ChevalleyGenerator baseGen;
   for (int i = 0; i < this->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(*this, i);
     adadAppliedToMon.makeZero();
-    adadAppliedToMon.AddMonomial(baseGen, 1);
+    adadAppliedToMon.addMonomial(baseGen, 1);
     this->LieBracket(right, adadAppliedToMon, tempElt);
     this->LieBracket(left, tempElt, adadAppliedToMon);
     result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
@@ -2205,7 +2205,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   }
   ElementSemisimpleLieAlgebra<Rational> leftEltSS, rightEltSS;
   if (left.GetLieAlgebraElementIfPossible(leftEltSS) && right.GetLieAlgebraElementIfPossible(rightEltSS)) {
-    return output.AssignValue(leftEltSS.GetOwner()->GetKillingForm(leftEltSS, rightEltSS), theCommands);
+    return output.AssignValue(leftEltSS.GetOwner()->getKillingForm(leftEltSS, rightEltSS), theCommands);
   }
   return output.AssignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
 }
@@ -2241,7 +2241,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
-  theDiagram.AmbientBilinearForm = theWeyl.CartanSymmetric;
+  theDiagram.AmbientBilinearForm = theWeyl.cartanSymmetric;
   theDiagram.AmbientRootSystem = theWeyl.RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.toString()
@@ -2500,7 +2500,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
   while (true) {
     bool found = false;
     Expression next;
-    next = *this->output.LastObject();
+    next = *this->output.lastObject();
     List<std::string> nextRules;
     for (int i = 0; i < numberOfChildren; i ++) {
       int& currentIndex = currentIndices[i];
@@ -2539,11 +2539,11 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
   }
   this->output.addOnTop(current[1]);
   this->rulesNames.setSize(this->rulesNames.size + 1);
-  this->rulesNames.LastObject()->setSize(0);
+  this->rulesNames.lastObject()->setSize(0);
   if (current.size() >= 3) {
     std::string incoming = current[2].toString();
     if (incoming != "") {
-      this->rulesNames.LastObject()->addOnTop(incoming);
+      this->rulesNames.lastObject()->addOnTop(incoming);
     }
   }
   return true;
@@ -2576,7 +2576,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
     currentRules.addListOnTop(this->rulesNames[j]);
     if (j > 0) {
       if (currentRules.size > 0) {
-        out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+        out << "&\\text{" << currentRules.toStringCommaDelimited() << "}";
       }
       currentRules.setSize(0);
       out << "\\\\";
@@ -2585,7 +2585,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
     out << "&\n" << currentEstring;
   }
   if (currentRules.size > 0) {
-    out << "&\\text{apply: " << currentRules.ToStringCommaDelimited() << "}";
+    out << "&\\text{apply: " << currentRules.toStringCommaDelimited() << "}";
   }
   out << "\\end{array}\\)";
   return out.str();

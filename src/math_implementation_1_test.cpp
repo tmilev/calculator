@@ -83,9 +83,9 @@ bool Rational::Test::TestScale() {
     TestRationalScale& current = toTest[i];
     List<Rational> copy = current.vector;
     Rational::scaleNormalizeIndex(copy, current.distinguishedIndex);
-    if (copy.ToStringCommaDelimited() != current.expected) {
-      global.fatal << "Vector " << current.vector.ToStringCommaDelimited()
-      << " scaled to " << copy.ToStringCommaDelimited()
+    if (copy.toStringCommaDelimited() != current.expected) {
+      global.fatal << "Vector " << current.vector.toStringCommaDelimited()
+      << " scaled to " << copy.toStringCommaDelimited()
       << " instead of the expected: " << current.expected
       << global.fatal;
     }
@@ -169,11 +169,11 @@ bool RationalFunction::Test::scaleNormalizeIndex() {
   "(210x_{1} +105)/(3x_{2} +1), 28x_{1} , 30x_{1} /(x_{2} )"
   };
   for (int i = 0; i < toScale.size; i ++) {
-    std::string atStart = toScale[i].ToStringCommaDelimited();
+    std::string atStart = toScale[i].toStringCommaDelimited();
     RationalFunction::scaleNormalizeIndex(toScale[i], 0);
-    if (toScale[i].ToStringCommaDelimited() != expected[i]) {
+    if (toScale[i].toStringCommaDelimited() != expected[i]) {
       global.fatal << "Scaling rational functions: " << atStart
-      << " produced: " << toScale[i].ToStringCommaDelimited()
+      << " produced: " << toScale[i].toStringCommaDelimited()
       << " instead of the expected: " << expected[i] << global.fatal;
     }
   }

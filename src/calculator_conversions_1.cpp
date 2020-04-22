@@ -203,7 +203,7 @@ bool CalculatorConversions::functionDynkinType(
       << theType.coefficients[i] << " of " << theType[i].toString()
       << " to a small positive integer. ";
     }
-    output.AddMonomial(simpleComponent, theMultiplicity);
+    output.addMonomial(simpleComponent, theMultiplicity);
   }
   return !theType.isEqualToZero();
 }
@@ -287,7 +287,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.coefficients[i]);
+    theMons.addMonomial(currentMon, input.coefficients[i]);
   }
   return output.makeSum(theCommands, theMons);
 }
@@ -301,7 +301,7 @@ bool CalculatorConversions::innerExpressionFromDynkinType(
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromDynkinSimpleType(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.coefficients[i]);
+    theMons.addMonomial(currentMon, input.coefficients[i]);
   }
   return output.makeSum(theCommands, theMons);
 }
@@ -315,15 +315,15 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.coefficients[i]);
+    theMons.addMonomial(currentMon, input.coefficients[i]);
   }
   return output.makeSum(theCommands, theMons);
 }
 
 bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
-  Calculator& theCommands, const Expression& input, slTwoSubalgebra& output
+  Calculator& theCommands, const Expression& input, SlTwoSubalgebra& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject slTwoSubalgebra");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject SlTwoSubalgebra");
   if (!input.isListNElements(4)) {
     return theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
   }
@@ -368,7 +368,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerSlTwoSubalgebraPrecomputed");
-  slTwoSubalgebra tempSL2;
+  SlTwoSubalgebra tempSL2;
   if (!CalculatorConversions::innerSlTwoSubalgebraPrecomputed(theCommands, input, tempSL2)) {
     return theCommands << "<hr>Failed to load sl(2) subalgebra. ";
   }
@@ -695,7 +695,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
       continue;
     }
     theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
-    theSAs.theSubalgebras.theValues.LastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
+    theSAs.theSubalgebras.theValues.lastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
   }
   reportStream << "Subalgebra loading done, total "
   << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
@@ -768,7 +768,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.MakeSequence(theCommands);
-  subalgebrasListE.children.Reserve(input.theSubalgebras.theValues.size + 1);
+  subalgebrasListE.children.reserve(input.theSubalgebras.theValues.size + 1);
   for (int i = 0; i < input.theSubalgebras.theValues.size; i ++) {
     if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras.theValues[i], candidateE)) {
       return false;
@@ -820,7 +820,7 @@ bool CalculatorConversions::innerExpressionFromUE(
     )) {
       return theCommands << "<hr>Failed to store " << input.toString();
     }
-    theUEE.AddMonomial(currentMonE, input.coefficients[i]);
+    theUEE.addMonomial(currentMonE, input.coefficients[i]);
   }
   return output.makeSum(theCommands, theUEE);
 }
@@ -901,7 +901,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.GetNumGenerators()) {
         isGood = false;
       }
-      output.AddMonomial(theChevGen, polyForm.coefficients[j]);
+      output.addMonomial(theChevGen, polyForm.coefficients[j]);
     } else if (theLetter == "h") {
       int theRootIndex = owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theRootIndex < 0) {
@@ -1010,7 +1010,7 @@ bool CalculatorConversions::innerElementUE(
       }
     }
     currentPMultiplicand.makeZero();
-    currentPMultiplicand.AddMonomial(currentMultiplicandRFpartMon, 1);
+    currentPMultiplicand.addMonomial(currentMultiplicandRFpartMon, 1);
     currentMultiplicandRFpart = currentPMultiplicand;
     currentSummand *= currentMultiplicandRFpart;
     outputUE += currentSummand;

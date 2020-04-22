@@ -11,7 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
@@ -270,7 +270,7 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
   spoofServer.spoofer.flagDoSpoof = true;
   for (int i = 2; i < inputMessages.size; i ++) {
     spoofServer.spoofer.incomingMessages.addOnTop(SSLRecord());
-    spoofServer.spoofer.incomingMessages.LastObject()->incomingBytes = inputMessages[i];
+    spoofServer.spoofer.incomingMessages.lastObject()->incomingBytes = inputMessages[i];
   }
   spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
@@ -1557,9 +1557,9 @@ bool CalculatorFunctions::outerCombineFractionsCommutative(
   return true;
 }
 
-template<class coefficient>
-void Polynomial<coefficient>::GetPolyWithPolyCoeff(
-  Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output
+template<class Coefficient>
+void Polynomial<Coefficient>::GetPolyWithPolyCoeff(
+  Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
   if (theNonCoefficientVariables.MaxSize != this->minimalNumberOfVariables()) {
@@ -1568,7 +1568,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
   }
   output.makeZero();
   MonomialP coeffPart, polyPart;
-  Polynomial<coefficient> currentCF;
+  Polynomial<Coefficient> currentCF;
   for (int i = 0; i < this->size(); i ++) {
     coeffPart.makeOne();
     polyPart.makeOne();
@@ -1580,14 +1580,14 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
       }
     }
     currentCF.makeZero();
-    currentCF.AddMonomial(coeffPart, this->coefficients[i]);
-    output.AddMonomial(polyPart, currentCF);
+    currentCF.addMonomial(coeffPart, this->coefficients[i]);
+    output.addMonomial(polyPart, currentCF);
   }
 }
 
-template<class coefficient>
-void Polynomial<coefficient>::GetPolyUnivariateWithPolyCoeffs(
-  int theVar, Polynomial<Polynomial<coefficient> >& output
+template<class Coefficient>
+void Polynomial<Coefficient>::GetPolyUnivariateWithPolyCoeffs(
+  int theVar, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   Selection theVars;
   theVars.init(this->minimalNumberOfVariables());
@@ -1595,11 +1595,11 @@ void Polynomial<coefficient>::GetPolyUnivariateWithPolyCoeffs(
   this->GetPolyWithPolyCoeff(theVars, output);
 }
 
-template <class coefficient>
-bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
-  const List<Polynomial<coefficient> >& theLinPolys,
-  Matrix<coefficient>& homogenousPart,
-  Matrix<coefficient>& constTerms
+template <class Coefficient>
+bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
+  const List<Polynomial<Coefficient> >& theLinPolys,
+  Matrix<Coefficient>& homogenousPart,
+  Matrix<Coefficient>& constTerms
 ) {
   MacroRegisterFunctionWithName("Polynomial::GetLinearSystemFromLinearPolys");
   int theLetter;
@@ -1626,8 +1626,8 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
   return true;
 }
 
-template <class coefficient>
-coefficient Polynomial<coefficient>::GetDiscriminant() {
+template <class Coefficient>
+Coefficient Polynomial<Coefficient>::GetDiscriminant() {
   MacroRegisterFunctionWithName("Polynomial::GetDiscriminant");
   if (this->minimalNumberOfVariables() > 1) {
     global.fatal
@@ -1641,9 +1641,9 @@ coefficient Polynomial<coefficient>::GetDiscriminant() {
     << "of degree not equal to 1."
     << global.fatal;
   }
-  coefficient a = this->GetMonomialCoefficient(MonomialP(0, 2));
-  coefficient b = this->GetMonomialCoefficient(MonomialP(0, 1));
-  coefficient c = this->GetMonomialCoefficient(MonomialP(0, 0));
+  Coefficient a = this->GetMonomialCoefficient(MonomialP(0, 2));
+  Coefficient b = this->GetMonomialCoefficient(MonomialP(0, 1));
+  Coefficient c = this->GetMonomialCoefficient(MonomialP(0, 0));
   return b * b - a * c * 4;
 }
 
@@ -1944,8 +1944,8 @@ void IntegralRFComputation::PrepareNumerators() {
         this->NumberOfSystemVariables ++;
         currentMon.MakeEi(this->NumberOfSystemVariables);
         currentMon.setVariable(0, j);
-        this->theNumerators[i][k].AddMonomial(currentMon, 1);
-        currentSummand.AddMonomial(currentMon, 1);
+        this->theNumerators[i][k].addMonomial(currentMon, 1);
+        currentSummand.addMonomial(currentMon, 1);
       }
       for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++) {
         Rational theExp = this->theDenominatorFactorsWithMults.coefficients[j];
@@ -2121,7 +2121,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.makeZero();
   for (int i = 0; i < this->theFactors.size; i ++) {
-    theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
+    theDenominatorFactorsWithMultsCopy.addMonomial(this->theFactors[i], 1);
   }
   theDenominatorFactorsWithMultsCopy.quickSortAscending();
   Polynomial<Rational> currentSecondDegreePoly;
@@ -2132,14 +2132,14 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     currentSecondDegreePoly = theDenominatorFactorsWithMultsCopy[i];
     currentSecondDegreePolyAlgebraic = currentSecondDegreePoly;
     if (currentSecondDegreePoly.totalDegree() != 2) {
-      this->theDenominatorFactorsWithMults.AddMonomial(
+      this->theDenominatorFactorsWithMults.addMonomial(
         currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
       );
       continue;
     }
     Rational theDiscriminant = currentSecondDegreePoly.GetDiscriminant();
     if (theDiscriminant < 0) {
-      this->theDenominatorFactorsWithMults.AddMonomial(
+      this->theDenominatorFactorsWithMults.addMonomial(
         currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
       );
       continue;
@@ -2163,10 +2163,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b + theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
+    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
     currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
+    this->theDenominatorFactorsWithMults.addMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
     additionalMultiple *= a;
   }
   this->theDenominatorFactorsWithMults.quickSortAscending();
@@ -2200,9 +2200,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML = true;
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
+  theSystemHomogeneous.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
   this->currentFormaT.flagUseHTML = false;
-  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
+  theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(this->NumberOfSystemVariables + 1);
   for (int i = 1; i < theSub.size; i ++) {
@@ -2210,7 +2210,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   }
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      this->theNumerators[i][k].Substitution(theSub);
+      this->theNumerators[i][k].substitution(theSub);
     }
   }
   this->PrepareFinalAnswer();
@@ -2317,7 +2317,7 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
   std::stringstream out;
   FormatExpressions theFormat;
   theFormat.flagUseFrac = true;
-  theMat.GaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &theFormat);
+  theMat.gaussianEliminationByRows(nullptr, nullptr, nullptr, &out, &theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2433,7 +2433,7 @@ bool CalculatorFunctions::innerIntersection(Calculator& theCommands, const Expre
   List<List<Expression> > theListsToBeIntersected;
   theListsToBeIntersected.setSize(input.size() - 1);
   for (int i = 1; i < input.size(); i ++) {
-    theListsToBeIntersected[i - 1].Reserve(input[i].size());
+    theListsToBeIntersected[i - 1].reserve(input[i].size());
     for (int j = 1; j < input[i].size(); j ++) {
       theListsToBeIntersected[i - 1].addOnTop(input[i][j]);
     }
@@ -2443,7 +2443,7 @@ bool CalculatorFunctions::innerIntersection(Calculator& theCommands, const Expre
   }
   List<Expression> outputList = theListsToBeIntersected[0];
   for (int i = 1; i < theListsToBeIntersected.size; i ++) {
-    outputList.IntersectWith(theListsToBeIntersected[i], outputList);
+    outputList.intersectWith(theListsToBeIntersected[i], outputList);
   }
   return output.MakeSequence(theCommands, &outputList);
 }
@@ -2495,7 +2495,7 @@ bool CalculatorFunctions::innerUnionNoRepetition(Calculator& theCommands, const 
   for (int i = 0; i < theList.size; i ++) {
     theIndices[i] = theCommands.theExpressionContainer.addNoRepetitionOrReturnIndexFirst(theList[i]);
   }
-  output.children.Reserve(numElts);
+  output.children.reserve(numElts);
   output.reset(theCommands, theIndices.size + 1);
   output.addChildAtomOnTop(theCommands.opSequence());
   output.children.addOnTop(theIndices);
@@ -3204,7 +3204,7 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   }
   if (theVars.size > 1) {
     return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
-    << theVars.ToStringCommaDelimited();
+    << theVars.toStringCommaDelimited();
   }
   double leftBoundary = 0;
   double rightBoundary = 0;
@@ -3384,18 +3384,18 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
     int currentNumSamplingPoints = 0;
     if (i + 1 < input.size()) {
       if (input[i + 1].IsSmallInteger(&currentNumSamplingPoints)) {
-        *numSamples.LastObject() = currentNumSamplingPoints;
+        *numSamples.lastObject() = currentNumSamplingPoints;
       } else {
         return theCommands << "Failed to extract a small integer for the number of sampling points from: "
         << input[i + 1].toString();
       }
-      if (*numSamples.LastObject() > 1000) {
-        return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.LastObject()->toString() << "; this exceeds the hard-coded limit of 1000. ";
+      if (*numSamples.lastObject() > 1000) {
+        return theCommands << *numSamples.lastObject() << " sampling points requested for variable/expression "
+        << theBoundaryVars.lastObject()->toString() << "; this exceeds the hard-coded limit of 1000. ";
       }
-      if (*numSamples.LastObject() < 1) {
-        return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.LastObject()->toString() << "; this is not allowed. ";
+      if (*numSamples.lastObject() < 1) {
+        return theCommands << *numSamples.lastObject() << " sampling points requested for variable/expression "
+        << theBoundaryVars.lastObject()->toString() << "; this is not allowed. ";
       }
     }
   }
@@ -3718,7 +3718,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   out << "Computing "
   << HtmlRoutines::GetMathSpanPure(theMatrix.toString(&theFormat) + "^{- 1}");
   extendedMatrix = theMatrix;
-  extendedMatrix.AppendMatrixOnTheRight(outputMat);
+  extendedMatrix.appendMatrixOnTheRight(outputMat);
   out << "<br>" << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
@@ -3727,12 +3727,12 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     tempI = theMatrix.FindPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
-        theMatrix.SwitchTwoRows(NumFoundPivots, tempI);
-        outputMat.SwitchTwoRows (NumFoundPivots, tempI);
+        theMatrix.switchRows(NumFoundPivots, tempI);
+        outputMat.switchRows (NumFoundPivots, tempI);
         out << "<br>Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
         extendedMatrix = theMatrix;
-        extendedMatrix.AppendMatrixOnTheRight(outputMat);
+        extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
       }
@@ -3748,7 +3748,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         extendedMatrix = theMatrix;
-        extendedMatrix.AppendMatrixOnTheRight(outputMat);
+        extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
@@ -3781,7 +3781,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\end{tabular}";
         outLaTeX << "\\\\";
         extendedMatrix = theMatrix;
-        extendedMatrix.AppendMatrixOnTheRight(outputMat);
+        extendedMatrix.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
@@ -3838,18 +3838,18 @@ bool Calculator::innerInvertMatrixVerbose(
   theFormat.MatrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
   out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.toString(&theFormat) + "^{- 1}");
   tempMat = mat;
-  tempMat.AppendMatrixOnTheRight(outputMat);
+  tempMat.appendMatrixOnTheRight(outputMat);
   out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
   for (int i = 0; i < mat.numberOfColumns; i ++) {
     tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
-        mat.SwitchTwoRows(NumFoundPivots, tempI);
-        outputMat.SwitchTwoRows (NumFoundPivots, tempI);
+        mat.switchRows(NumFoundPivots, tempI);
+        outputMat.switchRows (NumFoundPivots, tempI);
         out << "<br>switch row " << NumFoundPivots + 1
         << " and row " << tempI + 1 << ": ";
         tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
+        tempMat.appendMatrixOnTheRight(outputMat);
         out << "<br>"
         << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
       }
@@ -3863,7 +3863,7 @@ bool Calculator::innerInvertMatrixVerbose(
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
+        tempMat.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
       }
       bool found = false;
@@ -3888,7 +3888,7 @@ bool Calculator::innerInvertMatrixVerbose(
       if (found) {
         out << ": <br> ";
         tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
+        tempMat.appendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
       }
       NumFoundPivots ++;
@@ -5323,14 +5323,14 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
         mOneE * denominatorExponent
       );
       newNumSummand = numerators[i] * newNumSummandRightPart;
-      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
+      numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
     numerators[i].GetBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
     if (numeratorBaseRight == denominatorBase) {
       newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
-      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
+      numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
     bool isGood = false;
@@ -5342,7 +5342,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
       newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
       newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
-      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
+      numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       isGood = true;
       break;
     }
@@ -5757,12 +5757,12 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
     const Expression& sequenceCandidate = input[1];
     if (sequenceCandidate.IsSequenceNElementS() && sequenceCandidate.size() > 1) {
       output = sequenceCandidate;
-      output.children.RemoveLastObject();
+      output.children.removeLastObject();
       return true;
     }
   }
   output = input;
-  output.children.RemoveLastObject();
+  output.children.removeLastObject();
   return output.setChildAtomValue(0, theCommands.opSequence());
 }
 
@@ -5869,7 +5869,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
     if (theMat.GetDeterminant() == 0) {
       return output.MakeError("Matrix determinant is zero.", theCommands);
     }
-    theMat.Invert();
+    theMat.invert();
     return output.AssignMatrix(theMat, theCommands);
   }
   Matrix<AlgebraicNumber> theMatAlg;
@@ -5883,7 +5883,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
   if (theMatAlg.GetDeterminant() == 0) {
     return output.MakeError("Matrix determinant is zero.", theCommands);
   }
-  theMatAlg.Invert();
+  theMatAlg.invert();
   return output.AssignMatrix(theMatAlg, theCommands);
 }
 
@@ -5948,7 +5948,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
       break; //<-in case floating point arithmetic is misbehaving
     }
   }
-  XValues.ReverseOrderElements();
+  XValues.reverseElements();
   int indexXinitial = XValues.size - 1;
   pointsCounter = 0;
   for (double currentX = xInitial + delta; currentX < rightEndpoint + delta; currentX += delta) {
@@ -6021,7 +6021,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
     thePlot.thePointsDouble.addOnTop(currentPt);
   }
   thePlot.xLow = XValues[0];
-  thePlot.xHigh = *XValues.LastObject();
+  thePlot.xHigh = *XValues.lastObject();
   thePlot.yLow = - 0.5;
   thePlot.yHigh = 0.5;
   thePlot.coordinateFunctionsE.addOnTop(input);
@@ -6275,7 +6275,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     return theCommands << "Got a function with "
     << thePlotObj.variablesInPlay.size
     << " variables, namely: "
-    << thePlotObj.variablesInPlay.ToStringCommaDelimited()
+    << thePlotObj.variablesInPlay.toStringCommaDelimited()
     << ". I was expecting a single variable. ";
   }
   if (thePlotObj.variablesInPlay.size == 0) {
@@ -6688,7 +6688,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     << "Instead, your curve: " << input.toString()
     << " depends on "
     << thePlot.variablesInPlay.size << ", namely: "
-    << thePlot.variablesInPlay.ToStringCommaDelimited() << ". ";
+    << thePlot.variablesInPlay.toStringCommaDelimited() << ". ";
   }
   if (thePlot.variablesInPlay.size == 0) {
     Expression tempE;
@@ -7004,7 +7004,7 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
   theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
   std::stringstream out;
   out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
-  << theIndices.ToStringCommaDelimited();
+  << theIndices.toStringCommaDelimited();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -7538,7 +7538,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
     currentHW = theHWsimpCoords;
     currentHW += theSub.GetRho();
-    theWeyl.ActOn(i, currentHW);
+    theWeyl.actOn(i, currentHW);
     currentHW -= theSub.GetRho();
     out << "<tr><td>" << currentHW.toString() << "</td><td>"
     << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
@@ -7551,7 +7551,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel = parSel;
   invertedParSel.InvertSelection();
-  charSSAlgMod<RationalFunction> theChar, currentChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> theChar, currentChar;
   Weight<RationalFunction> theMon;
   theChar.makeZero();
   FormatExpressions formatChars;
@@ -7579,12 +7579,12 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
         theWeyl.ActOnRhoModified(j, currentHW);
         theMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
         int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
-        currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
+        currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
       }
     }
     currentHW = theHWsimpCoords;
     currentHW += theSub.GetRho();
-    theWeyl.ActOn(indexInWeyl, currentHW);
+    theWeyl.actOn(indexInWeyl, currentHW);
     currentHW -= theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
@@ -7880,7 +7880,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << global.fatal;
   }
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
-  charSSAlgMod<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
   Vectors<RationalFunction> theEigenVectorWeightsFund;
@@ -7928,7 +7928,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   for (int i = 0; i < theLeviEigenVectors.size; i ++) {
     tempMon.weightFundamentalCoordS = theEigenVectorWeightsFund[i];
     tempMon.weightFundamentalCoordS += theGenMod.theHWFundamentalCoordsBaseField;
-    theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
+    theFDLeviSplitShifteD.addMonomial(tempMon, RFOne);
     currentHWdualcoords = theSSalgebra.content->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar = theCasimir;
     currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
@@ -7963,7 +7963,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     Vector<RationalFunction> currentWeightSimpleCoords =
     theSSalgebra.content->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
-    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
+    tempElt.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
     tempElt.MakeHWV(theGenMod, RFOne);
     theElt.TensorOnTheRight(tempElt);
     theElt *= - 1;
@@ -7977,7 +7977,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
         theCasimirMinusChar = theCasimir;
         theCasimirMinusChar -= theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra.content, RFOne);
+        theElt.multiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra.content, RFOne);
         theElt = tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].toString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
@@ -8103,8 +8103,8 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.toString() << "<br>Parabolic selection: "
   << theG2B3Data.selInducing.toString();
   std::string report;
-  charSSAlgMod<RationalFunction> tempChar;
-  charSSAlgMod<RationalFunction> startingChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> tempChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> startingChar;
   Vector<RationalFunction> simpleWeight;
   simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
   startingChar.MakeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
@@ -8284,7 +8284,7 @@ bool Expression::EvaluatesToDoubleInRange(
   knownValues.addOnTop(0);
   int numPoints = numIntervals + 1;
   double delta = (highBound - lowBound) / (numIntervals);
-  *knownValues.LastObject() = lowBound;
+  *knownValues.lastObject() = lowBound;
   double currentValue = 0;
   if (outputPoints != nullptr) {
     outputPoints->setSize(numPoints);
@@ -8293,13 +8293,13 @@ bool Expression::EvaluatesToDoubleInRange(
   int numFailedEvaluations = 0;
   for (int i = 0; i < numPoints; i ++) {
     if (i == numPoints - 1) {
-      *knownValues.LastObject() = highBound; //correcting for floating point errors.
+      *knownValues.lastObject() = highBound; //correcting for floating point errors.
     }
     if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue)) {
       numFailedEvaluations ++;
       if (numFailedEvaluations < 5) {
         *(this->owner) << "<br>Failed to evaluate " << this->toString() << " at " << varName << "="
-        << *knownValues.LastObject() << ". ";
+        << *knownValues.lastObject() << ". ";
       }
       if (numFailedEvaluations == 5) {
         *(this->owner) << "<br>...";
@@ -8307,18 +8307,18 @@ bool Expression::EvaluatesToDoubleInRange(
       result = false;
       if (outputPoints != nullptr) {
         (*outputPoints)[i].setSize(2);
-        (*outputPoints)[i][0] = *knownValues.LastObject();
+        (*outputPoints)[i][0] = *knownValues.lastObject();
         (*outputPoints)[i][1] = std::nan("");
       }
-      *knownValues.LastObject() += delta;
+      *knownValues.lastObject() += delta;
       continue;
     }
     if (outputPoints != nullptr) {
       (*outputPoints)[i].setSize(2);
-      (*outputPoints)[i][0] = *knownValues.LastObject();
+      (*outputPoints)[i][0] = *knownValues.lastObject();
       (*outputPoints)[i][1] = currentValue;
     }
-    *knownValues.LastObject() += delta;
+    *knownValues.lastObject() += delta;
     if (outputYmin != nullptr) {
       if (i == 0) {
         *outputYmin = currentValue;
@@ -8802,7 +8802,7 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
   theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
   std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
-  global.ChDir(startingFolder);
+  global.changeDirectory(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -8824,7 +8824,7 @@ bool CalculatorFunctions::innerBuildFreecalc(
   theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
   std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
-  global.ChDir(startingFolder);
+  global.changeDirectory(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -8864,7 +8864,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   List<LargeIntegerUnsigned> theList;
   List<int> theIndexStack;
   theList.initializeFillInObject(theSize, 0);
-  theIndexStack.Reserve(theSize);
+  theIndexStack.reserve(theSize);
   LargeIntegerUnsigned theMod;
   theMod = static_cast<unsigned>(theSize);
   int numElementsCovered = 0;
@@ -9187,7 +9187,7 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   WeylGroupData& theWeyl = theSSalgpointer.content->theWeyl;
   highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   std::stringstream out;
-  charSSAlgMod<Rational> theChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
   DrawingVariables theDV;
   std::string report;
@@ -9196,12 +9196,12 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerDrawRootSystem(
+bool CalculatorFunctions::innerdrawRootSystem(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDrawRootSystem");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerdrawRootSystem");
   if (input.size() < 2) {
-    return theCommands << "DrawRootSystem expects at least 1 argument. ";
+    return theCommands << "drawRootSystem expects at least 1 argument. ";
   }
   bool hasPreferredProjectionPlane = input.isListNElements(4);
   WithContext<SemisimpleLieAlgebra*> theAlgPointer;
@@ -9236,7 +9236,7 @@ bool CalculatorFunctions::innerDrawRootSystem(
   }
   std::stringstream out;
   DrawingVariables theDV;
-  theWeyl.DrawRootSystem(theDV, true, false, nullptr, true, nullptr);
+  theWeyl.drawRootSystem(theDV, true, false, nullptr, true, nullptr);
   if (hasPreferredProjectionPlane) {
     theDV.flagFillUserDefinedProjection = true;
     theDV.FillUserDefinedProjection = preferredProjectionPlane;
@@ -9245,13 +9245,13 @@ bool CalculatorFunctions::innerDrawRootSystem(
   return output.AssignValue(out.str(), theCommands);
 }
 
-template <class coefficient>
-int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight(
-  const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords
+template <class Coefficient>
+int CharacterSemisimpleLieAlgebraModule<Coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight(
+  const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
 ) {
-  MacroRegisterFunctionWithName("charSSAlgMod_coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
+  MacroRegisterFunctionWithName("charSSAlgMod_Coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
   int result = - 1;
-  Weight<coefficient> currentWeight;
+  Weight<Coefficient> currentWeight;
   currentWeight = theWeightInFundCoords;
   for (
     ;
@@ -9262,11 +9262,11 @@ int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight(
   return result;
 }
 
-template <class coefficient>
-std::string charSSAlgMod<coefficient>::toStringFullCharacterWeightsTable() {
+template <class Coefficient>
+std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharacterWeightsTable() {
   MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::toStringFullCharacterWeightsTable");
   std::stringstream out;
-  charSSAlgMod<coefficient> outputChar;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> outputChar;
   if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, nullptr)) {
     out << "Failed to compute the character with highest weight " << this->toString()
     << " I used Fredenthal's formula; likely the computation was too large. ";
@@ -9274,13 +9274,13 @@ std::string charSSAlgMod<coefficient>::toStringFullCharacterWeightsTable() {
   }
   out << "<table><tr><td>Weight in fund. coords</td><td>simple coords.</td>"
   << "<td>Simple strings</td><td>Simple half-strings</td></tr>";
-  Vector<coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
-  Vector<coefficient> theSimpleRoot;
-  Vector<coefficient> theSimpleRootFundCoords;
+  Vector<Coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
+  Vector<Coefficient> theSimpleRoot;
+  Vector<Coefficient> theSimpleRootFundCoords;
   for (int k = 0; k < outputChar.size(); k ++) {
     out << "<tr>";
     out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
-    Vector<coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
+    Vector<Coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoords.makeZero(this->GetOwner()->GetRank());
@@ -9440,11 +9440,11 @@ public:
     std::stringstream out;
     out << "<br>Index in current layer: " << this->indexInCurrentLayer;
     out << "<br>Index in displayed strings: " << this->indexCurrentChild;
-    out << "<br>Current layer: " << this->currentLayer.ToStringCommaDelimited();
-    out << "<br>Next layer: " << this->nextLayer.ToStringCommaDelimited();
-    out << "<br>Displayed strings: " << this->DisplayedEstrings.ToStringCommaDelimited() ;
-    out << "<br>Node positions: " << this->NodePositions.ToStringCommaDelimited() ;
-    out << "<br>Arrows: " << this->arrows.ToStringCommaDelimited() ;
+    out << "<br>Current layer: " << this->currentLayer.toStringCommaDelimited();
+    out << "<br>Next layer: " << this->nextLayer.toStringCommaDelimited();
+    out << "<br>Displayed strings: " << this->DisplayedEstrings.toStringCommaDelimited() ;
+    out << "<br>Node positions: " << this->NodePositions.toStringCommaDelimited() ;
+    out << "<br>Arrows: " << this->arrows.toStringCommaDelimited() ;
     out << "<br>Width max layer: " << this->widthMaxLayer;
     return out.str();
   }
@@ -9613,7 +9613,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   // Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
-  charSSAlgMod<Rational> theChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
   DrawingVariables theDV;
   std::string report;
@@ -9765,7 +9765,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
     }
   }
   HashedList<std::string, MathRoutines::HashString> rulesToSwitch;
-  rulesToSwitch.Reserve(rulesToConsider.size);
+  rulesToSwitch.reserve(rulesToConsider.size);
   for (int i = 0; i < rulesToConsider.size; i ++) {
     if (!theCommands.namedRules.contains(rulesToConsider[i])) {
       return theCommands << "Can't find named rule: " << rulesToConsider[i]

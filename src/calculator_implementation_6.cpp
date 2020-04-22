@@ -122,9 +122,9 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
 
 std::string CalculatorHTML::Test::ToHTMLDebug() {
   std::stringstream out;
-  out << "File names all: " << this->fileNamesAll.ToStringCommaDelimited() << "<br>";
-  out << "Extensions all: " << this->fileExtensionsAll.ToStringCommaDelimited() << "<br>";
-  out << "File names extracted: " << this->fileNames.ToStringCommaDelimited();
+  out << "File names all: " << this->fileNamesAll.toStringCommaDelimited() << "<br>";
+  out << "Extensions all: " << this->fileExtensionsAll.toStringCommaDelimited() << "<br>";
+  out << "File names extracted: " << this->fileNames.toStringCommaDelimited();
   return out.str();
 }
 
@@ -307,7 +307,7 @@ bool CalculatorHTML::Test::BuiltInMultiple(
       *comments << numberOfRepetitions
       << " consecutive successfull tests of all involved problems. "
       << "The tests were carried out with starting random seeds: "
-      << randomSeeds.ToStringCommaDelimited()
+      << randomSeeds.toStringCommaDelimited()
       << "<br>"
       << tester.ToHTMLBuiltIn();
     }
@@ -351,7 +351,7 @@ bool CalculatorHTML::Test::BuiltIn(
   int badSoFar = 0;
   for (int i = this->firstFileIndex; i < lastIndex; i ++) {
     this->results.setSize(this->results.size + 1);
-    OneProblemTest& currentTest = *this->results.LastObject();
+    OneProblemTest& currentTest = *this->results.lastObject();
     currentTest.fileName = "problems/" + this->fileNames[i];
     currentTest.randomSeed = this->randomSeed;
     std::stringstream reportStream;
@@ -655,8 +655,8 @@ bool CalculatorFunctions::innerGetSummand(
   }
   List<Expression> theMultiplicands;
   theExpression.GetMultiplicandsRecursive(theMultiplicands);
-  Expression theSum = *theMultiplicands.LastObject();
-  theMultiplicands.RemoveLastObject();
+  Expression theSum = *theMultiplicands.lastObject();
+  theMultiplicands.removeLastObject();
   Expression theCoeff;
   if (theMultiplicands.size > 0) {
     theCoeff.MakeProducT(theCommands, theMultiplicands);
@@ -2508,7 +2508,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
     return theCommands << "While trying to extract a function from: " << theFun.toString()
     << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
-    << theVars.ToStringCommaDelimited();
+    << theVars.toStringCommaDelimited();
   }
   int numIterations = - 1;
   if (!input[3].IsSmallInteger(&numIterations)) {
@@ -2559,8 +2559,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   //  if (!yDefE.GetFreeVariables(yEcandidates, false))
   //    return theCommands << "Failed to get free variables from " << yDefE.toString();
   //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
-  //    return theCommands << "Couldn't get single free variable from " << xEcandidates.ToStringCommaDelimited()
-  //    << " and/or " << yEcandidates.ToStringCommaDelimited();
+  //    return theCommands << "Couldn't get single free variable from " << xEcandidates.toStringCommaDelimited()
+  //    << " and/or " << yEcandidates.toStringCommaDelimited();
   //  if (CalculatorFunctions::innerEqualityToArithmeticExpression())
   if (!xDefE.startsWith(theCommands.opDefine(), 3)) {
     return theCommands << "Failed to extract variable form " << xDefE.toString();

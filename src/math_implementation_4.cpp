@@ -128,7 +128,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-  output[WebAPI::result::comments] = global.Comments.getCurrentReset();
+  output[WebAPI::result::comments] = global.comments.getCurrentReset();
   global.theResponse.WriteResponse(output, true);
   assert(false);
   return *this;
@@ -333,7 +333,7 @@ void GlobalVariables::InitThreadsExecutableStart() {
 void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   this->PhysicalPathProjectBase = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
-  this->ChDir(this->PhysicalPathProjectBase);
+  this->changeDirectory(this->PhysicalPathProjectBase);
   this->PhysicalPathProjectBase = FileOperations::GetCurrentFolder() + "/";
 }
 
@@ -649,17 +649,17 @@ void DynkinDiagramRootSubalgebra::Sort() {
   this->sameTypeComponents.size = 0;
   this->indexInUniComponent.setSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.setSize(this->SimpleBasesConnectedComponents.size);
-  this->sameTypeComponents.Reserve(this->SimpleBasesConnectedComponents.size);
+  this->sameTypeComponents.reserve(this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     if (!(this->SimpleComponentTypes[i] == tempType)) {
       this->sameTypeComponents.setSize(this->sameTypeComponents.size + 1);
-      this->sameTypeComponents.LastObject()->size = 0;
+      this->sameTypeComponents.lastObject()->size = 0;
       tempType = this->SimpleComponentTypes[i];
     }
-    this->sameTypeComponents.LastObject()->addOnTop(i);
+    this->sameTypeComponents.lastObject()->addOnTop(i);
     this->indexUniComponent[i] = this->sameTypeComponents.size - 1;
-    this->indexInUniComponent[i] = this->sameTypeComponents.LastObject()->size - 1;
+    this->indexInUniComponent[i] = this->sameTypeComponents.lastObject()->size - 1;
   }
 }
 
@@ -726,7 +726,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     }
     for (int i = 0; i < 3; i ++) {
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].ReverseOrderElements();
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].reverseElements();
       }
     }
     for (int i = 0; i < 3; i ++) {
@@ -747,7 +747,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.scalarProduct(currentComponent[0], this->AmbientBilinearForm).isEqualToZero()) {
-        currentComponent.ReverseOrderElements();
+        currentComponent.reverseElements();
       }
       currentComponent.addOnTop(tripleNode);//<-then triple node
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
@@ -765,13 +765,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
         diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0],
         this->AmbientBilinearForm).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].ReverseOrderElements(); //<-the 2-root component has the first root perpendicular to the triple node
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].reverseElements(); //<-the 2-root component has the first root perpendicular to the triple node
       }
       if (
         tripleNode.scalarProduct(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0][0],
         this->AmbientBilinearForm).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[0].ReverseOrderElements(); //<-the largest component has the first root non-perpendicular to the triple node
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[0].reverseElements(); //<-the largest component has the first root non-perpendicular to the triple node
       }
       currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
       currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
@@ -838,7 +838,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
   }
   // so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter == 'G' || outputType.theLetter == 'C' ) {
-    currentComponent.ReverseOrderElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
+    currentComponent.reverseElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
   }
 }
 
@@ -846,7 +846,7 @@ std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) 
   DynkinType theType;
   theType.makeZero();
   for (int j = 0; j < this->SimpleComponentTypes.size; j ++) {
-    theType.AddMonomial(this->SimpleComponentTypes[j], 1);
+    theType.addMonomial(this->SimpleComponentTypes[j], 1);
   }
   return theType.toString(theFormat);
 }
@@ -865,7 +865,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
   this->CheckInitialization();
   this->SimpleBasesConnectedComponents.size = 0;
-  this->SimpleBasesConnectedComponents.Reserve(simpleBasisInput.size);
+  this->SimpleBasesConnectedComponents.reserve(simpleBasisInput.size);
   for (int i = 0; i < simpleBasisInput.size; i ++) {
     int indexFirstComponentConnectedToRoot = - 1;
     for (int j = 0; j < this->SimpleBasesConnectedComponents.size; j ++) {
@@ -886,8 +886,8 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
     }
     if (indexFirstComponentConnectedToRoot == - 1) {
       this->SimpleBasesConnectedComponents.setSize(this->SimpleBasesConnectedComponents.size + 1);
-      this->SimpleBasesConnectedComponents.LastObject()->size = 0;
-      this->SimpleBasesConnectedComponents.LastObject()->addOnTop(simpleBasisInput[i]);
+      this->SimpleBasesConnectedComponents.lastObject()->size = 0;
+      this->SimpleBasesConnectedComponents.lastObject()->addOnTop(simpleBasisInput[i]);
     }
   }
   this->ComputeDynkinStrings();
@@ -979,7 +979,7 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput");
   this->AmbientRootSystem = theWeyl.RootSystem;
-  this->AmbientBilinearForm = theWeyl.CartanSymmetric;
+  this->AmbientBilinearForm = theWeyl.cartanSymmetric;
   theWeyl.TransformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
   this->ComputeDiagramInputIsSimple(inputRoots);
 }
@@ -1025,7 +1025,7 @@ void DynkinDiagramRootSubalgebra::GetDynkinType(DynkinType& output) const {
   output.makeZero();
   output.setExpectedSize(this->SimpleComponentTypes.size);
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
-    output.AddMonomial(this->SimpleComponentTypes[i], 1);
+    output.addMonomial(this->SimpleComponentTypes[i], 1);
   }
 }
 
@@ -1040,7 +1040,7 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
   }
   output.addOnTop(thePermutation);
   if (currentStrinG.theLetter == 'A' && currentComponent.size != 1) {
-    thePermutation.ReverseOrderElements();
+    thePermutation.reverseElements();
     output.addOnTop(thePermutation);
   }
   if (currentStrinG.theLetter == 'D') {
@@ -1189,25 +1189,25 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   return result;
 }
 
-bool affineCone::SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output) {
+bool AffineCone::SplitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output) {
   (void) theKillerPlane;
   (void) output;
   return true;
 }
 
-bool affineCone::WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate) {
+bool AffineCone::WallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate) {
   (void) theKillerCandidate;
   return true;
 }
 
-int affineCone::GetDimension() {
+int AffineCone::GetDimension() {
   if (this->theWalls.size == 0) {
     return 0;
   }
   return this->theWalls.theObjects[0].affinePoint.size;
 }
 
-unsigned int affineCone::hashFunction() const {
+unsigned int AffineCone::hashFunction() const {
   int tempMin = MathRoutines::Minimum(this->theWalls.size, ::someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
@@ -1216,7 +1216,7 @@ unsigned int affineCone::hashFunction() const {
   return result;
 }
 
-void affineHyperplanes::toString(std::string& output) {
+void AffineHyperplanes::toString(std::string& output) {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     std::string tempS;
@@ -1226,7 +1226,7 @@ void affineHyperplanes::toString(std::string& output) {
   output = out.str();
 }
 
-void permutation::initPermutation(int n) {
+void Permutation::initPermutation(int n) {
   this->initPart1(n);
   for (int i = 0; i < n; i ++) {
     this->MaxMultiplicities[i] = n - i - 1;
@@ -1234,7 +1234,7 @@ void permutation::initPermutation(int n) {
   }
 }
 
-void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElements) {
+void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElements) {
   this->initPart1(TotalNumElements);
   int counter = 0;
   for (int i = 0; i < disjointSubsets.size; i ++) {
@@ -1250,12 +1250,12 @@ void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
   }
 }
 
-void permutation::incrementAndGetPermutation(List<int>& output) {
+void Permutation::incrementAndGetPermutation(List<int>& output) {
   this->IncrementReturnFalseIfPastLast();
   this->GetPermutationLthElementIsTheImageofLthIndex(output);
 }
 
-void permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
+void Permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
   int numElements = this->Multiplicities.size;
   output.setSize(numElements);
   for (int i = 0; i < numElements; i ++) {
@@ -1321,7 +1321,7 @@ bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational
     }
     for (int j = 0; j < this->theOuterAutos.theElements.size; j ++) {
       theWeightsCopy.getElement() = theWeights;
-      this->theOuterAutos.theElements[j].ActOnVectorsColumn(theWeightsCopy.getElement());
+      this->theOuterAutos.theElements[j].actOnVectorsColumn(theWeightsCopy.getElement());
       bool isGood = true;
       for (int k = 0; k < i; k ++) {
         if (!(theWeightsCopy.getElement()[k] - theWeights[k]).isPositiveOrZero()) {
@@ -1392,7 +1392,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
         global.MakeReport();
-        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.theObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
+        currentQPNoSub.substitution(this->theLinearOperatorsExtended.theObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
     }
@@ -1455,13 +1455,13 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Matrix<Rational> tempMat;
   Vector<Rational> tempRoot;
   DrawingVariables drawOps;
-  int theSmallDim = SmallerWeyl.CartanSymmetric.numberOfRows;
+  int theSmallDim = SmallerWeyl.cartanSymmetric.numberOfRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
   theDraggableBasis.MakeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
   tmpWeyl.MakeArbitrarySimple('A', 2);
-  drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis);
+  drawOps.theBuffer.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
   FormatExpressions theFormat;
   drawOps.theBuffer.BasisProjectionPlane[0][0] = 1;
   drawOps.theBuffer.BasisProjectionPlane[0][1] = 0;
@@ -1475,7 +1475,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->theLinearOperators.size);
-  this->theLinearOperators[0].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
+  this->theLinearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
   out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlgSimpleCoords.toString();
   out << "<br>Input parabolics selections: " << parabolicSel.toString();
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.toString();
@@ -1484,8 +1484,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
   Cone smallWeylChamber;
-  tempMat = SmallerWeyl.CartanSymmetric;
-  tempMat.Invert();
+  tempMat = SmallerWeyl.cartanSymmetric;
+  tempMat.invert();
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
   tMpRt = this->ParabolicSelectionSmallerAlgebra;
@@ -1505,7 +1505,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   out << "<br> The small Weyl chamber: " << smallWeylChamber.toString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
   for (int i = 0; i < this->theLinearOperators.size; i ++) {
-    this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
+    this->theLinearOperators[i].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i] += this->theTranslationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
@@ -1660,9 +1660,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
   Matrix<Rational> tempMat;
-  tempMat = input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert();
-//  tempMat.ActOnVectorsColumn(this->GmodKnegativeWeightS);
+  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat.invert();
+//  tempMat.actOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.toString();
   this->preferredBasiS.setSize(2);
   this->preferredBasiS[0] = - this->GmodKnegativeWeightS[1];
@@ -1674,8 +1674,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
   this->preferredBasisChangE.Transpose();
   this->preferredBasisChangeInversE = this->preferredBasisChangE;
-  this->preferredBasisChangeInversE.Invert();
-  this->preferredBasisChangeInversE.ActOnVectorsColumn
+  this->preferredBasisChangeInversE.invert();
+  this->preferredBasisChangeInversE.actOnVectorsColumn
   (this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
   this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
   for (int i = 0; i < this->GmodKnegativeWeightS.size; i ++) {
@@ -1695,7 +1695,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < input.theRange().GetRank(); i ++) {
     startingWeight.MakeEi(input.theRange().GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight);
-    this->preferredBasisChangeInversE.ActOnVectorColumn(projectedWeight);
+    this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
       theProjectionBasisChanged.elements[j][i] = projectedWeight[j];
     }
@@ -1732,12 +1732,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < theSubgroup.allElements.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
-//    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
+//    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
-    currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
+    currentLinearOperator.actOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
-    theProjectionBasisChanged.ActOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
+    theProjectionBasisChanged.actOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
       this->theCoeffs[i] = 1;
     } else {
@@ -1752,11 +1752,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int k = 0; k < this->theLinearOperators.size; k ++) {
     Matrix<Rational>& currentLO = this->theLinearOperators[k];
     Matrix<Rational>& currentLOExtended = this->theLinearOperatorsExtended[k];
-    currentLO.MultiplyOnTheLeft(theProjectionBasisChanged);
+    currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
     currentLO *= - 1;
     //tempList.addOnTopNoRepetition(this->theLinearOperators.theObjects[i]);
     currentLOExtended.MakeIdMatrix(currentLO.numberOfRows);
-    currentLOExtended.Resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
+    currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
       for (int j = 0; j < currentLO.numberOfColumns; j ++) {
         currentLOExtended.elements[i][j + currentLO.numberOfRows] = currentLO.elements[i][j];
@@ -1788,8 +1788,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   theFormat.polyAlphabeT[3] = "y_2";
   theFormat.polyAlphabeT[4] = "y_3";
   tempRoot = theSubgroup.GetRho();
-  this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
-  this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
+  this->theLinearOperators[0].actOnVectorColumn(tempRoot);
+  this->preferredBasisChangE.actOnVectorColumn(tempRoot);
   tempRoot.Minus();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
   << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
@@ -1804,7 +1804,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
         tempMatPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k], tempVect.size);
       }
     }
-    tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
+    tempMatPoly.actOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j = 0; j < tempVect2.size; j ++) {
       tempVect2[j] += this->theTranslationsProjectedBasisChanged[i][j];
     }
@@ -1818,14 +1818,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdMatrix(input.theDomain().GetRank());
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, Rational(0));
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
-  tempMat = theWeYl.CartanSymmetric;
-  tempMat.Invert();
+  tempMat = theWeYl.cartanSymmetric;
+  tempMat.invert();
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
     tempMat.GetVectorFromRow(i, tempRoot);
     if (ParabolicEvaluationRootImage[i].isEqualToZero()) {
       WallsWeylChamberLargerAlgebra.setSize(WallsWeylChamberLargerAlgebra.size + 1);
-      *WallsWeylChamberLargerAlgebra.LastObject() = tempRoot;
+      *WallsWeylChamberLargerAlgebra.lastObject() = tempRoot;
     }
   }
   this->log << "\n\n\n**************\nParabolic selection larger algebra:"
@@ -1847,19 +1847,19 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
     this->PreimageWeylChamberLargerAlgebra.Normals[i] = tempRoot;
   }
-  tempMat = input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert();
+  tempMat = input.theDomain().theWeyl.cartanSymmetric;
+  tempMat.invert();
   tempRoots.size = 0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    input.theDomain().theWeyl.CartanSymmetric.GetVectorFromRow(i, tempRoot);
+    input.theDomain().theWeyl.cartanSymmetric.GetVectorFromRow(i, tempRoot);
     if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
-      tempMat.GetVectorFromRow(i, *tempRoots.LastObject());
+      tempMat.GetVectorFromRow(i, *tempRoots.lastObject());
     }
   }
-  this->preferredBasisChangeInversE.ActOnVectorsColumn(tempRoots);
+  this->preferredBasisChangeInversE.actOnVectorsColumn(tempRoots);
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.toString();
   this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.toString();
@@ -1872,10 +1872,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << this->theLinearOperatorsExtended[1].toString(&global.theDefaultFormat.getElement()) << "\n";
   /*tempMat = this->theLinearOperatorsExtended.theObjects[0];
   tempMat.Transpose();
-  tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
+  tempMat.actOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.size; i ++) {
     this->PreimageWeylChamberSmallerAlgebra.theObjects[i].setSize(input.theRange.GetRank() + input.theDomain.GetRank() + 1);
-    *this->PreimageWeylChamberSmallerAlgebra.theObjects[i].LastObject()= 0;
+    *this->PreimageWeylChamberSmallerAlgebra.theObjects[i].lastObject()= 0;
   }*/
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
     tempRoot.makeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
@@ -1972,7 +1972,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport() {
         tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[j].GetInternalPoint();
         if (this->projectivizedChamber.theObjects[i].IsInCone(tempRoot)) {
           Rational tempRat;
-          tempRat =*tempRoot.LastObject();
+          tempRat =*tempRoot.lastObject();
           if (tempRat != 0)
             tempRoot/= tempRat;
           theMult.valueOnEachLatticeShift.theObjects[0].Evaluate(tempRoot, tempRat);
@@ -1999,8 +1999,8 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport() {
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::InitTheMaxComputation");
   this->theMaxComputation.numNonParaM = 2;
-  this->theMaxComputation.theConesLargerDim.Reserve(this->projectivizedChambeR.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.Reserve(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.reserve(this->projectivizedChambeR.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.reserve(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.setSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.setSize(0);
   Lattice ZnLattice;
@@ -2042,7 +2042,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone(FormatExpress
     Vector<Rational>& currentNormal = theCone.Normals[i];
     normalNoConstant = currentNormal;
     normalNoConstant.setSize(dimSmallerAlgebra + dimLargerAlgebra);
-    theConst = - (*currentNormal.LastObject());
+    theConst = - (*currentNormal.lastObject());
     if (!normalNoConstant.isEqualToZero()) {
       out1 << "$" << normalNoConstant.ToStringLetterFormat("x", &theFormat) << "$ & $\\geq$ & $"
       << theConst.toString() << "$ \\\\";
@@ -2088,7 +2088,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray(
     for (int k = 0; k < numParams - 1; k ++) {
       output.elements[l][k] = NonParams[l][k];
     }
-    outputTranslation[l] = *NonParams[l].LastObject();
+    outputTranslation[l] = *NonParams[l].lastObject();
   }
   for (int l = 0; l < numParams - 1; l ++) {
     output.elements[l + numNonParams][l] = 1;
@@ -2100,14 +2100,14 @@ void GeneralizedVermaModuleCharacters::GetProjection(
 ) {
   Matrix<Rational>& currentExtendedOperator = this->theLinearOperatorsExtended[indexOperator];
   Vector<Rational>& currentTranslation = this->theTranslationsProjectedBasisChanged[indexOperator];
-  if (input.LastObject()->isEqualToZero()) {
+  if (input.lastObject()->isEqualToZero()) {
     global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
   }
   output = input;
-  Rational tempRat = *output.LastObject();
+  Rational tempRat = *output.lastObject();
   output /= tempRat;
   output.size --;
-  currentExtendedOperator.ActOnVectorColumn(output);
+  currentExtendedOperator.actOnVectorColumn(output);
   output += currentTranslation;
 }
 
@@ -2142,9 +2142,9 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective(
   startingNormal.ScalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, theConst);
   theOperatorExtended.Transpose();
   outputNormal = startingNormal;
-  theOperatorExtended.ActOnVectorColumn(outputNormal);
+  theOperatorExtended.actOnVectorColumn(outputNormal);
   outputNormal.setSize(outputNormal.size + 1);
-  *outputNormal.LastObject() = - theConst;
+  *outputNormal.lastObject() = - theConst;
 }
 
 void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1() {

@@ -712,7 +712,7 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
     return;
   }
   std::stringstream reportStream;
-  reportStream << "Substitution rules so far:";
+  reportStream << "substitution rules so far:";
   for (int j = 1; j < childIndex; j ++) {
     if (
       output[j].startsWith(this->owner->opDefine()) ||
@@ -915,7 +915,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   this->owner->cachedExpressions.addOnTop(theExpressionWithContext);
   this->indexInCache = this->owner->cachedExpressions.size - 1;
   this->owner->imagesCachedExpressions.setSize(this->indexInCache + 1);
-  this->owner->imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", *this->owner);
+  this->owner->imagesCachedExpressions.lastObject()->MakeError("Error: not computed yet.", *this->owner);
 }
 
 bool Calculator::EvaluateExpression(
@@ -983,7 +983,7 @@ bool Calculator::EvaluateExpression(
   while (state.ReduceOnce()) {
   }
   outputIsNonCacheable = state.flagIsNonCacheable;
-  theCommands.EvaluatedExpressionsStack.RemoveLastObject();
+  theCommands.EvaluatedExpressionsStack.removeLastObject();
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {

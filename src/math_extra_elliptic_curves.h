@@ -19,15 +19,15 @@ public:
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
 };
 
-template <typename coefficient>
+template <typename Coefficient>
 class ElementEllipticCurve {
 public:
   EllipticCurveWeierstrassNormalForm owner;
-  coefficient xCoordinate;
-  coefficient yCoordinate;
+  Coefficient xCoordinate;
+  Coefficient yCoordinate;
   bool flagInfinity;
-  static unsigned int hashFunction(const ElementEllipticCurve<coefficient>& input);
-  void Invert();
+  static unsigned int hashFunction(const ElementEllipticCurve<Coefficient>& input);
+  void invert();
   bool MakeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
   void MakeGeneratorSecp256k1();
   void makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);

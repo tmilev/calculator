@@ -138,7 +138,7 @@ std::string Database::FallBack::ToStringIndices() const {
     }
     out << "]\n";
   }
-  out << "Known indices: " << this->knownIndices.ToStringCommaDelimited();
+  out << "Known indices: " << this->knownIndices.toStringCommaDelimited();
   return out.str();
 }
 
@@ -216,7 +216,7 @@ bool Database::FallBack::HasCollection(
     *commentsOnFailure << "Database collection "
     << collection << " not found. "
     << "Known collections: "
-    << this->knownCollectionS.ToStringCommaDelimited()
+    << this->knownCollectionS.toStringCommaDelimited()
     << ". ";
   }
   return false;

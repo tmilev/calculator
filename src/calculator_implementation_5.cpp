@@ -409,7 +409,7 @@ bool MeshTriangles::ComputePoints(
   theFreeVars.quickSortAscending();
   if (theFreeVars.size > 2) {
     return theCommands << "I got that your curve depends on " << theFreeVars.size << " expressions, namely: "
-    << theFreeVars.ToStringCommaDelimited()
+    << theFreeVars.toStringCommaDelimited()
     << " and that is too many (2 max). ";
   }
   Expression tempE;
@@ -959,7 +959,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
       }
     }
     out << "</b>.";
-    out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
+    out << "<br>The expected variables are: " << allowedFreeVars.toStringCommaDelimited() << ". ";
     out << "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
     << "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
     << "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>";
@@ -998,7 +998,7 @@ bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& i
       toBeSorted = &(input[1]);
     }
   }
-  sortedExpressions.Reserve(toBeSorted->size() - 1);
+  sortedExpressions.reserve(toBeSorted->size() - 1);
   for (int i = 1; i < toBeSorted->size(); i ++) {
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
@@ -1023,7 +1023,7 @@ bool CalculatorFunctions::innerSortDescending(
       toBeSorted = &(input[1]);
     }
   }
-  sortedExpressions.Reserve(toBeSorted->size() - 1);
+  sortedExpressions.reserve(toBeSorted->size() - 1);
   for (int i = 1; i < toBeSorted->size(); i ++) {
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
@@ -1091,7 +1091,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
       }
     }
     out << "</b>.";
-    out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.ToStringCommaDelimited() << ". ";
+    out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.toStringCommaDelimited() << ". ";
   }
   if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
@@ -1108,7 +1108,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
       }
     }
     out << "</b>.";
-    out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
+    out << "<br>The expected variables are: " << allowedFreeVars.toStringCommaDelimited() << ". ";
   }
   if (out.str() != "") {
     out << "<br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  "
@@ -2118,7 +2118,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     return theCommands << "Got a surface with "
     << thePlot.variablesInPlay.size
     << " variables, namely: "
-    << thePlot.variablesInPlay.ToStringCommaDelimited()
+    << thePlot.variablesInPlay.toStringCommaDelimited()
     << ". I've been taught to plot 2d surfaces only. "
     << "Please reduce the number of variables to 2. ";
   }
@@ -2370,9 +2370,9 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   return output.AssignValue(out.str(), theCommands);
 }
 
-template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlightLaTeX(
-  const Polynomial<coefficient>& thePoly,
+template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::GetSpacedMonomialsWithHighlightLaTeX(
+  const Polynomial<Coefficient>& thePoly,
   List<List<int> >* slidesToHighlightMon,
   List<int>* slidesToFcAnswer,
   List<int>* slidesToUncover,
@@ -2447,7 +2447,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     }
     if (slidesToHighlightMon != nullptr) {
       if ((*slidesToHighlightMon)[i].size > 0) {
-        highlightHead += "\\alertNoH{" + (*slidesToHighlightMon)[i].ToStringCommaDelimited() + "}{";
+        highlightHead += "\\alertNoH{" + (*slidesToHighlightMon)[i].toStringCommaDelimited() + "}{";
         highlightTail = "}" + highlightTail;
       }
     }
@@ -2461,7 +2461,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     }
     countMons ++;
     std::string monWithSign =
-    Polynomial<coefficient>::GetBlendCoeffAndMon(
+    Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
       thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->theFormat
     );
     std::string sign = monWithSign.substr(0, 1);
@@ -2505,8 +2505,8 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
   return out.str();
 }
 
-template <class coefficient>
-void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
+template <class Coefficient>
+void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   int remainderIndex, int& currentSlideNumber
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::ComputeHighLightsFromRemainder");
@@ -2552,9 +2552,9 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   if (remainderIndex >= this->intermediateSelectedDivisors.getElement().size) {
     return;
   }
-  Polynomial<coefficient>& currentRemainder = this->intermediateRemainders.getElement()[remainderIndex];
+  Polynomial<Coefficient>& currentRemainder = this->intermediateRemainders.getElement()[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors.getElement()[remainderIndex];
-  Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
+  Polynomial<Coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.theMonOrder
@@ -2563,7 +2563,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     divisorLeadingMonomial
   );
   MonomialP maxMonCurrentRemainder;
-  coefficient leadingCFCurrentRemainder;
+  Coefficient leadingCFCurrentRemainder;
   currentRemainder.GetIndexLeadingMonomial(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.theMonOrder
   );
@@ -2580,7 +2580,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << "\\alertNoH{"
   << currentSlideNumber << ","
   << currentSlideNumber + 1 << "}{"
-  << "$" << currentRemainder.GetBlendCoeffAndMon(
+  << "$" << currentRemainder.getBlendCoefficientAndMonomial(
     maxMonCurrentRemainder, leadingCFCurrentRemainder, false, &this->theFormat
   )
   << "$ "
@@ -2589,7 +2589,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << "\\alertNoH{"
   << currentSlideNumber << ","
   << currentSlideNumber + 1 << "}{"
-  << "$" << currentRemainder.GetBlendCoeffAndMon(
+  << "$" << currentRemainder.getBlendCoefficientAndMonomial(
     currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN],
     currentDivisor.coefficients[indexCurrentDivisorLeadingMoN],
     false,
@@ -2604,7 +2604,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
   this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]);
-  Polynomial<coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
+  Polynomial<Coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
   int indexCurrentQuotientMoN = currentQuotient.theMonomials.getIndex(
     this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]
   );
@@ -2625,7 +2625,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << currentSlideNumber << ", "
   << currentSlideNumber + 1
   << "}{$"
-  << currentQuotient.GetBlendCoeffAndMon(
+  << currentQuotient.getBlendCoefficientAndMonomial(
     currentQuotient.theMonomials[indexCurrentQuotientMoN],
     currentQuotient.coefficients[indexCurrentQuotientMoN],
     false,
@@ -2688,12 +2688,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   currentSlideNumber ++;
 }
 
-template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
+template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionLaTeXSlide");
   std::stringstream out;
-  List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.getElement();
-  List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
+  List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
+  List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
   this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
   this->allMonomials.clear();

@@ -361,7 +361,7 @@ bool WebAPIResponse::ProcessCompute() {
   global.theResponse.DisallowReport();
   JSData result;
   result = theCalculator.ToJSONOutputAndSpecials();
-  result[WebAPI::result::commentsGlobal] = global.Comments.getCurrentReset();
+  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
   global.theResponse.WriteResponse(result, false);
   global.flagComputationCompletE = true;
   return true;

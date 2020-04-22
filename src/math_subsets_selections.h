@@ -318,10 +318,10 @@ class SelectionPositiveIntegers {
     for (int i = this->theInts.size - 2; i >= 0; i --) {
       if (this->theInts[i] > 0) {
         this->theInts[i] --;
-        this->theInts[i + 1] = *this->theInts.LastObject();
+        this->theInts[i + 1] = *this->theInts.lastObject();
         this->theInts[i + 1] ++;
         if (i != this->theInts.size - 2) {
-          *this->theInts.LastObject() = 0;
+          *this->theInts.lastObject() = 0;
         }
         return true;
       }
@@ -331,13 +331,13 @@ class SelectionPositiveIntegers {
   }
 };
 
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
-  Vector<coefficient>& output,
-  Vector<coefficient>& ExtraRoot1,
-  Vector<coefficient>& ExtraRoot2,
+template<class Coefficient>
+bool Vectors<Coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
+  Vector<Coefficient>& output,
+  Vector<Coefficient>& ExtraRoot1,
+  Vector<Coefficient>& ExtraRoot2,
   Selection& theSelection,
-  Matrix<coefficient>& bufferMat,
+  Matrix<Coefficient>& bufferMat,
   Selection& bufferSel
 ) {
   Selection& NonPivotPoints = bufferSel;
@@ -354,37 +354,37 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
     bufferMat.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.theObjects[j]);
     bufferMat.elements[theSelection.CardinalitySelection + 1][j].Assign(ExtraRoot2.theObjects[j]);
   }
-  bufferMat.GaussianEliminationByRows(0, NonPivotPoints);
+  bufferMat.gaussianEliminationByRows(0, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
-  bufferMat.NonPivotPointsToEigenVector(NonPivotPoints, output);
+  bufferMat.nonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(
-  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output
+template <typename Coefficient>
+void Vectors<Coefficient>::SelectionToMatrix(
+  Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output
 ) {
   output.init(OutputDimension, theSelection.CardinalitySelection);
   this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
-template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrixAppend(
-  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex
+template <typename Coefficient>
+void Vectors<Coefficient>::SelectionToMatrixAppend(
+  Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
-    Vector<coefficient>& tempRoot = this->theObjects[theSelection.elements[i]];
+    Vector<Coefficient>& tempRoot = this->theObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
     }
   }
 }
 
-template <typename coefficient>
-void Vectors<coefficient>::SelectionToMatrix(
-  Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex
+template <typename Coefficient>
+void Vectors<Coefficient>::SelectionToMatrix(
+  Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     Vector<Rational>& tempRoot = this->theObjects[theSelection.elements[i]];
@@ -394,9 +394,9 @@ void Vectors<coefficient>::SelectionToMatrix(
   }
 }
 
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalExcludingIndex(
-  Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix
+template<class Coefficient>
+bool Vectors<Coefficient>::ComputeNormalExcludingIndex(
+  Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix
 ) {
   Selection NonPivotPoints;
   if (this->size == 0) {
@@ -414,19 +414,19 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
       }
     }
   }
-  bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
+  bufferMatrix.gaussianEliminationByRows(0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelection(
-  Vector<coefficient>& output,
+template<class Coefficient>
+bool Vectors<Coefficient>::ComputeNormalFromSelection(
+  Vector<Coefficient>& output,
   Selection& theSelection,
-  Matrix<coefficient>& bufferMatrix,
+  Matrix<Coefficient>& bufferMatrix,
   int theDimension
 ) const {
   Selection NonPivotPoints;
@@ -437,20 +437,20 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(
       bufferMatrix.elements[i][j] = this->theObjects[theSelection.elements[i]].theObjects[j];
     }
   }
-  bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
+  bufferMatrix.gaussianEliminationByRows(0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
-  Vector<coefficient>& output,
-  Vector<coefficient>& ExtraRoot,
+template<class Coefficient>
+bool Vectors<Coefficient>::ComputeNormalFromSelectionAndExtraRoot(
+  Vector<Coefficient>& output,
+  Vector<Coefficient>& ExtraRoot,
   Selection& theSelection,
-  Matrix<coefficient>& bufferMatrix,
+  Matrix<Coefficient>& bufferMatrix,
   Selection& bufferSel
 ) {
   if (this->size == 0) {
@@ -458,7 +458,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
   }
   int theDimension = this->theObjects[0].size;
   output.setSize(theDimension);
-  Matrix<coefficient> matOutputEmpty;
+  Matrix<Coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
   bufferMatrix.init(theSelection.CardinalitySelection + 1, theDimension);
   matOutputEmpty.init(- 1, - 1);
@@ -468,17 +468,17 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
     }
     bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
   }
-  bufferMatrix.GaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
+  bufferMatrix.gaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
+  bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template <class coefficient>
-void Vectors<coefficient>::GaussianEliminationForNormalComputation(
-  Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
+template <class Coefficient>
+void Vectors<Coefficient>::GaussianEliminationForNormalComputation(
+  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
 ) const {
   inputMatrix.init(this->size, theDimension);
   outputNonPivotPoints.init(theDimension);
@@ -487,16 +487,16 @@ void Vectors<coefficient>::GaussianEliminationForNormalComputation(
       inputMatrix(i, j) = (*this)[i][j];
     }
   }
-  inputMatrix.GaussianEliminationByRows(0, &outputNonPivotPoints);
+  inputMatrix.gaussianEliminationByRows(0, &outputNonPivotPoints);
 }
 
-template <class coefficient>
-int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection) const {
+template <class Coefficient>
+int Vectors<Coefficient>::GetRankOfSpanOfElements(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
   if (this->size == 0) {
     return 0;
   }
   int theDimension = this->theObjects[0].size;
-  MemorySaving<Matrix<coefficient> > emergencyMatBuf;
+  MemorySaving<Matrix<Coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
   if (buffer == nullptr) {
     buffer = &emergencyMatBuf.getElement();
@@ -508,9 +508,9 @@ int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, S
   return (theDimension - bufferSelection->CardinalitySelection);
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination) {
-  Matrix<coefficient> tempMat;
+template <class Coefficient>
+bool Vectors<Coefficient>::GetLinearDependence(Matrix<Coefficient>& outputTheLinearCombination) {
+  Matrix<Coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
   if (nonPivotPoints.CardinalitySelection == 0) {
@@ -520,8 +520,8 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
   return true;
 }
 
-template <class coefficient>
-void Vector<coefficient>::operator=(const Selection& other) {
+template <class Coefficient>
+void Vector<Coefficient>::operator=(const Selection& other) {
   if (other.MaxSize < 0) {
     this->setSize(0);
     return;
@@ -536,17 +536,17 @@ void Vector<coefficient>::operator=(const Selection& other) {
   }
 }
 
-template <class coefficient>
-void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other) {
+template <class Coefficient>
+void Vector<Coefficient>::operator=(const SelectionWithMultiplicities& other) {
   this->setSize(other.Multiplicities.size);
   for (int i = 0; i < other.Multiplicities.size; i ++) {
     this->theObjects[i] = other.Multiplicities[i];
   }
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
-  Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
+template <class Coefficient>
+bool Vectors<Coefficient>::LinearAlgebraForVertexComputation(
+  Selection& theSelection, Vector<Coefficient>& output, Matrix<Coefficient>& buffer, Selection& NonPivotPointsBuffer
 ) {
   if (this->size == 0) {
     return false;
@@ -562,9 +562,9 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
       buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);
     }
   }
-  buffer.GaussianEliminationByRows(0, NonPivotPointsBuffer);
+  buffer.gaussianEliminationByRows(0, NonPivotPointsBuffer);
   if (NonPivotPointsBuffer.CardinalitySelection == 1) {
-    buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
+    buffer.nonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
     return true;
   }
   return false;

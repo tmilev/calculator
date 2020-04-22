@@ -2,9 +2,9 @@
 #define math_general_implementation_H
 #include "math_general.h"
 
-template <class coefficient>
-void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
-  coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero
+template <class Coefficient>
+void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
+  Coefficient& output, const Coefficient& theRingOne, const Coefficient& theRingZero
 ) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
@@ -12,7 +12,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::gaussianElimination);
   int tempI;
   output = theRingOne;
-  coefficient tempRat;
+  Coefficient tempRat;
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
   }
@@ -23,7 +23,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
       output = theRingZero;
       return;
     }
-    this->SwitchTwoRows(i, tempI);
+    this->switchRows(i, tempI);
     if (tempI != i) {
       output *= - 1;
     }
@@ -62,8 +62,8 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
   }
 }
 
-template<class coefficient>
-std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat) {
+template<class Coefficient>
+std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& theMat) {
   output << "\\left(\\begin{array}{";
   for (int j = 0; j < theMat.numberOfColumns; j ++) {
     output << "c";
@@ -111,9 +111,9 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
   return output;
 }
 
-template <class coefficient, typename theIntegerType>
+template <class Coefficient, typename theIntegerType>
 void MathRoutines::raiseToPower(
-  coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit
+  Coefficient& theElement, const theIntegerType& thePower, const Coefficient& theRingUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   theIntegerType thePowerCopy;
@@ -130,7 +130,7 @@ void MathRoutines::raiseToPower(
   }
   ProgressReport reportOne;
   ProgressReport reportTwo(32, GlobalVariables::Response::ReportType::general);
-  coefficient squares;
+  Coefficient squares;
   squares = theElement;
   if (thePowerCopy < 4) {
     for (theIntegerType i = 1; i < thePowerCopy; i ++) {
@@ -169,20 +169,20 @@ void MathRoutines::raiseToPower(
   }
 }
 
-template <class templateMonomial, class coefficient>
-void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
-  const ElementMonomialAlgebra<templateMonomial, coefficient>& other,
-  ElementMonomialAlgebra<templateMonomial, coefficient>& output,
-  ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly,
+template <class templateMonomial, class Coefficient>
+void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
+  const ElementMonomialAlgebra<templateMonomial, Coefficient>& other,
+  ElementMonomialAlgebra<templateMonomial, Coefficient>& output,
+  ElementMonomialAlgebra<templateMonomial, Coefficient>& bufferPoly,
   templateMonomial& bufferMon
 ) const {
-  MacroRegisterFunctionWithName("ElementMonomialAlgebra::MultiplyBy");
+  MacroRegisterFunctionWithName("ElementMonomialAlgebra::multiplyBy");
   if (other.isEqualToZero()) {
     output.makeZero();
     return;
   }
   if (&bufferPoly == this || &bufferPoly == &other) {
-    global.fatal << "Bad buffer in ElementMonomialAlgebra::MultiplyBy." << global.fatal;
+    global.fatal << "Bad buffer in ElementMonomialAlgebra::multiplyBy." << global.fatal;
   }
   this->checkConsistency();
   other.checkConsistency();
@@ -205,7 +205,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   bufferPoly.setExpectedSize(maximumMonomials);
   bufferPoly.checkConsistency();
   bufferMon.checkConsistency();
-  coefficient current;
+  Coefficient current;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
       if (theReport2.tickAndWantReport()) {
@@ -219,20 +219,20 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
       bufferMon *= other[i];
       current = this->coefficients[j];
       current *= other.coefficients[i];
-      bufferPoly.AddMonomial(bufferMon, current);
+      bufferPoly.addMonomial(bufferMon, current);
     }
   }
   output = bufferPoly;
 }
 
-template <class templateMonomial, class coefficient>
-void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
+template <class templateMonomial, class Coefficient>
+void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
   const templateMonomial& other,
-  ElementMonomialAlgebra<templateMonomial, coefficient>& output
+  ElementMonomialAlgebra<templateMonomial, Coefficient>& output
 ) const {
   if (this == &output) {
-    ElementMonomialAlgebra<templateMonomial, coefficient> thisCopy = *this;
-    thisCopy.MultiplyBy(other, output);
+    ElementMonomialAlgebra<templateMonomial, Coefficient> thisCopy = *this;
+    thisCopy.multiplyBy(other, output);
     return;
   }
   output.makeZero();
@@ -240,25 +240,25 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   for (int i = 0; i < this->size(); i ++) {
     currentMonomial = this->theMonomials[i];
     currentMonomial *= other;
-    output.AddMonomial(currentMonomial, this->coefficients[i]);
+    output.addMonomial(currentMonomial, this->coefficients[i]);
   }
 }
 
-template<class coefficient>
-void MatrixTensor<coefficient>::raiseToPower(int power) {
+template<class Coefficient>
+void MatrixTensor<Coefficient>::raiseToPower(int power) {
   if (power <= 0) {
     global.fatal << "MatrixTensor::raiseToPower is currently implemented for positive integer power only. " << global.fatal;
   }
-  MatrixTensor<coefficient> id;
+  MatrixTensor<Coefficient> id;
   id.MakeIdSpecial();
   MathRoutines::raiseToPower(*this, power, id);
 }
 
-template <class coefficient>
-void MatrixTensor<coefficient>::operator*=(
-  const MatrixTensor<coefficient>& other
+template <class Coefficient>
+void MatrixTensor<Coefficient>::operator*=(
+  const MatrixTensor<Coefficient>& other
 ) {
-  MacroRegisterFunctionWithName("MatrixTensor::MultiplyBy");
+  MacroRegisterFunctionWithName("MatrixTensor::multiplyBy");
   if (other.isEqualToZero()) {
     this->makeZero();
     return;
@@ -280,9 +280,9 @@ void MatrixTensor<coefficient>::operator*=(
     << this->toString() << " times " << other.toString();
     theReport1.report(reportStream.str());
   }
-  MatrixTensor<coefficient> result;
+  MatrixTensor<Coefficient> result;
   result.setExpectedSize(maxNumMonsFinal);
-  coefficient currentCoefficient;
+  Coefficient currentCoefficient;
   MonomialMatrix currentMonomial;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
@@ -300,18 +300,18 @@ void MatrixTensor<coefficient>::operator*=(
       }
       currentCoefficient = this->coefficients[j];
       currentCoefficient *= other.coefficients[i];
-      result.AddMonomial(currentMonomial, currentCoefficient);
+      result.addMonomial(currentMonomial, currentCoefficient);
     }
   }
   *this = result;
 }
 
-template <class coefficient>
-void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
-  Matrix<coefficient>* otherMatrix,
-  const coefficient& theRingMinusUnit,
-  const coefficient& theRingUnit,
-  bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)
+template <class Coefficient>
+void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
+  Matrix<Coefficient>* otherMatrix,
+  const Coefficient& theRingMinusUnit,
+  const Coefficient& theRingUnit,
+  bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right)
 ) {
   MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
@@ -321,7 +321,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
     << "(most probably this is a wrong pointer typo). " << global.fatal;
   }
   int col = 0;
-  coefficient tempElt;
+  Coefficient tempElt;
   int row = 0;
   while (row < this->numberOfRows && col < this->numberOfColumns) {
     int foundPivotRow = - 1;
@@ -332,7 +332,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
       }
     }
     if (foundPivotRow != - 1) {
-      this->SwitchTwoRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
+      this->switchRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
       if (this->elements[row][col].isNegative()) {
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       }
@@ -344,8 +344,8 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
           << ExploringRow + 1 << "; total rows: " << this->numberOfRows;
           theReport.report(out.str());
         }
-        coefficient& PivotElt = this->elements[row][col];
-        coefficient& otherElt = this->elements[ExploringRow][col];
+        Coefficient& PivotElt = this->elements[row][col];
+        Coefficient& otherElt = this->elements[ExploringRow][col];
         if (otherElt.isNegative()) {
           this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         }
@@ -360,10 +360,10 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
         if (this->elements[ExploringRow][col].isEqualToZero()) {
           ExploringRow ++;
         } else {
-          this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
+          this->switchRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
         }
       }
-      coefficient& PivotElt = this->elements[row][col];
+      Coefficient& PivotElt = this->elements[row][col];
       for (int i = 0; i < row; i ++) {
         tempElt = this->elements[i][col];
         tempElt /= PivotElt;
@@ -379,24 +379,24 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   }
 }
 
-template <class coefficient>
-void Vectors<coefficient>::ChooseABasis() {
+template <class Coefficient>
+void Vectors<Coefficient>::ChooseABasis() {
   Vectors<Rational> output;
-  Matrix<coefficient> tempMat;
+  Matrix<Coefficient> tempMat;
   Selection tempSel;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->theObjects[i]);
     if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
-      output.RemoveLastObject();
+      output.removeLastObject();
     }
   }
   this->operator=(output);
 }
 
-template <class coefficient>
-void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
+template <class Coefficient>
+void Vectors<Coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   Selection BufferSel;
-  Matrix<coefficient> Buffer;
+  Matrix<Coefficient> Buffer;
   if (this->size != 0 && theDim != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
@@ -404,7 +404,7 @@ void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   if (currentRank == theDim) {
     return;
   }
-  Vector<coefficient> theVect;
+  Vector<Coefficient> theVect;
   for (int i = 0; i < theDim && currentRank < theDim; i ++) {
     theVect.MakeEi(theDim, i);
     this->addOnTop(theVect);
@@ -420,20 +420,20 @@ void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   }
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::LinSpanContainsVector(const Vector<coefficient>& input) const {
-    Matrix<coefficient> buffer;
+template <class Coefficient>
+bool Vectors<Coefficient>::LinSpanContainsVector(const Vector<Coefficient>& input) const {
+    Matrix<Coefficient> buffer;
     Selection bufferSelection;
     return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
 
-template <class coefficient>
-void Vectors<coefficient>::SelectABasisInSubspace(
-  const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivotColumns
+template <class Coefficient>
+void Vectors<Coefficient>::SelectABasisInSubspace(
+  const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivotColumns
 ) {
   if (&input == &output) {
-    List<Vector<coefficient> > inputCopy = input;
-    Vectors<coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
+    List<Vector<Coefficient> > inputCopy = input;
+    Vectors<Coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
     return;
   }
   if (input.size == 0) {
@@ -450,7 +450,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     << " generators in dimension " << theDim << "... " ;
     reportTask.report(reportStream.str());
   }
-  Matrix<coefficient> theMat;
+  Matrix<Coefficient> theMat;
   int MaxNumRows = MathRoutines::Minimum(input.size, theDim);
   theMat.init(MaxNumRows, theDim);
   int currentRow = 0;
@@ -460,7 +460,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     }
     currentRow ++;
     if (currentRow == MaxNumRows || i == input.size - 1) {
-      theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
+      theMat.gaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
       currentRow = outputSelectedPivotColumns.CardinalitySelection;
     }
     if (currentRow == MaxNumRows) {
@@ -479,10 +479,10 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   }
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
+template <typename Coefficient>
+void Matrix<Coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar) {
   ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);
-  coefficient tempElement;
+  Coefficient tempElement;
   for (int i = StartColIndex; i < this->numberOfColumns; i ++) {
     tempElement = this->elements[fromRowIndex][i];
     tempElement *= scalar;
@@ -495,15 +495,15 @@ void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int Start
   }
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::GaussianEliminationByRows(
-  Matrix<coefficient>* carbonCopyMat,
+template <typename Coefficient>
+void Matrix<Coefficient>::gaussianEliminationByRows(
+  Matrix<Coefficient>* carbonCopyMat,
   Selection* outputNonPivotColumns,
   Selection* outputPivotColumns,
   std::stringstream* humanReadableReport,
   FormatExpressions* theFormat
 ) {
-  MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
+  MacroRegisterFunctionWithName("Matrix::gaussianEliminationByRows");
   if (this->numberOfRows == 0) {
     global.fatal << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
     << " zero rows. " << global.fatal;
@@ -520,7 +520,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   int tempI;
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(this->numberOfRows, this->numberOfColumns);
-  coefficient tempElement;
+  Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->init(this->numberOfColumns);
   }
@@ -583,9 +583,9 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     if (outputPivotColumns != nullptr) {
       outputPivotColumns->AddSelectionAppendNewIndex(i);
     }
-    this->SwitchTwoRows(NumFoundPivots, tempI);
+    this->switchRows(NumFoundPivots, tempI);
     if (carbonCopyMat != 0) {
-      carbonCopyMat->SwitchTwoRows(NumFoundPivots, tempI);
+      carbonCopyMat->switchRows(NumFoundPivots, tempI);
     }
     tempElement = this->elements[NumFoundPivots][i];
     tempElement.invert();

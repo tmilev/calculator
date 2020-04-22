@@ -99,7 +99,7 @@ bool Test::ShouldTest(const std::string& testSuite) {
 
 void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
-  global << "Input arguments: " << inputArguments.ToStringCommaDelimited() << Logger::endL;
+  global << "Input arguments: " << inputArguments.toStringCommaDelimited() << Logger::endL;
   if (
     this->inputs.size == 0 ||
     this->inputs.contains(Test::Suites::all)

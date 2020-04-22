@@ -123,12 +123,12 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.lastObject()->SumCoords().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
-    outputWeightsByHeight[i].SetHashSizE(finalHashSize);
+    outputWeightsByHeight[i].setHashSize(finalHashSize);
   }
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
@@ -159,14 +159,14 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
-              outputWeightsByHeight[currentIndexShift].AdjustHashes();
+              outputWeightsByHeight[currentIndexShift].adjustHashes();
             }
           }
         }
       }
     }
     outputWeightsSimpleCoords.addOnTop(currentHashes);
-    outputWeightsSimpleCoords.AdjustHashes();
+    outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }
   out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
@@ -288,15 +288,15 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   std::stringstream out;
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
-  if (!this->GenerateOrbit(theOrbit, theGens, 1000, nullptr)) {
+  if (!this->generateOrbit(theOrbit, theGens, 1000, nullptr)) {
     out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
   }
   Vectors<double> coxPlane;
   coxPlane.setSize(2);
   this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
   DrawingVariables animated, collapsed;
-  this->owner->DrawRootSystem(animated, true, true);
-  this->owner->DrawRootSystem(collapsed, true, true);
+  this->owner->drawRootSystem(animated, true, true);
+  this->owner->drawRootSystem(collapsed, true, true);
   for (int i = 0; i < theOrbit.size; i ++) {
     LittelmannPath& currentPath = theOrbit[i];
     animated.drawPath(currentPath.Waypoints, "black", 1, this->owner->theDynkinType.toString(), i);
@@ -324,9 +324,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   LittelmannPath lastPath = theOrbit[0];
   LittelmannPath tempPath;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
-  tempMon = *theGens.LastObject();
-  tempMon.generatorsIndices.ReverseOrderElements();
-  tempMon.Powers.ReverseOrderElements();
+  tempMon = *theGens.lastObject();
+  tempMon.generatorsIndices.reverseElements();
+  tempMon.Powers.reverseElements();
   out << "<table>";
   for (int i = tempMon.generatorsIndices.size - 1; i >= 1; i --) {
     int curInd = - tempMon.generatorsIndices[i] - 1;
@@ -352,8 +352,8 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   for (int i = 0; i < theGens.size; i ++) {
     tempPath = theOrbit[i];
     tempMon = theGens[i];
-    tempMon.generatorsIndices.ReverseOrderElements();
-    tempMon.Powers.ReverseOrderElements();
+    tempMon.generatorsIndices.reverseElements();
+    tempMon.Powers.reverseElements();
     bool isadapted = tempPath.IsAdaptedString(tempMon);
     out << "<tr><td>" << tempMon.toString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
@@ -376,16 +376,16 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   return out.str();
 }
 
-template<class coefficient>
-void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
+template<class Coefficient>
+void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   HomomorphismSemisimpleLieAlgebra& theHmm,
   Selection& LeviInSmall,
-  List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
-  Vectors<coefficient>* outputWeightsFundCoords,
-  Vectors<coefficient>* outputEigenSpace,
+  List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors,
+  Vectors<Coefficient>* outputWeightsFundCoords,
+  Vectors<Coefficient>* outputEigenSpace,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
+  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size() != 1) {
     if (comments != nullptr) {
       std::stringstream out;
@@ -407,14 +407,14 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   << this->theChaR[0].weightFundamentalCoordS.toString();
   ProgressReport theReport;
   theReport.report(tempStream1.str());
-  List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
+  List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
   InvertedLeviInSmall.InvertSelection();
   eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.CardinalitySelection);
-  Vectors<coefficient> tempSpace1, tempSpace2;
-  MemorySaving<Vectors<coefficient> > tempEigenVects;
-  Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
+  Vectors<Coefficient> tempSpace1, tempSpace2;
+  MemorySaving<Vectors<Coefficient> > tempEigenVects;
+  Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
   theFinalEigenSpace.setSize(0);
   if (InvertedLeviInSmall.CardinalitySelection == 0) {
     theFinalEigenSpace.MakeEiBasis(this->getDimension());
@@ -422,7 +422,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
-    MatrixTensor<coefficient> currentOp, tempMat;
+    MatrixTensor<Coefficient> currentOp, tempMat;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
       tempMat = this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
@@ -433,7 +433,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     double timeAtStart1 = global.GetElapsedSeconds();
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
     theReport.report(tempStream3.str());
-    Matrix<coefficient> currentOpMat;
+    Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
     tempStream3 << " done in " << global.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
@@ -458,23 +458,23 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
   << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
-  Vector<coefficient> currentWeight;
-  Vector<coefficient> hwFundCoordsNilPart;
+  Vector<Coefficient> currentWeight;
+  Vector<Coefficient> hwFundCoordsNilPart;
   hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
-  ElementUniversalEnveloping<coefficient> currentElt, tempElt;
+  ElementUniversalEnveloping<Coefficient> currentElt, tempElt;
   if (outputEigenVectors != nullptr) {
     outputEigenVectors->setSize(0);
   }
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
     currentElt.makeZero(this->GetOwner());
-    Vector<coefficient>& currentVect = theFinalEigenSpace[j];
+    Vector<Coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
         tempElt.makeZero(this->GetOwner());
-        tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        tempElt.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
         currentElt += tempElt;
         lastNonZeroIndex = i;
@@ -610,8 +610,8 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
       << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
     for (int k = 0; k < theG2B3Data.theSmallCharFDpart.size(); k ++) {
-      charSSAlgMod<RationalFunction> tempChar;
-      tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.coefficients[k]);
+      CharacterSemisimpleLieAlgebraModule<RationalFunction> tempChar;
+      tempChar.addMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.coefficients[k]);
       int multiplicity = 0;
       theG2B3Data.theSmallCharFDpart.coefficients[k].IsSmallInteger(&multiplicity);
       for (int counter = 0; counter < multiplicity; counter ++, eigenIndexcounter ++) {
@@ -763,7 +763,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   if (output.IsError()) {
     return true;
   }
-  charSSAlgMod<RationalFunction> theCharacter, outputChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> theCharacter, outputChar;
   Vector<Rational> theHW;
   std::stringstream out;
   std::stringstream latexTable;
@@ -896,15 +896,15 @@ void branchingData::resetOutputData() {
   this->theCharacterDifferences.clear();
 }
 
-template<class coefficient>
-bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(
-  ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner
+template<class Coefficient>
+bool ElementSumGeneralizedVermas<Coefficient>::ExtractElementUE(
+  ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner
 ) {
   output.makeZero(theOwner);
-  ModuleSSalgebra<coefficient>* theModPtr = nullptr;
-  MonomialUniversalEnveloping<coefficient> tempMon;
+  ModuleSSalgebra<Coefficient>* theModPtr = nullptr;
+  MonomialUniversalEnveloping<Coefficient> tempMon;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialGeneralizedVerma<coefficient>& currentMon = (*this)[i];
+    const MonomialGeneralizedVerma<Coefficient>& currentMon = (*this)[i];
     if (i == 0) {
       theModPtr = currentMon.owner;
     }
@@ -913,7 +913,7 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(
     }
     tempMon = currentMon.theMonCoeffOne;
     tempMon *= currentMon.GetOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
-    output.AddMonomial(tempMon, this->coefficients[i]);
+    output.addMonomial(tempMon, this->coefficients[i]);
   }
   return true;
 }
@@ -953,8 +953,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat = theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
-  invertedG2cartanMat.Invert();
+  invertedG2cartanMat = theG2B3Data.theHmm.theDomain().theWeyl.cartanSymmetric;
+  invertedG2cartanMat.invert();
   WeylGroupData& rangeWeyl = theG2B3Data.theHmm.theRange().theWeyl;
   theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.outputWeightsFundCoordS);
   Vector<RationalFunction> weightSimpleCoordinates;
@@ -963,7 +963,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   );
   theG2B3Data.theAmbientChar.MakeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
   theG2B3Data.theSmallCharFDpart.makeZero();
-  charSSAlgMod<RationalFunction> tempMon;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction> tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction>& currentWeight = theG2B3Data.outputWeightsSimpleCoords[i];
     Vector<RationalFunction>& currentG2Weight = theG2B3Data.g2Weights[i];
@@ -977,7 +977,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
+    invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
     tempMon.MakeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
@@ -1000,10 +1000,10 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theG2B3Data.additionalMultipliers.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theShapovalovProducts.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theUEelts.setSize(theG2B3Data.g2Weights.size);
-  ElementSumGeneralizedVermas<RationalFunction>& theHWV = *theG2B3Data.theEigenVectorsLevi.LastObject();
+  ElementSumGeneralizedVermas<RationalFunction>& theHWV = *theG2B3Data.theEigenVectorsLevi.lastObject();
   theHWV.MakeHWV(theMod, 1);
   theHWV *= - 1;
-  *theG2B3Data.theEigenVectorS.LastObject() = theHWV;
+  *theG2B3Data.theEigenVectorS.lastObject() = theHWV;
   Vector<RationalFunction> weightDifference;
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3);
   theG2Casimir.checkConsistency();
@@ -1031,7 +1031,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
           theG2CasimirCopy *= 12;
           currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff = theG2B3Data.theChars[j];
-          charDiff -= *theG2B3Data.theChars.LastObject();
+          charDiff -= *theG2B3Data.theChars.lastObject();
           theG2B3Data.theCharacterDifferences.addOnTopNoRepetition(charDiff);
         }
       }
@@ -1251,7 +1251,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       hwPath.MakeFromWeightInSimpleCoords(
         currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl
       );
-      hwPath.GenerateOrbit(
+      hwPath.generateOrbit(
         tempList,
         theStrings,
         MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).numeratorShort),
@@ -1263,8 +1263,8 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       for (int k = 0; k < theStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
         tempMon = theStrings[k];
-        tempMon.generatorsIndices.ReverseOrderElements();
-        tempMon.Powers.ReverseOrderElements();
+        tempMon.generatorsIndices.reverseElements();
+        tempMon.Powers.reverseElements();
         if (!currentPath.IsAdaptedString(tempMon)) {
           foundBad = true;
           break;
@@ -1538,7 +1538,7 @@ bool Expression::AssignMatrixExpressions(
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
     currentRow.reset(owner);
-    currentRow.children.Reserve(input.numberOfColumns + 1);
+    currentRow.children.reserve(input.numberOfColumns + 1);
     currentRow.addChildAtomOnTop(owner.opSequence());
     for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));

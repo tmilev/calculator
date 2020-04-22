@@ -10,9 +10,9 @@
 
 //struct JSHashData;
 class Rational;
-template <typename coefficient>
+template <typename Coefficient>
 class Matrix;
-template <typename coefficient>
+template <typename Coefficient>
 class Vector;
 class LargeInteger;
 
@@ -85,10 +85,10 @@ public:
     }
   }
   void operator=(const LargeInteger& input);
-  template <typename coefficient>
-  void operator=(const Vector<coefficient>& other);
-  template <typename coefficient>
-  void operator=(const Matrix<coefficient>& other);
+  template <typename Coefficient>
+  void operator=(const Vector<Coefficient>& other);
+  template <typename Coefficient>
+  void operator=(const Matrix<Coefficient>& other);
   bool isNullOrUndefined();
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
@@ -148,15 +148,15 @@ public:
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);
 
-template <typename coefficient>
-void JSData::operator=(const Vector<coefficient>& other) {
+template <typename Coefficient>
+void JSData::operator=(const Vector<Coefficient>& other) {
   for (int i = 0; i < other.size; i ++) {
     (*this)[i] = other[i];
   }
 }
 
-template <typename coefficient>
-void JSData::operator=(const Matrix<coefficient>& other) {
+template <typename Coefficient>
+void JSData::operator=(const Matrix<Coefficient>& other) {
   for (int i = 0; i < other.numberOfRows; i ++) {
     for (int j = 0; j < other.numberOfColumns; j ++) {
       (*this)[i][j] = other(i, j);

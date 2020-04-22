@@ -30,10 +30,10 @@ bool ExpressionContext::operator==(const ExpressionContext& other) const {
   this->differentialOperatorVariables == other.differentialOperatorVariables;
 }
 
-template <class coefficient>
+template <class Coefficient>
 void ExpressionContext::polynomialSubstitutionNoFailure(
   const ExpressionContext& largerContext,
-  PolynomialSubstitution<coefficient>& output
+  PolynomialSubstitution<Coefficient>& output
 ) const {
   bool mustBeTrue = this->polynomialSubstitution(largerContext, output);
   if (!mustBeTrue) {
@@ -162,11 +162,11 @@ std::string ExpressionContext::toString() const {
   this->checkInitialization();
   out << "Context. ";
   if (this->variables.size > 0) {
-    out << "Variables: " << this->variables.ToStringCommaDelimited() << ". ";
+    out << "Variables: " << this->variables.toStringCommaDelimited() << ". ";
   }
   if (this->differentialOperatorVariables.size > 0) {
     out << "Differential operators: "
-    << this->variables.ToStringCommaDelimited() << ". ";
+    << this->variables.toStringCommaDelimited() << ". ";
   }
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     out << "Ambient semisimple Lie algebra: "
@@ -462,9 +462,9 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
   }
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool ExpressionContext::polynomialSubstitution(
-  const ExpressionContext& largerContext, PolynomialSubstitution<coefficient>& output
+  const ExpressionContext& largerContext, PolynomialSubstitution<Coefficient>& output
 ) const {
   output.setSize(this->variables.size);
   for (int i = 0; i < this->variables.size; i ++) {
@@ -477,11 +477,11 @@ bool ExpressionContext::polynomialSubstitution(
   return true;
 }
 
-template <class coefficient>
+template <class Coefficient>
 void ExpressionContext::polynomialAndWeylAlgebraSubstitutionNoFailure(
   const ExpressionContext& largerContext,
-  PolynomialSubstitution<coefficient>& outputPolyPart,
-  PolynomialSubstitution<coefficient>& outputDifferntialPart
+  PolynomialSubstitution<Coefficient>& outputPolyPart,
+  PolynomialSubstitution<Coefficient>& outputDifferntialPart
 ) const {
   bool mustBeTrue = this->polynomialAndWeylAlgebraSubstitution(
     largerContext, outputPolyPart, outputDifferntialPart
@@ -495,11 +495,11 @@ void ExpressionContext::polynomialAndWeylAlgebraSubstitutionNoFailure(
   }
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   const ExpressionContext& largerContext,
-  PolynomialSubstitution<coefficient>& outputPolynomialPart,
-  PolynomialSubstitution<coefficient>& outputDifferentialPart
+  PolynomialSubstitution<Coefficient>& outputPolynomialPart,
+  PolynomialSubstitution<Coefficient>& outputDifferentialPart
 ) const {
   if (!this->polynomialSubstitution(largerContext, outputPolynomialPart)) {
     return false;
@@ -552,14 +552,14 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     ElementUniversalEnveloping<RationalFunction> newUE = this->getValue<ElementUniversalEnveloping<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
-    newUE.Substitution(subPolyPart);
+    newUE.substitution(subPolyPart);
     return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<Polynomial<Rational> >()) {
     Polynomial<Rational> newPoly = this->getValue<Polynomial<Rational> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart)) {
+    if (!newPoly.substitution(subPolyPart)) {
       return false;
     }
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
@@ -568,7 +568,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     Polynomial<AlgebraicNumber> newPoly = this->getValue<Polynomial<AlgebraicNumber> >();
     PolynomialSubstitution<AlgebraicNumber> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<AlgebraicNumber>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart)) {
+    if (!newPoly.substitution(subPolyPart)) {
       return false;
     }
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
@@ -578,7 +578,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialAndWeylAlgebraSubstitutionNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA = this->getValue<ElementWeylAlgebra<Rational> >();
-    if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
+    if (!outputEWA.substitution(subPolyPart, subEWApart)) {
       this->owner->comments << "<hr>Failed to convert "
       << outputEWA.toString() << ": failed to carry out substitution "
       << subEWApart.toString() << ", " << subPolyPart.toString();
@@ -590,7 +590,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     RationalFunction newRF = this->getValue<RationalFunction>();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
-    newRF.Substitution(subPolyPart);
+    newRF.substitution(subPolyPart);
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
@@ -598,7 +598,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     newETGV = this->getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
-    newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
+    newETGV.substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
@@ -606,7 +606,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     oldContext.polynomialSubstitution(newContext, subPolyPart);
     Weight<Polynomial<Rational> > theWeight = this->getValue<Weight<Polynomial<Rational> > >();
     for (int i = 0; i < theWeight.weightFundamentalCoordS.size; i ++) {
-      theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
+      theWeight.weightFundamentalCoordS[i].substitution(subPolyPart);
     }
     return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
   }
@@ -617,7 +617,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
     for (int i = 0; i < newMat.numberOfRows; i ++) {
       for (int j = 0; j < newMat.numberOfColumns; j ++) {
-        if (!newMat(i, j).Substitution(subPolyPart)) {
+        if (!newMat(i, j).substitution(subPolyPart)) {
           return *this->owner << "Failed to carry out the substitution "
           << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";
         }

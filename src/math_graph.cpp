@@ -71,12 +71,12 @@ std::string GraphEdge::toString(FormatExpressions* theFormat) const {
 
 void GraphWeightedLabeledEdges::AddEdge(int i, int j) {
   GraphEdge theEdge(i, j);
-  this->theEdges.AddMonomial(theEdge, 1);
+  this->theEdges.addMonomial(theEdge, 1);
 }
 
 void GraphWeightedLabeledEdges::AddEdge(int i, int j, const std::string& inputLabel) {
   GraphEdge theEdge(i, j, inputLabel);
-  this->theEdges.AddMonomial(theEdge, 1);
+  this->theEdges.addMonomial(theEdge, 1);
 }
 
 bool GraphWeightedLabeledEdges:: checkConsistency() const {

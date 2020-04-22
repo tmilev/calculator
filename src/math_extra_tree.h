@@ -78,7 +78,7 @@ std::string TreeNode<data>::ToStringHTML(int indentation) const {
   out << this->myIndex << ": ";
   out << this->theData;
   if (this->children.size > 0) {
-    out << "-> " << this->children.ToStringCommaDelimited();
+    out << "-> " << this->children.toStringCommaDelimited();
   }
   indentation += 2;
   for (int i = 0; i < this->children.size; i ++) {

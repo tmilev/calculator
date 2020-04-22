@@ -1072,7 +1072,7 @@ bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCra
     status = "crash";
   }
   JSData output = incoming;
-  std::string comments = global.Comments.getCurrentReset();
+  std::string comments = global.comments.getCurrentReset();
   if (comments != "") {
     output[WebAPI::result::commentsGlobal] = comments;
   }

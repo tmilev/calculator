@@ -41,8 +41,8 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation() const 
   return this->CheckInitializationConjugacyClasses();
 }
 
-template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimpleGensAreOK() const {
+template <typename somegroup, typename Coefficient>
+bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckAllSimpleGensAreOK() const {
   this->CheckInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
     if (this->generatorS[i].numberOfRows == 0) {
@@ -54,8 +54,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimp
   return true;
 }
 
-/*template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMultiplicativelyClosed() {
+/*template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckRepIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
   tempList.addOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
@@ -63,7 +63,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
   for (int i = 0; i < tempList.size; i ++) {
     for (int j = 0; j < tempList.size; j ++) {
       tempMat = tempList[i];
-      tempMat.MultiplyOnTheLeft(tempList[j]);
+      tempMat.multiplyOnTheLeft(tempList[j]);
       tempElt = this->ownerGroup->theElements[j];
       tempElt *= this->ownerGroup->theElements[i];
       tempElt.MakeCanonical();
@@ -79,8 +79,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
 */
 
 /*
-template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* global) {
+template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* global) {
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
@@ -102,7 +102,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
       if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
-        this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
+        this->theElementImageS[indexParentElement].multiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
       }
     }
@@ -117,8 +117,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
 */
 
 // This method uses auto everywhere, and a lot of copying data in order to use auto
-template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllElementImages() {
+template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllElementImages() {
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
@@ -139,7 +139,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
       if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
-        this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
+        this->theElementImageS[indexParentElement].multiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
       }
     }
@@ -151,14 +151,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   //{   //}
 }
 
-template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator*=(
-  const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other
+template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
+  const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
 ) {
   MacroRegisterFunctionWithName("WeylGroupRepresentation::operator*=");
   //lazy programmers handling://////
   if (&other == this ) {
-    GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
+    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> otherCopy;
     otherCopy = other;
     *this *= otherCopy;
     return;
@@ -170,28 +170,28 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator*=(
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
     global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
   }
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> output;
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
   output.init(*this->ownerGroup);
   output.theCharacteR = this->theCharacteR;
   output.theCharacteR *= other.theCharacteR;
   for (int i = 0; i < output.generatorS.size; i ++) {
-    output.generatorS[i].AssignTensorProduct(this->generatorS[i], other.generatorS[i]);
+    output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
   }
   for (int i = 0; i < output.theElementImageS.size; i ++) {
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i]) {
-      output.theElementImageS[i].AssignTensorProduct(this->theElementImageS[i], other.theElementImageS[i]);
+      output.theElementImageS[i].assignTensorProduct(this->theElementImageS[i], other.theElementImageS[i]);
       output.theElementIsComputed[i] = true;
     }
   }
   *this = output;
 }
 
-template <typename somegroup, typename coefficient>
-void GroupRepresentation<somegroup, coefficient>::operator*=(const GroupRepresentation<somegroup, coefficient>& other) {
+template <typename somegroup, typename Coefficient>
+void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresentation<somegroup, Coefficient>& other) {
   MacroRegisterFunctionWithName("GroupRepresentation::operator*=");
   //lazy programmers handling://////
   if (&other == this ) {
-    GroupRepresentation<somegroup, coefficient> otherCopy;
+    GroupRepresentation<somegroup, Coefficient> otherCopy;
     otherCopy = other;
     *this *= otherCopy;
     return;
@@ -203,21 +203,21 @@ void GroupRepresentation<somegroup, coefficient>::operator*=(const GroupRepresen
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
     global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
   }
-  GroupRepresentation<somegroup, coefficient> output;
+  GroupRepresentation<somegroup, Coefficient> output;
   output.ownerGroup = this->ownerGroup;
   output.theCharacteR = this->theCharacteR;
   output.theCharacteR *= other.theCharacteR;
   for (int i = 0; i < output.generatorS.size; i ++) {
-    output.generatorS[i].AssignTensorProduct(this->generatorS[i], other.generatorS[i]);
+    output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
   }
   *this = output;
 }
 
-template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
-  const Vectors<coefficient>& VectorSpaceBasisSubrep,
+template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Restrict(
+  const Vectors<Coefficient>& VectorSpaceBasisSubrep,
   const ClassFunction<somegroup, Rational>& remainingCharacter,
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) {
   MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
@@ -228,7 +228,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   output.init(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
   output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
-  output.gramMatrixInverted.Invert();
+  output.gramMatrixInverted.invert();
   output.theCharacteR = remainingCharacter;
   ProgressReport theReport;
   for (int i = 0; i < this->generatorS.size; i ++) {
@@ -237,7 +237,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
       reportStream << "Restricting the action of generator of index " << i;
       theReport.report(reportStream.str());
     }
-    Matrix<coefficient>::MatrixInBasis(this->generatorS[i], output.generatorS[i], output.basis, output.gramMatrixInverted);
+    Matrix<Coefficient>::matrixInBasis(this->generatorS[i], output.generatorS[i], output.basis, output.gramMatrixInverted);
   }
   /*
   for (int i = 0; i < this->classFunctionMatrices.size; i ++)
@@ -249,7 +249,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
         << this->classFunctionMatrices.size;
         theReport.report(reportStream.str());
       }
-      Matrix<coefficient>::MatrixInBasis
+      Matrix<Coefficient>::matrixInBasis
       (this->classFunctionMatrices[i], output.classFunctionMatrices[i], output.vectorSpaceBasis,
        output.gramMatrixInverted);
     }
@@ -257,16 +257,16 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   output.CheckAllSimpleGensAreOK();
 }
 
-template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersion(
-  VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
-  List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList
+template <typename somegroup, typename Coefficient>
+bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTodorsVersion(
+  VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
+  List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >* appendOnlyGRCAMSList
 ) {
   MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputIrrepMults.makeZero();
-  List<GroupRepresentation<somegroup, coefficient> > appendOnlyIrrepsList;
+  List<GroupRepresentation<somegroup, Coefficient> > appendOnlyIrrepsList;
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     appendOnlyIrrepsList.addOnTop(this->ownerGroup->irreps[i]);
   }
@@ -289,14 +289,14 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
     if (theMinPoly.Evaluate(theEigenValueCandidate) == 0) {
       tempMat = *this;
       output.setSize(output.size + 1);
-      tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
-      if (output.LastObject()->size == 0) {
+      tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
+      if (output.lastObject()->size == 0) {
         global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
         << theMinPoly.toString() << " of the operator " << this->toString()
         << " but the corresponding eigenspace is empty. " << global.fatal;
       }
-      found += output.LastObject()->size;
+      found += output.lastObject()->size;
       if (found == this->numberOfColumns) {
         return true;
       }
@@ -313,8 +313,8 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
   // theRepresentations will be this->theGroup->irreps
-  // currently we have the difficulty with GroupRepresentation<WeylGroup, coefficient> vs
-  // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, coefficient>
+  // currently we have the difficulty with GroupRepresentation<WeylGroup, Coefficient> vs
+  // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, Coefficient>
   if ((letters.size == 1) && (letters[0] == 'A')) {
     int theRank = ranks[0];
     List<Partition> thePartitions;
@@ -339,7 +339,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       phi.generatorImages[i].h.AddTransposition(i, i + 1);
     }
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
-      phi.generatorImages.LastObject()->k.ToggleBit(i);
+      phi.generatorImages.lastObject()->k.ToggleBit(i);
     }
     global << "Generator commutation relations of groups\n";
     global << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
@@ -368,7 +368,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     }
     int oneortwo = (inclusionMap.generatorImages.size + 1) % 2;
     for (int i = 0; i < inclusionMap.generatorImages.size - 1 - oneortwo; i ++) {
-      inclusionMap.generatorImages.LastObject()->k.ToggleBit(i);
+      inclusionMap.generatorImages.lastObject()->k.ToggleBit(i);
     }
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
@@ -385,8 +385,8 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   global << G.PrettyPrintCharacterTable() << '\n';
 }
 
-template <class coefficient>
-void WeylGroupData::RaiseToMaximallyDominanT(List<Vector<coefficient> >& theWeights) {
+template <class Coefficient>
+void WeylGroupData::RaiseToMaximallyDominanT(List<Vector<Coefficient> >& theWeights) {
   bool found;
   for (int i = 0; i < theWeights.size; i ++) {
     do {
@@ -462,7 +462,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   } else {
     WeylGroupAutomorphisms theOuterAutos;
     theOuterAutos.theWeyl = &theSSalgebra->theWeyl;
-    theOuterAutos.RaiseToMaximallyDominant(theHWs);
+    theOuterAutos.raiseToMaximallyDominant(theHWs);
   }
   out << "<br>Maximally dominant output: " << theHWs.toString();
   return output.AssignValue(out.str(), theCommands);
@@ -534,7 +534,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     theFormat.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.ActOnVectorColumn(epsVect);
+    epsCoordMat.actOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString =
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
@@ -621,7 +621,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra.content->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
+  if (!theSSalgebra.content->theWeyl.generateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -647,7 +647,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   theFormat.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
-    "$" + theWeyl.GetEpsilonCoords(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
+    "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
@@ -660,7 +660,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       if (useRho) {
         currentWeight += theWeyl.rho;
       }
-      theWeyl.ActOn(currentElt, currentWeight);
+      theWeyl.actOn(currentElt, currentWeight);
       if (useRho) {
         currentWeight -= theWeyl.rho;
       }
@@ -689,7 +689,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     theFormat.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.ActOnVectorColumn(epsVect);
+    epsCoordMat.actOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
@@ -712,9 +712,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       for (int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >= 0; j --) {
         int simpleIndex = orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
         theExp = theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
-        theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
+        theWeyl.reflectRhoSimple(simpleIndex, currentWeight);
         theExp *= 2;
-        theExp /= theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex];
+        theExp /= theWeyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
         theExp += Rational(1);
         if (theExp.IsInteger(&tempInt)) {
           if (tempInt < 0) {
@@ -837,14 +837,14 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
     out << "Outer automorphism " << j << ": "
     << outerAutos[j].toString() << "<br>";
     invertedOuterAuto = outerAutos[j];
-    invertedOuterAuto.Invert();
-    for (int i = 0; i <groupNoOuterAutos.conjugacyClasseS.size; i ++) {
+    invertedOuterAuto.invert();
+    for (int i = 0; i <groupNoOuterAutos.conjugacyClasses.size; i ++) {
       conjugatedMat = outerAutos[j];
-      conjugatedMat *= groupNoOuterAutos.conjugacyClasseS[i].representative;
+      conjugatedMat *= groupNoOuterAutos.conjugacyClasses[i].representative;
       conjugatedMat *= invertedOuterAuto;
       int found = - 1;
-      for (int k = 0; k<groupNoOuterAutos.conjugacyClasseS.size; k ++) {
-        if (groupNoOuterAutos.conjugacyClasseS[k].theElements.contains(conjugatedMat)) {
+      for (int k = 0; k<groupNoOuterAutos.conjugacyClasses.size; k ++) {
+        if (groupNoOuterAutos.conjugacyClasses[k].theElements.contains(conjugatedMat)) {
           found = k;
           break;
         }
@@ -896,7 +896,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   theGroupData.checkConsistency();
   double timeStart1 = global.GetElapsedSeconds();
   theGroupData.checkConsistency();
-  theGroupData.theGroup.ComputeCCSizesAndRepresentatives();
+  theGroupData.theGroup.computeConjugacyClassSizesAndRepresentatives();
   theCommands << "<hr> Computed conjugacy classes representatives of "
   << theGroupData.theDynkinType.toString() << " in " << global.GetElapsedSeconds()-timeStart1
   << " second(s). ";
@@ -1340,8 +1340,8 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.toString()) << "}}\\\\ ";
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
-    out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasseS[i].representative.toString()
-    << "$&$ " << this->theGroup.conjugacyClasseS[i].size.toString() << "$";
+    out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasses[i].representative.toString()
+    << "$&$ " << this->theGroup.conjugacyClasses[i].size.toString() << "$";
     if (i < this->ccCarterLabels.size) {
       out << "&$" << this->ccCarterLabels[i] << "$";
     }
@@ -1488,7 +1488,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
       theSel.MaxMultiplicities[i] = this->partition[i];
     }
   }
-  theSel.rank = *this->tuple.LastObject();
+  theSel.rank = *this->tuple.lastObject();
   this->value = 0;
   while (theSel.IncrementReturnFalseIfPastLast()) {
     KostkaNumber ancestor;
@@ -1597,14 +1597,14 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
         continue;
       }
       theSimpleType.MakeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
-      theType.AddMonomial(theSimpleType, 1);
+      theType.addMonomial(theSimpleType, 1);
     }
     if (typeBsize == 1) {
       theSimpleType.MakeArbitrary('A', 1, 2);
-      theType.AddMonomial(theSimpleType,1);
+      theType.addMonomial(theSimpleType,1);
     } else if (typeBsize > 1) {
       theSimpleType.MakeArbitrary('B', typeBsize, 1);
-      theType.AddMonomial(theSimpleType, 1);
+      theType.addMonomial(theSimpleType, 1);
     }
     outLaTeX << "&$" << theType.toString(&theFormat) << "$";
   }
@@ -1668,9 +1668,9 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
     *comments << "<br>dim Hom_P(Sign P_{("
     << parabolicPartition.p << "), ("
     << BcomponentSize << ")}, V_{"
-    << leftPartition.p.ToStringCommaDelimited()
+    << leftPartition.p.toStringCommaDelimited()
     << ", "
-    << rightPartition.p.ToStringCommaDelimited()
+    << rightPartition.p.toStringCommaDelimited()
     << "} )=";
   }
   Rational result = 0;
@@ -1898,7 +1898,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups);
     List<Pair<std::string, List<Rational>, MathRoutines::HashString> > tauSigPairs;
-    finalSubGroups.Reserve(allRootSubgroups.size);
+    finalSubGroups.reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::HashString> currentTauSig;
     for (int j = 0; j < 3; j ++) {
       List<SubgroupDataRootReflections>* currentSGs = nullptr;
@@ -2088,7 +2088,7 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
   outputMultiple = 1;
   for (int i = 0; i <originalSel.CardinalitySelection; i ++) {
     currentV = this->owner->theWeyl.RootSystem[originalSel.elements[i]];
-    this->owner->theWeyl.SimpleReflection(indexSimpleReflection, currentV);
+    this->owner->theWeyl.reflectSimple(indexSimpleReflection, currentV);
     if (currentV.isNegative()) {
       currentV *= - 1;
       outputMultiple *= - 1;
@@ -2110,14 +2110,14 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  rootSubalgebras theRootSAs;
+  RootSubalgebras theRootSAs;
   theRootSAs.owner = algebra.content;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;
   for (int i = 0; i < theRootSAs.theSubalgebras.size; i ++) {
-    rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
+    RootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *algebra.content);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.toString();
@@ -2177,7 +2177,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
   } else {
     Vector<Rational> EiVector;
     EiVector.makeZero(theSSowner->GetRank());
-    Vector<Rational> tempV = theSSowner->theWeyl.GetEpsilonCoords(EiVector);
+    Vector<Rational> tempV = theSSowner->theWeyl.getEpsilonCoordinates(EiVector);
     if (theWeightIndex>tempV.size || theWeightIndex < 1) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
@@ -2418,7 +2418,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   ElementWeylGroup theElt;
-  theElt.generatorsLastAppliedFirst.Reserve(input.size() - 2);
+  theElt.generatorsLastAppliedFirst.reserve(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
     int tmp;
     if (!input[i].IsSmallInteger(& tmp)) {
@@ -2494,12 +2494,12 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
   return true;
 }
 
-template <typename somegroup, typename coefficient>
-void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepresentation<somegroup, coefficient>& other) {
+template <typename somegroup, typename Coefficient>
+void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepresentation<somegroup, Coefficient>& other) {
   MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
   (void) other;
   global.fatal << "Not implemented yet. " << global.fatal;
-/*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
+/*  WeylGroupVirtualRepresentation<Coefficient> output, currentContribution;
   output.ownerGroup = this->ownerGroup;
   output.coefficientsIrreps.makeZero(this->coefficientsIrreps.size);
   WeylGroupRepresentation<Rational> tempRep;
@@ -2516,20 +2516,20 @@ void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepr
   *this = output;*/
 }
 
-template <typename somegroup, typename coefficient>
-void VirtualRepresentation<somegroup, coefficient>::AssignRep(
+template <typename somegroup, typename Coefficient>
+void VirtualRepresentation<somegroup, Coefficient>::AssignRep(
   const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other
 ) {
   global.fatal << " not implemented " << global.fatal;
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> otherCopy;
   otherCopy = other;
 //  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
-template <typename somegroup, typename coefficient>
-void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
-  VirtualRepresentation<somegroup, coefficient> out;
-  out.AddMonomial(other.theCharacteR, 1);
+template <typename somegroup, typename Coefficient>
+void VirtualRepresentation<somegroup, Coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
+  VirtualRepresentation<somegroup, Coefficient> out;
+  out.addMonomial(other.theCharacteR, 1);
 //  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 

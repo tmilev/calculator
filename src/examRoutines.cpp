@@ -464,7 +464,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << this->MaxInterpretationAttempts << " for performance reasons; "
     << "with bad luck, some finicky problems require more. "
     << "Random seeds tried: "
-    << this->randomSeedsIfInterpretationFails.ToStringCommaDelimited()
+    << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
     << "<br> <b>Please refresh the page.</b><br>";
     if (!this->flagIsForReal) {
       out
@@ -711,7 +711,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
     }
   }
   out << "<br>Interpretation times (per attempt): "
-  << theProblem.timePerAttempt.ToStringCommaDelimited();
+  << theProblem.timePerAttempt.toStringCommaDelimited();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -737,7 +737,7 @@ std::string CalculatorHTML::ToStringExtractedCommands() {
 std::string CalculatorHTML::ToStringContent() {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringContent");
   std::stringstream out;
-//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
+//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.toStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><br>";
   for (int i = 0; i < this->theContent.size; i ++) {
     out << this->theContent[i].ToStringTagAndContent();
@@ -1222,8 +1222,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   theInterpreter.initialize();
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds()-startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("calculator init time");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("calculator init time");
   if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
     this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
@@ -1231,8 +1231,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << this->theProblemData.commandsGenerateProblem << "<br>";
   }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("calculator evaluation time");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("calculator evaluation time");
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
@@ -1911,9 +1911,9 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts) {
     startTime = global.GetElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
-    this->timeIntermediatePerAttempt.LastObject()->setSize(0);
+    this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
-    this->timeIntermediateComments.LastObject()->setSize(0);
+    this->timeIntermediateComments.lastObject()->setSize(0);
     Calculator theInterpreter;
     this->NumAttemptsToInterpret ++;
     std::stringstream commentsOnLastFailure;
@@ -1926,7 +1926,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->NumAttemptsToInterpret
       << " to interpret your file. Attempted random seeds: "
-      << this->randomSeedsIfInterpretationFails.ToStringCommaDelimited()
+      << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
       << "Last interpretation failure follows. <br>"
       << commentsOnLastFailure.str();
     }
@@ -2193,9 +2193,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       secondToLast.tag == last.tag
     ) {
       secondToLast.syntacticRole = "command";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       if (this->IsStateModifierApplyIfYes(secondToLast)) {
-        eltsStack.RemoveLastObject();
+        eltsStack.removeLastObject();
       }
       continue;
     }
@@ -2212,10 +2212,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
         thirdToLast.content = thirdToLast.ToStringOpenTag("", true);
         thirdToLast.resetAllExceptContent();
       }
-      eltsStack.RemoveLastObject();
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
+      eltsStack.removeLastObject();
       if (this->IsStateModifierApplyIfYes(thirdToLast)) {
-        eltsStack.RemoveLastObject();
+        eltsStack.removeLastObject();
       }
       continue;
     }
@@ -2234,7 +2234,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     }
     if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast == "<" && last == "/") {
       secondToLast.syntacticRole = "</";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast.syntacticRole == "") {
@@ -2257,26 +2257,26 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       secondToLast.tag = last.content;
       secondToLast.syntacticRole = "<openTag";
       secondToLast.content = "";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "" && secondToLast != "\"" && last == "/") {
       secondToLast.content += last.content;
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "<" && last == "/") {
       secondToLast.syntacticRole = "</";
       secondToLast.tag = "";
       secondToLast.content = "";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "</" ) {
       secondToLast.syntacticRole = "</closeTag";
       secondToLast.tag = last.content;
       secondToLast.content = "";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "</closeTag" && last.syntacticRole == ">") {
@@ -2284,7 +2284,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       if (this->SetTagClassFromCloseTag(secondToLast)) {
         secondToLast.syntacticRole = "command";
       }
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (last == " " &&(
@@ -2292,7 +2292,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       thirdToLast.syntacticRole == "<openTag" ||
       fourthToLast.syntacticRole == "<openTag"
     )) {
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (
@@ -2305,13 +2305,13 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       last != "\""
     ) {
       thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
-      eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
-      eltsStack.RemoveLastObject();
+      eltsStack[eltsStack.size - 2] = *eltsStack.lastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (this->CanBeMerged(secondToLast, last)) {
       secondToLast.content += last.content;
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (thirdToLast.syntacticRole == "<calculatorSolution>" && (
@@ -2321,7 +2321,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     )) {
       thirdToLast.children.addOnTop(secondToLast);
       eltsStack[eltsStack.size - 2] = last;
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (
@@ -2335,7 +2335,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       } else {
         secondToLast.content += last.content;
       }
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (thirdToLast == "\"" && secondToLast != "\"" && last != "\"") {
@@ -2346,7 +2346,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
         last.content = last.syntacticRole;
       }
       secondToLast.content += last.content;
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (
@@ -2376,8 +2376,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == ">"
     ) {
       thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
-      eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
-      eltsStack.RemoveLastObject();
+      eltsStack[eltsStack.size - 2] = *eltsStack.lastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "<openTag" && last.syntacticRole == ">") {
@@ -2416,12 +2416,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
         }
         secondToLast.resetAllExceptContent();
       }
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     if (secondToLast.syntacticRole == "" && last.syntacticRole == ">") {
       secondToLast.content += ">";
-      eltsStack.RemoveLastObject();
+      eltsStack.removeLastObject();
       continue;
     }
     reduced = false;
@@ -2432,7 +2432,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     bool needNewTag = false;
     if (i == SyntacticElementHTML::ParsingNumDummyElements) {
       needNewTag = true;
-    } else if (this->theContent.LastObject()->syntacticRole != "") {
+    } else if (this->theContent.lastObject()->syntacticRole != "") {
       needNewTag = true;
     }
     if (eltsStack[i].syntacticRole != "") {
@@ -2451,11 +2451,11 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       }
     }
     if (!needNewTag) {
-      this->theContent.LastObject()->content += eltsStack[i].content;
+      this->theContent.lastObject()->content += eltsStack[i].content;
     } else {
       if (this->theContent.size > 0) {
         if (
-          this->theContent.LastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
+          this->theContent.lastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
           eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration()
         ) {
           SyntacticElementHTML emptyElt;
@@ -2527,7 +2527,7 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
       this->theContent[i].content = "";
       continue;
     }
-    *this->answerHighlights.LastObject() += this->theContent[i].ToStringInterpretedBody();
+    *this->answerHighlights.lastObject() += this->theContent[i].ToStringInterpretedBody();
     this->theContent[i].content = "";
     this->theContent[i].interpretedCommand = "";
   }
@@ -2635,7 +2635,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
       return false;
     }
     if (currentE.GetKeyValue("name") == "") {
-      currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
+      currentE.SetKeyValue("name", *answerIdsSeenSoFar.lastObject());
     }
   }
   this->theProblemData.checkConsistency();
@@ -2947,11 +2947,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->NumAttemptsToInterpret - 1
   ]);
   this->FigureOutCurrentProblemList(comments);
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("Time before after loading problem list");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
   outHeadPt2 << HtmlRoutines::GetJavascriptMathjax("");
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("Time before execution");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, &comments)) {
     return false;
   }
@@ -2991,8 +2991,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   //////////////////////////////
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("Time after execution");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
   theInterpreter.theObjectContainer.resetSliders();
   if (!this->InterpretProcessExecutedCommands(theInterpreter, this->theContent, comments)) {
@@ -3000,8 +3000,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->outputHtmlBodyNoTag = outBody.str();
     return false;
   }
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("Time before class management routines");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("Time before class management routines");
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled = 0;
   for (int i = 0; i < this->theContent.size; i ++) {
@@ -3059,9 +3059,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
   //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
-  //out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
-  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->addOnTop("Time before database storage");
+  //out << "<hr> Between the commands:" << this->betweenTheCommands.toStringCommaDelimited();
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("Time before database storage");
   if (global.flagDatabaseCompiled) {
     bool shouldResetTheRandomSeed = false;
     if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven) {
@@ -3676,7 +3676,7 @@ void TopicElementParser::LoadTopicBundleFile(
       bundleNameStack.addOnTop(currentLine.contentTrimmedWhiteSpace);
     } else if (currentLine.theType == TopicElement::types::bundleEnd) {
       if (bundleNameStack.size > 0) {
-        bundleNameStack.RemoveLastObject();
+        bundleNameStack.removeLastObject();
       } else {
         errorStream << "BundleEnd command without BungleBegin.";
         input.MakeError(errorStream.str());
@@ -3733,7 +3733,7 @@ void TopicElementParser::ExhaustCrawlStack() {
       this->crawled.addOnTop(errorLine);
       return;
     }
-    TopicElementParser::TopicLine nextLine = bundleStack.PopLastObject();
+    TopicElementParser::TopicLine nextLine = bundleStack.popLastObject();
     if (nextLine.theType == TopicElement::types::loadTopicBundles) {
       this->LoadTopicBundleFile(nextLine);
       continue;
@@ -3872,7 +3872,7 @@ void TopicElementParser::CompressOneTopicLine(
     this->AddNewTopicElementFromLine(input);
     return;
   }
-  TopicElement& last = *this->elements.LastObject();
+  TopicElement& last = *this->elements.lastObject();
   if (last.MergeTopicLine(input)) {
     return;
   }
@@ -3928,7 +3928,7 @@ void TopicElementParser::ComputeTopicNumbers() {
       currentProblemNumber.addOnTop(0);
     }
     currentProblemNumber.setSize(labelsNeeded);
-    (*currentProblemNumber.LastObject()) ++;
+    (*currentProblemNumber.lastObject()) ++;
     current.problemNumber = currentProblemNumber;
   }
 }
@@ -3953,12 +3953,12 @@ void TopicElementParser::ComputeTopicHierarchyPartOne() {
     }
     for (int j = parentChain.size - 1; j >= 0; j --) {
       if (parentTypes[j] >= currentAdjustedtype) {
-        parentTypes.RemoveLastObject();
-        parentChain.RemoveLastObject();
+        parentTypes.removeLastObject();
+        parentChain.removeLastObject();
       }
     }
     if (parentChain.size > 0) {
-      TopicElement& parent = this->theTopics.theValues[*parentChain.LastObject()];
+      TopicElement& parent = this->theTopics.theValues[*parentChain.lastObject()];
       parent.immediateChildren.addOnTop(i);
     }
     this->theTopics.theValues[i].parentTopics.setSize(0);
@@ -4476,7 +4476,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   this->ComputeLinks(owner, true);
   if (this->type == TopicElement::types::problem && this->immediateChildren.size > 0) {
     global.fatal << "Error: Problem " << this->toString() << " reported to have children topic elements: "
-    << this->immediateChildren.ToStringCommaDelimited() << global.fatal;
+    << this->immediateChildren.toStringCommaDelimited() << global.fatal;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.topics.theTopics.theValues[this->immediateChildren[i]];
@@ -4537,7 +4537,7 @@ std::string TopicElement::toString() const {
     out << "(subsection)";
   }
   out << ". Index in parent: " << this->indexInParent;
-  out << ". Parents: " << this->parentTopics.ToStringCommaDelimited()
-  << ". Immediate children: " << this->immediateChildren.ToStringCommaDelimited() << ". ";
+  out << ". Parents: " << this->parentTopics.toStringCommaDelimited()
+  << ". Immediate children: " << this->immediateChildren.toStringCommaDelimited() << ". ";
   return out.str();
 }

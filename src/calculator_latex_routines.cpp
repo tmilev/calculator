@@ -17,7 +17,7 @@ bool LaTeXCrawler::IsInCrawlableFolder(const std::string& folderName, std::strin
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "File folder: " << folderName
     << " does not appear to be in one of the allowed folders: "
-    << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited()
+    << this->baseFoldersCrawlableFilesPhysical.toStringCommaDelimited()
     << ". ";
   }
   return false;
@@ -259,7 +259,7 @@ void LaTeXCrawler::BuildFreecalC() {
   }
   std::stringstream executedCommands, resultTable;
   std::string currentSysCommand; //"ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
-  global.ChDir(this->baseFolderStartFilePhysical);
+  global.changeDirectory(this->baseFolderStartFilePhysical);
   executedCommands
   << "<br>Directory changed to: " << this->baseFolderStartFilePhysical
   << ", making the current directory: "
@@ -387,8 +387,8 @@ void LaTeXCrawler::BuildFreecalC() {
     std::string currentName = this->slideTexInputCommands[i].substr(0, this->slideTexInputCommands[i].size() - 1);
     this->slideFileNamesVirtualNoPathNoExtensioN[i] = FileOperations::GetFileNameFromFileNameWithPath(currentName);
   }
-  //executedCommands << "<br>Slides extracted: " << this->theSlides.ToStringCommaDelimited();
-  //executedCommands << "<br>Slides names: " << this->theSlideNames.ToStringCommaDelimited();
+  //executedCommands << "<br>Slides extracted: " << this->theSlides.toStringCommaDelimited();
+  //executedCommands << "<br>Slides names: " << this->theSlideNames.toStringCommaDelimited();
   for (int i = 0; i < numSlidesToBuild; i ++) {
     for (int k = 0; k < 2; k ++) {
       if (!FileOperations::OpenFileUnsecure(workingFile, this->theFileNameWorkingCopy, false, true, false)) {
@@ -445,9 +445,9 @@ void LaTeXCrawler::Crawl() {
   std::stringstream crawlingResult;
 
   std::string startingDirectory = FileOperations::GetCurrentFolder();
-  global.ChDir(this->baseFolderStartFilePhysical);
+  global.changeDirectory(this->baseFolderStartFilePhysical);
   this->CrawlRecursive(crawlingResult, this->baseFolderStartFilePhysical + this->theFileNameToCrawlPhysicalNoPathName);
-  global.ChDir(startingDirectory);
+  global.changeDirectory(startingDirectory);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
@@ -508,11 +508,11 @@ void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
     this->errorStream << "Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
     << "of the designated crawlable folders: "
-    << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited();
+    << this->baseFoldersCrawlableFilesPhysical.toStringCommaDelimited();
     crawlingResult << "%Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
     << "of the designated crawlable folders: "
-    << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited() << "\n";
+    << this->baseFoldersCrawlableFilesPhysical.toStringCommaDelimited() << "\n";
     return;
   }
   std::fstream theFile;
@@ -790,7 +790,7 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
   }
   bool addExtraTex = (this->slideFileNamesVirtualWithPatH.size > 1);
   if (this->flagDoChangeDirs) {
-    global.ChDir(this->workingFilePathPhysical);
+    global.changeDirectory(this->workingFilePathPhysical);
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Changed directory. Current: "
       << "<b style = 'color:blue'>" << FileOperations::GetCurrentFolder() << "</b><br>";
@@ -960,7 +960,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagAnswerKey = false;
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br>Build homework pair from: "
-      << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited() << ". ";
+      << this->slideFileNamesVirtualWithPatH.toStringCommaDelimited() << ". ";
     }
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
@@ -989,7 +989,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     reportStream << "Processing lecture slides: "
     << numProcessed << " out of " << numSlidePairsToBuild << ". ";
     reportStream << "<br>Slide file names: "
-    << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+    << this->slideFileNamesVirtualWithPatH.toStringCommaDelimited();
     theReport.report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.setSize(topicParser.slidesSourcesHeaders.size);
@@ -1001,7 +1001,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagHomeworkRatherThanSlides = false;
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br>Build slide pair from: "
-      << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+      << this->slideFileNamesVirtualWithPatH.toStringCommaDelimited();
     }
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;

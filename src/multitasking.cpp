@@ -191,20 +191,20 @@ ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
   newThreadData.index = theThreadData.size;
   theThreadData.addOnTop(newThreadData);
   global.theThreads.setSize(theThreadData.size);
-  global.CustomStackTrace.Reserve(2);
-  global.progressReportStrings.Reserve(2);
+  global.CustomStackTrace.reserve(2);
+  global.progressReportStrings.reserve(2);
   global.CustomStackTrace.setSize(theThreadData.size);
   global.progressReportStrings.setSize(theThreadData.size);
-  global.CustomStackTrace.LastObject().Reserve(30);
-  global.progressReportStrings.LastObject().Reserve(30);
-  return global.theThreadData.LastObject();
+  global.CustomStackTrace.lastObject().reserve(30);
+  global.progressReportStrings.lastObject().reserve(30);
+  return global.theThreadData.lastObject();
 }
 
 void ThreadData::CreateThread(void (*InputFunction)(int), const std::string& inputName) {
   MutexLockGuard(global.MutexRegisterNewThread);
   ThreadData& theData = ThreadData::RegisterNewThread(inputName);
   std::thread newThread(InputFunction, theData.index);
-  global.theThreads.LastObject().swap(newThread);
+  global.theThreads.lastObject().swap(newThread);
 }
 
 int ThreadData::getCurrentThreadId() {

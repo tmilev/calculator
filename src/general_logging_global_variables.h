@@ -187,6 +187,7 @@ public:
   // When non-null, usually points to:
   // int externalCommandStream(const std::string& inputCommand)
   int (*pointerExternalCommandStream)(const std::string& theSystemCommand);
+  // When non-null, this usually points to: CallChDirWrapper.
   void (*pointerCallChDir)(const std::string& theDirectoryName);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
@@ -410,7 +411,7 @@ public:
       return result;
     }
   };
-  CommentsCurrentConnection Comments;
+  CommentsCurrentConnection comments;
   void JoinAllThreads();
   bool ConfigurationStore();
   bool ConfigurationLoad();
@@ -449,7 +450,7 @@ public:
   int externalCommandStream(const std::string& systemCommand);
   int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
   std::string externalCommandReturnOutput(const std::string& systemCommand);
-  void ChDir(const std::string& systemCommand);
+  void changeDirectory(const std::string& systemCommand);
   std::string ToStringCalculatorComputation(const std::string& computation, const std::string &display);
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
   std::string ToStringHTMLTopCommandLinuxSystem();

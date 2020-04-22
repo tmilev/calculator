@@ -17,11 +17,11 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
   for (int i = rightReflectionsActFirst.size - 1; i >= 0; i --) {
     Rational x = 0;
     for (int j = 0; j < this->getDimension(); j ++) {
-      x += v[j] * CartanSymmetric(rightReflectionsActFirst[i], j);
+      x += v[j] * cartanSymmetric(rightReflectionsActFirst[i], j);
     }
-    //CartanSymmetric(i, j) is slower than CartanSymmetric.elements[i][j] but includes index checking
+    //cartanSymmetric(i, j) is slower than cartanSymmetric.elements[i][j] but includes index checking
     //(we want to catch a rogue call to ApplyReflectionList
-    v[rightReflectionsActFirst[i]] -= x * 2 / CartanSymmetric(rightReflectionsActFirst[i], rightReflectionsActFirst[i]);
+    v[rightReflectionsActFirst[i]] -= x * 2 / cartanSymmetric(rightReflectionsActFirst[i], rightReflectionsActFirst[i]);
   }
   return v;
 }
@@ -31,7 +31,7 @@ void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Ration
   int rank = this->getDimension();
   output.MakeIdMatrix(rank);
   for (int j = 0; j < rank; j ++) {
-    output(indexSimpleRoot, j) -= (this->CartanSymmetric(indexSimpleRoot, j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
+    output(indexSimpleRoot, j) -= (this->cartanSymmetric(indexSimpleRoot, j) / cartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
   }
 }
 
@@ -58,7 +58,7 @@ void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps() {
   this->squaresCCReps.setSize(this->ConjugacyClassCount());
   //elementSomeGroup currentSquare;
   for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
-    this->squaresCCReps[i] = this->conjugacyClasseS[i].representative * this->conjugacyClasseS[i].representative;
+    this->squaresCCReps[i] = this->conjugacyClasses[i].representative * this->conjugacyClasses[i].representative;
   }
 }
 
@@ -94,12 +94,12 @@ unsigned int VectorSpace<Rational>::hashFunction(const VectorSpace<Rational>& in
 // going to define this for every other field
 
 
-template <typename coefficient>
-void MatrixInBasis(
-  Matrix<coefficient>& out,
-  const Matrix<coefficient>& in,
-  const List<Vector<coefficient> >& basis,
-  const Matrix<coefficient>& gramMatrix
+template <typename Coefficient>
+void matrixInBasis(
+  Matrix<Coefficient>& out,
+  const Matrix<Coefficient>& in,
+  const List<Vector<Coefficient> >& basis,
+  const Matrix<Coefficient>& gramMatrix
 ) {
   int d = basis.size;
   out.init(d, d);
@@ -108,14 +108,14 @@ void MatrixInBasis(
       out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
     }
   }
-  out.MultiplyOnTheLeft(gramMatrix);
+  out.multiplyOnTheLeft(gramMatrix);
 }
 
-template <typename coefficient>
-void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, const Matrix<coefficient>& BM) {
+template <typename Coefficient>
+void MatrixInBasisFast(Matrix<Coefficient>& out, const Matrix<Coefficient>& in, const Matrix<Coefficient>& BM) {
   int d = BM.numberOfRows;
-  Matrix<coefficient> M = BM;
-  Matrix<coefficient> inT = in;
+  Matrix<Coefficient> M = BM;
+  Matrix<Coefficient> inT = in;
   inT.Transpose();
   M.MultiplyOnTheRight(inT);
   out.MakeZeroMatrix(d);
@@ -141,20 +141,20 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
   }
 }
 
-template <typename coefficient>
+template <typename Coefficient>
 class SpaceTree {
 public:
-   List<Vector<coefficient> > space;
-   List<SpaceTree<coefficient> > subspaces;
+   List<Vector<Coefficient> > space;
+   List<SpaceTree<Coefficient> > subspaces;
 
-   void PlaceInTree(const List<Vector<coefficient> >& V);
-   void GetLeaves(List<List<Vector<coefficient> > >& leaves) const;
+   void PlaceInTree(const List<Vector<Coefficient> >& V);
+   void GetLeaves(List<List<Vector<Coefficient> > >& leaves) const;
    void DisplayTree() const;
 };
 
-template <typename coefficient>
-void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V) {
-  List<Vector<coefficient> > U;
+template <typename Coefficient>
+void SpaceTree<Coefficient>::PlaceInTree(const List<Vector<Coefficient> > &V) {
+  List<Vector<Coefficient> > U;
   for (int i = 0; i < subspaces.size; i ++) {
     intersection(V, subspaces[i].space, U);
     if (U.size == 0) {
@@ -165,21 +165,21 @@ void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V) {
     }
     subspaces[i].PlaceInTree(U);
   }
-  List<Vector<coefficient> > W, tempVspace;
+  List<Vector<Coefficient> > W, tempVspace;
   for (int i = 0; i < subspaces.size; i ++) {
     getunion(W, subspaces[i].space, tempVspace);
     W = tempVspace;
   }
   intersection(W, V, tempVspace);
   if (tempVspace.size != V.size) {
-    SpaceTree<coefficient> vst;
+    SpaceTree<Coefficient> vst;
     vst.space = V;
     subspaces.addOnTop(vst);
   }
 }
 
-template <typename coefficient>
-void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves) const {
+template <typename Coefficient>
+void SpaceTree<Coefficient>::GetLeaves(List<List<Vector<Coefficient> > >& leaves) const {
   if (subspaces.size > 0) {
     for (int i = 0; i < subspaces.size; i ++) {
       subspaces[i].GetLeaves(leaves);
@@ -189,26 +189,26 @@ void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves
   }
 }
 
-template <typename coefficient>
-void SpaceTree<coefficient>::DisplayTree() const {
-  global.Comments << '[' << space.size << ',';
+template <typename Coefficient>
+void SpaceTree<Coefficient>::DisplayTree() const {
+  global.comments << '[' << space.size << ',';
   for (int i = 0; i < subspaces.size; i ++) {
     subspaces[i].DisplayTree();
   }
 //  global.Comments << ']';
 }
 
-template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
-  const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other,
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output
+template <typename somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
+  const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) const {
   //lazy programmers handling://////
   if (&output == this || &output == &other) {
-    GroupRepresentationCarriesAllMatrices<somegroup, coefficient> thisCopy, otherCopy;
+    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> thisCopy, otherCopy;
     thisCopy = *this;
     otherCopy = other;
-    thisCopy.MultiplyBy(otherCopy, output);
+    thisCopy.multiplyBy(otherCopy, output);
     return;
   }
   //////////////////////////////////
@@ -222,7 +222,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
   int Ud = Vd * Wd;
   for (int vi = 0; vi < this->basis.size; vi ++) {
     for (int wi = 0; wi < other.basis.size; wi ++) {
-      Vector<coefficient> u;
+      Vector<Coefficient> u;
       u.setSize(Ud);
       for (int i = 0; i < Vd; i ++) {
         for (int j = 0; j < Wd; j ++) {
@@ -234,36 +234,36 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
   }
   output.generators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
-    output.generators[i].AssignTensorProduct(this->generators[i],other.generators[i]);
+    output.generators[i].assignTensorProduct(this->generators[i],other.generators[i]);
   }
   /* would that it be this simple
   if ((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0)) {
     U.classFunctionMatrices.setSize(G->ccCount);
     for (int i = 0; i <classFunctionMatrices.size; i ++) {
       if ((classFunctionMatrices[i].numberOfColumns > 0) && (other.classFunctionMatrices[i].numberOfColumns > 0))
-      U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
+      U.classFunctionMatrices[i].assignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
     }
   }*/
   output.ownerGroup = this->ownerGroup;
 }
 
-template <typename somegroup, typename coefficient>
-GroupRepresentationCarriesAllMatrices<somegroup, coefficient>
-GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
+template <typename somegroup, typename Coefficient>
+GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>
+GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Reduced() const {
   int d = basis.size;
-  Matrix<coefficient> GM;
+  Matrix<Coefficient> GM;
   GM.init(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
     }
   }
-  GM.Invert();
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
+  GM.invert();
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> out;
   out.generatorS.setSize(this->generatorS.size);
   for (int i = 0; i < this->generatorS.size; i ++) {
   //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
-    MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
+    matrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
   }
   out.ownerGroup = ownerGroup;
   out.basis.MakeEiBasis(d);
@@ -274,7 +274,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
      for (int i = 0; i <classFunctionMatrices.size; i ++) {
         if (classFunctionMatrices[i].numberOfRows > 0) {
           //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
-          MatrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
+          matrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
         }
       }
    }
@@ -282,12 +282,12 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
    return out;
 }
 
-template <typename somegroup, typename coefficient>
-VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::FindDecentBasis() const {
-  VectorSpace<coefficient> V;
+template <typename somegroup, typename Coefficient>
+VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::FindDecentBasis() const {
+  VectorSpace<Coefficient> V;
   int d = this->generators[0].numberOfColumns;
   for (int geni = 0; geni < this->generators.size; geni ++) {
-    List<Vector<coefficient> > ess = eigenspaces(this->generators[geni]);
+    List<Vector<Coefficient> > ess = eigenspaces(this->generators[geni]);
     for (int essi = 0; essi < ess.size; essi ++) {
       for (int esi = 0; esi < ess[essi].size; esi ++) {
         // the best laid coding practices of mice and men oft go astray
@@ -299,7 +299,7 @@ VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coeffi
   }
   // This should not be possible
   for (int i = 0; i < d; i ++) {
-    Vector<coefficient> v;
+    Vector<Coefficient> v;
     v.MakeEi(d, i);
     if (!V.AddVectorToBasis(v)) {
       return V;
@@ -309,26 +309,26 @@ VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coeffi
 }
 
 
-template <typename somegroup, typename coefficient>
-List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeThomasVersion() {
+template <typename somegroup, typename Coefficient>
+List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeThomasVersion() {
   MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeThomasVersion");
-  Matrix<coefficient> splittingOperatorMatrix;
-  List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> > out;
+  Matrix<Coefficient> splittingOperatorMatrix;
+  List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if (GetNumberOfComponents() == 1) {
     if (this->ownerGroup->characterTable.getIndex(this->theCharacteR) == - 1) {
-      global.Comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
+      global.comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
     out.addOnTop(*this);
     return out;
   }
-  List<Vector<coefficient> > Vb = this->basis;
-  List<Vector<coefficient> > tempVectors;
+  List<Vector<Coefficient> > Vb = this->basis;
+  List<Vector<Coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
     if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
-      global.Comments << "contains irrep " << i << "\n";
+      global.comments << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
@@ -336,14 +336,14 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     }
   }
   if ((Vb.size < this->basis.size) && (Vb.size > 0)) {
-    global.Comments << "calculating remaining subrep... ";
-    GroupRepresentationCarriesAllMatrices<somegroup, coefficient> V;
+    global.comments << "calculating remaining subrep... ";
+    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> V;
     V.ownerGroup = this->ownerGroup;
     V.generatorS = this->generatorS;
     V.basis = Vb;
     V = V.Reduced();
-    global.Comments << "done\n";
-    global.Comments << "Decomposing remaining subrep " << V.GetCharacter();
+    global.comments << "done\n";
+    global.comments << "Decomposing remaining subrep " << V.GetCharacter();
     return V.DecomposeThomasVersion();
   }
   if (Vb.size == 0) {
@@ -352,14 +352,14 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
 /*  SpaceTree<Rational> st;
   st.space = basis;
   for (int cfi = 0; cfi <G->ccCount; cfi ++) {
-     ClassFunction<coefficient> cf;
+     ClassFunction<Coefficient> cf;
       cf.G = G;
       cf.makeZero();
       cf[cfi] = 1;
       global.Comments << "getting matrix " << cf << "\n";
-      Matrix<coefficient> A;
+      Matrix<Coefficient> A;
       ClassFunctionMatrix(cf, A);
-      List<List<Vector<coefficient> > > es = eigenspaces(A);
+      List<List<Vector<Coefficient> > > es = eigenspaces(A);
       global.Comments << "eigenspaces were ";
       for (int i = 0; i <es.size; i ++)
          global.Comments << es[i].size << " ";
@@ -370,34 +370,34 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
       st.DisplayTree();
       global.Comments << "\n";
   }
-  List<List<Vector<coefficient> > > leaves;
+  List<List<Vector<Coefficient> > > leaves;
   st.GetLeaves(leaves);
   global.Comments << "leaves are ";
   for (int i = 0; i <leaves.size; i ++)
     global.Comments << leaves[i].size << " ";
   global.Comments << "\n";
 */
-  List<List<Vector<coefficient> > > es;
+  List<List<Vector<Coefficient> > > es;
   for (int cfi = this->ownerGroup->ConjugacyClassCount() - 1; cfi >= 0; cfi --) {
-    ClassFunction<somegroup, coefficient> cf;
+    ClassFunction<somegroup, Coefficient> cf;
     cf.makeZero(*this->ownerGroup);
     cf[cfi] = 1;
-    global.Comments << "getting matrix " << cf << "\n";
-    Matrix<coefficient> A;
+    global.comments << "getting matrix " << cf << "\n";
+    Matrix<Coefficient> A;
     ClassFunctionMatrix(cf, A);
     es = eigenspaces(A);
     if (es.size > 1) {
-      global.Comments << "eigenspaces were ";
+      global.comments << "eigenspaces were ";
       for (int i = 0; i < es.size; i ++) {
-        global.Comments << es[i].size << " ";
+        global.comments << es[i].size << " ";
       }
-      global.Comments << "\n";
+      global.comments << "\n";
       break;
     }
   }
 
   for (int i = 0; i < es.size; i ++) {
-    GroupRepresentationCarriesAllMatrices<somegroup, coefficient> outeme;
+    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> outeme;
     outeme.ownerGroup = this->ownerGroup;
     outeme.generatorS = this->generatorS;
     outeme.basis = es[i];
@@ -416,9 +416,9 @@ int ithfactor(int i, List<int> f) {
   return acc;
 }
 
-template <typename coefficient>
-struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::DivideBy(const UDPolynomial<coefficient>& divisor) const {
-  struct DivisionResult<UDPolynomial<coefficient> > out;
+template <typename Coefficient>
+struct DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::DivideBy(const UDPolynomial<Coefficient>& divisor) const {
+  struct DivisionResult<UDPolynomial<Coefficient> > out;
   out.remainder = *this;
   if (data.size < divisor.data.size) {
     return out;
@@ -430,7 +430,7 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
       out.quotient[i] = 0;
       continue;
     }
-    UDPolynomial<coefficient> p = divisor.TimesXn(i);
+    UDPolynomial<Coefficient> p = divisor.TimesXn(i);
     out.quotient[i] = out.remainder.data[out.remainder.data.size - 1] / divisor.data[divisor.data.size - 1];
     p *= out.quotient[i];
     out.remainder -= p;
@@ -438,20 +438,20 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
   return out;
 }
 
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::operator/(const UDPolynomial<coefficient>& divisor) const {
-  struct DivisionResult<UDPolynomial<coefficient> > tmp = this->DivideBy(divisor);
+template <typename Coefficient>
+UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator/(const UDPolynomial<Coefficient>& divisor) const {
+  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->DivideBy(divisor);
   return tmp.quotient;
 }
 
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::operator%(const UDPolynomial<coefficient>& divisor) const {
-  struct DivisionResult<UDPolynomial<coefficient> > tmp = this->DivideBy(divisor);
+template <typename Coefficient>
+UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator%(const UDPolynomial<Coefficient>& divisor) const {
+  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->DivideBy(divisor);
   return tmp.remainder;
 }
 
-template <typename coefficient>
-bool UDPolynomial<coefficient>::operator==(const int other) const {
+template <typename Coefficient>
+bool UDPolynomial<Coefficient>::operator==(const int other) const {
   if (other == 0) {
     if (data.size == 0) {
       return true;
@@ -467,9 +467,9 @@ bool UDPolynomial<coefficient>::operator==(const int other) const {
   return false;
 }
 
-template <typename coefficient>
+template <typename Coefficient>
 //template <typename integral>
-void UDPolynomial<coefficient>::ClearDenominators() {
+void UDPolynomial<Coefficient>::ClearDenominators() {
   int acc = 1;
   for (int i = 0; i < data.size; i ++) {
     acc = lcm(acc, data[i].GetDenominator());
@@ -477,8 +477,8 @@ void UDPolynomial<coefficient>::ClearDenominators() {
   *this *= acc;
 }
 
-template <typename coefficient>
-void UDPolynomial<coefficient>::FormalDerivative() {
+template <typename Coefficient>
+void UDPolynomial<Coefficient>::FormalDerivative() {
   if (data.size < 2) {
     data.size = 0;
   }
@@ -488,8 +488,8 @@ void UDPolynomial<coefficient>::FormalDerivative() {
   data.size --;
 }
 
-template <typename coefficient>
-bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right) const {
+template <typename Coefficient>
+bool UDPolynomial<Coefficient>::operator<(const UDPolynomial<Coefficient>& right) const {
   if (data.size < right.data.size) {
     return true;
   }
@@ -502,19 +502,19 @@ bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right
   return data[data.size - 1] < right.data[data.size - 1];
 }
 
-template <typename coefficient>
-void UDPolynomial<coefficient>::SquareFree() {
-  global.Comments << *this << "\n";
-  UDPolynomial<coefficient> p = FormalDerivative();
-  global.Comments << p << "\n";
-  UDPolynomial<coefficient> q = gcd(*this, p);
+template <typename Coefficient>
+void UDPolynomial<Coefficient>::SquareFree() {
+  global.comments << *this << "\n";
+  UDPolynomial<Coefficient> p = FormalDerivative();
+  global.comments << p << "\n";
+  UDPolynomial<Coefficient> q = gcd(*this, p);
   if (q.data.size > 1) {
     data = (*this / q).data;
   }
 }
 
-template <typename coefficient>
-bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient> v) {
+template <typename Coefficient>
+bool space_contains(const List<Vector<Coefficient> >& V, Vector<Coefficient> v) {
   if (v.isEqualToZero()) {
     if (V.size == 0) {
       return false;
@@ -544,10 +544,10 @@ bool space_contains(const List<Vector<coefficient> >& V, Vector<coefficient> v) 
   }
 }
 
-template<typename coefficient>
-void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& W, List<Vector<coefficient> >& output) {
+template<typename Coefficient>
+void getunion(const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& W, List<Vector<Coefficient> >& output) {
   if (&output == &V || &output == &W) {
-    List<Vector<coefficient> > newOutput;
+    List<Vector<Coefficient> > newOutput;
     getunion(V, W, newOutput);
     output = newOutput;
     return;
@@ -557,7 +557,7 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
     return;
   }
   int d = V[0].size;
-  Matrix<coefficient> M;
+  Matrix<Coefficient> M;
   M.init(V.size + W.size,d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
@@ -569,9 +569,9 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
       M.elements[V.size + i][j] = W[i][j];
     }
   }
-  M.GaussianEliminationByRows(M);
+  M.gaussianEliminationByRows(M);
   output.setSize(0);
-  Vector<coefficient> v;
+  Vector<Coefficient> v;
   for (int i = 0; i < M.numberOfRows; i ++) {
     v.setSize(d);
     for (int j = 0; j < d; j ++) {
@@ -584,11 +584,11 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
   }
 }
 
-template<typename coefficient>
+template<typename Coefficient>
 void intersection(
-  const List<Vector<coefficient> > &V,
-  const List<Vector<coefficient> > &W,
-  List<Vector<coefficient> >& output
+  const List<Vector<Coefficient> > &V,
+  const List<Vector<Coefficient> > &W,
+  List<Vector<Coefficient> >& output
 ) {
   if ((V.size == 0) or (W.size == 0)) {
     output.setSize(0);
@@ -596,27 +596,27 @@ void intersection(
   }
   int d = V[0].size;
 
-  Matrix<coefficient> MV;
+  Matrix<Coefficient> MV;
   MV.init(V.size, d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
       MV.elements[i][j] = V[i][j];
     }
   }
-  List<Vector<coefficient> > Vperp;
+  List<Vector<Coefficient> > Vperp;
   MV.GetZeroEigenSpaceModifyMe(Vperp);
 
-  Matrix<coefficient> MW;
+  Matrix<Coefficient> MW;
   MW.init(W.size, d);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < d; j ++) {
       MW.elements[i][j] = W[i][j];
     }
   }
-  List<Vector<coefficient> > Wperp;
+  List<Vector<Coefficient> > Wperp;
   MW.GetZeroEigenSpaceModifyMe(Wperp);
 
-  Matrix<coefficient> M;
+  Matrix<Coefficient> M;
   M.init(Vperp.size + Wperp.size,d);
   int i = 0;
   for (; i < Vperp.size; i ++) {
@@ -632,48 +632,48 @@ void intersection(
   M.GetZeroEigenSpaceModifyMe(output);
 }
 
-template <typename coefficient>
-List<Vector<coefficient> > orthogonal_complement(
-  const List<Vector<coefficient> >& V, const List<Vector<coefficient> >& WW
+template <typename Coefficient>
+List<Vector<Coefficient> > orthogonal_complement(
+  const List<Vector<Coefficient> >& V, const List<Vector<Coefficient> >& WW
 ) {
-  List<Vector<coefficient> > W = intersection(V, WW);
+  List<Vector<Coefficient> > W = intersection(V, WW);
   if (W.size == 0) {
     return V;
   }
   int d = W[0].size;
-  Matrix<coefficient> GM;
+  Matrix<Coefficient> GM;
   GM.init(W.size, W.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < W.size; j ++) {
       GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
     }
   }
-  GM.Invert();
-  Matrix<coefficient> VM;
+  GM.invert();
+  Matrix<Coefficient> VM;
   VM.init(W.size,V.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < V.size; j ++) {
       VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
     }
   }
-  VM.MultiplyOnTheLeft(GM);
-  Matrix<coefficient> outm;
+  VM.multiplyOnTheLeft(GM);
+  Matrix<Coefficient> outm;
   outm.init(V.size, d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
-      coefficient r = V[i][j];
+      Coefficient r = V[i][j];
       outm.elements[i][j] = r;
       for (int k = 0; k < W.size; k ++) {
         outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
       }
     }
   }
-  Matrix<coefficient> tmp;
+  Matrix<Coefficient> tmp;
   Selection s;
-  outm.GaussianEliminationByRows(outm,tmp,s);
-  List<Vector<coefficient> > out;
+  outm.gaussianEliminationByRows(outm,tmp,s);
+  List<Vector<Coefficient> > out;
   for (int i = 0; i < outm.numberOfRows; i ++) {
-    Vector<coefficient> v;
+    Vector<Coefficient> v;
     v.setSize(d);
     for (int j = 0; j < d; j ++) {
       v[j] = outm.elements[i][j];
@@ -687,10 +687,10 @@ List<Vector<coefficient> > orthogonal_complement(
 }
 
 // we're going to guess at integers
-template <typename coefficient>
-bool pdiv(List<coefficient> &p, int a) {
-  List<coefficient> q;
-  coefficient lastround = p[0];
+template <typename Coefficient>
+bool pdiv(List<Coefficient> &p, int a) {
+  List<Coefficient> q;
+  Coefficient lastround = p[0];
   for (int i = 1; i < p.size; i ++) {
     q.addOnTop(lastround);
     lastround = p[i] - lastround * a;
@@ -702,8 +702,8 @@ bool pdiv(List<coefficient> &p, int a) {
   return false;
 }
 
-template <typename coefficient>
-List<int> factorpoly(List<coefficient> p, int maxfac) {
+template <typename Coefficient>
+List<int> factorpoly(List<Coefficient> p, int maxfac) {
   List<int> factors;
   for (int i1 = 0; i1 < maxfac; i1 ++) {
     for (int i2 = 1; i2 >= - 1; i2 -= 2) {
@@ -721,16 +721,16 @@ List<int> factorpoly(List<coefficient> p, int maxfac) {
   return factors;
 }
 
-template <typename coefficient>
-List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
+template <typename Coefficient>
+List<Vector<Coefficient> > DestructiveColumnSpace(Matrix<Coefficient>& M) {
   M.Transpose();
-  Matrix<coefficient> dummy1;
+  Matrix<Coefficient> dummy1;
   Selection dummy2;
-  M.GaussianEliminationByRows(M, dummy1, dummy2);
-  List<Vector<coefficient> > out;
+  M.gaussianEliminationByRows(M, dummy1, dummy2);
+  List<Vector<Coefficient> > out;
   bool zerov;
   for (int i = 0; i < M.numberOfRows; i ++) {
-    Vector<coefficient> v;
+    Vector<Coefficient> v;
     v.makeZero(M.numberOfColumns); // initializing is not necessary
     zerov = true;
     for (int j = 0; j < M.numberOfColumns; j ++) {
@@ -775,11 +775,11 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
   return spaces;
 }
 
-template <typename coefficient>
-Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<coefficient> >& B) {
-  Vector<coefficient> w;
+template <typename Coefficient>
+Vector<Coefficient> PutInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
+  Vector<Coefficient> w;
   w.makeZero(B.size);
-  Matrix<coefficient> M;
+  Matrix<Coefficient> M;
   M.MakeZeroMatrix(B.size);
   for (int i = 0; i < B.size; i ++) {
     for (int j = 0; j < v.size; j ++) {
@@ -791,35 +791,35 @@ Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<c
       }
     }
   }
-  M.Invert();
-  Vector<coefficient> v2 = M * w;
-  Vector<coefficient> v3;
+  M.invert();
+  Vector<Coefficient> v2 = M * w;
+  Vector<Coefficient> v3;
   v3.makeZero(v.size);
   for (int i = 0; i < B.size; i ++) {
     v3 += B[i] * v2[i];
   }
   if (!(v3 == v)) {
-    Vector<coefficient> out;
+    Vector<Coefficient> out;
     return out;
   }
   return v2;
 }
 
-template <typename coefficient>
-ElementWeylGroupRing<coefficient> ActOnGroupRing(
-  ElementWeylGroup& theElement, const ElementWeylGroupRing<coefficient>& v
+template <typename Coefficient>
+ElementWeylGroupRing<Coefficient> ActOnGroupRing(
+  ElementWeylGroup& theElement, const ElementWeylGroupRing<Coefficient>& v
 ) {
-  ElementWeylGroupRing<coefficient> out;
+  ElementWeylGroupRing<Coefficient> out;
   out.makeZero();
   for (int i = 0; i < v.size(); i ++) {
-    out.AddMonomial(v.coefficients[i], theElement * v[i]);
+    out.addMonomial(v.coefficients[i], theElement * v[i]);
   }
   return out;
 }
 
 // this function name is a lie
-template <typename coefficient>
-bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V) {
+template <typename Coefficient>
+bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V) {
   // pre-initial test: V isn't empty
   if (V.size == 0) {
     return false;
@@ -830,14 +830,14 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
     return false;
   }
   // more expensive test: character of V has unit Norm
-  ClassFunction<FiniteGroup<ElementWeylGroup>, coefficient> X;
+  ClassFunction<FiniteGroup<ElementWeylGroup>, Coefficient> X;
   X.G = &G.theGroup;
   X.data.setSize(G.theGroup.ConjugacyClassCount());
   for (int i = 0; i < G.theGroup.ConjugacyClassCount(); i ++) {
-    ElementWeylGroup& g = G.theGroup.conjugacyClasseS[i].representative;
-    coefficient tr = 0;
+    ElementWeylGroup& g = G.theGroup.conjugacyClasses[i].representative;
+    Coefficient tr = 0;
     for (int j = 0; j < V.size; j ++) {
-      Vector<coefficient> v = ActOnGroupRing(g, V[j]);
+      Vector<Coefficient> v = ActOnGroupRing(g, V[j]);
       v = PutInBasis(v, V);
       tr += v[j];
     }
@@ -848,8 +848,8 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
     return false;
   }
   // okay now do the really hard test
-  Matrix<coefficient> M = GetMatrix(X);
-  List<List<Vector<coefficient> > > spaces = eigenspaces(M);
+  Matrix<Coefficient> M = GetMatrix(X);
+  List<List<Vector<Coefficient> > > spaces = eigenspaces(M);
   if (spaces.size != 2) {
     return false;
   }
@@ -862,7 +862,7 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
   return true;
 }
 
-Matrix<Rational> MatrixInBasis(
+Matrix<Rational> matrixInBasis(
   const ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& X, const List<Vector<Rational> >& B
 ) {
   List<Vector<Rational> > rows;
@@ -872,11 +872,11 @@ Matrix<Rational> MatrixInBasis(
     rows.addOnTop(v);
   }
   for (int i1 = 0; i1 < X.G->ConjugacyClassCount(); i1 ++) {
-    for (int i2 = 0; i2 < X.G->conjugacyClasseS[i1].size; i2 ++) {
+    for (int i2 = 0; i2 < X.G->conjugacyClasses[i1].size; i2 ++) {
       for (int j = 0; j < X.G->GetSize(); j ++) {
         for (int k = 0; k < B.size; k ++) {
           int l = X.G->theElements.getIndex(
-            X.G->conjugacyClasseS[i1].theElements[i2] * X.G->theElements[j]
+            X.G->conjugacyClasses[i1].theElements[i2] * X.G->theElements[j]
           );
           rows[k][l] = X.data[i1] * B[k][j];
         }
@@ -899,16 +899,16 @@ ElementMonomialAlgebra<ElementWeylGroup, Rational> FromClassFunction(
 ) {
   ElementMonomialAlgebra<ElementWeylGroup, Rational> out;
   for (int i = 0; i < X.G->ConjugacyClassCount(); i ++) {
-    for (int j = 0; j < X.G->conjugacyClasseS[i].size; j ++) {
-      out.AddMonomial(X.G->conjugacyClasseS[i].theElements[j], X.data[i]);
+    for (int j = 0; j < X.G->conjugacyClasses[i].size; j ++) {
+      out.addMonomial(X.G->conjugacyClasses[i].theElements[j], X.data[i]);
     }
   }
   return out;
 }
 
-template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, coefficient>& X) {
-  Matrix<coefficient> M;
+template <typename Coefficient>
+Matrix<Coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& X) {
+  Matrix<Coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for (int i1 = 0; i1 < X.G->ccCount; i1 ++) {
     for (int i2 = 0; i2 < X.G->ccSizes[i1]; i2 ++) {
@@ -923,7 +923,7 @@ Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, 
 
 void SubgroupDataRootReflections::ComputeDynkinType() {
   WeylGroupData tempGroup;
-  tempGroup.CartanSymmetric = this->SubCartanSymmetric;
+  tempGroup.cartanSymmetric = this->SubCartanSymmetric;
   tempGroup.MakeMeFromMyCartanSymmetric();
   this->theDynkinType = tempGroup.theDynkinType;
 }
@@ -980,7 +980,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->CheckInitialization();
   if (!this->theSubgroupData.theGroup->flagCCRepresentativesComputed) {
-    this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
+    this->theSubgroupData.theGroup->computeConjugacyClassSizesAndRepresentatives();
   }
   this->theSubgroupData.theGroup->CheckConjugacyClassRepsMatchCCsizes();
   this->theSubgroupData.theGroup->CheckOrthogonalityCharTable();
@@ -996,18 +996,18 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << Xs << " <- subgroup sign character\n";
   //global.Comments << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
   //global.Comments << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
-  //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
+  //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
  //}
 
   this->tauSignature.setSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
 
   Vector<Rational> XiS;
-  XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasseS.size);
-  for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasseS.size; i ++) {
+  XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasses.size);
+  for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasses.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->theWeylData->theGroup.characterTable[i];
     //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
-    for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++) {
+    for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasses.size; j ++) {
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
     }
     this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs, XiS);
@@ -1022,14 +1022,14 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
   if (this->theDynkinType == this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed) {
-    this->theSubgroupData.theSubgroup->conjugacyClasseS.setSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
-    for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; i ++) {
-      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed = true;
-      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].representative = this->theSubgroupData.theGroup->conjugacyClasseS[i].representative;
-      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].size = this->theSubgroupData.theGroup->conjugacyClasseS[i].size;
-      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagElementsComputed = false;
+    this->theSubgroupData.theSubgroup->conjugacyClasses.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
+    for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasses.size; i ++) {
+      this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagRepresentativeComputed = true;
+      this->theSubgroupData.theSubgroup->conjugacyClasses[i].representative = this->theSubgroupData.theGroup->conjugacyClasses[i].representative;
+      this->theSubgroupData.theSubgroup->conjugacyClasses[i].size = this->theSubgroupData.theGroup->conjugacyClasses[i].size;
+      this->theSubgroupData.theSubgroup->conjugacyClasses[i].flagElementsComputed = false;
     }
-    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
+    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.theGroup->conjugacyClasses.size);
     for (int i = 0; i < this->theSubgroupData.ccRepresentativesPreimages.size; i ++) {
       this->theSubgroupData.ccRepresentativesPreimages[i] = i;
     }
@@ -1038,7 +1038,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
     if (this->theDynkinType.GetRank() <= 6) {
       this->theSubgroupData.theSubgroup->ComputeCCfromAllElements();
     } else {
-      this->theSubgroupData.theSubgroup->ComputeCCSizesAndRepresentatives();
+      this->theSubgroupData.theSubgroup->computeConjugacyClassSizesAndRepresentatives();
     }
 
     this->theSubgroupData.ComputeCCRepresentativesPreimages();
@@ -1121,7 +1121,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
     return false;
   }
   OrbitIteratorWeylGroup theIterator;
-  theIterator.init(this->generators, left, ElementWeylGroup::ConjugationAction);
+  theIterator.init(this->generators, left, ElementWeylGroup::conjugationAction);
   if (this->generators.size == 0) {
     global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
@@ -1137,7 +1137,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
 
 void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups) {
   MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
-  rootSubalgebras theRootSAs;
+  RootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeFromDynkinType(this->theDynkinType);
 //  theSSlieAlg.ComputeChevalleyConstants(global);

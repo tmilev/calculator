@@ -407,7 +407,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
   List<List<std::string> >& modifiableData = global.databaseModifiableFields;
   List<std::string> currentEntry;
-  modifiableData.Reserve(10);
+  modifiableData.reserve(10);
   currentEntry.addOnTop(DatabaseStrings::tableUsers);
   currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
   currentEntry.addOnTop(DatabaseStrings::labelProblemDataJSON);
@@ -575,7 +575,7 @@ std::string UserCalculator::toString() {
   out << "Calculator user: " << this->username
   << "<br>Section: computed: " << this->sectionComputed
   << ", in DB: " << this->sectionInDB
-  << "<br>Sections taught: " << this->sectionsTaught.ToStringCommaDelimited()
+  << "<br>Sections taught: " << this->sectionsTaught.toStringCommaDelimited()
   << "<br>Course: computed: " << this->courseInDB << ", in DB: " << this->courseComputed;
 
   Rational weightRat;
@@ -1015,7 +1015,7 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
       continue;
     }
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
-    Answer& currentA = *this->theAnswers.theValues.LastObject();
+    Answer& currentA = *this->theAnswers.theValues.lastObject();
     std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
     result = HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
@@ -1064,7 +1064,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
       continue;
     }
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
-    Answer& currentA = *this->theAnswers.theValues.LastObject();
+    Answer& currentA = *this->theAnswers.theValues.lastObject();
     JSData currentQuestionJSON = inputData.objects.theValues[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =

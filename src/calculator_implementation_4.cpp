@@ -81,7 +81,7 @@ int IntIdentity(const int& x) {
 
 bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
   MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
-  output.Reserve(input.size());
+  output.reserve(input.size());
   output.setSize(0);
   if (!input.IsSequenceNElementS() && !input.startsWith(this->opIntervalOpen())) {
     if (targetDimNonMandatory > 0) {
@@ -108,8 +108,8 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   return true;
 }
 
-template <class coefficient>
-bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex) {
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::IsNotInParabolic(int theGeneratorIndex) {
   Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
     if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
@@ -119,8 +119,8 @@ bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex) {
   return false;
 }
 
-template <class coefficient>
-bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex) {
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::IsNotInLevi(int theGeneratorIndex) {
   Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
@@ -130,15 +130,15 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex) {
   return false;
 }
 
-template <class coefficient>
-void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
+template <class Coefficient>
+void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
   ElementUniversalEnveloping<RationalFunction>& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
-  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
   RationalFunction tempRF;
   output.makeZero(*this->theAlgebras, this->indexAlgebra);
@@ -153,18 +153,18 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.makeOne();
-  output.AddMonomial(tempMon, tempRF);
+  output.addMonomial(tempMon, tempRF);
 }
 
-template <class coefficient>
-void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
+template <class Coefficient>
+void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
   ElementUniversalEnveloping<Polynomial<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
-  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
   output.makeZero(*this->owner);
@@ -180,31 +180,31 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.makeOne(numVars);
-  output.AddMonomial(tempMon, tempRF);
+  output.addMonomial(tempMon, tempRF);
 }
 
-class quasiDiffMon {
-  friend std::ostream& operator << (std::ostream& output, const quasiDiffMon& theMon) {
+class QuasiDifferentialMononomial {
+  friend std::ostream& operator << (std::ostream& output, const QuasiDifferentialMononomial& theMon) {
     output << theMon.toString();
     return output;
   }
   public:
   MonomialWeylAlgebra theWeylMon;
   MonomialMatrix theMatMon;
-  static unsigned int hashFunction(const quasiDiffMon& input) {
+  static unsigned int hashFunction(const QuasiDifferentialMononomial& input) {
     return input.theWeylMon.hashFunction() * someRandomPrimes[0] + input.theMatMon.hashFunction() * someRandomPrimes[1];
   }
   unsigned int hashFunction() const {
     return hashFunction(*this);
   }
-  bool operator==(const quasiDiffMon& other) const {
+  bool operator==(const QuasiDifferentialMononomial& other) const {
     return this->theWeylMon == other.theWeylMon && this->theMatMon == other.theMatMon;
   }
-  void operator=(const quasiDiffMon& other) {
+  void operator=(const QuasiDifferentialMononomial& other) {
     this->theWeylMon = other.theWeylMon;
     this->theMatMon = other.theMatMon;
   }
-  bool operator>(const quasiDiffMon& other) const {
+  bool operator>(const QuasiDifferentialMononomial& other) const {
     if (this->theMatMon == other.theMatMon) {
       return this->theWeylMon>other.theWeylMon;
     }
@@ -213,58 +213,58 @@ class quasiDiffMon {
   std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
-std::string quasiDiffMon::toString(FormatExpressions* theFormat) const {
+std::string QuasiDifferentialMononomial::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   out << this->theWeylMon.toString(theFormat) << "\\otimes ";
   out << this->theMatMon.toString(theFormat);
   return out.str();
 }
 
-template <class coefficient>
-class quasiDiffOp : public LinearCombination<quasiDiffMon, coefficient> {
+template <class Coefficient>
+class QuasiDifferentialOperator : public LinearCombination<QuasiDifferentialMononomial, Coefficient> {
 public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
-  void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
-  void operator=(const LinearCombination<quasiDiffMon, coefficient>& other) {
-    this->LinearCombination<quasiDiffMon, coefficient>::operator=(other);
+  void GenerateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
+  void operator*=(const QuasiDifferentialOperator<Coefficient>& standsOnTheRight);
+  void operator=(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& other) {
+    this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::operator=(other);
   }
-  void LieBracketMeOnTheRight(const LinearCombination<quasiDiffMon, coefficient>& standsOnTheRight) {
-    quasiDiffOp<coefficient> tempRight;
+  void LieBracketMeOnTheRight(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& standsOnTheRight) {
+    QuasiDifferentialOperator<Coefficient> tempRight;
     tempRight = standsOnTheRight;
     MathRoutines::LieBracket(*this, tempRight, *this);
   }
-  void FourierTransformDiffPartOnly(quasiDiffOp<coefficient>& output) const;
-  void GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output) const;
+  void FourierTransformDiffPartOnly(QuasiDifferentialOperator<Coefficient>& output) const;
+  void GetEWAsetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const;
 };
 
-template <class coefficient>
-void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coefficient>& output) const {
+template <class Coefficient>
+void QuasiDifferentialOperator<Coefficient>::FourierTransformDiffPartOnly(QuasiDifferentialOperator<Coefficient>& output) const {
   if (&output == this) {
-    quasiDiffOp<coefficient> thisCopy;
+    QuasiDifferentialOperator<Coefficient> thisCopy;
     thisCopy.FourierTransformDiffPartOnly(output);
     return;
   }
   output.makeZero();
-  ElementWeylAlgebra<coefficient> startDO, finalDO;
-  quasiDiffMon theMon;
+  ElementWeylAlgebra<Coefficient> startDO, finalDO;
+  QuasiDifferentialMononomial theMon;
   for (int i = 0; i < this->size(); i ++) {
     startDO.makeZero();
-    startDO.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
+    startDO.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
     startDO.FourierTransform(finalDO);
     for (int j = 0; j < finalDO.size(); j ++) {
       theMon.theMatMon = (*this)[i].theMatMon;
       theMon.theWeylMon = finalDO[j];
-      output.AddMonomial(theMon, finalDO.coefficients[j]);
+      output.addMonomial(theMon, finalDO.coefficients[j]);
     }
   }
 }
 
-template <class coefficient>
-void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output) const {
+template <class Coefficient>
+void QuasiDifferentialOperator<Coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const {
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    output.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
+    output.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
   }
 }
 
@@ -285,17 +285,17 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
   output -= tempE;
 }
 
-template <class coefficient>
-void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
-  List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat
+template <class Coefficient>
+void QuasiDifferentialOperator<Coefficient>::GenerateBasisLieAlgebra(
+  List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat
 ) {
-  MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
+  MacroRegisterFunctionWithName("QuasiDifferentialOperator<Coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport;
-  HashedList<quasiDiffMon> bufferMons;
-  List< LinearCombination<quasiDiffMon, coefficient> > theEltsConverted;
+  HashedList<QuasiDifferentialMononomial> bufferMons;
+  List< LinearCombination<QuasiDifferentialMononomial, Coefficient> > theEltsConverted;
   theEltsConverted = theElts;
-  this->GaussianEliminationByRows(theEltsConverted);
-  quasiDiffOp tempQDO;
+  this->gaussianEliminationByRows(theEltsConverted);
+  QuasiDifferentialOperator tempQDO;
   bool foundNew = true;
   int numTimesEliminationWasExecuted = 0;
   while (foundNew) {
@@ -313,9 +313,9 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         report << tempQDO.toString(theFormat);
         theReport.report(report.str());
         theEltsConverted.addOnTop(tempQDO);
-        quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
+        QuasiDifferentialOperator::gaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;
-        if (!theEltsConverted.LastObject()->isEqualToZero()) {
+        if (!theEltsConverted.lastObject()->isEqualToZero()) {
           foundNew = true;
         }
         for (int k = theEltsConverted.size - 1; k >= 0; k --) {
@@ -335,62 +335,62 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
 
 }
 
-template <class coefficient>
-void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& standsOnTheRight) {
-  quasiDiffOp<coefficient> output;
+template <class Coefficient>
+void QuasiDifferentialOperator<Coefficient>::operator*=(const QuasiDifferentialOperator<Coefficient>& standsOnTheRight) {
+  QuasiDifferentialOperator<Coefficient> output;
   ElementWeylAlgebra<Rational> leftElt, rightElt;
-  quasiDiffMon outputMon;
+  QuasiDifferentialMononomial outputMon;
   output.makeZero();
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     rightElt.makeZero();
-    rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.coefficients[j]);
+    rightElt.addMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.coefficients[j]);
     for (int i = 0; i < this->size(); i ++) {
       leftElt.makeZero();
-      leftElt.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
+      leftElt.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
       outputMon.theMatMon = (*this)[i].theMatMon;
       outputMon.theMatMon *= standsOnTheRight[j].theMatMon;
       leftElt *= rightElt;
       for (int k = 0; k < leftElt.size(); k ++) {
         outputMon.theWeylMon = leftElt[k];
-        output.AddMonomial(outputMon, leftElt.coefficients[k]);
+        output.addMonomial(outputMon, leftElt.coefficients[k]);
       }
     }
   }
   *this = output;
 }
 
-template <class coefficient>
-std::string quasiDiffOp<coefficient>::toString(FormatExpressions* theFormat) const {
+template <class Coefficient>
+std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* theFormat) const {
   bool combineWeylPart = true;
   if (theFormat != nullptr) {
     combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
   }
   if (!combineWeylPart) {
-    return this->LinearCombination<quasiDiffMon, coefficient>::toString(theFormat);
+    return this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(theFormat);
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.makeZero();
   ElementWeylAlgebra<Rational> tempP;
   for (int i = 0; i < this->size(); i ++) {
-    const quasiDiffMon& currentMon = (*this)[i];
+    const QuasiDifferentialMononomial& currentMon = (*this)[i];
     tempP.makeZero();
-    tempP.AddMonomial(currentMon.theWeylMon, this->coefficients[i]);
-    reordered.AddMonomial(currentMon.theMatMon, tempP);
+    tempP.addMonomial(currentMon.theWeylMon, this->coefficients[i]);
+    reordered.addMonomial(currentMon.theMatMon, tempP);
   }
   std::string result = reordered.toString(theFormat);
   if (result == "0" && this->size() != 0) {
     global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
-    << this->LinearCombination<quasiDiffMon, coefficient>::toString(theFormat)
+    << this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::toString(theFormat)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
   }
   return result;
 }
 
-template <class coefficient>
-bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::GetActionEulerOperatorPart(
   const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetActionEulerOperatorPart");
@@ -411,15 +411,15 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   return true;
 }
 
-template <class coefficient>
-bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
   ElementSemisimpleLieAlgebra<Rational>& inputElt,
-  quasiDiffOp<Rational>& output,
+  QuasiDifferentialOperator<Rational>& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
-  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
@@ -436,7 +436,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
-  quasiDiffMon monQDO, monQDO2;
+  QuasiDifferentialMononomial monQDO, monQDO2;
   Rational tempRat;
   output.makeZero();
   Rational currentShift;
@@ -456,7 +456,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
           return false;
         }
         tempMat1.coefficients[k].GetNumerator(tempP1);
-        tempMT.AddMonomial(tempMat1[k], tempP1);
+        tempMT.addMonomial(tempMat1[k], tempP1);
       }
       MathRoutines::raiseToPower(tempMT, thePower, idMT);
       endoPart *= tempMT;
@@ -493,7 +493,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
             monQDO2.theWeylMon.polynomialPart *= currentEndoCoeff[m];
             tempRat = currentEndoCoeff.coefficients[m];
             tempRat *= weylPartSummand.coefficients[j];
-            output.AddMonomial(monQDO2, tempRat);
+            output.addMonomial(monQDO2, tempRat);
           }
         }
       }
@@ -527,7 +527,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra<Rational> theGenerator;
   ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
-  List<quasiDiffOp<Rational> > theQDOs;
+  List<QuasiDifferentialOperator<Rational> > theQDOs;
   FormatExpressions theWeylFormat, theUEformat;
   std::stringstream out, latexReport, latexReport2;
   theWeylFormat.MaxLineLength = 40;
@@ -764,7 +764,7 @@ bool Calculator::innerHWVCommon(
   if (indexOfModule == - 1) {
     indexOfModule = theMods.size;
     theMods.setSize(theMods.size + 1);
-    theMods.LastObject().reset();
+    theMods.lastObject().reset();
   }
   ModuleSSalgebra<RationalFunction>& theMod = theMods[indexOfModule];
   if (!theMod.flagIsInitialized) {
@@ -1606,7 +1606,7 @@ bool Calculator::CollectCoefficientsPowersVar(
         currentCoeff.MakeProducT(theCommands, remainingMultiplicands);
       }
       if (currentE == theVariable) {
-        outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(1), currentCoeff);
+        outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(1), currentCoeff);
         found = true;
         break;
       }
@@ -1614,7 +1614,7 @@ bool Calculator::CollectCoefficientsPowersVar(
         int thePower;
         if (currentE[1] == theVariable) {
           if (currentE[2].IsSmallInteger(&thePower)) {
-            outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(thePower), currentCoeff);
+            outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(thePower), currentCoeff);
             found = true;
             break;
           }
@@ -1622,7 +1622,7 @@ bool Calculator::CollectCoefficientsPowersVar(
       }
     }
     if (!found) {
-      outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(0), theSummands[i]);
+      outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(0), theSummands[i]);
     }
   }
   return true;
@@ -1669,17 +1669,17 @@ bool Calculator::functionCollectSummands(
     }
     if (summands[i].startsWith(theCommands.opTimes(), 3)) {
       if (summands[i][1].IsOfType<Rational>(&coeffRat)) {
-        outputSum.AddMonomial(summands[i][2], coeffRat);
+        outputSum.addMonomial(summands[i][2], coeffRat);
         continue;
       } else if (summands[i][1].IsOfType<AlgebraicNumber>(&coeffAlg)) {
         if (coeffAlg.IsRational(&coeffRat)) {
-          outputSum.AddMonomial(summands[i][2], coeffRat);
+          outputSum.addMonomial(summands[i][2], coeffRat);
           continue;
         }
-        sumOverAlgebraicNumbers.AddMonomial(summands[i][2], coeffAlg);
+        sumOverAlgebraicNumbers.addMonomial(summands[i][2], coeffAlg);
         continue;
       } else if (summands[i][1].IsOfType<double>(&coeffDouble)) {
-        sumOverDoubles.AddMonomial(summands[i][2], coeffDouble);
+        sumOverDoubles.addMonomial(summands[i][2], coeffDouble);
         if (std::isnan(coeffDouble)) {
           hasNAN = true;
         }
@@ -1687,22 +1687,22 @@ bool Calculator::functionCollectSummands(
       }
     }
     if (summands[i].IsRational(&coeffRat)) {
-      outputSum.AddMonomial(theCommands.EOne(), coeffRat);
+      outputSum.addMonomial(theCommands.EOne(), coeffRat);
     } else {
-      outputSum.AddMonomial(summands[i], 1);
+      outputSum.addMonomial(summands[i], 1);
     }
   }
   if (!sumOverDoubles.isEqualToZero() && !hasNAN) {
     sumOverDoubles.quickSortDescending();
     Expression doubleSum;
     doubleSum.makeSum(theCommands, sumOverDoubles);
-    outputSum.AddMonomial(doubleSum, 1);
+    outputSum.addMonomial(doubleSum, 1);
   }
   if (!sumOverAlgebraicNumbers.isEqualToZero()) {
     sumOverAlgebraicNumbers.quickSortDescending();
     Expression algebraicSum;
     algebraicSum.makeSum(theCommands, sumOverAlgebraicNumbers);
-    outputSum.AddMonomial(algebraicSum, 1);
+    outputSum.addMonomial(algebraicSum, 1);
   }
   outputSum.quickSortDescending();
   return !hasNAN;
@@ -1770,7 +1770,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     *this = input[0];
     return true;
   }
-  this->MakeXOX(owner, theOp, input[input.size - 2], *input.LastObject());
+  this->MakeXOX(owner, theOp, input[input.size - 2], *input.lastObject());
   Expression result;
   for (int i = input.size - 3; i >= 0; i --) {
     result.reset(owner, 3);
@@ -2717,14 +2717,14 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
     "not enough empty tokens in the start of the syntactic stack.";
   }
   bool isBad = ((*this->CurrentSyntacticStacK).size > this->numEmptyTokensStart + 1);
-  SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).LastObject();
+  SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).lastObject();
   if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1) {
     if (lastSyntacticElt.controlIndex != this->conExpression()) {
       isBad = true;
     }
   }
   if (!isBad) {
-    out << this->CurrentSyntacticStacK->LastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
+    out << this->CurrentSyntacticStacK->lastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
     return out.str();
   }
   out << "<table style =\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
@@ -2858,7 +2858,7 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   if (this->theRationals.size != 0) {
     global.fatal << "Rationals expected to be empty, have: " << this->theRationals.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
+  // HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   if (this->theDoubles.size != 1) {
     global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
   }
@@ -2961,7 +2961,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   if (truncatedInput.children.size > 4) {
     int numEltsToCut = truncatedInput.children.size - 4;
     for (int i = 0; i < numEltsToCut; i ++) {
-      truncatedInput.children.RemoveLastObject();
+      truncatedInput.children.removeLastObject();
     }
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >(
@@ -3022,7 +3022,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   if (tempSel.CardinalitySelection > 0) {
     return output.MakeError("Failed to extract highest weight. ", theCommands);
   }
-  charSSAlgMod<Rational> startingChar, resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
@@ -3049,7 +3049,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   if (tempSel.CardinalitySelection > 0) {
     return output.MakeError("Failed to extract highest weight. ", theCommands);
   }
-  charSSAlgMod<Rational> startingChar, resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;

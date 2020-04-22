@@ -170,7 +170,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool CalculatorConversions::innerPolynomial(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -178,10 +178,10 @@ bool CalculatorConversions::innerPolynomial(
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], output);
+  return CalculatorConversions::functionPolynomial<Coefficient>(theCommands, input[1], output);
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
@@ -189,19 +189,19 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   }
-  if (input.IsOfType<Polynomial<coefficient> >()) {
+  if (input.IsOfType<Polynomial<Coefficient> >()) {
     output = input;
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >()) {
     Polynomial<Rational> thePolynomial;
-    Polynomial<coefficient> converted;
+    Polynomial<Coefficient> converted;
     input.IsOfType(&thePolynomial);
     converted = thePolynomial;
     return output.AssignValueWithContext(converted, input.GetContext(), theCommands);
   }
-  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
-    if (!input.ConvertInternally<Polynomial<coefficient> >(output)) {
+  if (input.IsOfType<Coefficient>() || input.IsOfType<Rational>()) {
+    if (!input.ConvertInternally<Polynomial<Coefficient> >(output)) {
       global.fatal << "This is a programming error: "
       << "failed to convert coefficient to polynomial. " << global.fatal;
     }
@@ -215,7 +215,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     theComputed.reset(theCommands, input.size());
     theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::functionPolynomial<coefficient>(
+      if (!CalculatorConversions::functionPolynomial<Coefficient>(
         theCommands, input[i], theConverted
       )) {
         return theCommands << "<hr>Failed to extract polynomial from "
@@ -241,7 +241,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       if (i == 2) {
         summand *= - 1;
       }
-      if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, summand, theConverted)) {
+      if (!CalculatorConversions::functionPolynomial<Coefficient>(theCommands, summand, theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << summand.toString();
       }
       theComputed.addChildOnTop(theConverted);
@@ -252,20 +252,20 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   int thePower = - 1;
   if (input.startsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
-      if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], theConverted)) {
+      if (!CalculatorConversions::functionPolynomial<Coefficient>(theCommands, input[1], theConverted)) {
         return theCommands
         << "<hr>Failed to extract polynomial from "
         << input[1].toString() << ".";
       }
-      Polynomial<coefficient> resultP = theConverted.getValue<Polynomial<coefficient> >();
+      Polynomial<Coefficient> resultP = theConverted.getValue<Polynomial<Coefficient> >();
       if (thePower < 0) {
-        coefficient theConst;
+        Coefficient theConst;
         if (!resultP.IsConstant(&theConst)) {
           theCommands << "<hr>Failed to extract polynomial from  "
           << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "
           << "I am treating " << input.toString() << " as a single variable. ";
-          Polynomial<coefficient> monomial;
+          Polynomial<Coefficient> monomial;
           monomial.makeMonomial(0, 1, 1);
           ExpressionContext theContext(theCommands);
           theContext.makeOneVariable(input);
@@ -279,7 +279,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
   }
-  Polynomial<coefficient> monomial;
+  Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariable(input);

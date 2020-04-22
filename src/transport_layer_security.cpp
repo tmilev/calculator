@@ -184,13 +184,13 @@ void TransportLayerSecurity::RemoveLastSocket() {
 void TransportLayerSecurityOpenSSL::RemoveLastSocket() {
   MacroRegisterFunctionWithName("TransportLayerSecurity::RemoveLastSocket");
   if (this->socketStack.size > 0) {
-    int lastSocket = this->socketStack.PopLastObject();
+    int lastSocket = this->socketStack.popLastObject();
     close(lastSocket);
   }
   if (this->socketStack.size <= 0) {
     return;
   }
-  this->DoSetSocket(*this->socketStack.LastObject());
+  this->DoSetSocket(*this->socketStack.lastObject());
 }
 
 CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(int inputId) {
@@ -329,7 +329,7 @@ bool TransportLayerSecurityServer::WriteBytesOnce(
   List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
-  struct timeval tv; //<- code involving tv taken from stackexchange
+  struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
@@ -417,7 +417,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   if (this->spoofer.flagDoSpoof) {
     return this->spoofer.ReadBytesOnce(commentsOnError);
   }
-  struct timeval tv; //<- code involving tv taken from stackexchange
+  struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));

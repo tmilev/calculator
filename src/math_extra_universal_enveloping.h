@@ -5,15 +5,15 @@
 #include "math_general.h"
 #include "math_extra_Lie_theory_extras.h"
 
-template <class coefficient>
-class MonomialUniversalEnveloping : public MonomialTensor<coefficient> {
+template <class Coefficient>
+class MonomialUniversalEnveloping : public MonomialTensor<Coefficient> {
 private:
 public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
-  friend std::ostream& operator<<(std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const MonomialUniversalEnveloping<Coefficient>& theMon) {
     output << theMon.toString();
     return output;
   }
@@ -21,11 +21,11 @@ public:
     return this->IsEqualToOne();
   }
   bool AdjointRepresentationAction(
-    const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& input, ElementUniversalEnveloping<Coefficient>& output
   ) const;
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other) {
-    this->MonomialTensor<coefficient>::operator=(other);
+    this->MonomialTensor<Coefficient>::operator=(other);
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
   }
@@ -43,28 +43,28 @@ public:
     this->Powers[0] = 1;
   }
   bool HWTAAbilinearForm(
-    const MonomialUniversalEnveloping<coefficient>& right,
-    coefficient& output,
-    const Vector<coefficient>* subHiGoesToIthElement,
-    const coefficient& theRingUnit,
-    const coefficient& theRingZero,
+    const MonomialUniversalEnveloping<Coefficient>& right,
+    Coefficient& output,
+    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Coefficient& theRingUnit,
+    const Coefficient& theRingZero,
     std::stringstream* logStream = nullptr
   );
   void ModOutVermaRelations(
-    coefficient& outputCoeff,
-    const Vector<coefficient>* subHiGoesToIthElement = 0,
-    const coefficient& theRingUnit = 1,
-    const coefficient& theRingZero = 0
+    Coefficient& outputCoeff,
+    const Vector<Coefficient>* subHiGoesToIthElement = 0,
+    const Coefficient& theRingUnit = 1,
+    const Coefficient& theRingZero = 0
   );
-  void SetNumVariables(int newNumVars);
-  void Substitution(const PolynomialSubstitution<Rational>& theSub);
+  void setNumberOfVariables(int newNumVars);
+  void substitution(const PolynomialSubstitution<Rational>& theSub);
   unsigned int hashFunction() const {
-    return this->::MonomialTensor<coefficient>::hashFunction();
+    return this->::MonomialTensor<Coefficient>::hashFunction();
   }
-  static inline unsigned int hashFunction(const MonomialUniversalEnveloping<coefficient>& input) {
+  static inline unsigned int hashFunction(const MonomialUniversalEnveloping<Coefficient>& input) {
     return input.hashFunction();
   }
-  void GetDegree(coefficient& output) const {
+  void GetDegree(Coefficient& output) const {
     if (this->Powers.size == 0) {
       output.makeZero();
       return;
@@ -75,10 +75,10 @@ public:
     }
   }
   bool CommutingABntoBnAPlusLowerOrderAllowed(
-    coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex
+    Coefficient& theLeftPower, int leftGeneratorIndex, Coefficient& theRightPower, int rightGeneratorIndex
   );
   bool CommutingAnBtoBAnPlusLowerOrderAllowed(
-    coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex
+    Coefficient& theLeftPower, int leftGeneratorIndex, Coefficient& theRightPower, int rightGeneratorIndex
   );
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
   void makeOne(SemisimpleLieAlgebra& inputOwner) {
@@ -96,73 +96,73 @@ public:
   // in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
-  void simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
+  void simplify(ElementUniversalEnveloping<Coefficient>& output, const Coefficient& theRingUnit = 1);
   void CommuteABntoBnAPlusLowerOrder(
-    int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
+    int theIndeX, ElementUniversalEnveloping<Coefficient>& output, const Coefficient& theRingUnit = 1
   );
   void CommuteAnBtoBAnPlusLowerOrder(
-    int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
+    int indexA, ElementUniversalEnveloping<Coefficient>& output, const Coefficient& theRingUnit = 1
   );
   MonomialUniversalEnveloping(): owner(nullptr) {}
   bool operator>(const MonomialUniversalEnveloping& other) const {
-    return this->::MonomialTensor<coefficient>::operator>(other);
+    return this->::MonomialTensor<Coefficient>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other) const {
     return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other) {
-    this->::MonomialTensor<coefficient>::operator=(other);
+    this->::MonomialTensor<Coefficient>::operator=(other);
     this->owner = other.owner;
   }
   inline void operator*=(const MonomialUniversalEnveloping& other) {
-    this->::MonomialTensor<coefficient>::operator*=(other);
+    this->::MonomialTensor<Coefficient>::operator*=(other);
   }
 };
 
-template <class coefficient>
-class ElementUniversalEnveloping: public ElementMonomialAlgebra<MonomialUniversalEnveloping<coefficient>, coefficient> {
+template <class Coefficient>
+class ElementUniversalEnveloping: public ElementMonomialAlgebra<MonomialUniversalEnveloping<Coefficient>, Coefficient> {
 private:
   void CleanUpZeroCoeff();
-  friend class MonomialUniversalEnveloping<coefficient>;
+  friend class MonomialUniversalEnveloping<Coefficient>;
 public:
   SemisimpleLieAlgebra* owner;
   bool AdjointRepresentationAction(
-    const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& input, ElementUniversalEnveloping<Coefficient>& output
   ) const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool isEqualToZero() const {
     return this->size() == 0;
   }
   bool HWMTAbilinearForm(
-    const ElementUniversalEnveloping<coefficient>& right,
-    coefficient& output,
-    const Vector<coefficient>* subHiGoesToIthElement,
-    const coefficient& theRingUnit,
-    const coefficient& theRingZero,
+    const ElementUniversalEnveloping<Coefficient>& right,
+    Coefficient& output,
+    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Coefficient& theRingUnit,
+    const Coefficient& theRingZero,
     std::stringstream* logStream = nullptr
   );
   std::string IsInProperSubmodule(
-    const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero
+    const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& theRingUnit, const Coefficient& theRingZero
   );
   bool HWTAAbilinearForm(
-    const ElementUniversalEnveloping<coefficient>&right,
-    coefficient& output,
-    const Vector<coefficient>* subHiGoesToIthElement,
-    const coefficient& theRingUnit,
-    const coefficient& theRingZero,
+    const ElementUniversalEnveloping<Coefficient>&right,
+    Coefficient& output,
+    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Coefficient& theRingUnit,
+    const Coefficient& theRingZero,
     std::stringstream* logStream = nullptr
   ) const;
   bool HWTAAbilinearForm(
-    const MonomialUniversalEnveloping<coefficient>& right,
-    coefficient& output,
-    const Vector<coefficient>* subHiGoesToIthElement,
-    const coefficient& theRingUnit,
-    const coefficient& theRingZero,
+    const MonomialUniversalEnveloping<Coefficient>& right,
+    Coefficient& output,
+    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Coefficient& theRingUnit,
+    const Coefficient& theRingZero,
     std::stringstream* logStream = nullptr
   ) const {
-    ElementUniversalEnveloping<coefficient> tempElt;
+    ElementUniversalEnveloping<Coefficient> tempElt;
     tempElt.makeZero(*this->owner);
-    tempElt.AddMonomial(right, theRingUnit);
+    tempElt.addMonomial(right, theRingUnit);
     return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theRingUnit, theRingZero, logStream);
   }
   bool NeedsBracketForMultiplication() {
@@ -172,27 +172,27 @@ public:
   bool ApplyTransposeAntiAutoOnMe();
   void MakeHgenerator(const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner);
   void AssignElementLieAlgebra(
-    const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1
+    const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const Coefficient& theRingUnit = 1
   );
-  bool GetWithSimpleGeneratorsOnly(LinearCombination<MonomialTensor<coefficient>, coefficient>& output);
-  void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit);
-  void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit = 1);
+  bool GetWithSimpleGeneratorsOnly(LinearCombination<MonomialTensor<Coefficient>, Coefficient>& output);
+  void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& theRingUnit);
+  void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const Coefficient& theRingUnit = 1);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
   void MakeOneGeneratorCoeffOne(
-    const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1
+    const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const Coefficient& theRingUnit = 1
   ) {
     this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
   }
-  coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
+  Coefficient GetKillingFormProduct(const ElementUniversalEnveloping<Coefficient>& right) const;
   void makeZero(SemisimpleLieAlgebra& inputOwner);
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
-  void makeConstant(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
+  void makeConstant(const Coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
     this->makeZero(inputOwner);
-    MonomialUniversalEnveloping<coefficient> tempMon;
+    MonomialUniversalEnveloping<Coefficient> tempMon;
     tempMon.makeOne(inputOwner);
-    this->AddMonomial(tempMon, coeff);
+    this->addMonomial(tempMon, coeff);
   }
-  void simplify(const coefficient& theRingUnit = 1);
+  void simplify(const Coefficient& theRingUnit = 1);
   int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
@@ -201,40 +201,40 @@ public:
     }
     return result;
   }
-  void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
+  void multiplyBy(const MonomialUniversalEnveloping<Coefficient>& standsOnTheRight, const Coefficient& theCoeff);
   void ModToMinDegreeFormFDRels(
-    const Vector<Rational> & theHWinSimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero
+    const Vector<Rational> & theHWinSimpleCoords, const Coefficient& theRingUnit, const Coefficient& theRingZero
   );
   void ModOutVermaRelations(
-    const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0
+    const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& theRingUnit = 1, const Coefficient& theRingZero = 0
   );
   static void GetCoordinateFormOfSpanOfElements(
-    List<ElementUniversalEnveloping<coefficient> >& theElements,
-    Vectors<coefficient>& outputCoordinates,
-    ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials
+    List<ElementUniversalEnveloping<Coefficient> >& theElements,
+    Vectors<Coefficient>& outputCoordinates,
+    ElementUniversalEnveloping<Coefficient>& outputCorrespondingMonomials
   );
   bool getCoordinatesInBasis(
-    List<ElementUniversalEnveloping<coefficient> >& theBasis,
-    Vector<coefficient>& output,
-    const coefficient& theRingUnit,
-    const coefficient& theRingZero
+    List<ElementUniversalEnveloping<Coefficient> >& theBasis,
+    Vector<Coefficient>& output,
+    const Coefficient& theRingUnit,
+    const Coefficient& theRingZero
   ) const;
-  static inline unsigned int hashFunction (const ElementUniversalEnveloping<coefficient>& input) {
+  static inline unsigned int hashFunction (const ElementUniversalEnveloping<Coefficient>& input) {
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::hashFunction();
+    return this->::LinearCombination<MonomialUniversalEnveloping<Coefficient>, Coefficient>::hashFunction();
   }
   template<class CoefficientTypeQuotientField>
   static bool GetBasisFromSpanOfElements(
-    List<ElementUniversalEnveloping<coefficient> >& theElements,
+    List<ElementUniversalEnveloping<Coefficient> >& theElements,
     Vectors<CoefficientTypeQuotientField>& outputCoords,
-    List<ElementUniversalEnveloping<coefficient> >& outputTheBasis,
+    List<ElementUniversalEnveloping<Coefficient> >& outputTheBasis,
     const CoefficientTypeQuotientField& theFieldUnit,
     const CoefficientTypeQuotientField& theFieldZero
   );
   void AssignFromCoordinateFormWRTBasis(
-    List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner
+    List<ElementUniversalEnveloping<Coefficient> >& theBasis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
   );
   void raiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator() const {
@@ -247,21 +247,21 @@ public:
     return (*this)[0].generatorsIndices.size == 1;
   }
   void SubstitutionCoefficients(
-    PolynomialSubstitution<Rational>& theSub, const coefficient& theRingUnit, const coefficient& theRingZero
+    PolynomialSubstitution<Rational>& theSub, const Coefficient& theRingUnit, const Coefficient& theRingZero
   );
-  void Substitution(const PolynomialSubstitution<Rational>& theSub);
+  void substitution(const PolynomialSubstitution<Rational>& theSub);
   void MakeCasimir(SemisimpleLieAlgebra& theOwner);
   void MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);
   static void LieBracket(
-    const ElementUniversalEnveloping<coefficient>& left,
-    const ElementUniversalEnveloping<coefficient>& right,
-    ElementUniversalEnveloping<coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& left,
+    const ElementUniversalEnveloping<Coefficient>& right,
+    ElementUniversalEnveloping<Coefficient>& output
   ) {
     left.LieBracketOnTheRight(right, output);
     output.simplify();
   }
   void LieBracketOnTheRight(
-    const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& right, ElementUniversalEnveloping<Coefficient>& output
   ) const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner) {
@@ -275,34 +275,34 @@ public:
   void Assign(const ElementUniversalEnveloping<otherType>& other) {
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
-    MonomialUniversalEnveloping<coefficient> tempMon;
-    coefficient theCoeff;
+    MonomialUniversalEnveloping<Coefficient> tempMon;
+    Coefficient theCoeff;
     for (int i = 0; i < other.size; i ++) {
       tempMon = other[i];
       theCoeff = other.coefficients[i];
-      this->AddMonomial(tempMon, theCoeff);
+      this->addMonomial(tempMon, theCoeff);
     }
   }
   void operator=(const Rational& other) {
     this->makeConstant(other, 0, *this->owner);
   }
-  void operator=(const ElementUniversalEnveloping<coefficient>& other) {
-    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
+  void operator=(const ElementUniversalEnveloping<Coefficient>& other) {
+    this->::LinearCombination<MonomialUniversalEnveloping<Coefficient>, Coefficient>::operator=(other);
     this->owner = other.owner;
   }
-  void operator*=(const ElementUniversalEnveloping<coefficient>& standsOnTheRight);
-  void operator*=(const coefficient& other) {
-    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>
+  void operator*=(const ElementUniversalEnveloping<Coefficient>& standsOnTheRight);
+  void operator*=(const Coefficient& other) {
+    this->::LinearCombination<MonomialUniversalEnveloping<Coefficient>, Coefficient>
     ::operator*=(other);
   }
   template<class otherType>
   void operator/=(const otherType& other) {
-    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>
+    this->::LinearCombination<MonomialUniversalEnveloping<Coefficient>, Coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>(): owner(nullptr) {
+  ElementUniversalEnveloping<Coefficient>(): owner(nullptr) {
   }
-  ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other) {
+  ElementUniversalEnveloping<Coefficient>(const ElementUniversalEnveloping<Coefficient>& other) {
     this->operator=(other);
   }
 };

@@ -181,9 +181,9 @@ private:
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
     bool dontReduceTypes
   );
-  template<class coefficient>
+  template<class Coefficient>
   bool AssignMatrix(
-    const Matrix<coefficient>& input,
+    const Matrix<Coefficient>& input,
     Calculator& owner,
     ExpressionContext const* inputContext = nullptr,
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
@@ -342,24 +342,7 @@ private:
     return true;
   }
   template <class theType>
-  bool IsOfTypeWithContext(WithContext<theType>* whichElement) const {
-    MacroRegisterFunctionWithName("Expression::IsOfTypeWithContext");
-    if (this->owner == nullptr) {
-      return false;
-    }
-    if (!this->startsWith(this->getTypeOperation<theType>())) {
-      return false;
-    }
-    if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
-      return false;
-    }
-    if (whichElement == 0) {
-      return true;
-    }
-    whichElement->context = this->GetContext();
-    whichElement->content = this->getValue<theType>();
-    return true;
-  }
+  bool IsOfTypeWithContext(WithContext<theType>* whichElement) const;
   template <class theType>
   const theType& getValue() const {
     return this->GetValueNonConst<theType>();
@@ -445,8 +428,8 @@ private:
     const Expression& theFunction,
     const Expression& theVariable
   );
-  template<class coefficient>
-  bool makeSum(Calculator& theCommands, const LinearCombination<Expression, coefficient>& theSum);
+  template<class Coefficient>
+  bool makeSum(Calculator& theCommands, const LinearCombination<Expression, Coefficient>& theSum);
   bool makeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
@@ -761,27 +744,27 @@ public:
   Expression getVariable(int variableIndex) const;
   bool isEmpty();
   SemisimpleLieAlgebra* getAmbientSemisimpleLieAlgebra() const;
-  template <class coefficient>
+  template <class Coefficient>
   bool polynomialSubstitution(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<coefficient>& output
+    PolynomialSubstitution<Coefficient>& output
   ) const;
-  template <class coefficient>
+  template <class Coefficient>
   void polynomialSubstitutionNoFailure(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<coefficient>& output
+    PolynomialSubstitution<Coefficient>& output
   ) const;
-  template <class coefficient>
+  template <class Coefficient>
   bool polynomialAndWeylAlgebraSubstitution(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<coefficient>& outputPolynomialPart,
-    PolynomialSubstitution<coefficient>& outputDifferentialPart
+    PolynomialSubstitution<Coefficient>& outputPolynomialPart,
+    PolynomialSubstitution<Coefficient>& outputDifferentialPart
   ) const;
-  template <class coefficient>
+  template <class Coefficient>
   void polynomialAndWeylAlgebraSubstitutionNoFailure(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<coefficient>& outputPolynomialPart,
-    PolynomialSubstitution<coefficient>& outputDifferentialPart
+    PolynomialSubstitution<Coefficient>& outputPolynomialPart,
+    PolynomialSubstitution<Coefficient>& outputDifferentialPart
   ) const;
   bool operator==(const ExpressionContext& other) const;
   int numberOfVariables() const;
@@ -1090,7 +1073,7 @@ public:
   HashedListReferences<ElementUniversalEnveloping<RationalFunction> > theUEs;
   HashedListReferences<RationalFunction> theRFs;
   HashedListReferences<Rational> theRationals;
-  HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
+  HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::HashString> theStrings;
   HashedListReferences<std::string, MathRoutines::HashString> ExpressionNotation;
@@ -2451,20 +2434,20 @@ public:
   static bool innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);
-  template<class coefficient>
+  template<class Coefficient>
   bool GetTypeWeight(
     Calculator& theCommands,
     const Expression& input,
-    Vector<coefficient>& outputWeightSimpleCoords,
+    Vector<Coefficient>& outputWeightSimpleCoords,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
-  template<class coefficient>
+  template<class Coefficient>
   bool GetTypeHighestWeightParabolic(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vector<coefficient>& outputWeightHWFundcoords,
+    Vector<Coefficient>& outputWeightHWFundcoords,
     Selection& outputInducingSel,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
@@ -2523,12 +2506,12 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  template<class coefficient>
+  template<class Coefficient>
   static bool TypeHighestWeightParabolic(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vector<coefficient>& outputWeight,
+    Vector<Coefficient>& outputWeight,
     Selection& outputInducingSel,
     Expression* outputContext = nullptr
   );
@@ -2730,14 +2713,14 @@ public:
   static bool functionDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
-  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
+  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, SlTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialModuloInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  template <class coefficient>
+  template <class Coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
-  template <class coefficient>
+  template <class Coefficient>
   static bool functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctioN(Calculator& theCommands, const Expression& input, Expression& output);
   static bool functionRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2760,10 +2743,10 @@ public:
   static bool innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
-  template <class coefficient>
+  template <class Coefficient>
   static bool innerExpressionFromPoly(
     Calculator& theCommands,
-    const Polynomial<coefficient>& input,
+    const Polynomial<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
@@ -2850,7 +2833,7 @@ public:
   );
   static bool functionExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInTypE(Calculator& theCommands, const Expression& input, Expression& output);
-  template <class coefficient>
+  template <class Coefficient>
   static bool functionExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2891,15 +2874,15 @@ bool Calculator::getVector(const Expression& input,
   return true;
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool CalculatorConversions::functionExpressionFromPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPoly");
-  if (!input.IsOfType<Polynomial<coefficient> >()) {
+  if (!input.IsOfType<Polynomial<Coefficient> >()) {
     return false;
   }
-  const Polynomial<coefficient>& thePoly = input.getValue<Polynomial<coefficient> >();
+  const Polynomial<Coefficient>& thePoly = input.getValue<Polynomial<Coefficient> >();
   ExpressionContext context = input.GetContext();
   return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &context);
 }
@@ -2935,6 +2918,26 @@ bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (outputNumCols != nullptr) {
     *outputNumCols = firstRow.size() - 1;
   }
+  return true;
+}
+
+template <class theType>
+bool Expression::IsOfTypeWithContext(WithContext<theType>* whichElement) const {
+  MacroRegisterFunctionWithName("Expression::IsOfTypeWithContext");
+  if (this->owner == nullptr) {
+    return false;
+  }
+  if (!this->startsWith(this->getTypeOperation<theType>())) {
+    return false;
+  }
+  if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
+    return false;
+  }
+  if (whichElement == 0) {
+    return true;
+  }
+  whichElement->context = this->GetContext();
+  whichElement->content = this->getValue<theType>();
   return true;
 }
 
@@ -3008,10 +3011,10 @@ bool Calculator::functionGetMatrix(
   return true;
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool Expression::makeSum(
   Calculator& theCommands,
-  const LinearCombination<Expression, coefficient>& theSum
+  const LinearCombination<Expression, Coefficient>& theSum
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
@@ -3129,11 +3132,11 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
   return true;
 }
 
-template<class coefficient>
+template<class Coefficient>
 bool Calculator::GetTypeWeight(
   Calculator& theCommands,
   const Expression& input,
-  Vector<coefficient>& outputWeightSimpleCoords,
+  Vector<Coefficient>& outputWeightSimpleCoords,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra,
   Expression::FunctionAddress ConversionFun
 ) {
@@ -3154,7 +3157,7 @@ bool Calculator::GetTypeWeight(
     return false;
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSemisimpleLieAlgebra.content;
-  if (!theCommands.getVector<coefficient>(
+  if (!theCommands.getVector<Coefficient>(
     middleE,
     outputWeightSimpleCoords,
     &outputAmbientSemisimpleLieAlgebra.context,
@@ -3181,12 +3184,22 @@ bool Calculator::GetTypeWeight(
   return true;
 }
 
-template<class coefficient>
+template <class builtInType>
+void Calculator::addOneBuiltInHandler() {
+  Expression typeConverter(*this);
+  this->addOneStringHandler(
+    typeConverter.getTypeOperation<builtInType>(),
+    Expression::toStringBuiltIn<builtInType>,
+    this->toStringDataHandlers
+  );
+}
+
+template<class Coefficient>
 bool Calculator::GetTypeHighestWeightParabolic(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  Vector<coefficient>& outputWeightHWFundcoords,
+  Vector<Coefficient>& outputWeightHWFundcoords,
   Selection& outputInducingSel,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
   Expression::FunctionAddress ConversionFun
@@ -3209,7 +3222,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSSalgebra.content;
-  if (!theCommands.getVector<coefficient>(
+  if (!theCommands.getVector<Coefficient>(
     middleE,
     outputWeightHWFundcoords,
     &outputAmbientSSalgebra.context,
@@ -3266,9 +3279,9 @@ bool Calculator::GetTypeHighestWeightParabolic(
   return true;
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool Expression::AssignMatrix(
-  const Matrix<coefficient>& input,
+  const Matrix<Coefficient>& input,
   Calculator& owner,
   const ExpressionContext *inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
@@ -3292,15 +3305,15 @@ bool Expression::AssignMatrix(
   );
 }
 
-template <class coefficient>
+template <class Coefficient>
 bool CalculatorConversions::innerExpressionFromPoly(
   Calculator& theCommands,
-  const Polynomial<coefficient>& input,
+  const Polynomial<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
-  LinearCombination<Expression, coefficient> theTerms;
+  LinearCombination<Expression, Coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.IsConstant() && inputContext == nullptr) {
     theCommands << "While converting polynomial to expression, "
@@ -3312,7 +3325,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].IsConstant()) {
       currentTerm.AssignValue(1, theCommands);
-      theTerms.AddMonomial(currentTerm, input.coefficients[i]);
+      theTerms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
     bool found = false;
@@ -3341,7 +3354,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
         found = true;
       }
     }
-    theTerms.AddMonomial(currentTerm, input.coefficients[i]);
+    theTerms.addMonomial(currentTerm, input.coefficients[i]);
   }
   return output.makeSum(theCommands, theTerms);
 }

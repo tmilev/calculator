@@ -79,14 +79,14 @@ public:
   static LargeIntegerUnsigned lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
   static void lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
   unsigned int hashFunction() const;
-  void MultiplyBy(const LargeIntegerUnsigned& right);
+  void multiplyBy(const LargeIntegerUnsigned& right);
   void operator*=(const LargeIntegerUnsigned& right);
   void operator*=(unsigned int x);
   void operator+=(unsigned int x);
   void operator++(int);
   bool IsIntegerFittingInInt(int* whichInt);
   void AssignFactorial(unsigned int x);
-  void MultiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const;
+  void multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const;
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
@@ -179,7 +179,7 @@ public:
   LargeIntegerUnsigned value;
   void operator*=(const LargeInteger& x) {
     this->sign *= x.sign;
-    this->value.MultiplyBy(x.value);
+    this->value.multiplyBy(x.value);
   }
   void MultiplyByInt(int x);
   void toString(std::string& output) const;
@@ -511,7 +511,7 @@ public:
     tempRat.AssignFracValue();
     *this -= tempRat;
   }
-  void MultiplyBy(const Rational& r);
+  void multiplyBy(const Rational& r);
   // The Hash function of zero must be equal to zero.
   // See Note on Hashes before the definition of someRandomPrimes;
   unsigned int hashFunction() const {
@@ -584,13 +584,13 @@ public:
   }
   void DivideByLargeInteger(LargeInteger& x) {
     this->InitExtendedFromShortIfNeeded();
-    this->extended->denominator.MultiplyBy(x.value);
+    this->extended->denominator.multiplyBy(x.value);
     this->extended->numerator.sign *= x.sign;
     this->simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntegerUnsigned& x) {
     this->InitExtendedFromShortIfNeeded();
-    this->extended->denominator.MultiplyBy(x);
+    this->extended->denominator.multiplyBy(x);
     this->simplify();
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -783,17 +783,17 @@ public:
     tempRat.InitExtendedFromShortIfNeeded();
     LargeInteger tempI;
     tempI = tempRat.extended->numerator;
-    tempI.value.MultiplyBy(this->extended->denominator);
-    this->extended->numerator.value.MultiplyBy(tempRat.extended->denominator);
+    tempI.value.multiplyBy(this->extended->denominator);
+    this->extended->numerator.value.multiplyBy(tempRat.extended->denominator);
     this->extended->numerator += (tempI);
-    this->extended->denominator.MultiplyBy(tempRat.extended->denominator);
+    this->extended->denominator.multiplyBy(tempRat.extended->denominator);
     this->simplify();
   }
   inline void operator-=(const Rational& right) {
     this->Subtract(right);
   }
   inline void operator*=(const Rational& right) {
-    this->MultiplyBy(right);
+    this->multiplyBy(right);
   }
   void operator/=(const Rational& right) {
     this->DivideBy(right);

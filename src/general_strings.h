@@ -6,7 +6,7 @@
 #include "general_lists.h"
 #include "general_memory_saving.h"
 
-template <typename coefficient>
+template <typename Coefficient>
 class Matrix;
 
 class StringRoutines {

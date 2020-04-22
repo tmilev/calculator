@@ -128,7 +128,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceLikeContent(
   ASNElement nextElement;
   int numberOfDecoded = 0;
   // We reserve 32 bytes per object - a reasonable assumption.
-  output.theElements.Reserve(output.lengthPromised / 32);
+  output.theElements.reserve(output.lengthPromised / 32);
   while (this->dataPointer < lastIndexPlusOne) {
     int lastPointer = this->dataPointer;
     bool isGood = this->DecodeCurrent(nextElement);
@@ -348,7 +348,7 @@ bool ASNElement::HasSubElementTemplate(
     if (currentIndex >= current->theElements.size) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ASN element is missing composite index: "
-        << desiredIndices.SliceCopy(0, i + 1).ToStringCommaDelimited() << ". ";
+        << desiredIndices.sliceCopy(0, i + 1).toStringCommaDelimited() << ". ";
       }
       return false;
     }
@@ -361,7 +361,7 @@ bool ASNElement::HasSubElementTemplate(
       ) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "ASN element with composite index: "
-          << desiredIndices.SliceCopy(0, i + 1).ToStringCommaDelimited() << ". "
+          << desiredIndices.sliceCopy(0, i + 1).toStringCommaDelimited() << ". "
           << " is not of the needed type " << static_cast<int>(desiredTag) << ". ";
         }
       }
@@ -570,7 +570,7 @@ void ASNElement::toJSON(JSData& output) const {
   if (this->isComposite()) {
     JSData children;
     children.theType = JSData::token::tokenArray;
-    children.theList.Reserve(this->theElements.size);
+    children.theList.reserve(this->theElements.size);
     for (int i = 0; i < this->theElements.size; i ++) {
       JSData incoming;
       this->theElements[i].toJSON(incoming);
@@ -586,7 +586,7 @@ void ASNElement::toJSON(JSData& output) const {
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime0x17 ||
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::dateTime0x21
     ) {
-      output[ASNElement::JSLabels::interpretation] = this->ASNAtom.ToStringConcatenate();
+      output[ASNElement::JSLabels::interpretation] = this->ASNAtom.toStringConcatenate();
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
       output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
@@ -962,7 +962,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
     global << Logger::red << "Wrong number of reserved bytes for sequence writer. "
     << "This is non-fatal but affects negatively performance. " << Logger::endL;
-    this->outputPointer->ShiftUpExpandOnTopRepeated(
+    this->outputPointer->shiftUpExpandOnTopRepeated(
       this->offset + 1, actualBytesNeededForLength - this->reservedBytesForLength
     );
   }
@@ -1179,7 +1179,7 @@ std::string ASNObject::toString() const {
   std::stringstream out;
   out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom)
   << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false);
-  std::string content = this->content.ASNAtom.ToStringConcatenate();
+  std::string content = this->content.ASNAtom.toStringConcatenate();
   out << ", content: " << StringRoutines::ConvertStringToHexIfNonReadable(content, 0, false);
   return out.str();
 }
@@ -1453,7 +1453,7 @@ void ASNObject::ComputeASN(ASNElement& output) {
   output[0][0] = this->objectId;
   output[0][1] = this->content;
   std::stringstream comment;
-  comment << "Object: " << this->name << ", interpretation: " << this->content.ASNAtom.ToStringConcatenate();
+  comment << "Object: " << this->name << ", interpretation: " << this->content.ASNAtom.toStringConcatenate();
   output[0][0].comment = comment.str();
   output[0][1].comment = comment.str();
 }

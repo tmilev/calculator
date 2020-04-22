@@ -48,7 +48,7 @@ void AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection(
     }
     resultVectorSel.ComputeIndicesFromSelection();
     tempM.MakeEij(this->GetIndexFromRadicalSelection(resultVectorSel), this->GetIndexFromRadicalSelection(vectorActedOnSel));
-    outputOp.AddMonomial(tempM, theCoeff);
+    outputOp.addMonomial(tempM, theCoeff);
   } while (vectorActedOnSel.IncrementReturnFalseIfPastLast());
 }
 
@@ -145,7 +145,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
   }
   radicalsNew.quickSortAscending();
   if (radicalsNew.size > 16) {
-    global.Comments << "Computing with fields whose dimension over the "
+    global.comments << "Computing with fields whose dimension over the "
     << "rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current "
     << "implementation of algberaic extensions of the rationals. "
@@ -173,7 +173,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
         }
       }
     }
-    currentInjection.AddMonomial(MonomialMatrix(
+    currentInjection.addMonomial(MonomialMatrix(
         this->GetIndexFromRadicalSelection(largerFieldSel),
         this->GetIndexFromRadicalSelection(smallerFieldSel)
       ), 1
@@ -211,15 +211,15 @@ void AlgebraicClosureRationals::InjectOldBases(
   }
   for (int j = 0; j < this->basisInjections.size; j ++) {
     for (int i = 0; i < this->basisInjections[j].size; i ++) {
-      injectionNullForIdentity->ActOnVectorColumn(this->basisInjections[j][i]);
+      injectionNullForIdentity->actOnVectorColumn(this->basisInjections[j][i]);
     }
   }
 }
 void AlgebraicClosureRationals::AppendAdditiveEiBasis() {
   this->basisInjections.setSize(this->basisInjections.size + 1);
-  this->basisInjections.LastObject()->setSize(this->latestBasis.size);
+  this->basisInjections.lastObject()->setSize(this->latestBasis.size);
   for (int i = 0; i < this->latestBasis.size; i ++) {
-    (*this->basisInjections.LastObject())[i].MaKeEi(i);
+    (*this->basisInjections.lastObject())[i].MaKeEi(i);
   }
 }
 
@@ -248,7 +248,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
         *commentsOnFailure << "Choice of generating element is taking too long: made "
         << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
       }
-      global.Comments << "Choice of generating element is taking too long: made "
+      global.comments << "Choice of generating element is taking too long: made "
       << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
       return false;
     }
@@ -256,7 +256,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
     for (int i = 0; i < theSel.theInts.size; i ++) {
       MonomialVector tempV;
       tempV.MakeEi(i);
-      this->GeneratingElemenT.element.AddMonomial(tempV, theSel.theInts[i]);
+      this->GeneratingElemenT.element.addMonomial(tempV, theSel.theInts[i]);
     }
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
@@ -264,7 +264,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
     currentVect.MakeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
-      this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
+      this->GeneratingElementMatForm.actOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
@@ -300,8 +300,8 @@ void AlgebraicClosureRationals::ContractBasesIfRedundant(
   MatrixTensor<Rational> reverseMap;
 
   reverseMap.AssignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
-  reverseMap.Invert();
-  reverseMap.ActOnVectorColumn(outputImageGenerator->element);
+  reverseMap.invert();
+  reverseMap.actOnVectorColumn(outputImageGenerator->element);
   outputImageGenerator->basisIndex = this->basisInjections.size - 3;
   *this = previousCopy;
 }
@@ -337,7 +337,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   MatrixTensor<Rational> generatorPowers, generatorPowersInverse;
   generatorPowers.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   generatorPowersInverse = generatorPowers;
-  generatorPowersInverse.Invert();
+  generatorPowersInverse.invert();
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
@@ -351,7 +351,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   }
   projectionGeneratorCoordinates.makeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
-    projectionGeneratorCoordinates.AddMonomial(MonomialMatrix(i, i), 1);
+    projectionGeneratorCoordinates.addMonomial(MonomialMatrix(i, i), 1);
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.makeMonomial(0, i, 1, 1);
@@ -359,7 +359,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
-      projectionGeneratorCoordinates.AddMonomial(
+      projectionGeneratorCoordinates.addMonomial(
         MonomialMatrix(theIndex, i),
         remainderAfterReduction.coefficients[j]
       );
@@ -372,12 +372,12 @@ bool AlgebraicClosureRationals::ReduceMe(
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
       termBelowMainDiagonal.MakeEij(i + 1, i);
-      generatorProjected.AddMonomial(termBelowMainDiagonal, 1);
+      generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
     termInLastColumn.MakeEij(i, smallestFactorDegree - 1);
     Rational coefficientLastColumn = - smallestFactor.GetMonomialCoefficient(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
-    generatorProjected.AddMonomial(termInLastColumn, coefficientLastColumn);
+    generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
       global.fatal << "We shouldn't have zero generator. " << global.fatal;
     }
@@ -660,7 +660,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
     if (!algNumPoly.coefficients[i].IsRational(&currentCF)) {
       return false;
     } else {
-      minPoly.AddMonomial(algNumPoly[i], currentCF);
+      minPoly.addMonomial(algNumPoly[i], currentCF);
     }
   }
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
@@ -680,7 +680,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
   checkSub[0].makeConstant(outputRoot);
-  algNumPoly.Substitution(checkSub);
+  algNumPoly.substitution(checkSub);
   if (!algNumPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
     << " was just adjoined to a quadratic radical extension of the rationals; z "
@@ -706,7 +706,7 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   theSub.MakeIdSubstitution(indexVar + 1);
   theSub[indexVar].makeMonomial(0, 1, 1);
   output = input;
-  output.Substitution(theSub);
+  output.substitution(theSub);
 }
 
 bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
@@ -758,7 +758,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   theGenMat.makeZero();
   for (int i = 0; i < degreeMinPoly - 1; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
-      theGenMat.AddMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
+      theGenMat.addMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
     }
   }
   Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minPoly;
@@ -781,7 +781,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
       if (relRowIndex == - 1 || relColIndex == - 1) {
         global.fatal << "This is a programming error: non initialized monomial. " << global.fatal;
       }
-      theGenMat.AddMonomial(
+      theGenMat.addMonomial(
         MonomialMatrix(
           currentMon.TotalDegreeInt() * startingDimension + relRowIndex,
           startingDimension * (degreeMinPoly - 1) + relColIndex
@@ -796,7 +796,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   MatrixTensor<Rational> theGenMatPower;
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDimension; i ++) {
-    finalBasis[i].AssignTensorProduct(theGenMatPower, this->latestBasis[i]);
+    finalBasis[i].assignTensorProduct(theGenMatPower, this->latestBasis[i]);
   }
   this->latestBasis = finalBasis;
   this->latestBasis.setSize(finalDimension);
@@ -836,7 +836,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   theSub[0].makeConstant(outputRoot);
   Polynomial<AlgebraicNumber> substitutedMinPoly;
   substitutedMinPoly = minPoly;
-  substitutedMinPoly.Substitution(theSub);
+  substitutedMinPoly.substitution(theSub);
   if (!substitutedMinPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = "
     << outputRoot.toString() << " was just adjoined to the base field; z "
@@ -873,10 +873,10 @@ void AlgebraicNumber::invert() {
   Matrix<Rational> tempMat2;
   this->owner->GetMultiplicationBy(*this, theInverted);
   theInverted.GetMatrix(tempMat2, this->owner->latestBasis.size);
-  tempMat2.Invert();
+  tempMat2.invert();
   theInverted = tempMat2;
   this->element.MaKeEi(0);
-  theInverted.ActOnVectorColumn(this->element);
+  theInverted.actOnVectorColumn(this->element);
   this->basisIndex = this->owner->basisInjections.size - 1;
 }
 
@@ -970,7 +970,7 @@ bool AlgebraicNumber::checkConsistency() const {
   if (this->owner == nullptr) {
     if (!this->IsRational()) {
       for (int i = 0; i < this->element.size(); i ++) {
-        global.Comments << "<br>index: " << this->element[i].theIndex << ", coefficient: "
+        global.comments << "<br>index: " << this->element[i].theIndex << ", coefficient: "
         << this->element.coefficients[i];
       }
       global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
@@ -1025,7 +1025,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   leftMat *= rightMat;
   this->basisIndex = this->owner->basisInjections.size - 1;
   this->element.MaKeEi(0);
-  leftMat.ActOnVectorColumn(this->element);
+  leftMat.actOnVectorColumn(this->element);
 }
 
 void AlgebraicNumber::SqrtMeDefault(std::stringstream* commentsOnError) {
@@ -1218,7 +1218,7 @@ bool AlgebraicNumber::RadicalMeDefault(
   thePolynomial.AddConstant(*this * minusOne);
   MonomialP leadingMonomial;
   leadingMonomial.MakeEi(0, radical);
-  thePolynomial.AddMonomial(leadingMonomial, one);
+  thePolynomial.addMonomial(leadingMonomial, one);
   if (!this->owner->AdjoinRootMinimalPolynomial(
     thePolynomial, result, commentsOnError
   )) {
@@ -1578,7 +1578,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   output.makeZero();
   for (int i = 0; i < input.size(); i ++) {
     theCF = input.coefficients[i];
-    output.AddMonomial(input[i], theCF);
+    output.addMonomial(input[i], theCF);
   }
 }
 

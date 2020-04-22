@@ -2123,10 +2123,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     return false;
   }
   CalculatorHTML currentUserRecord;
-  this->userScores.Reserve(this->userProblemData.size);
-  this->userNames.Reserve(this->userProblemData.size);
-  this->userInfos.Reserve(this->userProblemData.size);
-  this->scoresBreakdown.Reserve(this->userProblemData.size);
+  this->userScores.reserve(this->userProblemData.size);
+  this->userNames.reserve(this->userProblemData.size);
+  this->userInfos.reserve(this->userProblemData.size);
+  this->scoresBreakdown.reserve(this->userProblemData.size);
   this->userScores.setSize(0);
   this->userNames.setSize(0);
   this->userInfos.setSize(0);
@@ -2183,12 +2183,12 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       &theProblem.topics.theTopics,
       comments
     );
-    this->scoresBreakdown.LastObject()->clear();
+    this->scoresBreakdown.lastObject()->clear();
     for (int j = 0; j < theProblem.topics.theTopics.size(); j ++) {
       TopicElement& currentTopic = theProblem.topics.theTopics.theValues[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
-      this->scoresBreakdown.LastObject()->SetKeyValue(
+      this->scoresBreakdown.lastObject()->SetKeyValue(
         theProblem.topics.theTopics.theKeys[j], currentPts
       );
       if (maxPts == currentPts) {
@@ -2199,7 +2199,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
         this->numStudentsSolvedNothingInTopic[j] ++;
       }
     }
-    *this->userScores.LastObject() = currentUserRecord.currentUseR.pointsEarned;
+    *this->userScores.lastObject() = currentUserRecord.currentUseR.pointsEarned;
   }
   return true;
 }

@@ -35,13 +35,13 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
   xOneXtwo *= xTwo;
   List<List<MonomialP>::Comparator> allOrders;
   allOrders.addOnTop(MonomialP::greaterThan_leftLargerWins);
-  allOrders.LastObject()->name = "lexicographic";
+  allOrders.lastObject()->name = "lexicographic";
   allOrders.addOnTop(MonomialP::greaterThan_rightLargerWins);
-  allOrders.LastObject()->name = "lexicographic opposite";
+  allOrders.lastObject()->name = "lexicographic opposite";
   allOrders.addOnTop(MonomialP::greaterThan_totalDegree_leftLargerWins);
-  allOrders.LastObject()->name = "graded lexicographic";
+  allOrders.lastObject()->name = "graded lexicographic";
   allOrders.addOnTop(MonomialP::greaterThan_totalDegree_rightSmallerWins);
-  allOrders.LastObject()->name = "graded reverse lexicographic";
+  allOrders.lastObject()->name = "graded reverse lexicographic";
   List<List<MonomialP> > elementsIncreasingOrder ({
     {one, xOne, xOneSquared},
     {one, xTwo, xTwoSquared},
@@ -228,7 +228,7 @@ bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
   std::string inputFirst = "x";
   std::string inputSecond = "y^{2}+y";
   List<Polynomial<Rational> > underTest = Polynomial<Rational>::Test::fromStringCommonContext(inputFirst, inputSecond);
-  std::string result = underTest.ToStringCommaDelimited(&this->format);
+  std::string result = underTest.toStringCommaDelimited(&this->format);
   if (result != expected) {
     global.fatal << "Polynomials with context from string: "
     << "input: " << inputFirst << ", " << inputSecond
@@ -255,7 +255,7 @@ bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   if (outputString != expected) {
     global.fatal << "Least common multiple of "
     << left << ", " << right
-    << ", converted to:\n" << converted.ToStringCommaDelimited(&this->format)
+    << ", converted to:\n" << converted.toStringCommaDelimited(&this->format)
     << "\ncomputed to be:\n[" << outputString
     << "]\nexpected:\n[" << expected << "]" << global.fatal;
   }

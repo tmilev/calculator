@@ -168,7 +168,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       if (currentData->theType != JSData::token::tokenArray) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
-          << keys.ToStringCommaDelimited() << "] "
+          << keys.toStringCommaDelimited() << "] "
           << "is not an array, but is instead: "
           << currentData->toString(&JSData::PrintOptions::HTML())
           << ". ";
@@ -222,7 +222,7 @@ JSData& JSData::operator[](const std::string& key) {
 
 void JSData::operator=(const List<unsigned char>& other) {
   this->theType = JSData::token::tokenString;
-  this->theString = other.ToStringConcatenate();
+  this->theString = other.toStringConcatenate();
   this->theList.setSize(0); ;
   this->objects.clear();
 }
@@ -424,7 +424,7 @@ bool JSData::readstringConsumeNextCharacter(
   const std::string& input,
   std::stringstream* commentsOnFailure
 ) {
-  JSData& last = *readingStack.LastObject();
+  JSData& last = *readingStack.lastObject();
   char next = input[currentIndex];
   if (last.theType == JSData::token::tokenQuoteUnclosedStandard) {
     if (next == '\\') {
@@ -604,28 +604,28 @@ bool JSData::readstring(
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.IsValidElement()) {
       secondToLast.theList.addOnTop(last);
-      readingStack.RemoveLastObject();
+      readingStack.removeLastObject();
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.theType == JSData::token::tokenComma) {
-      readingStack.RemoveLastObject();
+      readingStack.removeLastObject();
       continue;
     }
     if (
       (secondToLast.theType == JSData::token::tokenOpenBrace || secondToLast.theType == JSData::token::tokenOpenBracket) &&
       last.theType == JSData::token::tokenComma
     ) {
-      readingStack.RemoveLastObject();
+      readingStack.removeLastObject();
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBrace && last.theType == JSData::token::tokenCloseBrace) {
       secondToLast.theType = JSData::token::tokenObject;
-      readingStack.RemoveLastObject();
+      readingStack.removeLastObject();
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.theType == JSData::token::tokenCloseBracket) {
       secondToLast.theType = JSData::token::tokenArray;
-      readingStack.RemoveLastObject();
+      readingStack.removeLastObject();
       continue;
     }
     i ++;

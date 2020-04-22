@@ -4,27 +4,27 @@
 #define vpfVectorSpaceHeader_alreadyIncluded
 #include "math_general.h"
 
-template <typename coefficient>
+template <typename Coefficient>
 class Basis {
   public:
   //vectors are vector rows
-  Matrix<coefficient> basis;
-  Matrix<coefficient> gramMatrix;
+  Matrix<Coefficient> basis;
+  Matrix<Coefficient> gramMatrix;
   bool haveGramMatrix;
 
-  void AddVector(const Vector<coefficient>& v);
+  void AddVector(const Vector<Coefficient>& v);
   void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& input);
-  Matrix<coefficient> PutInBasis(const Matrix<coefficient>& M);
+  Vector<Coefficient> PutInBasis(const Vector<Coefficient>& input);
+  Matrix<Coefficient> PutInBasis(const Matrix<Coefficient>& M);
 };
 
-template <typename coefficient>
+template <typename Coefficient>
 class VectorSpace {
 public:
    int degree;
    int rank;
-   Matrix<coefficient> fastbasis;
-   Basis<coefficient> basis;
+   Matrix<Coefficient> fastbasis;
+   Basis<Coefficient> basis;
 
    VectorSpace() {
      degree = - 1;
@@ -32,24 +32,24 @@ public:
    }
    void MakeFullRank(int dim);
    // true if it wasn't already there
-   bool AddVector(const Vector<coefficient>& v);
-   bool AddVectorDestructively(Vector<coefficient>& v);
-   bool AddVectorToBasis(const Vector<coefficient>& v);
-   bool GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const;
-   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient = 0, Matrix<coefficient>* form = 0) const;
-   Vector<coefficient> GetBasisVector(int i) const;
-   Vector<coefficient> GetCanonicalBasisVector(int i) const;
+   bool AddVector(const Vector<Coefficient>& v);
+   bool AddVectorDestructively(Vector<Coefficient>& v);
+   bool AddVectorToBasis(const Vector<Coefficient>& v);
+   bool GetCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
+   VectorSpace<Coefficient> Intersection(const VectorSpace<Coefficient>& other) const;
+   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
+   VectorSpace<Coefficient> OrthogonalComplement(VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0) const;
+   Vector<Coefficient> GetBasisVector(int i) const;
+   Vector<Coefficient> GetCanonicalBasisVector(int i) const;
    //unsigned int hashFunction() const {return this->hashFunction(*this);}
-   static unsigned int hashFunction(const VectorSpace<coefficient>& input) {
+   static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
      return input.fastbasis.hashFunction();
    }
-   bool operator==(const VectorSpace<coefficient> &other) const;
+   bool operator==(const VectorSpace<Coefficient> &other) const;
 };
 
-template <typename coefficient>
-void Basis<coefficient>::AddVector(const Vector<coefficient>& v) {
+template <typename Coefficient>
+void Basis<Coefficient>::AddVector(const Vector<Coefficient>& v) {
   if (basis.numberOfColumns == 0) {
     basis.init(v.size, v.size);
     basis.numberOfRows = 0;
@@ -66,8 +66,8 @@ void Basis<coefficient>::AddVector(const Vector<coefficient>& v) {
   basis.numberOfRows ++;
 }
 
-template <typename coefficient>
-void Basis<coefficient>::ComputeGramMatrix() {
+template <typename Coefficient>
+void Basis<Coefficient>::ComputeGramMatrix() {
   int r = basis.numberOfRows;
   int d = basis.numberOfColumns;
   gramMatrix.MakeZeroMatrix(r);
@@ -78,16 +78,16 @@ void Basis<coefficient>::ComputeGramMatrix() {
       }
     }
   }
-  gramMatrix.Invert();
+  gramMatrix.invert();
   haveGramMatrix = true;
 }
 
-template <typename coefficient>
-Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& input) {
+template <typename Coefficient>
+Vector<Coefficient> Basis<Coefficient>::PutInBasis(const Vector<Coefficient>& input) {
   if (false) {
-    Vectors<coefficient> theBasisVectorForm;
+    Vectors<Coefficient> theBasisVectorForm;
     this->basis.GetVectorsFromRows(theBasisVectorForm);
-    Vector<coefficient> output;
+    Vector<Coefficient> output;
     input.getCoordinatesInBasis(theBasisVectorForm, output);
     return output;
   } else {
@@ -98,22 +98,22 @@ Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& in
   }
 }
 
-template <typename coefficient>
-Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in) {
+template <typename Coefficient>
+Matrix<Coefficient> Basis<Coefficient>::PutInBasis(const Matrix<Coefficient>& in) {
   if (!haveGramMatrix) {
     ComputeGramMatrix();
   }
   return gramMatrix * (basis * in);
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v) {
-  Vector<coefficient> tmp = v;
+template <typename Coefficient>
+bool VectorSpace<Coefficient>::AddVector(const Vector<Coefficient>& v) {
+  Vector<Coefficient> tmp = v;
   return AddVectorDestructively(tmp);
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
+template <typename Coefficient>
+bool VectorSpace<Coefficient>::AddVectorDestructively(Vector<Coefficient>& v) {
   if (fastbasis.numberOfRows == 0) {
     this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
@@ -149,9 +149,9 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
       if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
         fastbasis.numberOfRows ++;
       } else {
-        fastbasis.Resize(fastbasis.numberOfRows + 1,fastbasis.numberOfColumns, true);
+        fastbasis.resize(fastbasis.numberOfRows + 1,fastbasis.numberOfColumns, true);
       }
-      coefficient* tmp = fastbasis.elements[fastbasis.numberOfRows - 1];
+      Coefficient* tmp = fastbasis.elements[fastbasis.numberOfRows - 1];
       for (int bi = fastbasis.numberOfRows - 1; bi > i; bi --) {
         fastbasis.elements[bi] = fastbasis.elements[bi - 1];
       }
@@ -159,14 +159,14 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
       for (int bj = 0; bj < fastbasis.numberOfColumns; bj ++) {
         fastbasis.elements[i][bj] = v[bj];
       }
-      fastbasis.GaussianEliminationByRows();
+      fastbasis.gaussianEliminationByRows();
       rank ++;
       return true;
     }
     if (jj > j) {
       continue;
     }
-    coefficient x = - v[jj] / fastbasis.elements[i][j];
+    Coefficient x = - v[jj] / fastbasis.elements[i][j];
     for (int jjj = jj; jjj < v.size; jjj ++) {
       v[jjj] += x * fastbasis.elements[i][jjj];
     }
@@ -178,7 +178,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
   if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
     fastbasis.numberOfRows ++;
   } else {
-    fastbasis.Resize(fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true);
+    fastbasis.resize(fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true);
   }
   for (int j = 0; j < fastbasis.numberOfColumns; j ++) {
     fastbasis.elements[fastbasis.numberOfRows - 1][j] = v[j];
@@ -187,8 +187,8 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
   return true;
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v) {
+template <typename Coefficient>
+bool VectorSpace<Coefficient>::AddVectorToBasis(const Vector<Coefficient>& v) {
   if (AddVector(v)) {
     basis.AddVector(v);
     return true;
@@ -196,8 +196,8 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v) {
   return false;
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const {
+template <typename Coefficient>
+bool VectorSpace<Coefficient>::GetCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const {
   out.makeZero(this->rank);
   if (v.isEqualToZero()) {
     if (this->rank == 0) {
@@ -224,7 +224,7 @@ bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& 
       }
       i ++;
     }
-    coefficient c = v[vi] / this->fastbasis(i, vi);
+    Coefficient c = v[vi] / this->fastbasis(i, vi);
     out[i] = c;
     for (int k = 0; k < this->degree; k ++) {
       v[k] -= this->fastbasis(i, k) * c;
@@ -235,14 +235,14 @@ bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& 
   }
 }
 
-template<typename coefficient>
-VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const {
+template<typename Coefficient>
+VectorSpace<Coefficient> VectorSpace<Coefficient>::Intersection(const VectorSpace<Coefficient>& other) const {
   // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
   if (this->degree != other.degree && ((this->degree != - 1) && (other.degree != - 1))) {
     global.fatal << "Attempting to intersect vector spaces of different degrees, "
     << this->degree << " and " << other.degree << ". " << global.fatal;
   }
-  VectorSpace<coefficient> output;
+  VectorSpace<Coefficient> output;
   output.degree = this->degree;
   if ((this->rank == 0) or (other.rank == 0)) {
     return output;
@@ -262,14 +262,14 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
 
 
   Matrix<Rational> MV = this->fastbasis;
-  List<Vector<coefficient> > Vperp;
+  List<Vector<Coefficient> > Vperp;
   MV.GetZeroEigenSpaceModifyMe(Vperp);
 
-  Matrix<coefficient> MW = other.fastbasis;
-  List<Vector<coefficient> > Wperp;
+  Matrix<Coefficient> MW = other.fastbasis;
+  List<Vector<Coefficient> > Wperp;
   MW.GetZeroEigenSpaceModifyMe(Wperp);
 
-  Matrix<coefficient> M;
+  Matrix<Coefficient> M;
   M.init(Vperp.size + Wperp.size, this->degree);
   int i = 0;
   for (; i < Vperp.size; i ++) {
@@ -282,7 +282,7 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
       M.elements[i][j] = Wperp[i - Vperp.size][j];
     }
   }
-  List<Vector<coefficient> > outvecs;
+  List<Vector<Coefficient> > outvecs;
   M.GetZeroEigenSpaceModifyMe(outvecs);
   output.rank = outvecs.size;
   if (outvecs.size == 0) {
@@ -306,15 +306,15 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
       output.fastbasis.elements[i][j] = outvecs[i][j];
     }
   }
-  output.fastbasis.GaussianEliminationByRows();
+  output.fastbasis.gaussianEliminationByRows();
   return output;
 }
 
-template <typename coefficient>
-VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(
-  VectorSpace<coefficient>* ambient, Matrix<coefficient>* form
+template <typename Coefficient>
+VectorSpace<Coefficient> VectorSpace<Coefficient>::OrthogonalComplement(
+  VectorSpace<Coefficient>* ambient, Matrix<Coefficient>* form
 ) const {
-  VectorSpace<coefficient> V;
+  VectorSpace<Coefficient> V;
   V.degree = this->degree;
   if (this->rank == this->degree) {
     V.rank = 0;
@@ -329,11 +329,11 @@ VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(
     V.rank = this->degree;
     return V;
   }
-  Matrix<coefficient> M = this->fastbasis;
+  Matrix<Coefficient> M = this->fastbasis;
   if (form) {
     M.MultiplyOnTheRight(*form); // i can never tell which one is right or left :/
   }
-  List<Vector<coefficient> > VVs;
+  List<Vector<Coefficient> > VVs;
   // this is where 'nullspace' and 'kernel' are conceptually different
   M.GetZeroEigenSpaceModifyMe(VVs);
   // this appears common enough to warrant a better method
@@ -341,7 +341,7 @@ VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(
     V.AddVectorDestructively(VVs[i]);
   }
   if (ambient && ambient->rank < ambient->degree) {
-    VectorSpace<coefficient> W = V.Intersection(*ambient);
+    VectorSpace<Coefficient> W = V.Intersection(*ambient);
     return W;
   }
   return V;
@@ -350,23 +350,23 @@ VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(
 // part of the point of coming up with a VectorSpace class
 // was to find a way to special case full rank spaces and not carry around
 // identity matrices everywhere...
-template <typename coefficient>
-void VectorSpace<coefficient>::MakeFullRank(int d) {
+template <typename Coefficient>
+void VectorSpace<Coefficient>::MakeFullRank(int d) {
   this->degree = d;
   this->rank = d;
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::operator==(const VectorSpace<coefficient>& other) const {
+template <typename Coefficient>
+bool VectorSpace<Coefficient>::operator==(const VectorSpace<Coefficient>& other) const {
   return fastbasis == other.fastbasis;
 }
 
-template <typename coefficient>
-Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const {
+template <typename Coefficient>
+Vector<Coefficient> VectorSpace<Coefficient>::GetBasisVector(int i) const {
   if (i >= this->rank) {
     global.fatal << "Bad vector index. " << global.fatal;
   }
-  Vector<coefficient> out;
+  Vector<Coefficient> out;
   if (basis.basis.numberOfRows > i) {
     basis.basis.GetVectorFromRow(i, out);
     return out;
@@ -375,12 +375,12 @@ Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const {
   return out;
 }
 
-template <typename coefficient>
-Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) const {
+template <typename Coefficient>
+Vector<Coefficient> VectorSpace<Coefficient>::GetCanonicalBasisVector(int i) const {
   if (i >= this->rank) {
     global.fatal << "Vector index too large. " << global.fatal;
   }
-  Vector<coefficient> out;
+  Vector<Coefficient> out;
   fastbasis.GetVectorFromRow(i, out);
   return out;
 }

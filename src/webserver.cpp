@@ -50,7 +50,7 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
-//This class locks/unlocks all signals within its scope
+// This class locks/unlocks all signals within its scope
 class SignalLock {
   SignalLock() {
     SignalsInfrastructure::theSignals().blockSignals();
@@ -75,7 +75,7 @@ void SignalsInfrastructure::unblockSignals() {
 void SignalsInfrastructure::blockSignals() {
   sigset_t* theSignals = nullptr;
   if (!this->flagSignalsAreStored) {
-    //store signals on first run.
+    // Store signals on first run.
     theSignals = &this->oldSignals;
   }
   int error = sigprocmask(SIG_BLOCK, &this->allSignals, theSignals);
@@ -163,9 +163,9 @@ bool WebWorker::ReceiveAll() {
   if (this->connectedSocketID == - 1) {
     global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
-  struct timeval tv; //<- code involving tv taken from stackexchange
+  struct timeval tv;
   tv.tv_sec = 3;  // 3 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  tv.tv_usec = 0;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   std::string errorString;
   int numFailedReceives = 0;
@@ -175,10 +175,7 @@ bool WebWorker::ReceiveAll() {
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
   while (true) {
     numBytesInBuffer = this->parent->theTLS.readOnce(this->connectedSocketID, &errorString, nullptr, true);
-
-    //int64_t readTime = global.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0) {
-      //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
     }
     numFailedReceives ++;
@@ -209,7 +206,6 @@ bool WebWorker::ReceiveAll() {
     this->displayUserInput = "GET " + this->addressGetOrPost;
   }
   if (this->ContentLength <= 0) {
-    //logIO << " exiting successfully" << Logger::endL;
     return true;
   }
   if (this->messageBody.size() == static_cast<unsigned>(this->ContentLength)) {
@@ -285,9 +281,9 @@ void WebWorker::SendAllBytesNoHeaderS() {
   global << "Worker " << this->indexInParent + 1
   << " sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
   double startTime = global.GetElapsedSeconds();
-  struct timeval tv; //<- code involving tv taken from stackexchange
+  struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  tv.tv_usec = 0;
   int numTimesRunWithoutSending = 0;
   int timeOutInSeconds = 20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, static_cast<void*>(&tv), sizeof(timeval));
@@ -323,7 +319,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
     }
     if (numTimesRunWithoutSending > 3) {
       global << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
-      << " sending any bytes. "
+      << "sending any bytes. "
       << Logger::endL;
       return;
     }
@@ -333,7 +329,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
 
 const int WebServer::maxNumPendingConnections = 1000000;
 
-// get sockaddr, IPv4 or IPv6:
+// IPv4 or IPv6:
 void *get_in_addr(struct sockaddr* sa) {
   if (sa->sa_family == AF_INET) {
     return &((reinterpret_cast<struct sockaddr_in*>(sa))->sin_addr);
@@ -342,8 +338,6 @@ void *get_in_addr(struct sockaddr* sa) {
 }
 
 std::string WebWorker::ToStringMessageFull() const {
-  //if (global.flagUsingSSLinCurrentConnection)
-  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   out << this->ToStringMessageShort();
   if (this->theMessageHeaderStrings.size > 0) {
@@ -401,7 +395,7 @@ std::string WebWorker::ToStringMessageShort() const {
 
 void WebWorker::resetConnection() {
   MacroRegisterFunctionWithName("WebWorker::resetConnection");
-  //This function needs a security audit.
+  // This function needs a security audit.
   this->resetMessageComponentsExceptRawMessage();
   UserCalculatorData blankUser;
   global.userDefault = blankUser;
@@ -496,7 +490,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   }
   for (int i = 0; i < newlyFoundArgs.size(); i ++) {
     if (global.webArguments.contains(newlyFoundArgs.theKeys[i])) {
-      continue; //<-if a key is already given cookie entries are ignored.
+      continue; // <-if a key is already given cookie entries are ignored.
     }
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0) {
@@ -507,10 +501,10 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
     bool isGood = true;
     if (newlyFoundArgs.theKeys[i] == "request") { //<- we are careful about
-      //reading arbitrary requests from the cookie. Those may effectively deny login
-      //to a person who does not know to change the request type from the web address.
-      //To prevent that we refuse to read requests from cookies except for the
-      //whitelist below.
+      // reading arbitrary requests from the cookie. Those may effectively deny login
+      // to a person who does not know to change the request type from the web address.
+      // To prevent that we refuse to read requests from cookies except for the
+      // whitelist below.
       isGood = false;
       if (
         trimmed == "template" ||
@@ -578,9 +572,9 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   theUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(
     HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("password"), true), false
   );
-  //<-Passwords are ONE-LAYER url-encoded
-  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
-  //<-Incoming pluses must be re-coded as spaces (%20).
+  // <-Passwords are ONE-LAYER url-encoded
+  // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  // <-Incoming pluses must be re-coded as spaces (%20).
 
   theUser.flagEnteredPassword = (theUser.enteredPassword != "");
   if (theUser.flagEnteredPassword) {
@@ -673,15 +667,15 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   global.CookiesToSetUsingHeaders.SetKeyValue(
     "username",
     HtmlRoutines::ConvertStringToURLString(theUser.username, false)
-    //<-User name must be stored in URL-encoded fashion, NO PLUSES.
+    // <-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
   if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
-    //in case the user logged in with password, we need
-    //to give him/her the correct authentication token
+    // In case the user logged in with password, we need
+    // to give the user the correct authentication token.
     global.CookiesToSetUsingHeaders.SetKeyValue(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
-      //<-URL-encoded fashion, NO PLUSES.
+      // <-URL-encoded fashion, NO PLUSES.
     );
     global.SetWebInpuT(
       DatabaseStrings::labelAuthenticationToken,
@@ -721,7 +715,7 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   if (includeUserName) {
     out << "<input type =\"hidden\" id =\"username\" name =\"username\">\n";
   }
-  //the values of the hidden inputs will be filled in via javascript
+  // The values of the hidden inputs will be filled in via javascript.
   if (this->flagFoundMalformedFormInput) {
     out << "<b>Your input formed had malformed entries.</b>";
   }
@@ -795,12 +789,12 @@ void WebWorker::ParseMessageHead() {
     } else if (this->theMessageHeaderStrings[i] == "POST") {
       this->requestTypE = this->requestPost;
       i ++;
-      //Short post messages may be attached to the message head
-      //if that is the case the message does not end in \n
+      // Short post messages may be attached to the message head
+      // if that is the case the message does not end in \n.
       if (i < this->theMessageHeaderStrings.size) {
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
-        if (*this->theMessageHeaderStrings.LastObject() != "\n") {
-          this->messageBody = *this->theMessageHeaderStrings.LastObject();
+        if (*this->theMessageHeaderStrings.lastObject() != "\n") {
+          this->messageBody = *this->theMessageHeaderStrings.lastObject();
         } else {
           this->messageBody = "";
         }
@@ -899,10 +893,10 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   global << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << Logger::endL;
   global << Logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0) {
-    if (*this->theMessageHeaderStrings.LastObject() != "\n") {
+    if (*this->theMessageHeaderStrings.lastObject() != "\n") {
       global << Logger::green
       << "Message body set to last message chunk.\n";
-      this->messageBody = *this->theMessageHeaderStrings.LastObject();
+      this->messageBody = *this->theMessageHeaderStrings.lastObject();
     }
   }
   if (this->messageBody.size() != 0) {
@@ -1397,9 +1391,6 @@ int WebWorker::ProcessFile() {
   if (!this->flagKeepAlive) {
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
   }
-  //std::string theCookie = this->GetHeaderSetCookie();
-  //if (theCookie != "")
-  //  theHeader << theCookie << "\r\n";
   theHeader << "\r\n";
   this->QueueStringForSendingNoHeadeR(theHeader.str());
   if (this->requestTypE == this->requestHead) {
@@ -1705,7 +1696,6 @@ JSData WebWorker::SetEmail(const std::string& input) {
     return result;
   }
   std::stringstream out, debugStream;
-  //double startTime = global.GetElapsedSeconds();
   global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
   if (global.UserDefaultHasAdminRights()) {
@@ -1816,9 +1806,8 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
     }
   }
   if (this->addressComputed == "/" || this->addressComputed == "") {
-    this->addressComputed = global.DisplayNameExecutableApp; //was: global.DisplayNameExecutable;
+    this->addressComputed = global.DisplayNameExecutableApp;
     global.requestType = WebAPI::app;
-    //global.requestType = "selectCourse";
     stateNotModified = false;
   }
   return stateNotModified;
@@ -2151,7 +2140,7 @@ int WebWorker::ProcessFolderOrFile() {
 }
 
 void WebWorker::PauseIfRequested() {
-  this->PauseWorker.Lock(); // if pause was requested, here we block
+  this->PauseWorker.Lock(); // If pause was requested, here we block.
   this->PauseWorker.Unlock();
 }
 
@@ -2227,8 +2216,6 @@ void WebWorker::WriteAfterTimeoutShowIndicator(const std::string& message) {
     }
   }
   this->parent->Release(this->connectedSocketID);
-  // set flags properly:
-  // we need to rewire the standard output and the crashing mechanism:
 }
 
 std::string WebWorker::ToStringAddressRequest() const {
@@ -2364,7 +2351,7 @@ WebServer::WebServer() {
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s) {
-  (void) s; //avoid unused parameter warning, portable.
+  (void) s;
   if (global.flagIsChildProcess) {
     return;
   }
@@ -2774,7 +2761,7 @@ void WebServer::ReleaseWorkerSideResources() {
   if (global.flagServerDetailedLog) {
     global << Logger::green << "Detail: server RELEASED active worker. " << Logger::endL;
   }
-  //<-release socket- communication is handled by the worker.
+  //<-release socket communication is handled by the worker.
   this->activeWorker = - 1; //<-The active worker is needed only in the child process.
 }
 
@@ -2794,9 +2781,9 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
 }
 
 void segfault_sigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
-  // <- this signal should never happen in
+  // <- This signal should never happen in
   // <- server, so even if racy, we take the risk of a hang.
-  // <- racy-ness in child process does not bother us: hanged children are still fine.
+  // <- Racy-ness in child process does not bother us: hanged children are still fine.
   (void) signal; //avoid unused parameter warning, portable.
   (void) arg;
   global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal;
@@ -3135,7 +3122,7 @@ void SignalsInfrastructure::initializeSignals() {
     << "Crashing to let you know. " << global.fatal;
   }
   ///////////////////////
-  //catch floating point exceptions
+  // catch floating point exceptions
   if (sigemptyset(&SignalFPE.sa_mask) == - 1) {
     global.fatal << "Failed to initialize SignalFPE mask. Crashing to let you know. " << global.fatal;
   }
@@ -3173,10 +3160,10 @@ void SignalsInfrastructure::initializeSignals() {
   if (sigaction(SIGCHLD, &SignalChild, nullptr) == - 1) {
     global.fatal << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << global.fatal;
   }
-//  sigemptyset(&sa.sa_mask);
-//  sa.sa_flags = SA_RESTART;
-//  if (sigaction(SIGCHLD, &sa, NULL) == - 1)
-//    global << "sigaction returned - 1" << Logger::endL;
+  //  sigemptyset(&sa.sa_mask);
+  //  sa.sa_flags = SA_RESTART;
+  //  if (sigaction(SIGCHLD, &sa, NULL) == - 1)
+  //    global << "sigaction returned - 1" << Logger::endL;
   this->flagInitialized = true;
 }
 
@@ -3197,7 +3184,7 @@ void WebServer::WriteVersionJSFile() {
   theFileStream << out.str();
 }
 
-// class not included in header for portability reasons
+// Class not included in header for portability reasons
 // - the header needs not to know of
 // the fd_set and sockaddr_storage structures.
 class Listener {
@@ -3293,7 +3280,7 @@ int WebServer::Daemon() {
   while(true) {
     int pidChild = fork();
     if (pidChild == 0) {
-      // child process
+      // Child process.
       global << Logger::orange << "Development daemon is starting command:" << Logger::endL;
       global << Logger::green << restartCommand.str() << Logger::endL;
       global.externalCommandStream(restartCommand.str());
@@ -3329,10 +3316,10 @@ int WebServer::Run() {
     << Logger::purple << "************************" << Logger::endL;
   }
 
-  // <-worker log resets are needed, else forked processes reset their common log.
-  // <-resets of the server logs are not needed, but I put them here nonetheless.
+  // <-Worker log resets are needed, else forked processes reset their common log.
+  // <-Resets of the server logs are not needed, but I put them here nonetheless.
   if (global.flagSSLIsAvailable) {
-    // creates key files if absent. Does not call any openssl functions.
+    // Creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
     TransportLayerSecurity::initializeNonThreadSafePartsCommon();
     this->theTLS.initSSLKeyFiles(&commentsOnFailure);
@@ -3356,7 +3343,7 @@ int WebServer::Run() {
   }
   this->initializeSignals();
   global.calculator().getElement().initialize();
-  // cannot call initializeMutex here: not before we execute Fork();
+  // Cannot call initializeMutex here: not before we execute Fork();
   global.calculator().getElement().ComputeAutoCompleteKeyWords();
   global.calculator().getElement().WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
@@ -3374,7 +3361,7 @@ int WebServer::Run() {
   long long previousReportedNumberOfSelects = 0;
   Listener theListener(this);
   while (true) {
-    // main accept() loop
+    // Main accept() loop.
     theListener.zeroSocketSet();
     SignalsInfrastructure::theSignals().unblockSignals();
     theListener.Select();
@@ -3434,13 +3421,12 @@ int WebServer::Run() {
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
     this->GetActiveWorker().millisecondsServerAtWorkerStart = global.GetElapsedMilliseconds();
     this->GetActiveWorker().millisecondsLastPingServerSideOnly = this->GetActiveWorker().millisecondsServerAtWorkerStart;
-    this->GetActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; //<- measured right after select()
-    //<-cannot set earlier as the active worker may change after recycling.
+    this->GetActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; // <- measured right after select()
+    // <-cannot set earlier as the active worker may change after recycling.
     this->NumConnectionsSoFar ++;
     this->GetActiveWorker().connectionID = this->NumConnectionsSoFar;
     this->GetActiveWorker().userAddress.theObject = theListener.userAddress;
-    this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1);
-//    global << this->ToStringStatus();
+    this->currentlyConnectedAddresses.addMonomial(this->GetActiveWorker().userAddress, 1);
     /////////////
     if (global.flagServerDetailedLog) {
       global << "Detail: about to fork, sigprocmasking " << Logger::endL;
@@ -3574,7 +3560,7 @@ bool WebWorker::RunOnce() {
   if (this->numberOfReceivesCurrentConnection > 0) {
     global.calculator().FreeMemory();
     global.calculator().getElement().initialize();
-    global.Comments.resetComments();
+    global.comments.resetComments();
     global << Logger::blue << "Created new calculator for connection: "
     << this->numberOfReceivesCurrentConnection << Logger::endL;
   }
@@ -3652,7 +3638,7 @@ void WebServer::FigureOutOperatingSystem() {
   }
   global << Logger::red << "Your Linux flavor is not currently supported. " << Logger::endL;
   global << "We support the following Linux distros: "
-  << Logger::blue << supportedOSes.ToStringCommaDelimited() << Logger::endL;
+  << Logger::blue << supportedOSes.toStringCommaDelimited() << Logger::endL;
   global << "Please post a request for support of your Linux flavor on our bug tracker: " << Logger::endL
   << Logger::green << HtmlRoutines::gitRepository
   << Logger::endL << "and we will add your Linux flavor to the list of supported distros. " << Logger::endL;
@@ -3715,7 +3701,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
     global.externalCommandNoOutput("sudo yum install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
-  global.ChDir(global.PhysicalPathProjectBase);
+  global.changeDirectory(global.PhysicalPathProjectBase);
   global.externalCommandNoOutput("make clean", true);
   global << "Proceeding to rebuild the calculator. " << Logger::red
   << "This is expected to take 10+ minutes. " << Logger::endL;
@@ -3738,9 +3724,8 @@ void WebServer::CheckMongoDBSetup() {
   WebServer::FigureOutOperatingSystem();
   global << Logger::yellow << "Mongo setup file missing, proceeding with setup. " << Logger::endL;
   global << Logger::green << "Enter the sudo password as prompted please. " << Logger::endL;
-  //result << Logger::yellow << "(Re)-starting mongo: " << Logger::endL;
   StateMaintainerCurrentFolder maintainFolder;
-  global.ChDir("../external-source");
+  global.changeDirectory("../external-source");
 
   std::stringstream commandUnzipMongoC, commandUnzipLibbson;
   commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
@@ -3750,19 +3735,19 @@ void WebServer::CheckMongoDBSetup() {
   global << Logger::green << commandUnzipLibbson.str() << Logger::endL;
   global << global.externalCommandReturnOutput(commandUnzipLibbson.str());
 
-  global.ChDir("./mongo-c-driver-1.9.3");
+  global.changeDirectory("./mongo-c-driver-1.9.3");
   global.externalCommandNoOutput("./configure", true);
   global.externalCommandNoOutput("make -j8", true);
   global << "Need sudo access for command: "
   << Logger::red << "sudo make install" << Logger::endL;
   global.externalCommandNoOutput("sudo make install", true);
-  global.ChDir("../libbson-1.9.3");
+  global.changeDirectory("../libbson-1.9.3");
   global.externalCommandNoOutput("./configure", true);
   global.externalCommandNoOutput("make -j8", true);
   global << "Need sudo access for command: "
   << Logger::red << "sudo make install" << Logger::endL;
   global.externalCommandNoOutput("sudo make install", true);
-  global.ChDir("../../bin");
+  global.changeDirectory("../../bin");
   global << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << Logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << Logger::endL;
   global.externalCommandNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", true);
@@ -3783,7 +3768,7 @@ void WebServer::CheckFreecalcSetup() {
   global << Logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << Logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
   std::string startingDir = FileOperations::GetCurrentFolder();
-  global.ChDir(global.PhysicalPathProjectBase + "../");
+  global.changeDirectory(global.PhysicalPathProjectBase + "../");
   global << Logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << Logger::endL;
   global << Logger::green << "git clone https://github.com/tmilev/freecalc.git" << Logger::endL;
   global.externalCommandNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
@@ -4022,7 +4007,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   global.programArguments.setSize(argC);
   for (int i = 0; i < argC; i ++) {
     global.programArguments[i] = argv[i];
-    //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
   }
   global.flagRunningConsoleRegular = true;
   if (argC == 0) {
@@ -4132,7 +4116,7 @@ void WebServer::InitializeMainAddresses() {
   // FORBIDDEN:
   // this->addressStartsNotNeedingLogin.addOnTop("logout");
   // Logging someone out definitely
-  // requires authentication imagine someone
+  // requires authentication: imagine someone
   // asking for logouts on your account once every second:
   // this would be fatal as proper logout resets
   // the authentication tokens.
@@ -4409,7 +4393,7 @@ int WebServer::main(int argc, char **argv) {
     global.server().WebServer::InitializeBuildFlags();
     // Process executable arguments.
     // May set the value of
-    // global.PathProjectBaseUserInputOrDeduced
+    // global.PathProjectBaseUserInputOrDeduced.
     global.server().AnalyzeMainArguments(argc, argv);
     if (global.flagRunningConsoleHelp) {
       return WebServer::mainConsoleHelp();
@@ -4418,8 +4402,8 @@ int WebServer::main(int argc, char **argv) {
     // using global.PathProjectBaseUserInputOrDeduced.
     global.initDefaultFolderAndFileNames();
     // Ensure the server path coincides with the current
-    // directory:
-    global.ChDir(global.PhysicalPathProjectBase);
+    // directory.
+    global.changeDirectory(global.PhysicalPathProjectBase);
     // Initializes folder locations needed by logging facilities.
     FileOperations::InitializeFoldersSensitive();
 
@@ -4476,7 +4460,9 @@ int WebServer::main(int argc, char **argv) {
 int WebServer::mainConsoleHelp() {
   std::cout << "All flags are optional.\n";
   std::cout << "Run the server with:\n";
-  std::cout << "calculator " << MainFlags::server << " [[max_seconds_per_computation]] " << MainFlags::configurationFile << " [[configuration_file_name]]"
+  std::cout << "calculator " << MainFlags::server
+  << " [[max_seconds_per_computation]] "
+  << MainFlags::configurationFile << " [[configuration_file_name]]"
   << MainFlags::pathExecutable << " [[custom_path_to_run_from]]" << "\n";
   std::cout << "Examples:\n";
   std::cout << "Run as server with defaults:\n";
@@ -4484,7 +4470,9 @@ int WebServer::mainConsoleHelp() {
   std::cout << "Run as server with custom computation timeout:\n";
   std::cout << "./calculator server 200\n";
   std::cout << "Run as server with custom timeout, custom base path and custom configuration file:\n";
-  std::cout << "./calculator " << MainFlags::server << " 50 " << MainFlags::configurationFile << " \"./configuration/configuration.json\" "
+  std::cout << "./calculator " << MainFlags::server
+  << " 50 "
+  << MainFlags::configurationFile << " \"./configuration/configuration.json\" "
   << MainFlags::pathExecutable  << " \"./\"" << "\n";
   std::cout << "Run unit tests with:\n";
   std::cout << "calculator " << MainFlags::test << "\n";
@@ -4574,7 +4562,7 @@ bool WebWorker::EnsureAllBytesSent() {
   global << Logger::red << "Type: " << Logger::blue << global.requestType
   << ", address: " << this->addressComputed << Logger::endL;
   global << Logger::red << "Remaining header: " << Logger::red
-  << this->remainingHeaderToSend.ToStringCommaDelimited() << Logger::endL;
+  << this->remainingHeaderToSend.toStringCommaDelimited() << Logger::endL;
   global << Logger::red << "Remaining body size: " << Logger::blue
   << this->remainingBodyToSend.size << Logger::endL;
   global << Logger::red << "Remaining bytes: " << Logger::blue
@@ -4593,8 +4581,8 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
   MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
   (void) MustSendAll;
   this->remainingBytesToSenD.addListOnTop(bytesToSend);
-//  if (this->remainingBytesToSend.size >= 1024 * 512 || MustSendAll)
-//    this->SendAllBytes();
+  //  if (this->remainingBytesToSend.size >= 1024 * 512 || MustSendAll)
+  //    this->SendAllBytes();
 }
 
 bool WebWorker::WriteToBody(const std::string& stringToSend) {

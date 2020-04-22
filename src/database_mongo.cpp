@@ -808,7 +808,7 @@ bool Database::isDeleteable(
     }
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Labels: " << theLabels.ToStringCommaDelimited()
+    *commentsOnFailure << "Labels: " << theLabels.toStringCommaDelimited()
     << " do not match any modifiable field pattern. ";
   }
   return false;
@@ -878,7 +878,7 @@ bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* comment
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "When deleting an object, it needs at least two labels: table name and objectid. "
-      << "Your input appears to have only " << theLabels.size << " entries: " << theLabels.ToStringCommaDelimited()
+      << "Your input appears to have only " << theLabels.size << " entries: " << theLabels.toStringCommaDelimited()
       << ". ";
     }
     return false;

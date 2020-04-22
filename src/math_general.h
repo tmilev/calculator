@@ -14,7 +14,7 @@
 class ElementZmodP;
 class WeylGroupData;
 class AlgebraicClosureRationals;
-template <class coefficient>
+template <class Coefficient>
 class MatrixTensor;
 
 // We are wrapping the math.h c++ functions for portability reasons
@@ -71,23 +71,23 @@ public:
   }
 };
 
-template <class coefficient, unsigned int inputHashFunction(const coefficient&)= coefficient::hashFunction>
+template <class Coefficient, unsigned int inputHashFunction(const Coefficient&) = Coefficient::hashFunction>
 class MonomialTensor {
-  friend std::ostream& operator << (std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon) {
+  friend std::ostream& operator << (std::ostream& output, const MonomialTensor<Coefficient, inputHashFunction>& theMon) {
     return output << theMon.toString();
   }
 private:
 public:
   List<int> generatorsIndices;
-  List<coefficient> Powers;
+  List<Coefficient> Powers;
   bool flagDeallocated;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool IsEqualToOne() const {
     return this->generatorsIndices.size == 0;
   }
   void operator=(List<int>& other) {
-    this->generatorsIndices.Reserve(other.size);
-    this->Powers.Reserve(other.size);
+    this->generatorsIndices.reserve(other.size);
+    this->Powers.reserve(other.size);
     this->makeConstant();
     for (int i = 0; i < other.size; i ++) {
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
@@ -99,7 +99,7 @@ public:
     }
     return true;
   }
-  void operator=(const MonomialTensor<coefficient, inputHashFunction>& other) {
+  void operator=(const MonomialTensor<Coefficient, inputHashFunction>& other) {
     this->generatorsIndices = other.generatorsIndices;
     this->Powers = other.Powers;
   }
@@ -125,8 +125,8 @@ public:
     }
   }
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const coefficient& thePower);
-  void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const coefficient& thePower);
+  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
+  void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const Coefficient& thePower);
   unsigned int hashFunction() const {
     int top = MathRoutines::Minimum(someRandomPrimesSize, this->generatorsIndices.size);
     unsigned int result = 0;
@@ -136,14 +136,14 @@ public:
     }
     return result;
   }
-  static unsigned int hashFunction(const MonomialTensor<coefficient, inputHashFunction>& input) {
+  static unsigned int hashFunction(const MonomialTensor<Coefficient, inputHashFunction>& input) {
     return input.hashFunction();
   }
   void makeConstant() {
     this->generatorsIndices.size = 0;
     this->Powers.size = 0;
   }
-  bool operator>(const MonomialTensor<coefficient, inputHashFunction>& other) const {
+  bool operator>(const MonomialTensor<Coefficient, inputHashFunction>& other) const {
     if (other.generatorsIndices.size > this->generatorsIndices.size) {
       return false;
     }
@@ -166,15 +166,15 @@ public:
     }
     return false;
   }
-  bool operator==(const MonomialTensor<coefficient, inputHashFunction>& other) const {
+  bool operator==(const MonomialTensor<Coefficient, inputHashFunction>& other) const {
     return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
-  bool operator<(const MonomialTensor<coefficient, inputHashFunction>& right) const {
-    coefficient leftrank = 0;
+  bool operator<(const MonomialTensor<Coefficient, inputHashFunction>& right) const {
+    Coefficient leftrank = 0;
     for (int i = 0; i < this->Powers.size; i ++) {
       leftrank += this->Powers[i];
     }
-    coefficient rightrank = 0;
+    Coefficient rightrank = 0;
     for (int i = 0; i < right.Powers.size; i ++) {
       rightrank += right.Powers[i];
     }
@@ -201,12 +201,12 @@ public:
     }
     return false;
   }
-  void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight) {
+  void operator*=(const MonomialTensor<Coefficient, inputHashFunction>& standsOnTheRight) {
     if (standsOnTheRight.generatorsIndices.size == 0) {
       return;
     }
     if (this == &standsOnTheRight) {
-      MonomialTensor<coefficient, inputHashFunction> tempMon;
+      MonomialTensor<Coefficient, inputHashFunction> tempMon;
       tempMon = standsOnTheRight;
       (*this) *= (tempMon);
       return;
@@ -216,8 +216,8 @@ public:
     int firstIndex = standsOnTheRight.generatorsIndices[0];
     int i = 0;
     if (this->generatorsIndices.size > 0) {
-      if (firstIndex == (*this->generatorsIndices.LastObject())) {
-        *this->Powers.LastObject() += standsOnTheRight.Powers[0];
+      if (firstIndex == (*this->generatorsIndices.lastObject())) {
+        *this->Powers.lastObject() += standsOnTheRight.Powers[0];
         i = 1;
       }
     }
@@ -352,7 +352,7 @@ public:
     }
     return result;
   }
-  void MultiplyBy(const MonomialP& other) {
+  void multiplyBy(const MonomialP& other) {
     this->operator*=(other);
   }
   void DivideBy(const MonomialP& other) {
@@ -397,8 +397,8 @@ public:
   bool checkConsistency() const {
     return true;
   }
-  template <class coefficient>
-  bool Substitution(const List<Polynomial<coefficient> >& theSubstitution, Polynomial<coefficient>& output) const;
+  template <class Coefficient>
+  bool substitution(const List<Polynomial<Coefficient> >& theSubstitution, Polynomial<Coefficient>& output) const;
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGCD();
@@ -451,7 +451,7 @@ public:
   int minimalNumberOfVariables() const {
     return this->monBody.size;
   }
-  void Invert() {
+  void invert() {
     for (int i = 0; i < this->monBody.size; i ++) {
       this->monBody[i].Minus();
     }
@@ -461,8 +461,8 @@ public:
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
   bool operator==(const MonomialP& other) const;
-  template <class coefficient>
-  void operator=(const Vector<coefficient>& other) {
+  template <class Coefficient>
+  void operator=(const Vector<Coefficient>& other) {
     this->monBody = other;
   }
   void operator=(const MonomialP& other) {
@@ -481,23 +481,23 @@ public:
   };
 };
 
-template <typename coefficient>
-std::ostream& operator<<  (std::ostream& output, const Matrix<coefficient>& theMat);
+template <typename Coefficient>
+std::ostream& operator<<  (std::ostream& output, const Matrix<Coefficient>& theMat);
 
-template <typename coefficient>
+template <typename Coefficient>
 class Matrix {
-  //friend std::iostream& operator<< <coefficient>(std::iostream& output, const Matrix<coefficient>& theMat);
-  friend std::ostream& operator<< <coefficient>(std::ostream& output, const Matrix<coefficient>& theMat);
-  //friend std::iostream& operator>> <coefficient>(std::iostream& input, Matrix<coefficient>& theMat);
+  //friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Matrix<Coefficient>& theMat);
+  friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Matrix<Coefficient>& theMat);
+  //friend std::iostream& operator>> <Coefficient>(std::iostream& input, Matrix<Coefficient>& theMat);
 public:
   int numberOfRows; int ActualNumRows;
   int numberOfColumns; int ActualNumCols;
-  coefficient** elements;
+  Coefficient** elements;
   static bool flagComputingDebugInfo;
   bool flagDeallocated;
   void init(int r, int c);
-  void ReleaseMemory();
-  bool IsPositiveDefinite();
+  void releaseMemory();
+  bool isPositiveDefinite();
   bool IsNonNegativeAllEntries() {
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -508,27 +508,27 @@ public:
     }
     return true;
   }
-  void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero = nullptr);
+  void resize(int r, int c, bool PReserveValues, const Coefficient* theRingZero = nullptr);
   Matrix(): numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(nullptr), flagDeallocated(false) {
   }
-  Matrix(const Matrix<coefficient>& other):
+  Matrix(const Matrix<Coefficient>& other):
     numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(0), flagDeallocated(false) {
     *this = other;
   }
   ~Matrix() {
-    this->ReleaseMemory();
+    this->releaseMemory();
     this->flagDeallocated = true;
   }
   void Transpose() {
     if (this->numberOfColumns == this->numberOfRows) {
       for (int i = 0; i < this->numberOfRows; i ++) {
         for (int j = i + 1; j < this->numberOfColumns; j ++) {
-          MathRoutines::swap<coefficient>(this->elements[j][i], this->elements[i][j]);
+          MathRoutines::swap<Coefficient>(this->elements[j][i], this->elements[i][j]);
         }
       }
       return;
     }
-    Matrix<coefficient> tempMat;
+    Matrix<Coefficient> tempMat;
     tempMat.init(this->numberOfColumns, this->numberOfRows);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -537,57 +537,57 @@ public:
     }
     *this = tempMat;
   }
-  void AppendMatrixOnTheRight(const Matrix<coefficient>& standsOnTheRight) {
+  void appendMatrixOnTheRight(const Matrix<Coefficient>& standsOnTheRight) {
     if (&standsOnTheRight == this) {
-      Matrix<coefficient> copyThis = *this;
-      this->AppendMatrixOnTheRight(copyThis);
+      Matrix<Coefficient> copyThis = *this;
+      this->appendMatrixOnTheRight(copyThis);
       return;
     }
     if (standsOnTheRight.numberOfRows < this->numberOfRows) {
-      coefficient theZero;
+      Coefficient theZero;
       theZero = 0;
-      Matrix<coefficient> standsOnTheRightNew = standsOnTheRight;
-      standsOnTheRightNew.Resize(this->numberOfRows, standsOnTheRight.numberOfColumns, true, &theZero);
-      this->AppendMatrixOnTheRight(standsOnTheRightNew);
+      Matrix<Coefficient> standsOnTheRightNew = standsOnTheRight;
+      standsOnTheRightNew.resize(this->numberOfRows, standsOnTheRight.numberOfColumns, true, &theZero);
+      this->appendMatrixOnTheRight(standsOnTheRightNew);
       return;
     }
     if (this->numberOfRows < standsOnTheRight.numberOfRows) {
-      coefficient theZero;
+      Coefficient theZero;
       theZero = 0;
-      this->Resize(standsOnTheRight.numberOfRows, this->numberOfColumns, true, &theZero);
+      this->resize(standsOnTheRight.numberOfRows, this->numberOfColumns, true, &theZero);
     }
     int oldNumCols = this->numberOfColumns;
-    this->Resize(this->numberOfRows, standsOnTheRight.numberOfColumns + oldNumCols, true);
+    this->resize(this->numberOfRows, standsOnTheRight.numberOfColumns + oldNumCols, true);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = oldNumCols; j < this->numberOfColumns; j ++) {
         this->elements[i][j] = standsOnTheRight.elements[i][j - oldNumCols];
       }
     }
   }
-  void AppendMatrixToTheBottom(const Matrix<coefficient>& standsBelow) {
+  void appendMatrixToTheBottom(const Matrix<Coefficient>& standsBelow) {
     if (&standsBelow == this) {
-      Matrix<coefficient> copyThis = *this;
-      this->AppendMatrixToTheBottom(copyThis);
+      Matrix<Coefficient> copyThis = *this;
+      this->appendMatrixToTheBottom(copyThis);
       return;
     }
     if (standsBelow.numberOfColumns < this->numberOfColumns) {
-      coefficient theZero;
+      Coefficient theZero;
       theZero = 0;
-      Matrix<coefficient> standsBelowNew = standsBelow;
-      standsBelowNew.Resize(standsBelow.numberOfRows, this->numberOfColumns, true, &theZero);
-      this->AppendMatrixOnTheRight(standsBelowNew);
+      Matrix<Coefficient> standsBelowNew = standsBelow;
+      standsBelowNew.resize(standsBelow.numberOfRows, this->numberOfColumns, true, &theZero);
+      this->appendMatrixOnTheRight(standsBelowNew);
       return;
     }
     if (this->numberOfColumns < standsBelow.numberOfColumns) {
-      coefficient theZero;
+      Coefficient theZero;
       theZero = 0;
-      this->Resize(this->numberOfRows, standsBelow.numberOfColumns, true, &theZero);
+      this->resize(this->numberOfRows, standsBelow.numberOfColumns, true, &theZero);
     }
     // So far, we have guaranteed that this and
     // &standsBelow have the same number of columns and
     // are different objects.
     int oldNumRows = this->numberOfRows;
-    this->Resize(this->numberOfRows + standsBelow.numberOfRows, this->numberOfColumns, true);
+    this->resize(this->numberOfRows + standsBelow.numberOfRows, this->numberOfColumns, true);
     for (int i = oldNumRows; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
         this->elements[i][j] = standsBelow(i - oldNumRows, j);
@@ -600,36 +600,36 @@ public:
     }
     return true;
   }
-  static void MatrixInBasis(
-    const Matrix<coefficient>& input,
-    Matrix<coefficient>& output,
-    const List<Vector<coefficient> >& basis,
-    const Matrix<coefficient>& gramMatrixInverted
+  static void matrixInBasis(
+    const Matrix<Coefficient>& input,
+    Matrix<Coefficient>& output,
+    const List<Vector<Coefficient> >& basis,
+    const Matrix<Coefficient>& gramMatrixInverted
   ) {
     int d = basis.size;
     output.init(d, d);
     Vector<Rational> tempV;
     for (int j = 0; j < d; j ++) {
-      input.ActOnVectorColumn(basis[j], tempV);
+      input.actOnVectorColumn(basis[j], tempV);
       for (int i = 0; i < d; i ++) {
         output.elements[i][j] = basis[i].ScalarEuclidean(tempV);
       }
     }
-    output.MultiplyOnTheLeft(gramMatrixInverted);
+    output.multiplyOnTheLeft(gramMatrixInverted);
   }
   void ComputeDeterminantOverwriteMatrix(
-    coefficient& output,
-    const coefficient& theRingOne = 1,
-    const coefficient& theRingZero = 0
+    Coefficient& output,
+    const Coefficient& theRingOne = 1,
+    const Coefficient& theRingZero = 0
   );
-  void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow) const {
-    List<Vector<coefficient> > output;
+  void ActOnVectorROWSOnTheLeft(List<Vector<Coefficient> >& standOnTheRightAsVectorRow) const {
+    List<Vector<Coefficient> > output;
     this->ActOnVectorROWSOnTheLeft(standOnTheRightAsVectorRow, output);
     standOnTheRightAsVectorRow = output;
   }
   void ActOnVectorROWSOnTheLeft(
-    List<Vector<coefficient> >& standOnTheRightAsVectorRow,
-    List<Vector<coefficient> >& output
+    List<Vector<Coefficient> >& standOnTheRightAsVectorRow,
+    List<Vector<Coefficient> >& output
   ) const {
     if (this->numberOfColumns != standOnTheRightAsVectorRow.size) {
       global.fatal << "This is a programming error: "
@@ -646,12 +646,12 @@ public:
       }
     }
   }
-  void ActMultiplyVectorRowOnTheRight(Vector<coefficient>& standsOnTheLeft) const {
-    Vector<coefficient> output;
+  void ActMultiplyVectorRowOnTheRight(Vector<Coefficient>& standsOnTheLeft) const {
+    Vector<Coefficient> output;
     this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output);
     standsOnTheLeft = output;
   }
-  void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output) const {
+  void ActMultiplyVectorRowOnTheRight(const Vector<Coefficient>& standsOnTheLeft, Vector<Coefficient>& output) const {
     if (&standsOnTheLeft == &output) {
       global.fatal << "In ActMultiplyVectorRowOnTheRight: output not allowed to equal input. " << global.fatal;
     }
@@ -659,7 +659,7 @@ public:
       global.fatal << "Number of rows of matrix vector number of elements. " << global.fatal;
     }
     output.makeZero(this->numberOfColumns);
-    coefficient tempElt;
+    Coefficient tempElt;
     for (int i = 0; i < this->numberOfColumns; i ++) {
       for (int j = 0; j < this->numberOfRows; j ++) {
         tempElt = this->elements[j][i];
@@ -668,7 +668,7 @@ public:
       }
     }
   }
-  void GetNSquaredVectorForm(Vector<coefficient>& output) {
+  void GetNSquaredVectorForm(Vector<Coefficient>& output) {
     output.setSize(this->numberOfRows*this->numberOfColumns);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -677,10 +677,10 @@ public:
     }
   }
   template <class otherType>
-  void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& TheRingZero = 0) const {
+  void actOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& theRingZero = 0) const {
     if (&input == &output) {
       Vector<otherType> inputNew = input;
-      this->ActOnVectorColumn(inputNew, output, TheRingZero);
+      this->actOnVectorColumn(inputNew, output, theRingZero);
       return;
     }
     if (this->numberOfColumns != input.size) {
@@ -701,7 +701,7 @@ public:
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  static unsigned int hashFunction(const Matrix<coefficient>& input) {
+  static unsigned int hashFunction(const Matrix<Coefficient>& input) {
     unsigned int result = 0;
     int counter = 0;
     for (int i = 0; i < input.numberOfRows; i ++, counter ++) {
@@ -716,13 +716,13 @@ public:
     return result;
   }
   template <class otherType>
-  void ActOnVectorsColumn(
+  void actOnVectorsColumn(
     const Vectors<otherType>& input,
     Vectors<otherType>& output,
-    const otherType& TheRingZero = 0
+    const otherType& theRingZero = 0
   ) const {
     if (&input == &output) {
-      global.fatal << "In ActOnVectorsColumn: input not allowed to equal output. " << global.fatal;
+      global.fatal << "In actOnVectorsColumn: input not allowed to equal output. " << global.fatal;
     }
     if (input.size == 0) {
       return;
@@ -735,37 +735,37 @@ public:
     }
     output.setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
-      this->ActOnVectorColumn(input[i], output[i], TheRingZero);
+      this->actOnVectorColumn(input[i], output[i], theRingZero);
     }
   }
   template <class otherType>
-  void ActOnVectorColumn(
+  void actOnVectorColumn(
     Vector<otherType>& inputOutput,
-    const otherType& TheRingZero = static_cast<otherType>(0)
+    const otherType& theRingZero = static_cast<otherType>(0)
   ) const {
     Vector<otherType> buffer;
-    this->ActOnVectorColumn(inputOutput, buffer, TheRingZero);
+    this->actOnVectorColumn(inputOutput, buffer, theRingZero);
     inputOutput = buffer;
   }
   template <class otherType>
-  void ActOnVectorsColumn(
+  void actOnVectorsColumn(
     Vectors<otherType>& inputOutput,
-    const otherType& TheRingZero = static_cast<otherType>(0)
+    const otherType& theRingZero = static_cast<otherType>(0)
   ) const {
     for (int i = 0; i < inputOutput.size; i ++) {
-      this->ActOnVectorColumn(inputOutput[i], TheRingZero);
+      this->actOnVectorColumn(inputOutput[i], theRingZero);
     }
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringLatex(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSystemLatex(
-    Matrix<coefficient>* constTerms = 0,
+    Matrix<Coefficient>* constTerms = 0,
     FormatExpressions* theFormat = nullptr
   ) const;
   std::string ToStringPlainText(bool jsonFormat = false) const;
   std::string ToStringOneLine(bool jsonFormat = false) const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
-  void MakeIdMatrix(int theDimension, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0) {
+  void MakeIdMatrix(int theDimension, const Coefficient& theRingUnit = 1, const Coefficient& theRingZero = 0) {
     this->init(theDimension, theDimension);
     for (int i = 0; i < theDimension; i ++) {
       for (int j = 0; j < theDimension; j ++) {
@@ -777,7 +777,7 @@ public:
       }
     }
   }
-  void MakeZeroMatrix(int theDimension, const coefficient& theRingZero = 0) {
+  void MakeZeroMatrix(int theDimension, const Coefficient& theRingZero = 0) {
     this->init(theDimension, theDimension);
     for (int i = 0; i < theDimension; i ++) {
       for (int j = 0; j < theDimension; j ++) {
@@ -786,31 +786,31 @@ public:
     }
   }
   void ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
-  void SwitchTwoRows(int row1, int row2);
-  void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<coefficient>* theCarbonCopy) {
-    this->SwitchTwoRows(row1, row2);
+  void switchRows(int row1, int row2);
+  void switchRowsWithCarbonCopy(int row1, int row2, Matrix<Coefficient>* theCarbonCopy) {
+    this->switchRows(row1, row2);
     if (theCarbonCopy != 0) {
-      theCarbonCopy->SwitchTwoRows(row1, row2);
+      theCarbonCopy->switchRows(row1, row2);
     }
   }
-  void SetNumVariables(int GoalNumVars) {
+  void setNumberOfVariables(int GoalNumVars) {
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        this->elements[i][j].SetNumVariables(GoalNumVars);
+        this->elements[i][j].setNumberOfVariables(GoalNumVars);
       }
     }
   }
-  void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  coefficient scalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right) {
-    return this->scalarProduct(left, right, static_cast<coefficient>(0));
+  void substitution(const PolynomialSubstitution<Rational>& theSub);
+  Coefficient scalarProduct(const Vector<Coefficient>& left, const Vector<Coefficient>& right) {
+    return this->scalarProduct(left, right, static_cast<Coefficient>(0));
   }
-  coefficient scalarProduct(
-    const Vector<coefficient>& left, const Vector<coefficient>& right, const coefficient& theRingZero
+  Coefficient scalarProduct(
+    const Vector<Coefficient>& left, const Vector<Coefficient>& right, const Coefficient& theRingZero
   ) {
     if (left.size != this->numberOfColumns || right.size != this->numberOfRows) {
       global.fatal << "Scalar product using matrix: dimensions of vectors don't match. " << global.fatal;
     }
-    coefficient Result, tempElt;
+    Coefficient Result, tempElt;
     Result = theRingZero;
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -822,10 +822,10 @@ public:
     }
     return Result;
   }
-  inline coefficient& operator()(unsigned i, unsigned j) const {
+  inline Coefficient& operator()(unsigned i, unsigned j) const {
     return (*this)(static_cast<signed>(i), static_cast<signed>(j));
   }
-  coefficient& operator()(int i, int j) const {
+  Coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->numberOfRows || j < 0 || j >= this->numberOfColumns) {
       global.fatal
       << "This is a programming error: requesting row, column indexed by "
@@ -838,7 +838,7 @@ public:
   bool IsSquare() const {
     return this->numberOfColumns == this->numberOfRows;
   }
-  bool IsIdMatrix() const {
+  bool isIdentity() const {
     if (this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0) {
       return false;
     }
@@ -857,13 +857,10 @@ public:
     }
     return true;
   }
-  bool IsID() const {
-    return IsIdMatrix();
-  } // for FiniteGroup compat
-  void GetVectorFromColumn(int colIndex, Vector<coefficient>& output) const;
-  void GetVectorFromRow(int rowIndex, Vector<coefficient>& output) const;
-  int FindPivot(int columnIndex, int RowStartIndex);
-  bool FindFirstNonZeroElementSearchEntireRow(coefficient& output) {
+  void GetVectorFromColumn(int colIndex, Vector<Coefficient>& output) const;
+  void GetVectorFromRow(int rowIndex, Vector<Coefficient>& output) const;
+  int FindPivot(int columnIndex, int rowStartIndex);
+  bool FindFirstNonZeroElementSearchEntireRow(Coefficient& output) {
     for (int i = 0; i < this->numberOfColumns; i ++) {
       for (int j = 0; j < this->numberOfRows; j ++) {
         if (!this->elements[i][j].isEqualToZero()) {
@@ -874,57 +871,57 @@ public:
     }
     return false;
   }
-  void MakeLinearOperatorFromDomainAndRange(Vectors<coefficient>& domain, Vectors<coefficient>& range) {
-    Matrix<coefficient> A;
-    Matrix<coefficient> B;
+  void MakeLinearOperatorFromDomainAndRange(Vectors<Coefficient>& domain, Vectors<Coefficient>& range) {
+    Matrix<Coefficient> A;
+    Matrix<Coefficient> B;
     A.AssignVectorsToRows(domain);
     B.AssignVectorsToRows(range);
-    A.Invert();
+    A.invert();
     (*this) = A * B;
     this->Transpose();
   }
-  void RowTimesScalar(int rowIndex, const coefficient& scalar);
-  void RowTimesScalarWithCarbonCopy(int rowIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy) {
+  void RowTimesScalar(int rowIndex, const Coefficient& scalar);
+  void RowTimesScalarWithCarbonCopy(int rowIndex, const Coefficient& scalar, Matrix<Coefficient>* theCarbonCopy) {
     this->RowTimesScalar(rowIndex, scalar);
     if (theCarbonCopy != 0) {
       theCarbonCopy->RowTimesScalar(rowIndex, scalar);
     }
   }
-  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar);
+  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar);
   void AddTwoRowsWithCarbonCopy(
-    int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy
+    int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar, Matrix<Coefficient>* theCarbonCopy
   ) {
     this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
     if (theCarbonCopy != 0) {
       theCarbonCopy->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
     }
   }
-  void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const coefficient& scalar);
+  void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int startColumnIndex, const Coefficient& scalar);
   void SubtractRowsWithCarbonCopy(
     int indexRowWeSubtractFrom,
     int indexSubtracted,
     int StartColIndex,
-    const coefficient& scalar,
-    Matrix<coefficient>* theCarbonCopy
+    const Coefficient& scalar,
+    Matrix<Coefficient>* theCarbonCopy
   ) {
     this->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
     if (theCarbonCopy != 0) {
       theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
     }
   }
-  void MultiplyOnTheLeft(
-    const Matrix<coefficient>& standsOnTheLeft,
-    Matrix<coefficient>& output,
-    const coefficient& theRingZero = 0
+  void multiplyOnTheLeft(
+    const Matrix<Coefficient>& standsOnTheLeft,
+    Matrix<Coefficient>& output,
+    const Coefficient& theRingZero = 0
   ) const;
-  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero = 0);
-  void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight) {
-    Matrix<coefficient> temp = *this;
+  void multiplyOnTheLeft(const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& theRingZero = 0);
+  void MultiplyOnTheRight(const Matrix<Coefficient>& standsOnTheRight) {
+    Matrix<Coefficient> temp = *this;
     *this = standsOnTheRight;
-    this->MultiplyOnTheLeft(temp);
+    this->multiplyOnTheLeft(temp);
   }
-  void NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<coefficient>& output);
-  void GetVectorsFromRows(List<Vector<coefficient> >& output) {
+  void NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<Coefficient>& output);
+  void GetVectorsFromRows(List<Vector<Coefficient> >& output) {
     output.setSize(this->numberOfRows);
     for (int i = 0; i < this->numberOfRows; i ++) {
       output[i].setSize(this->numberOfColumns);
@@ -933,42 +930,42 @@ public:
       }
     }
   }
-  void NonPivotPointsToEigenVector(
-    Selection& TheNonPivotPoints,
-    Vector<coefficient>& output,
-    const coefficient& theRingUnit = 1,
-    const coefficient& theRingZero = 0
+  void nonPivotPointsToEigenVector(
+    Selection& theNonPivotPoints,
+    Vector<Coefficient>& output,
+    const Coefficient& theRingUnit = 1,
+    const Coefficient& theRingZero = 0
   );
-  bool Invert();
-  Matrix<coefficient> Inverse() {
-    Matrix<coefficient> copy = *this;
-    if (!copy.Invert()) {
+  bool invert();
+  Matrix<Coefficient> inverse() {
+    Matrix<Coefficient> copy = *this;
+    if (!copy.invert()) {
       global.fatal << "Request to invert " << copy.toString() << " failed. " << global.fatal;
     }
     return copy;
   }
-  Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
-  static void ConjugationAction(
-    const Matrix<coefficient>& conjugateMe,
-    const Matrix<coefficient>& conjugateBy,
-    Matrix<coefficient>& out
+  Matrix<Coefficient> operator^(const Matrix<Coefficient>& right) const;
+  static void conjugationAction(
+    const Matrix<Coefficient>& conjugateMe,
+    const Matrix<Coefficient>& conjugateBy,
+    Matrix<Coefficient>& out
   );
-  void makeZero(const coefficient& theRingZero = 0);
+  void makeZero(const Coefficient& theRingZero = 0);
   void makeIdentity(
-    const Matrix<coefficient>& prototype,
-    const coefficient& theRingZero = 0,
-    const coefficient& theRingOne = 1
+    const Matrix<Coefficient>& prototype,
+    const Coefficient& theRingZero = 0,
+    const Coefficient& theRingOne = 1
   );
   // if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   // corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
   // this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
-  void AssignDirectSum(Matrix<coefficient>& m1,  Matrix<coefficient>& m2);
+  void assignDirectSum(Matrix<Coefficient>& m1,  Matrix<Coefficient>& m2);
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
-  void AssignTensorProduct(const Matrix<coefficient>& left, const Matrix<coefficient>& right);
-  void AssignVectorsToRows(const List<Vector<coefficient> >& input) {
+  void assignTensorProduct(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right);
+  void AssignVectorsToRows(const List<Vector<Coefficient> >& input) {
     int numCols = - 1;
     if (input.size > 0) {
       numCols = input[0].size;
@@ -980,7 +977,7 @@ public:
       }
     }
   }
-  void AssignVectorsToColumns(const Vectors<coefficient>& input) {
+  void AssignVectorsToColumns(const Vectors<Coefficient>& input) {
     this->init(input[0].size, input.size);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -988,13 +985,13 @@ public:
       }
     }
   }
-  void AssignVectorColumn(const Vector<coefficient>& input) {
+  void AssignVectorColumn(const Vector<Coefficient>& input) {
     this->init(input.size, 1);
     for (int i = 0; i < input.size; i ++) {
       this->elements[i][0] = input[i];
     }
   }
-  void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input) {
+  void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<Coefficient>& input) {
     if (input.size != this->numberOfColumns || rowIndex >= this->numberOfRows || rowIndex < 0) {
       global.fatal << "Error: attempting to assign vector " << input.toString()
       << " (" << input.size << " coordinates) "
@@ -1005,7 +1002,7 @@ public:
       this->elements[rowIndex][i] = input[i];
     }
   }
-  void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<coefficient>& input) {
+  void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<Coefficient>& input) {
     if (input.size != this->numberOfRows || colIndex >= this->numberOfColumns || colIndex < 0) {
       global.fatal << "In AssignVectorToColumnKeepOtherColsIntactNoInit: bad vector/matrix dimensions. "  << global.fatal;
     }
@@ -1013,7 +1010,7 @@ public:
       this->elements[i][colIndex] = input[i];
     }
   }
-  void AssignBlock(Matrix<coefficient>& block, int starti, int startj) {
+  void AssignBlock(Matrix<Coefficient>& block, int starti, int startj) {
     if (starti + block.numberOfRows > this->numberOfRows || startj + block.numberOfColumns > this->numberOfColumns) {
       global.fatal << "In AssignBlock: bad indices. " << global.fatal;
     }
@@ -1023,17 +1020,17 @@ public:
       }
     }
   }
-  void AssignVectorRow(const Vector<coefficient>& input) {
+  void AssignVectorRow(const Vector<Coefficient>& input) {
     this->init(1, input.size);
     for (int i = 0; i < input.size; i ++) {
       this->elements[0][i] = input[i];
     }
   }
-  void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero = 0);
-  bool operator!=(const Matrix<coefficient>& other) const {
+  void DirectSumWith(const Matrix<Coefficient>& m2, const Coefficient& theRingZero = 0);
+  bool operator!=(const Matrix<Coefficient>& other) const {
     return !((*this) == other);
   }
-  bool operator==(const Matrix<coefficient>& other) const {
+  bool operator==(const Matrix<Coefficient>& other) const {
     if (this->numberOfRows != other.numberOfRows || this->numberOfColumns != other.numberOfColumns) {
       return false;
     }
@@ -1056,7 +1053,7 @@ public:
     }
     return true;
   }
-  bool IsProportionalTo(const Matrix<coefficient>& input, coefficient& outputTimesMeEqualsInput) {
+  bool IsProportionalTo(const Matrix<Coefficient>& input, Coefficient& outputTimesMeEqualsInput) {
     if (input.numberOfColumns != this->numberOfColumns || input.numberOfRows != this->numberOfRows) {
       return false;
     }
@@ -1074,7 +1071,7 @@ public:
     if (!found) {
       return input.isEqualToZero();
     }
-    Matrix<coefficient> tempMat;
+    Matrix<Coefficient> tempMat;
     tempMat = *this;
     tempMat *= outputTimesMeEqualsInput;
     tempMat -= input;
@@ -1082,9 +1079,9 @@ public:
   }
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(
-    Selection& inputPivotPoints, Matrix<coefficient>& inputRightHandSide, Matrix<coefficient>& outputSolution
+    Selection& inputPivotPoints, Matrix<Coefficient>& inputRightHandSide, Matrix<Coefficient>& outputSolution
   );
-  void operator+=(const Matrix<coefficient>& right) {
+  void operator+=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
       global.fatal << "This is a programming error: attempting to add matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
@@ -1098,7 +1095,7 @@ public:
     }
   }
   LargeIntegerUnsigned FindPositiveLCMCoefficientDenominators();
-  void operator-=(const Matrix<coefficient>& right) {
+  void operator-=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
       global.fatal << "This is a programming error: attempting to subtract from matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
@@ -1113,37 +1110,37 @@ public:
   }
   void WriteToFile(std::fstream& output);
   bool ReadFromFile(std::fstream& input);
-  void operator/=(const coefficient& input) {
+  void operator/=(const Coefficient& input) {
     for (int j = 0; j < this->numberOfRows; j ++) {
       for (int i = 0; i < this->numberOfColumns; i ++) {
         this->elements[j][i] /= input;
       }
     }
   }
-  void operator*=(const coefficient& input) {
+  void operator*=(const Coefficient& input) {
     for (int j = 0; j < this->numberOfRows; j ++) {
       for (int i = 0; i < this->numberOfColumns; i ++) {
         this->elements[j][i] *= input;
       }
     }
   }
-  void operator*=(const Matrix<coefficient>& input) {
+  void operator*=(const Matrix<Coefficient>& input) {
     this->MultiplyOnTheRight(input);
   }
-  void LieBracketWith(Matrix<coefficient>& right) {
-    Matrix<coefficient> tempMat;
+  void LieBracketWith(Matrix<Coefficient>& right) {
+    Matrix<Coefficient> tempMat;
     this->LieBracket(*this, right, tempMat);
     *this = tempMat;
   }
-  static void LieBracket(const Matrix<coefficient>& left, const Matrix<coefficient>& right, Matrix<coefficient>& output) {
+  static void LieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
     if (left.numberOfColumns != left.numberOfRows || right.numberOfColumns != right.numberOfRows || left.numberOfColumns != right.numberOfColumns) {
       global.fatal << "In LieBracket: bad dimensions of matrices. " << global.fatal;
     }
-    Matrix<coefficient> tempPlus, tempMinus;
+    Matrix<Coefficient> tempPlus, tempMinus;
     tempPlus = (right);
-    tempPlus.MultiplyOnTheLeft(left);
+    tempPlus.multiplyOnTheLeft(left);
     tempMinus = (left);
-    tempMinus.MultiplyOnTheLeft(right);
+    tempMinus.multiplyOnTheLeft(right);
     tempPlus -= (tempMinus);
     output = tempPlus;
   }
@@ -1156,8 +1153,8 @@ public:
   // In the Gaussian elimination below, we define non-pivot points to be indices of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
-  void GaussianEliminationByRows(
-    Matrix<coefficient>* carbonCopyMat = 0,
+  void gaussianEliminationByRows(
+    Matrix<Coefficient>* carbonCopyMat = 0,
     Selection* outputNonPivotColumns = nullptr,
     Selection* outputPivotColumns = nullptr,
     std::stringstream* humanReadableReport = nullptr,
@@ -1169,20 +1166,20 @@ public:
     Selection* outputNonPivotPoints__WarningSelectionNotInitialized
   );
   void GaussianEliminationEuclideanDomain(
-    Matrix<coefficient>* otherMatrix = 0,
-    const coefficient& theRingMinusUnit = - 1,
-    const coefficient& theRingUnit = 1,
-    bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right) = 0
+    Matrix<Coefficient>* otherMatrix = 0,
+    const Coefficient& theRingMinusUnit = - 1,
+    const Coefficient& theRingUnit = 1,
+    bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right) = 0
   );
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
-    Matrix<coefficient>& A, Matrix<coefficient>& b, Matrix<coefficient>& output
+    Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
   );
-  coefficient GetDeterminant();
-  coefficient GetTrace() const;
+  Coefficient GetDeterminant();
+  Coefficient GetTrace() const;
   void AssignMatrixIntWithDen(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen);
-  void LieBracketWith(const Matrix<coefficient>& right);
+  void LieBracketWith(const Matrix<Coefficient>& right);
   void ApproximateLargestEigenSpace(
     Vectors<Rational>& outputBasis,
     const Rational& DesiredError,
@@ -1190,30 +1187,30 @@ public:
     int numIterations
   );
   void MatrixToRoot(Vector<Rational>& output);
-  bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<coefficient> >& output) const;
-  void GetZeroEigenSpace(List<Vector<coefficient> >& output) const {
-    Matrix<coefficient> tempMat = *this;
+  bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<Coefficient> >& output) const;
+  void GetZeroEigenSpace(List<Vector<Coefficient> >& output) const {
+    Matrix<Coefficient> tempMat = *this;
     tempMat.GetZeroEigenSpaceModifyMe(output);
   }
-  void GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& output);
-  void GetEigenspaceModifyMe(const coefficient &inputEigenValue, List<Vector<coefficient> >& outputEigenspace) {
+  void GetZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output);
+  void GetEigenspaceModifyMe(const Coefficient &inputEigenValue, List<Vector<Coefficient> >& outputEigenspace) {
     for (int i = 0; i < this->numberOfColumns; i ++) {
       this->elements[i][i] -= inputEigenValue;
     }
     this->GetZeroEigenSpaceModifyMe(outputEigenspace);
   }
   static bool SystemLinearInequalitiesHasSolution(
-    Matrix<coefficient>& matA,
-    Matrix<coefficient>& matb,
-    Matrix<coefficient>& outputPoint
+    Matrix<Coefficient>& matA,
+    Matrix<Coefficient>& matb,
+    Matrix<Coefficient>& outputPoint
   );
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-    Matrix<coefficient>& matA,
-    Matrix<coefficient>& matb,
-    Vector<coefficient>* outputSolution = 0
+    Matrix<Coefficient>& matA,
+    Matrix<Coefficient>& matb,
+    Vector<Coefficient>* outputSolution = 0
   );
   static void ComputePotentialChangeGradient(
-    Matrix<coefficient>& matA,
+    Matrix<Coefficient>& matA,
     Selection& BaseVariables,
     int NumTrueVariables,
     int ColumnIndex,
@@ -1224,24 +1221,24 @@ public:
     Rational& maxMovement,
     int& LeavingVariableRow,
     int EnteringVariable,
-    Matrix<coefficient>& tempMatA,
-    Vector<coefficient>& inputVectorX,
+    Matrix<Coefficient>& tempMatA,
+    Vector<Coefficient>& inputVectorX,
     Selection& BaseVariables
   );
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
-  Matrix<coefficient> operator-(const Matrix<coefficient>& right) const {
-    Matrix<coefficient> tempMat =(*this);
+  Matrix<Coefficient> operator-(const Matrix<Coefficient>& right) const {
+    Matrix<Coefficient> tempMat =(*this);
     tempMat -= right;
     return tempMat;
   }
-  Matrix<coefficient> operator*(const Matrix<coefficient>& right) const;
-  Vector<coefficient> operator*(const Vector<coefficient>& v) const;
+  Matrix<Coefficient> operator*(const Matrix<Coefficient>& right) const;
+  Vector<Coefficient> operator*(const Vector<Coefficient>& v) const;
 
-  void operator=(const Matrix<coefficient>& other);
+  void operator=(const Matrix<Coefficient>& other);
   template<class otherType>
   void operator=(const Matrix<otherType>& other) {
-    this->Resize(other.numberOfRows, other.numberOfColumns, false);
+    this->resize(other.numberOfRows, other.numberOfColumns, false);
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
         (*this)(i, j) = other(i, j);
@@ -1249,16 +1246,16 @@ public:
     }
   }
   // The following are for compatibility with the FiniteGroup class
-  void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& out) {
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<Coefficient>& out) {
     out.AssignCharPoly(*this);
   }
-  bool HasDifferentConjugacyInvariantsFrom(Matrix<coefficient>& other) {
-    Polynomial<coefficient> p, q;
+  bool HasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
+    Polynomial<Coefficient> p, q;
     this->GetCharacteristicPolyStandardRepresentation(p);
     other.GetCharacteristicPolyStandardRepresentation(q);
     return !(p == q);
   }
-  bool operator>(const Matrix<coefficient>& right) const {
+  bool operator>(const Matrix<Coefficient>& right) const {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
       global.fatal << "An attempt was just made to compare two matrices of different dimensions; "
       << "most likely something is wrong in some FiniteGroup, see the frames above. "
@@ -1275,8 +1272,8 @@ public:
   }
 };
 
-template <class coefficient>
-bool Vectors<coefficient>::ConesIntersect(
+template <class Coefficient>
+bool Vectors<Coefficient>::ConesIntersect(
   List<Vector<Rational> >& StrictCone,
   List<Vector<Rational> >& NonStrictCone,
   Vector<Rational>* outputLinearCombo,
@@ -1315,9 +1312,9 @@ bool Vectors<coefficient>::ConesIntersect(
     matA, matb, outputLinearCombo
   )) {
     if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
+      bool tempBool = Vectors<Coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
-        global.fatal << "This is an algorithmic/mathematical (hence also programming) error: "
+        global.fatal << "This is an algorithmic/mathematical (hence also programming) error. "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
@@ -1336,7 +1333,7 @@ bool Vectors<coefficient>::ConesIntersect(
 }
 
 template <typename Element>
-void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* const TheRingZero) {
+void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* const theRingZero) {
   if (r < 0) {
     r = 0;
   }
@@ -1377,7 +1374,7 @@ void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* c
       }
     }
   }
-  if (TheRingZero != nullptr) {
+  if (theRingZero != nullptr) {
     if (!PReserveValues) {
       firstInvalidRow = 0;
       firstInvalidCol = 0;
@@ -1385,12 +1382,12 @@ void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* c
     for (int i = 0; i < r; i ++) {
       int colStart = (i < firstInvalidRow) ? firstInvalidCol : 0;
       for (int j = colStart; j < c; j ++) {
-        newElements[i][j] = *TheRingZero;
+        newElements[i][j] = *theRingZero;
       }
     }
   }
   if (newElements != nullptr) {
-    this->ReleaseMemory();
+    this->releaseMemory();
     this->elements = newElements;
     this->ActualNumCols = newActualNumCols;
     this->ActualNumRows = newActualNumRows;
@@ -1399,8 +1396,8 @@ void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* c
   this->numberOfRows = r;
 }
 
-template <typename coefficient>
-void Vectors<coefficient>::GetMatrixRootsToRows(Matrix<Rational>& output) const {
+template <typename Coefficient>
+void Vectors<Coefficient>::GetMatrixRootsToRows(Matrix<Rational>& output) const {
   int tempNumCols = 0;
   if (this->size != 0) {
     tempNumCols = static_cast<int>(this->theObjects[0].size);
@@ -1413,8 +1410,8 @@ void Vectors<coefficient>::GetMatrixRootsToRows(Matrix<Rational>& output) const 
   }
 }
 
-template <typename coefficient>
-void Vectors<coefficient>::GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm) {
+template <typename Coefficient>
+void Vectors<Coefficient>::GetOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm) {
   if (this->size == 0) {
     if (theBilinearForm != nullptr) {
       output.MakeEiBasis(theBilinearForm->numberOfRows);
@@ -1423,7 +1420,7 @@ void Vectors<coefficient>::GetOrthogonalComplement(Vectors<coefficient>& output,
     global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
     << " forbidden: I can't determine the dimension of the ambient vector space. " << global.fatal;
   }
-  Matrix<coefficient> theMatrix;
+  Matrix<Coefficient> theMatrix;
   theMatrix.AssignVectorsToRows(*this);
   if (theBilinearForm != nullptr) {
     theMatrix *= *theBilinearForm;
@@ -1431,8 +1428,8 @@ void Vectors<coefficient>::GetOrthogonalComplement(Vectors<coefficient>& output,
   theMatrix.GetZeroEigenSpaceModifyMe(output);
 }
 
-template <typename coefficient>
-bool Vectors<coefficient>::ComputeNormal(Vector<coefficient>& output, int inputDim) {
+template <typename Coefficient>
+bool Vectors<Coefficient>::ComputeNormal(Vector<Coefficient>& output, int inputDim) {
   if (this->size == 0) {
     if (inputDim == 1) {
       output.MakeEi(1, 0);
@@ -1441,7 +1438,7 @@ bool Vectors<coefficient>::ComputeNormal(Vector<coefficient>& output, int inputD
     return false;
   }
   int theDimension = this->theObjects[0].size;
-  Matrix<coefficient> tempMatrix;
+  Matrix<Coefficient> tempMatrix;
   Selection NonPivotPoints;
   NonPivotPoints.init(theDimension);
   output.setSize(theDimension);
@@ -1449,7 +1446,7 @@ bool Vectors<coefficient>::ComputeNormal(Vector<coefficient>& output, int inputD
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
-  tempMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
+  tempMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
@@ -1458,7 +1455,7 @@ void Matrix<Element>::operator=(const Matrix<Element>& m) {
   if (this == &m) {
     return;
   }
-  this->Resize(m.numberOfRows, m.numberOfColumns, false);
+  this->resize(m.numberOfRows, m.numberOfColumns, false);
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       this->elements[i][j] = m.elements[i][j];
@@ -1467,7 +1464,7 @@ void Matrix<Element>::operator=(const Matrix<Element>& m) {
 }
 
 template <typename Element>
-void Matrix<Element>::ReleaseMemory() {
+void Matrix<Element>::releaseMemory() {
   for (int i = 0; i < this->ActualNumRows; i ++) {
     delete [] this->elements[i];
   }
@@ -1483,18 +1480,18 @@ ParallelComputing::GlobalPointerCounter -= this->ActualNumRows * this->ActualNum
   this->ActualNumCols = 0;
 }
 
-template <typename coefficient>
-bool Matrix<coefficient>::Invert() {
+template <typename Coefficient>
+bool Matrix<Coefficient>::invert() {
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "This is a programming error: requesting to invert a non-square matrix of "
     << this->numberOfRows << " rows and "
     << this->numberOfColumns << " columns. " << global.fatal;
   }
-  MacroRegisterFunctionWithName("Matrix::Invert");
+  MacroRegisterFunctionWithName("Matrix::invert");
   Matrix theInverse;
   theInverse.MakeIdMatrix(this->numberOfRows);
   Selection NonPivotCols;
-  this->GaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
+  this->gaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
   if (NonPivotCols.CardinalitySelection != 0) {
     return false;
   }
@@ -1502,50 +1499,50 @@ bool Matrix<coefficient>::Invert() {
   return true;
 }
 
-template <typename coefficient>
-Matrix<coefficient> Matrix<coefficient>::operator^(const Matrix<coefficient>& right) const {
-  Matrix<coefficient> conjugateInverse = right;
-  conjugateInverse.Invert();
-  Matrix<coefficient> tmp;
-  this->MultiplyOnTheLeft(conjugateInverse,tmp);
-  Matrix<coefficient> out;
-  right.MultiplyOnTheLeft(tmp, out);
+template <typename Coefficient>
+Matrix<Coefficient> Matrix<Coefficient>::operator^(const Matrix<Coefficient>& right) const {
+  Matrix<Coefficient> conjugateInverse = right;
+  conjugateInverse.invert();
+  Matrix<Coefficient> tmp;
+  this->multiplyOnTheLeft(conjugateInverse,tmp);
+  Matrix<Coefficient> out;
+  right.multiplyOnTheLeft(tmp, out);
   return out;
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::ConjugationAction(
-  const Matrix<coefficient>& conjugateWith,
-  const Matrix<coefficient>& conjugateOn,
-  Matrix<coefficient>& out
+template <typename Coefficient>
+void Matrix<Coefficient>::conjugationAction(
+  const Matrix<Coefficient>& conjugateWith,
+  const Matrix<Coefficient>& conjugateOn,
+  Matrix<Coefficient>& out
 ) {
   out = conjugateOn ^ conjugateWith;
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero) {
-  Matrix<coefficient> tempMat;
-  this->MultiplyOnTheLeft(standsOnTheLeft, tempMat, theRingZero);
+template <typename Coefficient>
+void Matrix<Coefficient>::multiplyOnTheLeft(const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& theRingZero) {
+  Matrix<Coefficient> tempMat;
+  this->multiplyOnTheLeft(standsOnTheLeft, tempMat, theRingZero);
   this->operator=(tempMat);
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::MultiplyOnTheLeft(
-  const Matrix<coefficient>& standsOnTheLeft,
-  Matrix<coefficient>& output,
-  const coefficient& theRingZero
+template <typename Coefficient>
+void Matrix<Coefficient>::multiplyOnTheLeft(
+  const Matrix<Coefficient>& standsOnTheLeft,
+  Matrix<Coefficient>& output,
+  const Coefficient& theRingZero
 ) const {
   if (&output == this || &output == &standsOnTheLeft) {
-    Matrix<coefficient> thisCopy = *this;
-    Matrix<coefficient> standsOnTheLeftCopy = standsOnTheLeft;
-    thisCopy.MultiplyOnTheLeft(standsOnTheLeftCopy, output, theRingZero);
+    Matrix<Coefficient> thisCopy = *this;
+    Matrix<Coefficient> standsOnTheLeftCopy = standsOnTheLeft;
+    thisCopy.multiplyOnTheLeft(standsOnTheLeftCopy, output, theRingZero);
     return;
   }
   if (this->numberOfRows != standsOnTheLeft.numberOfColumns) {
     global.fatal << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.numberOfColumns
     << " columns by a matrix with " << this->numberOfRows << "rows. " << global.fatal;
   }
-  coefficient tempEl;
+  Coefficient tempEl;
   output.init(standsOnTheLeft.numberOfRows, this->numberOfColumns);
   for (int i = 0; i < standsOnTheLeft.numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -1603,11 +1600,11 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks) {
 }
 
 template<typename Element>
-void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2) {
+void Matrix<Element>::assignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2) {
   if (this == &m1 || this == &m2) {
-    global.fatal << "In AssignDirectSum: output not allowed to equal any of the inputs. " << global.fatal;
+    global.fatal << "In assignDirectSum: output not allowed to equal any of the inputs. " << global.fatal;
   }
-  this->Resize(m1.numberOfRows + m2.numberOfRows, m1.numberOfColumns + m2.numberOfColumns, false);
+  this->resize(m1.numberOfRows + m2.numberOfRows, m1.numberOfColumns + m2.numberOfColumns, false);
   this->makeZero();
   for (int i = 0; i < m1.numberOfRows; i ++) {
     for (int j = 0; j < m1.numberOfColumns; j ++) {
@@ -1622,19 +1619,19 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2) 
 }
 
 template<typename Element>
-void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& left, const Matrix<Element>& right) {
+void Matrix<Element>::assignTensorProduct(const Matrix<Element>& left, const Matrix<Element>& right) {
   //handle lazy programmers:
   if (this == &left || this == &right) {
     Matrix<Element> leftCopy = left;
     Matrix<Element> rightCopy = right;
-    this->AssignTensorProduct(leftCopy, rightCopy);
+    this->assignTensorProduct(leftCopy, rightCopy);
     return;
   }
-  this->Resize(left.numberOfRows*right.numberOfRows, left.numberOfColumns*right.numberOfColumns, false);
+  this->resize(left.numberOfRows*right.numberOfRows, left.numberOfColumns*right.numberOfColumns, false);
   int sr = right.numberOfRows;
   int sc = right.numberOfColumns;
   // The basis of the tensor product vector space MUST be
-  // in the SAME order as the one used by MatrixTensor::AssignTensorProduct.
+  // in the SAME order as the one used by MatrixTensor::assignTensorProduct.
   // indexing. Let the first vector space have basis
   // v_1, ..., v_k, the second: w_1, ..., w_m.
   // Then the basis of the tensor product is given
@@ -1655,7 +1652,7 @@ template<typename Element>
 void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero) {
   int oldNumRows = this->numberOfRows;
   int oldNumCols = this->numberOfColumns;
-  this->Resize(this->numberOfRows + m2.numberOfRows, this->numberOfColumns + m2.numberOfColumns, true);
+  this->resize(this->numberOfRows + m2.numberOfRows, this->numberOfColumns + m2.numberOfColumns, true);
   for (int i = 0; i < m2.numberOfRows; i ++) {
     for (int j = 0; j < m2.numberOfColumns; j ++) {
       this->elements[i + oldNumRows][j + oldNumCols] = m2.elements[i][j];
@@ -1672,8 +1669,8 @@ void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2, const Element& th
 }
 
 template <typename Element>
-int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex) {
-  for (int i = RowStartIndex; i < this->numberOfRows; i ++) {
+int Matrix<Element>::FindPivot(int columnIndex, int rowStartIndex) {
+  for (int i = rowStartIndex; i < this->numberOfRows; i ++) {
     if (!this->elements[i][columnIndex].isEqualToZero()) {
       return i;
     }
@@ -1683,10 +1680,13 @@ int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex) {
 
 template <typename Element>
 void Matrix<Element>::SubtractRows(
-  int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar
+  int indexRowWeSubtractFrom,
+  int indexSubtracted,
+  int startColumnIndex,
+  const Element& scalar
 ) {
   Element tempElement;
-  for (int i = StartColIndex; i < this->numberOfColumns; i ++) {
+  for (int i = startColumnIndex; i < this->numberOfColumns; i ++) {
     tempElement = this->elements[indexSubtracted][i];
     tempElement *= scalar;
     this->elements[indexRowWeSubtractFrom][i] -= tempElement;
@@ -1701,7 +1701,7 @@ void Matrix<Element>::RowTimesScalar(int rowIndex, const Element& scalar) {
 }
 
 template <typename Element>
-void Matrix<Element>::SwitchTwoRows(int row1, int row2) {
+void Matrix<Element>::switchRows(int row1, int row2) {
   if (row1 == row2) {
     return;
   }
@@ -1718,7 +1718,7 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     global.fatal << "Number of matrix rows does not match number of vector entries. " << global.fatal;
   }
   Selection thePivotPoints;
-  A.GaussianEliminationByRows(&b, 0, &thePivotPoints);
+  A.gaussianEliminationByRows(&b, 0, &thePivotPoints);
   return A.RowEchelonFormToLinearSystemSolution(thePivotPoints, b, output);
 }
 
@@ -1734,16 +1734,16 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(
     global.fatal << "In RowEchelonFormToLinearSystemSolution: bad matrix dimensions. " << global.fatal;
   }
   outputSolution.init(this->numberOfColumns, 1);
-  int NumPivots = 0;
+  int numPivots = 0;
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (inputPivotPoints.selected[i]) {
-      outputSolution(i, 0) = inputRightHandSide(NumPivots, 0);
-      NumPivots ++;
+      outputSolution(i, 0) = inputRightHandSide(numPivots, 0);
+      numPivots ++;
     } else {
       outputSolution(i, 0).makeZero();
     }
   }
-  for (int i = NumPivots; i < this->numberOfRows; i ++) {
+  for (int i = numPivots; i < this->numberOfRows; i ++) {
     if (!inputRightHandSide.elements[i][0].isEqualToZero()) {
       return false;
     }
@@ -1770,7 +1770,7 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     outputPivotPointCols.theObjects[i] = currentPivotCol;
     if (currentPivotCol != - 1) {
       tempElement = this->elements[i][currentPivotCol];
-      tempElement.Invert();
+      tempElement.invert();
       this->RowTimesScalar(i, tempElement);
       for (int j = 0; j < this->numberOfRows; j ++) {
         if (i != j) {
@@ -1820,7 +1820,7 @@ void Matrix<Element>::makeIdentity(
 
 template <typename Element>
 void Matrix<Element>::init(int r, int c) {
-  this->Resize(r, c, false);
+  this->resize(r, c, false);
 }
 
 class FormatExpressions {
@@ -1948,29 +1948,29 @@ class MonomialWeylAlgebra {
   }
 };
 
-template <class coefficient>
-std::iostream& operator<<(std::iostream& output, const Polynomial<coefficient>& input) {
+template <class Coefficient>
+std::iostream& operator<<(std::iostream& output, const Polynomial<Coefficient>& input) {
   output << input.toString();
   return output;
 }
 
-template <class templateMonomial, class coefficient>
+template <class templateMonomial, class Coefficient>
 std::ostream& operator<<(
   std::ostream& output,
-  const LinearCombination<templateMonomial, coefficient>& theCollection
+  const LinearCombination<templateMonomial, Coefficient>& theCollection
 );
 
-template <class templateMonomial, class coefficient>
+template <class templateMonomial, class Coefficient>
 class LinearCombination {
 private:
   void addOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
   void clear();//<-to guard the now unsafe base class method
-  friend std::ostream& operator<< <templateMonomial, coefficient>(
-    std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection
+  friend std::ostream& operator<< <templateMonomial, Coefficient>(
+    std::ostream& output, const LinearCombination<templateMonomial, Coefficient>& theCollection
   );
 public:
   HashedList<templateMonomial> theMonomials;
-  List<coefficient> coefficients;
+  List<Coefficient> coefficients;
   bool flagDeallocated;
   LinearCombination() {
     this->flagDeallocated = false;
@@ -1996,7 +1996,7 @@ public:
   }
   // The hash function of Monomial collection must return the same value for
   // monomial collections whose monomials are permuted.
-  static unsigned int hashFunction(const LinearCombination<templateMonomial, coefficient>& input) {
+  static unsigned int hashFunction(const LinearCombination<templateMonomial, Coefficient>& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.size(); i ++) {
       result += input.coefficients[i].hashFunction() * input[i].hashFunction();
@@ -2013,17 +2013,17 @@ public:
     theSortedMons.quickSortDescending(theOrder, &this->coefficients);
     this->theMonomials = theSortedMons;
   }
-  void GetVectorMonsAscending(Vector<coefficient>& result);
-  void GetVectorMonsDescending(Vector<coefficient>& result);
+  void GetVectorMonsAscending(Vector<Coefficient>& result);
+  void GetVectorMonsDescending(Vector<Coefficient>& result);
   void PopMonomial(int index) {
     this->theMonomials.removeIndexSwapWithLast(index);
     this->coefficients.removeIndexSwapWithLast(index);
   }
   void AddOtherTimesConst(
-    LinearCombination<templateMonomial, coefficient>& other,
-    const coefficient& theConst
+    LinearCombination<templateMonomial, Coefficient>& other,
+    const Coefficient& theConst
   );
-  void PopMonomial(int index, templateMonomial& outputMon, coefficient& outputCoeff) {
+  void PopMonomial(int index, templateMonomial& outputMon, Coefficient& outputCoeff) {
     outputMon = (*this)[index];
     outputCoeff = this->coefficients[index];
     this->theMonomials.removeIndexSwapWithLast(index);
@@ -2032,21 +2032,21 @@ public:
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  coefficient GetCoefficientsSum() const {
-    coefficient result = 0;
+  Coefficient GetCoefficientsSum() const {
+    Coefficient result = 0;
     for (int i = 0; i < this->coefficients.size; i ++) {
       result += this->coefficients[i];
     }
     return result;
   }
-  void AddMonomial(
-    const templateMonomial& inputMon, const coefficient& inputCoeff
+  void addMonomial(
+    const templateMonomial& inputMon, const Coefficient& inputCoeff
   ) {
     this->CleanupMonIndex(
       this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff)
     );
   }
-  void GetMinMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
+  void GetMinMonomial(templateMonomial& outputMon, Coefficient& outputCF) const {
     if (this->isEqualToZero()) {
       global.fatal << "This is a programming error: calling GetMinMon "
       << "on a zero monomial collection is forbidden. " << global.fatal;
@@ -2061,8 +2061,8 @@ public:
     }
   }
 
-  coefficient GetLeadingCoefficient(const typename List<templateMonomial>::Comparator* monomialOrder) {
-    coefficient result;
+  Coefficient GetLeadingCoefficient(const typename List<templateMonomial>::Comparator* monomialOrder) {
+    Coefficient result;
     this->GetIndexLeadingMonomial(nullptr, &result, monomialOrder);
     return result;
   }
@@ -2075,7 +2075,7 @@ public:
 
   int GetIndexLeadingMonomial(
     templateMonomial* outputMonomial,
-    coefficient* outputCoefficient,
+    Coefficient* outputCoefficient,
     const typename List<templateMonomial>::Comparator* monomialOrder = nullptr
   ) const {
     if (this->size() == 0) {
@@ -2129,14 +2129,14 @@ public:
     return true;
   }
   int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
-    const templateMonomial& inputMonomial, const coefficient& inputCoefficient
+    const templateMonomial& inputMonomial, const Coefficient& inputCoefficient
   );
   template <class LinearCombinationTemplate>
-  static void GaussianEliminationByRows(
+  static void gaussianEliminationByRows(
     List<LinearCombinationTemplate>& theList,
     bool *IHaveMadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr,
-    Matrix<coefficient>* carbonCopyMatrix = nullptr,
+    Matrix<Coefficient>* carbonCopyMatrix = nullptr,
     List<LinearCombinationTemplate>* carbonCopyList = nullptr
   );
   template <class LinearCombinationTemplate>
@@ -2155,7 +2155,7 @@ public:
     List<LinearCombinationTemplate> listCopy = vectorSpace1;
     listCopy.addListOnTop(vectorSpace2);
     return vectorSpace1.size + vectorSpace2.size -
-    LinearCombination<templateMonomial, coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
+    LinearCombination<templateMonomial, Coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
   }
   template <class LinearCombinationTemplate>
   static bool VectorSpacesIntersectionIsNonTrivial(
@@ -2163,7 +2163,7 @@ public:
     List<LinearCombinationTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    return 0 != LinearCombination<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(
+    return 0 != LinearCombination<templateMonomial, Coefficient>::GetRankIntersectionVectorSpaces(
       vectorSpace1, vectorSpace2, seedMonomials
     );
   }
@@ -2174,12 +2174,12 @@ public:
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;
-    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     int startSpanSize = listCopy.size;
     listCopy.addOnTop(input);
-    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     return listCopy.size == startSpanSize;
@@ -2188,7 +2188,7 @@ public:
   static bool LinSpanContainsGetFirstLinearCombination(
     const List<LinearCombinationTemplate>& theList,
     const LinearCombinationTemplate& input,
-    Vector<coefficient>& outputFirstLinearCombination,
+    Vector<Coefficient>& outputFirstLinearCombination,
     HashedList<templateMonomial>* seedMonomials = nullptr
   );
   bool HasRationalCoeffs(LinearCombination<templateMonomial, Rational>*
@@ -2205,7 +2205,7 @@ public:
         return false;
       } else {
         if (outputConversionToRationals != nullptr) {
-          outputConversionToRationals->AddMonomial((*this)[i], *theCF);
+          outputConversionToRationals->addMonomial((*this)[i], *theCF);
         }
       }
     }
@@ -2217,7 +2217,7 @@ public:
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;
-    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
   template <class LinearCombinationTemplate>
@@ -2226,7 +2226,7 @@ public:
     bool *IvemadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    LinearCombinationTemplate::GaussianEliminationByRows(
+    LinearCombinationTemplate::gaussianEliminationByRows(
       theList, IvemadeARowSwitch, seedMonomials
     );
     for (int j = theList.size - 1; j >= 0; j --) {
@@ -2236,7 +2236,7 @@ public:
     }
   }
   int SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
-    const templateMonomial& inputMon, const coefficient& inputCoeff
+    const templateMonomial& inputMon, const Coefficient& inputCoeff
   );
   void CleanUpZeroCoeffs() {
     for (int i = 0; i < this->size; i ++) {
@@ -2248,10 +2248,10 @@ public:
   template<class baseType>
   void SubstitutionCoefficients(const List<Polynomial<baseType> >& theSub) {
     MacroRegisterFunctionWithName("Polynomial::SubstitutionCoefficients");
-    coefficient newCoeff;
+    Coefficient newCoeff;
     for (int i = 0; i < this->size(); i ++) {
       newCoeff = this->coefficients[i];
-      newCoeff.Substitution(theSub);
+      newCoeff.substitution(theSub);
       if (newCoeff.isEqualToZero()) {
         this->PopMonomial(i);
         i --;
@@ -2260,28 +2260,28 @@ public:
       this->coefficients[i] = newCoeff;
     }
   }
-  void SubtractMonomial(const templateMonomial& inputMon, const coefficient& inputCoeff) {
+  void SubtractMonomial(const templateMonomial& inputMon, const Coefficient& inputCoeff) {
     this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(inputMon, inputCoeff));
   }
-  coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
+  Coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
     int theIndex = this->theMonomials.getIndex(inputMon);
     if (theIndex == - 1) {
       if (this->coefficients.size > 0) {
         return this->coefficients[0].zero();
       }
-      return coefficient::zeroStatic();
+      return Coefficient::zeroStatic();
     }
     return this->coefficients[theIndex];
   }
-  bool operator>(const LinearCombination<templateMonomial, coefficient>& other) const {
+  bool operator>(const LinearCombination<templateMonomial, Coefficient>& other) const {
     if (this->size() > other.size()) {
       return true;
     }
     if (this->size() < other.size()) {
       return false;
     }
-    LinearCombination<templateMonomial, coefficient> leftCopy = *this;
-    LinearCombination<templateMonomial, coefficient> rightCopy = other;
+    LinearCombination<templateMonomial, Coefficient> leftCopy = *this;
+    LinearCombination<templateMonomial, Coefficient> rightCopy = other;
     leftCopy.quickSortAscending();
     rightCopy.quickSortAscending();
     for (int i = leftCopy.size() - 1; i >= 0; i --) {
@@ -2321,21 +2321,21 @@ public:
     this->CheckNumCoeffsConsistency();
   }
   // Returns the number by which the linear combination was multiplied.
-  coefficient scaleNormalizeLeadingMonomial() {
+  Coefficient scaleNormalizeLeadingMonomial() {
     MacroRegisterFunctionWithName("Polynomial::scaleNormalizeLeadingMonomial");
     if (this->isEqualToZero()) {
-      return coefficient();
+      return Coefficient();
     }
     int indexLeadingMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr);
-    coefficient result = coefficient::scaleNormalizeIndex(
+    Coefficient result = Coefficient::scaleNormalizeIndex(
       this->coefficients, indexLeadingMonomial
     );
     return result;
   }
 
-  static std::string GetBlendCoeffAndMon(
+  static std::string getBlendCoefficientAndMonomial(
     const templateMonomial& inputMonomial,
-    coefficient& inputCoefficient,
+    Coefficient& inputCoefficient,
     bool addPlusToFront,
     FormatExpressions* theFormat = nullptr
   );
@@ -2379,63 +2379,63 @@ public:
     }
   }
   bool ReadFromFile(std::fstream& input);
-  bool operator!=(const LinearCombination<templateMonomial, coefficient>& other) const {
+  bool operator!=(const LinearCombination<templateMonomial, Coefficient>& other) const {
     return !(*this == other);
   }
-  bool operator==(const LinearCombination<templateMonomial, coefficient>& other) const;
+  bool operator==(const LinearCombination<templateMonomial, Coefficient>& other) const;
   bool operator==(int x) const;
-  void operator+=(const LinearCombination<templateMonomial, coefficient>& other);
-  LinearCombination<templateMonomial, coefficient> operator*(const coefficient& other) const {
-    LinearCombination<templateMonomial, coefficient> result = *this;
+  void operator+=(const LinearCombination<templateMonomial, Coefficient>& other);
+  LinearCombination<templateMonomial, Coefficient> operator*(const Coefficient& other) const {
+    LinearCombination<templateMonomial, Coefficient> result = *this;
     result *= other;
     return result;
   }
-  LinearCombination<templateMonomial, coefficient> operator-(
-    const LinearCombination<templateMonomial, coefficient>& other
+  LinearCombination<templateMonomial, Coefficient> operator-(
+    const LinearCombination<templateMonomial, Coefficient>& other
   ) const {
-    LinearCombination<templateMonomial, coefficient> output = *this;
+    LinearCombination<templateMonomial, Coefficient> output = *this;
     output -= other;
     return output;
   }
-  LinearCombination<templateMonomial, coefficient> operator+(
-    const LinearCombination<templateMonomial, coefficient>& other
+  LinearCombination<templateMonomial, Coefficient> operator+(
+    const LinearCombination<templateMonomial, Coefficient>& other
   ) const {
-    LinearCombination<templateMonomial, coefficient> output = *this;
+    LinearCombination<templateMonomial, Coefficient> output = *this;
     output += other;
     return output;
   }
-  void makeConstant(const coefficient& coeff) {
+  void makeConstant(const Coefficient& coeff) {
     templateMonomial tempM;
     tempM.makeOne();
-    this->AddMonomial(tempM, coeff);
+    this->addMonomial(tempM, coeff);
   }
   void makeOne() {
     this->makeConstant(1);
   }
-  void operator+=(const coefficient& other) {
+  void operator+=(const Coefficient& other) {
     templateMonomial tempM;
     tempM.makeOne();
-    this->AddMonomial(tempM, other);
+    this->addMonomial(tempM, other);
   }
-  void operator-=(const coefficient& other) {
+  void operator-=(const Coefficient& other) {
     templateMonomial tempM;
     tempM.makeOne();
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
-  void AssignOtherType(const LinearCombination<templateMonomial, coefficient>& other) {
+  void AssignOtherType(const LinearCombination<templateMonomial, Coefficient>& other) {
     this->::HashedList<templateMonomial>::operator=(other);
     this->coefficients.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->coefficients[i] = other.coefficients[i];
     }
   }
-  void operator-=(const LinearCombination<templateMonomial, coefficient>& other) {
+  void operator-=(const LinearCombination<templateMonomial, Coefficient>& other) {
     this->SubtractOtherTimesCoeff(other);
   }
   void SubtractOtherTimesCoeff(
-    const LinearCombination<templateMonomial, coefficient>& other,
-    coefficient* inputcf = nullptr
+    const LinearCombination<templateMonomial, Coefficient>& other,
+    Coefficient* inputcf = nullptr
   );
   template <class otherType>
   void operator/=(const otherType& other) {
@@ -2474,7 +2474,7 @@ public:
     // This shouldn't yield a measurable slowdown.
     // Further this function is to be used for non-time critical operations.
     this->makeZero();
-    this->AddMonomial(otherCopy, 1);
+    this->addMonomial(otherCopy, 1);
   }
   template<class otherType>
   void operator=(const LinearCombination<templateMonomial, otherType>& other) {
@@ -2512,14 +2512,14 @@ class MonomialVector {
   }
 };
 
-template <class coefficient>
-class VectorSparse : public LinearCombination<MonomialVector, coefficient> {
+template <class Coefficient>
+class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   public:
-  void MaKeEi(int NonZeroIndex, const coefficient& theCoeff = 1) {
+  void MaKeEi(int NonZeroIndex, const Coefficient& theCoeff = 1) {
     this->makeZero();
     MonomialVector theMon;
     theMon.MakeEi(NonZeroIndex);
-    this->AddMonomial(theMon, theCoeff);
+    this->addMonomial(theMon, theCoeff);
   }
   int GetLargestParticipatingBasisIndex() {
     int result = - 1;
@@ -2528,117 +2528,117 @@ class VectorSparse : public LinearCombination<MonomialVector, coefficient> {
     }
     return result;
   }
-  bool operator>(const VectorSparse<coefficient>& other) const {
-    return this->::LinearCombination<MonomialVector, coefficient>::operator>(other);
+  bool operator>(const VectorSparse<Coefficient>& other) const {
+    return this->::LinearCombination<MonomialVector, Coefficient>::operator>(other);
   }
 };
 
-template <class templateMonomial, class coefficient>
-class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coefficient> {
+template <class templateMonomial, class Coefficient>
+class ElementMonomialAlgebra: public LinearCombination<templateMonomial, Coefficient> {
   public:
-  void MultiplyBy(
-    const ElementMonomialAlgebra<templateMonomial, coefficient>& other,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& output,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly,
+  void multiplyBy(
+    const ElementMonomialAlgebra<templateMonomial, Coefficient>& other,
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& output,
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& bufferPoly,
     templateMonomial& bufferMon
   ) const;
-  void MultiplyBy(
+  void multiplyBy(
     const templateMonomial& other,
-    const coefficient& theCoeff,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& output,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly,
+    const Coefficient& theCoeff,
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& output,
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& bufferPoly,
     templateMonomial& bufferMon
   ) const;
-  void MultiplyBy(
+  void multiplyBy(
     const templateMonomial& monomial,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& output
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& output
   ) const;
-  void MultiplyBy(const MonomialP& other) {
-    this->MultiplyBy(other, *this);
+  void multiplyBy(const MonomialP& other) {
+    this->multiplyBy(other, *this);
   }
-  void MultiplyBy(const MonomialP& other, const coefficient& theCoeff) {
-    return this->MultiplyBy(other, theCoeff, *this);
+  void multiplyBy(const MonomialP& other, const Coefficient& theCoeff) {
+    return this->multiplyBy(other, theCoeff, *this);
   }
-  void MultiplyBy(
+  void multiplyBy(
     const MonomialP& other,
-    const coefficient& theCoeff,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& output
+    const Coefficient& theCoeff,
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& output
   ) const {
-    this->MultiplyBy(other, output);
+    this->multiplyBy(other, output);
     output *= theCoeff;
   }
 
-  void MultiplyOnTheLeft(
-    const ElementMonomialAlgebra<templateMonomial, coefficient>& standsOnTheLeft
+  void multiplyOnTheLeft(
+    const ElementMonomialAlgebra<templateMonomial, Coefficient>& standsOnTheLeft
   ) {
-    ElementMonomialAlgebra<templateMonomial, coefficient> tempMat, bufferPoly;
+    ElementMonomialAlgebra<templateMonomial, Coefficient> tempMat, bufferPoly;
     templateMonomial bufferMon;
-    standsOnTheLeft.MultiplyBy(*this, tempMat, bufferPoly, bufferMon);
+    standsOnTheLeft.multiplyBy(*this, tempMat, bufferPoly, bufferMon);
     *this = tempMat;
   }
-  void operator*=(const ElementMonomialAlgebra<templateMonomial, coefficient>& other) {
-    ElementMonomialAlgebra<templateMonomial, coefficient> bufferPoly;
+  void operator*=(const ElementMonomialAlgebra<templateMonomial, Coefficient>& other) {
+    ElementMonomialAlgebra<templateMonomial, Coefficient> bufferPoly;
     templateMonomial bufferMon;
-    this->MultiplyBy(other, *this, bufferPoly, bufferMon);
+    this->multiplyBy(other, *this, bufferPoly, bufferMon);
   }
-  void operator*=(const coefficient& other) {
-    this->::LinearCombination<templateMonomial, coefficient>::operator*=(other);
+  void operator*=(const Coefficient& other) {
+    this->::LinearCombination<templateMonomial, Coefficient>::operator*=(other);
   }
   void raiseToPower(
     int d,
-    ElementMonomialAlgebra<templateMonomial, coefficient>& output,
-    const coefficient& theRingUniT
+    ElementMonomialAlgebra<templateMonomial, Coefficient>& output,
+    const Coefficient& theRingUniT
   );
   void raiseToPower(int d) {
     if (d == 1) {
       return;
     }
-    ElementMonomialAlgebra<templateMonomial, coefficient> theOne;
+    ElementMonomialAlgebra<templateMonomial, Coefficient> theOne;
     theOne.makeConstant(1);
     MathRoutines::raiseToPower(*this, d, theOne);
   }
 };
 
-template<class coefficient>
+template<class Coefficient>
 class PolynomialOrder {
   public:
   List<MonomialP>::Comparator theMonOrder;
-  bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;
+  bool CompareLeftGreaterThanRight(const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right) const;
 };
 
-template <class coefficient, class oneFactorFinder>
+template <class Coefficient, class oneFactorFinder>
 class PolynomialFactorization;
 
-template<class coefficient>
-class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient> {
+template<class Coefficient>
+class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
 public:
-  friend std::iostream& operator<< <coefficient>(std::iostream& output, const Polynomial<coefficient>& input);
+  friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Polynomial<Coefficient>& input);
   Polynomial(int x) {
     this->makeConstant(x, 0);
   }
   Polynomial(){}
-  Polynomial(const Polynomial<coefficient>& other) {
+  Polynomial(const Polynomial<Coefficient>& other) {
     this->operator=(other);
   }
   static bool flagAnErrorHasOccuredTimeToPanic;
   unsigned int hashFunction() const {
-    return this->::LinearCombination<MonomialP, coefficient>::hashFunction();
+    return this->::LinearCombination<MonomialP, Coefficient>::hashFunction();
   }
-  static unsigned int hashFunction(const Polynomial<coefficient>& input) {
+  static unsigned int hashFunction(const Polynomial<Coefficient>& input) {
     return input.hashFunction();
   }
   //////////////////////////////////////////////
   void AssignFloor() const {
   }
-  void AssignMinPoly(const Matrix<coefficient>& input);
-  void AssignCharPoly(const Matrix<coefficient>& input);
-  void AssignMonomialWithExponent(Vector<Rational>& r, const coefficient& theCoeff = 1) {
+  void AssignMinPoly(const Matrix<Coefficient>& input);
+  void AssignCharPoly(const Matrix<Coefficient>& input);
+  void AssignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
     this->makeZero();
-    this->AddMonomial(r, theCoeff);
+    this->addMonomial(r, theCoeff);
   }
-  void GetConstantTerm(coefficient& output, const coefficient& theRingZero = 0) const;
-  coefficient GetConstantTerm(const coefficient& theRingZero = 0) const {
-    coefficient result;
+  void GetConstantTerm(Coefficient& output, const Coefficient& theRingZero = 0) const;
+  Coefficient GetConstantTerm(const Coefficient& theRingZero = 0) const {
+    Coefficient result;
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
@@ -2648,72 +2648,72 @@ public:
     Vectors<Rational>& outputValuesInterpolands
   );
   bool isSquareFree(
-    const coefficient& one,
+    const Coefficient& one,
     std::stringstream* comments
   ) const;
   bool isSquareFreeAndUnivariate(
-    const coefficient& one,
+    const Coefficient& one,
     std::stringstream* comments
   ) const;
   // Given polynomial p, returns d/dx_1 p dx_1 + ... + d/dx_n p dx_n.
   // The differentials dx_1, ..., dx_n are introduced as additional variables.
   bool differential(
-    Polynomial<coefficient>& output, std::stringstream* comments
+    Polynomial<Coefficient>& output, std::stringstream* comments
   ) const;
   // Similar to the preceding function but returns a vector.
   bool differential(
-    Vector<Polynomial<coefficient> >& output, std::stringstream* comments
+    Vector<Polynomial<Coefficient> >& output, std::stringstream* comments
   ) const;
-  void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
+  void Interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
-  coefficient GetDiscriminant();
-  void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
+  Coefficient GetDiscriminant();
+  void GetCoeffInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
   void makeMonomial(
     int letterIndex,
     const Rational& power,
-    const coefficient& inputCoefficient = 1,
+    const Coefficient& inputCoefficient = 1,
     int ExpectedNumVars = 0
   );
-  void makeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
+  void makeDegreeOne(int NVar, int NonZeroIndex, const Coefficient& coeff);
   void makeDegreeOne(
     int NVar,
     int NonZeroIndex1,
     int NonZeroIndex2,
-    const coefficient& coeff1,
-    const coefficient& coeff2
+    const Coefficient& coeff1,
+    const Coefficient& coeff2
   );
-  void makeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm);
+  void makeDegreeOne(int NVar, int NonZeroIndex, const Coefficient& coeff1, const Coefficient& ConstantTerm);
   void makeLinearNoConstant(const Vector<Rational>& inputCoefficients);
   void makeLinearWithConstantTerm(const Vector<Rational>& inputLastCoordinateConstantTerm);
   void MakePolyFromDirectionAndNormal(
-    Vector<coefficient>& direction,
-    Vector<coefficient>& normal,
-    coefficient& Correction
+    Vector<Coefficient>& direction,
+    Vector<Coefficient>& normal,
+    Coefficient& Correction
   );
   static bool GetLinearSystemFromLinearPolys(
-    const List<Polynomial<coefficient> >& theLinPolys,
-    Matrix<coefficient>& homogenousPart,
-    Matrix<coefficient>& constTerms
+    const List<Polynomial<Coefficient> >& theLinPolys,
+    Matrix<Coefficient>& homogenousPart,
+    Matrix<Coefficient>& constTerms
   );
   bool IsOneVariablePoly(int* whichVariable = nullptr) const;
   bool IsOneVariableNonConstPoly(int* whichVariable = nullptr) const;
-  Polynomial<coefficient> one() const;
-  static Polynomial<coefficient> zero();
+  Polynomial<Coefficient> one() const;
+  static Polynomial<Coefficient> zero();
   Rational RationalValue();
-  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat);
-  void makeConstant(const coefficient& theConst, int ExpectedNumVars = 0) {
+  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
+  void makeConstant(const Coefficient& theConst, int ExpectedNumVars = 0) {
     this->makeZero();
     MonomialP theConstMon;
     theConstMon.makeOne(ExpectedNumVars);
-    this->AddMonomial(theConstMon, theConst);
+    this->addMonomial(theConstMon, theConst);
   }
   void makeOne(int ExpectedNumVars = 0);
   void GetPolyWithPolyCoeff(
-    Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output
+    Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
   ) const;
   void GetPolyUnivariateWithPolyCoeffs(
     int theVar,
-    Polynomial<Polynomial<coefficient> >& output
+    Polynomial<Polynomial<Coefficient> >& output
   ) const;
   void TimesInteger(int a);
   // Multivariable polynomial division with remainder.
@@ -2722,16 +2722,15 @@ public:
   // However, since that data structure is somewhat heavy,
   // we provide an alternative independent implementation here.
   void DivideBy(
-    const Polynomial<coefficient>& inputDivisor,
-    Polynomial<coefficient>& outputQuotient,
-    Polynomial<coefficient>& outputRemainder,
+    const Polynomial<Coefficient>& inputDivisor,
+    Polynomial<Coefficient>& outputQuotient,
+    Polynomial<Coefficient>& outputRemainder,
     List<MonomialP>::Comparator* monomialOrder
   ) const;
-  void DivideByConstant(const coefficient& r);
-  void AddConstant(const coefficient& theConst) {
+  void AddConstant(const Coefficient& theConst) {
     MonomialP tempMon;
     tempMon.makeOne();
-    this->AddMonomial(tempMon, theConst);
+    this->addMonomial(tempMon, theConst);
   }
   void ShiftVariableIndicesToTheRight(int VarIndexShift);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
@@ -2740,71 +2739,71 @@ public:
   }
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate();
   void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
-  void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
-  bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution);
+  void DecreaseNumVariables(int increment, Polynomial<Coefficient>& output);
+  bool substitution(const List<Polynomial<Coefficient> >& TheSubstitution);
   Rational totalDegree() const;
   int TotalDegreeInt() const;
   bool IsEqualToOne() const;
   bool IsMonomialCoeffOne() const;
   bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const;
-  bool IsConstant(coefficient* whichConstant = nullptr) const;
+  bool IsConstant(Coefficient* whichConstant = nullptr) const;
   bool isNegative() const;
   bool IsLinearNoConstantTerm();
   bool IsLinear();
-  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot);
-  void raiseToPower(int d, const coefficient& one);
-  bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot);
-  Matrix<coefficient> EvaluateUnivariatePoly(const Matrix<coefficient>& input);//<-for univariate polynomials only
-  coefficient Evaluate(const Vector<coefficient>& input);
+  bool IsLinearGetRootConstantTermLastCoordinate(Vector<Coefficient>& outputRoot);
+  void raiseToPower(int d, const Coefficient& one);
+  bool GetRootFromLinPolyConstTermLastVariable(Vector<Coefficient>& outputRoot);
+  Matrix<Coefficient> EvaluateUnivariatePoly(const Matrix<Coefficient>& input);//<-for univariate polynomials only
+  Coefficient Evaluate(const Vector<Coefficient>& input);
   bool IsProportionalTo(
-    const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit
+    const Polynomial<Coefficient>& other, Coefficient& TimesMeEqualsOther, const Coefficient& theRingUnit
   ) const;
   void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
 
-  // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
+  // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<Coefficient> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
-  bool operator<=(const coefficient& other) const;
-  bool operator<(const coefficient& other) const;
-  bool operator>(const Polynomial<coefficient>& other) const;
-  bool operator<=(const Polynomial<coefficient>& other) const;
+  bool operator<=(const Coefficient& other) const;
+  bool operator<(const Coefficient& other) const;
+  bool operator>(const Polynomial<Coefficient>& other) const;
+  bool operator<=(const Polynomial<Coefficient>& other) const;
   bool IsGreaterThanZeroLexicographicOrder();
   static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic(
-    const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
+    const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
   static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest(
-    const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
+    const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
-  bool IsEqualTo(const Polynomial<coefficient>& p) const;
+  bool IsEqualTo(const Polynomial<Coefficient>& p) const;
   void operator-=(int x);
-  void operator-=(const coefficient& other);
-  void operator-=(const Polynomial<coefficient>& other);
+  void operator-=(const Coefficient& other);
+  void operator-=(const Polynomial<Coefficient>& other);
   void operator*=(const MonomialP& other);
-  void operator*=(const Polynomial<coefficient>& other);
-  Polynomial<coefficient> operator%(const Polynomial<coefficient>& other);
-  void operator/=(const Polynomial<coefficient>& other);
+  void operator*=(const Polynomial<Coefficient>& other);
+  Polynomial<Coefficient> operator%(const Polynomial<Coefficient>& other);
+  void operator/=(const Polynomial<Coefficient>& other);
   void operator/=(int other);
-  void operator/=(const coefficient& other);
+  void operator/=(const Coefficient& other);
   template <class otherType>
   void operator*=(const otherType& other);
-  void operator=(const Polynomial<coefficient>& other);
+  void operator=(const Polynomial<Coefficient>& other);
   template<class otherType>
   void operator=(const Polynomial<otherType>& other);
-  void operator=(const coefficient& other);
+  void operator=(const Coefficient& other);
   void operator=(int other);
   template <class otherType>
   void AssignOtherType(const Polynomial<otherType>& other);
   static bool greatestCommonDivisor(
-    const Polynomial<coefficient>& left,
-    const Polynomial<coefficient>& right,
-    Polynomial<coefficient>& output,
-    coefficient one,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Polynomial<Coefficient>& output,
+    const Coefficient& one,
     std::stringstream* commentsOnFailure
   );
   static bool leastCommonMultiple(
-    const Polynomial<coefficient>& left,
-    const Polynomial<coefficient>& right,
-    Polynomial<coefficient>& output,
-    coefficient one,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Polynomial<Coefficient>& output,
+    const Coefficient& one,
     std::stringstream* commentsOnFailure
   );
   bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
@@ -2826,9 +2825,9 @@ public:
     bool factorizationKronecker();
     bool oneDifferential(const std::string& input, const std::string& expected);
     bool differential();
-    Polynomial<coefficient> fromString(const std::string& input);
-    Vector<Polynomial<coefficient> > fromStringCommonContext(const std::string& first, const std::string& second);
-    Vector<Polynomial<coefficient> > fromStringCommonContext(const List<std::string>& input);
+    Polynomial<Coefficient> fromString(const std::string& input);
+    Vector<Polynomial<Coefficient> > fromStringCommonContext(const std::string& first, const std::string& second);
+    Vector<Polynomial<Coefficient> > fromStringCommonContext(const List<std::string>& input);
     bool fromStringTest();
     bool fromStringCommonContextTest();
   };
@@ -2868,32 +2867,32 @@ bool Polynomial<Rational>::Test::fromStringTest();
 template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 
-template <class coefficient>
+template <class Coefficient>
 class ElementOneVariablePolynomialQuotientRing {
 public:
-  Polynomial<coefficient> modulus;
-  Polynomial<coefficient> value;
+  Polynomial<Coefficient> modulus;
+  Polynomial<Coefficient> value;
   void reduce();
-  void operator*=(ElementOneVariablePolynomialQuotientRing<coefficient>& other);
+  void operator*=(ElementOneVariablePolynomialQuotientRing<Coefficient>& other);
   std::string toString(FormatExpressions* theFormat = nullptr);
-  static unsigned int hashFunction(const ElementOneVariablePolynomialQuotientRing<coefficient>& input);
+  static unsigned int hashFunction(const ElementOneVariablePolynomialQuotientRing<Coefficient>& input);
   unsigned int hashFunction();
 };
 
-template <class coefficient, class oneFactorFinder>
+template <class Coefficient, class oneFactorFinder>
 class PolynomialFactorization {
 public:
-  Polynomial<coefficient> original;
-  Polynomial<coefficient> current;
-  coefficient constantFactor;
-  List<Polynomial<coefficient> > reduced;
-  List<Polynomial<coefficient> > nonReduced;
+  Polynomial<Coefficient> original;
+  Polynomial<Coefficient> current;
+  Coefficient constantFactor;
+  List<Polynomial<Coefficient> > reduced;
+  List<Polynomial<Coefficient> > nonReduced;
   bool factor(
-    const Polynomial<coefficient>& input,
+    const Polynomial<Coefficient>& input,
     std::stringstream* commentsOnFailure
   );
-  bool accountNonReducedFactor(Polynomial<coefficient>& incoming);
-  bool accountReducedFactor(Polynomial<coefficient>& incoming);
+  bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
+  bool accountReducedFactor(Polynomial<Coefficient>& incoming);
   bool oneFactor(std::stringstream* comments);
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* theFormat) const;
@@ -2911,8 +2910,8 @@ class PolynomialFactorizationKronecker {
   }
 };
 
-template <class coefficient>
-class PolynomialSubstitution: public List<Polynomial<coefficient> > {
+template <class Coefficient>
+class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   public:
   // One of the main purposes of this class is to be used for carrying out substitutions.
   // the general format of the substitution is:
@@ -2924,11 +2923,11 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   // like this: x_1-> x_1+x_2
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables
-  void MakeIdSubstitution(int numVars, const coefficient& theRingUnit = 1);
+  void MakeIdSubstitution(int numVars, const Coefficient& theRingUnit = 1);
   void MakeIdLikeInjectionSub(
     int numStartingVars,
     int numTargetVarsMustBeLargerOrEqual,
-    const coefficient& theRingUnit
+    const Coefficient& theRingUnit
   );
   // In the following function we have that:
   // the format of the linear substitution is:
@@ -2940,10 +2939,10 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   // is defined as element [x][y].
   void MakeExponentSubstitution(Matrix<LargeInteger>& theSub);
   void PrintPolys(std::string& output);
-  void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint);
-  void AddConstant(coefficient& theConst);
-  void TimesConstant(coefficient& r);
-  void DivideByConstant(coefficient& r);
+  void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<Coefficient>& EndPoint);
+  void AddConstant(Coefficient& theConst);
+  void TimesConstant(Coefficient& r);
+  void DivideByConstant(Coefficient& r);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
     int result = - 1;
     for (int i = 0; i < this->size; i ++) {
@@ -2965,10 +2964,10 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   }
   void ComputeDebugString();
   bool operator==(const PolynomialSubstitution& right);
-  void Substitution(PolynomialSubstitution<coefficient>& theSub, int NumVarsTarget) {
+  void substitution(PolynomialSubstitution<Coefficient>& theSub, int NumVarsTarget) {
     Polynomial<Rational>  tempP;
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].Substitution(
+      this->theObjects[i].substitution(
         theSub,
         tempP,
         NumVarsTarget,
@@ -2980,11 +2979,11 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   void MakeOneParameterSubFromDirection(Vector<Rational>& direction) {
     MonomialP tempM;
     tempM.makeOne(1);
-    tempM[0] = 1;
+    tempM.setVariable(0, 1);
     this->setSize(direction.size);
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i].makeZero();
-      this->theObjects[i].AddMonomial(tempM,direction.theObjects[i]);
+      this->theObjects[i].addMonomial(tempM,direction.theObjects[i]);
     }
   }
   void MakeSubFromMatrixIntAndDen(Matrix<LargeInteger>& theMat, LargeIntegerUnsigned& Den) {
@@ -3031,7 +3030,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
       output += EpsForm.theObjects[i];
     }
   }
-  void MakeLinearSubConstTermsLastRow(Matrix<coefficient>& theMat);
+  void MakeLinearSubConstTermsLastRow(Matrix<Coefficient>& theMat);
   void MakeConstantShiftCoordinatesAreAdded(Vector<Rational>& shiftPerVariable);
   void MakeLinearSubbedVarsCorrespondToMatRows(Matrix<Rational>& theMat, Vector<Rational>& theConstants);
   void ComputeDiscreteIntegrationUpTo(int d);
@@ -3066,22 +3065,22 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   }
 };
 
-template<class coefficient>
+template<class Coefficient>
 class GroebnerBasisComputation {
   public:
-  PolynomialOrder<coefficient> thePolynomialOrder;
-  Polynomial<coefficient> SoPolyBuf;
-  Polynomial<coefficient> remainderDivision;
-  Polynomial<coefficient> bufPoly;
-  Polynomial<coefficient> bufPolyForGaussianElimination;
+  PolynomialOrder<Coefficient> thePolynomialOrder;
+  Polynomial<Coefficient> SoPolyBuf;
+  Polynomial<Coefficient> remainderDivision;
+  Polynomial<Coefficient> bufPoly;
+  Polynomial<Coefficient> bufPolyForGaussianElimination;
   MonomialP SoPolyLeftShift;
   MonomialP SoPolyRightShift;
   MonomialP bufferMoN1;
-  List<Polynomial<coefficient> > theQuotients;
-  List<Polynomial<coefficient> > theBasiS;
-  List<Polynomial<coefficient> > basisCandidates;
+  List<Polynomial<Coefficient> > theQuotients;
+  List<Polynomial<Coefficient> > theBasiS;
+  List<Polynomial<Coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
-  List<coefficient> leadingCoeffs;
+  List<Coefficient> leadingCoeffs;
   int RecursionCounterSerreLikeSystem;
   int NumVarsToSolveForStarT;
   int NumVariablesToSolveForAfterReduction;
@@ -3125,34 +3124,34 @@ class GroebnerBasisComputation {
   List<List<int> > additionalHighlightRemainders;
   List<int> firstNonZeroIndicesPerIntermediateSubtracand;
   std::stringstream longDivisionLog;
-  MemorySaving<GroebnerBasisComputation<coefficient> > ComputationUsedInRecursiveCalls;
-  MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
+  MemorySaving<GroebnerBasisComputation<Coefficient> > ComputationUsedInRecursiveCalls;
+  MemorySaving<List<Polynomial<Coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
-  MemorySaving<List<coefficient> > intermediateCoeffs;
-  MemorySaving<List<Polynomial<coefficient> > > intermediateSubtractands;
+  MemorySaving<List<Coefficient> > intermediateCoeffs;
+  MemorySaving<List<Polynomial<Coefficient> > > intermediateSubtractands;
   MemorySaving<List<int> > intermediateSelectedDivisors;
-  MemorySaving<Polynomial<coefficient> > startingPoly;
-  MemorySaving<List<coefficient> > systemSolution;
+  MemorySaving<Polynomial<Coefficient> > startingPoly;
+  MemorySaving<List<Coefficient> > systemSolution;
   MemorySaving<Selection> solutionsFound;
-  List<PolynomialSubstitution<coefficient> > theImpliedSubS;
+  List<PolynomialSubstitution<Coefficient> > theImpliedSubS;
   FormatExpressions theFormat;
-  void SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst);
-  void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub);
+  void SetSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
+  void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
   std::string ToStringSerreLikeSolution();
   std::string GetPolynomialStringSpacedMonomialsHtml(
-    const Polynomial<coefficient>& thePoly,
+    const Polynomial<Coefficient>& thePoly,
     const std::string& extraStyle,
     List<MonomialP>* theHighLightedMons = nullptr
   );
   std::string GetPolynomialStringSpacedMonomialsLaTeX(
-    const Polynomial<coefficient>& thePoly,
+    const Polynomial<Coefficient>& thePoly,
     std::string* highlightColor = nullptr,
     List<MonomialP>* theHighLightedMons = nullptr,
     int* firstNonZeroIndex = nullptr
   );
   std::string GetSpacedMonomialsWithHighlightLaTeX(
-    const Polynomial<coefficient>& thePoly,
+    const Polynomial<Coefficient>& thePoly,
     List<List<int> >* slidesToHighlightMon,
     List<int>* slidesToFcAnswer,
     List<int>* slidesToUncover,
@@ -3168,66 +3167,66 @@ class GroebnerBasisComputation {
   int SelectPolyIndexToAddNext();
   bool AddPolysAndReduceBasis();
   bool TransformToReducedBasis(
-    List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations
+    List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
   );
-  bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT);
+  bool TransformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(
-    List<Polynomial<coefficient> >& inputOutpuT,
+    List<Polynomial<Coefficient> >& inputOutpuT,
     int upperComputationBound = - 1
   );
   void TrySettingValueToVariable(
-    List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
+    List<Polynomial<Coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
   );
-  bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<coefficient> >& inputOutpuT);
-  bool WrapUpOnGroebnerBasisSuccess(List<Polynomial<coefficient> >& inputOutpuT);
+  bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<Coefficient> >& inputOutpuT);
+  bool WrapUpOnGroebnerBasisSuccess(List<Polynomial<Coefficient> >& inputOutpuT);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
   int GetNumVars() const;
   std::string ToStringLetterOrder(bool addDollars) const;
   std::string ToStringPolynomialBasisStatus() const;
   std::string ToStringImpliedSubs();
-  static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
-  static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
-  static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
-  static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
+  static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<Coefficient> >& input);
+  static int GetNumVarsToSolveFor(const List<Polynomial<Coefficient> >& input);
+  static void GetVarsToSolveFor(const List<Polynomial<Coefficient> >& input, Selection& output);
+  static bool IsContradictoryReducedSystem(const List<Polynomial<Coefficient> >& input);
   void RemainderDivisionByBasis(
-    Polynomial<coefficient>& inputOutput,
-    Polynomial<coefficient>* outputRemainder = 0,
+    Polynomial<Coefficient>& inputOutput,
+    Polynomial<Coefficient>* outputRemainder = 0,
     int basisIndexToIgnore = - 1
   );
   bool OneDivisonStepWithBasis(
-    Polynomial<coefficient>& currentRemainder,
-    Polynomial<coefficient>* remainderResult,
+    Polynomial<Coefficient>& currentRemainder,
+    Polynomial<Coefficient>* remainderResult,
     int basisIndexToIgnore,
     ProgressReport* report
   );
   void OneDivisonSubStepWithBasis(
-    Polynomial<coefficient>& remainder,
+    Polynomial<Coefficient>& remainder,
     const MonomialP& leadingMonomial,
-    const coefficient& leadingCoefficient,
+    const Coefficient& leadingCoefficient,
     int index,
     ProgressReport* theReport
   );
-  std::string toStringDivision(Polynomial<coefficient>& toBeDivided);
-  std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem);
+  std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
+  std::string ToStringCalculatorInputFromSystem(const List<Polynomial<Coefficient> >& inputSystem);
+  void SolveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   bool HasImpliedSubstitutions(
-    List<Polynomial<coefficient> >& inputSystem,
-    PolynomialSubstitution<coefficient>& outputSub
+    List<Polynomial<Coefficient> >& inputSystem,
+    PolynomialSubstitution<Coefficient>& outputSub
   );
-  bool HasSingleMonomialEquation(const List<Polynomial<coefficient> >& inputSystem, MonomialP& outputMon);
+  bool HasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialP& outputMon);
   void SetUpRecursiveComputation(GroebnerBasisComputation& toBeModified);
   void ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution(GroebnerBasisComputation& potentiallySolvedCase);
-  void SolveWhenSystemHasSingleMonomial(List<Polynomial<coefficient> >& inputSystem, const MonomialP& theMon);
-  int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem);
-  void PolySystemSolutionSimplificationPhase(List<Polynomial<coefficient> >& inputSystem);
-  void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs);
+  void SolveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialP& theMon);
+  int GetPreferredSerreSystemSubIndex(List<Polynomial<Coefficient> >& inputSystem);
+  void SolveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
+  void PolySystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
+  void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<Coefficient> >& theImpliedSubs);
   void BackSubstituteIntoSinglePoly(
-    Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub
+    Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
   );
   bool AddRemainderToBasis();
-  bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution);
+  bool GetOneVarPolySolution(const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution);
   // Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh(
     HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
@@ -3237,7 +3236,7 @@ class GroebnerBasisComputation {
   void checkConsistency();
   void initForSystemSolution();
   void initForGroebnerComputation(int expectedNumInputPolys);
-  void initializeForDivision(List<Polynomial<coefficient> >& inputOutpuT);
+  void initializeForDivision(List<Polynomial<Coefficient> >& inputOutpuT);
 };
 
 class RationalFunction {
@@ -3271,7 +3270,7 @@ public:
   static RationalFunction zero();
   static RationalFunction zeroStatic();
   int minimalNumberOfVariables() const;
-  bool Substitution(const PolynomialSubstitution<Rational>& theSub);
+  bool substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other);
   RationalFunction();
   RationalFunction(int other);
@@ -3286,7 +3285,7 @@ public:
   void operator=(const Rational& other);
   void operator=(const RationalFunction& other);
   bool checkConsistency() const;
-  void SetNumVariables(int GoalNumVars);
+  void setNumberOfVariables(int GoalNumVars);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   void MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars = 0);
   void GetNumerator(Polynomial<Rational>& output) const;
@@ -3385,8 +3384,8 @@ public:
   };
 };
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::operator==(int x) const {
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::operator==(int x) const {
   if (x == 0) {
     return this->size() == 0;
   }
@@ -3397,9 +3396,9 @@ bool LinearCombination<templateMonomial, coefficient>::operator==(int x) const {
   return false;
 }
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::operator==(
-  const LinearCombination<templateMonomial, coefficient>& other
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::operator==(
+  const LinearCombination<templateMonomial, Coefficient>& other
 ) const {
   if (this->coefficients.size != other.coefficients.size) {
     return false;
@@ -3416,13 +3415,13 @@ bool LinearCombination<templateMonomial, coefficient>::operator==(
   return true;
 }
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::isEqualToZero() const {
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::isEqualToZero() const {
   return this->size() == 0;
 }
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::IsInteger(LargeInteger* whichInteger) const {
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::IsInteger(LargeInteger* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3439,8 +3438,8 @@ bool LinearCombination<templateMonomial, coefficient>::IsInteger(LargeInteger* w
   return result;
 }
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::IsSmallInteger(int* whichInteger) const {
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::IsSmallInteger(int* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3457,33 +3456,33 @@ bool LinearCombination<templateMonomial, coefficient>::IsSmallInteger(int* which
   return result;
 }
 
-template <class templateMonomial, class coefficient>
-void LinearCombination<templateMonomial, coefficient>::GetVectorMonsAscending(Vector<coefficient>& result) {
+template <class templateMonomial, class Coefficient>
+void LinearCombination<templateMonomial, Coefficient>::GetVectorMonsAscending(Vector<Coefficient>& result) {
   this->quickSortAscending();
   result = this->coefficients;
 }
 
-template <class templateMonomial, class coefficient>
-void LinearCombination<templateMonomial, coefficient>::GetVectorMonsDescending(Vector<coefficient>& result) {
+template <class templateMonomial, class Coefficient>
+void LinearCombination<templateMonomial, Coefficient>::GetVectorMonsDescending(Vector<Coefficient>& result) {
   this->quickSortDescending();
   result = this->coefficients;
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::makeLinearWithConstantTerm(
+template <class Coefficient>
+void Polynomial<Coefficient>::makeLinearWithConstantTerm(
   const Vector<Rational>& inputLastCoordinateConstantTerm
 ) {
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < inputLastCoordinateConstantTerm.size - 1; i ++) {
     tempM.MakeEi(i);
-    this->AddMonomial(tempM, inputLastCoordinateConstantTerm[i]);
+    this->addMonomial(tempM, inputLastCoordinateConstantTerm[i]);
   }
-  this->operator+=(*inputLastCoordinateConstantTerm.LastObject());
+  this->operator+=(*inputLastCoordinateConstantTerm.lastObject());
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::makeLinearNoConstant(
+template <class Coefficient>
+void Polynomial<Coefficient>::makeLinearNoConstant(
   const Vector<Rational>& inputCoefficients
 ) {
   this->makeZero();
@@ -3497,25 +3496,25 @@ void Polynomial<coefficient>::makeLinearNoConstant(
       << "this requires further consideration. I am crashing just in case. "
       << global.fatal;
     }
-    this->AddMonomial(tempM, inputCoefficients[i].GetNumerator());
+    this->addMonomial(tempM, inputCoefficients[i].GetNumerator());
   }
 }
 
-template <class templateMonomial, class coefficient>
-void LinearCombination<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
-  const LinearCombination<templateMonomial, coefficient>& other, coefficient* inputcf
+template <class templateMonomial, class Coefficient>
+void LinearCombination<templateMonomial, Coefficient>::SubtractOtherTimesCoeff(
+  const LinearCombination<templateMonomial, Coefficient>& other, Coefficient* inputcf
 ) {
   if (this == &other) {
     if (inputcf == nullptr) {
       this->makeZero();
       return;
     }
-    LinearCombination<templateMonomial, coefficient> otherNew = other;
+    LinearCombination<templateMonomial, Coefficient> otherNew = other;
     this->SubtractOtherTimesCoeff(otherNew, inputcf);
     return;
   }
   this->setExpectedSize(other.size() + this->size());
-  coefficient tempCF;
+  Coefficient tempCF;
   for (int i = 0; i < other.size(); i ++) {
     tempCF = other.coefficients[i];
     if (inputcf != nullptr) {
@@ -3525,31 +3524,31 @@ void LinearCombination<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
   }
 }
 
-template <class templateMonomial, class coefficient>
-void LinearCombination<templateMonomial, coefficient>::AddOtherTimesConst(
-  LinearCombination<templateMonomial, coefficient>& other, const coefficient& theConst
+template <class templateMonomial, class Coefficient>
+void LinearCombination<templateMonomial, Coefficient>::AddOtherTimesConst(
+  LinearCombination<templateMonomial, Coefficient>& other, const Coefficient& theConst
 ) {
   this->setExpectedSize(other.size() + this->size());
-  coefficient tempCF;
+  Coefficient tempCF;
   for (int i = 0; i < other.size(); i ++) {
     tempCF = theConst;
     tempCF *= other.coefficients[i];
-    this->AddMonomial(other[i], tempCF);
+    this->addMonomial(other[i], tempCF);
   }
 }
 
-template <class templateMonomial, class coefficient>
-void LinearCombination<templateMonomial, coefficient>::operator+=(
-  const LinearCombination<templateMonomial, coefficient>& other
+template <class templateMonomial, class Coefficient>
+void LinearCombination<templateMonomial, Coefficient>::operator+=(
+  const LinearCombination<templateMonomial, Coefficient>& other
 ) {
   this->setExpectedSize(other.size() + this->size());
   for (int i = 0; i < other.size(); i ++) {
-    this->AddMonomial(other[i], other.coefficients[i]);
+    this->addMonomial(other[i], other.coefficients[i]);
   }
 }
 
-template <class templateMonomial, class coefficient>
-bool LinearCombination<templateMonomial, coefficient>::HasGEQMonomial(templateMonomial& m, int& WhichIndex) {
+template <class templateMonomial, class Coefficient>
+bool LinearCombination<templateMonomial, Coefficient>::HasGEQMonomial(templateMonomial& m, int& WhichIndex) {
   for (int i = 0; i < this->size; i ++) {
     if (this->theObjects[i].IsGEQpartialOrder(m)) {
       WhichIndex = i;
@@ -3560,23 +3559,23 @@ bool LinearCombination<templateMonomial, coefficient>::HasGEQMonomial(templateMo
   return false;
 }
 
-template <class templateMonomial, class coefficient>
+template <class templateMonomial, class Coefficient>
 template <class LinearCombinationTemplate>
-bool LinearCombination<templateMonomial, coefficient>::LinSpanContainsGetFirstLinearCombination(
+bool LinearCombination<templateMonomial, Coefficient>::LinSpanContainsGetFirstLinearCombination(
   const List<LinearCombinationTemplate>& theList,
   const LinearCombinationTemplate& input,
-  Vector<coefficient>& outputFirstLinearCombination,
+  Vector<Coefficient>& outputFirstLinearCombination,
   HashedList<templateMonomial>* seedMonomials
 ) {
   List<LinearCombinationTemplate> listCopy = theList;
-  Matrix<coefficient> theRowOperations;
+  Matrix<Coefficient> theRowOperations;
   theRowOperations.MakeIdMatrix(theList.size);
-  LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(
+  LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(
     listCopy, 0, seedMonomials, &theRowOperations
   );
   LinearCombinationTemplate remainderFromInput = input;
   templateMonomial currentMon;
-  coefficient CFminMon, CFinRemainder;
+  Coefficient CFminMon, CFinRemainder;
   outputFirstLinearCombination.makeZero(listCopy.size);
   for (int i = 0; i < listCopy.size; i ++) {
     if (listCopy[i].isEqualToZero()) {
@@ -3595,16 +3594,16 @@ bool LinearCombination<templateMonomial, coefficient>::LinSpanContainsGetFirstLi
   return true;
 }
 
-template <class templateMonomial, class coefficient>
+template <class templateMonomial, class Coefficient>
 template <class LinearCombinationTemplate>
-void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(
+void LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(
   List<LinearCombinationTemplate>& theList,
   bool *IHaveMadeARowSwitch,
   HashedList<templateMonomial>* seedMonomials,
-  Matrix<coefficient>* carbonCopyMatrix,
+  Matrix<Coefficient>* carbonCopyMatrix,
   List<LinearCombinationTemplate>* carbonCopyList
 ) {
-  MacroRegisterFunctionWithName("LinearCombination::GaussianEliminationByRows");
+  MacroRegisterFunctionWithName("LinearCombination::gaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->numberOfRows != theList.size) {
       global.fatal
@@ -3645,7 +3644,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
     *IHaveMadeARowSwitch = false;
   }
   int currentRowIndex = 0;
-  coefficient tempCF, tempCF2;
+  Coefficient tempCF, tempCF2;
   for (int i = 0; i < allMons.size && currentRowIndex < theList.size; i ++) {
     const templateMonomial& currentMon = allMons[i];
     int goodRow = currentRowIndex;
@@ -3663,13 +3662,13 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
         carbonCopyList->swapTwoIndices(currentRowIndex, goodRow);
       }
       if (carbonCopyMatrix != 0) {
-        carbonCopyMatrix->SwitchTwoRows(currentRowIndex, goodRow);
+        carbonCopyMatrix->switchRows(currentRowIndex, goodRow);
       }
       if (IHaveMadeARowSwitch != nullptr) {
         *IHaveMadeARowSwitch = true;
       }
     }
-    LinearCombination<templateMonomial, coefficient>& currentPivot = theList[currentRowIndex];
+    LinearCombination<templateMonomial, Coefficient>& currentPivot = theList[currentRowIndex];
     int colIndex = currentPivot.theMonomials.getIndex(currentMon);
     if (colIndex == - 1) {
       global.fatal << "This is a programming error. An internal check at the "
@@ -3688,7 +3687,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
     }
     for (int j = 0; j < theList.size; j ++) {
       if (j != currentRowIndex) {
-        LinearCombination<templateMonomial, coefficient>& currentOther = theList[j];
+        LinearCombination<templateMonomial, Coefficient>& currentOther = theList[j];
         int otherColIndex = currentOther.theMonomials.getIndex(currentMon);
         if (otherColIndex != - 1) {
           tempCF = currentOther.coefficients[otherColIndex];
@@ -3708,9 +3707,9 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
   }
 }
 
-template <class templateMonomial, class coefficient>
-int LinearCombination<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
-  const templateMonomial& inputMonomial, const coefficient& inputCoefficient
+template <class templateMonomial, class Coefficient>
+int LinearCombination<templateMonomial, Coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
+  const templateMonomial& inputMonomial, const Coefficient& inputCoefficient
 ) {
   this->checkConsistency();
   if (inputCoefficient == 0) {
@@ -3746,9 +3745,9 @@ int LinearCombination<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpR
   return j;
 }
 
-template <class templateMonomial, class coefficient>
-int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
-  const templateMonomial& inputMon, const coefficient& inputCoeff
+template <class templateMonomial, class Coefficient>
+int LinearCombination<templateMonomial, Coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
+  const templateMonomial& inputMon, const Coefficient& inputCoeff
 ) {
   if (inputCoeff.isEqualToZero()) {
     return - 1;
@@ -3757,7 +3756,7 @@ int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCle
   if (j == - 1) {
     this->theMonomials.addOnTop(inputMon);
     this->coefficients.addOnTop(inputCoeff);
-    *this->coefficients.LastObject() *= - 1;
+    *this->coefficients.lastObject() *= - 1;
     j = this->coefficients.size - 1;
   } else {
     this->coefficients[j] -= inputCoeff;
@@ -3765,18 +3764,18 @@ int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCle
   return j;
 }
 
-template <class templateMonomial, class coefficient>
-void ElementMonomialAlgebra<templateMonomial, coefficient>::raiseToPower(
-  int d, ElementMonomialAlgebra<templateMonomial, coefficient>& output, const coefficient& theRingUniT
+template <class templateMonomial, class Coefficient>
+void ElementMonomialAlgebra<templateMonomial, Coefficient>::raiseToPower(
+  int d, ElementMonomialAlgebra<templateMonomial, Coefficient>& output, const Coefficient& theRingUniT
 ) {
-  ElementMonomialAlgebra<templateMonomial, coefficient> tempOne;
+  ElementMonomialAlgebra<templateMonomial, Coefficient> tempOne;
   tempOne.makeConstant(theRingUniT);
   output = *this;
   MathRoutines::raiseToPower(output, d, tempOne);
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::PrintPolys(std::string& output) {
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::PrintPolys(std::string& output) {
   std::stringstream out;
   FormatExpressions PolyFormatLocal;
   for (int i = 0; i < this->size; i ++) {
@@ -3788,56 +3787,56 @@ void PolynomialSubstitution<coefficient>::PrintPolys(std::string& output) {
   output = out.str();
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeIdSubstitution(int numVars, const coefficient& theRingUnit) {
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::MakeIdSubstitution(int numVars, const Coefficient& theRingUnit) {
   this->MakeIdLikeInjectionSub(numVars, numVars, theRingUnit);
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeIdLikeInjectionSub(
-  int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::MakeIdLikeInjectionSub(
+  int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Coefficient& theRingUnit
 ) {
   if (numStartingVars > numTargetVarsMustBeLargerOrEqual) {
     global.fatal << "Bad number of variables. " << global.fatal;
   }
   this->setSize(numStartingVars);
   for (int i = 0; i < this->size; i ++) {
-    Polynomial<coefficient>& currentPoly = this->theObjects[i];
+    Polynomial<Coefficient>& currentPoly = this->theObjects[i];
     currentPoly.makeDegreeOne(numTargetVarsMustBeLargerOrEqual, i, theRingUnit);
   }
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeExponentSubstitution(Matrix<LargeInteger>& theSub) {
-  Polynomial<coefficient> tempP;
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::MakeExponentSubstitution(Matrix<LargeInteger>& theSub) {
+  Polynomial<Coefficient> tempP;
   MonomialP tempM;
   tempM.makeOne(theSub.numberOfRows);
   this->size = 0;
   this->setSize(theSub.numberOfColumns);
   for (int i = 0; i < theSub.numberOfColumns; i ++) {
     for (int j = 0; j < theSub.numberOfRows; j ++) {
-      tempM[j] = Rational(theSub(j, i));
+      tempM.setVariable(j, theSub(j, i));
     }
     tempP.makeZero();
-    tempP.AddMonomial(tempM, 1);
+    tempP.addMonomial(tempM, 1);
     this->theObjects[i] = tempP;
   }
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeSubstitutionLastVariableToEndPoint(
-  int numVars, Polynomial<coefficient>& EndPoint
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::MakeSubstitutionLastVariableToEndPoint(
+  int numVars, Polynomial<Coefficient>& EndPoint
 ) {
   this->setSize(numVars);
   for (int i = 0; i < numVars - 1; i ++) {
-    this->theObjects[i].makeDegreeOne(numVars, i, coefficient::TheRingUnit);
+    this->theObjects[i].makeDegreeOne(numVars, i, Coefficient::TheRingUnit);
   }
   this->theObjects[numVars - 1].CopyFromPoly(EndPoint);
 }
 
 class PartFractions;
 
-class oneFracWithMultiplicitiesAndElongations {
+class OnePartialFractionDenominator {
 public:
   ListLight<int> Multiplicities;
   ListLight<int> Elongations;
@@ -3852,13 +3851,13 @@ public:
   void init();
   static Vector<Rational> GetCheckSumRoot(int NumVars);
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const oneFracWithMultiplicitiesAndElongations& input) {
+  static unsigned int hashFunction(const OnePartialFractionDenominator& input) {
     return input.hashFunction();
   }
   void ComputeOneCheckSum(Rational& output, const Vector<Rational>& theExp, int theDimension);
-  bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
-  void operator=(oneFracWithMultiplicitiesAndElongations& right);
-  bool operator==(oneFracWithMultiplicitiesAndElongations& right);
+  bool IsHigherThan(OnePartialFractionDenominator& f);
+  void operator=(OnePartialFractionDenominator& right);
+  bool operator==(OnePartialFractionDenominator& right);
   std::string toString();
   void OneFracToStringBasisChange(
     PartFractions& owner,
@@ -3894,7 +3893,7 @@ public:
   static void GetStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput);
 };
 
-class permutation: public SelectionWithDifferentMaxMultiplicities {
+class Permutation: public SelectionWithDifferentMaxMultiplicities {
 public:
   void initPermutation(int n);
   void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
@@ -3905,9 +3904,9 @@ public:
   }
 };
 
-template<typename coefficient>
-void Matrix<coefficient>::NonPivotPointsToEigenVectorMatrixForm(
-  Selection& TheNonPivotPoints, Matrix<coefficient>& output
+template<typename Coefficient>
+void Matrix<Coefficient>::NonPivotPointsToEigenVectorMatrixForm(
+  Selection& TheNonPivotPoints, Matrix<Coefficient>& output
 ) {
   int RowCounter = 0;
   output.init(this->numberOfColumns, 1);
@@ -3924,20 +3923,20 @@ void Matrix<coefficient>::NonPivotPointsToEigenVectorMatrixForm(
   }
 }
 
-template<typename coefficient>
-void Matrix<coefficient>::NonPivotPointsToEigenVector(
-  Selection& TheNonPivotPoints,
-  Vector<coefficient>& output,
-  const coefficient& theRingUnit,
-  const coefficient& theRingZero
+template<typename Coefficient>
+void Matrix<Coefficient>::nonPivotPointsToEigenVector(
+  Selection& theNonPivotPoints,
+  Vector<Coefficient>& output,
+  const Coefficient& theRingUnit,
+  const Coefficient& theRingZero
 ) {
   int RowCounter = 0;
   output.setSize(this->numberOfColumns);
   for (int i = 0; i < this->numberOfColumns; i ++) {
-    if (!TheNonPivotPoints.selected[i]) {
+    if (!theNonPivotPoints.selected[i]) {
       output[i] = theRingZero;
-      for (int j = 0; j < TheNonPivotPoints.CardinalitySelection; j ++) {
-        output[i] -= this->elements[RowCounter][TheNonPivotPoints.elements[j]];
+      for (int j = 0; j < theNonPivotPoints.CardinalitySelection; j ++) {
+        output[i] -= this->elements[RowCounter][theNonPivotPoints.elements[j]];
       }
       RowCounter ++;
     } else {
@@ -3946,38 +3945,38 @@ void Matrix<coefficient>::NonPivotPointsToEigenVector(
   }
 }
 
-template<class coefficient>
+template<class Coefficient>
 class Complex {
   static bool flagEqualityIsApproximate;
   static double EqualityPrecision;
   public:
-  coefficient Im;
-  coefficient Re;
+  Coefficient Im;
+  Coefficient Re;
   std::string toString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat; //taking care of unused parameters
     std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
   }
-  friend std::iostream& operator<<(std::iostream& output, const Complex<coefficient>& input) {
+  friend std::iostream& operator<<(std::iostream& output, const Complex<Coefficient>& input) {
     output << input.Re << "+ i" << input.Im;
     return output;
   }
-  void operator*=(const Complex<coefficient>& other) {
+  void operator*=(const Complex<Coefficient>& other) {
     Complex Accum;
     Accum.Re = this->Re * other.Re - this->Im * other.Im;
     Accum.Im = this->Re * other.Im + this->Im * other.Re;
     this->operator=(Accum);
   }
-  void operator=(const Complex<coefficient>& other) {
+  void operator=(const Complex<Coefficient>& other) {
     this->Re = other.Re;
     this->Im = other.Im;
   }
-  void operator+=(const Complex<coefficient>& other) {
+  void operator+=(const Complex<Coefficient>& other) {
     this->Re += other.Re;
     this->Im += other.Im;
   }
-  void operator-=(const Complex<coefficient>& other) {
+  void operator-=(const Complex<Coefficient>& other) {
     this->Re -= other.Re;
     this->Im -= other.Im;
   }
@@ -3986,12 +3985,12 @@ class Complex {
     this->Im = 0;
   }
   bool operator==(int other) const {
-    Complex<coefficient> otherComplex;
+    Complex<Coefficient> otherComplex;
     otherComplex = other;
     return *this == otherComplex;
   }
-  bool operator==(Complex<coefficient>& other) const {
-    Complex<coefficient> difference;
+  bool operator==(Complex<Coefficient>& other) const {
+    Complex<Coefficient> difference;
     difference = *this;
     difference -= other;
     return difference.isEqualToZero();
@@ -4001,7 +4000,7 @@ class Complex {
     this->Im = 0;
   }
   void invert() {
-    coefficient numerator;
+    Coefficient numerator;
     numerator = this->Re * this->Re + this->Im * this->Im;
     this->Re /= numerator;
     numerator *= - 1;
@@ -4034,19 +4033,19 @@ class Complex {
 template < > bool Complex<double>::flagEqualityIsApproximate;
 template < > double Complex<double>::EqualityPrecision;
 
-template <class coefficient>
-bool Complex<coefficient>::isEqualToZero() const {
-  if (!Complex<coefficient>::flagEqualityIsApproximate) {
+template <class Coefficient>
+bool Complex<Coefficient>::isEqualToZero() const {
+  if (!Complex<Coefficient>::flagEqualityIsApproximate) {
     return this->Im == 0 && this->Re == 0;
   } else {
     return
-    this->Im<Complex<coefficient>::EqualityPrecision && - this->Im<Complex<coefficient>::EqualityPrecision &&
-    this->Re<Complex<coefficient>::EqualityPrecision && - this->Re<Complex<coefficient>::EqualityPrecision;
+    this->Im<Complex<Coefficient>::EqualityPrecision && - this->Im<Complex<Coefficient>::EqualityPrecision &&
+    this->Re<Complex<Coefficient>::EqualityPrecision && - this->Re<Complex<Coefficient>::EqualityPrecision;
   }
 }
 
-template<class coefficient>
-class ElementSemisimpleLieAlgebra : public LinearCombination<ChevalleyGenerator, coefficient> {
+template<class Coefficient>
+class ElementSemisimpleLieAlgebra : public LinearCombination<ChevalleyGenerator, Coefficient> {
 public:
   bool checkConsistency() const {
     if (this->size() == 0) {
@@ -4062,18 +4061,18 @@ public:
     return true;
   }
   bool needsParenthesisForMultiplication() const;
-  Vector<coefficient> GetCartanPart() const;
+  Vector<Coefficient> GetCartanPart() const;
   void MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
   bool IsElementCartan() const;
-  void MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
+  void MakeHgenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
-  void ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output) const;
+  void ElementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces(
-    const Vector<coefficient>& input,
+    const Vector<Coefficient>& input,
     SemisimpleLieAlgebra& owner
   );
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output
+    const List<ElementSemisimpleLieAlgebra<Coefficient> >& theBasis, Vector<Coefficient>& output
   ) const;
   SemisimpleLieAlgebra* GetOwner() const {
     this->checkConsistency();
@@ -4132,13 +4131,13 @@ public:
   }
   template<class otherElement>
   void operator=(const otherElement& other) {
-    this->::LinearCombination<ChevalleyGenerator, coefficient>::operator=(other);
+    this->::LinearCombination<ChevalleyGenerator, Coefficient>::operator=(other);
   }
   Vector<Rational> GetRootIMustBeWeight() const;
 };
 
-template <class coefficient>
-int Matrix<coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated() {
+template <class Coefficient>
+int Matrix<Coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated() {
   int result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -4148,8 +4147,8 @@ int Matrix<coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated() {
   return result;
 }
 
-template <class coefficient>
-LargeIntegerUnsigned Matrix<coefficient>::FindPositiveLCMCoefficientDenominators() {
+template <class Coefficient>
+LargeIntegerUnsigned Matrix<Coefficient>::FindPositiveLCMCoefficientDenominators() {
   LargeIntegerUnsigned result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -4159,8 +4158,8 @@ LargeIntegerUnsigned Matrix<coefficient>::FindPositiveLCMCoefficientDenominators
   return result;
 }
 
-template <class coefficient>
-void Matrix<coefficient>::GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen) {
+template <class Coefficient>
+void Matrix<Coefficient>::GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen) {
   outputDen = this->FindPositiveLCMCoefficientDenominators();
   outputMat.init(this->numberOfRows, this->numberOfColumns);
   Rational tempRat;
@@ -4172,8 +4171,8 @@ void Matrix<coefficient>::GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, L
   }
 }
 
-template <class coefficient>
-int Matrix<coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated() {
+template <class Coefficient>
+int Matrix<Coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated() {
   int result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -4191,8 +4190,8 @@ int Matrix<coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated() {
   return result;
 }
 
-template <class coefficient>
-void Matrix<coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange() {
+template <class Coefficient>
+void Matrix<Coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange() {
   Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(
     this->FindPositiveLCMCoefficientDenominatorsTruncated(),
@@ -4201,16 +4200,16 @@ void Matrix<coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange() {
   *this *= tempRat;
 }
 
-template <class coefficient>
-coefficient Matrix<coefficient> ::GetDeterminant() {
-  Matrix<coefficient> tempMat = *this;
-  coefficient result;
+template <class Coefficient>
+Coefficient Matrix<Coefficient> ::GetDeterminant() {
+  Matrix<Coefficient> tempMat = *this;
+  Coefficient result;
   tempMat.ComputeDeterminantOverwriteMatrix(result);
   return result;
 }
 
-template <class coefficient>
-coefficient Matrix<coefficient>::GetTrace() const {
+template <class Coefficient>
+Coefficient Matrix<Coefficient>::GetTrace() const {
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "This is either programming error, a mathematical error, "
     << "or requires a more general definition of trace. Requesting the trace of "
@@ -4218,28 +4217,31 @@ coefficient Matrix<coefficient>::GetTrace() const {
     << this->numberOfColumns << " columns is not allowed. "
     << global.fatal;
   }
-  coefficient acc = 0;
+  Coefficient acc = 0;
   for (int i = 0; i < this->numberOfColumns; i ++) {
     acc += this->elements[i][i];
   }
   return acc;
 }
 
-template <class coefficient>
-Matrix<coefficient> Matrix<coefficient>::operator*(const Matrix<coefficient>& right) const {
-  Matrix<coefficient> tempMat;
+template <class Coefficient>
+Matrix<Coefficient> Matrix<Coefficient>::operator*(const Matrix<Coefficient>& right) const {
+  Matrix<Coefficient> tempMat;
   tempMat = right;
-  tempMat.MultiplyOnTheLeft(*this);
+  tempMat.multiplyOnTheLeft(*this);
   return tempMat;
 }
 
-template <class coefficient>
-Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v) const {
+template <class Coefficient>
+Vector<Coefficient> Matrix<Coefficient>::operator*(const Vector<Coefficient>& v) const {
   if (v.size != numberOfColumns) {
-    global.fatal << "matrix application mismatch: matrix with " << numberOfColumns
-    << " columns attempted to multiply vector of length " << v.size << global.fatal;
+    global.fatal
+    << "Matrix application mismatch: matrix with "
+    << numberOfColumns
+    << " columns attempted to multiply vector of length "
+    << v.size << ". " << global.fatal;
   }
-  Vector<coefficient> out;
+  Vector<Coefficient> out;
   out.makeZero(numberOfRows);
   for (int i = 0; i < numberOfRows; i ++) {
     for (int j = 0; j < numberOfColumns; j ++) {
@@ -4249,8 +4251,8 @@ Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v)
   return out;
 }
 
-template <class coefficient>
-void Matrix<coefficient>::AssignMatrixIntWithDen(
+template <class Coefficient>
+void Matrix<Coefficient>::AssignMatrixIntWithDen(
   Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den
 ) {
   this->init(theMat.numberOfRows, theMat.numberOfColumns);
@@ -4262,25 +4264,25 @@ void Matrix<coefficient>::AssignMatrixIntWithDen(
   }
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::MakePolyFromDirectionAndNormal(
-  Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction
+template <class Coefficient>
+void Polynomial<Coefficient>::MakePolyFromDirectionAndNormal(
+  Vector<Coefficient>& direction, Vector<Coefficient>& normal, Coefficient& Correction
 ) {
-  Rational tempRat2 = Vector<coefficient>::ScalarEuclidean(direction, normal);
+  Rational tempRat2 = Vector<Coefficient>::ScalarEuclidean(direction, normal);
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < direction.size; i ++) {
     tempM.MakeEi(i);
-    this->AddMonomial(tempM, normal.theObjects[i] / tempRat2);
+    this->addMonomial(tempM, normal.theObjects[i] / tempRat2);
   }
   *this += Correction;
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::GetNormalSeparatingCones(
-  List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
-  List<Vector<coefficient> >& coneNonNegativeCoeffs,
-  Vector<coefficient>& outputNormal
+template <class Coefficient>
+bool Vectors<Coefficient>::GetNormalSeparatingCones(
+  List<Vector<Coefficient> >& coneStrictlyPositiveCoeffs,
+  List<Vector<Coefficient> >& coneNonNegativeCoeffs,
+  Vector<Coefficient>& outputNormal
 ) {
   Matrix<Rational> matA;
   Matrix<Rational> matb;
@@ -4333,16 +4335,16 @@ bool Vectors<coefficient>::GetNormalSeparatingCones(
     for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
       coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
       if (!tempRat.IsNonPositive()) {
-        global.fatal << "Unexpected positive value" << global.fatal;
+        global.fatal << "Unexpected positive value. " << global.fatal;
       }
     }
   }
   return result;
 }
 
-template<class coefficient>
-void Matrix<coefficient>::ComputePotentialChangeGradient(
-  Matrix<coefficient>& matA,
+template<class Coefficient>
+void Matrix<Coefficient>::ComputePotentialChangeGradient(
+  Matrix<Coefficient>& matA,
   Selection& BaseVariables,
   int NumTrueVariables,
   int ColumnIndex,
@@ -4362,13 +4364,13 @@ void Matrix<coefficient>::ComputePotentialChangeGradient(
   }
 }
 
-template<class coefficient>
-void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow(
+template<class Coefficient>
+void Matrix<Coefficient>::GetMaxMovementAndLeavingVariableRow(
   Rational& maxMovement,
   int& LeavingVariableRow,
   int EnteringVariable,
-  Matrix<coefficient>& tempMatA,
-  Vector<coefficient>& inputVectorX,
+  Matrix<Coefficient>& tempMatA,
+  Vector<Coefficient>& inputVectorX,
   Selection& BaseVariables
 ) {
   LeavingVariableRow = - 1;
@@ -4378,7 +4380,7 @@ void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow(
     tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
     if (tempRat.isPositive()) {
       tempRat.invert();
-      tempRat.MultiplyBy(inputVectorX[BaseVariables.elements[i]]);
+      tempRat.multiplyBy(inputVectorX[BaseVariables.elements[i]]);
       if (maxMovement.IsGreaterThan(tempRat) || (LeavingVariableRow == - 1)) {
         maxMovement.Assign(tempRat);
         LeavingVariableRow = i;
@@ -4387,8 +4389,8 @@ void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow(
   }
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
+template <typename Coefficient>
+void Matrix<Coefficient>::ActOnMonomialAsDifferentialOperator(
   const MonomialP& input, Polynomial<Rational>& output
 ) {
   if (this->numberOfRows != this->numberOfColumns) {
@@ -4404,13 +4406,13 @@ void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
       coeff *= this->elements[i][j];
       tempMon.multiplyByVariable(j, - 1);
       tempMon.multiplyByVariable(i, 1);
-      output.AddMonomial(tempMon, coeff);
+      output.addMonomial(tempMon, coeff);
     }
   }
 }
 
-template <typename coefficient>
-void Matrix<coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& output) {
+template <typename Coefficient>
+void Matrix<Coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output) {
   if (this->numberOfRows == 0) {
     output.setSize(this->numberOfColumns);
     for (int i = 0; i < this->numberOfColumns; i ++) {
@@ -4419,7 +4421,7 @@ void Matrix<coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& 
     return;
   }
   Selection nonPivotPts;
-  this->GaussianEliminationByRows(0, &nonPivotPts);
+  this->gaussianEliminationByRows(0, &nonPivotPts);
   output.setSize(nonPivotPts.CardinalitySelection);
   for (int i = 0; i < nonPivotPts.CardinalitySelection; i ++) {
     int currentPivotIndex = nonPivotPts.elements[i];
@@ -4434,8 +4436,8 @@ void Matrix<coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& 
   }
 }
 
-template <class coefficient>
-std::string Vectors<coefficient>::toString(FormatExpressions* theFormat) const {
+template <class Coefficient>
+std::string Vectors<Coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
   bool useLaTeX = false;
@@ -4493,11 +4495,11 @@ void List<Object>::SubSelection(const Selection& theSelection, List<Object>& out
 }
 
 template <class Object>
-void List<Object>::IntersectWith(const List<Object>& other, List<Object>& output) const {
+void List<Object>::intersectWith(const List<Object>& other, List<Object>& output) const {
   if (&output == &other || this == &output) {
     List<Object> l1 = *this;
     List<Object> l2 = other;
-    l1.IntersectWith(l2, output);
+    l1.intersectWith(l2, output);
     return;
   }
   HashedList<Object> tempList;
@@ -4510,8 +4512,8 @@ void List<Object>::IntersectWith(const List<Object>& other, List<Object>& output
   }
 }
 
-template <class coefficient>
-std::string Vector<coefficient>::ToStringLetterFormat(
+template <class Coefficient>
+std::string Vector<Coefficient>::ToStringLetterFormat(
   const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
@@ -4555,15 +4557,15 @@ std::string Vector<coefficient>::ToStringLetterFormat(
   return out.str();
 }
 
-template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft(
-  int theGeneratorIndexStandsOnTheLeft, const coefficient& thePower
+template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+void MonomialTensor<Coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft(
+  int theGeneratorIndexStandsOnTheLeft, const Coefficient& thePower
 ) {
   if (thePower == 0) {
     return;
   }
   List<int> newGeneratorIndices;
-  List<coefficient> newPowers;
+  List<Coefficient> newPowers;
   newGeneratorIndices.setExpectedSize(this->generatorsIndices.size + 1);
   newPowers.setExpectedSize(this->generatorsIndices.size + 1);
   newGeneratorIndices.addOnTop(theGeneratorIndexStandsOnTheLeft);
@@ -4575,16 +4577,16 @@ void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnT
   this->SimplifyEqualConsecutiveGenerators(0);
 }
 
-template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight(
-  int theGeneratorIndex, const coefficient& thePower
+template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+void MonomialTensor<Coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight(
+  int theGeneratorIndex, const Coefficient& thePower
 ) {
   if (thePower == 0) {
     return;
   }
   if (this->generatorsIndices.size > 0) {
-    if (*this->generatorsIndices.LastObject() == theGeneratorIndex) {
-      (*this->Powers.LastObject()) += thePower;
+    if (*this->generatorsIndices.lastObject() == theGeneratorIndex) {
+      (*this->Powers.lastObject()) += thePower;
       return;
     }
   }
@@ -4592,8 +4594,8 @@ void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnT
   this->generatorsIndices.addOnTop(theGeneratorIndex);
 }
 
-template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-std::string MonomialTensor<coefficient, inputHashFunction>::toString(FormatExpressions* theFormat) const {
+template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpressions* theFormat) const {
   if (this->generatorsIndices.size == 0) {
     return "1";
   }
@@ -4632,8 +4634,8 @@ std::string MonomialTensor<coefficient, inputHashFunction>::toString(FormatExpre
   return out.str();
 }
 
-template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-bool MonomialTensor<coefficient, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex) {
+template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+bool MonomialTensor<Coefficient, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex) {
   if (this->generatorsIndices.size < 1) {
     return false;
   }
@@ -4656,8 +4658,8 @@ bool MonomialTensor<coefficient, inputHashFunction>::SimplifyEqualConsecutiveGen
   return result;
 }
 
-template <typename coefficient>
-std::string Matrix<coefficient>::ToStringLatex(FormatExpressions* theFormat) const {
+template <typename Coefficient>
+std::string Matrix<Coefficient>::ToStringLatex(FormatExpressions* theFormat) const {
   FormatExpressions formatCopy;
   if (theFormat != nullptr) {
     formatCopy = *theFormat;
@@ -4667,9 +4669,9 @@ std::string Matrix<coefficient>::ToStringLatex(FormatExpressions* theFormat) con
   return this->toString(&formatCopy);
 }
 
-template <typename coefficient>
-std::string Matrix<coefficient>::ToStringSystemLatex(
-  Matrix<coefficient>* constTerms, FormatExpressions* theFormat
+template <typename Coefficient>
+std::string Matrix<Coefficient>::ToStringSystemLatex(
+  Matrix<Coefficient>* constTerms, FormatExpressions* theFormat
 ) const {
   std::stringstream out;
   bool constTermsAreGood =
@@ -4680,7 +4682,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
   }
   out << "}";
   std::string currentEntry;
-  Polynomial<coefficient> theMon;
+  Polynomial<Coefficient> theMon;
   for (int i = 0; i < this->numberOfRows; i ++) {
     bool foundNonZeroEntry = false;
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -4713,8 +4715,8 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
   return out.str();
 }
 
-template <typename coefficient>
-std::string Matrix<coefficient>::toString(FormatExpressions* theFormat) const {
+template <typename Coefficient>
+std::string Matrix<Coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
   bool useHtml    = (theFormat == nullptr) ? true : theFormat->flagUseHTML;
@@ -4782,8 +4784,8 @@ std::string Matrix<coefficient>::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-template <typename coefficient>
-std::string Matrix<coefficient>::ToStringOneLine(bool jsonFormat) const {
+template <typename Coefficient>
+std::string Matrix<Coefficient>::ToStringOneLine(bool jsonFormat) const {
   std::stringstream out;
   out << "[";
   for (int i = 0; i < this->numberOfRows; i ++) {
@@ -4811,8 +4813,8 @@ std::string Matrix<coefficient>::ToStringOneLine(bool jsonFormat) const {
   return out.str();
 }
 
-template <typename coefficient>
-std::string Matrix<coefficient>::ToStringPlainText(bool jsonFormat) const {
+template <typename Coefficient>
+std::string Matrix<Coefficient>::ToStringPlainText(bool jsonFormat) const {
   // I'm pretty sure C++ supports having a block of memory with
   // multiple indices into it.  oh well.
   List<List<std::string> > element_strings;
@@ -4866,10 +4868,10 @@ std::string Matrix<coefficient>::ToStringPlainText(bool jsonFormat) const {
   return out.str();
 }
 
-template <class templateMonomial, class coefficient>
-std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMon(
+template <class templateMonomial, class Coefficient>
+std::string LinearCombination<templateMonomial, Coefficient>::getBlendCoefficientAndMonomial(
   const templateMonomial& inputMonomial,
-  coefficient& inputCoefficient,
+  Coefficient& inputCoefficient,
   bool addPlusToFront,
   FormatExpressions* theFormat
 ) {
@@ -4906,8 +4908,8 @@ std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMo
   return out.str();
 }
 
-template <class templateMonomial, class coefficient>
-std::string LinearCombination<templateMonomial, coefficient>::toString(
+template <class templateMonomial, class Coefficient>
+std::string LinearCombination<templateMonomial, Coefficient>::toString(
   FormatExpressions* theFormat
 ) const {
   if (this->size() == 0) {
@@ -4943,7 +4945,7 @@ std::string LinearCombination<templateMonomial, coefficient>::toString(
   }
   for (int i = 0; i < sortedMons.size; i ++) {
     templateMonomial& currentMon = sortedMons[i];
-    coefficient& currentCoeff = this->coefficients[this->theMonomials.getIndex(currentMon)];
+    Coefficient& currentCoeff = this->coefficients[this->theMonomials.getIndex(currentMon)];
     if (currentCoeff.needsParenthesisForMultiplication(theFormat)) {
       tempS1 = "\\left(" + currentCoeff.toString(theFormat) + "\\right)";
     } else {
@@ -5038,7 +5040,7 @@ public:
   int GetRank() const {
     return this->basis.numberOfRows;
   }
-  void IntersectWith(const Lattice& other);
+  void intersectWith(const Lattice& other);
   bool FindOnePreimageInLatticeOf(
     const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
@@ -5163,18 +5165,18 @@ public:
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
   }
-  void Substitution(
+  void substitution(
     const Matrix<Rational>& mapFromNewSpaceToOldSpace,
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     const Lattice& ambientLatticeNewSpace,
     QuasiPolynomial& output
   );
-  void Substitution(
+  void substitution(
     const Matrix<Rational>& mapFromNewSpaceToOldSpace,
     const Lattice& ambientLatticeNewSpace,
     QuasiPolynomial& output
   );
-  void Substitution(
+  void substitution(
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     QuasiPolynomial& output
   );
@@ -5194,7 +5196,7 @@ public:
   }
 };
 
-class PartFraction: ListLight<oneFracWithMultiplicitiesAndElongations> {
+class PartFraction: ListLight<OnePartialFractionDenominator> {
 private:
   void findPivot();
   void findInitialPivot();
@@ -5323,7 +5325,7 @@ public:
   static unsigned int hashFunction(const PartFraction& input) {
     return input.hashFunction();
   }
-  int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
+  int MultiplyByOneFrac(OnePartialFractionDenominator& f);
   void init(int numRoots);
   void ComputeIndicesNonZeroMults();
   bool DecreasePowerOneFrac(int index, int increment);
@@ -6101,11 +6103,11 @@ public:
   bool IncrementReturnFalseIfPastLast();
 };
 
-template <class coefficient>
-class ElementWeylAlgebra : public LinearCombination<MonomialWeylAlgebra, coefficient> {
+template <class Coefficient>
+class ElementWeylAlgebra : public LinearCombination<MonomialWeylAlgebra, Coefficient> {
 public:
   unsigned int hashFunction() const {
-    return this->::LinearCombination<MonomialWeylAlgebra, coefficient>::hashFunction();
+    return this->::LinearCombination<MonomialWeylAlgebra, Coefficient>::hashFunction();
   }
   static unsigned int hashFunction(const ElementWeylAlgebra& input) {
     return input.hashFunction();
@@ -6124,16 +6126,16 @@ public:
     ElementWeylAlgebra& outputDO,
     Polynomial<Rational>& outputDenominator
   );
-  void FourierTransform (ElementWeylAlgebra<coefficient>& output) const;
+  void FourierTransform (ElementWeylAlgebra<Coefficient>& output) const;
   bool ActOnPolynomial(Polynomial<Rational>& thePoly) const;
-  void SetNumVariables(int newNumVars);
-  void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
+  void setNumberOfVariables(int newNumVars);
+  void multiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   static void LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);
   void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight);
   void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
-  bool Substitution(
+  bool substitution(
     const PolynomialSubstitution<Rational>& SubPolyPart,
     const PolynomialSubstitution<Rational>& SubDiffPArt
   );
@@ -6142,9 +6144,9 @@ public:
     tempMon.polynomialPart.makeOne(ExpectedNumVars);
     tempMon.differentialPart.makeOne(ExpectedNumVars);
     this->makeZero();
-    this->AddMonomial(tempMon, 1);
+    this->addMonomial(tempMon, 1);
   }
-  bool IsPolynomial(Polynomial<coefficient>* whichPoly = 0) const;
+  bool IsPolynomial(Polynomial<Coefficient>* whichPoly = 0) const;
   bool HasNonSmallPositiveIntegerDerivation() const;
   void raiseToPower(int thePower);
   void MultiplyTwoMonomials(
@@ -6155,12 +6157,12 @@ public:
     MonomialWeylAlgebra tempM;
     for (int i = 0; i < input.size(); i ++) {
       tempM.polynomialPart = input[i];
-      this->AddMonomial(tempM, input.coefficients[i]);
+      this->addMonomial(tempM, input.coefficients[i]);
     }
   }
   void operator=(const std::string& input);
-  void operator*=(const coefficient& other) {
-    this->LinearCombination<MonomialWeylAlgebra, coefficient>::operator*=(other);
+  void operator*=(const Coefficient& other) {
+    this->LinearCombination<MonomialWeylAlgebra, Coefficient>::operator*=(other);
   }
   void operator*=(const ElementWeylAlgebra& other);
   bool IsLetter(char theLetter);
@@ -6182,8 +6184,8 @@ public:
   void ActByEalpha(int indexAlpha);
   void ActByEFDisplayIndex(int displayIndex);
   void operator+=(const LittelmannPath& other) {
-    this->Waypoints.Reserve(this->Waypoints.size + other.Waypoints.size);
-    Vector<Rational> endPoint = *this->Waypoints.LastObject();
+    this->Waypoints.reserve(this->Waypoints.size + other.Waypoints.size);
+    Vector<Rational> endPoint = *this->Waypoints.lastObject();
     for (int i = 0; i < other.Waypoints.size; i ++) {
       this->Waypoints.addOnTop(other.Waypoints[i] + endPoint);
     }
@@ -6191,7 +6193,7 @@ public:
   bool IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString);
   std::string ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string ElementToStringOperatorSequenceStartingOnMe(List<int>& input);
-  bool GenerateOrbit(
+  bool generateOrbit(
     List<LittelmannPath>& output,
     List<List<int> >& outputOperators,
     int UpperBoundNumElts,
@@ -6396,14 +6398,14 @@ class MonomialMatrix {
   }
 };
 
-template <class coefficient>
-class MatrixTensor: public LinearCombination<MonomialMatrix, coefficient> {
+template <class Coefficient>
+class MatrixTensor: public LinearCombination<MonomialMatrix, Coefficient> {
 public:
   void MakeIdSpecial() {
     this->makeZero();
     MonomialMatrix theMon;
     theMon.MakeIdSpecial();
-    this->AddMonomial(theMon, 1);
+    this->addMonomial(theMon, 1);
   }
   void MakeId(int numVars) {
     this->makeZero();
@@ -6411,10 +6413,10 @@ public:
     for (int i = 0; i < numVars; i ++) {
       theMon.dualIndex = i;
       theMon.vIndex = i;
-      this->AddMonomial(theMon, 1);
+      this->addMonomial(theMon, 1);
     }
   }
-  void Invert();
+  void invert();
   int GetMinNumRows() const {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
@@ -6437,21 +6439,21 @@ public:
     }
     return result + 1;
   }
-  coefficient GetDeterminant() const {
-    Matrix<coefficient> theMat;
+  Coefficient GetDeterminant() const {
+    Matrix<Coefficient> theMat;
     this->GetMatrix(theMat, this->GetMinNumColsNumRows());
     return theMat.GetDeterminant();
   }
-  void DirectSumWith(const MatrixTensor<coefficient>& other);
+  void DirectSumWith(const MatrixTensor<Coefficient>& other);
   void raiseToPower(int power);
-  void operator*=(const MatrixTensor<coefficient>& other);
-  void operator*=(const coefficient& other) {
-    return this->::LinearCombination<MonomialMatrix, coefficient>::operator*=(other);
+  void operator*=(const MatrixTensor<Coefficient>& other);
+  void operator*=(const Coefficient& other) {
+    return this->::LinearCombination<MonomialMatrix, Coefficient>::operator*=(other);
   }
   void GetVectorsSparseFromRowsIncludeZeroRows(
-    List<VectorSparse<coefficient> >& output, int MinNumRows = - 1
+    List<VectorSparse<Coefficient> >& output, int MinNumRows = - 1
   );
-  bool IsID() const {
+  bool isIdentity() const {
     int theDim = this->GetMinNumColsNumRows();
     Selection theSel;
     theSel.init(theDim);
@@ -6466,12 +6468,12 @@ public:
     }
     return theSel.CardinalitySelection == theDim;
   }
-  bool IsPositiveDefinite() {
-    Matrix<coefficient> other;
+  bool isPositiveDefinite() {
+    Matrix<Coefficient> other;
     this->GetMatrix(other, this->GetMinNumColsNumRows());
-    return other.IsPositiveDefinite();
+    return other.isPositiveDefinite();
   }
-  void operator=(const Matrix<coefficient>& other) {
+  void operator=(const Matrix<Coefficient>& other) {
     this->makeZero();
     MonomialMatrix theMon;
     for (int i = 0; i < other.numberOfRows; i ++) {
@@ -6479,86 +6481,86 @@ public:
         if (!other.elements[i][j].isEqualToZero()) {
           theMon.dualIndex = j;
           theMon.vIndex = i;
-          this->AddMonomial(theMon, other.elements[i][j]);
+          this->addMonomial(theMon, other.elements[i][j]);
         }
       }
     }
   }
-  void AssignTensorProduct(const MatrixTensor<coefficient>& left, const MatrixTensor<coefficient>& right) {
+  void assignTensorProduct(const MatrixTensor<Coefficient>& left, const MatrixTensor<Coefficient>& right) {
     //handle lazy programmers:
     if (this == &left || this == &right) {
-      MatrixTensor<coefficient> leftCopy = left;
-      MatrixTensor<coefficient> rightCopy = right;
-      this->AssignTensorProduct(leftCopy, rightCopy);
+      MatrixTensor<Coefficient> leftCopy = left;
+      MatrixTensor<Coefficient> rightCopy = right;
+      this->assignTensorProduct(leftCopy, rightCopy);
       return;
     }
-    //The basis of the tensor product vector space MUST be in the SAME order as the one used by Matrix::AssignTensorProduct.
+    //The basis of the tensor product vector space MUST be in the SAME order as the one used by Matrix::assignTensorProduct.
     //int leftDomainDim= left.GetMinNumCols();
     int rightDomainDim = right.GetMinNumCols();
     //int leftRangeDim= left.GetMinNumRows();
     int rightRangeDim = right.GetMinNumRows();
     MonomialMatrix tempM;
     this->makeZero();
-    coefficient tempCF;
+    Coefficient tempCF;
     for (int i = 0; i < left.size(); i ++) {
       for (int j = 0; j < right.size(); j ++) {
         tempM.dualIndex = left[i].dualIndex * rightDomainDim + right[j].dualIndex;
         tempM.vIndex = left[i].vIndex * rightRangeDim + right[j].vIndex;
         tempCF = left.coefficients[i];
         tempCF *= right.coefficients[j];
-        this->AddMonomial(tempM, tempCF);
+        this->addMonomial(tempM, tempCF);
       }
     }
   }
-  void Substitution(const PolynomialSubstitution<Rational>& theSub) {
-    MatrixTensor<coefficient> thisCopy = *this;
+  void substitution(const PolynomialSubstitution<Rational>& theSub) {
+    MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
-    coefficient tempCF;
+    Coefficient tempCF;
     for (int i = 0; i < thisCopy.size(); i ++) {
       tempCF = thisCopy.coefficients[i];
-      tempCF.Substitution(theSub);
-      this->AddMonomial(thisCopy[i], tempCF);
+      tempCF.substitution(theSub);
+      this->addMonomial(thisCopy[i], tempCF);
     }
   }
   void Transpose() {
-    MatrixTensor<coefficient> output;
+    MatrixTensor<Coefficient> output;
     MonomialMatrix theMon;
     output.makeZero();
     for (int i = 0; i < this->size(); i ++) {
       theMon = (*this)[i];
       theMon.Transpose();
-      output.AddMonomial(theMon, this->coefficients[i]);
+      output.addMonomial(theMon, this->coefficients[i]);
     }
     *this = output;
   }
-  void SetNumVariables(int newNumVars) {
-    MatrixTensor<coefficient> thisCopy = *this;
+  void setNumberOfVariables(int newNumVars) {
+    MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
-    coefficient tempCF;
+    Coefficient tempCF;
     for (int i = 0; i < thisCopy.size; i ++) {
       tempCF = thisCopy.coefficients[i];
-      tempCF.SetNumVariables(newNumVars);
-      this->AddMonomial(thisCopy[i], tempCF);
+      tempCF.setNumberOfVariables(newNumVars);
+      this->addMonomial(thisCopy[i], tempCF);
     }
   }
-  void LieBracketOnTheLeft(const MatrixTensor<coefficient>& standsOnTheLeft) {
-    MacroRegisterFunctionWithName("MatrixTensor<coefficient>::LieBracketOnTheLeft");
-    MatrixTensor<coefficient> output;
+  void LieBracketOnTheLeft(const MatrixTensor<Coefficient>& standsOnTheLeft) {
+    MacroRegisterFunctionWithName("MatrixTensor<Coefficient>::LieBracketOnTheLeft");
+    MatrixTensor<Coefficient> output;
     MonomialMatrix theMon;
     output.makeZero();
     output.setExpectedSize(this->size() * standsOnTheLeft.size() * 2);
-    coefficient tempCF;
+    Coefficient tempCF;
     for (int i = 0; i < this->size(); i ++) {
       for (int j = 0; j < standsOnTheLeft.size(); j ++) {
         tempCF = this->coefficients[i];
         tempCF *= standsOnTheLeft.coefficients[j];
         theMon = standsOnTheLeft[j];
         theMon *= (*this)[i];
-        output.AddMonomial(theMon, tempCF);
+        output.addMonomial(theMon, tempCF);
         tempCF *= - 1;
         theMon = (*this)[i];
         theMon *= standsOnTheLeft[j];
-        output.AddMonomial(theMon, tempCF);
+        output.addMonomial(theMon, tempCF);
       }
     }
     *this = output;
@@ -6567,11 +6569,11 @@ public:
     if (this->isEqualToZero()) {
       return "(0)";
     }
-    Matrix<coefficient> tempMat;
+    Matrix<Coefficient> tempMat;
     this->GetMatrix(tempMat, this->GetMinNumColsNumRows());
     return tempMat.toString(theFormat);
   }
-  void GetMatrix(Matrix<coefficient>& output, int theDim) const {
+  void GetMatrix(Matrix<Coefficient>& output, int theDim) const {
     theDim = MathRoutines::Maximum(theDim, this->GetMinNumColsNumRows());
     output.init(theDim, theDim);
     output.makeZero();
@@ -6590,7 +6592,7 @@ public:
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size; j ++) {
-        this->AddMonomial(MonomialMatrix(j, i), inputVectors[i][j]);
+        this->addMonomial(MonomialMatrix(j, i), inputVectors[i][j]);
       }
     }
   }
@@ -6599,7 +6601,7 @@ public:
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size(); j ++) {
-        this->AddMonomial(MonomialMatrix(inputVectors[i][j].theIndex, i), inputVectors[i].coefficients[j]);
+        this->addMonomial(MonomialMatrix(inputVectors[i][j].theIndex, i), inputVectors[i].coefficients[j]);
       }
     }
   }
@@ -6608,12 +6610,12 @@ public:
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size(); j ++) {
-        this->AddMonomial(MonomialMatrix(i, inputVectors[i][j].theIndex), inputVectors[i].coefficients[j]);
+        this->addMonomial(MonomialMatrix(i, inputVectors[i][j].theIndex), inputVectors[i].coefficients[j]);
       }
     }
   }
   bool IsNilpotent() const {
-    MatrixTensor<coefficient> theMat;
+    MatrixTensor<Coefficient> theMat;
     theMat = *this;
     for (int theDim = this->GetMinNumColsNumRows() + 1; theDim > 0; theDim /= 2) {
       theMat *= theMat;
@@ -6623,12 +6625,12 @@ public:
     }
     return false;
   }
-  void GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat = 0);
+  void GaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMat = 0);
   template <class otherType>
-  void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output) const {
+  void actOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output) const {
     if (&input == &output) {
       Vector<otherType> inputCopy = input;
-      this->ActOnVectorColumn(inputCopy, output);
+      this->actOnVectorColumn(inputCopy, output);
       return;
     }
     output.makeZero(this->GetMinNumRows());
@@ -6643,10 +6645,10 @@ public:
     }
   }
   void ActOnVectorROWSOnTheLeft(
-    const List<Vector<coefficient> >& inputStandToTheLeftAsVectorRows, List<Vector<coefficient> >& output
+    const List<Vector<Coefficient> >& inputStandToTheLeftAsVectorRows, List<Vector<Coefficient> >& output
   ) const {
     if (&inputStandToTheLeftAsVectorRows == &output) {
-      List<Vector<coefficient> > inputCopy = inputStandToTheLeftAsVectorRows;
+      List<Vector<Coefficient> > inputCopy = inputStandToTheLeftAsVectorRows;
       this->ActOnVectorROWSOnTheLeft(inputCopy, output);
       return;
     }
@@ -6669,13 +6671,13 @@ public:
     }
   }
   template <class otherType>
-  void ActOnVectorsColumn(Vectors<otherType>& inputOutput) const {
+  void actOnVectorsColumn(Vectors<otherType>& inputOutput) const {
     for (int i = 0; i < inputOutput.size; i ++) {
-      this->ActOnVectorColumn(inputOutput[i], inputOutput[i]);
+      this->actOnVectorColumn(inputOutput[i], inputOutput[i]);
     }
   }
   template <class otherType>
-  void ActOnVectorColumn(VectorSparse<otherType>& inputOutput) const {
+  void actOnVectorColumn(VectorSparse<otherType>& inputOutput) const {
     VectorSparse<otherType> output;
     output.makeZero();
     otherType tempElt;
@@ -6686,23 +6688,23 @@ public:
           tempVM.theIndex = (*this)[i].vIndex;
           tempElt = this->coefficients[i];
           tempElt *= inputOutput.coefficients[j];
-          output.AddMonomial(tempVM, tempElt);
+          output.addMonomial(tempVM, tempElt);
         }
       }
     }
     inputOutput = output;
   }
   unsigned int hashFunction() const {
-    return this->::LinearCombination<MonomialMatrix, coefficient>::hashFunction();
+    return this->::LinearCombination<MonomialMatrix, Coefficient>::hashFunction();
   }
-  static unsigned int hashFunction(const MatrixTensor<coefficient>& input) {
+  static unsigned int hashFunction(const MatrixTensor<Coefficient>& input) {
     return input.hashFunction();
   }
   template<class otherClass>
   void operator=(const otherClass& other) {
-    this->::LinearCombination<MonomialMatrix, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialMatrix, Coefficient>::operator=(other);
   }
-  MatrixTensor<coefficient> operator+(const MatrixTensor<coefficient>& rightM) const {
+  MatrixTensor<Coefficient> operator+(const MatrixTensor<Coefficient>& rightM) const {
     MatrixTensor output;
     output = *this;
     output += rightM;
@@ -6710,9 +6712,9 @@ public:
   }
 };
 
-template <class coefficient>
-void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(
-  List<VectorSparse<coefficient> >& output, int MinNumRows
+template <class Coefficient>
+void MatrixTensor<Coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(
+  List<VectorSparse<Coefficient> >& output, int MinNumRows
 ) {
   MinNumRows = MathRoutines::Maximum(MinNumRows, this->GetMinNumRows());
   output.setSize(MinNumRows);
@@ -6722,31 +6724,31 @@ void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(
   for (int i = 0; i < this->size(); i ++) {
     int rowIndex = (*this)[i].vIndex;
     int colIndex = (*this)[i].dualIndex;
-    output[rowIndex].AddMonomial(MonomialVector(colIndex), this->coefficients[i]);
+    output[rowIndex].addMonomial(MonomialVector(colIndex), this->coefficients[i]);
   }
 }
 
-template <class coefficient>
-void MatrixTensor<coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat) {
-  List<VectorSparse<coefficient> > theRows, theCarbonCopyRows;
+template <class Coefficient>
+void MatrixTensor<Coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<Coefficient>* carbonCopyMat) {
+  List<VectorSparse<Coefficient> > theRows, theCarbonCopyRows;
   int numRows = this->GetMinNumRows();
   if (carbonCopyMat != 0) {
     numRows = MathRoutines::Maximum(numRows, carbonCopyMat->GetMinNumRows());
     carbonCopyMat->GetVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numRows);
   }
   this->GetVectorsSparseFromRowsIncludeZeroRows(theRows, numRows);
-  List<VectorSparse<coefficient> >* theCarbonCopyPointer = carbonCopyMat == 0 ? 0 : &theCarbonCopyRows;
-  VectorSparse<coefficient>::GaussianEliminationByRows(theRows, 0, 0, 0, theCarbonCopyPointer);
+  List<VectorSparse<Coefficient> >* theCarbonCopyPointer = carbonCopyMat == 0 ? 0 : &theCarbonCopyRows;
+  VectorSparse<Coefficient>::gaussianEliminationByRows(theRows, 0, 0, 0, theCarbonCopyPointer);
   this->AssignVectorsToRows(theRows);
   if (carbonCopyMat != 0) {
     carbonCopyMat->AssignVectorsToRows(theCarbonCopyRows);
   }
 }
 
-template <class coefficient>
-void MatrixTensor<coefficient>::DirectSumWith(const MatrixTensor<coefficient>& other) {
+template <class Coefficient>
+void MatrixTensor<Coefficient>::DirectSumWith(const MatrixTensor<Coefficient>& other) {
   if (&other == this) {
-    MatrixTensor<coefficient> otherCopy = other;
+    MatrixTensor<Coefficient> otherCopy = other;
     this->DirectSumWith(otherCopy);
     return;
   }
@@ -6756,15 +6758,15 @@ void MatrixTensor<coefficient>::DirectSumWith(const MatrixTensor<coefficient>& o
   for (int i = 0; i < other.size(); i ++) {
     currentM.vIndex = other[i].vIndex + indexShift;
     currentM.dualIndex = other[i].dualIndex + indexShift;
-    this->AddMonomial(currentM, other.coefficients[i]);
+    this->addMonomial(currentM, other.coefficients[i]);
   }
 }
 
-template <class coefficient>
-void MatrixTensor<coefficient>::Invert() {
-  MatrixTensor<coefficient> theId;
+template <class Coefficient>
+void MatrixTensor<Coefficient>::invert() {
+  MatrixTensor<Coefficient> theId;
   theId.MakeId(this->GetMinNumColsNumRows());
-  MatrixTensor<coefficient> result = theId;
+  MatrixTensor<Coefficient> result = theId;
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this != theId) {
     global.fatal << "This is a programming error: attempting to invert a "
@@ -6774,52 +6776,52 @@ void MatrixTensor<coefficient>::Invert() {
   *this = result;
 }
 
-template<class coefficient>
+template<class Coefficient>
 class MonomialGeneralizedVerma {
   public:
-  ModuleSSalgebra<coefficient>* owner;
-  MonomialUniversalEnveloping<coefficient> theMonCoeffOne;
+  ModuleSSalgebra<Coefficient>* owner;
+  MonomialUniversalEnveloping<Coefficient> theMonCoeffOne;
   int indexFDVector;
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
   }
-  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<coefficient>& theGen) {
+  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<Coefficient>& theGen) {
     output << theGen.toString();
     return output;
   }
   void MultiplyMeByUEEltOnTheLefT(
-    const ElementUniversalEnveloping<coefficient>& theUE,
-    ElementSumGeneralizedVermas<coefficient>& output
+    const ElementUniversalEnveloping<Coefficient>& theUE,
+    ElementSumGeneralizedVermas<Coefficient>& output
   ) const;
-  void operator=(const MonomialGeneralizedVerma<coefficient>& other) {
+  void operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
     this->owner = other.owner;
     this->indexFDVector = other.indexFDVector;
     this->theMonCoeffOne = other.theMonCoeffOne;
   }
 
   std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
-  bool operator==(const MonomialGeneralizedVerma<coefficient>& other) const {
+  bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
       return this->theMonCoeffOne == other.theMonCoeffOne;
     }
     return false;
   }
-  void SetNumVariables(int GoalNumVars) {
+  void setNumberOfVariables(int GoalNumVars) {
     if (this->owner->size <= this->indexInOwner) {
-      global.fatal << "Crash in SetNumVariables: bad number of variables. " << global.fatal;
+      global.fatal << "Crash in setNumberOfVariables: bad number of variables. " << global.fatal;
     }
-    this->theMonCoeffOne.SetNumVariables(GoalNumVars);
-    this->owner->theObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
+    this->theMonCoeffOne.setNumberOfVariables(GoalNumVars);
+    this->owner->theObjects[this->indexInOwner].setNumberOfVariables(GoalNumVars);
   }
-  void Substitution(
-    const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods
+  void substitution(
+    const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
   );
   unsigned int hashFunction() const {
     return this->indexFDVector * someRandomPrimes[0] + (static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->owner))) * someRandomPrimes[1];
   }
-  static unsigned int hashFunction(const MonomialGeneralizedVerma<coefficient>& input) {
+  static unsigned int hashFunction(const MonomialGeneralizedVerma<Coefficient>& input) {
     return input.hashFunction();
   }
-  bool operator>(const MonomialGeneralizedVerma<coefficient>& other) const {
+  bool operator>(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (this->owner != other.owner) {
       return reinterpret_cast<unsigned long>(this->owner) > reinterpret_cast<unsigned long>(other.owner);
     }
@@ -6828,35 +6830,35 @@ class MonomialGeneralizedVerma {
     }
     return this->theMonCoeffOne > other.theMonCoeffOne;
   }
-  void ReduceMe(ElementSumGeneralizedVermas<coefficient>& output) const;
+  void ReduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
   bool IsHWV() const {
     if (!this->theMonCoeffOne.IsEqualToOne()) {
       return false;
     }
     return this->GetOwner().getDimension() - 1 == this->indexFDVector;
   }
-  void makeConstant(ModuleSSalgebra<coefficient>& inputOwner) {
+  void makeConstant(ModuleSSalgebra<Coefficient>& inputOwner) {
     this->owner = &inputOwner;
     this->theMonCoeffOne.makeOne(*inputOwner.owner);
   }
-  ModuleSSalgebra<coefficient>& GetOwner() const {
+  ModuleSSalgebra<Coefficient>& GetOwner() const {
     return *this->owner;
   }
 };
 
-template<class coefficient>
-class ElementSumGeneralizedVermas : public LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient> {
+template<class Coefficient>
+class ElementSumGeneralizedVermas : public LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient> {
 public:
-  void MultiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<coefficient>& theUE);
+  void MultiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<Coefficient>& theUE);
   unsigned int hashFunction() const {
-    return this->LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient >::hashFunction();
+    return this->LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::hashFunction();
   }
-  static unsigned int hashFunction(const ElementSumGeneralizedVermas<coefficient>& input) {
+  static unsigned int hashFunction(const ElementSumGeneralizedVermas<Coefficient>& input) {
     return input.hashFunction();
   }
   ElementSumGeneralizedVermas() {
   }
-  void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
+  void MakeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit);
   int GetNumVars() {
     if (this->owner == nullptr) {
       return - 1;
@@ -6872,34 +6874,30 @@ public:
     }
     return theAnswer;
   }
-  bool ExtractElementUE(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner);
-  void operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
-    this->::LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient>::operator=(other);
+  bool ExtractElementUE(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner);
+  void operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
+    this->::LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::operator=(other);
   }
 };
 
-template <class coefficient>
+template <class Coefficient>
 class MonomialTensorGeneralizedVermas {
 public:
-  List<MonomialGeneralizedVerma<coefficient> > theMons;
-  void SimplifyNormalizeCoeffs();
-  friend std::ostream& operator << (std::ostream& output, const MonomialTensorGeneralizedVermas<coefficient>& input) {
+  List<MonomialGeneralizedVerma<Coefficient> > theMons;
+  friend std::ostream& operator << (std::ostream& output, const MonomialTensorGeneralizedVermas<Coefficient>& input) {
     output << input.toString();
     return output;
   }
-  int GetNumVars() {
-    return this->Coefficient.GetNumVars();
-  }
-  void operator*=(const MonomialTensorGeneralizedVermas<coefficient>& other) {
+  void operator*=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
     if (this == &other) {
-      MonomialTensorGeneralizedVermas<coefficient> tempMon1;
+      MonomialTensorGeneralizedVermas<Coefficient> tempMon1;
       tempMon1 = other;
       *this *= tempMon1;
       return;
     }
     this->theMons.addListOnTop(other.theMons);
   }
-  void operator*=(const MonomialGeneralizedVerma<coefficient>& other) {
+  void operator*=(const MonomialGeneralizedVerma<Coefficient>& other) {
     this->theMons.addOnTop(other);
   }
   unsigned int hashFunction() const {
@@ -6910,30 +6908,30 @@ public:
     }
     return result;
   }
-  static unsigned int hashFunction(const MonomialTensorGeneralizedVermas<coefficient>& input) {
+  static unsigned int hashFunction(const MonomialTensorGeneralizedVermas<Coefficient>& input) {
     return input.hashFunction();
   }
-  void SetNumVariables(int GoalNumVars) {
+  void setNumberOfVariables(int GoalNumVars) {
     for (int i = 0; i < this->theMons.size; i ++) {
-      this->theMons[i].SetNumVariables(GoalNumVars);
+      this->theMons[i].setNumberOfVariables(GoalNumVars);
     }
   }
-  void Substitution(
+  void substitution(
     const PolynomialSubstitution<Rational>& theSub,
-    ListReferences<ModuleSSalgebra<coefficient> >& theMods
+    ListReferences<ModuleSSalgebra<Coefficient> >& theMods
   ) {
     for (int i = 0; i < this->theMons.size; i ++) {
-      this->theMons[i].Substitution(theSub, theMods);
+      this->theMons[i].substitution(theSub, theMods);
     }
   }
   std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
   MonomialTensorGeneralizedVermas() {
   }
-  void operator=(const MonomialTensorGeneralizedVermas<coefficient>& other) {
+  void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
     this->theMons = other.theMons;
   }
-  void operator=(const MonomialGeneralizedVerma<coefficient>& other);
-  bool operator==(const MonomialTensorGeneralizedVermas<coefficient>& other) const {
+  void operator=(const MonomialGeneralizedVerma<Coefficient>& other);
+  bool operator==(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
     if (this->theMons.size != other.theMons.size) {
       return false;
     }
@@ -6950,7 +6948,7 @@ public:
     }
     return this->theMons[0].IsHWV();
   }
-  bool operator>(const MonomialTensorGeneralizedVermas<coefficient>& other) const {
+  bool operator>(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
     if (this->theMons.size > other.theMons.size) {
       return true;
     }
@@ -6964,26 +6962,9 @@ public:
   }
 };
 
-template <class coefficient>
-void MonomialTensorGeneralizedVermas <coefficient>::SimplifyNormalizeCoeffs() {
-  if (this->Coefficient.isEqualToZero()) {
-    this->makeZero(this->Coefficient.GetZero());
-    return;
-  }
-  for (int i = 0; i < this->theMons.size; i ++) {
-    coefficient& currentCF = this->theMons[i].Coefficient;
-    if (currentCF.isEqualToZero()) {
-      this->makeZero(this->Coefficient.GetZero());
-      return;
-    }
-    this->Coefficient *= currentCF;
-    currentCF = currentCF.GetOne();
-  }
-}
-
 class PolynomialOverModule;
 
-class slTwoInSlN {
+class SlTwoInSlN {
   int GetModuleIndexFromHighestWeightVector(const Matrix<Rational>& input) {
     Rational tempRat;
     for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
@@ -7026,16 +7007,16 @@ public:
   );
 };
 
-template<typename coefficient>
-void Matrix<coefficient>::GetVectorFromRow(int rowIndex, Vector<coefficient>& output) const {
+template<typename Coefficient>
+void Matrix<Coefficient>::GetVectorFromRow(int rowIndex, Vector<Coefficient>& output) const {
   output.setSize(this->numberOfColumns);
   for (int i = 0; i < this->numberOfColumns; i ++) {
     output.theObjects[i] = this->elements[rowIndex][i];
   }
 }
 
-template<typename coefficient>
-void Matrix<coefficient>::GetVectorFromColumn(int colIndex, Vector<coefficient>& output) const {
+template<typename Coefficient>
+void Matrix<Coefficient>::GetVectorFromColumn(int colIndex, Vector<Coefficient>& output) const {
   output.setSize(this->numberOfRows);
   for (int i = 0; i < this->numberOfRows; i ++) {
     output[i] = this->elements[i][colIndex];
@@ -7092,17 +7073,17 @@ public:
 };
 
 
-template<class coefficient>
-void Matrix<coefficient>::Substitution(const PolynomialSubstitution<Rational>& theSub) {
+template<class Coefficient>
+void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j].Substitution(theSub);
+      this->elements[i][j].substitution(theSub);
     }
   }
 }
 
-template <class coefficient>
-std::string MonomialTensorGeneralizedVermas<coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+template <class Coefficient>
+std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
   std::stringstream out;
   if (this->theMons.size > 1) {
     for (int i = 0; i < this->theMons.size; i ++) {
@@ -7124,12 +7105,12 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::toString(FormatExpress
   return out.str();
 }
 
-template <class coefficient>
-std::string MonomialGeneralizedVerma<coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+template <class Coefficient>
+std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
-  ModuleSSalgebra<coefficient>& theMod = *this->owner;
+  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
   std::string tempS;
   if (tempS == "1") {
     tempS = "";
@@ -7161,8 +7142,8 @@ std::string MonomialGeneralizedVerma<coefficient>::toString(FormatExpressions* t
   return out.str();
 }
 
-template <class templateMonomial, class coefficient>
-std::ostream& operator<<(std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection) {
+template <class templateMonomial, class Coefficient>
+std::ostream& operator<<(std::ostream& output, const LinearCombination<templateMonomial, Coefficient>& theCollection) {
   if (theCollection.size() == 0) {
     output << "0";
     return output;
@@ -7175,7 +7156,7 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<templateM
   for (int i = 0; i < sortedMons.size; i ++) {
     templateMonomial& currentMon = sortedMons[i];
     std::stringstream tempStream;
-    coefficient& currentCoeff = theCollection.coefficients[theCollection.theMonomials.getIndex(currentMon)];
+    Coefficient& currentCoeff = theCollection.coefficients[theCollection.theMonomials.getIndex(currentMon)];
     tempStream << currentCoeff;
     tempS1 = tempStream.str();
     tempS2 = currentMon.toString();
@@ -7205,8 +7186,8 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<templateM
   return output;
 }
 
-template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<coefficient>& theMat) {
+template <class Coefficient>
+void PolynomialSubstitution<Coefficient>::MakeLinearSubConstTermsLastRow(Matrix<Coefficient>& theMat) {
   this->setSize(theMat.numberOfColumns);
   MonomialP tempM;
   for (int i = 0; i < this->size; i ++) {
@@ -7214,39 +7195,39 @@ void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<
     for (int j = 0; j < theMat.numberOfRows - 1; j ++) {
       tempM.makeOne(theMat.numberOfRows - 1);
       tempM.setVariable(j, 1);
-      this->theObjects[i].AddMonomial(tempM, theMat.elements[j][i]);
+      this->theObjects[i].addMonomial(tempM, theMat.elements[j][i]);
     }
     this->theObjects[i] += theMat.elements[theMat.numberOfRows - 1][i];
   }
 }
 
-template <class coefficient>
-void MonomialGeneralizedVerma<coefficient>::Substitution(
-  const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
 ) {
-  this->theMonCoeffOne.Substitution(theSub);
-  ModuleSSalgebra<coefficient> newOwner;
+  this->theMonCoeffOne.substitution(theSub);
+  ModuleSSalgebra<Coefficient> newOwner;
   newOwner = *this->owner;
-  newOwner.Substitution(theSub);
+  newOwner.substitution(theSub);
   int newModIndex = theMods.addNoRepetitionOrReturnIndexFirst(newOwner);
   this->owner = &theMods[newModIndex];
 }
 
-template <class coefficient>
-void MonomialTensorGeneralizedVermas<coefficient>::operator=(const MonomialGeneralizedVerma<coefficient>& other) {
+template <class Coefficient>
+void MonomialTensorGeneralizedVermas<Coefficient>::operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
   this->theMons.setSize(1);
   this->theMons[0] = other;
 }
 
-template <class coefficient>
-void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT(
-  const ElementUniversalEnveloping<coefficient>& theUE,
-  ElementSumGeneralizedVermas<coefficient>& output
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::MultiplyMeByUEEltOnTheLefT(
+  const ElementUniversalEnveloping<Coefficient>& theUE,
+  ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName("MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT");
-  MonomialGeneralizedVerma<coefficient> currentMon;
+  MacroRegisterFunctionWithName("MonomialGeneralizedVerma<Coefficient>::MultiplyMeByUEEltOnTheLefT");
+  MonomialGeneralizedVerma<Coefficient> currentMon;
   output.makeZero();
-  ElementSumGeneralizedVermas<coefficient> buffer;
+  ElementSumGeneralizedVermas<Coefficient> buffer;
   ProgressReport theReport;
   if (!this->GetOwner().owner->flagHasNilradicalOrder) {
     global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
@@ -7270,12 +7251,12 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT(
   }
 }
 
-template <class coefficient>
-void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft(
-  const ElementUniversalEnveloping<coefficient>& theUE
+template <class Coefficient>
+void ElementSumGeneralizedVermas<Coefficient>::MultiplyMeByUEEltOnTheLeft(
+  const ElementUniversalEnveloping<Coefficient>& theUE
 ) {
-  MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft");
-  ElementSumGeneralizedVermas<coefficient> buffer, Accum;
+  MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<Coefficient>::MultiplyMeByUEEltOnTheLeft");
+  ElementSumGeneralizedVermas<Coefficient> buffer, Accum;
   Accum.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer);
@@ -7285,14 +7266,14 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft(
   *this = Accum;
 }
 
-template <class coefficient>
-void MonomialGeneralizedVerma<coefficient>::ReduceMe(
-  ElementSumGeneralizedVermas<coefficient>& output
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::ReduceMe(
+  ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
   MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
-  ModuleSSalgebra<coefficient>& theMod = *this->owner;
+  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
   output.makeZero();
-  MonomialUniversalEnveloping<coefficient> tempMon;
+  MonomialUniversalEnveloping<Coefficient> tempMon;
   tempMon = this->theMonCoeffOne;
   tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck = theMod.theGeneratingWordsNonReduced.getIndex(tempMon);
@@ -7300,22 +7281,22 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
     global.fatal << "Owner needs nilradical order!!!" << global.fatal;
   }
   if (indexCheck != - 1) {
-    MonomialGeneralizedVerma<coefficient> basisMon;
+    MonomialGeneralizedVerma<Coefficient> basisMon;
     basisMon.makeConstant(*this->owner);
     basisMon.indexFDVector = indexCheck;
-    output.AddMonomial(basisMon, 1);
+    output.addMonomial(basisMon, 1);
     return;
   }
-  ElementUniversalEnveloping<coefficient> theUEelt;
+  ElementUniversalEnveloping<Coefficient> theUEelt;
   theUEelt.makeZero(*this->GetOwner().owner);
-  theUEelt.AddMonomial(this->theMonCoeffOne, 1);
+  theUEelt.addMonomial(this->theMonCoeffOne, 1);
   theUEelt.simplify();
 
-  MonomialUniversalEnveloping<coefficient> currentMon;
-  MonomialGeneralizedVerma<coefficient> newMon;
-  MatrixTensor<coefficient> tempMat1, tempMat2;
+  MonomialUniversalEnveloping<Coefficient> currentMon;
+  MonomialGeneralizedVerma<Coefficient> newMon;
+  MatrixTensor<Coefficient> tempMat1, tempMat2;
   ProgressReport theReport;
-  coefficient theCF;
+  Coefficient theCF;
   for (int l = 0; l < theUEelt.size(); l ++) {
     currentMon = theUEelt[l];
     tempMat1.MakeIdSpecial();
@@ -7357,29 +7338,29 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
         newMon.indexFDVector = otherIndex;
         theCF = theUEelt.coefficients[l];
         theCF *= tempMat1.coefficients[i];
-        output.AddMonomial(newMon, theCF);
+        output.addMonomial(newMon, theCF);
       }
     }
   }
   theMod.GetOwner().OrderStandardAscending();
 }
 
-template<class coefficient>
-void Vectors<coefficient>::IntersectTwoLinSpaces(
-  const List<Vector<coefficient> >& firstSpace,
-  const List<Vector<coefficient> >& secondSpace,
-  List<Vector<coefficient> >& output
+template<class Coefficient>
+void Vectors<Coefficient>::IntersectTwoLinSpaces(
+  const List<Vector<Coefficient> >& firstSpace,
+  const List<Vector<Coefficient> >& secondSpace,
+  List<Vector<Coefficient> >& output
 ) {
-  Vectors<coefficient> firstReduced, secondReduced;
+  Vectors<Coefficient> firstReduced, secondReduced;
   Selection tempSel;
-  Vectors<coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel);
-  Vectors<coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel);
+  Vectors<Coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel);
+  Vectors<Coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel);
   if (firstReduced.size == 0 || secondReduced.size == 0) {
     output.size = 0;
     return;
   }
   int theDim = firstReduced[0].size;
-  Matrix<coefficient> theMat;
+  Matrix<Coefficient> theMat;
   theMat.init(theDim, firstReduced.size + secondReduced.size);
   for (int i = 0; i < theDim; i ++) {
     for (int j = 0; j < firstReduced.size; j ++) {
@@ -7390,10 +7371,10 @@ void Vectors<coefficient>::IntersectTwoLinSpaces(
       theMat(i, firstReduced.size + j) -= secondReduced[j][i];
     }
   }
-  theMat.GaussianEliminationByRows(0, &tempSel);
-  output.Reserve(tempSel.CardinalitySelection);
+  theMat.gaussianEliminationByRows(0, &tempSel);
+  output.reserve(tempSel.CardinalitySelection);
   output.size = 0;
-  Vector<coefficient> nextIntersection;
+  Vector<Coefficient> nextIntersection;
   for (int i = 0; i < tempSel.CardinalitySelection; i ++) {
     int currentIndex = tempSel.elements[i];
     if (currentIndex < firstReduced.size) {
@@ -7409,26 +7390,26 @@ void Vectors<coefficient>::IntersectTwoLinSpaces(
   }
 }
 
-template <class coefficient>
-void ElementSumGeneralizedVermas<coefficient>::MakeHWV(
-  ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit
+template <class Coefficient>
+void ElementSumGeneralizedVermas<Coefficient>::MakeHWV(
+  ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit
 ) {
   this->makeZero();
-  MonomialGeneralizedVerma<coefficient> theMon;
+  MonomialGeneralizedVerma<Coefficient> theMon;
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
   theMon.theMonCoeffOne.makeOne(theOwner.GetOwner());
   theMon.owner = &theOwner;
-  this->AddMonomial(theMon, theRingUnit);
+  this->addMonomial(theMon, theRingUnit);
 }
 
-template<class coefficient>
-bool Matrix<coefficient>::IsPositiveDefinite() {
+template<class Coefficient>
+bool Matrix<Coefficient>::isPositiveDefinite() {
   if (this->numberOfRows != this->numberOfColumns) {
     global.fatal << "This is a programming error: attempting to evaluate whether a matrix "
     << "is positive definite, but the matrix is not square. " << global.fatal;
   }
-  coefficient det;
-  Matrix<coefficient> tempMat;
+  Coefficient det;
+  Matrix<Coefficient> tempMat;
   for (int i = 0; i < this->numberOfRows; i ++) {
     tempMat.init(i + 1, i + 1);
     for (int j = 0; j < tempMat.numberOfColumns; j ++) {
@@ -7444,9 +7425,9 @@ bool Matrix<coefficient>::IsPositiveDefinite() {
   return true;
 }
 
-template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::getCoordinatesInBasis(
-  const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<coefficient>& output
+template <class Coefficient>
+bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
+  const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Coefficient>& output
 ) const {
   if (theBasis.size == 0) {
     return false;
@@ -7456,8 +7437,8 @@ bool ElementSemisimpleLieAlgebra<coefficient>::getCoordinatesInBasis(
     return true;
   }
   MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
-  Vectors<coefficient> tempBasis;
-  Vector<coefficient> tempRoot;
+  Vectors<Coefficient> tempBasis;
+  Vector<Coefficient> tempRoot;
   tempBasis.setSize(theBasis.size);
   for (int i = 0 ; i < theBasis.size; i ++) {
     theBasis[i].ElementToVectorNegativeRootSpacesFirst(tempBasis[i]);
@@ -7466,16 +7447,16 @@ bool ElementSemisimpleLieAlgebra<coefficient>::getCoordinatesInBasis(
   return tempRoot.getCoordinatesInBasis(tempBasis, output);
 }
 
-template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
+template <class Coefficient>
+void ElementSemisimpleLieAlgebra<Coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
   this->makeZero();
   ChevalleyGenerator tempGenerator;
   tempGenerator.MakeGenerator(inputOwner, generatorIndex);
-  this->AddMonomial(tempGenerator, 1);
+  this->addMonomial(tempGenerator, 1);
 }
 
-template <class coefficient>
-std::string Vectors<coefficient>::ElementsToInequalitiesString(
+template <class Coefficient>
+std::string Vectors<Coefficient>::ElementsToInequalitiesString(
   bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
 ) const {
   std::stringstream out;
@@ -7498,9 +7479,9 @@ std::string Vectors<coefficient>::ElementsToInequalitiesString(
       }
     } else {
       if (useLatex) {
-        out << "\\geq " << (- (*current.LastObject())).toString() << "\\\\";
+        out << "\\geq " << (- (*current.lastObject())).toString() << "\\\\";
       } else {
-        out << "=>" <<  (- (*current.LastObject())).toString();
+        out << "=>" <<  (- (*current.lastObject())).toString();
       }
     }
     if (tempS == "") {

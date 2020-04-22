@@ -4439,7 +4439,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "DrawRootSystem",
-    CalculatorFunctions::innerDrawRootSystem,
+    CalculatorFunctions::innerdrawRootSystem,
     "",
     "Draws the root system of a semisimple Lie algebra. "
     "Takes one or three arguments: "
@@ -4461,7 +4461,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Clicking the obvious button creates a basis "
     "change animations ideal for presentations.",
     "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
-    "CalculatorFunctions::innerDrawRootSystem",
+    "CalculatorFunctions::innerdrawRootSystem",
     "DrawRootSystem",
     innerStandard
   );
@@ -7375,8 +7375,8 @@ void Calculator::initPredefinedStandardOperations() {
     "Raises polynomial modulo an integer to a small integer power. ",
     "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
     "a^20",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger",
-    "PowerPolynomialAlgebraicNumbersBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger",
+    "innerPowerPolynomialModuloIntegerBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -8368,16 +8368,6 @@ void Calculator::addOneStringCompositeHandler(
   this->addOneStringHandler(atom, handler, this->toStringHandlersComposite);
 }
 
-template <class builtInType>
-void Calculator::addOneBuiltInHandler() {
-  Expression typeConverter(*this);
-  this->addOneStringHandler(
-    typeConverter.getTypeOperation<builtInType>(),
-    Expression::toStringBuiltIn<builtInType>,
-    this->toStringDataHandlers
-  );
-}
-
 void Calculator::addOneStringHandler(
   int atom,
   Expression::ToStringHandler handler,
@@ -8471,7 +8461,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<ElementWeylGroup                                                         >();
   this->addOneBuiltInHandler<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>             >();
   this->addOneBuiltInHandler<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>           >();
-  this->addOneBuiltInHandler<charSSAlgMod<Rational>                                                   >();
+  this->addOneBuiltInHandler<CharacterSemisimpleLieAlgebraModule<Rational>                                                   >();
   this->addOneBuiltInHandler<SemisimpleSubalgebras                                                    >();
   this->addOneBuiltInHandler<double                                                                   >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();

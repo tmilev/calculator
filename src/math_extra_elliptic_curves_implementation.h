@@ -5,8 +5,8 @@
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_algebraic_numbers.h"
 
-template <typename coefficient>
-unsigned int ElementEllipticCurve<coefficient>::hashFunction(const ElementEllipticCurve<coefficient>& input) {
+template <typename Coefficient>
+unsigned int ElementEllipticCurve<Coefficient>::hashFunction(const ElementEllipticCurve<Coefficient>& input) {
   if (input.flagInfinity) {
     return 0;
   }
@@ -15,8 +15,8 @@ unsigned int ElementEllipticCurve<coefficient>::hashFunction(const ElementEllipt
   input.owner.hashFunction(input.owner) * someRandomPrimes[2];
 }
 
-template <typename coefficient>
-bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& other) const {
+template <typename Coefficient>
+bool ElementEllipticCurve<Coefficient>::operator==(const ElementEllipticCurve& other) const {
   if (!(this->owner == other.owner)) {
     return false;
   }
@@ -28,22 +28,22 @@ bool ElementEllipticCurve<coefficient>::operator==(const ElementEllipticCurve& o
   this->flagInfinity == other.flagInfinity;
 }
 
-template <typename coefficient>
-void ElementEllipticCurve<coefficient>::Invert() {
+template <typename Coefficient>
+void ElementEllipticCurve<Coefficient>::invert() {
   if (this->flagInfinity) {
     return;
   }
   this->yCoordinate *= - 1;
 }
 
-template <typename coefficient>
-void ElementEllipticCurve<coefficient>::makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve) {
+template <typename Coefficient>
+void ElementEllipticCurve<Coefficient>::makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve) {
   this->owner = inputCurve;
   this->flagInfinity = true;
 }
 
-template <typename coefficient>
-bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& other) {
+template <typename Coefficient>
+bool ElementEllipticCurve<Coefficient>::operator*=(const ElementEllipticCurve& other) {
   if (!(this->owner == other.owner)) {
     return false;
   }
@@ -59,7 +59,7 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
   // (the slope of secant line (two points) or tangent line (double point).
   // x_C = s^2 - x_A - x_B
   // y_C = -s(x_C - x_A)-y_A
-  coefficient slope;
+  Coefficient slope;
   if (this->xCoordinate == other.xCoordinate) {
     if (this->yCoordinate == other.yCoordinate * (- 1)) {
       this->flagInfinity = true;
@@ -74,20 +74,20 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
   } else {
     slope = (other.yCoordinate - this->yCoordinate) / (other.xCoordinate - this->xCoordinate);
   }
-  coefficient originalX = this->xCoordinate;
+  Coefficient originalX = this->xCoordinate;
   this->xCoordinate = slope * slope - this->xCoordinate - other.xCoordinate;
   this->yCoordinate = slope * (this->xCoordinate - originalX) * (- 1) - this->yCoordinate;
   this->flagInfinity = false;
   return true;
 }
 
-template <typename coefficient>
-std::string ElementEllipticCurve<coefficient>::toString(FormatExpressions* theFormat) const {
+template <typename Coefficient>
+std::string ElementEllipticCurve<Coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   Polynomial<Rational> leftHandSide, rightHandSide;
   leftHandSide.makeMonomial(1, 2, 1);
   rightHandSide.makeMonomial(0, 3, 1);
-  rightHandSide.AddMonomial(MonomialP(0, 1), this->owner.linearCoefficient);
+  rightHandSide.addMonomial(MonomialP(0, 1), this->owner.linearCoefficient);
   rightHandSide += Rational(this->owner.constantTerm);
   out << "ElementEllipticCurveNormalForm{}(" << leftHandSide.toString(theFormat)
   << " = " << rightHandSide.toString(theFormat) << ", "

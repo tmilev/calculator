@@ -56,7 +56,7 @@ bool LargeIntegerUnsigned::AssignStringFailureAllowed(const std::string& input, 
 
 LargeIntegerUnsigned LargeIntegerUnsigned::operator*(const LargeIntegerUnsigned& x) const {
   LargeIntegerUnsigned result;
-  this->MultiplyBy(x, result);
+  this->multiplyBy(x, result);
   return result;
 }
 
@@ -103,7 +103,7 @@ void LargeIntegerUnsigned::GetHexBigEndian(
   for (int i = 0; i < numberOfLeadingZeroesToPadWith; i ++) {
     result.addOnTop(0);
   }
-  result.ReverseOrderElements();
+  result.reverseElements();
   output.assign(result.theObjects, static_cast<unsigned>(result.size));
 }
 
@@ -116,7 +116,7 @@ bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
   this->WriteBigEndianBytes(outputAppend, 0);
   int zeroesToPad = desiredNumberOfBytes - outputAppend.size - startOffset;
   if (zeroesToPad > 0) {
-    outputAppend.ShiftUpExpandOnTopRepeated(startOffset, zeroesToPad);
+    outputAppend.shiftUpExpandOnTopRepeated(startOffset, zeroesToPad);
     for (int i = 0; i < zeroesToPad; i ++) {
       outputAppend[startOffset + i] = 0;
     }
@@ -151,7 +151,7 @@ void LargeIntegerUnsigned::WriteBigEndianBytes(
       }
     }
   }
-  outputAppend.Reserve(outputAppend.size + digitsReveredOrder.size + padWithZero);
+  outputAppend.reserve(outputAppend.size + digitsReveredOrder.size + padWithZero);
   if (padWithZero == 1) {
     outputAppend.addOnTop(0);
   }
@@ -173,12 +173,12 @@ void LargeIntegerUnsigned::makeZero() {
 void LargeIntegerUnsigned::MultiplyByUInt(unsigned int x) {
   LargeIntegerUnsigned tempLI;
   tempLI.AssignShiftedUInt(x, 0);
-  this->MultiplyBy(tempLI);
+  this->multiplyBy(tempLI);
 }
 
-void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x) {
+void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x) {
   LargeIntegerUnsigned tempInt;
-  this->MultiplyBy(x, tempInt);
+  this->multiplyBy(x, tempInt);
   *this = tempInt;
 }
 
@@ -189,7 +189,7 @@ void LargeIntegerUnsigned::AddUInt(unsigned int x) {
 }
 
 void LargeIntegerUnsigned::operator*=(const LargeIntegerUnsigned& right) {
-  this->MultiplyBy(right);
+  this->multiplyBy(right);
 }
 
 void LargeIntegerUnsigned::operator*=(unsigned int x) {
@@ -412,7 +412,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
 ) {
   List<int> theSieve;
   theSieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1);
-  output.Reserve(primesUpToInclusive / 2);
+  output.reserve(primesUpToInclusive / 2);
   output.size = 0;
   for (unsigned int i = 2; i <= primesUpToInclusive; i ++) {
     if (theSieve[static_cast<signed>(i)] == 0) {
@@ -557,14 +557,14 @@ void LargeIntegerUnsigned::DivPositive(
   remainderOutput = *this;
   quotientOutput.makeZero();
   int currentQuotientDigit = 0;
-  int divisorLeadingDigit = *divisor.theDigits.LastObject();
+  int divisorLeadingDigit = *divisor.theDigits.lastObject();
   int lastRemainderSize = - 1;
   int numRunsNoDigitImprovement = 0;
   LargeIntegerUnsigned remainderBackup;
   int upperlimitNoImprovementRounds = this->SquareRootOfCarryOverBound * 2;
   while (remainderOutput.IsGreaterThanOrEqualTo(divisor)) {
     int quotientDigitIndex = remainderOutput.theDigits.size - divisor.theDigits.size;
-    long long remainderLeadingDigit = *remainderOutput.theDigits.LastObject();
+    long long remainderLeadingDigit = *remainderOutput.theDigits.lastObject();
     int divisorLeadingDigitPlusSlack = divisorLeadingDigit;
     for (;;) {
       if (remainderLeadingDigit < divisorLeadingDigitPlusSlack) {
@@ -578,7 +578,7 @@ void LargeIntegerUnsigned::DivPositive(
       ///////////////////////////////////////////////////////////
       remainderBackup = remainderOutput;
       remainderOutput.AddLargeIntUnsignedShiftedTimesDigit(divisor, quotientDigitIndex, - currentQuotientDigit);
-      if (*remainderOutput.theDigits.LastObject() >= 0) {
+      if (*remainderOutput.theDigits.lastObject() >= 0) {
         quotientOutput.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned>(currentQuotientDigit), quotientDigitIndex);
         break;
       }
@@ -618,11 +618,11 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
     if (this->CarryOverBound == 10) {
       numZeroesInCarryOver = 1;
     }
-    if (*this->theDigits.LastObject() < 0) {
+    if (*this->theDigits.lastObject() < 0) {
       out << "[";
     }
-    out << (*this->theDigits.LastObject());
-    if (*this->theDigits.LastObject() < 0) {
+    out << (*this->theDigits.lastObject());
+    if (*this->theDigits.lastObject() < 0) {
       out << "]";
     }
     for (int i = this->theDigits.size - 2; i >= 0; i --) {
@@ -753,10 +753,10 @@ unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) c
       break;
     }
     baseRaisedTo2ToPowerIndex.addOnTop(current);
-    powersOfTwo.addOnTop(*powersOfTwo.LastObject() * 2);
+    powersOfTwo.addOnTop(*powersOfTwo.lastObject() * 2);
   }
-  unsigned int result = *powersOfTwo.LastObject();
-  current = *baseRaisedTo2ToPowerIndex.LastObject();
+  unsigned int result = *powersOfTwo.lastObject();
+  current = *baseRaisedTo2ToPowerIndex.lastObject();
   LargeIntegerUnsigned next;
   for (int i = baseRaisedTo2ToPowerIndex.size - 2; i >= 0; i --) {
     next = current * baseRaisedTo2ToPowerIndex[i];
@@ -884,7 +884,7 @@ void LargeIntegerUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeInteg
     }
   }
   this->FitSize();
-  int lastDigit =* this->theDigits.LastObject();
+  int lastDigit =* this->theDigits.lastObject();
   if (lastDigit >= this->CarryOverBound || (- lastDigit) <= (- this->CarryOverBound)) {
     global.fatal << "Leading digit: " << lastDigit << " is too large" << global.fatal;
   }
@@ -916,11 +916,11 @@ void LargeIntegerUnsigned::SubtractSmallerPositive(const LargeIntegerUnsigned& x
   this->FitSize();
 }
 
-void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const {
+void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const {
   if (this == &output || &x == &output) {
     LargeIntegerUnsigned thisCopy = *this;
     LargeIntegerUnsigned xCopy = x;
-    return thisCopy.MultiplyBy(xCopy, output);
+    return thisCopy.multiplyBy(xCopy, output);
   }
   MacroIncrementCounter(Rational::TotalLargeMultiplications);
   output.theDigits.setSize(x.theDigits.size + this->theDigits.size);
@@ -1035,8 +1035,8 @@ void LargeIntegerUnsigned::accountFactor(
     outputMultiplicities.addOnTop(1);
     return;
   }
-  if ((*outputPrimeFactors.LastObject()).operator==(prime)) {
-    (*outputMultiplicities.LastObject()) ++;
+  if ((*outputPrimeFactors.lastObject()).operator==(prime)) {
+    (*outputMultiplicities.lastObject()) ++;
   } else {
     outputPrimeFactors.addOnTop(prime);
     outputMultiplicities.addOnTop(1);
@@ -1114,7 +1114,7 @@ void LargeIntegerUnsigned::lcm(
     global.fatal << "This is a programming error: calling lcm on zero elements is not allowed. " << global.fatal;
   }
   LargeIntegerUnsigned::gcd(a, b, tempUI);
-  a.MultiplyBy(b, tempUI2);
+  a.multiplyBy(b, tempUI2);
   output = tempUI2;
   output.DivPositive(tempUI, output, tempUI2);
   if (output.isEqualToZero()) {
@@ -1523,10 +1523,10 @@ void Rational::ReadFromFile(std::istream& input) {
 void Rational::MultiplyByInt(int x) {
   Rational tempRat;
   tempRat.AssignInteger(x);
-  this->MultiplyBy(tempRat);
+  this->multiplyBy(tempRat);
 }
 
-void Rational::MultiplyBy(const Rational& r) {
+void Rational::multiplyBy(const Rational& r) {
   if (r.extended == nullptr && this->extended == nullptr) {
     if (this->TryToMultiplyQuickly(r.numeratorShort, r.denominatorShort)) {
       return;
@@ -1564,7 +1564,7 @@ void Rational::MultiplyByLargeInt(LargeInteger& x) {
 
 void Rational::MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x) {
   this->InitExtendedFromShortIfNeeded();
-  this->extended->numerator.value.MultiplyBy(x);
+  this->extended->numerator.value.multiplyBy(x);
   this->simplify();
 }
 
@@ -1588,7 +1588,7 @@ Rational Rational::operator/(const Rational& right) const {
 Rational Rational::operator*(const Rational& right) const {
   Rational tempRat;
   tempRat.Assign(*this);
-  tempRat.MultiplyBy(right);
+  tempRat.multiplyBy(right);
   return tempRat;
 }
 

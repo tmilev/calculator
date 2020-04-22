@@ -124,9 +124,9 @@ public:
 //  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
-  charSSAlgMod<Rational> theCharNonPrimalFundCoords;
-  charSSAlgMod<Rational> thePrimalChaR;
+  CharacterSemisimpleLieAlgebraModule<Rational> theCharFundamentalCoordsRelativeToCartan;
+  CharacterSemisimpleLieAlgebraModule<Rational> theCharNonPrimalFundCoords;
+  CharacterSemisimpleLieAlgebraModule<Rational> thePrimalChaR;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<AlgebraicNumber> > theSystemToSolve;
@@ -175,8 +175,8 @@ public:
 
   List<Vectors<Rational> > WeightsModulesNONprimal;
   List<Vectors<Rational> > WeightsModulesPrimal;
-  List<charSSAlgMod<Rational> > CharsPrimalModules;
-  List<charSSAlgMod<Rational> > CharsPrimalModulesMerged;
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > CharsPrimalModules;
+  List<CharacterSemisimpleLieAlgebraModule<Rational> > CharsPrimalModulesMerged;
   HashedList<Vector<Rational> > RootSystemCentralizerPrimalCoords;
   HashedList<Vector<Rational> > RootSystemSubalgebraPrimalCoords;
 

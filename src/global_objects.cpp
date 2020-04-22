@@ -63,7 +63,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
 }
 
 void HtmlRoutines::MakeStdCoutReport(const std::string& input) {
-  global.Comments << input;
+  global.comments << input;
   HtmlRoutines::MakeReportIndicatorFile(input);
 }
 

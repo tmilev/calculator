@@ -46,7 +46,7 @@ bool Calculator::outerExtractBaseMultiplication(
     return false;
   }
   bool result = false;
-  //handle Anything * Rational = Rational * Anything
+  // handle Anything * Rational = Rational * Anything
   output = input;
   if (output[2].IsOfType<Rational>()) {
     output.children.swapTwoIndices(1, 2);
@@ -60,15 +60,15 @@ bool Calculator::outerExtractBaseMultiplication(
     if (output[2].children.size != 3) {
       return result;
     }
-    //handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)
+    // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)
     if (output[2][1].IsOfType<Rational>()) {
       Expression tempRight;
       tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
       output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
       result = true;
     }
-    //<- handle a * (b * anything)
-    //on condition that a*b has an inner handler
+    // <- handle a * (b * anything)
+    // on condition that a*b has an inner handler
     Expression tempExp, newExpr;
     tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
     if (theCommands.innerTimes(theCommands, tempExp, newExpr)) {
@@ -76,7 +76,7 @@ bool Calculator::outerExtractBaseMultiplication(
       result = true;
     }
   }
-  //handle 0 * anything = 0
+  // handle 0 * anything = 0
   if (output[1].isEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
@@ -493,7 +493,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->GetSimpleCoordinatesFromFundamental(
     theWeight.weightFundamentalCoordS
   );
-  theElt.ActOn(theWeightSimpleCoords);
+  theElt.actOn(theWeightSimpleCoords);
   theWeight.weightFundamentalCoordS = theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
   return output.AssignValueWithContext(theWeight, inputConverted[2].GetContext(), theCommands);
 }
@@ -574,7 +574,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   }
   theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
-  if (!rightEltETGVM.MultiplyOnTheLeft(
+  if (!rightEltETGVM.multiplyOnTheLeft(
     leftE.getValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
   )) {
     return false;
@@ -846,7 +846,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
       theCF.raiseToPower(thePower);
       theMon.raiseToPower(thePower);
       outputPoly.makeZero();
-      outputPoly.AddMonomial(theMon, theCF);
+      outputPoly.addMonomial(theMon, theCF);
       return output.AssignValueWithContext(outputPoly, input[1].GetContext(), theCommands);
     }
     base.raiseToPower(- thePower, 1);
@@ -892,7 +892,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       return theCommands << "Matrix power too large.";
     }
     if (largePower < 0) {
-      baseRat.Invert();
+      baseRat.invert();
       largePower *= - 1;
     }
     Matrix<Rational> idMat;
@@ -918,7 +918,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       return theCommands << "Matrix power too large.";
     }
     if (largePower < 0) {
-      baseAlg.Invert();
+      baseAlg.invert();
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
@@ -960,7 +960,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       }
     }
     if (thePower < 0) {
-      baseRat.Invert();
+      baseRat.invert();
       thePower *= - 1;
     }
     Matrix<Rational> idMat;
@@ -979,7 +979,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       }
     }
     if (thePower < 0) {
-      baseAlg.Invert();
+      baseAlg.invert();
       thePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
@@ -1232,7 +1232,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
       }
     }
     finalOutput.makeZero();
-    finalOutput.AddMonomial(theMon, 1);
+    finalOutput.addMonomial(theMon, 1);
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
 
@@ -1315,7 +1315,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   theMon.Powers[0] *= exponentConverted.getValue<RationalFunction>();
   ElementUniversalEnveloping<RationalFunction> outputUE;
   outputUE.makeZero(*theUE.owner);
-  outputUE.AddMonomial(theMon, 1);
+  outputUE.addMonomial(theMon, 1);
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }
 
@@ -1629,7 +1629,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   if (!input.isListNElements(3)) {
     return false;
   }
-  charSSAlgMod<Rational> leftC, rightC;
+  CharacterSemisimpleLieAlgebraModule<Rational> leftC, rightC;
   if (!input[1].IsOfType(&leftC)) {
     return false;
   }
@@ -1689,7 +1689,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
     return false;
   }
   output.reset(theCommands);
-  output.children.Reserve(input[2].size());
+  output.children.reserve(input[2].size());
   output.addChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
   for (int i = 1; i < input[2].size(); i ++) {
@@ -1821,7 +1821,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(
     theCommands.functionGetMatrix(rightE, rightMatRat)
   ) {
     Matrix<Rational> resultMatRat;
-    resultMatRat.AssignTensorProduct(leftMatRat, rightMatRat);
+    resultMatRat.assignTensorProduct(leftMatRat, rightMatRat);
     return output.AssignMatrix(resultMatRat, theCommands, nullptr, true);
   }
   Matrix<Expression> leftMatE, rightMatE, resultMatE;
@@ -1831,7 +1831,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(
   if (!theCommands.GetMatrixExpressions(input[2], rightMatE)) {
     return false;
   }
-  resultMatE.AssignTensorProduct(leftMatE, rightMatE);
+  resultMatE.assignTensorProduct(leftMatE, rightMatE);
   return output.AssignMatrixExpressions(resultMatE, theCommands, true, true);
 }
 
@@ -1848,7 +1848,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(
     return false;
   }
   MatrixTensor<Rational> result;
-  result.AssignTensorProduct(leftE.getValue<MatrixTensor<Rational> >(), rightE.getValue<MatrixTensor<Rational> >());
+  result.assignTensorProduct(leftE.getValue<MatrixTensor<Rational> >(), rightE.getValue<MatrixTensor<Rational> >());
   return output.AssignValue(result, theCommands);
 }
 
@@ -2264,7 +2264,7 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
     << " rows to the right by a matrix with a different number of rows: "
     << rightMat.numberOfRows << ". ";
   }
-  leftMat.AppendMatrixOnTheRight(rightMat);
+  leftMat.appendMatrixOnTheRight(rightMat);
   return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
 }
 
@@ -2287,7 +2287,7 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
     << " rows to the right by a matrix with a different number of rows: "
     << rightMat.numberOfRows << ". ";
   }
-  leftMat.AppendMatrixToTheBottom(rightMat);
+  leftMat.appendMatrixToTheBottom(rightMat);
   return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
 
 }
@@ -2503,7 +2503,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
     << input[2].size() - 1 << ", possible user typo?";
   }
   output.reset(theCommands);
-  output.children.Reserve(input[1].size());
+  output.children.reserve(input[1].size());
   output.addChildAtomOnTop(theCommands.opSequence());
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {
@@ -2587,7 +2587,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
     return false;
   }
   if (thePower < 0) {
-    theElt.Invert();
+    theElt.invert();
     thePower *= - 1;
   }
   ElementEllipticCurve<Rational> unit;
@@ -2614,7 +2614,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
     return false;
   }
   if (thePower < 0) {
-    theElt.Invert();
+    theElt.invert();
     thePower *= - 1;
   }
   ElementEllipticCurve<ElementZmodP> unit;

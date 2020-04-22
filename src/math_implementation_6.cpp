@@ -72,14 +72,14 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   power /= 2;
   MathRoutines::raiseToPower(x, power, oneQuotientRing);
   if (commentsOnFailure != 0) {
-    global.Comments << "Power x^{" << power << "} is: " << x.toString();
+    global.comments << "Power x^{" << power << "} is: " << x.toString();
   }
   return false;
 }
 
-template<class coefficient>
-bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
-  const coefficient& one,
+template<class Coefficient>
+bool Polynomial<Coefficient>::isSquareFreeAndUnivariate(
+  const Coefficient& one,
   std::stringstream* comments
 ) const {
   int numberOfVariables = this->minimalNumberOfVariables();
@@ -181,11 +181,11 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
   }
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::Interpolate(
-  const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints
+template <class Coefficient>
+void Polynomial<Coefficient>::Interpolate(
+  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints
 ) {
-  Polynomial<coefficient> theLagrangeInterpolator, accumulator;
+  Polynomial<Coefficient> theLagrangeInterpolator, accumulator;
   this->makeZero();
   for (int i = 0; i < thePoints.size; i ++) {
     theLagrangeInterpolator.makeConstant(1, 1);
@@ -264,7 +264,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> PointsOfInterpolationLeft;
-  PointsOfInterpolationLeft.Reserve(degreeLeft + 1);
+  PointsOfInterpolationLeft.reserve(degreeLeft + 1);
   Rational currentPrimePowerContribution, currentPointContribution;
   for (int i = 0; i <= degreeLeft; i ++) {
     PointsOfInterpolationLeft.addOnTop(AllPointsOfEvaluation[i]);

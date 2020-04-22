@@ -7,16 +7,16 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
   coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero
 ) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
-  bool doReport = this->NumCols > 10 && this->NumRows > 10 && this->NumCols * this->NumRows >= 400;
+  bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::gaussianElimination);
   int tempI;
   output = theRingOne;
   coefficient tempRat;
-  if (this->NumCols != this->NumRows) {
+  if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
   }
-  int dim = this->NumCols;
+  int dim = this->numberOfColumns;
   for (int i = 0; i < dim; i ++) {
     tempI = this->FindPivot(i, i);
     if (tempI == - 1) {
@@ -32,12 +32,12 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
     tempRat.invert();
     this->RowTimesScalar(i, tempRat);
     if (doReport) {
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
-        for (int colCounter = 0; colCounter < this->NumCols; colCounter ++) {
+        for (int colCounter = 0; colCounter < this->numberOfColumns; colCounter ++) {
           reportStream << (*this)(i, colCounter).toString();
-          if (colCounter != this->NumCols - 1) {
+          if (colCounter != this->numberOfColumns - 1) {
             reportStream << ", ";
           }
         }
@@ -50,7 +50,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
         tempRat.Minus();
         this->AddTwoRows (i, j, i, tempRat);
         if (doReport) {
-          if (theReport2.TickAndWantReport()) {
+          if (theReport2.tickAndWantReport()) {
             std::stringstream reportStream;
             reportStream << "Computing large determinant: pivot " << i + 1 << ", row " << j << " out of "
             << dim <<  " times  " << dim << " total.";
@@ -65,33 +65,33 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
 template<class coefficient>
 std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat) {
   output << "\\left(\\begin{array}{";
-  for (int j = 0; j < theMat.NumCols; j ++) {
+  for (int j = 0; j < theMat.numberOfColumns; j ++) {
     output << "c";
   }
   output << "}";
-  int firstMatRowIndexToHide = theMat.NumRows;
-  int lastMatRowIndexToHide = theMat.NumRows;
-  int firstMatColIndexToHide = theMat.NumCols;
-  int lastMatColIndexToHide = theMat.NumCols;
+  int firstMatRowIndexToHide = theMat.numberOfRows;
+  int lastMatRowIndexToHide = theMat.numberOfRows;
+  int firstMatColIndexToHide = theMat.numberOfColumns;
+  int lastMatColIndexToHide = theMat.numberOfColumns;
   FormatExpressions& theFormat = global.theDefaultFormat.getElement();
   if (theFormat.flagSuppressLongMatrices) {
-    if (theMat.NumRows > theFormat.MaxMatrixDisplayedRows) {
+    if (theMat.numberOfRows > theFormat.MaxMatrixDisplayedRows) {
       firstMatRowIndexToHide = theFormat.MaxMatrixDisplayedRows / 2;
-      lastMatRowIndexToHide = theMat.NumRows - 1 - theFormat.MaxMatrixDisplayedRows / 2;
+      lastMatRowIndexToHide = theMat.numberOfRows - 1 - theFormat.MaxMatrixDisplayedRows / 2;
     }
-    if (theMat.NumCols > theFormat.MaxMatrixLineLength) {
+    if (theMat.numberOfColumns > theFormat.MaxMatrixLineLength) {
       firstMatColIndexToHide = theFormat.MaxMatrixLineLength / 2;
-      lastMatColIndexToHide = theMat.NumCols - 1 - theFormat.MaxMatrixLineLength / 2;
+      lastMatColIndexToHide = theMat.numberOfColumns - 1 - theFormat.MaxMatrixLineLength / 2;
     }
   }
-  for (int i = 0; i < theMat.NumRows; i ++) {
+  for (int i = 0; i < theMat.numberOfRows; i ++) {
     if (firstMatRowIndexToHide <= i && i <= lastMatRowIndexToHide) {
       if (firstMatRowIndexToHide == i) {
         output << "...\\\\\n";
       }
       continue;
     }
-    for (int j = 0; j < theMat.NumCols; j ++) {
+    for (int j = 0; j < theMat.numberOfColumns; j ++) {
       if (firstMatColIndexToHide <= j && j <= lastMatColIndexToHide) {
         if (firstMatColIndexToHide == j) {
           output << "...&";
@@ -99,7 +99,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
         continue;
       }
       output << theMat(i, j);
-      if (j != theMat.NumCols - 1) {
+      if (j != theMat.numberOfColumns - 1) {
         output << " & ";
       } else {
         output << "\\\\";
@@ -138,7 +138,7 @@ void MathRoutines::RaiseToPower(
     }
     return;
   }
-  if (reportOne.TickAndWantReport()) {
+  if (reportOne.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Raising " << theElement.toString()
     << " to power: " << thePowerCopy;
@@ -147,7 +147,7 @@ void MathRoutines::RaiseToPower(
   theElement = theRingUnit;
   while (thePowerCopy > 0) {
     if (thePowerCopy % 2 == 1) {
-      if (reportTwo.TickAndWantReport()) {
+      if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Multiplying " << theElement.toString()
@@ -158,7 +158,7 @@ void MathRoutines::RaiseToPower(
     }
     thePowerCopy /= 2;
     if (thePowerCopy > 0) {
-      if (reportTwo.TickAndWantReport()) {
+      if (reportTwo.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Squaring: " << squares.toString();
@@ -184,8 +184,8 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   if (&bufferPoly == this || &bufferPoly == &other) {
     global.fatal << "Bad buffer in ElementMonomialAlgebra::MultiplyBy." << global.fatal;
   }
-  this->CheckConsistency();
-  other.CheckConsistency();
+  this->checkConsistency();
+  other.checkConsistency();
   int maxNumMonsFinal = this->size() * other.size();
   if (maxNumMonsFinal > 2000000) {
     maxNumMonsFinal = 2000000;
@@ -193,7 +193,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   int totalMonPairs = 0;
   ProgressReport theReport1;
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
-  if (theReport1.TickAndWantReport()) {
+  if (theReport1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
     reportStream << "Large polynomial computation: " << this->size() << " x "
@@ -203,12 +203,12 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   }
   bufferPoly.makeZero();
   bufferPoly.setExpectedSize(maxNumMonsFinal);
-  bufferPoly.CheckConsistency();
-  bufferMon.CheckConsistency();
+  bufferPoly.checkConsistency();
+  bufferMon.checkConsistency();
   coefficient theCoeff;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      if (theReport2.TickAndWantReport()) {
+      if (theReport2.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Multiplying monomials: "
         << i + 1 << " out of " << other.size() << " by " << j + 1
@@ -264,8 +264,8 @@ void MatrixTensor<coefficient>::operator*=(
     this->makeZero();
     return;
   }
-  this->CheckConsistency();
-  other.CheckConsistency();
+  this->checkConsistency();
+  other.checkConsistency();
   int maxNumMonsFinal = this->size() * other.size();
   if (maxNumMonsFinal > 2000000) {
     maxNumMonsFinal = 2000000;
@@ -273,7 +273,7 @@ void MatrixTensor<coefficient>::operator*=(
   int totalMonPairs = 0;
   ProgressReport theReport1;
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
-  if (theReport1.TickAndWantReport()) {
+  if (theReport1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
     reportStream << "Large matrix monomial computation: " << this->size() << " x "
@@ -287,7 +287,7 @@ void MatrixTensor<coefficient>::operator*=(
   MonomialMatrix currentMonomial;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      if (theReport2.TickAndWantReport()) {
+      if (theReport2.tickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Multiplying monomials: "
         << i + 1 << " out of " << other.size() << " by " << j + 1
@@ -324,9 +324,9 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   int col = 0;
   coefficient tempElt;
   int row = 0;
-  while (row < this->NumRows && col < this->NumCols) {
+  while (row < this->numberOfRows && col < this->numberOfColumns) {
     int foundPivotRow = - 1;
-    for (int i = row; i < this->NumRows; i ++) {
+    for (int i = row; i < this->numberOfRows; i ++) {
       if (!this->elements[i][col].isEqualToZero()) {
         foundPivotRow = i;
         break;
@@ -338,11 +338,11 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       }
       int ExploringRow = row + 1;
-      while (ExploringRow < this->NumRows) {
-        if (theReport.TickAndWantReport()) {
+      while (ExploringRow < this->numberOfRows) {
+        if (theReport.tickAndWantReport()) {
           std::stringstream out;
           out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
-          << ExploringRow + 1 << "; total rows: " << this->NumRows;
+          << ExploringRow + 1 << "; total rows: " << this->numberOfRows;
           theReport.report(out.str());
         }
         coefficient& PivotElt = this->elements[row][col];
@@ -445,7 +445,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   ProgressReport reportTask(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport reportProgress(200, GlobalVariables::Response::ReportType::gaussianElimination);
   int theDim = input[0].size;
-  if (reportTask.TickAndWantReport()) {
+  if (reportTask.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... " ;
@@ -472,7 +472,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   for (int i = 0; i < output.size; i ++) {
     theMat.GetVectorFromRow(i, output[i]);
   }
-  if (reportProgress.TickAndWantReport()) {
+  if (reportProgress.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... done. " ;
@@ -484,12 +484,12 @@ template <typename coefficient>
 void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
   ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);
   coefficient tempElement;
-  for (int i = StartColIndex; i < this->NumCols; i ++) {
+  for (int i = StartColIndex; i < this->numberOfColumns; i ++) {
     tempElement = this->elements[fromRowIndex][i];
     tempElement *= scalar;
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream out;
-      out << "Processing row, element " << i + 1 << " out of " << this->NumCols;
+      out << "Processing row, element " << i + 1 << " out of " << this->numberOfColumns;
       theReport.report(out.str());
     }
     this->elements[ToRowIndex][i] += tempElement;
@@ -505,28 +505,28 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   FormatExpressions* theFormat
 ) {
   MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
-  if (this->NumRows == 0) {
+  if (this->numberOfRows == 0) {
     global.fatal << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
     << " zero rows. " << global.fatal;
   }
   if (carbonCopyMat != 0) {
-    if (carbonCopyMat->NumRows != this->NumRows) {
+    if (carbonCopyMat->numberOfRows != this->numberOfRows) {
       global.fatal << "This is a programming error: requesting to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
-      << this->NumRows << " rows, while the carbon copy has "
-      << carbonCopyMat->NumRows << " rows. " << global.fatal;
+      << this->numberOfRows << " rows, while the carbon copy has "
+      << carbonCopyMat->numberOfRows << " rows. " << global.fatal;
     }
   }
   ///////////////////
   int tempI;
   int NumFoundPivots = 0;
-  int MaxRankMat = MathRoutines::Minimum(this->NumRows, this->NumCols);
+  int MaxRankMat = MathRoutines::Minimum(this->numberOfRows, this->numberOfColumns);
   coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
-    outputNonPivotColumns->init(this->NumCols);
+    outputNonPivotColumns->init(this->numberOfColumns);
   }
   if (outputPivotColumns != nullptr) {
-    outputPivotColumns->init(this->NumCols);
+    outputPivotColumns->init(this->numberOfColumns);
   }
   bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
@@ -540,10 +540,10 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     }
   }
   //Initialization done! Time to do actual work:
-  for (int i = 0; i < this->NumCols; i ++) {
+  for (int i = 0; i < this->numberOfColumns; i ++) {
     if (NumFoundPivots == MaxRankMat) {
       if (outputNonPivotColumns != nullptr) {
-        for (int j = i; j < this->NumCols; j ++) {
+        for (int j = i; j < this->numberOfColumns; j ++) {
           outputNonPivotColumns->AddSelectionAppendNewIndex(j);
         }
       }
@@ -594,16 +594,16 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     if (carbonCopyMat != 0) {
       carbonCopyMat->RowTimesScalar(NumFoundPivots, tempElement);
     }
-    for (int j = 0; j < this->NumRows; j ++) {
+    for (int j = 0; j < this->numberOfRows; j ++) {
       if (j != NumFoundPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
           tempElement.Minus();
-          if (theReport.TickAndWantReport()) {
+          if (theReport.tickAndWantReport()) {
             std::stringstream reportStream;
-            reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols
-            << "): column " << i + 1 << " out of " << this->NumCols
-            << ".\n<br>Pivot row: " << NumFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->NumRows;
+            reportStream << "Gaussian elimination (" << this->numberOfRows << "x" << this->numberOfColumns
+            << "): column " << i + 1 << " out of " << this->numberOfColumns
+            << ".\n<br>Pivot row: " << NumFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
             theReport.report(reportStream.str());
           }
           this->AddTwoRows(NumFoundPivots, j, i, tempElement);

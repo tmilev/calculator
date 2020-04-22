@@ -67,12 +67,12 @@ public:
     return this->DebugString == right.DebugString;
   }
   unsigned int hashFunction() const {
-    int tempI = ::MathRoutines::Minimum(static_cast<int>(this->DebugString.length()), ::SomeRandomPrimesSize);
+    int tempI = ::MathRoutines::Minimum(static_cast<int>(this->DebugString.length()), ::someRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
       result += static_cast<unsigned>(
         this->DebugString[static_cast<unsigned>(i)]
-      ) * ::SomeRandomPrimes[i];
+      ) * ::someRandomPrimes[i];
     }
     return result;
   }
@@ -192,7 +192,7 @@ public:
   SemisimpleLieAlgebra& GetOwnerSSalg() const;
   //returns - 1 if the weight/root  is not in g/k
   bool CheckInitialization() const;
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckScalarProdMatrixOrdered() const;
   Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
   Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
@@ -477,7 +477,7 @@ public:
   ~slTwoSubalgebra() {
     this->flagDeallocated = true;
   }
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
 
   SltwoSubalgebras& GetContainerSl2s() {
     if (this->container == nullptr) {
@@ -544,10 +544,10 @@ public:
   bool operator==(const slTwoSubalgebra& right) const;
   bool operator>(const slTwoSubalgebra& right) const;
   unsigned int hashFunction() const {
-    int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
+    int tempI = MathRoutines::Minimum(someRandomPrimesSize, this->hCharacteristic.size);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
-      result += static_cast<unsigned>(this->hCharacteristic[i].NumShort) * SomeRandomPrimes[i];
+      result += static_cast<unsigned>(this->hCharacteristic[i].NumShort) * someRandomPrimes[i];
     }
     return result;
   }
@@ -588,7 +588,7 @@ public:
     }
     return this->GetOwner() == other.GetOwner();
   }
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const {
     if (this->owner == nullptr) {
       global.fatal << "<br>This is a programming error. Object SltwoSubalgebras "

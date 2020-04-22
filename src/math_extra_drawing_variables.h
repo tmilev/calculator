@@ -43,9 +43,9 @@ public:
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
     Matrix<double> tempMat;
-    tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
-    for (int i = 0; i < bilinearForm.NumRows; i ++) {
-      for (int j = 0; j < bilinearForm.NumCols; j ++) {
+    tempMat.init(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
+    for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
+      for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
         tempMat.elements[i][j] = bilinearForm.elements[i][j].GetDoubleValue();
       }
     }

@@ -23,7 +23,7 @@ void Calculator::initAdminFunctions() {
   if (!global.flagDatabaseCompiled || global.flagRunningConsoleTest) {
     return;
   }
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MongoFind",
     CalculatorDatabaseFunctions::innerExecuteMongoQuery,
     "",
@@ -104,7 +104,7 @@ void Calculator::initPredefinedInnerFunctions() {
   innerAdminNoTestInvisibleOffByDefault.disabledByUserDefault = true;
 
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SetRandomSeed",
     CalculatorFunctions::innerSetRandomSeed,
     "",
@@ -114,7 +114,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SetRandomSeed",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SelectAtRandom",
     CalculatorFunctions::innerSelectAtRandom,
     "",
@@ -126,7 +126,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SelectAtRandom",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RandomInteger",
     CalculatorFunctions::innerRandomInteger,
     "",
@@ -145,7 +145,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RandomInteger",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TurnOffRules",
     CalculatorFunctions::innerTurnOffRules,
     "",
@@ -162,7 +162,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TurnOffRules",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TurnOnRules",
     CalculatorFunctions::innerTurnOnRules,
     "",
@@ -172,7 +172,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TurnOnRules",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TurnOnApproximations",
     CalculatorFunctions::innerTurnOnApproximations,
     "",
@@ -182,7 +182,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TurnOnApproximations",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TurnOffApproximations",
     CalculatorFunctions::innerTurnOffApproximations,
     "",
@@ -192,7 +192,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TurnOffApproximations",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EvaluateSymbols",
     CalculatorHtmlFunctions::innerEvaluateSymbols,
     "",
@@ -205,7 +205,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EvaluateSymbols",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "or",
     CalculatorFunctions::innerOr,
     "",
@@ -215,7 +215,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "or",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "or",
     CalculatorFunctions::innerOrIdentical,
     "",
@@ -231,7 +231,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "orIdentical",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IfStandard",
     CalculatorFunctions::innerIfStandard,
     "",
@@ -250,7 +250,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IfStandard",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "if",
     CalculatorFunctions::innerIfFrozen,
     "",
@@ -276,7 +276,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "if",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "and",
     CalculatorFunctions::innerAnd,
     "",
@@ -286,7 +286,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "and",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertElementZmodPToInteger",
     CalculatorFunctions::innerConvertElementZmodPToInteger,
     "",
@@ -297,7 +297,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "URLStringToNormalString",
     CalculatorFunctions::innerUrlStringToNormalString,
     "",
@@ -307,7 +307,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "URLStringToNormalString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertStringToURL",
     CalculatorFunctions::innerStringToURL,
     "",
@@ -317,7 +317,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertStringToURL",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "URLKeyValuePairsDecode",
     CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive,
     "",
@@ -329,7 +329,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "URLKeyValuePairsDecode",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LoadFileIntoString",
     CalculatorConversions::innerLoadFileIntoString,
     "",
@@ -354,7 +354,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadFileIntoString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "InterpretProblem",
     CalculatorHtmlFunctions::innerInterpretProblem,
     "",
@@ -366,7 +366,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "InterpretProblem",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ProblemGiveUp",
     CalculatorHtmlFunctions::innerInterpretProblemGiveUp,
     "",
@@ -383,7 +383,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ProblemGiveUp",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeInputBox",
     CalculatorHtmlFunctions::innerUserInputBox,
     "",
@@ -393,7 +393,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeInputBox",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SetInputBox",
     CalculatorHtmlFunctions::innerSetInputBox,
     "",
@@ -404,7 +404,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SetInputBox",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ExtractCalculatorExpressionFromHtml",
     CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml,
     "",
@@ -419,7 +419,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExtractCalculatorExpressionFromHtml",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestCalculatorIndicator",
     CalculatorFunctions::innerTestIndicator,
     "",
@@ -435,7 +435,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerNoTest,
     ""
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestTopCommand",
     CalculatorFunctions::innerTestTopCommand,
     "",
@@ -445,7 +445,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTopCommand",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Crash",
     CalculatorFunctions::innerCrash,
     "",
@@ -456,7 +456,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Crash",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CrashListOutOfBounds",
     CalculatorFunctions::innerCrashByListOutOfBounds,
     "",
@@ -467,7 +467,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CrashListOutOfBounds",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CrashVectorOutOfBounds",
     CalculatorFunctions::innerCrashByVectorOutOfBounds,
     "",
@@ -478,7 +478,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CrashVectorOutOfBounds",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotExpressionTree",
     CalculatorFunctions::innerDrawExpressionGraph,
     "",
@@ -489,7 +489,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotExpressionTree",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Thaw",
     CalculatorFunctions::innerThaw,
     "",
@@ -501,7 +501,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Thaw",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogEvaluationStepsDebug",
     Calculator::innerLogEvaluationStepsDebug,
     "",
@@ -512,7 +512,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogEvaluationStepsDebug",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogEvaluationSteps",
     Calculator::innerLogEvaluationSteps,
     "",
@@ -523,7 +523,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogEvaluationSteps",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotExpressionTreeFull",
     CalculatorFunctions::innerDrawExpressionGraphFull,
     "",
@@ -535,7 +535,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotExpressionTreeFull",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Lispify",
     CalculatorFunctions::innerLispify,
     "",
@@ -547,7 +547,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Lispify",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FlattenCommandEnclosuresOneLayer",
     Calculator::innerFlattenCommandEnclosuresOneLayeR,
     "",
@@ -558,7 +558,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FlattenCommandEnclosuresOneLayer",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LispifyFull",
     CalculatorFunctions::innerLispifyFull,
     "",
@@ -569,7 +569,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LispifyFull",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ChildExpression",
     CalculatorFunctions::innerChildExpression,
     "",
@@ -579,7 +579,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ChildExpression",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "toString",
     CalculatorFunctions::innerExpressionToString,
     "",
@@ -590,7 +590,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "toString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ToUTF8String",
     CalculatorFunctions::innerExpressiontoUTF8String,
     "",
@@ -602,7 +602,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ToUTF8String",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "StringToAtom",
     CalculatorFunctions::innerStringToAtom,
     "",
@@ -612,7 +612,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "StringToAtom",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\"",
     CalculatorFunctions::innerQuoteToString,
     "",
@@ -622,7 +622,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "QuoteToString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestBase64",
     CalculatorFunctions::innerBase64ToCharToBase64Test,
     "",
@@ -634,7 +634,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestBase64",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EllipticCurveOrderNIST",
     CalculatorFunctions::innerNISTEllipticCurveOrder,
     "",
@@ -646,7 +646,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EllipticCurveOrderNIST",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EllipticCurveGeneratorNIST",
     CalculatorFunctions::innerNISTEllipticCurveGenerator,
     "",
@@ -659,7 +659,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "StringDifference",
     CalculatorFunctions::innerStringDifference,
     "",
@@ -674,7 +674,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Slice",
     CalculatorFunctions::innerSliceString,
     "",
@@ -690,7 +690,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Slice",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertIntegerToBase58",
     CalculatorFunctions::innerConvertIntegerUnsignedToBase58,
     "",
@@ -701,7 +701,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertIntegerToBase58",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertBase58ToHex",
     CalculatorFunctions::innerConvertBase58ToHex,
     "",
@@ -711,7 +711,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertBase58ToHex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AESCBCEncrypt",
     CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt,
     "",
@@ -725,7 +725,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AESCBCEncrypt",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AESCBCDecrypt",
     CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt,
     "",
@@ -741,7 +741,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AESCBCDecrypt",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AppendDoubleSha256Check",
     CalculatorFunctions::innerAppendDoubleSha256Check,
     "",
@@ -755,7 +755,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AppendDoubleSha256Check",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertHexToBase58",
     CalculatorFunctions::innerConvertHexToBase58,
     "",
@@ -765,7 +765,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertHexToBase58",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CharToBase64",
     CalculatorFunctions::innerCharToBase64,
     "",
@@ -786,7 +786,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CharToBase64",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertBase64ToString",
     CalculatorFunctions::innerConvertBase64ToString,
     "",
@@ -798,7 +798,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertBase64ToString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LoadKnownCertificates",
     CalculatorFunctions::innerLoadKnownCertificates,
     "",
@@ -808,7 +808,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadKnownCertificates",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestLoadPEMCertificate",
     CalculatorFunctions::innerTestLoadPEMCertificates,
     "",
@@ -818,7 +818,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestLoadPEMCertificate",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestLoadPEMPrivateKey",
     CalculatorFunctions::innerTestLoadPEMPrivateKey,
     "",
@@ -828,7 +828,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestLoadPEMPrivateKey",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestTLSMessageSequence",
     CalculatorFunctions::innerTestTLSMessageSequence,
     "",
@@ -847,7 +847,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTLSMessageSequence",
     innerNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestTLSDecodeSSLRecord",
     CalculatorFunctions::innerTestTLSDecodeSSLRecord,
     "",
@@ -859,7 +859,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTLSDecodeSSLRecord",
     innerExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestASN1Decode",
     CalculatorFunctions::innerTestASN1Decode,
     "",
@@ -871,7 +871,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestASN1Decode",
     innerExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "X509CertificateServerBase64",
     CalculatorFunctions::innerX509CertificateServer,
     "",
@@ -881,7 +881,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateServerBase64",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "X509CertificateDecode",
     CalculatorFunctions::innerX509CertificateDecode,
     "",
@@ -893,7 +893,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateDecode",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ShowKnownASNObjectIds",
     CalculatorFunctions::innerShowKnownObjectIds,
     "",
@@ -903,7 +903,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ShowKnownASNObjectIds",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "JWTVerifyAgainstKnownKeys",
     CalculatorFunctions::innerJWTVerifyAgainstKnownKeys,
     "",
@@ -913,7 +913,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "JWTVerifyAgainstKnownKeys",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "JWTVerifyRSA256",
     CalculatorFunctions::innerJWTVerifyAgainstRSA256,
     "",
@@ -929,7 +929,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "JWTVerifyRSA256",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sha1",
     CalculatorFunctions::innerSha1OfString,
     "",
@@ -941,7 +941,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha1",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sha224",
     CalculatorFunctions::innerSha224OfString,
     "",
@@ -952,7 +952,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha224",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogarithmBaseNCeiling",
     CalculatorFunctions::innerLogarithmBaseNCeiling,
     "",
@@ -975,7 +975,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogarithmBaseNCeiling",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestRSASign",
     CalculatorFunctions::innerTestRSASign,
     "",
@@ -998,7 +998,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestRSASign",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GenerateRandomPrime",
     CalculatorFunctions::innerGenerateRandomPrime,
     "",
@@ -1009,7 +1009,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerNoTest
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RSAEncrypt",
     CalculatorFunctions::innerRSAEncrypt,
     "",
@@ -1020,7 +1020,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RSAEncrypt",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Ripemd160",
     CalculatorFunctions::innerRIPEMD160OfString,
     "",
@@ -1033,7 +1033,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Ripemd160",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ShaThree256",
     CalculatorFunctions::innerSha3_256OfString,
     "",
@@ -1055,7 +1055,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ShaThree256",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Keccak256",
     CalculatorFunctions::innerKeccak256OfString,
     "",
@@ -1073,7 +1073,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Keccak256",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sha256",
     CalculatorFunctions::innerSha256OfString,
     "",
@@ -1090,7 +1090,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha256",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sha512",
     CalculatorFunctions::innerSha512,
     "",
@@ -1108,7 +1108,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha512",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sha256Verbose",
     CalculatorFunctions::innerSha256OfStringVerbose,
     "",
@@ -1118,7 +1118,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha256Verbose",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestJSON",
     CalculatorFunctions::innerTestJSON,
     "",
@@ -1130,7 +1130,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestJSON",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertBase64ToHex",
     CalculatorFunctions::innerBase64ToHex,
     "",
@@ -1140,7 +1140,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertBase64ToHex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertStringToHex",
     CalculatorFunctions::innerConvertStringToHex,
     "",
@@ -1150,7 +1150,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertStringToHex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertHexToInteger",
     CalculatorFunctions::innerHexToInteger,
     "",
@@ -1160,7 +1160,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertHexToInteger",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertIntegerToHex",
     CalculatorFunctions::innerIntegerToHex,
     "",
@@ -1170,7 +1170,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertIntegerToHex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertHexToString",
     CalculatorFunctions::innerHexToString,
     "",
@@ -1180,7 +1180,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertHexToString",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FormatCPPCode",
     CalculatorFunctions::innerFormatCPPSourceCode,
     "",
@@ -1190,7 +1190,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FormatCPPCode",
     innerInvisibleNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FormatCPPDirectory",
     CalculatorFunctions::innerFormatCPPDirectory,
     "",
@@ -1201,7 +1201,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerInvisibleNoTest
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestCalculatorAll",
     Calculator::innerAutomatedTest,
     "",
@@ -1215,7 +1215,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestCalculatorAll",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestTopicListProblems",
     CalculatorFunctions::innerTestTopicListProblems,
     "",
@@ -1225,7 +1225,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTopicListProblems",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestProblemInterpretation",
     CalculatorFunctions::innerTestProblemInterpretation,
     "",
@@ -1247,7 +1247,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestProblemInterpretation",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "!",
     CalculatorFunctions::innerFactorial,
     "",
@@ -1257,7 +1257,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Factorial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RepresentElementHyperoctahedral",
     CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral,
     "",
@@ -1269,7 +1269,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RepresentElementHyperoctahedral",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HyperOctahedralIrreps",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules,
     "",
@@ -1279,7 +1279,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HyperOctahedralIrreps",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SpechtModule",
     CalculatorFunctionsWeylGroup::innerSpechtModule,
     "",
@@ -1289,7 +1289,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SpechtModule",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HyperOctahedralRepresentation",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation,
     "",
@@ -1299,7 +1299,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HyperOctahedralRepresentation",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HyperOctahedralGeneratorPrint",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations,
     "",
@@ -1309,7 +1309,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HyperOctahedralGeneratorPrint",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintMacdonaldPolys",
     CalculatorFunctionsWeylGroup::innerMacdonaldPolys,
     "",
@@ -1319,7 +1319,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintMacdonaldPolys",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Numerator",
     CalculatorFunctions::innerNumerator,
     "",
@@ -1330,7 +1330,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Numerator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
     CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFunctions,
     "",
@@ -1341,7 +1341,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SubList",
     CalculatorFunctions::innerSubList,
     "",
@@ -1353,7 +1353,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SubList",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ApplyToList",
     CalculatorFunctions::innerApplyToList,
     "",
@@ -1365,7 +1365,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ApplyToList",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Denominator",
     CalculatorFunctions::innerDenominator,
     "",
@@ -1376,7 +1376,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Denominator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Product",
     CalculatorFunctions::innerMultiplySequence,
     "",
@@ -1390,7 +1390,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Product",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sum",
     CalculatorFunctions::innerSumSequence,
     "",
@@ -1405,7 +1405,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\sum",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeExpression",
     CalculatorConversions::innerExpressionFromBuiltInTypE,
     "",
@@ -1423,7 +1423,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeExpression",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Polynomial",
     CalculatorConversions::innerPolynomial<Rational>,
     "",
@@ -1434,7 +1434,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Polynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolynomialAlgebraicNumbers",
     CalculatorConversions::innerPolynomial<AlgebraicNumber>,
     "",
@@ -1444,7 +1444,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolynomialModP",
     CalculatorConversions::innerPolynomialModuloInteger,
     "",
@@ -1457,7 +1457,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialModP",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConvertAlgebraicNumberToMatrix",
     CalculatorFunctions::innerConvertAlgebraicNumberToMatrix,
     "",
@@ -1473,7 +1473,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertAlgebraicNumberToMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintAlgebraicClosureStatus",
     CalculatorFunctions::innerPrintAlgebraicClosureStatus,
     "",
@@ -1488,7 +1488,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintAlgebraicClosureStatus",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AlgebraicNumberFromPolynomial",
     CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly,
     "",
@@ -1501,7 +1501,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AlgebraicNumberFromPolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrincipalSlTwoIndex",
     CalculatorFunctions::innerGetPrincipalSl2Index,
     "",
@@ -1511,7 +1511,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrincipalSlTwoIndex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DynkinIndicesSlTwoSubalgebras",
     CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras,
     "",
@@ -1527,7 +1527,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DynkinIndicesSlTwoSubalgebras",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CartanSymmetric",
     CalculatorFunctions::innerGetSymmetricCartan,
     "",
@@ -1537,7 +1537,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CartanSymmetric",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GrowDynkinType",
     CalculatorFunctions::innerGrowDynkinType,
     "",
@@ -1549,7 +1549,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GrowDynkinType",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsDifferentialOneFormOneVariable",
     CalculatorFunctions::innerIsDifferentialOneFormOneVariable,
     "",
@@ -1563,7 +1563,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsDifferentialOneFormOneVariable",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Polynomialize",
     CalculatorFunctions::outerPolynomializE,
     "",
@@ -1576,7 +1576,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Polynomialize",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsAlgebraicRadical",
     CalculatorFunctions::innerIsAlgebraicRadical,
     "",
@@ -1589,7 +1589,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsAlgebraicRadical",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsReal",
     CalculatorFunctions::innerIsReal,
     "",
@@ -1600,7 +1600,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsReal",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsConstant",
     CalculatorFunctions::innerIsConstant,
     "",
@@ -1611,7 +1611,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsConstant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateDefiniteIntegral,
     "",
@@ -1621,7 +1621,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DefiniteIntegral",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst,
     "",
@@ -1631,7 +1631,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateAfterPolynomialization",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateXnDiffX,
     "",
@@ -1641,7 +1641,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegratePowerRule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateEpowerAxDiffX,
     "",
@@ -1651,7 +1651,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateEpowerX",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegratePullConstant,
     "",
@@ -1661,7 +1661,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegratePullConstant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared,
     "",
@@ -1671,7 +1671,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateSqrtOneminusXsquared",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne,
     "",
@@ -1681,7 +1681,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateSqrtXsquaredMinusOne",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateXpowerNePowerAx,
     "",
@@ -1691,7 +1691,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateXpowerNePowerAx",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerEulerFlaAsALaw,
     "",
@@ -1702,7 +1702,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EulerFormula",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerPowerImaginaryUnit,
     "",
@@ -1713,7 +1713,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PowerImaginaryUnit",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     CalculatorFunctions::innerTrigSumToTrigProduct,
     "",
@@ -1730,7 +1730,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TrigSumToTrigProduct",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sin",
     CalculatorFunctions::innerSineOfAngleSumToTrig,
     "",
@@ -1740,7 +1740,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SineOfAngleSum",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cos",
     CalculatorFunctions::innerCosineOfAngleSumToTrig,
     "",
@@ -1751,7 +1751,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CosineOfAngleSum",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sin",
     CalculatorFunctions::innerConvertSinToExponent,
     "",
@@ -1763,7 +1763,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressSinViaExponent",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cos",
     CalculatorFunctions::innerConvertCosToExponent,
     "",
@@ -1775,7 +1775,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressCosViaExponent",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cos",
     CalculatorFunctions::innerExploitCosEvenness,
     "",
@@ -1786,7 +1786,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExploitCosEvenness",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sin",
     CalculatorFunctions::innerExploitSinOddness,
     "",
@@ -1797,7 +1797,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExploitSinOddness",
     innerStandardOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateSinPowerNCosPowerM,
     "",
@@ -1807,7 +1807,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateSinPowerNCosPowerM",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateTanPowerNSecPowerM,
     "",
@@ -1818,7 +1818,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateTanPowerNSecPowerM",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateSum,
     "",
@@ -1829,7 +1829,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateSum",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegratePullImaginaryUnit,
     "",
@@ -1839,7 +1839,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegratePullOutImaginaryUnit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateSqrt,
     "",
@@ -1851,7 +1851,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   //the function integrating the building blocks must come in the exact order below:
   //else we risk infinite substitution cycle. The reasons are implementation-specific.
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa,
     "",
@@ -1861,7 +1861,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIa",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb,
     "",
@@ -1871,7 +1871,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIb",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa,
     "",
@@ -1881,7 +1881,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIIaIIIa",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb,
     "",
@@ -1891,7 +1891,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIIIb",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb,
     "",
@@ -1901,7 +1901,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntegrateBlockIIb",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks,
     "",
@@ -1912,7 +1912,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateTrigAndInverseTrig,
     "",
@@ -1922,7 +1922,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateTrigAndInverseTrig",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateChainRule,
     "",
@@ -1932,7 +1932,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateChainRule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateAtimesB,
     "",
@@ -1942,7 +1942,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateProductRule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateAdivideBCommutative,
     "",
@@ -1958,7 +1958,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateQuotientRule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateAplusB,
     "",
@@ -1968,7 +1968,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateSum",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateConstant,
     "",
@@ -1979,7 +1979,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateConstant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateX,
     "",
@@ -1990,7 +1990,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateIdentity",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateConstPower,
     "",
@@ -2003,7 +2003,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateConstPower",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerDifferentiateAPowerB,
     "",
@@ -2016,7 +2016,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DifferentiateApowerB",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\times",
     CalculatorFunctions::innerCrossProduct,
     "",
@@ -2026,7 +2026,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "crossProduct",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ElementWeylAlgebraDO",
     Calculator::innerElementWeylAlgebra,
     "",
@@ -2042,7 +2042,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ElementWeylAlgebraDO",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ElementWeylAlgebraPoly",
     Calculator::innerPolynomialWithEWA,
     "",
@@ -2055,7 +2055,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ElementWeylAlgebraPoly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeRationalFunction",
     CalculatorConversions::innerRationalFunctioN,
     "",
@@ -2065,7 +2065,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeRationalFunction",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeMatrix",
     CalculatorConversions::innerMakeMatrix,
     "",
@@ -2078,7 +2078,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeMatrixTensorForm",
     CalculatorConversions::innerMatrixRationalTensorForM,
     "",
@@ -2094,7 +2094,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeMatrixTensorForm",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeMatrixRFs",
     CalculatorConversions::innerMatrixRationalFunction,
     "",
@@ -2105,7 +2105,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeMatrixRFs",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FourierTransformDO",
     CalculatorFunctions::innerFourierTransformEWA,
     "",
@@ -2124,7 +2124,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FourierTransformDO",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PerturbSplittingNormal",
     Calculator::innerPerturbSplittingNormal,
     "",
@@ -2159,7 +2159,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PerturbSplittingNormal",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestSpechtModules",
     CalculatorFunctionsWeylGroup::innerTestSpechtModules,
     "",
@@ -2169,7 +2169,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestSpechtModules",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeElementWeylGroup",
     CalculatorFunctionsWeylGroup::innerWeylGroupElement,
     "",
@@ -2180,7 +2180,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeElementWeylGroup",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeElementHyperOctahedral",
     CalculatorConversions::innerMakeElementHyperOctahedral,
     "",
@@ -2192,7 +2192,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeElementHyperOctahedral",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupClassicalSignMultiplicities",
     CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers,
     "",
@@ -2212,7 +2212,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupClassicalSignMultiplicities",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupTauSignatures",
     CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems,
     "",
@@ -2223,7 +2223,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupTauSignatures",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements,
     "",
@@ -2234,7 +2234,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupConjugacyClassesFromAllElements",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupOuterConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements,
     "",
@@ -2245,7 +2245,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupOuterConjugacyClassesFromAllElements",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupConjugacyClassesRepresentatives",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives,
     "",
@@ -2257,7 +2257,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupConjugacyClassesRepresentatives",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupConjugacyClasses",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS,
     "",
@@ -2268,7 +2268,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupConjugacyClasses",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupCharTable",
     CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable,
     "",
@@ -2279,7 +2279,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupCharTable",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
     CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch,
     "",
@@ -2291,7 +2291,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylOrbitSize",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize,
     "",
@@ -2302,7 +2302,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOrbitSize",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylOrbitSimpleCoords",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple,
     "",
@@ -2314,7 +2314,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOrbitSimpleCoords",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupOrbitOuterSimple",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple,
     "",
@@ -2328,7 +2328,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupOrbitOuterSimple",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylOrbitFundCoords",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund,
     "",
@@ -2339,7 +2339,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOrbitFundCoords",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylOrbitFundRho",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho,
     "",
@@ -2351,7 +2351,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOrbitFundRho",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylRaiseToMaximallyDominant",
     CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant,
     "",
@@ -2367,7 +2367,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylRaiseToMaximallyDominant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeWeight",
     CalculatorFunctionsWeylGroup::innerLieAlgebraWeight,
     "",
@@ -2385,7 +2385,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeWeight",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeRho",
     CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight,
     "",
@@ -2395,7 +2395,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeRho",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsOuterAuto",
     CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup,
     "",
@@ -2414,7 +2414,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsOuterAuto",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylOuterRaiseToMaximallyDominant",
     CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant,
     "",
@@ -2427,7 +2427,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOuterRaiseToMaximallyDominant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GenerateFiniteMultiplicativelyClosedSet",
     Calculator::innerGenerateMultiplicativelyClosedSet,
     "",
@@ -2443,7 +2443,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GenerateFiniteMultiplicativelyClosedSet",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CartanSA",
     CalculatorFunctions::innerConstructCartanSA,
     "",
@@ -2455,7 +2455,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CartanSA",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GenerateVectorSpaceClosedWRTLieBracket",
     CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket,
     "",
@@ -2487,7 +2487,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GenerateVectorSpaceClosedWRTLieBracket",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupNaturalRep",
     CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep,
     "",
@@ -2497,7 +2497,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupNaturalRep",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylGroupGetOuterAutoGenerators",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint,
     "",
@@ -2508,7 +2508,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupGetOuterAutoGenerators",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeVirtualWeylGroupRepresentation",
     CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep,
     "",
@@ -2518,7 +2518,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeVirtualWeylGroupRepresentation",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MinPolyMatrix",
     CalculatorFunctions::innerMinPolyMatrix,
     "",
@@ -2529,7 +2529,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MinPolyMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CharPoly",
     CalculatorFunctions::innerCharPolyMatrix,
     "",
@@ -2540,7 +2540,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CharPoly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeCharacterLieAlg",
     Calculator::innerCharacterSSLieAlgFD,
     "",
@@ -2553,7 +2553,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeCharacterLieAlg",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetLinks",
     Calculator::innerGetLinksToSimpleLieAlgerbas,
     "",
@@ -2563,7 +2563,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetLinks",
     innerInvisible
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConesIntersection",
     Calculator::innerConesIntersect,
     "",
@@ -2582,7 +2582,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConesIntersection",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintRuleStack",
     CalculatorFunctions::innerPrintRuleStack,
     "",
@@ -2594,7 +2594,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintRuleStack",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Crawl",
     CalculatorFunctions::innerCrawlTexFile,
     "",
@@ -2607,7 +2607,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Crawl",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "BuildFreecalc",
     CalculatorFunctions::innerBuildFreecalc,
     "",
@@ -2628,7 +2628,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "BuildFreecalc",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "BuildFreecalcWithSlides",
     CalculatorFunctions::innerBuildFreecalcSingleSlides,
     "",
@@ -2638,7 +2638,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "BuildFreecalcWithSlides",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "BuildSlidesInTopicList",
     CalculatorFunctions::innerBuildFreecalcSlidesOnTopic,
     "",
@@ -2648,7 +2648,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "BuildSlidesInTopicList",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EnsureExpressionDependsOnlyOn",
     CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard,
     "",
@@ -2661,7 +2661,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EnsureExpressionDependsOnlyOn",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EnsureExpressionDependsMandatoryVariables",
     CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants,
     "",
@@ -2674,7 +2674,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EnsureExpressionDependsMandatoryVariables",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants",
     CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants,
     "",
@@ -2685,7 +2685,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\log",
     CalculatorFunctions::innerLog,
     "",
@@ -2696,7 +2696,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\log",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogBase",
     CalculatorFunctions::innerLogBaseNaturalToLn,
     "",
@@ -2706,7 +2706,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogBaseNaturalToLn",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogBase",
     CalculatorFunctions::innerLogBaseSimpleCases,
     "",
@@ -2716,7 +2716,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogBaseSimpleCases",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LogBase",
     CalculatorFunctions::innerLogBase,
     "",
@@ -2727,7 +2727,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogBase",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\arctan",
     CalculatorFunctions::innerArctan,
     "",
@@ -2737,7 +2737,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\arctan",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\arcsin",
     CalculatorFunctions::innerArcsinAlgebraic,
     "",
@@ -2747,7 +2747,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "arcsinAlgebraic",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\arccos",
     CalculatorFunctions::innerArccosAlgebraic,
     "",
@@ -2757,7 +2757,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "arccosAlgebraic",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\arccos",
     CalculatorFunctions::innerArccos,
     "",
@@ -2767,7 +2767,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\arccos",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\arcsin",
     CalculatorFunctions::innerArcsin,
     "",
@@ -2777,7 +2777,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\arcsin",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "|",
     CalculatorFunctions::innerAbs,
     "",
@@ -2787,7 +2787,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AbsoluteValue",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sin",
     CalculatorFunctions::innerSin,
     "",
@@ -2797,7 +2797,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cos",
     CalculatorFunctions::innerCos,
     "",
@@ -2807,7 +2807,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Cosine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\tan",
     CalculatorFunctions::innerTan,
     "",
@@ -2817,7 +2817,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressTanViaSineCosine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cot",
     CalculatorFunctions::innerCot,
     "",
@@ -2827,7 +2827,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressCotViaSineCosine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\csc",
     CalculatorFunctions::innerCsc,
     "",
@@ -2837,7 +2837,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressCscViaSine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sec",
     CalculatorFunctions::innerSec,
     "",
@@ -2847,7 +2847,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ExpressSecViaCosine",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Floor",
     CalculatorFunctions::innerFloor,
     "",
@@ -2857,7 +2857,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Floor",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Round",
     CalculatorFunctions::innerRound,
     "",
@@ -2867,7 +2867,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Round",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DoubleValue",
     CalculatorFunctions::innerEvaluateToDoublE,
     "",
@@ -2877,7 +2877,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DoubleValue",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerDegreesToRadians,
     "",
@@ -2887,7 +2887,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DegreesToRadians",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ModP",
     Calculator::innerZmodP,
     "",
@@ -2897,7 +2897,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ModP",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AdCommonEigenspace",
     Calculator::innerAdCommonEigenSpaces,
     "",
@@ -2908,7 +2908,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AdCommonEigenspace",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
     Calculator::innerAttemptExtendingEtoHEFwithHinCartan,
     "",
@@ -2920,7 +2920,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AttemptExtendingEtoHEFwithHinCartan",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsPrimeMillerRabin",
     CalculatorFunctions::innerIsPrimeMillerRabin,
     "",
@@ -2933,7 +2933,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPrimeMillerRabin",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsPossiblyPrime",
     CalculatorFunctions::innerIsPossiblyPrime,
     "",
@@ -2949,7 +2949,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPossiblyPrime",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GCD",
     CalculatorFunctions::innerGCD,
     "",
@@ -2959,7 +2959,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GCD",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LCM",
     CalculatorFunctions::innerLCM,
     "",
@@ -2969,7 +2969,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LCM",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GCDPoly",
     Calculator::innerGCDPoly,
     "",
@@ -2992,7 +2992,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GCDPoly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LCMPoly",
     Calculator::innerLCMPoly,
     "",
@@ -3012,7 +3012,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LCMPoly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Interpolate",
     Calculator::innerInterpolatePoly,
     "",
@@ -3025,7 +3025,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Interpolate",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivRemainder",
     CalculatorFunctions::innerPolynomialDivisionRemainder,
     "",
@@ -3037,7 +3037,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivRemainder",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivQuotient",
     CalculatorFunctions::innerPolynomialDivisionQuotient,
     "",
@@ -3048,7 +3048,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivQuotient",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivSlidesGrLex",
     CalculatorFunctions::innerPolynomialDivisionSlidesGrLex,
     "",
@@ -3059,7 +3059,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivSlidesGrLex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivStringGrLex",
     CalculatorFunctions::innerPolynomialDivisionVerboseGrLex,
     "",
@@ -3070,7 +3070,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivStringGrLex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivStringGrLexRev",
     CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic,
     "",
@@ -3085,7 +3085,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivStringGrLexRev",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivStringLex",
     CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic,
     "",
@@ -3102,7 +3102,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivStringLex",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolyDivStringLexRev",
     CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicOpposite,
     "",
@@ -3120,7 +3120,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivStringLexRev",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SuffixNotationForPostScript",
     Calculator::innerSuffixNotationForPostScript,
     "",
@@ -3130,7 +3130,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SuffixNotationForPostScript",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MakeJavascriptExpression",
     CalculatorFunctions::innerMakeJavascriptExpressioN,
     "",
@@ -3141,7 +3141,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeJavascriptExpression",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DFQEuler",
     CalculatorFunctions::innerDFQsEulersMethod,
     "",
@@ -3156,7 +3156,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DFQEuler",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "NewtonsMethod",
     CalculatorFunctions::innerNewtonsMethod,
     "",
@@ -3170,7 +3170,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "NewtonsMethod",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FetchKnownPublicKeys",
     CalculatorFunctions::innerFetchKnownPublicKeys,
     "",
@@ -3181,7 +3181,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FetchKnownPublicKeys",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotDirectionField",
     CalculatorFunctions::innerPlotDirectionField,
     "",
@@ -3198,7 +3198,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotDirectionField",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotPolar",
     CalculatorFunctions::innerPlotPolarRfunctionTheta,
     "",
@@ -3214,7 +3214,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPolar",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotPolarExtended",
     CalculatorFunctions::innerPlotPolarRfunctionThetaExtended,
     "",
@@ -3227,7 +3227,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPolarExtended",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GaussianElimination",
     CalculatorFunctions::innerGaussianEliminationMatrix,
     "",
@@ -3241,7 +3241,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GaussianElimination",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "UnivariatePartialFractionAlgrithm",
     CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm,
     "",
@@ -3255,7 +3255,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "UnivariatePartialFractionAlgrithm",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "UnivariatePartialFractions",
     CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS,
     "",
@@ -3270,7 +3270,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "UnivariatePartialFractions",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EqualityToArithmeticExpression",
     CalculatorFunctions::innerEqualityToArithmeticExpression,
     "",
@@ -3280,7 +3280,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EqualityToArithmeticExpression",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PointsImplicitly",
     CalculatorFunctions::innerGetPointsImplicitly,
     "",
@@ -3293,7 +3293,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PointsImplicitly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotImplicit",
     CalculatorFunctions::innerPlotImplicitFunction,
     "",
@@ -3315,7 +3315,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotImplicit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotImplicitShowGrid",
     CalculatorFunctions::innerPlotImplicitShowGridFunction,
     "",
@@ -3327,7 +3327,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotImplicitShowGrid",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotCoordinateSystem",
     CalculatorFunctions::innerPlotCoordinateSystem,
     "",
@@ -3337,7 +3337,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotCoordinateSystem",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotSetProjectionScreen",
     CalculatorFunctions::innerPlotSetProjectionScreenBasis,
     "",
@@ -3349,7 +3349,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotSetProjectionScreen",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotSurface",
     CalculatorFunctions::innerPlotSurface,
     "",
@@ -3372,7 +3372,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotSurface",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotCurve",
     CalculatorFunctions::innerPlotParametricCurve,
     "",
@@ -3390,7 +3390,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotCurve",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotSegment",
     CalculatorFunctions::innerPlotSegment,
     "",
@@ -3400,7 +3400,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotSegment",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotMarkSegment",
     CalculatorFunctions::innerPlotMarkSegment,
     "",
@@ -3410,7 +3410,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotMarkSegment",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotPath",
     CalculatorFunctions::innerPlotPath,
     "",
@@ -3420,7 +3420,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPath",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotSetId",
     CalculatorFunctions::innerPlotSetId,
     "",
@@ -3431,7 +3431,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotSetId",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MatchesPattern",
     CalculatorFunctions::innerMatchesPattern,
     "",
@@ -3445,7 +3445,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MatchesPattern",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetVariablesExcludeNamedConstants",
     CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants,
     "",
@@ -3459,7 +3459,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetVariablesExcludeNamedConstants",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetVariablesIncludeNamedConstants",
     CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants,
     "",
@@ -3473,7 +3473,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetVariablesIncludeNamedConstants",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotPoint",
     CalculatorFunctions::innerPlotPoint,
     "",
@@ -3483,7 +3483,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPoint",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Plot2D",
     CalculatorFunctions::innerPlot2DoverIntervals,
     "",
@@ -3496,7 +3496,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Plot2DoverIntervals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Plot2D",
     CalculatorFunctions::innerPlot2D,
     "",
@@ -3512,7 +3512,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Plot2D",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsPlot",
     CalculatorFunctions::innerIsPlot,
     "",
@@ -3523,7 +3523,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPlot",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotFill",
     CalculatorFunctions::innerPlotFill,
     "",
@@ -3533,7 +3533,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotFill",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotRectangle",
     CalculatorFunctions::innerPlotRectangle,
     "",
@@ -3545,7 +3545,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotRectangle",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotGrid",
     CalculatorFunctions::innerPlotGrid,
     "",
@@ -3555,7 +3555,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotGrid",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotRemoveCoordinateAxes",
     CalculatorFunctions::innerPlotRemoveCoordinateAxes,
     "",
@@ -3565,7 +3565,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotRemoveCoordinateAxes",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotLabel",
     CalculatorFunctions::innerPlotLabel,
     "",
@@ -3575,7 +3575,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotLabel",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotViewRectangle",
     CalculatorFunctions::innerPlotViewRectangle,
     "",
@@ -3591,7 +3591,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotViewRectangle",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PlotWindow",
     CalculatorFunctions::innerPlotViewWindow,
     "",
@@ -3605,7 +3605,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotWindow",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Plot2DWithBars",
     CalculatorFunctions::innerPlot2DWithBars,
     "",
@@ -3617,7 +3617,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Plot2DWithBars",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CompareFunctionsNumerically",
     CalculatorFunctions::innerCompareFunctionsNumerically,
     "",
@@ -3634,7 +3634,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CompareFunctionsNumerically",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CompareExpressionsNumerically",
     CalculatorFunctions::innerCompareExpressionsNumerically,
     "",
@@ -3649,7 +3649,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CompareExpressionsNumerically",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CompareExpressionsNumericallyAtPoints",
     CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints,
     "",
@@ -3673,7 +3673,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CompareExpressionsNumericallyAtPoints",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsInteger",
     Calculator::innerIsInteger,
     "",
@@ -3684,7 +3684,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsInteger",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsEven",
     CalculatorFunctions::innerIsEven,
     "",
@@ -3695,7 +3695,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsEven",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsSquareFree",
     CalculatorFunctions::innerIsSquareFree,
     "",
@@ -3709,7 +3709,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsSquareFree",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsSquareFreePolynomial",
     CalculatorFunctions::innerIsSquareFreePolynomial,
     "",
@@ -3723,7 +3723,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsSquareFreePolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsPower",
     CalculatorFunctions::innerIsPower,
     "",
@@ -3736,7 +3736,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPower",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsSquare",
     CalculatorFunctions::innerIsSquare,
     "",
@@ -3746,7 +3746,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsSquare",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[)",
     CalculatorFunctions::innerIntervalLeftClosedFromSequence,
     "",
@@ -3757,7 +3757,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "[)",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "(]",
     CalculatorFunctions::innerIntervalRightClosedFromSequence,
     "",
@@ -3768,7 +3768,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "(]",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IntervalClosed",
     CalculatorFunctions::innerIntervalClosedFromSequence,
     "",
@@ -3779,7 +3779,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntervalClosed",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IntervalOpen",
     CalculatorFunctions::innerIntervalOpenFromSequence,
     "",
@@ -3790,7 +3790,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntervalOpen",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsNonEmptySequence",
     CalculatorFunctions::innerIsNonEmptySequence,
     "",
@@ -3805,7 +3805,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsNonEmptySequence",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsRational",
     Calculator::innerIsRational,
     "",
@@ -3820,7 +3820,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsRational",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "not",
     Calculator::innerNot,
     "",
@@ -3832,7 +3832,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "not",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AllPartitions",
     CalculatorFunctions::innerAllPartitions,
     "",
@@ -3842,7 +3842,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AllPartitions",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AllVectorPartitions",
     CalculatorFunctions::innerAllVectorPartitions,
     "",
@@ -3855,7 +3855,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AllVectorPartitions",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AllSelectionsFixedRank",
     CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank,
     "",
@@ -3873,7 +3873,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AllSelectionsFixedRank",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "KostkaNumber",
     CalculatorFunctionsWeylGroup::innerKostkaNumber,
     "",
@@ -3887,7 +3887,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "KostkaNumber",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintNonNegativeVectorsLevel",
     Calculator::innerPrintZnEnumeration,
     "",
@@ -3900,7 +3900,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintNonNegativeVectorsLevel",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SemisimpleLieAlgebra",
     CalculatorConversions::innerSemisimpleLieAlgebra,
     "",
@@ -3944,7 +3944,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SemisimpleLieAlgebra",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WriteSemisimpleLieAlgebra",
     Calculator::innerWriteSSLieAlgebraToHD,
     "",
@@ -3956,7 +3956,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSemisimpleLieAlgebra",
     Calculator::innerPrintSSLieAlgebraVerbose,
     "",
@@ -3971,7 +3971,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleLieAlgebra",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrecomputeSemisimpleLieAlgebraStructure",
     CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure,
     "",
@@ -3984,7 +3984,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrecomputeSemisimpleLieAlgebraStructure",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetChevalleyGenerator",
     Calculator::innerGetChevGen,
     "",
@@ -4004,7 +4004,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetChevalleyGenerator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetCartanGenerator",
     Calculator::innerGetCartanGen,
     "",
@@ -4024,7 +4024,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetCartanGenerator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FunctionToMatrix",
     Calculator::innerFunctionToMatrix,
     "",
@@ -4036,7 +4036,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FunctionToMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Transpose",
     Calculator::innerTranspose,
     "",
@@ -4046,7 +4046,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Transpose",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\det",
     CalculatorFunctions::innerDeterminant,
     "",
@@ -4060,7 +4060,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Determinant",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DeterminantPolynomial",
     Calculator::innerDeterminantPolynomial,
     "",
@@ -4084,7 +4084,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DeterminantPolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Length",
     CalculatorFunctions::innerLength,
     "",
@@ -4100,7 +4100,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Length",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetMultiplicandList",
     CalculatorFunctions::innerCollectMultiplicands,
     "",
@@ -4110,7 +4110,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetMultiplicandList",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "NormalizeIntervals",
     CalculatorFunctions::innerNormalizeIntervals,
     "",
@@ -4120,7 +4120,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "NormalizeIntervals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cup",
     CalculatorFunctions::innerUnionUnionIntervals,
     "",
@@ -4132,7 +4132,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "UnionUnionIntervals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cup",
     CalculatorFunctions::innerUnionIntervals,
     "",
@@ -4143,7 +4143,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "UnionIntervals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cup",
     CalculatorFunctions::innerUnionEmptySet,
     "",
@@ -4154,7 +4154,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "UnionEmptySet",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cap",
     CalculatorFunctions::innerIntersectUnion,
     "",
@@ -4164,7 +4164,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IntersectUnion",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cap",
     CalculatorFunctions::innerIntersectEmptySet,
     "",
@@ -4174,7 +4174,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "InersectEmptySet",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cap",
     CalculatorFunctions::innerIntersectIntervals,
     "",
@@ -4184,7 +4184,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "InersectIntervals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CompareIntervalsNumerically",
     CalculatorFunctions::innerCompareIntervalsNumerically,
     "",
@@ -4198,7 +4198,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CompareIntervalsNumerically",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetOpandList",
     CalculatorFunctions::innerCollectOpands,
     "",
@@ -4212,7 +4212,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetOpandList",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetSummandList",
     CalculatorFunctions::innerCollectSummands,
     "",
@@ -4222,7 +4222,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetSummandList",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetSummand",
     CalculatorFunctions::innerGetSummand,
     "",
@@ -4233,7 +4233,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetSummand",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GetFirstSummandContaining",
     CalculatorFunctions::innerGetFirstSummandContaining,
     "",
@@ -4244,7 +4244,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GetFirstSummandContaining",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RemoveDuplicates",
     CalculatorFunctions::innerRemoveDuplicates,
     "",
@@ -4254,7 +4254,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RemoveDuplicates",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Sort",
     CalculatorFunctions::innerSort,
     "",
@@ -4267,7 +4267,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sort",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SortDescending",
     CalculatorFunctions::innerSortDescending,
     "",
@@ -4277,7 +4277,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SortDescending",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "BlocksOfCommutativity",
     CalculatorFunctions::innerGetUserDefinedSubExpressions,
     "",
@@ -4287,7 +4287,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "BlocksOfCommutativity",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HeighestWeightVector",
     CalculatorFunctions::innerHWV,
     "",
@@ -4310,7 +4310,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HeighestWeightVector",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintModule",
     CalculatorFunctions::innerPrintGenVermaModule,
     "",
@@ -4333,7 +4333,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintModule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HighestWeightTAAbf",
     CalculatorFunctions::innerHWTAABF,
     "",
@@ -4353,7 +4353,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HighestWeightTAAbf",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WeylDimFormula",
     CalculatorFunctions::innerWeylDimFormula,
     "",
@@ -4366,7 +4366,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylDimFormula",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AnimateLittelmannPaths",
     Calculator::innerAnimateLittelmannPaths,
     "",
@@ -4379,7 +4379,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "AnimateLittelmannPaths",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DecomposeInducingRepGenVermaModule",
     CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart,
     "",
@@ -4400,7 +4400,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DecomposeInducingRepGenVermaModule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Casimir",
     Calculator::innerCasimir,
     "",
@@ -4410,7 +4410,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Casimir",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CasimirWRTLevi",
     CalculatorFunctions::innerCasimirWRTlevi,
     "",
@@ -4424,7 +4424,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CasimirWRTLevi",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "HmmG2inB3",
     Calculator::innerEmbedG2inB3,
     "",
@@ -4437,7 +4437,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "HmmG2inB3",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DrawRootSystem",
     CalculatorFunctions::innerDrawRootSystem,
     "",
@@ -4465,7 +4465,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DrawRootSystem",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DrawWeightSupportWithMults",
     CalculatorFunctions::innerDrawWeightSupportWithMults,
     "",
@@ -4489,7 +4489,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DrawWeightSupportWithMults",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "DrawWeightSupport",
     CalculatorFunctions::innerDrawWeightSupport,
     "",
@@ -4502,7 +4502,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DrawWeightSupport",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SplitFDpartB3overG2CharsOnly",
     Calculator::innerSplitFDpartB3overG2CharsOnly,
     "",
@@ -4520,7 +4520,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SplitFDpartB3overG2CharsOnly",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SplitFDpartB3overG2",
     CalculatorFunctions::innerSplitFDpartB3overG2,
     "",
@@ -4538,7 +4538,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SplitFDpartB3overG2",
     innerInvisibleExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintB3G2branchingTableCharsOnly",
     Calculator::innerPrintB3G2branchingTableCharsOnly,
     "",
@@ -4557,7 +4557,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintB3G2branchingTableCharsOnly",
     innerInvisibleExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintB3G2branchingTable",
     Calculator::innerPrintB3G2branchingTable,
     "",
@@ -4571,7 +4571,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintB3G2branchingTable",
     innerInvisibleExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SplitFDTensorGenericGeneralizedVerma",
     CalculatorFunctions::innerSplitGenericGenVermaTensorFD,
     "",
@@ -4582,7 +4582,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SplitFDTensorGenericGeneralizedVerma",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
     CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel,
     "",
@@ -4599,7 +4599,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
     Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
     "",
@@ -4635,7 +4635,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebra",
     Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
     "",
@@ -4658,7 +4658,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MapSemisimpleLieAlgebraInWeylAlgebra",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
     "",
@@ -4693,7 +4693,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "KLcoeffs",
     Calculator::innerKLcoeffs,
     "",
@@ -4718,7 +4718,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "KLcoeffs",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RootSubsystem",
     Calculator::innerRootSubsystem,
     "",
@@ -4730,7 +4730,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RootSubsystem",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintRootSubalgebras",
     CalculatorFunctions::innerPrintRootSAs,
     "",
@@ -4741,7 +4741,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintRootSubalgebras",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintRootSubalgebrasRecompute",
     CalculatorFunctions::innerPrintRootSAsForceRecompute,
     "",
@@ -4752,7 +4752,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintRootSubalgebrasRecompute",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSlTwoSubalgebras",
     CalculatorFunctions::innerPrintSltwos,
     "",
@@ -4763,7 +4763,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSlTwoSubalgebras",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ParabolicsInfoBruhatGraph",
     CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph,
     "",
@@ -4798,7 +4798,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ParabolicsInfoBruhatGraph",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "TestMonomialBasisConjecture",
     Calculator::innerTestMonomialBaseConjecture,
     "",
@@ -4810,7 +4810,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestMonomialBasisConjecture",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LSpath",
     Calculator::innerLSPath,
     "",
@@ -4822,7 +4822,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LSpath",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LROdefine",
     Calculator::innerLittelmannOperator,
     "",
@@ -4835,7 +4835,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LROdefine",
     innerExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintProductDistancesModN",
     CalculatorFunctions::innerFindProductDistanceModN,
     "",
@@ -4854,7 +4854,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintProductDistancesModN",
     innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SolveProductSumEquationOverSetModN",
     CalculatorFunctions::innerSolveProductSumEquationOverSetModN,
     "",
@@ -4867,7 +4867,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SolveProductSumEquationOverSetModN",
     innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsNilpotent",
     CalculatorFunctions::innerIsNilpotent,
     "",
@@ -4879,7 +4879,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsNilpotent",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "InvertMatrixVerbose",
     Calculator::innerInvertMatrixVerbose,
     "",
@@ -4892,7 +4892,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "InvertMatrixVerbose",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "InvertMatrix",
     CalculatorFunctions::innerInvertMatrix,
     "",
@@ -4902,7 +4902,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "InvertMatrix",
     innerStandard
   );
-  //this->AddOperationHandler
+  //this->addOperationHandler
   //("GramSchmidtAlgebraicVerbose",
   //  CalculatorFunctions::innerGramSchmidtVerbose, "",
   // "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . The inputs are vector-rows.",
@@ -4910,7 +4910,7 @@ void Calculator::initPredefinedInnerFunctions() {
   // false, false,
   // "CalculatorFunctions::innerInvertMatrix",
   // "InvertMatrix");
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Trace",
     CalculatorFunctions::innerTrace,
     "",
@@ -4920,7 +4920,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Trace",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ReverseBytes",
     CalculatorFunctions::innerReverseBytes,
     "",
@@ -4930,7 +4930,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ReverseBytes",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Reverse",
     Calculator::innerReverseOrder,
     "",
@@ -4943,7 +4943,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Reverse",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ReverseRecursively",
     Calculator::innerReverseOrderRecursivelY,
     "",
@@ -4953,7 +4953,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ReverseRecursively",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SolveFor",
     CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT,
     "",
@@ -4973,7 +4973,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SolveFor",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
     "",
@@ -5024,7 +5024,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystem",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit,
     "",
@@ -5056,7 +5056,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic,
     "",
@@ -5068,7 +5068,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit,
     "",
@@ -5081,7 +5081,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GroebnerLexUpperLimit",
     Calculator::innerGroebnerLexicographic,
     "",
@@ -5157,7 +5157,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GroebnerLexUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PolynomialRelationsUpperLimit",
     CalculatorFunctions::innerPolynomialRelations,
     "",
@@ -5167,7 +5167,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialRelationsUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GroebnerLexOppositeUpperLimit",
     Calculator::innerGroebnerLexicographicOpposite,
     "",
@@ -5178,7 +5178,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GroebnerLexOppositeUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "GroebnerGrLexUpperLimit",
     Calculator::innerGroebnerGradedLexicographic,
     "",
@@ -5203,7 +5203,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "GroebnerGrLexUpperLimit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ComputeFKFT",
     CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras,
     "",
@@ -5215,7 +5215,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ComputeFKFT",
     innerAdminNoTestExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ComputeSemisimpleSubalgebras",
     CalculatorFunctions::innerComputeSemisimpleSubalgebras,
     "",
@@ -5226,7 +5226,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ComputeSemisimpleSubalgebras",
     innerInvisibleNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CentralizerChains",
     CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras,
     "",
@@ -5240,7 +5240,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CentralizerChains",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSemisimpleSubalgebras",
     Calculator::innerPrintSSsubalgebrasRegular,
     "",
@@ -5251,7 +5251,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebras",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
     Calculator::innerPrintSSsubalgebrasRecompute,
     "",
@@ -5262,7 +5262,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebrasRecompute",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSemisimpleSubalgebrasNoCentralizers",
     Calculator::innerPrintSSsubalgebrasNoCentralizers,
     "",
@@ -5273,7 +5273,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebrasNoCentralizers",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "PrintSemisimpleSubalgebrasFull",
     Calculator::innerPrintSSsubalgebrasNilradicals,
     "",
@@ -5284,7 +5284,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintSemisimpleSubalgebrasFull",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CanBeExtendedParabolicallyTo",
     CalculatorFunctions::innerCanBeExtendedParabolicallyTo,
     "",
@@ -5300,7 +5300,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CanBeExtendedParabolicallyTo",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "EmbedSemisimpleInSemisimple",
     CalculatorFunctions::innerEmbedSSalgInSSalg,
     "",
@@ -5312,7 +5312,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EmbedSemisimpleInSemisimple",
     innerNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "LoadSemisimpleSubalgebras",
     CalculatorConversions::innerLoadSemisimpleSubalgebras,
     "",
@@ -5323,7 +5323,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadSemisimpleSubalgebras",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "SltwoSubalgebra",
     CalculatorConversions::innerSlTwoSubalgebraPrecomputed,
     "",
@@ -5340,7 +5340,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "SltwoSubalgebra",
     innerAdminNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sqrt",
     CalculatorFunctions::innerSqrt,
     "",
@@ -5351,7 +5351,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "sqrt",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FactorOutNumberContent",
     CalculatorFunctions::innerFactorOutNumberContent,
     "",
@@ -5365,7 +5365,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOutNumberContent",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FactorOneVarPolyOverRationals",
     Calculator::innerFactorPolynomial,
     "",
@@ -5384,7 +5384,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOneVarPolyOverRationals",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FactorOneVariablePolynomialModPrime",
     CalculatorFunctions::innerFactorPolynomialModPrime,
     "",
@@ -5397,7 +5397,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOneVariablePolynomialModPrime",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FactorInteger",
     CalculatorFunctions::innerFactorIntegeR,
     "",
@@ -5410,7 +5410,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorInteger",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Freudenthal",
     Calculator::innerFreudenthalEval,
     "",
@@ -5424,7 +5424,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Freudenthal",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Killing",
     Calculator::innerKillingForm,
     "",
@@ -5436,7 +5436,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Killing",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "FreudenthalFull",
     Calculator::innerFreudenthalFull,
     "",
@@ -5447,7 +5447,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FreudenthalFull",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CoefficientsPowersOf",
     CalculatorFunctions::innerCoefficientsPowersOf,
     "",
@@ -5457,7 +5457,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CoefficientsPowersOf",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ConstantTerm",
     CalculatorFunctions::innerConstTermRelative,
     "",
@@ -5467,7 +5467,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConstantTerm",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "CoefficientOf",
     CalculatorFunctions::innerCoefficientOf,
     "",
@@ -5477,7 +5477,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CoefficientOf",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsLinearOrConstantIn",
     CalculatorFunctions::innerIsLinearOrConstantIn,
     "",
@@ -5491,7 +5491,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsLinearOrConstantIn",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsProductLinearOrConstantTermsIn",
     CalculatorFunctions::innerIsProductLinearOrConstTermsIn,
     "",
@@ -5508,7 +5508,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsProductLinearOrConstantTermsIn",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "IsProductTermsUpToPower",
     CalculatorFunctions::innerIsProductTermsUpToPower,
     "",
@@ -5560,7 +5560,7 @@ void Calculator::initPredefinedStandardOperations() {
   innerNoTestInvisibleExperimental.dontTestAutomatically = true;
   innerNoTestInvisibleExperimental.visible = false;
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     ";",
     Calculator::outerMeltBrackets,
     "",
@@ -5586,7 +5586,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MeltBrackets",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "=",
     Calculator::outerCheckRule,
     "",
@@ -5602,7 +5602,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CheckAutoEquality",
     outerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddStringToString,
     this->opString(),
@@ -5613,7 +5613,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddStrings",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatToRat,
     this->opRational(),
@@ -5624,7 +5624,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationals",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
     this->opRational(),
@@ -5635,7 +5635,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToElementZmodP",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
     this->opEltZmodP(),
@@ -5646,7 +5646,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementZmodPToRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
     this->opEltZmodP(),
@@ -5657,7 +5657,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementZmodPToElementZmodP",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
     this->opAlgNumber(),
@@ -5668,7 +5668,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddAlgebraicNumberToAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
     this->opAlgNumber(),
@@ -5679,7 +5679,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddAlgebraicNumberToRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
     this->opRational(),
@@ -5690,7 +5690,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
     this->opDouble(),
@@ -5703,7 +5703,7 @@ void Calculator::initPredefinedStandardOperations() {
     innerStandard
   );
   // must come before outer plus:
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
     this->opCalculusPlot(),
@@ -5714,7 +5714,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPlots",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ScaleToLeadingUnit",
     CalculatorFunctions::innerScaleToLeadingUnit,
     "",
@@ -5724,7 +5724,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ScaleToLeadingUnit",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     Calculator::outerPlus,
     "",
@@ -5737,7 +5737,7 @@ void Calculator::initPredefinedStandardOperations() {
     outerStandard,
     "+"
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     CalculatorFunctions::outerCombineFractionsCommutative,
     "",
@@ -5749,7 +5749,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CommonDenominator",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     this->outerCombineFractions,
     "",
@@ -5759,7 +5759,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CommonDenominatorOneNonFraction",
     outerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor,
     this->opElementTensorGVM(),
@@ -5771,7 +5771,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opRational(),
@@ -5782,7 +5782,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialRational(),
@@ -5793,7 +5793,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialToRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialRational(),
@@ -5805,7 +5805,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialToPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -5816,7 +5816,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialOverAlgebraicNumbersToPolynomialOverAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opAlgNumber(),
@@ -5827,7 +5827,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddAlgebraicNumberToPolynomialOverAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -5838,7 +5838,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialOverAlgebraicNumbersToAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opRational(),
@@ -5849,7 +5849,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToPolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -5860,7 +5860,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialAlgebraicNumbersToRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialRational(),
@@ -5871,7 +5871,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialToAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialRational(),
@@ -5882,7 +5882,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialToPolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -5893,7 +5893,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialAlgebraicNumbersToPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opAlgNumber(),
@@ -5904,7 +5904,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddAlgebraicNumberToPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
     this->opRational(),
@@ -5916,7 +5916,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
     this->opPolynomialRational(),
@@ -5928,7 +5928,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddPolynomialToElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
@@ -5940,7 +5940,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementWeylAlgebraToPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
@@ -5952,7 +5952,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementWeylAlgebraToElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF,
     this->opRationalFunction(),
@@ -5963,7 +5963,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalFunctionToRationalFunction",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
     this->opRational(),
@@ -5975,7 +5975,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationalToDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
     this->opDouble(),
@@ -5987,7 +5987,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddDoubleToDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddWeightToWeight,
     this->opWeightLieAlgPoly(),
@@ -6000,7 +6000,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddUEToAny,
     this->opElementUEoverRF(),
@@ -6013,7 +6013,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix,
     "",
@@ -6025,7 +6025,7 @@ void Calculator::initPredefinedStandardOperations() {
     innerStandard
   );
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AugmentMatrixToTheRight",
     CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight,
     "",
@@ -6037,7 +6037,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AugmentMatrixToTheRight",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AugmentMatrixBelow",
     CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow,
     "",
@@ -6049,7 +6049,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AugmentMatrixBelow",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\oplus",
     CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix,
     "",
@@ -6060,7 +6060,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DirectSumMatrices",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
     "",
@@ -6071,7 +6071,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyMatrixByMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix,
     "",
@@ -6081,7 +6081,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplySequenceByMatrix",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddSequenceToSequence,
     this->opSequence(),
@@ -6098,7 +6098,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddSequences",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
     this->opMatTensorRat(),
@@ -6110,7 +6110,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AddMatrixTensorToMatrixTensor",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "-",
     Calculator::outerMinus,
     "",
@@ -6120,7 +6120,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Minus",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::innerInterpretAsDifferential,
     "",
@@ -6130,7 +6130,7 @@ void Calculator::initPredefinedStandardOperations() {
     "InterpretAsDifferential",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::innerIntegralOperator,
     "",
@@ -6143,7 +6143,7 @@ void Calculator::initPredefinedStandardOperations() {
     "IntegralOperatorFromProduct",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::innerSumTimesExpressionToSumOf,
     "",
@@ -6154,7 +6154,7 @@ void Calculator::initPredefinedStandardOperations() {
     "SumProductNotationToOperator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::innerSumTimesExpressionToSumOf,
     "",
@@ -6165,7 +6165,7 @@ void Calculator::initPredefinedStandardOperations() {
     "SumProductNotationToOperatorRelativeToDivision",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerHandleUnderscorePowerLimits,
     "",
@@ -6175,7 +6175,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LimitBoundaryNotationPower",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "_",
     CalculatorFunctions::innerHandleUnderscorePowerLimits,
     "",
@@ -6185,7 +6185,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LimitBoundaryNotationUnderscore",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerDifferentiateWRTxTimesAny,
     "",
@@ -6195,7 +6195,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DifferentiateWithRespectToXTimeAny",
     outerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct,
     this->opElementHyperOctahedral(),
@@ -6208,7 +6208,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyElementHyperOctahedralByElementHyperOctahedral",
     innerExperimentalNoTest
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat,
     this->opRational(),
@@ -6219,7 +6219,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByElementZmodP",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat,
     this->opEltZmodP(),
@@ -6230,7 +6230,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyElementZmodPByElementZModP",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber,
     this->opAlgNumber(),
@@ -6241,7 +6241,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAlgebraicNumberByAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber,
     this->opRational(),
@@ -6252,7 +6252,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatByRat,
     this->opRational(),
@@ -6263,7 +6263,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationals",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat,
     this->opRational(),
@@ -6283,7 +6283,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat,
     this->opDouble(),
@@ -6298,7 +6298,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyDoubleByRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat,
     this->opDouble(),
@@ -6313,7 +6313,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyDoubleByDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt,
     this->opWeylGroupElement(),
@@ -6324,7 +6324,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyWeylGroupElementByWeylGroupElement",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg,
     this->opCharSSAlgMod(),
@@ -6339,7 +6339,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyCharacterSemisimpleLieAlgebraModuleBy",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
     this->opRational(),
@@ -6352,7 +6352,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
     this->opPolynomialRational(),
@@ -6365,7 +6365,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
@@ -6379,7 +6379,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyElementWeylAlgebraByElementWeylAlgebra",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
@@ -6392,7 +6392,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyElementWeylAlgebraByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opPolynomialRational(),
@@ -6405,7 +6405,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opRational(),
@@ -6418,7 +6418,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opPolynomialRational(),
@@ -6431,7 +6431,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -6442,7 +6442,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialAlgebraicNumbersByPolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opPolynomialAlgebraicNumbers(),
@@ -6453,7 +6453,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opAlgNumber(),
@@ -6464,7 +6464,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opRational(),
@@ -6475,7 +6475,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByPolynomialAlgebraicNumbers",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opPolynomialRational(),
@@ -6486,7 +6486,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByAlgebraicNumber",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opAlgNumber(),
@@ -6497,7 +6497,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAlgebraicNumberByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
     this->opMatTensorRat(),
@@ -6513,7 +6513,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyMatrixTensorByMatrixTensor",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
     this->opRational(),
@@ -6529,7 +6529,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByMatrixTensor",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps,
     this->opWeylGroupVirtualRep(),
@@ -6543,7 +6543,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TensorAndDecomposeWeylGroupRepresentations",
     innerExperimentalNoTest
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY,
     "",
@@ -6557,7 +6557,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CombineExponents",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::innerMultiplyByOne,
     "",
@@ -6568,7 +6568,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyByOne",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerCommuteConstants,
     "",
@@ -6579,7 +6579,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CommuteConstants",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerMergeConstantRadicals,
     "",
@@ -6589,7 +6589,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MergeConstantRadicals",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::outerAssociate,
     "",
@@ -6599,7 +6599,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AssociativeRule",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate,
     "",
@@ -6611,7 +6611,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CommuteAtimesBtimesCifUnivariate",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerCommuteAtimesBifUnivariate,
     "",
@@ -6623,7 +6623,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CommuteIfUnivariate",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::outerExtractBaseMultiplication,
     "",
@@ -6633,7 +6633,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ConstantExtraction",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::outerAssociateTimesDivision,
     "",
@@ -6643,7 +6643,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AssociateTimesDivision",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::innerCancelMultiplicativeInverse,
     "",
@@ -6653,7 +6653,7 @@ void Calculator::initPredefinedStandardOperations() {
     "CancelMultiplicativeInverse",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::outerDistributeTimes,
     "",
@@ -6664,7 +6664,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DistributeMultiplication",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     Calculator::outerDistributeTimesConstant,
     "",
@@ -6678,7 +6678,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DistributeMultiplicationConstants",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ,
     "",
@@ -6691,7 +6691,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideAdivBpowerItimesBpowerJ",
     outerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
     this->opRational(),
@@ -6703,7 +6703,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRationalByUE",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE,
     this->opElementUEoverRF(),
@@ -6716,7 +6716,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyUEByUE",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF,
     this->opRational(),
@@ -6727,7 +6727,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRatOrPolyOrRFByRF",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
     this->opRational(),
@@ -6743,7 +6743,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAnyByEltTensor",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
     this->opPolynomialRational(),
@@ -6762,7 +6762,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByElementTensorGeneralVermaModule",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements,
     this->opEllipticCurveElementsRational(),
@@ -6775,7 +6775,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyEllipticCurveElementsRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP,
     this->opEllipticCurveElementsZmodP(),
@@ -6788,7 +6788,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyEllipticCurveElementsOverZmodP",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
     this->opRationalFunction(),
@@ -6806,7 +6806,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAnyByTensor",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
     this->opElementUEoverRF(),
@@ -6822,7 +6822,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence,
     this->opRational(),
@@ -6837,7 +6837,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ScalarTimesSequence",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix,
     "",
@@ -6847,7 +6847,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ScalarTimesMatrix",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence,
     this->opDouble(),
@@ -6860,7 +6860,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyDoubleBySequence",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence,
     this->opAlgNumber(),
@@ -6871,7 +6871,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyAlgebraicNumberBySequence",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence,
     this->opPolynomialRational(),
@@ -6883,7 +6883,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialBySequence",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly,
     this->opWeylGroupElement(),
@@ -6898,7 +6898,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly,
     this->opPolynomialRational(),
@@ -6911,7 +6911,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyPolynomialByWeightLieAlgebraPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly,
     this->opRational(),
@@ -6924,7 +6924,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MultiplyRaitonalByWeightLieAlgebraPolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\binom",
     CalculatorFunctionsBinaryOps::innerNChooseK,
     "",
@@ -6934,7 +6934,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Binom",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ElementEllipticCurveNormalForm",
     CalculatorFunctions::innerElementEllipticCurveNormalForm,
     "",
@@ -6945,7 +6945,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ElementEllipticCurveNormalForm",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "mod",
     Calculator::innerZmodP,
     "",
@@ -6955,7 +6955,7 @@ void Calculator::initPredefinedStandardOperations() {
     "mod",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "mod",
     CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP,
     "",
@@ -6971,7 +6971,7 @@ void Calculator::initPredefinedStandardOperations() {
     "moduloPolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\setminus",
     CalculatorFunctionsBinaryOps::innerSetMinus,
     "",
@@ -6982,7 +6982,7 @@ void Calculator::initPredefinedStandardOperations() {
     "\\setminus",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differential",
     CalculatorFunctions::innerDifferentialStandardHandler,
     "",
@@ -6992,7 +6992,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DifferentialStandardHandler",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differential",
     CalculatorFunctions::innerDifferentialOfPolynomial,
     "",
@@ -7003,7 +7003,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DifferentialOfPolynomial",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::innerIntegralOperator,
     "",
@@ -7013,7 +7013,7 @@ void Calculator::initPredefinedStandardOperations() {
     "IntegralOperatorFromQuotient",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat,
     this->opEltZmodP(),
@@ -7024,7 +7024,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideElementZmodPByElementZModP",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::innerDiffdivDiffxToDifferentiation,
     "",
@@ -7035,7 +7035,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LeibnizDifferentialOperatorToDifferentialOperator",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::innerDdivDxToDiffDivDiffx,
     "",
@@ -7046,7 +7046,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LeibnizDifferentialOperatorNotation",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
     this->opAlgNumber(),
@@ -7057,7 +7057,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideAlgebraicByAlgebraic",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
     this->opRational(),
@@ -7068,7 +7068,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideRationalByAlgebraic",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
     this->opAlgNumber(),
@@ -7079,7 +7079,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideAlgebraicByRational",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::outerDivideByNumber,
     "",
@@ -7092,7 +7092,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideByNumber",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     Calculator::innerSubZeroDivAnythingWithZero,
     "",
@@ -7102,7 +7102,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideZeroDivideByAnything",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::outerDivCancellations,
     "",
@@ -7112,7 +7112,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideCancellations",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::outerAssociateDivisionDivision,
     "",
@@ -7125,7 +7125,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AssociateDivisionDivision",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::outerAssociateAdivBdivCpowerD,
     "",
@@ -7137,7 +7137,7 @@ void Calculator::initPredefinedStandardOperations() {
     "AssociateAdividedByBdividedByCpowerD",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI,
     "",
@@ -7148,7 +7148,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ConvertShortDenominatorToNegativePower",
     outerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideRatByRat,
     this->opRational(),
@@ -7159,7 +7159,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideRationalByRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
     this->opRational(),
@@ -7170,7 +7170,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideRationalByDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
     this->opDouble(),
@@ -7186,7 +7186,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideDoubleByDouble",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
     this->opRational(),
@@ -7197,7 +7197,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DivideRationalByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
     this->opPolynomialRational(),
@@ -7209,7 +7209,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DividePolynomialByPolynomial",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerRationalByInteger,
     this->opRational(),
@@ -7220,7 +7220,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerIntegerByInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors,
     this->opRational(),
@@ -7232,7 +7232,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerRationalByRational",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic,
     this->opRational(),
@@ -7245,7 +7245,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerRationalByRationalOutputAlgebraic",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat,
     this->opRational(),
@@ -7260,7 +7260,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerDoubleToDouble",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT,
     "",
@@ -7271,7 +7271,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TransposePowerNotation",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger,
     "",
@@ -7287,7 +7287,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerMatrixNumbersByInteger",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible,
     "",
@@ -7297,7 +7297,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerMatrixNumbersByLargeIntegerIfPossible",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger,
     "",
@@ -7307,7 +7307,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerMatrixNumbersBySmallIntegerIfPossible",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger,
     "",
@@ -7317,7 +7317,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerElementZmodPToInteger",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerPowerExponentToLog,
     "",
@@ -7327,7 +7327,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerToLog",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerPowerAnyToZero,
     "",
@@ -7345,7 +7345,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerAnyToZero",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
     this->opPolynomialRational(),
@@ -7356,7 +7356,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerPolynomialBySmallInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger,
     this->opPolynomialAlgebraicNumbers(),
@@ -7367,7 +7367,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerPolynomialAlgebraicNumbersBySmallInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger,
     this->opEllipticCurveElementsRational(),
@@ -7379,7 +7379,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerEllipticCurveElementRationalByInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger,
     this->opEllipticCurveElementsZmodP(),
@@ -7391,7 +7391,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerEllipticCurveElementZmodPByInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger,
     this->opAlgNumber(),
@@ -7406,7 +7406,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerAlgebraicNumberBySmallInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault,
     this->opAlgNumber(),
@@ -7419,7 +7419,7 @@ void Calculator::initPredefinedStandardOperations() {
     "RadicalAlgebraicNumberPositiveDefault",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger,
     this->opElementWeylAlgebra(),
@@ -7435,7 +7435,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerElementWeylAlgebraBySmallInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEoverRF(),
@@ -7449,7 +7449,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerElementUniversalEnvelopingBySmallInteger",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEoverRF(),
@@ -7463,7 +7463,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerUEelementToPolyPower",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEoverRF(),
@@ -7477,7 +7477,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerUEelementToRFPower",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat,
     this->opDouble(),
@@ -7493,7 +7493,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerFloatingToPower",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     Calculator::innerAssociateExponentExponent,
     "",
@@ -7508,7 +7508,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerPowerToPower",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerDistributeExponent,
     "",
@@ -7518,7 +7518,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DistributeExponent",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sqrt",
     CalculatorFunctions::innerDistributeSqrt,
     "",
@@ -7528,7 +7528,7 @@ void Calculator::initPredefinedStandardOperations() {
     "innerDistributeSqrt",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     Calculator::outerPowerRaiseToFirst,
     "",
@@ -7538,7 +7538,7 @@ void Calculator::initPredefinedStandardOperations() {
     "PowerToOne",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerOperatorBounds,
     "",
@@ -7548,7 +7548,7 @@ void Calculator::initPredefinedStandardOperations() {
     "OperatorBoundsSuperscript",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "_",
     CalculatorFunctions::innerOperatorBounds,
     "",
@@ -7558,7 +7558,7 @@ void Calculator::initPredefinedStandardOperations() {
     "OperatorBoundsUnderscore",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "_",
     CalculatorFunctions::innerDereferenceSequenceOrMatrix,
     "",
@@ -7582,7 +7582,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DereferenceSequenceOrMatrix",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "_",
     CalculatorFunctions::innerDereferenceInterval,
     "",
@@ -7595,7 +7595,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DereferenceInterval",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "_",
     CalculatorFunctions::innerDereferenceSequenceStatements,
     "",
@@ -7607,7 +7607,7 @@ void Calculator::initPredefinedStandardOperations() {
     "DereferenceSequenceStatements",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\otimes",
     CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
     "",
@@ -7624,7 +7624,7 @@ void Calculator::initPredefinedStandardOperations() {
     "MatrixTensorMatrix",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
     CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor,
     this->opElementTensorGVM(),
@@ -7643,7 +7643,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketDistribute,
     "",
@@ -7654,7 +7654,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketDistribute",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant,
     "",
@@ -7664,7 +7664,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketConstants",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA,
     "",
@@ -7675,7 +7675,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketWeylAlgebraElements",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE,
     "",
@@ -7687,7 +7687,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketSemisimpleLieAlgebras",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded,
     "",
@@ -7697,7 +7697,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketSwapTermsIfNeeded",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded,
     "",
@@ -7708,7 +7708,7 @@ void Calculator::initPredefinedStandardOperations() {
     innerStandard
   );
 
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
     CalculatorFunctionsWeylGroup::innerTensorWeylReps,
     this->opWeylGroupRep(),
@@ -7720,7 +7720,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TensorWeylGroupRepresentationByWeylGroupRepresentation",
     innerStandard
   );
-  this->AddOperationBinaryInnerHandlerWithTypes(
+  this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
     CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
     this->opMatTensorRat(),
@@ -7738,7 +7738,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TensorMatrixTensorByMatrixTensor",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\otimes",
     Calculator::outerTensorProductStandard,
     "",
@@ -7754,7 +7754,7 @@ void Calculator::initPredefinedStandardOperations() {
     "TensorProductStandard",
     innerNoTestInvisibleExperimental
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "=:",
     Calculator::StandardIsDenotedBy,
     "",
@@ -7810,7 +7810,7 @@ void Calculator::initPredefinedStandardOperations() {
   << LargeIntegerUnsigned::SquareRootOfCarryOverBound << "). "
   << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "<",
     CalculatorFunctions::innerLessThan,
     "",
@@ -7822,7 +7822,7 @@ void Calculator::initPredefinedStandardOperations() {
     "LessThan",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     ">",
     CalculatorFunctions::innerGreaterThan,
     "",
@@ -7836,7 +7836,7 @@ void Calculator::initPredefinedStandardOperations() {
     "GreaterThan",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Max",
     CalculatorFunctions::innerMax,
     "",
@@ -7846,7 +7846,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Max",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Min",
     CalculatorFunctions::innerMin,
     "",
@@ -7856,7 +7856,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Min",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\geq",
     CalculatorFunctions::innerGreaterThanOrEqualTo,
     "",
@@ -7868,7 +7868,7 @@ void Calculator::initPredefinedStandardOperations() {
     "greaterThanOrEqualTo",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\leq",
     CalculatorFunctions::innerLessThanOrEqualTo,
     "",
@@ -7878,7 +7878,7 @@ void Calculator::initPredefinedStandardOperations() {
     "lessThanOrEqualTo",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "==",
     CalculatorFunctions::outerEqualEqual,
     "",
@@ -7899,7 +7899,7 @@ void Calculator::initPredefinedStandardOperations() {
     "IsEqualTo",
     outerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "===",
     CalculatorFunctions::innerEqualEqualEqual,
     "",
@@ -7911,7 +7911,7 @@ void Calculator::initPredefinedStandardOperations() {
     "IsEqualExpressionTree",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Contains",
     CalculatorFunctions::innerContains,
     "",
@@ -7923,7 +7923,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Contains",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ExpressionLeafs",
     CalculatorFunctions::innerExpressionLeafs,
     "",
@@ -7936,7 +7936,7 @@ void Calculator::initPredefinedStandardOperations() {
     "ExpressionLeafs",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Last",
     CalculatorFunctions::innerLastElement,
     "",
@@ -7958,7 +7958,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Last",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RemoveLast",
     CalculatorFunctions::innerRemoveLastElement,
     "",
@@ -7973,7 +7973,7 @@ void Calculator::initPredefinedStandardOperations() {
     "RemoveLast",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cap",
     CalculatorFunctions::innerIntersection,
     "",
@@ -7988,7 +7988,7 @@ void Calculator::initPredefinedStandardOperations() {
     "\\cap",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\cup",
     CalculatorFunctions::innerUnion,
     "",
@@ -8001,7 +8001,7 @@ void Calculator::initPredefinedStandardOperations() {
     "\\cup",
     innerStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sqcup",
     CalculatorFunctions::innerUnionNoRepetition,
     "",
@@ -8021,7 +8021,7 @@ void Calculator::initPredefinedOperationsComposite() {
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
 
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "\\sum",
     CalculatorFunctions::innerSumAsOperatorToSumInternalNotation,
     "",
@@ -8032,7 +8032,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "SumAsOperator",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Matrix",
     CalculatorConversions::outerMatrixExpressionsToMatrixOfType,
     "",
@@ -8053,7 +8053,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "MatrixTypeDeduction",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Rational",
     CalculatorFunctions::innerConstantFunction,
     "",
@@ -8063,7 +8063,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "ConstantFunction",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "RationalFunction",
     CalculatorFunctions::innerRationalFunctionSubstitution,
     "",
@@ -8073,7 +8073,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "RationalFunctionSubstitution",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "+",
     CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
@@ -8083,7 +8083,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "CompositeArithmeticOperationEvaluatedOnArgumentAddition",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
@@ -8093,7 +8093,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "/",
     CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
@@ -8103,7 +8103,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "CompositeArithmeticOperationEvaluatedOnArgumentDivision",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "AlgebraicNumber",
     CalculatorFunctions::innerConstantFunction,
     "",
@@ -8115,7 +8115,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "ConstantFunctionAlgebraicNumber",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "ElementWeylAlgebra",
     CalculatorFunctions::innerCompositeEWAactOnPoly,
     "",
@@ -8126,7 +8126,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "EWAactOnPoly",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "*",
     CalculatorFunctions::innerCompositeConstTimesAnyActOn,
     "",
@@ -8136,7 +8136,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "ConstTimesAnyAction",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "^",
     CalculatorFunctions::innerCompositeApowerBevaluatedAtC,
     "",
@@ -8146,7 +8146,7 @@ void Calculator::initPredefinedOperationsComposite() {
     "ApowerBevaluatedAtC",
     compositeStandard
   );
-  this->AddOperationHandler(
+  this->addOperationHandler(
     "Differentiate",
     CalculatorFunctions::innerCompositeDifferentiateLog,
     "",

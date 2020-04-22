@@ -29,7 +29,7 @@ void ParallelComputing::CheckPointerCounters() {
   }
 }
 
-void MutexRecursiveWrapper::CheckConsistency() {
+void MutexRecursiveWrapper::checkConsistency() {
   if (this->flagDeallocated) {
     global << Logger::red << "Use after free of mutex. "
     << global.fatal.GetStackTraceEtcErrorMessageConsole() << Logger::endL;
@@ -69,12 +69,12 @@ MutexRecursiveWrapper::~MutexRecursiveWrapper() {
 
 bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly() {
  // std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
-  this->CheckConsistency();
+  this->checkConsistency();
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
 
 void MutexRecursiveWrapper::LockMe() {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (!this->InitializeIfNeeded()) {
     return;
   }
@@ -98,7 +98,7 @@ void MutexRecursiveWrapper::LockMe() {
 }
 
 void MutexRecursiveWrapper::UnlockMe() {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (!this->InitializeIfNeeded()) {
     return;
   }

@@ -20,7 +20,7 @@ int AlgebraicClosureRationals::getDimensionOverTheRationals() const {
   return this->latestBasis.size;
 }
 
-bool AlgebraicClosureRationals::CheckConsistency() const {
+bool AlgebraicClosureRationals::checkConsistency() const {
   return true;
 }
 
@@ -129,8 +129,8 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
         if (candidateGCD > 1) {
           leftQuotient = radicalsNew[i].value / candidateGCD;
           rightQuotient = radicalsNew[j].value / candidateGCD;
-          radicalsNew.RemoveIndexSwapWithLast(j);
-          radicalsNew.RemoveIndexSwapWithLast(i);
+          radicalsNew.removeIndexSwapWithLast(j);
+          radicalsNew.removeIndexSwapWithLast(i);
           if (leftQuotient > 1) {
             radicalsNew.addOnTopNoRepetition(LargeInteger(leftQuotient));
           }
@@ -928,12 +928,12 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
-  this->CheckConsistency();
-  other.CheckConsistency();
+  this->checkConsistency();
+  other.checkConsistency();
   if (this == &other) {
     AlgebraicNumber otherCopy = other;
     *this += otherCopy;
-    this->CheckConsistency();
+    this->checkConsistency();
     return;
   }
   this->CheckCommonOwner(other);
@@ -948,10 +948,10 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   }
   if (this->basisIndex == other.basisIndex) {
     this->owner = theOwner;
-    this->CheckConsistency();
-    other.CheckConsistency();
+    this->checkConsistency();
+    other.checkConsistency();
     this->element += other.element;
-    this->CheckConsistency();
+    this->checkConsistency();
     return;
   }
   VectorSparse<Rational> AdditiveFormOther;
@@ -960,10 +960,10 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   this->owner = theOwner;
   this->basisIndex = theOwner->basisInjections.size - 1;
   this->element += AdditiveFormOther;
-  this->CheckConsistency();
+  this->checkConsistency();
 }
 
-bool AlgebraicNumber::CheckConsistency() const {
+bool AlgebraicNumber::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of AlgebraicNumber. " << global.fatal;
   }
@@ -989,7 +989,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     *this *= otherCopy;
     return;
   }
-  this->CheckConsistency();
+  this->checkConsistency();
   if (other.owner == nullptr) {
     if (other.isEqualToZero()) {
       this->element.makeZero();
@@ -1124,7 +1124,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (inpuT == 0) {
     return false;
   }
@@ -1134,7 +1134,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     minPoly -= inpuT;
     bool result = this->ConstructFromMinPoly(minPoly, inputOwner, commentsOnFailure);
     if (result) {
-      this->CheckConsistency();
+      this->checkConsistency();
     }
     return result;
   }
@@ -1168,7 +1168,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   }
   if (theFactors.size == 0) {
     this->AssignRational(squareRootRationalPart, inputOwner);
-    this->CheckConsistency();
+    this->checkConsistency();
     return true;
   }
   if (!inputOwner.MergeRadicals(theFactors)) {
@@ -1193,7 +1193,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   this->basisIndex = this->owner->basisInjections.size - 1;
   this->element.MaKeEi(this->owner->GetIndexFromRadicalSelection(FactorSel));
   this->element *= squareRootRationalPart;
-  this->CheckConsistency();
+  this->checkConsistency();
   return true;
 }
 
@@ -1407,8 +1407,8 @@ std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) c
 
 bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   Rational ratValue;
-  this->CheckConsistency();
-  other.CheckConsistency();
+  this->checkConsistency();
+  other.checkConsistency();
   if (this->IsRational(&ratValue)) {
     return other == ratValue;
   }
@@ -1504,8 +1504,8 @@ unsigned int ElementZmodP::hashFunction() const {
   if (this->theValue.isEqualToZero()) {
     return 0;
   }
-  return this->theValue.hashFunction() * SomeRandomPrimes[0] +
-  this->theModulus.hashFunction() * SomeRandomPrimes[1];
+  return this->theValue.hashFunction() * someRandomPrimes[0] +
+  this->theModulus.hashFunction() * someRandomPrimes[1];
 }
 
 void ElementZmodP::CheckIamInitialized() const {

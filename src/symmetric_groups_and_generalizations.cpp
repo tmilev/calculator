@@ -174,7 +174,7 @@ void Partition::FillTableauOrdered(Tableau& in) const {
 
 void Partition::GetAllStandardTableaux(List<Tableau>& out) const {
   GeneratorPermutationsOfList<int> perms;
-  for (perms.Initialize(this->n); !perms.DoneIterating(); ++ perms) {
+  for (perms.initialize(this->n); !perms.DoneIterating(); ++ perms) {
     Tableau theTableau;
     this->FillTableau(theTableau, *perms);
     if (theTableau.IsStandard()) {
@@ -694,9 +694,9 @@ unsigned int PermutationR2::hashFunction() const {
   unsigned int n = 0;
   for (int i = 0; i < this->cycles.size; i ++) {
     for (int j = 0; j < this->cycles[i].size; j ++) {
-      acc += SomeRandomPrimes[n] * static_cast<unsigned>(this->cycles[i][j]);
+      acc += someRandomPrimes[n] * static_cast<unsigned>(this->cycles[i][j]);
       n ++;
-      if (n >= static_cast<unsigned>(SomeRandomPrimesSize)) {
+      if (n >= static_cast<unsigned>(someRandomPrimesSize)) {
         n = 0;
       }
     }
@@ -1066,8 +1066,8 @@ unsigned int ElementHyperoctahedralGroup::hashFunction() const {
   // class types or whatever
   // its ok though because I need to be sure that a string of false at the end
   // hashes to the exact same thing as not having a string of false at the end
-  for (int i = 0; (i < this->s.size)&&(i <SomeRandomPrimesSize); i ++)
-    acc += this->s[i] ? SomeRandomPrimes[i] : 0;
+  for (int i = 0; (i < this->s.size)&&(i <someRandomPrimesSize); i ++)
+    acc += this->s[i] ? someRandomPrimes[i] : 0;
   return acc;
 }
 
@@ -1168,7 +1168,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup> PxM;
   auto PxMgens = Sn.generators;
   if ((positive.n > 0) && (negative.n > 0))
-    PxMgens.RemoveIndexShiftDown(positive.n);
+    PxMgens.removeIndexShiftDown(positive.n);
   PxM.MakeTranslatableWordsSubgroup(Sn,PxMgens);
 
   GroupRepresentation<Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup>, Rational> pxmr;
@@ -1202,7 +1202,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   for (int i = 0; i < this->generators.size; i ++)
     subgens[i] = this->generators[i];
   if ((positive.n > 0) && (negative.n > 0))
-    subgens.RemoveIndexShiftDown(positive.n- 1);
+    subgens.removeIndexShiftDown(positive.n- 1);
   PxM.MakeTranslatableWordsSubgroup(*this, subgens);
   global.Comments << "Generating subgroup:\n";
   for (int i = 0; i < this->generators.size; i ++)
@@ -1218,7 +1218,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   pxmr.generatorS.addListOnTop(negm);
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.setSize(PxM.generators.size);
-  int repRank = pxmr.generatorS[0].NumRows;
+  int repRank = pxmr.generatorS[0].numberOfRows;
   if (repRank == 0)
     repRank = 1;
   for (int i = 0; i < this->N; i ++)
@@ -1254,7 +1254,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
     subgenids.addOnTop(i);
   }
   if ((positive.n > 0) && (negative.n > 0)) {
-    subgenids.RemoveIndexShiftDown(positive.n - 1);
+    subgenids.removeIndexShiftDown(positive.n - 1);
   }
   auto PxM = this->theGroup->ParabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->GetEmptyRationalRepresentation();
@@ -1263,7 +1263,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
   pxmr.generatorS.addListOnTop(negm);
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.setSize(PxM.theSubgroup->generators.size);
-  int repRank = pxmr.generatorS[0].NumRows;
+  int repRank = pxmr.generatorS[0].numberOfRows;
   if (repRank == 0) {
     repRank = 1;
   }
@@ -1315,7 +1315,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   for (int i = 0; i <subsn->generators.size; i ++)
     subgens[i] = i;
   if (pozm.size + negm.size != subsn->generators.size)
-    subgens.RemoveIndexShiftDown(pozm.size);
+    subgens.removeIndexShiftDown(pozm.size);
   PxM.MakeTranslatableWordsSubgroup(*subsn, subgens);
   global.Comments << "Generating subgroup:\n";
   for (int i = 0; i <subsn->generators.size; i ++)

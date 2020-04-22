@@ -94,18 +94,18 @@ public:
     const Matrix<otherType>& TheBilinearForm,
     coefficient& result
   ) {
-    if (r1.size != TheBilinearForm.NumRows || r1.size != r2.size || r1.size != TheBilinearForm.NumCols) {
+    if (r1.size != TheBilinearForm.numberOfRows || r1.size != r2.size || r1.size != TheBilinearForm.numberOfColumns) {
       global.fatal << "This is a programming error: attempting to take "
-      << "a bilinear form represented by matrix with " << TheBilinearForm.NumRows
-      << " rows and " << TheBilinearForm.NumCols << " columns "
+      << "a bilinear form represented by matrix with " << TheBilinearForm.numberOfRows
+      << " rows and " << TheBilinearForm.numberOfColumns << " columns "
       << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
       << global.fatal;
     }
     coefficient tempRat, accumRow;
     result = 0;
-    for (int i = 0; i < TheBilinearForm.NumRows; i ++) {
+    for (int i = 0; i < TheBilinearForm.numberOfRows; i ++) {
       accumRow = 0;
-      for (int j = 0; j < TheBilinearForm.NumCols; j ++) {
+      for (int j = 0; j < TheBilinearForm.numberOfColumns; j ++) {
         tempRat = r2[j];
         tempRat *= TheBilinearForm.elements[i][j];
         accumRow += tempRat;
@@ -254,9 +254,9 @@ public:
   }
   unsigned int hashFunction() const {
     unsigned int result = 0;
-    int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
+    int theSize = MathRoutines::Minimum(this->size, someRandomPrimesSize);
     for (int i = 0; i < theSize; i ++) {
-      result += this->theObjects[i].hashFunction() * ::SomeRandomPrimes[i];
+      result += this->theObjects[i].hashFunction() * ::someRandomPrimes[i];
     }
     return result;
   }
@@ -270,15 +270,15 @@ public:
     this->operator/=(theElt);
   }
   bool AssignMatDetectRowOrColumn(const Matrix<coefficient>& input) {
-    if (input.NumCols == 1) {
-      this->setSize(input.NumRows);
+    if (input.numberOfColumns == 1) {
+      this->setSize(input.numberOfRows);
       for (int i = 0; i < this->size; i ++) {
         this->theObjects[i] = input.elements[i][0];
       }
       return true;
     }
-    if (input.NumRows == 1) {
-      this->setSize(input.NumCols);
+    if (input.numberOfRows == 1) {
+      this->setSize(input.numberOfColumns);
       for (int i = 0; i < this->size; i ++) {
         this->theObjects[i] = input.elements[0][i];
       }
@@ -640,7 +640,7 @@ template <class coefficient>
 int Vector<coefficient>::FindLCMDenominatorsTruncateToInt() {
   int result = 1;
   for (int i = 0; i < this->size; i ++) {
-    result = MathRoutines::lcm(result, this->theObjects[i].DenShort);
+    result = MathRoutines::lcm(result, this->theObjects[i].denominatorShort);
     if ((*this)[i].Extended != 0) {
       global.fatal << "Coefficient is large rational at a place where that is not allowed. " << global.fatal;
     }
@@ -936,10 +936,10 @@ class Vectors: public List<Vector<coefficient> > {
   }
   void AssignMatrixColumns(Matrix<coefficient>& mat) {
     Vector<coefficient> tempRoot;
-    this->setSize(mat.NumCols);
-    tempRoot.setSize(mat.NumRows);
-    for (int i = 0; i < mat.NumCols; i ++) {
-      for (int j = 0; j < mat.NumRows; j ++) {
+    this->setSize(mat.numberOfColumns);
+    tempRoot.setSize(mat.numberOfRows);
+    for (int i = 0; i < mat.numberOfColumns; i ++) {
+      for (int j = 0; j < mat.numberOfRows; j ++) {
         tempRoot[j] = mat.elements[j][i];
       }
       this->theObjects[i] = tempRoot;
@@ -947,10 +947,10 @@ class Vectors: public List<Vector<coefficient> > {
   }
   void AssignMatrixRows(const Matrix<coefficient>& mat) {
     this->size = 0;
-    this->setSize(mat.NumRows);
-    for (int i = 0; i < mat.NumRows; i ++) {
-      this->theObjects[i].setSize(mat.NumCols);
-      for (int j = 0; j < mat.NumCols; j ++) {
+    this->setSize(mat.numberOfRows);
+    for (int i = 0; i < mat.numberOfRows; i ++) {
+      this->theObjects[i].setSize(mat.numberOfColumns);
+      for (int j = 0; j < mat.numberOfColumns; j ++) {
         this->theObjects[i].theObjects[j] = mat.elements[i][j];
       }
     }
@@ -1025,10 +1025,10 @@ bool Vector<coefficient>::getCoordinatesInBasis(const Vectors<coefficient>& inpu
   if (!bufferVectors.GetLinearDependence(bufferMat)) {
     return false;
   }
-  coefficient tempCF = bufferMat(bufferMat.NumRows - 1, 0);
+  coefficient tempCF = bufferMat(bufferMat.numberOfRows - 1, 0);
   bufferMat /= tempCF;
-  output.setSize(bufferMat.NumRows - 1);
-  for (int i = 0; i < bufferMat.NumRows - 1; i ++) {
+  output.setSize(bufferMat.numberOfRows - 1);
+  for (int i = 0; i < bufferMat.numberOfRows - 1; i ++) {
     bufferMat(i, 0).Minus();
     output[i] = bufferMat(i, 0);
   }
@@ -1098,7 +1098,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];
     }
   }
-  bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
+  bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit
   );
@@ -1172,7 +1172,7 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
     tempRoots.addOnTop(this->theObjects[i]);
     int newRank = tempRoots.GetRankOfSpanOfElements(bufferMat, bufferSel);
     if (newRank == oldRank) {
-      tempRoots.RemoveIndexSwapWithLast(tempRoots.size - 1);
+      tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);
     } else {
       this->swapTwoIndices(oldRank, i);
       if (oldRank + 1 != newRank) {

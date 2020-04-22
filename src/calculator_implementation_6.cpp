@@ -632,7 +632,7 @@ bool CalculatorFunctions::innerGetSummand(
     for (int i = 0; i < theSummands.size; i ++) {
       if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum())) {
         theSums.addOnTop(theSummands[i]);
-        theSummands.RemoveIndexShiftDown(i);
+        theSummands.removeIndexShiftDown(i);
         i --;
       }
     }
@@ -647,7 +647,7 @@ bool CalculatorFunctions::innerGetSummand(
       return false;
     }
     output.reset(theCommands);
-    output.AddChildAtomOnTop("GetSummand");
+    output.addChildAtomOnTop("GetSummand");
     output.addChildOnTop(theSums[0]);
     Expression shiftE;
     shiftE.AssignValue(theSummands.size, theCommands);
@@ -679,9 +679,9 @@ bool CalculatorFunctions::innerGetSummand(
   valueToSubWith;
   //oneE.AssignValue(1, theCommands);
   valueToSubWith = theBottomBoundary[2] + input[2];
-  theSub.SetChilD(2, valueToSubWith);
+  theSub.setChild(2, valueToSubWith);
   Expression theCommandSequence(theCommands);
-  theCommandSequence.AddChildAtomOnTop(theCommands.opEndStatement());
+  theCommandSequence.addChildAtomOnTop(theCommands.opEndStatement());
   theCommandSequence.addChildOnTop(theSub);
   theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.ETwo());
@@ -1263,7 +1263,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
     Expression factorsSoFar, factorNext, numberLast;
     factorsSoFar.MakeSequence(theCommands, &result);
     factorNext.reset(theCommands);
-    factorNext.AddChildAtomOnTop(opFactorInteger);
+    factorNext.addChildAtomOnTop(opFactorInteger);
     numberLast.AssignValue(Rational(primeFactors[primeFactors.size - 1]), theCommands);
     factorNext.addChildOnTop(numberLast);
     return output.MakeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
@@ -1321,7 +1321,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   }
   Expression theSubbed, toBeSubbed, subbedSimplified;
   toBeSubbed.reset(theCommands);
-  toBeSubbed.AddChildAtomOnTop(theCommands.opBind());
+  toBeSubbed.addChildAtomOnTop(theCommands.opBind());
   toBeSubbed.addChildOnTop(boundVars[0]);
   List<Expression> theList;
   for (int i = 1; i < input[1].size(); i ++) {
@@ -1381,7 +1381,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   List<Expression> theList;
   for (int i = 0; i < computation.theQuotients.size; i ++) {
     currentE.reset(theCommands);
-    currentE.AddChildAtomOnTop("MakeExpression");
+    currentE.addChildAtomOnTop("MakeExpression");
     thePolyE.AssignValueWithContext(computation.theQuotients[i], theContext, theCommands);
     currentE.addChildOnTop(thePolyE);
     theList.addOnTop(currentE);
@@ -1549,7 +1549,7 @@ bool CalculatorFunctions::innerMatchesPattern(
   }
   Expression commandList;
   commandList.reset(theCommands);
-  commandList.AddChildAtomOnTop(theCommands.opEndStatement());
+  commandList.addChildAtomOnTop(theCommands.opEndStatement());
   for (int i = 0; i < matchedExpressions.size(); i ++) {
     Expression currentCommand;
     if (!matchedExpressions.theKeys[i].StartsWith(theCommands.opBind(), 2)) {
@@ -1567,7 +1567,7 @@ bool CalculatorFunctions::innerMatchesPattern(
     commandList.addChildOnTop(currentCommand);
   }
   output.reset(theCommands);
-  output.AddChildAtomOnTop(theCommands.opCommandEnclosure());
+  output.addChildAtomOnTop(theCommands.opCommandEnclosure());
   return output.addChildOnTop(commandList);
 }
 
@@ -1596,7 +1596,7 @@ bool CalculatorFunctions::innerLessThanOrEqualTo(
     return false;
   }
   Expression result(theCommands);
-  result.AddChildAtomOnTop("\\geq");
+  result.addChildAtomOnTop("\\geq");
   result.addChildOnTop(input[2]);
   result.addChildOnTop(input[1]);
   output = result;

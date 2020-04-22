@@ -25,8 +25,8 @@ public:
     if (theIndex == - 1) {
       return;
     }
-    this->theKeys.RemoveIndexSwapWithLast(theIndex);
-    this->theValues.RemoveIndexSwapWithLast(theIndex);
+    this->theKeys.removeIndexSwapWithLast(theIndex);
+    this->theValues.removeIndexSwapWithLast(theIndex);
   }
   const value& getValueNoFail(const key& input) const {
     int theIndex = this->theKeys.getIndex(input);

@@ -12,11 +12,11 @@ class AlgebraicNumber {
     return output;
   }
   friend AlgebraicNumber operator-(const AlgebraicNumber& argument) {
-    argument.CheckConsistency();
+    argument.checkConsistency();
     AlgebraicNumber result = argument;
-    result.CheckConsistency();
+    result.checkConsistency();
     result *= - 1;
-    result.CheckConsistency();
+    result.checkConsistency();
     return result;
   }
   public:
@@ -49,7 +49,7 @@ class AlgebraicNumber {
   }
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
   unsigned int hashFunction() const;
@@ -143,12 +143,12 @@ class AlgebraicNumber {
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
   AlgebraicNumber operator+(const AlgebraicNumber& other) const {
-    this->CheckConsistency();
+    this->checkConsistency();
     AlgebraicNumber result = *this;
-    result.CheckConsistency();
-    other.CheckConsistency();
+    result.checkConsistency();
+    other.checkConsistency();
     result += other;
-    result.CheckConsistency();
+    result.checkConsistency();
     return result;
   }
   AlgebraicNumber operator-(const AlgebraicNumber& other) const {
@@ -162,8 +162,8 @@ class AlgebraicNumber {
     return result;
   }
   AlgebraicNumber operator/(const AlgebraicNumber& other) const {
-    this->CheckConsistency();
-    other.CheckConsistency();
+    this->checkConsistency();
+    other.checkConsistency();
     AlgebraicNumber result = *this;
 
     result /= other;
@@ -214,7 +214,7 @@ public:
   void AppendAdditiveEiBasis();
   void AssignDefaultBasisDisplayNames();
   void reset();
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   AlgebraicClosureRationals() {
     this->reset();
   }

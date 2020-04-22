@@ -30,7 +30,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(
   inputOutputGenerators = inputLinIndep;
   for (int i = 0; i < inputOutputGenerators.size; i ++) {
     for (int j = i + 1; j < inputOutputGenerators.size; j ++) {
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Generating Lie subalgebra of a semisimple Lie algebra. "
         << "I am taking the Lie bracket of elements "
@@ -84,11 +84,11 @@ std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const
   return out.str();
 }
 
-bool SemisimpleLieAlgebra::CheckConsistency() const {
+bool SemisimpleLieAlgebra::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
-  this->theWeyl.CheckConsistency();
+  this->theWeyl.checkConsistency();
   return true;
 }
 
@@ -165,7 +165,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
   this->GetAd(theM, theE);
   MatrixTensor<AlgebraicNumber> theMatTensor, theId;
   theMatTensor = theM;
-  theId.MakeId(theM.NumRows);
+  theId.MakeId(theM.numberOfRows);
   MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
   if (!theMatTensor.isEqualToZero()) {
     if (logStream != nullptr) {
@@ -363,7 +363,7 @@ std::string DynkinType::toString(FormatExpressions* theFormat) const {
 
 void SemisimpleSubalgebras::CheckFileWritePermissions() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::CheckFileWritePermissions");
-  this->CheckConsistency();
+  this->checkConsistency();
   this->ComputeFolderNames(this->currentFormat);
   std::fstream testFile;
   std::string testFileNameRelative =
@@ -416,7 +416,7 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
 void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   (void) inputFormat;//avoid unused parameter warning in a portable way
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal << "To compute semisimple subalgebra folders, "
     << "you need to specify the ambient Lie algebra. " << global.fatal;
@@ -989,7 +989,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue() {
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasInit");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
@@ -1241,14 +1241,14 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra(
   }
   ProgressReport theReport;
   if (!this->ComputeChar(false)) {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       theReport.report("Candidate " + this->theWeylNonEmbedded->theDynkinType.toString() + " doesn't have fitting chars.");
     }
     return false;
   }
   this->ComputeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution) {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       theReport.report("Candidate " + this->theWeylNonEmbedded->theDynkinType.toString() + " -> no system solution.");
     }
   }
@@ -1278,7 +1278,7 @@ const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::GetCurren
   return this->theIterator.GetCurrentElement();
 }
 
-bool OrbitIteratorRootActionWeylGroupAutomorphisms::CheckConsistency() {
+bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
   if (this->flagOrbitIsBuffered) {
     if (this->currentIndexInBuffer >= this->orbitBuffer.size) {
       global.fatal << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
@@ -1309,7 +1309,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::CheckConsistency() {
 
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLast");
-  this->CheckConsistency();
+  this->checkConsistency();
   this->theIterator.CheckInitialization();
   if (this->flagOrbitIsBuffered) {
     this->currentIndexInBuffer ++;
@@ -1343,7 +1343,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLa
       this->orbitBuffer.setSize(0);
       this->orbitBuffer.ReleaseMemory();
     }
-    this->CheckConsistency();
+    this->checkConsistency();
     return false;
   }
   if (this->orbitBuffer.size < this->maxOrbitBufferSize) {
@@ -1463,7 +1463,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   ProgressReport theReport3;
   int baseRank = currentType.GetRank() - 1;
   DynkinSimpleType theSmallType = currentType.GetSmallestSimpleType();
-  if (theReport1.TickAndWantReport()) {
+  if (theReport1.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "the latest root of the candidate simple component " << theSmallType.toString();
     theReport1.report(reportStream.str());
@@ -1474,7 +1474,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.setSize(0);
   for (int j = 0; j < this->theSl2s.size; j ++) {
-    if (theReport2.TickAndWantReport()) {
+    if (theReport2.tickAndWantReport()) {
       std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->theSl2s[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
@@ -1501,7 +1501,7 @@ void SemisimpleSubalgebras::GetHCandidates(
     do {
       currentCandidate = currentOrbit.GetCurrentElement();
       if (newCandidate.IsGoodHnewActingByTwo(currentCandidate, currentRootInjection)) {
-        if (theReport3.TickAndWantReport()) {
+        if (theReport3.tickAndWantReport()) {
           std::stringstream out2, out3;
           out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size + 1 << " good candidates. ";
           theReport2.report(out3.str());
@@ -1511,7 +1511,7 @@ void SemisimpleSubalgebras::GetHCandidates(
         }
         outputHCandidatesScaledToActByTwo.addOnTop(currentOrbit.GetCurrentElement());
       } else {
-        if (theReport3.TickAndWantReport()) {
+        if (theReport3.tickAndWantReport()) {
           std::stringstream out2;
           out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.toString()
           << "\n<br>Current element is not a valid candidate. ";
@@ -1839,7 +1839,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
     return true;
   }
   ProgressReport theReport0, theReport1;
-  if (theReport0.TickAndWantReport()) {
+  if (theReport0.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << " Finding h-candidates for extension of "
     << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.toString()
@@ -1866,7 +1866,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
       }
     }
     if (indicesModulesNewComponentExtensionMod.size == 0) {
-      if (theReport1.TickAndWantReport()) {
+      if (theReport1.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << " Extension " << typeIndex + 1
         << " out of " << this->currentPossibleLargerDynkinTypes[stackIndex].size
@@ -2013,7 +2013,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->currentSubalgebraChain.size == 0) {
     return false;
   }
@@ -2047,7 +2047,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
     this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
     this->currentRootInjections[stackIndex][typeIndex]
   );
-  this->CheckConsistency();
+  this->checkConsistency();
   if (newSubalgebraCreated) {
     if (!newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution) {
       this->flagRealizedAllCandidates = false;
@@ -2074,7 +2074,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
 /*
 void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (input.theSubalgebraNonEmbeddedDefaultScale == 0)
     global.fatal << "Non-initialized non-default scale subalgebra in candidate subalgebra. " << global.fatal;
   this->CheckInitialization();
@@ -2283,7 +2283,7 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH) {
   }
   for (int i = 0; i < this->PosRootsPerpendicularPrecedingWeights.size; i ++) {
     if (this->GetAmbientWeyl().RootScalarCartanRoot(this->PosRootsPerpendicularPrecedingWeights[i], theH) != 0) {
-      this->PosRootsPerpendicularPrecedingWeights.RemoveIndexShiftDown(i);
+      this->PosRootsPerpendicularPrecedingWeights.removeIndexShiftDown(i);
       i --;
     }
   }
@@ -2872,7 +2872,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
   }
   for (int j = 0; j < rightModule.size; j ++) {
     this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Bracketing index " << j + 1 << " with input element. ";
       theReport.report(reportStream.str());
@@ -2898,7 +2898,7 @@ void CandidateSSSubalgebra::ComputeSinglePair(int leftIndex, int rightIndex, Lis
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& leftModule = this->ModulesIsotypicallyMerged[leftIndex];
   ProgressReport theReport;
   for (int i = 0; i < leftModule.size; i ++) {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Bracketing element number " << i + 1 << " out of " << leftModule.size << " with other module. ";
       theReport.report(reportStream.str());
@@ -2919,7 +2919,7 @@ void CandidateSSSubalgebra::ComputePairingTable() {
   }
   for (int i = 0; i < this->NilradicalPairingTable.size; i ++) {
     for (int j = i; j < this->NilradicalPairingTable[i].size; j ++) {
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Pairing indices " << i + 1 << " and " << j + 1 << " out of "
         << this->NilradicalPairingTable.size << ".";
@@ -3703,7 +3703,7 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
     << global.fatal;
   }
   ProgressReport theReport;
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream out;
     out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
     theReport.report(out.str());
@@ -3889,7 +3889,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
             this->HighestVectors.LastObject()->RemoveLastObject();
           }
         }
-        this->HighestVectors.LastObject()->RemoveIndexSwapWithLast(0);
+        this->HighestVectors.LastObject()->removeIndexSwapWithLast(0);
         if (this->HighestVectors.LastObject()->size != tempModules[i].size - 1) {
           global.fatal << "This is a programming error: wrong number of hwv's: got "
           << this->HighestVectors.LastObject()->size << ", must have "
@@ -3950,7 +3950,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHws) {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly");
-  this->CheckConsistency();
+  this->checkConsistency();
   List<Matrix<AlgebraicNumber> > theAdsOfHs;
   Matrix<AlgebraicNumber> tempAd, temp, commonAd, adIncludingCartanActions;
   for (int i = 0; i < this->thePosGens.size; i ++) {
@@ -3998,7 +3998,7 @@ bool SemisimpleSubalgebras::CheckConsistencyHs() const {
 }
 
 bool SemisimpleSubalgebras::CheckInitialization() const {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal << "No owner semisimple Lie algebra. " << global.fatal;
   }
@@ -4008,7 +4008,7 @@ bool SemisimpleSubalgebras::CheckInitialization() const {
   return true;
 }
 
-bool SemisimpleSubalgebras::CheckConsistency() const {
+bool SemisimpleSubalgebras::checkConsistency() const {
   //if (this == 0)
   //  global.fatal << "Programming error: this pointer is zero." << global.fatal;
   if (this->flagDeallocated) {
@@ -4436,12 +4436,12 @@ void slTwoSubalgebra::init() {
   this->dimensionCentralizer = - 1;
 }
 
-bool slTwoSubalgebra::CheckConsistency() const {
+bool slTwoSubalgebra::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of slTwoSubalgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
-    this->owner->CheckConsistency();
+    this->owner->checkConsistency();
   }
   return true;
 }
@@ -4518,15 +4518,15 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
   ProgressReport theReport0;
-  if (theReport0.TickAndWantReport()) {
+  if (theReport0.tickAndWantReport()) {
     std::stringstream reportStream0;
     reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
     << inputOwner.theWeyl.theDynkinType.toString();
     theReport0.report(reportStream0.str());
   }
-  inputOwner.CheckConsistency();
+  inputOwner.checkConsistency();
   output.reset(inputOwner);
-  output.CheckConsistency();
+  output.checkConsistency();
   output.GetOwner().ComputeChevalleyConstants();
   output.theRootSAs.owner = &inputOwner;
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
@@ -4561,7 +4561,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
       output.IndicesSl2sContainedInRootSA[j][k] = theIndexMap[output.IndicesSl2sContainedInRootSA[j][k]];
     }
   }
-  inputOwner.CheckConsistency();
+  inputOwner.checkConsistency();
   for (int i = 0; i <output.size; i ++) {
     //slTwoSubalgebra& theSl2= output.getElement(i);
     output.getElement(i).IndicesMinimalContainingRootSAs.Reserve(output.getElement(i).IndicesContainingRootSAs.size);
@@ -4580,12 +4580,12 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
         output.getElement(i).IndicesMinimalContainingRootSAs.addOnTopNoRepetition(output.getElement(i).IndicesContainingRootSAs[j]);
       }
     }
-    output.CheckConsistency();
+    output.checkConsistency();
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra();
   }
 }
 
-bool CandidateSSSubalgebra::CheckConsistency() const {
+bool CandidateSSSubalgebra::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of CandidateSSSubalgebra. " << global.fatal;
   }
@@ -4653,22 +4653,22 @@ bool CandidateSSSubalgebra::CheckMaximalDominance() const {
   return true;
 }
 
-bool SltwoSubalgebras::CheckConsistency() const {
+bool SltwoSubalgebras::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
-    this->owner->CheckConsistency();
+    this->owner->checkConsistency();
   }
   for (int i = 0; i < this->size; i ++) {
-    (*this)[i].CheckConsistency();
+    (*this)[i].checkConsistency();
   }
   return true;
 }
 
 void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra() {
   this->GrandMasterConsistencyCheck();
-  this->CheckConsistency();
+  this->checkConsistency();
   for (int i = 0; i < this->size; i ++) {
     (*this).getElement(i).ComputeModuleDecompositionAmbientLieAlgebra();
   }
@@ -4744,10 +4744,10 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer() {
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra() {
-  this->CheckConsistency();
+  this->checkConsistency();
   this->ComputeModuleDecomposition(
     this->GetOwnerWeyl().RootsOfBorel,
-    this->GetOwnerWeyl().CartanSymmetric.NumRows,
+    this->GetOwnerWeyl().CartanSymmetric.numberOfRows,
     this->moduleDecompositionAmbientSA,
     this->moduleDimensions
   );
@@ -4816,8 +4816,8 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   List<int>& outputModuleDimensions
 ) {
   MacroRegisterFunctionWithName("slTwoSubalgebra::ComputePrimalModuleDecomposition");
-  this->CheckConsistency();
-  positiveRootsContainingRegularSA.CheckConsistency();
+  this->checkConsistency();
+  positiveRootsContainingRegularSA.checkConsistency();
   if (positiveRootsContainingRegularSA.size <= 0) {
     global.fatal << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << global.fatal;
   }
@@ -4832,7 +4832,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   );
   for (int k = 0; k < positiveRootsContainingRegularSA.size; k ++) {
     tempRat = this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
-    if (tempRat.DenShort != 1) {
+    if (tempRat.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
     if (tempRat>positiveRootsContainingRegularSA.size * 2) {
@@ -5235,11 +5235,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     return "";
   }
   std::stringstream out;
-  if (thePrimalRank != this->BilinearFormFundPrimal.NumCols) {
+  if (thePrimalRank != this->BilinearFormFundPrimal.numberOfColumns) {
     out << "<br>The primal rank was computed to be " << thePrimalRank
     << " but the bilinear form in fundamental coordinates relative to "
     << " the subalgebra was not computed: this->BilinearFormFundPrimal has "
-    << this->BilinearFormFundPrimal.NumRows << " rows. ";
+    << this->BilinearFormFundPrimal.numberOfRows << " rows. ";
     return out.str();
   }
   out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the "
@@ -6289,7 +6289,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
   if (this->indexMaxSSContainer != - 1) {
     centralizerTypeAlternative = this->owner->theSubalgebras.theValues[this->indexMaxSSContainer].theWeylNonEmbedded->theDynkinType;
     centralizerTypeAlternative -= this->theWeylNonEmbedded->theDynkinType;
-    if (theReport1.TickAndWantReport()) {
+    if (theReport1.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "<hr>The centralizer of subalgebra of type "
       << this->theWeylNonEmbedded->theDynkinType.toString() << " is of type "
@@ -6816,7 +6816,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   ProgressReport theReport;
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Computing whether "
     << this->theWeylNonEmbedded->theDynkinType << " is direct summand of "
@@ -6887,7 +6887,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes() {
     if (!this->flagComputePairingTable) {
       continue;
     }
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->theSubalgebras.theValues.size
@@ -6898,7 +6898,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes() {
       continue;
     }
     currentSA.ComputePairingTable();
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->theSubalgebras.theValues.size
@@ -7070,11 +7070,11 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted = this->BilinearFormSimplePrimal;
   bilinearFormInverted.Invert();
-  diagMat.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
-  diagMatrix2.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
+  diagMat.init(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
+  diagMatrix2.init(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
   diagMat.makeZero();
   diagMatrix2.makeZero();
-  for (int i = 0; i < this->BilinearFormSimplePrimal.NumRows; i ++) {
+  for (int i = 0; i < this->BilinearFormSimplePrimal.numberOfRows; i ++) {
     if (i < this->theHs.size) {
       diagMat(i, i) = this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.CartanSymmetric(i, i) / 2;
       diagMatrix2(i, i) = this->theWeylNonEmbedded->CartanSymmetric(i, i) / 2;

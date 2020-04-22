@@ -24,14 +24,14 @@ public:
 
   void SetBasis(const List<templateVector>& basis);
   void DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in);
-  bool CheckConsistency() const {
+  bool checkConsistency() const {
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use of SparseSubspaceBasis after free. " << global.fatal;
     }
     for (int i = 0; i < this->involvedMonomials.size; i ++) {
-      this->involvedMonomials[i].CheckConsistency();
+      this->involvedMonomials[i].checkConsistency();
     }
-    this->projectionOperator.CheckConsistency();
+    this->projectionOperator.checkConsistency();
     return true;
   }
   SparseSubspaceBasis() {
@@ -47,7 +47,7 @@ public:
 
 template <class templateVector, class templateMonomial, class coefficient>
 void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::SetBasis(const List<templateVector>& basis) {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (basis.size == 0) {
     return;
   }
@@ -786,7 +786,7 @@ public:
 
   enum pcpositions { beginning, loop, firstout, afterloop, end};
 
-  void Initialize(List<object>& theL) {
+  void initialize(List<object>& theL) {
     if (theL.size == 0) {
       done_iterating = true;
       return;
@@ -855,13 +855,13 @@ public:
       }
     }
   }
-  void Initialize(int theN) {
+  void initialize(int theN) {
     List<int> ll;
     ll.setSize(theN);
     for (int i = 0; i < theN; i ++) {
       ll[i] = i;
     }
-    this->Initialize(ll);
+    this->initialize(ll);
   }
   List<int>& operator*() {
     return l;
@@ -896,10 +896,10 @@ public:
   List<int> replacements;
   GeneratorPermutationsOfList<int> pads;
 
-  void Initialize(const List<int>& l) {
+  void initialize(const List<int>& l) {
     replacements = l;
     replacements.quickSortAscending();
-    pads.Initialize(l.size);
+    pads.initialize(l.size);
   }
 
   GeneratorPermutationR2sOnIndices& operator++() {
@@ -919,13 +919,13 @@ public:
     }
     return out;
   }
-  void Initialize(int n) {
+  void initialize(int n) {
     List<int> l;
     l.setSize(n);
     for (int i = 0; i < n; i ++) {
       l[i] = i;
     }
-    Initialize(l);
+    initialize(l);
   }
 
   bool DoneIterating() const {
@@ -933,7 +933,7 @@ public:
   }
 
   void ResetIteration() {
-    this->Initialize(replacements);
+    this->initialize(replacements);
   }
 };
 
@@ -949,7 +949,7 @@ public:
   };
   List<struct frame> stack;
   int frame_pointer;
-  void Initialize(List<TElementGenerator> theGenerators) {
+  void initialize(List<TElementGenerator> theGenerators) {
     generators = theGenerators;
     stack.setSize(generators.size);
     frame_pointer = 0;
@@ -959,7 +959,7 @@ public:
 
   /* This program is too confusing to write without writing it in python first
   def operator++(frame_pointer):
-    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
+    permgens[frame_pointer].initialize(indiceses[frame_pointer])
     for permi in permgens[frame_pointer]:
       if (frame_pointer > 0):
         subprods[frame_pointer] = subprods[frame_pointer- 1]*permi
@@ -1026,13 +1026,13 @@ public:
 /* Apparently, parametric polymorphism doesn't work well with inheritance and templates.
 class GeneratorElementsSnxSnOnIndicesAndIndices: public GeneratorProductOfGenerators<GeneratorPermutationR2sOnIndices, PermutationR2>
 { public:
-  void Initialize(List<List<int> > indiceses) {
+  void initialize(List<List<int> > indiceses) {
     List<GeneratorPermutationR2sOnIndices> gens;
     gens.setSize(indiceses.size);
     for (int i = 0; i < indiceses.size; i ++) {
-      gens[i].Initialize(indiceses[i]);
+      gens[i].initialize(indiceses[i]);
     }
-    this->Initialize(gens);
+    this->initialize(gens);
   }
 };
 */
@@ -1048,7 +1048,7 @@ public:
   };
   List<struct frame> stack;
   int frame_pointer;
-  void Initialize(List<GeneratorPermutationR2sOnIndices> theGenerators) {
+  void initialize(List<GeneratorPermutationR2sOnIndices> theGenerators) {
     if (theGenerators.size == 0) {
       frame_pointer = - 1;
       return;
@@ -1062,7 +1062,7 @@ public:
 
   /* This program is too confusing to write without writing it in python first
   def operator++(frame_pointer):
-    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
+    permgens[frame_pointer].initialize(indiceses[frame_pointer])
     for permi in permgens[frame_pointer]:
       if (frame_pointer > 0):
         subprods[frame_pointer] = subprods[frame_pointer- 1]*permi
@@ -1128,13 +1128,13 @@ public:
     return false;
   }
 
-  void Initialize(List<List<int> >& indiceses) {
+  void initialize(List<List<int> >& indiceses) {
     List<GeneratorPermutationR2sOnIndices> gens;
     gens.setSize(indiceses.size);
     for (int i = 0; i < indiceses.size; i ++) {
-      gens[i].Initialize(indiceses[i]);
+      gens[i].initialize(indiceses[i]);
     }
-    this->Initialize(gens);
+    this->initialize(gens);
   }
 };
 
@@ -1363,7 +1363,7 @@ void Tableau::YoungSymmetrizerAction(
 ) {
   GeneratorElementsSnxSnOnIndicesAndIndices rs,cs;
   ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, coefficient> rst;
-  for (rs.Initialize(this->t); !rs.DoneIterating(); ++ rs) {
+  for (rs.initialize(this->t); !rs.DoneIterating(); ++ rs) {
     ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, coefficient> tmp;
     (*rs).ActOnTensor(tmp, in);
     rst += tmp;
@@ -1371,7 +1371,7 @@ void Tableau::YoungSymmetrizerAction(
   out.makeZero();
   List<List<int> > columns;
   this->GetColumns(columns);
-  cs.Initialize(columns);
+  cs.initialize(columns);
   for (; !cs.DoneIterating(); ++ cs) {
     ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, coefficient> tmp;
     PermutationR2 csi = *cs;
@@ -1441,7 +1441,7 @@ bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x,
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y) {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->AreConjugateByFormula != 0) {
     return this->AreConjugateByFormula(x, y);
   }
@@ -1491,7 +1491,7 @@ void FiniteGroup<elementSomeGroup>::makeIdentity(elementSomeGroup& e) {
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords() {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesRepresentativesWords");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->GetWordByFormula != 0) {
     this->flagWordsComputed = true;
   }
@@ -1548,7 +1548,7 @@ bool SimpleFiniteGroup<Matrix<coefficient> >::IsID(const Matrix<coefficient>& g)
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
-  if (this->generatorCommutationRelations.NumRows == this->generators.size) {
+  if (this->generatorCommutationRelations.numberOfRows == this->generators.size) {
     return;
   }
   this->generatorCommutationRelations.init(this->generators.size, this->generators.size);
@@ -1988,7 +1988,7 @@ std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGr
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation() {
   bool badrep = false;
-  if (this->generatorS.size != this->ownerGroup->generatorCommutationRelations.NumRows) {
+  if (this->generatorS.size != this->ownerGroup->generatorCommutationRelations.numberOfRows) {
     this->ownerGroup->ComputeGeneratorCommutationRelations();
     for (int i = 0; i < this->generatorS.size; i ++) {
       for (int j = i; j < this->generatorS.size; j ++) {

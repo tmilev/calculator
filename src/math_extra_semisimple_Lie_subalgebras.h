@@ -198,7 +198,7 @@ public:
   ~CandidateSSSubalgebra();
   WeylGroupData& GetWeylNonEmbeddedDefaultScale();
   void reset(SemisimpleSubalgebras* inputOwner = nullptr);
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckMaximalDominance() const;
   bool ComputeAndVerifyFromGeneratorsAndHs();
   int GetPrimalRank() const;
@@ -486,7 +486,7 @@ public:
   );
   bool SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate);
   bool CheckConsistencyHs() const;
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckInitialization() const;
   std::string ToStringState(FormatExpressions* theFormat = nullptr);
   std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);

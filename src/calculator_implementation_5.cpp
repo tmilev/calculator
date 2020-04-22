@@ -336,7 +336,7 @@ bool Calculator::GetVectorDoubles(
   Vector<double>& output,
   int DesiredDimensionNonMandatory
 ) {
-  return this->GetVector(
+  return this->getVector(
     input,
     output,
     nullptr,
@@ -433,7 +433,7 @@ bool MeshTriangles::ComputePoints(
     return theCommands << "Failed to extract upper right corner from: " << input[3].toString();
   }
   List<int> theGridCount;
-  if (!theCommands.GetVectoRInt(input[4], theGridCount)) {
+  if (!theCommands.getVectorInt(input[4], theGridCount)) {
     return theCommands << "Failed to extract pair of small integers from: " << input[4].toString();
   }
   if (theGridCount.size != 2) {
@@ -704,14 +704,14 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
     }
   }
   Expression theSubTop(theCommands), theSubBottom(theCommands);
-  theSubTop.AddChildAtomOnTop(theCommands.opDefine());
+  theSubTop.addChildAtomOnTop(theCommands.opDefine());
   theSubTop.addChildOnTop(theVariableE);
   theSubBottom = theSubTop;
   theSubBottom.addChildOnTop(theSetE[1]);
   theSubTop.addChildOnTop(theSetE[2]);
   Expression theTopCommands(theCommands), theBottomCommands(theCommands);
-  theTopCommands.AddChildAtomOnTop(theCommands.opEndStatement());
-  theBottomCommands.AddChildAtomOnTop(theCommands.opEndStatement());
+  theTopCommands.addChildAtomOnTop(theCommands.opEndStatement());
+  theBottomCommands.addChildAtomOnTop(theCommands.opEndStatement());
 
   theTopCommands.addChildOnTop(theSubTop);
   theBottomCommands.addChildOnTop(theSubBottom);
@@ -751,7 +751,7 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
     output.addChildOnTop(input[1]);
     Expression theRecursivelyModifiedE(theCommands), nextE(theCommands);
     theRecursivelyModifiedE.addChildOnTop(theArg[0]);
-    nextE.AddChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+    nextE.addChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
     nextE.addChildOnTop(input[1]);
     for (int i = 1; i < theArg.size(); i ++) {
       nextE.children.setSize(2);
@@ -821,12 +821,12 @@ bool CalculatorFunctions::innerHandleUnderscorePowerLimits(
   }
   output = input[1];
   for (int i = output.size(); i < 3; i ++) {
-    output.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+    output.addChildAtomOnTop(theCommands.opIndefiniteIndicator());
   }
   if (input.StartsWith(theCommands.opThePower())) {
-    return output.SetChilD(2, input[2]);
+    return output.setChild(2, input[2]);
   } else {
-    return output.SetChilD(1, input[2]);
+    return output.setChild(1, input[2]);
   }
 }
 
@@ -882,7 +882,7 @@ bool CalculatorFunctions::innerSumTimesExpressionToSumOf(
     theSummed.addChildOnTop(input[1][2]);
     theSummed.addChildOnTop(input[2]);
     output = input[1];
-    return output.SetChilD(2,theSummed);
+    return output.setChild(2,theSummed);
   }
   return false;
 }
@@ -1229,7 +1229,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     if (!Calculator::EvaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE)) {
       return theCommands << "Failed to simplify: " << convertedEqualityE.toString();
     }
-    modifiedInput.SetChilD(2, convertedSimplifiedEqualityE);
+    modifiedInput.setChild(2, convertedSimplifiedEqualityE);
     if (!CalculatorFunctions::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers)) {
       return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].toString()
       << " in " << modifiedInput[2].toString() << " which was obtained from the equality "
@@ -1288,11 +1288,11 @@ bool CalculatorFunctions::innerOperatorBounds(
     theIntegralOp == theCommands.opIntegral() || theIntegralOp == theCommands.opSum()
   ) {
     output.reset(theCommands);
-    output.AddChildAtomOnTop(theIntegralOp);
+    output.addChildAtomOnTop(theIntegralOp);
     theLimitsE.reset(theCommands);
-    theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
+    theLimitsE.addChildAtomOnTop(theCommands.opLimitBoundary());
     theLimitsE.addChildOnTop(input[2]);
-    theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+    theLimitsE.addChildAtomOnTop(theCommands.opIndefiniteIndicator());
     output.addChildOnTop(theLimitsE);
     return true;
   }
@@ -1303,21 +1303,21 @@ bool CalculatorFunctions::innerOperatorBounds(
     return false;
   }
   theLimitsE.reset(theCommands);
-  theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
+  theLimitsE.addChildAtomOnTop(theCommands.opLimitBoundary());
   for (int i = 1; i < 3; i ++) {
     if (i < baseE[1].size()) {
       theLimitsE.addChildOnTop(baseE[1][i]);
     } else {
-      theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+      theLimitsE.addChildAtomOnTop(theCommands.opIndefiniteIndicator());
     }
   }
   if (input[1].IsOperationGiven(theCommands.opUnderscore())) {
-    theLimitsE.SetChilD(1, input[2]);
+    theLimitsE.setChild(1, input[2]);
   } else {
-    theLimitsE.SetChilD(2, input[2]);
+    theLimitsE.setChild(2, input[2]);
   }
   output = input[1];
-  return output.SetChilD(1, theLimitsE);
+  return output.setChild(1, theLimitsE);
 }
 
 bool CalculatorFunctions::innerPowerExponentToLog(
@@ -1525,7 +1525,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   if (!theCommands.GetMatrixDoubles(theMatE, theMat)) {
     return theCommands << "Failed to extract matrix from: " << theMatE.toString();
   }
-  if (theMat.NumCols != 2 && theMat.NumCols != 3) {
+  if (theMat.numberOfColumns != 2 && theMat.numberOfColumns != 3) {
     return theCommands << "Only dimensions 2 and 3 are supported at the moment. ";
   }
   PlotObject theSegment;
@@ -1553,7 +1553,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
     theSegment.lineWidthJS = lineWidthStream.str();
   }
   theSegment.thePlotType = "segmentPath";
-  theSegment.dimension = theMat.NumCols;
+  theSegment.dimension = theMat.numberOfColumns;
   theMat.GetVectorsFromRows(theSegment.thePointsDouble);
   if (input.size() >= 4) {
     if (!input[3].EvaluatesToDouble(&theSegment.lineWidth)) {
@@ -1601,7 +1601,7 @@ bool CalculatorFunctions::innerPlotMarkSegment(Calculator& theCommands, const Ex
   Expression leftPt = midPt - theOrthoV / 25;
   Expression rightPt = midPt + theOrthoV / 25;
   output.reset(theCommands);
-  output.AddChildAtomOnTop("PlotSegment");
+  output.addChildAtomOnTop("PlotSegment");
   output.addChildOnTop(leftPt);
   output.addChildOnTop(rightPt);
   for (int i = 4; i < input.size(); i ++) {
@@ -2272,7 +2272,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   Expression thePolyE;
   thePolyE.AssignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
-  output.AddChildAtomOnTop("MakeExpression");
+  output.addChildAtomOnTop("MakeExpression");
   output.addChildOnTop(thePolyE);
   return true;
 }

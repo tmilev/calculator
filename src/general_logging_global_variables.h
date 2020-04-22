@@ -445,7 +445,7 @@ public:
   bool UserGuestMode();
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
-  bool CheckConsistency();
+  bool checkConsistency();
   int externalCommandStream(const std::string& systemCommand);
   int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
   std::string externalCommandReturnOutput(const std::string& systemCommand);

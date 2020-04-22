@@ -240,7 +240,7 @@ bool MonomialUniversalEnveloping<coefficient>::CommutingABntoBnAPlusLowerOrderAl
     }
   }
   int numPosRoots = this->GetOwner().theWeyl.RootsOfBorel.size;
-  int theDimension = this->GetOwner().theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->GetOwner().theWeyl.CartanSymmetric.numberOfRows;
   if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
     return this->GetOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].isEqualToZero();
   }
@@ -629,7 +629,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   //std::stringstream out;
   this->makeZero(theOwner);
   WeylGroupData& theWeyl = this->GetOwner().theWeyl;
-  int theDimension = theWeyl.CartanSymmetric.NumRows;
+  int theDimension = theWeyl.CartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
 //  killingForm.init(theDimension, theDimension);
@@ -760,7 +760,7 @@ template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::CleanUpZeroCoeff() {
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i].Coefficient.isEqualToZero()) {
-      this->RemoveIndexSwapWithLast(i);
+      this->removeIndexSwapWithLast(i);
       i --;
     }
   }
@@ -868,7 +868,7 @@ void ElementUniversalEnveloping<coefficient>::MakeHgenerator(
   MonomialUniversalEnveloping<coefficient> tempMon;
   this->makeZero(inputOwner);
   tempMon.makeOne(inputOwner);
-  int theDimension = this->GetOwner().theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->GetOwner().theWeyl.CartanSymmetric.numberOfRows;
   int numPosRoots = this->GetOwner().theWeyl.RootsOfBorel.size;
   tempMon.generatorsIndices.setSize(1);
   tempMon.Powers.setSize(1);
@@ -1267,7 +1267,7 @@ template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::CleanUpZeroCoeff() {
   for (int i = 0; i < this->size; i ++) {
     if (this->theObjects[i].Coefficient.isEqualToZero()) {
-      this->RemoveIndexSwapWithLast(i);
+      this->removeIndexSwapWithLast(i);
       i --;
     }
   }
@@ -1477,7 +1477,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::SimplifyAccumulateInOutput
       }
     }
     if (reductionOccurred) {
-      output.RemoveIndexSwapWithLast(IndexlowestNonSimplified);
+      output.removeIndexSwapWithLast(IndexlowestNonSimplified);
     } else {
       IndexlowestNonSimplified ++;
     }
@@ -1685,7 +1685,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::CommutingLeftIndexAroundRi
       return true;
     }
     int numPosRoots = this->owner->theOwner->theWeyl.RootsOfBorel.size;
-    int theDimension = this->owner->theOwner->theWeyl.CartanSymmetric.NumRows;
+    int theDimension = this->owner->theOwner->theWeyl.CartanSymmetric.numberOfRows;
     if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
       ElementSemisimpleLieAlgebra<Rational> tempElt;
       this->owner->theOwner->LieBracket(
@@ -1723,10 +1723,10 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::makeZero(
 
 template <class coefficient>
 unsigned int MonomialUniversalEnvelopingOrdered<coefficient>::hashFunction() const {
-  int top = MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
+  int top = MathRoutines::Minimum(someRandomPrimesSize, this->generatorsIndices.size);
   unsigned int result = 0;
   for (int i = 0; i < top; i ++) {
-    result += SomeRandomPrimes[i] * this->generatorsIndices.theObjects[i];
+    result += someRandomPrimes[i] * this->generatorsIndices.theObjects[i];
   }
   return result;
 }
@@ -1964,7 +1964,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::AddMonomial(
   } else {
     this->theObjects[theIndex].Coefficient += input.Coefficient;
     if (this->theObjects[theIndex].Coefficient.isEqualToZero()) {
-      this->RemoveIndexSwapWithLast(theIndex);
+      this->removeIndexSwapWithLast(theIndex);
     }
   }
 }

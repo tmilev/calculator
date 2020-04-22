@@ -40,7 +40,7 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * SomeRandomPrimes[0];
+    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * someRandomPrimes[0];
   }
   bool operator==(const GraphEdge& other) const {
     return
@@ -68,7 +68,7 @@ public:
   List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
   GraphWeightedLabeledEdges(): numNodes(- 1), groupMaxSize(- 1){}
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   void AddEdge(int i, int j);
   void ComputeEdgesPerNodesNoMultiplicities();
   double GetXnode(int groupIndex, int indexInGroup);

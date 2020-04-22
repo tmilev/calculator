@@ -26,11 +26,11 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Selection BaseVariables;
   Rational GlobalGoal;
   GlobalGoal.makeZero();
-  if (matA.NumRows != matb.NumRows) {
-    global.fatal << "The number of inequalities: " << matA.NumRows << " does not match the number of "
-    << "constaints: " << matb.NumRows << ". " << global.fatal;
+  if (matA.numberOfRows != matb.numberOfRows) {
+    global.fatal << "The number of inequalities: " << matA.numberOfRows << " does not match the number of "
+    << "constaints: " << matb.numberOfRows << ". " << global.fatal;
   }
-  for (int j = 0; j < matb.NumRows; j ++) {
+  for (int j = 0; j < matb.numberOfRows; j ++) {
     GlobalGoal += matb.elements[j][0];
     if (matb.elements[j][0].isNegative()) {
       global.fatal << "Constraint index " << j << " is negative: "
@@ -40,20 +40,20 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   if (GlobalGoal.isEqualToZero()) {
     return false;
   }
-  int NumTrueVariables = matA.NumCols;
+  int NumTrueVariables = matA.numberOfColumns;
   //tempMatb.Assign(matb);
-  tempMatA.init(matA.NumRows, NumTrueVariables + matA.NumRows);
+  tempMatA.init(matA.numberOfRows, NumTrueVariables + matA.numberOfRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.clear();
-  BaseVariables.init(tempMatA.NumCols);
+  BaseVariables.init(tempMatA.numberOfColumns);
   tempMatA.makeZero();
-  matX.makeZero(tempMatA.NumCols);
-  for (int j = 0; j < matA.NumCols; j ++) {
-    for (int i = 0; i < matA.NumRows; i ++) {
+  matX.makeZero(tempMatA.numberOfColumns);
+  for (int j = 0; j < matA.numberOfColumns; j ++) {
+    for (int i = 0; i < matA.numberOfRows; i ++) {
       tempMatA.elements[i][j].Assign(matA.elements[i][j]);
     }
   }
-  for (int j = 0; j < matA.NumRows; j ++) {
+  for (int j = 0; j < matA.numberOfRows; j ++) {
     tempMatA.elements[j][j + NumTrueVariables].makeOne();
     matX[j + NumTrueVariables] = (matb.elements[j][0]);
     BaseVariables.AddSelectionAppendNewIndex(j + NumTrueVariables);
@@ -63,7 +63,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   bool WeHaveNotEnteredACycle = true;
   while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.isPositive()) {
     EnteringVariable = - 1; ChangeGradient.makeZero();
-    for (int i = 0; i < tempMatA.NumCols; i ++) {
+    for (int i = 0; i < tempMatA.numberOfColumns; i ++) {
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
         Matrix<Rational>::ComputePotentialChangeGradient(
@@ -87,7 +87,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.invert();
-      for (int i = 0; i < tempMatA.NumRows; i ++) {
+      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
           << global.fatal;
@@ -108,7 +108,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           WeHaveNotEnteredACycle = false;
         }
       }
-      for (int i = 0; i < tempMatA.NumRows; i ++) {
+      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.MultiplyBy(MaxMovement);
@@ -128,7 +128,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
       BaseVariables.selected[EnteringVariable] = true;
       //BaseVariables.ComputeDebugString();
-      for (int i = 0; i < tempMatA.NumRows; i ++) {
+      for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
           global.fatal << "New base variable expected to be equal to 1. " << global.fatal;
         }
@@ -770,13 +770,13 @@ bool Calculator::innerDeterminantPolynomial(
     return theCommands << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";
   }
-  if (matPol.NumRows != matPol.NumCols) {
+  if (matPol.numberOfRows != matPol.numberOfColumns) {
     return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   }
-  if (matPol.NumRows > 8) {
+  if (matPol.numberOfRows > 8) {
     return theCommands << "<hr>Failed to compute determinant: "
     << "matrix is larger than 8 x 8, and your matrix had "
-    << matPol.NumRows << " rows. Note that you can compute "
+    << matPol.numberOfRows << " rows. Note that you can compute "
     << "determinant using the \\det function which "
     << "does Gaussian elimination "
     << "and will work for large rational matrices. "
@@ -807,7 +807,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
   // If the commented code needs to be restored, please document why.
   // if (input.IsSequenceNElementS())
-  //   if (theMat.NumRows !=1)
+  //   if (theMat.numberOfRows !=1)
   //     return false;
   theMat.Transpose();
   return output.AssignMatrixExpressions(theMat, theCommands, true, true);
@@ -1512,16 +1512,16 @@ std::string PlotObject::GetJavascriptPoints(
   (void) funCounter;
   std::stringstream fnInstStream;
   fnInstStream << "drawPoints([";
-  for (int i = 0; i < this->thePointsJS.NumRows; i ++) {
+  for (int i = 0; i < this->thePointsJS.numberOfRows; i ++) {
     fnInstStream << "[";
-    for (int j = 0; j < this->thePointsJS.NumCols; j ++) {
+    for (int j = 0; j < this->thePointsJS.numberOfColumns; j ++) {
       fnInstStream << this->thePointsJS(i, j);
-      if (j != this->thePointsJS.NumCols - 1) {
+      if (j != this->thePointsJS.numberOfColumns - 1) {
         fnInstStream << ", ";
       }
     }
     fnInstStream << "]";
-    if (i != this->thePointsJS.NumRows - 1) {
+    if (i != this->thePointsJS.numberOfRows - 1) {
       fnInstStream << ", ";
     }
   }
@@ -1826,12 +1826,12 @@ void Expression::SubstituteRecursivelyInChildren(MapList<Expression, Expression>
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
     if (theSubs.contains((*this)[i])) {
-      this->SetChilD(i, theSubs.GetValueCreate((*this)[i]));
+      this->setChild(i, theSubs.GetValueCreate((*this)[i]));
     } else {
       tempE = (*this)[i];
       tempE.SubstituteRecursivelyInChildren(theSubs);
       if (!(tempE == (*this)[i])) {
-        this->SetChilD(i, tempE);
+        this->setChild(i, tempE);
       }
     }
   }
@@ -1852,12 +1852,12 @@ void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, c
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
     if (toBeSubbed == (*this)[i]) {
-      this->SetChilD(i, toBeSubbedWith);
+      this->setChild(i, toBeSubbedWith);
     } else {
       tempE = (*this)[i];
       tempE.SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
       if (!(tempE == (*this)[i])) {
-        this->SetChilD(i, tempE);
+        this->setChild(i, tempE);
       }
     }
   }
@@ -2024,9 +2024,9 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     return theCommands << "Failed to extract matrix from the second argument, " << input[2].toString();
   }
   std::stringstream out;
-  if (coneNonStrictMatForm.NumCols != coneStrictMatForm.NumCols) {
-    out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.NumCols
-    << " and second of dimension " << coneStrictMatForm.NumCols << " which is not allowed. ";
+  if (coneNonStrictMatForm.numberOfColumns != coneStrictMatForm.numberOfColumns) {
+    out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.numberOfColumns
+    << " and second of dimension " << coneStrictMatForm.numberOfColumns << " which is not allowed. ";
     return output.MakeError(out.str(), theCommands);
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
@@ -2043,7 +2043,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   bool conesDoIntersect = coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
-    checkVector.makeZero(coneStrictMatForm.NumCols);
+    checkVector.makeZero(coneStrictMatForm.numberOfColumns);
     for (int i = 0; i < coneStrictGens.size; i ++) {
       checkVector += coneStrictGens[i] * outputIntersection[i];
     }
@@ -2230,7 +2230,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
   }
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
+    if (!theCommands.getVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
       return false;
     }
     if (!theWeyl.RootSystem.contains(currentRoot)) {
@@ -2265,7 +2265,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
     return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;
-  if (!theCommands.GetVector(input[1], splittingNormal, nullptr)) {
+  if (!theCommands.getVector(input[1], splittingNormal, nullptr)) {
     return output.MakeError("Failed to extract normal from first argument. ", theCommands);
   }
   Matrix<Rational> theMat;
@@ -2509,7 +2509,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
         currentIndex ++;
         found = true;
         int indexInParent = indicesInParent[i];
-        next.SetChilD(indexInParent, expressionSequence[currentIndex]);
+        next.setChild(indexInParent, expressionSequence[currentIndex]);
         nextRules.addListOnTop(childrenEnumerators[i].rulesNames[currentIndex]);
       }
     }

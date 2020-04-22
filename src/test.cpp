@@ -29,7 +29,7 @@ public:
 
 int mainTest(List<std::string>& inputArguments) {
   Test tester;
-  inputArguments.SliceInPlace(2, inputArguments.size - 2);
+  inputArguments.sliceInPlace(2, inputArguments.size - 2);
   tester.initialize(inputArguments);
   tester.Run();
   return 0;

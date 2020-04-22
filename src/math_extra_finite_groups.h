@@ -228,7 +228,7 @@ public:
   }
   void InitGenerators() {
   }
-  bool CheckConsistency() const {
+  bool checkConsistency() const {
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use after free of Finite group. " << global.fatal;
     }
@@ -255,7 +255,7 @@ public:
   int ConjugacyClassCount() const;
   LargeInteger GetSize();
   LargeInteger SizeByFormulaOrNeg1() {
-    this->CheckConsistency();
+    this->checkConsistency();
     if (this->GetSizeByFormula != 0) {
       return GetSizeByFormula(*this);
     }
@@ -449,7 +449,7 @@ public:
   static void ActOn(const ElementWeylGroup& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output);
   template<class coefficient>
   void ActOn(Vector<coefficient>& inputOutput) const;
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckInitialization() const;
   int Sign() const;
   void MultiplyOnTheRightBySimpleReflection(int reflectionIndex);
@@ -637,7 +637,7 @@ public:
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   static bool GetWordByFormulaImplementation(
     FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
   );
@@ -814,7 +814,7 @@ public:
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
   int getDimension() const {
-    return this->CartanSymmetric.NumRows;
+    return this->CartanSymmetric.numberOfRows;
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
@@ -1026,8 +1026,8 @@ void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vecto
   }
   output = r1[0].zero();
   leftType buffer;
-  for (int i = 0; i < this->CartanSymmetric.NumRows; i ++) {
-    for (int j = 0; j < this->CartanSymmetric.NumCols; j ++) {
+  for (int i = 0; i < this->CartanSymmetric.numberOfRows; i ++) {
+    for (int j = 0; j < this->CartanSymmetric.numberOfColumns; j ++) {
       buffer = r1[i];
       buffer *= r2[j];
       buffer *= this->CartanSymmetric.elements[i][j];
@@ -1561,7 +1561,7 @@ public:
   const Vector<Rational>& GetCurrentElement();
   std::string toString() const;
   std::string ToStringSize() const;
-  bool CheckConsistency();
+  bool checkConsistency();
   void initialize();
   void initialize(const List<ElementWeylGroupAutomorphisms>& inputGenerators,
     const Vector<Rational>& inputElement);
@@ -1753,7 +1753,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     out.generatorS[i].init(this->cosets.size, this->cosets.size);
     out.generatorS[i].makeZero();
-    for (int ci = 0; ci <out.generatorS[i].NumCols; ci ++) {
+    for (int ci = 0; ci <out.generatorS[i].numberOfColumns; ci ++) {
       elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
       int j = this->GetCosetId(g);
       out.generatorS[i](j, ci) = 1;
@@ -1832,7 +1832,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
     if (in.generatorS.size == 0) {
       out.generatorS[i].MakeZeroMatrix(1 * this->cosets.size);
     } else {
-      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].NumRows * this->cosets.size);
+      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].numberOfRows * this->cosets.size);
     }
     for (int ci = 0; ci < cosets.size; ci ++) {
       elementSomeGroup k = g * cosets[ci].representative;
@@ -1843,7 +1843,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
       elementSomeGroup hk = cki * k;
       Matrix<coefficient> ikblock;
       in.GetMatrixOfElement(hk, ikblock);
-      out.generatorS[i].AssignBlock(ikblock, kcsi * ikblock.NumRows, ci * ikblock.NumCols);
+      out.generatorS[i].AssignBlock(ikblock, kcsi * ikblock.numberOfRows, ci * ikblock.numberOfColumns);
     }
   }
   out.ownerGroup = this->theGroup;
@@ -2254,7 +2254,7 @@ public:
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
-  int n = input.NumCols;
+  int n = input.numberOfColumns;
   this->data.setSize(1);
   this->data[0] = 1;
   for (int col = 0; col < n; col ++) {
@@ -2282,7 +2282,7 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) 
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
-  int n = input.NumCols;
+  int n = input.numberOfColumns;
   this->data.setSize(n + 1);
   this->data[0] = 1;
   Matrix<coefficient> acc;
@@ -2473,7 +2473,7 @@ bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>
 
 template <class elementSomeGroup>
 LargeInteger FiniteGroup<elementSomeGroup>::GetSize() {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->sizePrivate > 0) {
     return sizePrivate;
   }

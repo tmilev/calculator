@@ -30,7 +30,7 @@ void Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<uns
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
     global.fatal << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << global.fatal;
   }
-  global.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
+  global.randomBytesCurrent.slice(0, numberOfBytesMax32, output);
 }
 
 bool Crypto::HaveEqualHashes(const std::string& left, const std::string& right) {

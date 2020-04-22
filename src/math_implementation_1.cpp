@@ -76,10 +76,10 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
   Vectors<Rational> tempRoots;
   tempRoots.addOnTop(inputLine);
   this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  if (this->basisRationalForm.NumRows > 1) {
+  if (this->basisRationalForm.numberOfRows > 1) {
     global.fatal << "This should not be possible. " << global.fatal;
   }
-  if (this->basisRationalForm.NumRows == 0) {
+  if (this->basisRationalForm.numberOfRows == 0) {
     outputGenerator.makeZero(inputLine.size);
   } else {
     this->basisRationalForm.GetVectorFromRow(0, outputGenerator);
@@ -810,8 +810,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
     int theIndex = this->NilModPreNil.getIndex(eltImage);
     if (theIndex != - 1) {
-      this->NilModPreNil.RemoveIndexSwapWithLast(theIndex);
-      this->weightsNilModPreNil.RemoveIndexSwapWithLast(theIndex);
+      this->NilModPreNil.removeIndexSwapWithLast(theIndex);
+      this->weightsNilModPreNil.removeIndexSwapWithLast(theIndex);
       continue;
     }
     bool isGood = false;
@@ -819,8 +819,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       proj = this->ProjectWeight(this->weightsNilModPreNil[j]);
       if (proj == this->weightsNilradicalSmall[i]) {
         isGood = true;
-        this->NilModPreNil.RemoveIndexSwapWithLast(j);
-        this->weightsNilModPreNil.RemoveIndexSwapWithLast(j);
+        this->NilModPreNil.removeIndexSwapWithLast(j);
+        this->weightsNilModPreNil.removeIndexSwapWithLast(j);
         break;
       }
     }

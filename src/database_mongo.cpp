@@ -1298,7 +1298,7 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   findQuery.theType = JSData::token::tokenObject;
   findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = labelStrings[1];
   QueryResultOptions projector;
-  labelStrings.Slice(2, labelStrings.size - 2,  projector.fieldsToProjectTo);
+  labelStrings.slice(2, labelStrings.size - 2,  projector.fieldsToProjectTo);
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;

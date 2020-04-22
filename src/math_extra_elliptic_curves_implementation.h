@@ -10,9 +10,9 @@ unsigned int ElementEllipticCurve<coefficient>::hashFunction(const ElementEllipt
   if (input.flagInfinity) {
     return 0;
   }
-  return input.xCoordinate.hashFunction() * SomeRandomPrimes[0] +
-  input.yCoordinate.hashFunction() * SomeRandomPrimes[1] +
-  input.owner.hashFunction(input.owner) * SomeRandomPrimes[2];
+  return input.xCoordinate.hashFunction() * someRandomPrimes[0] +
+  input.yCoordinate.hashFunction() * someRandomPrimes[1] +
+  input.owner.hashFunction(input.owner) * someRandomPrimes[2];
 }
 
 template <typename coefficient>

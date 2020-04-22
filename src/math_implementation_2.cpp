@@ -388,7 +388,7 @@ bool LargeIntegerUnsigned::IsPossiblyPrime(
   }
   ProgressReport theReport;
   for (int i = 0; i < timesToRunMillerRabin; i ++) {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Testing whether " << this->ToStringAbbreviate()
       << " is prime using Miller-Rabin test " << i + 1 << " out of "
@@ -952,7 +952,7 @@ void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntege
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(lowPart), i + j);
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(highPart), i + j + 1);
       if (doReport) {
-        if (report2.getElement().TickAndWantReport()) {
+        if (report2.getElement().tickAndWantReport()) {
           std::stringstream out;
           out << "<br>Crunching " << numCycles << " out of " << totalCycles
           << " pairs of large integer ``digits'' = "
@@ -1131,10 +1131,10 @@ void LargeIntegerUnsigned::operator=(unsigned int x) {
 }
 
 unsigned int LargeIntegerUnsigned::hashFunction() const {
-  int numCycles = MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
+  int numCycles = MathRoutines::Minimum(this->theDigits.size, someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++) {
-    result += static_cast<unsigned>(this->theDigits[i]) * SomeRandomPrimes[i];
+    result += static_cast<unsigned>(this->theDigits[i]) * someRandomPrimes[i];
   }
   return result;
 }
@@ -1454,13 +1454,13 @@ int LargeInteger::operator%(int x) {
 int Rational::floorIfSmall() {
   if (this->Extended == nullptr) {
     if (NumShort < 0) {
-      if (DenShort != 1) {
-        return (this->NumShort / this->DenShort) - 1;
+      if (denominatorShort != 1) {
+        return (this->NumShort / this->denominatorShort) - 1;
       } else {
-        return this->NumShort / this->DenShort;
+        return this->NumShort / this->denominatorShort;
       }
     } else {
-      return this->NumShort / this->DenShort;
+      return this->NumShort / this->denominatorShort;
     }
   }
   global.fatal << "This piece of code should not be reached. " << global.fatal;
@@ -1494,15 +1494,15 @@ void Rational::RaiseToPower(int x) {
 
 void Rational::invert() {
   if (this->Extended == nullptr) {
-    int tempI = this->DenShort;
+    int tempI = this->denominatorShort;
     if (tempI <= 0) {
       global.fatal << "Denominator not allowed to be negative. " << global.fatal;
     }
     if (this->NumShort < 0) {
-      this->DenShort = - this->NumShort;
+      this->denominatorShort = - this->NumShort;
       this->NumShort = - tempI;
     } else {
-      this->DenShort = this->NumShort;
+      this->denominatorShort = this->NumShort;
       this->NumShort = tempI;
     }
     return;
@@ -1524,7 +1524,7 @@ void Rational::MultiplyByInt(int x) {
 
 void Rational::MultiplyBy(const Rational& r) {
   if (r.Extended == nullptr && this->Extended == nullptr) {
-    if (this->TryToMultiplyQuickly(r.NumShort, r.DenShort)) {
+    if (this->TryToMultiplyQuickly(r.NumShort, r.denominatorShort)) {
       return;
     }
   }
@@ -1534,7 +1534,7 @@ void Rational::MultiplyBy(const Rational& r) {
     this->Extended->den *= r.Extended->den;
   } else {
     this->Extended->num.MultiplyByInt(r.NumShort);
-    this->Extended->den.MultiplyByUInt( static_cast<unsigned int>(r.DenShort));
+    this->Extended->den.MultiplyByUInt( static_cast<unsigned int>(r.denominatorShort));
   }
   this->simplify();
 }
@@ -1604,7 +1604,7 @@ Rational Rational::operator-(const Rational& right) const {
 
 void Rational::Assign(const Rational& r) {
   this->NumShort = r.NumShort;
-  this->DenShort = r.DenShort;
+  this->denominatorShort = r.denominatorShort;
   if (r.Extended == nullptr) {
     if (this->Extended == nullptr) {
       return;
@@ -1622,14 +1622,14 @@ void Rational::AssignFracValue() {
     if (this->NumShort == 0) {
       return;
     }
-    if (this->DenShort == 1) {
+    if (this->denominatorShort == 1) {
       this->NumShort = 0;
-      this->DenShort = 1;
+      this->denominatorShort = 1;
       return;
     }
-    this->NumShort = this->NumShort % this->DenShort;
+    this->NumShort = this->NumShort % this->denominatorShort;
     if (this->NumShort < 0) {
-      this->NumShort += this->DenShort;
+      this->NumShort += this->denominatorShort;
     }
     return;
   }
@@ -1730,9 +1730,9 @@ bool Rational::GetSquareRootIfRational(Rational& output) const {
 
 bool Rational::TryToAddQuickly(int OtherNum, int OtherDen) {
   int OtherNumAbs, thisNumAbs;
-  if (this->DenShort <= 0 || OtherDen <= 0) {
+  if (this->denominatorShort <= 0 || OtherDen <= 0) {
     global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
-    << this->DenShort << " and " << OtherDen
+    << this->denominatorShort << " and " << OtherDen
     << ". The cause of the error should be in some of the calling functions. " << global.fatal;
   }
   if (OtherNum < 0) {
@@ -1748,17 +1748,17 @@ bool Rational::TryToAddQuickly(int OtherNum, int OtherDen) {
   if (
     this->Extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    this->DenShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->NumShort * OtherDen + this->DenShort * OtherNum;
-  int D = this->DenShort * OtherDen;
+  int N = this->NumShort * OtherDen + this->denominatorShort * OtherNum;
+  int D = this->denominatorShort * OtherDen;
   if (N == 0) {
     this->NumShort = 0;
-    this->DenShort = 1;
+    this->denominatorShort = 1;
     MacroIncrementCounter(Rational::TotalSmallAdditions);
     return true;
   }
@@ -1769,15 +1769,15 @@ bool Rational::TryToAddQuickly(int OtherNum, int OtherDen) {
     tempGCD = Rational::gcd(- N, D);
   }
   this->NumShort = N / tempGCD;
-  this->DenShort = D / tempGCD;
+  this->denominatorShort = D / tempGCD;
   MacroIncrementCounter(Rational::TotalSmallAdditions);
   return true;
 }
 
 bool Rational::TryToMultiplyQuickly(int OtherNum, int OtherDen) {
   int OtherNumAbs, thisNumAbs;
-  if (this->DenShort <= 0 || OtherDen <= 0) {
-    if (DenShort == 0 || OtherDen == 0) {
+  if (this->denominatorShort <= 0 || OtherDen <= 0) {
+    if (denominatorShort == 0 || OtherDen == 0) {
       global.fatal << "This is a programming error: division by zero. ";
     } else {
       global.fatal << "This is a programming error during rational number multiplication: "
@@ -1798,17 +1798,17 @@ bool Rational::TryToMultiplyQuickly(int OtherNum, int OtherDen) {
   if (
     this->Extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    this->DenShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
   int N = this->NumShort * OtherNum;
-  int D = this->DenShort * OtherDen;
+  int D = this->denominatorShort * OtherDen;
   if (N == 0) {
     this->NumShort = 0;
-    this->DenShort = 1;
+    this->denominatorShort = 1;
   } else {
     int tempGCD = 0;
     if (N > 0) {
@@ -1817,7 +1817,7 @@ bool Rational::TryToMultiplyQuickly(int OtherNum, int OtherDen) {
       tempGCD = Rational::gcd(- N, D);
     }
     this->NumShort = N / static_cast<signed int>(tempGCD);
-    this->DenShort = D / tempGCD;
+    this->denominatorShort = D / tempGCD;
   }
   MacroIncrementCounter(Rational::TotalSmallMultiplications);
   return true;
@@ -1857,7 +1857,7 @@ Rational Rational::scaleNormalizeIndex(
 LargeIntegerUnsigned Rational::GetDenominator() const {
   LargeIntegerUnsigned result;
   if (this->Extended == nullptr) {
-    unsigned int tempI = static_cast<unsigned int>(this->DenShort);
+    unsigned int tempI = static_cast<unsigned int>(this->denominatorShort);
     result.AssignShiftedUInt(tempI, 0);
   } else {
     result = (this->Extended->den);
@@ -1910,7 +1910,7 @@ bool Rational::GetPrimeFactorsAbsoluteValue(
 
 void Rational::AssignInteger(int x) {
   this->FreeExtended();
-  this->DenShort = 1;
+  this->denominatorShort = 1;
   this->NumShort = x;
 }
 
@@ -1927,7 +1927,7 @@ bool Rational::ShrinkExtendedPartIfPossible() {
     return false;
   }
   this->NumShort = this->Extended->num.GetIntValueTruncated();
-  this->DenShort = this->Extended->den.GetUnsignedIntValueTruncated();
+  this->denominatorShort = this->Extended->den.GetUnsignedIntValueTruncated();
   this->FreeExtended();
   return true;
 }
@@ -1977,7 +1977,7 @@ Rational Rational::NtoTheKth(int n, int k) {
 bool Rational::IsInteger(LargeInteger* whichInteger) const {
   bool result = false;
   if (this->Extended == nullptr) {
-    result = (this->DenShort == 1);
+    result = (this->denominatorShort == 1);
     if (whichInteger != nullptr) {
       *whichInteger = this->NumShort;
     }
@@ -1998,7 +1998,7 @@ bool MathRoutines::IsInteger(Rational x) {
 
 double Rational::GetDoubleValue() const {
   if (this->Extended == nullptr) {
-    return static_cast<double>(this->NumShort) / static_cast<double>(this->DenShort);
+    return static_cast<double>(this->NumShort) / static_cast<double>(this->denominatorShort);
   } else {
     return this->Extended->num.GetDoubleValue() / this->Extended->den.GetDoubleValue();
   }
@@ -2007,19 +2007,19 @@ double Rational::GetDoubleValue() const {
 void Rational::simplify() {
   if (this->Extended == nullptr) {
     if (this->NumShort == 0) {
-      this->DenShort = 1;
+      this->denominatorShort = 1;
     } else {
-      if (this->DenShort == 1) {
+      if (this->denominatorShort == 1) {
         return;
       }
       int tempGCD;
       if (this->NumShort > 0) {
-        tempGCD = this->gcd(this->NumShort, this->DenShort);
+        tempGCD = this->gcd(this->NumShort, this->denominatorShort);
       } else {
-        tempGCD = this->gcd(- this->NumShort, this->DenShort);
+        tempGCD = this->gcd(- this->NumShort, this->denominatorShort);
       }
       this->NumShort /= tempGCD;
-      this->DenShort /= tempGCD;
+      this->denominatorShort /= tempGCD;
     }
     return;
   }
@@ -2052,7 +2052,7 @@ void Rational::operator=(const Polynomial<Rational>& other) {
 
 bool Rational::IsEqualTo(const Rational& b) const {
   if (this->Extended == nullptr && b.Extended == nullptr) {
-    return (this->NumShort * b.DenShort == b.NumShort * this->DenShort);
+    return (this->NumShort * b.denominatorShort == b.NumShort * this->denominatorShort);
   }
   Rational tempRat;
   tempRat.Assign(*this);
@@ -2062,7 +2062,7 @@ bool Rational::IsEqualTo(const Rational& b) const {
 
 bool Rational::IsGreaterThanOrEqualTo(const Rational& right) const {
   if (this->Extended == nullptr && right.Extended == nullptr) {
-    return (this->NumShort * right.DenShort >= right.NumShort * this->DenShort);
+    return (this->NumShort * right.denominatorShort >= right.NumShort * this->denominatorShort);
   }
   Rational tempRat;
   tempRat.Assign(*this);
@@ -2079,8 +2079,8 @@ std::string Rational::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   if (this->Extended == nullptr) {
     out << this->NumShort;
-    if (this->DenShort != 1) {
-      out << "/" << this->DenShort;
+    if (this->denominatorShort != 1) {
+      out << "/" << this->denominatorShort;
     }
   } else {
     std::string tempS;
@@ -2102,10 +2102,10 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
       out << "-";
     }
     int numShortAbsoluteValue = this->NumShort < 0 ? - this->NumShort: this->NumShort;
-    if (this->DenShort == 1) {
+    if (this->denominatorShort == 1) {
       out << numShortAbsoluteValue;
     } else {
-      out << numShortAbsoluteValue << "_div_" << this->DenShort;
+      out << numShortAbsoluteValue << "_div_" << this->denominatorShort;
     }
     return out.str();
   }
@@ -2129,10 +2129,10 @@ std::string Rational::ToStringFrac() const {
       out << "-";
     }
     int numShortAbsoluteValue = this->NumShort < 0 ? - this->NumShort: this->NumShort;
-    if (this->DenShort == 1) {
+    if (this->denominatorShort == 1) {
       out << numShortAbsoluteValue;
     } else {
-      out << "\\frac{" << numShortAbsoluteValue << "}{" << this->DenShort << "}";
+      out << "\\frac{" << numShortAbsoluteValue << "}{" << this->denominatorShort << "}";
     }
     return out.str();
   }

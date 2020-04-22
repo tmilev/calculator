@@ -892,7 +892,7 @@
     "output":"-4"
   },
   {
-    "input":"contains ((\\arcsin x +\\cos x,5), \\arcsin )",
+    "input":"Contains ((\\arcsin x +\\cos x,5), \\arcsin )",
     "output":"1"
   },
   {

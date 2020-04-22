@@ -50,7 +50,7 @@ public:
   void LockMe();
   // unlocks the mutex.
   void UnlockMe();
-  void CheckConsistency();
+  void checkConsistency();
   void initConstructorCallOnly();
   MutexRecursiveWrapper() {
     this->initConstructorCallOnly();

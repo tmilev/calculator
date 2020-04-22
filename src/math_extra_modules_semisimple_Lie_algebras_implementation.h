@@ -704,7 +704,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     if (!theBF.IsNonNegativeAllEntries()) {
       this->flagConjectureBholds = false;
     }
-    if (theBFinverted.NumRows <= 0) {
+    if (theBFinverted.numberOfRows <= 0) {
       isBad = true;
     }
   }
@@ -860,7 +860,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
 }
 
 template<class coefficient>
-void ModuleSSalgebra<coefficient>::CheckConsistency() {
+void ModuleSSalgebra<coefficient>::checkConsistency() {
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::TestConsistency");
   ProgressReport theReport;
   MatrixTensor<coefficient> left, right, output, otherOutput, tempMat, diffMat;
@@ -1338,7 +1338,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
       out << " (positive entries only )";
     }
     out << " corresonding inverted matrix:<br>";
-    if (theBFinverted.NumRows > 0) {
+    if (theBFinverted.numberOfRows > 0) {
       out << theBFinverted.toString(&global.theDefaultFormat.getElement());
     } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";

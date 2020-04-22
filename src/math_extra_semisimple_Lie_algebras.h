@@ -109,7 +109,7 @@ public:
   ~SemisimpleLieAlgebra() {
     this->flagDeallocated = true;
   }
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   template <class coefficient>
   void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
   void ComputeMultTable();
@@ -151,13 +151,13 @@ public:
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output);
   inline int GetNumGenerators() const {
-    return this->theWeyl.CartanSymmetric.NumRows + this->theWeyl.RootSystem.size;
+    return this->theWeyl.CartanSymmetric.numberOfRows + this->theWeyl.RootSystem.size;
   }
   inline int GetNumPosRoots() const {
     return this->theWeyl.RootsOfBorel.size;
   }
   inline int GetRank() const {
-    return this->theWeyl.CartanSymmetric.NumRows;
+    return this->theWeyl.CartanSymmetric.numberOfRows;
   }
   void OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
   void OrderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
@@ -342,7 +342,7 @@ public:
 template <class coefficient>
 class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> {
   public:
-  void CheckConsistency() const {
+  void checkConsistency() const {
     if (this->size() == 0) {
       return;
     }
@@ -355,7 +355,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
     }
   }
   void CheckNonZeroOwner() const {
-    this->CheckConsistency();
+    this->checkConsistency();
     if (this->GetOwner() == 0) {
       global.fatal << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, "
       << "which is not allowed at by the calling function. " << global.fatal;

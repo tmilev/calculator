@@ -235,7 +235,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   }
   bool newlyCreated = !theCommands.theObjectContainer.semisimpleLieAlgebras.contains(theDynkinType);
   outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
-  outputPointer->CheckConsistency();
+  outputPointer->checkConsistency();
   output.AssignValue(outputPointer, theCommands);
   if (newlyCreated) {
     outputPointer->ComputeChevalleyConstants();
@@ -540,7 +540,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
     << outputSubalgebra.theWeylNonEmbedded->theDynkinType << "<hr>";
   }
-  if (theHs.NumRows != outputSubalgebra.theWeylNonEmbedded->getDimension()) {
+  if (theHs.numberOfRows != outputSubalgebra.theWeylNonEmbedded->getDimension()) {
     return theCommands << "<hr>Failed to load Cartan elements: I expected "
     << outputSubalgebra.theWeylNonEmbedded->getDimension() << " elements, but failed to get them.";
   }
@@ -625,13 +625,13 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     return theCommands << "<hr>Failed to load CurrentChain from: " << input.toString();
   }
   List<int> currentChainInt, numExploredTypes, numExploredHs;
-  if (!theCommands.GetVectoRInt(currentChainE, currentChainInt)) {
+  if (!theCommands.getVectorInt(currentChainE, currentChainInt)) {
     return false;
   }
-  if (!theCommands.GetVectoRInt(numExploredHsE, numExploredHs)) {
+  if (!theCommands.getVectorInt(numExploredHsE, numExploredHs)) {
     return false;
   }
-  if (!theCommands.GetVectoRInt(numExploredTypesE, numExploredTypes)) {
+  if (!theCommands.getVectorInt(numExploredTypesE, numExploredTypes)) {
     return false;
   }
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
@@ -1005,7 +1005,7 @@ bool CalculatorConversions::innerElementUE(
         currentMultiplicand.RaiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {
-        int variableIndex = polynomialVariables.AddNoRepetitionOrReturnIndexFirst(singleChevGenE);
+        int variableIndex = polynomialVariables.addNoRepetitionOrReturnIndexFirst(singleChevGenE);
         currentMultiplicandRFpartMon.setVariable(variableIndex, thePower);
       }
     }
@@ -1325,7 +1325,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
   }
   output.AssignMatrix(outputMat, theCommands, &context);
-  output.CheckConsistency();
+  output.checkConsistency();
   return true;
 }
 
@@ -1366,7 +1366,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
     return theCommands << "To make elements of hyperoctahedral group we need at least 3 inputs. ";
   }
   List<int> oneCycle;
-  if (!theCommands.GetVectoRInt(input[1], oneCycle)) {
+  if (!theCommands.getVectorInt(input[1], oneCycle)) {
     return theCommands
     << "Failed to extract a cycle structure from the first argument of input: "
     << input.toString();

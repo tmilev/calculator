@@ -212,7 +212,7 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
-  if (!parser.GetVector<Polynomial<Rational> >(
+  if (!parser.getVector<Polynomial<Rational> >(
     parser.theProgramExpression[1], result
   )) {
     global.fatal

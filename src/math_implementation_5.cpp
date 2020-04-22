@@ -63,7 +63,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   this->truncated = false;
   this->allElements.clear();
   orbitRho.clear();
-  if (this->AmbientWeyl->CartanSymmetric.NumRows < 1) {
+  if (this->AmbientWeyl->CartanSymmetric.numberOfRows < 1) {
     return false;
   }
   if (recomputeAmbientRho) {
@@ -415,7 +415,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   global.fatal << "Not implemented yet!!!!!" << global.fatal;
   rootSubalgebra theRootSA;
 //  theRootSA.init(*this);
-  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->theWeyl.CartanSymmetric.numberOfRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theAutos);
@@ -515,7 +515,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   this->GenerateWeightSupport(theHighestWeight, weightSupport);
   int highestWeight, distanceToHW;
   this->EmbeddingsRootSpaces.setSize(this->theWeyl.RootSystem.size);
-  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->theWeyl.CartanSymmetric.numberOfRows;
   List<bool> Explored;
   Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
   int numExplored = 0;
@@ -593,7 +593,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators");
   this->theDomain().ComputeChevalleyConstants();
   this->theRange().ComputeChevalleyConstants();
-  int theDomainDimension = this->theDomain().theWeyl.CartanSymmetric.NumRows;
+  int theDomainDimension = this->theDomain().theWeyl.CartanSymmetric.numberOfRows;
   Selection NonExplored;
   int numRoots = this->theDomain().theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -682,7 +682,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& 
   Matrix<Rational> invertedSmallCartan;
   invertedSmallCartan = this->theDomain().theWeyl.CartanSymmetric;
   invertedSmallCartan.Invert();
-  int theSmallDimension = this->theDomain().theWeyl.CartanSymmetric.NumRows;
+  int theSmallDimension = this->theDomain().theWeyl.CartanSymmetric.numberOfRows;
   output.makeZero(theSmallDimension);
   for (int i = 0; i < theSmallDimension; i ++) {
     output[i] = this->theRange().theWeyl.RootScalarCartanRoot(
@@ -972,7 +972,7 @@ void SemisimpleLieAlgebra::OrderNilradical(const Selection& parSelZeroMeansLeviP
 }
 
 bool SemisimpleLieAlgebra::HasComputedStructureConstants() {
-  return this->ChevalleyConstants.NumRows == this->theWeyl.theDynkinType.GetRootSystemSize();
+  return this->ChevalleyConstants.numberOfRows == this->theWeyl.theDynkinType.GetRootSystemSize();
 }
 
 void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation() {
@@ -1026,7 +1026,7 @@ int SemisimpleLieAlgebra::GetGeneratorFromRootIndex(int theIndex) const {
   if (theIndex < 0 || theIndex >= this->theWeyl.RootSystem.size) {
     return - 1;
   }
-  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->theWeyl.CartanSymmetric.numberOfRows;
   int numPosRoots = this->theWeyl.RootsOfBorel.size;
   if (theIndex >= numPosRoots) {
     return theIndex + theDimension;
@@ -1036,7 +1036,7 @@ int SemisimpleLieAlgebra::GetGeneratorFromRootIndex(int theIndex) const {
 
 int SemisimpleLieAlgebra::GetRootIndexFromGenerator(int theIndex) const {
   int numPosRoots = this->theWeyl.RootsOfBorel.size;
-  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  int theDimension = this->theWeyl.CartanSymmetric.numberOfRows;
   if (theIndex < numPosRoots) {
     return theIndex;
   }
@@ -1602,7 +1602,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   }
   Polynomial<Rational> theGCD, theResult, tempP;
   ProgressReport theReport;
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString(&global.theDefaultFormat.getElement()) << " by "
     << other.toString(&global.theDefaultFormat.getElement());
@@ -1623,7 +1623,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   this->Denominator.getElement() = theResult;
   this->ReduceMemory();
   this->simplifyLeadingCoefficientOnly();
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString(&global.theDefaultFormat.getElement()) << " by "
     << other.toString(&global.theDefaultFormat.getElement());
@@ -1704,7 +1704,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   //  tempde_Bugger = other;
   //  tempde_Bugger.ComputeDebugString();
   ProgressReport theReport;
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
     theReport.report(out.str());
@@ -1734,7 +1734,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   this->Numerator.getElement() *= tempP1;
   this->ReduceMemory();
   this->simplifyLeadingCoefficientOnly();
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
     out << " and the result is:\n" << this->toString();
@@ -1842,7 +1842,7 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
 }
 
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
-  int theRank = theAlgebra.theWeyl.CartanSymmetric.NumRows;
+  int theRank = theAlgebra.theWeyl.CartanSymmetric.numberOfRows;
   int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
   output.makeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
 }
@@ -2188,11 +2188,11 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   //currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
-  for (int i = 0; i < currentHW.NumRows; i ++) {
+  for (int i = 0; i < currentHW.numberOfRows; i ++) {
     if (found) {
       break;
     }
-    for (int j = 0; j < currentHW.NumCols; j ++) {
+    for (int j = 0; j < currentHW.numberOfColumns; j ++) {
       if (!currentHW.elements[i][j].isEqualToZero()) {
         firstNonZeroColumn = j;
         firstNonZeroRow = i;
@@ -2245,8 +2245,8 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& inpu
   std::stringstream out;
   std::string tempS;
   bool found = false;
-  for (int i = 0; i < input.NumRows; i ++) {
-    for (int j = 0; j < input.NumCols; j ++) {
+  for (int i = 0; i < input.numberOfRows; i ++) {
+    for (int j = 0; j < input.numberOfColumns; j ++) {
       if (!input.elements[i][j].isEqualToZero()) {
         tempS = input.elements[i][j].toString();
         if (tempS == "- 1" || tempS == "-1") {
@@ -2630,8 +2630,8 @@ unsigned int RationalFunction::hashFunction() const {
     case RationalFunction::typePoly:
       return this->Numerator.GetElementConst().hashFunction();
     case RationalFunction::typeRationalFunction:
-      return this->Numerator.GetElementConst().hashFunction() * SomeRandomPrimes[0] +
-      this->Denominator.GetElementConst().hashFunction() * SomeRandomPrimes[1];
+      return this->Numerator.GetElementConst().hashFunction() * someRandomPrimes[0] +
+      this->Denominator.GetElementConst().hashFunction() * someRandomPrimes[1];
     default:
       return static_cast<unsigned int>(- 1);
   }

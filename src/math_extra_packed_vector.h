@@ -198,32 +198,32 @@ int AnotherWeylGroup<scalar, templateVector>::Invert(int i) const {
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
-  if (unrationalCartanSymmetric.NumRows < CartanSymmetric.NumRows) {
+  if (unrationalCartanSymmetric.numberOfRows < CartanSymmetric.numberOfRows) {
     int den = 1;
-    for (int i = 0; i < CartanSymmetric.NumRows; i ++) {
-      for (int j = 0; j < CartanSymmetric.NumCols; j ++) {
+    for (int i = 0; i < CartanSymmetric.numberOfRows; i ++) {
+      for (int j = 0; j < CartanSymmetric.numberOfColumns; j ++) {
         den = MathRoutines::lcm(den,CartanSymmetric.elements[i][j].GetDenominator().GetUnsignedIntValueTruncated());
       }
     }
-    unrationalCartanSymmetric.init(CartanSymmetric.NumRows, CartanSymmetric.NumCols);
-    //this->ucsm = malloc(CartanSymmetric.NumRows*sizeof(templateVector));
-    //for (int i = 0; i <CartanSymmetric.NumRows; i ++)
-    //  this->ucsm[i].setSize(CartanSymmetric.NumCols);
-    for (int i = 0; i < CartanSymmetric.NumRows; i ++) {
-      for (int j = 0; j < CartanSymmetric.NumCols; j ++) {
+    unrationalCartanSymmetric.init(CartanSymmetric.numberOfRows, CartanSymmetric.numberOfColumns);
+    //this->ucsm = malloc(CartanSymmetric.numberOfRows*sizeof(templateVector));
+    //for (int i = 0; i <CartanSymmetric.numberOfRows; i ++)
+    //  this->ucsm[i].setSize(CartanSymmetric.numberOfColumns);
+    for (int i = 0; i < CartanSymmetric.numberOfRows; i ++) {
+      for (int j = 0; j < CartanSymmetric.numberOfColumns; j ++) {
         unrationalCartanSymmetric.elements[i][j] = (CartanSymmetric.elements[i][j] * den).GetNumerator().GetIntValueTruncated();
         //ucsm[i][j] = unrationalCartanSymmetric.elements[i][j];
       }
     }
   }
   global.Comments << "symmetric Cartan matrix is" << "\n";
-  for (int i = 0; i < unrationalCartanSymmetric.NumRows; i ++) {
-    for (int j = 0; j < unrationalCartanSymmetric.NumCols; j ++) {
+  for (int i = 0; i < unrationalCartanSymmetric.numberOfRows; i ++) {
+    for (int j = 0; j < unrationalCartanSymmetric.numberOfColumns; j ++) {
       global.Comments << unrationalCartanSymmetric.elements[i][j] << '\t';
     }
     global.Comments << '\n';
   }
-  this->rank = this->unrationalCartanSymmetric.NumRows;
+  this->rank = this->unrationalCartanSymmetric.numberOfRows;
   for (int rvi = 0; rvi < rank; rvi ++) {
     templateVector vi;
     vi.MakeEi(rank, rvi);
@@ -371,7 +371,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices() {
 
 template <typename scalar, typename templateVector>
 int AnotherWeylGroup<scalar, templateVector>::GetRank() const {
-  return this->CartanSymmetric.NumRows;
+  return this->CartanSymmetric.numberOfRows;
 }
 
 template <typename scalar, typename templateVector>
@@ -564,9 +564,9 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
       }
     }
   Matrix<Rational> out;
-  out.init(M.NumRows, M.NumCols);
-  for (int i = 0; i < M.NumRows; i ++) {
-    for (int j = 0; j < M.NumCols; j ++) {
+  out.init(M.numberOfRows, M.numberOfColumns);
+  for (int i = 0; i < M.numberOfRows; i ++) {
+    for (int j = 0; j < M.numberOfColumns; j ++) {
       out.elements[i][j] = M.elements[i][j];
     }
   }
@@ -624,7 +624,7 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 
 void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
   Selection sel;
-  sel.init(G->CartanSymmetric.NumCols);
+  sel.init(G->CartanSymmetric.numberOfColumns);
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.setSize(numCycles);
@@ -649,7 +649,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   if (pseudo) {
     global.Comments << "pseudo-parabolics" << "\n";
     ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
-    sel.init(G->CartanSymmetric.NumCols);
+    sel.init(G->CartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
       theGenerators.setSize(sel.CardinalitySelection);
       for (int j = 0; j < sel.CardinalitySelection; j ++) {

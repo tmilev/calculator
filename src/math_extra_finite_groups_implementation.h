@@ -28,7 +28,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
   bool andWords, int MaxElements
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
-  this->CheckConsistency();
+  this->checkConsistency();
   //double startTimeDebug= global.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if (this->sizePrivate > 0 && MaxElements > 0 && this->sizePrivate > MaxElements) {
@@ -71,7 +71,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
           this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         LargeInteger sizeByFla = this->SizeByFormulaOrNeg1();
         reportStream << "So far, generated " << this->theElements.size << " elements";
@@ -89,7 +89,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     }
   }
   theReport.ticksPerReport = 1;
-  if (theReport.TickAndWantReport()) {
+  if (theReport.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.report(reportStream.str());
@@ -456,7 +456,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitialization() const {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->generators.size == 0) {
     global.fatal << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
     << "group, you are still supposed to put the identity element in the group generators. " << global.fatal;
@@ -595,7 +595,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
     //in case there are two non-conjugate elements with the same char poly.
     for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
-        if (theReport.TickAndWantReport()) {
+        if (theReport.tickAndWantReport()) {
           std::stringstream reportStream;
           reportStream << "Exploring conjugacy class " << i + 1
           << " out of " << this->conjugacyClasseS.size
@@ -622,7 +622,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->GetSizeByFormula != 0) {
     LargeInteger theSize = this->GetSizeByFormula(*this);
     //extended digit separators only appear in cxx14
@@ -818,7 +818,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
           return false;
         }
       }
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Generating outer orbit, " << output.size
         << " elements found so far, Weyl group type: "
@@ -881,7 +881,7 @@ template <class coefficient>
 void WeylGroupData::SimpleReflectionRhoModified(int index, Vector<coefficient>& theVector) const {
   coefficient alphaShift, tempRat;
   alphaShift = 0;
-  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
+  for (int i = 0; i < this->CartanSymmetric.numberOfColumns; i ++) {
     tempRat = theVector[i];
     tempRat *= this->CartanSymmetric.elements[index][i] * (- 2);
     alphaShift += tempRat;
@@ -932,9 +932,9 @@ bool WeylGroupData::GenerateOrbit(
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   simpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
-    for (int j = 0; j < this->CartanSymmetric.NumRows; j ++) {
+    for (int j = 0; j < this->CartanSymmetric.numberOfRows; j ++) {
       currentRoot = output[i];
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "So far found " << i + 1 << " elements in the orbit(s) of the starting weight(s) "
         << theWeights.toString() << ". ";
@@ -971,7 +971,7 @@ template <class coefficient>
 void WeylGroupData::SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector) const {
   coefficient alphaShift, tempRat;
   alphaShift = 0;
-  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
+  for (int i = 0; i < this->CartanSymmetric.numberOfColumns; i ++) {
     tempRat = theVector[i];
     tempRat *= this->CartanSymmetric.elements[index][i];
     alphaShift += tempRat;
@@ -986,14 +986,14 @@ void WeylGroupData::SimpleReflectionMinusRhoModified(int index, Vector<coefficie
 
 template <class coefficient>
 void WeylGroupData::SimpleReflection(int index, Vector<coefficient>& theVector) const {
-  if (index < 0 || index >= this->CartanSymmetric.NumCols) {
+  if (index < 0 || index >= this->CartanSymmetric.numberOfColumns) {
     global.fatal << "This is a programming error: simple reflection with respect to index "
     << index + 1 << " in a Weyl group of rank "
     << this->getDimension() << global.fatal;
   }
   coefficient alphaShift, tempRat;
   alphaShift = 0;
-  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
+  for (int i = 0; i < this->CartanSymmetric.numberOfColumns; i ++) {
     tempRat = theVector[i];
     tempRat *= this->CartanSymmetric.elements[index][i];
     alphaShift += tempRat;
@@ -1264,8 +1264,8 @@ void WeylGroupData::ReflectBetaWRTAlpha(
   if (RhoAction) {
     result += this->rho;//<-implicit type conversion here if coefficient is not Rational
   }
-  for (int i = 0; i < this->CartanSymmetric.NumRows; i ++) {
-    for (int j = 0; j < this->CartanSymmetric.NumCols; j ++) {
+  for (int i = 0; i < this->CartanSymmetric.numberOfRows; i ++) {
+    for (int j = 0; j < this->CartanSymmetric.numberOfColumns; j ++) {
       bufferCoeff = result[j];
       bufferCoeff *= alpha[i];
       bufferCoeff *= this->CartanSymmetric.elements[i][j] * (- 2);
@@ -1277,8 +1277,8 @@ void WeylGroupData::ReflectBetaWRTAlpha(
     }
   }
   alphaShift /= lengthA;
-  Output.setSize(this->CartanSymmetric.NumRows);
-  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
+  Output.setSize(this->CartanSymmetric.numberOfRows);
+  for (int i = 0; i < this->CartanSymmetric.numberOfColumns; i ++) {
     bufferCoeff = alphaShift;
     bufferCoeff *= alpha[i];
     bufferCoeff += result[i];
@@ -1362,7 +1362,7 @@ int GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::getDimension(
   if (this->ownerGroup->generators.size == 0) {
     return 1;
   }
-  return this->generatorS[0].NumRows;
+  return this->generatorS[0].numberOfRows;
 }
 
 template <typename somegroup, typename coefficient>
@@ -1437,7 +1437,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
             this->ComputeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
-          if (theReport.TickAndWantReport()) {
+          if (theReport.tickAndWantReport()) {
             std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is " << numClasses << ").";
@@ -1445,7 +1445,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
           }
         }
       }
-      if (theReport.TickAndWantReport()) {
+      if (theReport.tickAndWantReport()) {
         std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci + 1
         << " (total num classes is " << numClasses << ") computed to be: "
@@ -1453,8 +1453,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
         theReport.report(reportstream.str());
       }
     }
-    for (int j = 0; j < outputMat.NumRows; j ++) {
-      for (int k = 0; k < outputMat.NumCols; k ++) {
+    for (int j = 0; j < outputMat.numberOfRows; j ++) {
+      for (int k = 0; k < outputMat.numberOfColumns; k ++) {
         outputMat(j, k) += this->classFunctionMatrices[cci](j, k) * MathRoutines::ComplexConjugate(inputChar[cci]);
       }
     }
@@ -1465,7 +1465,7 @@ template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctionMatrix(
   ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat
 ) {
-  int theDim = this->generatorS[0].NumRows;
+  int theDim = this->generatorS[0].numberOfRows;
   outputMat.MakeZeroMatrix(theDim);
   if (classFunctionMatrices.size == 0) {
     classFunctionMatrices.setSize(this->ownerGroup->ConjugacyClassCount());
@@ -1474,14 +1474,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctio
     if (inputCF[cci] == 0) {
       continue;
     }
-    if (classFunctionMatrices[cci].NumCols == 0) {
-      classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].NumCols);
+    if (classFunctionMatrices[cci].numberOfColumns == 0) {
+      classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].numberOfColumns);
       for (int icci = 0; icci < this->ownerGroup->conjugacyClasseS[cci].size; icci ++) {
         this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].theElements[icci]);
       }
     }
-    for (int i = 0; i < outputMat.NumRows; i ++) {
-      for (int j = 0; j < outputMat.NumCols; j ++) {
+    for (int i = 0; i < outputMat.numberOfRows; i ++) {
+      for (int j = 0; j < outputMat.numberOfColumns; j ++) {
         outputMat.elements[i][j] += classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
       }
     }
@@ -1894,9 +1894,9 @@ std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup,
 template<class someFiniteGroup, typename coefficient>
 unsigned int ClassFunction<someFiniteGroup, coefficient>::hashFunction(const ClassFunction<someFiniteGroup, coefficient>& input) {
   unsigned int acc = 0;
-  int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
+  int N = (input.data.size < someRandomPrimesSize) ? input.data.size : someRandomPrimesSize;
   for (int i = 0; i < N; i ++) {
-    acc += input.data[i].hashFunction() * SomeRandomPrimes[i];
+    acc += input.data[i].hashFunction() * someRandomPrimes[i];
   }
   return acc;
 }
@@ -2064,7 +2064,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
     }
     if (!nontrivial) {
-      appendOnlyIrrepsList.RemoveIndexShiftDown(0);
+      appendOnlyIrrepsList.removeIndexShiftDown(0);
     }
   }
   int initialcount = appendOnlyIrrepsList.size;
@@ -2080,7 +2080,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   //  int indexLastPredefinedrep = 2; //<-this should be the index of the standard rep.
   for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
-      if (theReport1.TickAndWantReport()) {
+      if (theReport1.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << this->irreps.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacteR
@@ -2095,7 +2095,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
     }
   }
-  if (theReport1.TickAndWantReport()) {
+  if (theReport1.tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreps.size; i ++) {
@@ -2146,8 +2146,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetLargestDe
   outputLCM = 1;
   outputDen = 1;
   for (int gi = 0; gi < this->generatorS.size; gi ++) {
-    for (int mi = 0; mi < this->generatorS[gi].NumRows; mi ++) {
-      for (int mj = 0; mj < this->generatorS[gi].NumCols; mj ++) {
+    for (int mi = 0; mi < this->generatorS[gi].numberOfRows; mi ++) {
+      for (int mj = 0; mj < this->generatorS[gi].numberOfColumns; mj ++) {
         if (this->generatorS[gi](mi, mj).GetDenominator() > outputDen) {
           outputDen = this->generatorS[gi](mi, mj).GetDenominator();
         }
@@ -2329,7 +2329,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
         startingIrrep = &(this->irreps[0].MakeGRCAM());
       }
     }
-    if (!startingIrrep || (startingIrrep->generatorS.size > 0 && startingIrrep->generatorS[0].NumRows == 1)) {
+    if (!startingIrrep || (startingIrrep->generatorS.size > 0 && startingIrrep->generatorS[0].numberOfRows == 1)) {
       global.fatal << "Can't find a good starting irrep.  If you think you provided one, change the present assertion. "
       << global.fatal;
     }
@@ -2349,7 +2349,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
       nspace = newspaces.PopLastObject();
     } else {
       nspace = incompletely_digested[0];
-      incompletely_digested.RemoveIndexShiftDown(0);
+      incompletely_digested.removeIndexShiftDown(0);
     }
     GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> tspace = sr * nspace;
     tspace.flagCharacterIsComputed = false;
@@ -2372,7 +2372,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
       for (int ci = 0; ci < this->theGroup.characterTable.size; ci ++) {
         if (incompletely_digested[spi].GetCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0) {
           List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
-          incompletely_digested.RemoveIndexShiftDown(spi);
+          incompletely_digested.removeIndexShiftDown(spi);
           for (int shi = 0; shi < shards.size; shi ++) {
             if (shards[shi].GetNumberOfComponents() == 1) {
               if (!this->theGroup.characterTable.contains(shards[shi].GetCharacter())) {

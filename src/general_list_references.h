@@ -59,7 +59,7 @@ public:
     }
     return false;
   }
-  void RemoveIndexSwapWithLast(int theIndex) {
+  void removeIndexSwapWithLast(int theIndex) {
     //This is not thread-safe
     this->KillElementIndex(theIndex);
     this->theReferences[theIndex] = this->theReferences[this->size - 1];
@@ -106,7 +106,7 @@ public:
     }
     return result;
   }
-  int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
+  int addNoRepetitionOrReturnIndexFirst(const Object& o) {
     int indexOfObject = this->getIndex(o);
     if (indexOfObject == - 1) {
       this->addOnTop(o);
@@ -232,8 +232,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline int getIndexNoFail(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndexNoFail(o);
   }
-  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
+  inline int addNoRepetitionOrReturnIndexFirst(const Object& o) {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addNoRepetitionOrReturnIndexFirst(o);
   }
 };
 #endif

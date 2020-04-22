@@ -55,7 +55,7 @@ void MutexProcess::Release() {
   this->name = "";
 }
 
-bool MutexProcess::CheckConsistency() {
+bool MutexProcess::checkConsistency() {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of " << this->toString() << global.fatal;
   }
@@ -77,7 +77,7 @@ std::string PipePrimitive::GetLastRead() {
   return result;
 }
 
-bool PipePrimitive::CheckConsistency() {
+bool PipePrimitive::checkConsistency() {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of pipe: " << this->toString() << global.fatal;
   }
@@ -136,7 +136,7 @@ bool MutexProcess::ResetNoAllocation() {
 }
 
 bool MutexProcess::Lock() {
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->flagLockHeldByAnotherThread) {
     global.fatal << "MutexProcess about to deadlock itself. " << global.fatal;
   }
@@ -356,7 +356,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
 
 void Pipe::ReadLoop(List<char>& output) {
   MacroRegisterFunctionWithName("Pipe::ReadLoop");
-  this->CheckConsistency();
+  this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); // Prevent threads from locking one another.
   this->metaData.lastRead.setSize(0);
@@ -511,7 +511,7 @@ bool Pipe::ResetNoAllocation() {
 }
 
 bool Pipe::CreateMe(const std::string& inputPipeName) {
-  this->CheckConsistency();
+  this->checkConsistency();
   this->Release();
   this->name = inputPipeName;
   if (!this->thePipe.CreateMe("pipe[" + inputPipeName + "]", false, false, true)) {
@@ -529,8 +529,8 @@ bool Pipe::CreateMe(const std::string& inputPipeName) {
   return true;
 }
 
-bool Pipe::CheckConsistency() {
-  MacroRegisterFunctionWithName("Pipe::CheckConsistency");
+bool Pipe::checkConsistency() {
+  MacroRegisterFunctionWithName("Pipe::checkConsistency");
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of pipe. " << global.fatal;
   }
@@ -548,7 +548,7 @@ Pipe::Pipe() {
 }
 
 void Pipe::Release() {
-  this->CheckConsistency();
+  this->checkConsistency();
   this->theMutexPipe.Release();
   this->thePipe.Release();
   this->metaData.Release();
@@ -556,7 +556,7 @@ void Pipe::Release() {
 
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
-  this->CheckConsistency();
+  this->checkConsistency();
   this->lastRead.setSize(0);
   if (this->pipeEnds[0] == - 1) {
     return false;
@@ -613,7 +613,7 @@ void Pipe::ReadOnceWithoutEmptying(bool dontCrashOnFail) {
 
 void Pipe::ReadOnce(bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadOnce");
-  this->CheckConsistency();
+  this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   MutexLockGuard guard(safetyFirst); // guard from other threads.
   MutexProcessLockGuard lock(this->theMutexPipe);

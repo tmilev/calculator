@@ -331,7 +331,7 @@ void Calculator::initialize() {
   this->initializeToStringHandlers();
 
   this->RuleStack.reset(*this, 100);
-  this->RuleStack.AddChildAtomOnTop(this->opEndStatement());
+  this->RuleStack.addChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.clear();
   this->RuleStackCacheIndex = 0;
   this->cachedRuleStacks.addOnTop(this->RuleStack);
@@ -372,7 +372,7 @@ bool Calculator::ReplaceOXEXEXEXByE() {
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(middleE.theData);
   newExpr.addChildOnTop(rightE.theData);
@@ -386,7 +386,7 @@ bool Calculator::ReplaceSqrtEXByEX() {
   SyntacticElement& argument = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.addChildAtomOnTop(this->opSqrt());
   newExpr.addChildOnTop(this->ETwo());
   newExpr.addChildOnTop(argument.theData);
   left.theData = newExpr;
@@ -400,7 +400,7 @@ bool Calculator::ReplaceSqrtEXXByEXX() {
   SyntacticElement& argument = (*this->CurrentSyntacticStacK)[lastSize - 3];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.addChildAtomOnTop(this->opSqrt());
   newExpr.addChildOnTop(this->ETwo());
   newExpr.addChildOnTop(argument.theData);
   left.theData = newExpr;
@@ -416,7 +416,7 @@ bool Calculator::ReplaceSqrtXEXByEX() {
   SyntacticElement& argument = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.addChildAtomOnTop(this->opSqrt());
   newExpr.addChildOnTop(this->ETwo());
   newExpr.addChildOnTop(argument.theData);
   left.theData = newExpr;
@@ -430,7 +430,7 @@ bool Calculator::ReplaceOXEXEByE() {
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(rightE.theData);
   opElt.theData = newExpr;
@@ -444,7 +444,7 @@ bool Calculator::ReplaceOXEXEXByEX() {
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(rightE.theData);
   opElt.theData = newExpr;
@@ -458,7 +458,7 @@ bool Calculator::ReplaceOXEXEXXByEXX() {
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(rightE.theData);
   opElt.theData = newExpr;
@@ -505,7 +505,7 @@ bool Calculator::ReplaceOXEEXByEX() {
   SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr(*this);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(rightE.theData);
   opElt.theData = newExpr;
@@ -520,7 +520,7 @@ bool Calculator::ReplaceOXXEXEXEXByE() {
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
   newExpr.addChildOnTop(leftE.theData);
   newExpr.addChildOnTop(middleE.theData);
   newExpr.addChildOnTop(rightE.theData);
@@ -535,7 +535,7 @@ bool Calculator::ReplaceOXEXByEX() {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
@@ -557,7 +557,7 @@ bool Calculator::ReplaceOXEByE() {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
@@ -569,7 +569,7 @@ bool Calculator::ReplaceOEByE() {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
@@ -584,7 +584,7 @@ bool Calculator::ReplaceOEXByEX() {
   }
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
   newExpr.addChildOnTop(right.theData);
   middle.theData = newExpr;
   middle.controlIndex = this->conExpression();
@@ -664,7 +664,7 @@ bool Calculator::ReplaceOEXByE() {
   }
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
   newExpr.addChildOnTop(right.theData);
   middle.theData = newExpr;
   middle.controlIndex = this->conExpression();
@@ -684,7 +684,7 @@ bool Calculator::ReplaceEOByE() {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(right.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(right.controlIndex));
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
@@ -1007,7 +1007,7 @@ bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex) {
     this->parsingLog += "[Rule: Calculator::ReplaceXEXByEcontainingOE]";
   }
   outputElt.theData.reset(*this, 2);
-  outputElt.theData.AddChildAtomOnTop(inputOpIndex);
+  outputElt.theData.addChildAtomOnTop(inputOpIndex);
   outputElt.theData.addChildOnTop(inputElt.theData);
   outputElt.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
@@ -1016,7 +1016,7 @@ bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex) {
 bool Calculator::ReplaceXXByEEmptySequence() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theElt.theData.reset(*this, 1);
-  theElt.theData.AddChildAtomOnTop(this->opSequence());
+  theElt.theData.addChildAtomOnTop(this->opSequence());
   theElt.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(1);
 }
@@ -1048,8 +1048,8 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
     this->BoundVariablesInContext.addOnTopNoRepetition(theBoundVar);
   }
   theElt.theData.reset(*this, 2);
-  theElt.theData.AddChildAtomOnTop(this->opBind());
-  theElt.theData.AddChildAtomOnTop(theBoundVar);
+  theElt.theData.addChildAtomOnTop(this->opBind());
+  theElt.theData.addChildAtomOnTop(theBoundVar);
   theElt.controlIndex = this->conExpression();
   this->DecreaseStackSetCharacterRangeS(numXs);
   this->ReplaceXXYByY();
@@ -1061,8 +1061,8 @@ bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   int theBoundVar = theElt.theData.theData;
   if (this->IsBoundVarInContext(theBoundVar)) {
     theElt.theData.reset(*this, 2);
-    theElt.theData.AddChildAtomOnTop(this->opBind());
-    theElt.theData.AddChildAtomOnTop(theBoundVar);
+    theElt.theData.addChildAtomOnTop(this->opBind());
+    theElt.theData.addChildAtomOnTop(theBoundVar);
   } else {
     theElt.theData.MakeAtom(theBoundVar, *this);
     if (!this->IsNonBoundVarInContext(theBoundVar)) {
@@ -1082,9 +1082,9 @@ bool Calculator::ReplaceOOEEXbyEXpowerLike() {
     this->parsingLog += "[Rule: Calculator::ReplaceOOEEXbyEXpowerLike]";
   }
   Expression newInnerE(*this), newFinalE(*this);
-  newInnerE.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(innerO.controlIndex));
+  newInnerE.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(innerO.controlIndex));
   newInnerE.addChildOnTop(innerArg.theData);
-  newFinalE.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(outerO.controlIndex));
+  newFinalE.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(outerO.controlIndex));
   newFinalE.addChildOnTop(newInnerE);
   newFinalE.addChildOnTop(outerArg.theData);
 
@@ -1320,7 +1320,7 @@ bool Calculator::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs)
   SyntacticElement& main = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numXs - 1];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->opSequence());
+  newExpr.addChildAtomOnTop(this->opSequence());
   newExpr.addChildOnTop(main.theData);
   main.theData = newExpr;
   main.controlIndex = theControlIndex;
@@ -1335,7 +1335,7 @@ bool Calculator::ReplaceEXEBySequence(int theControlIndex) {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opSequence());
+  newExpr.addChildAtomOnTop(this->opSequence());
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1349,7 +1349,7 @@ bool Calculator::ReplaceEEBy_CofEE(int theControlIndex) {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1363,7 +1363,7 @@ bool Calculator::ReplaceEOXbyEX() {
   int theOp = this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(theOp);
+  newExpr.addChildAtomOnTop(theOp);
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
   this->DecreaseStackExceptLast(1);
@@ -1410,7 +1410,7 @@ bool Calculator::ReplaceEEXBy_CofEE_X(int theControlIndex) {
   }
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1424,7 +1424,7 @@ bool Calculator::ReplaceEXXEXEBy_CofEEE(int theControlIndex) {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(middle.theData);
   newExpr.addChildOnTop(right.theData);
@@ -1439,7 +1439,7 @@ bool Calculator::ReplaceEXXEXEXBy_CofEEE_X(int theControlIndex) {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(middle.theData);
   newExpr.addChildOnTop(right.theData);
@@ -1458,7 +1458,7 @@ bool Calculator::ReplaceUnderscoreEPowerEbyLimits() {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opLimitBoundary());
+  newExpr.addChildAtomOnTop(this->opLimitBoundary());
   newExpr.addChildOnTop(bottom.theData);
   newExpr.addChildOnTop(top.theData);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].theData = newExpr;
@@ -1487,7 +1487,7 @@ bool Calculator::ReplaceXEXEXBy_CofEE(int theControlIndex) {
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 5];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(lefT.theData);
   newExpr.addChildOnTop(right.theData);
   result.theData = newExpr;
@@ -1518,7 +1518,7 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots) {
   Expression newExpr;
   newExpr.reset(*this);
   newExpr.children.Reserve(2);
-  newExpr.AddChildAtomOnTop(this->opEndStatement());
+  newExpr.addChildAtomOnTop(this->opEndStatement());
   newExpr.addChildOnTop(left.theData);
   left.theData = newExpr;
   left.controlIndex = this->conSequenceStatements();
@@ -1552,7 +1552,7 @@ bool Calculator::ReplaceEXEByCofEE(int theControlIndex) {
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1602,7 +1602,7 @@ bool Calculator::ReplaceEOEXByEX() {
   }
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1620,7 +1620,7 @@ bool Calculator::ReplaceEXEXBy_OofEE_X(int theOp) {
   }
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(theOp);
+  newExpr.addChildAtomOnTop(theOp);
   newExpr.addChildOnTop(left.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1640,8 +1640,8 @@ bool Calculator::ReplaceC1C2Eby_C2ofC1E() {
   }
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.addChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
   left.controlIndex = this->conExpression();
@@ -1654,7 +1654,7 @@ bool Calculator::ReplaceXEEXBy_OofEE_X(int inputOperation) {
   SyntacticElement& right =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(inputOperation);
+  newExpr.addChildAtomOnTop(inputOperation);
   newExpr.addChildOnTop(middle.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;
@@ -1672,7 +1672,7 @@ bool Calculator::ReplaceXEEBy_OofEE(int inputOperation) {
   SyntacticElement& left  =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(inputOperation);
+  newExpr.addChildAtomOnTop(inputOperation);
   newExpr.addChildOnTop(middle.theData);
   newExpr.addChildOnTop(right.theData);
   left.theData = newExpr;

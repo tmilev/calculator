@@ -41,7 +41,7 @@ public:
    VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient = 0, Matrix<coefficient>* form = 0) const;
    Vector<coefficient> GetBasisVector(int i) const;
    Vector<coefficient> GetCanonicalBasisVector(int i) const;
-//   unsigned int hashFunction() const {return this->hashFunction(*this);}
+   //unsigned int hashFunction() const {return this->hashFunction(*this);}
    static unsigned int hashFunction(const VectorSpace<coefficient>& input) {
      return input.fastbasis.hashFunction();
    }
@@ -50,26 +50,26 @@ public:
 
 template <typename coefficient>
 void Basis<coefficient>::AddVector(const Vector<coefficient>& v) {
-  if (basis.NumCols == 0) {
+  if (basis.numberOfColumns == 0) {
     basis.init(v.size, v.size);
-    basis.NumRows = 0;
+    basis.numberOfRows = 0;
   }
-  if (basis.NumRows == basis.NumCols) {
-    global.fatal << "Programming error: attempting to add the " << basis.NumRows
-    << " vector to a Basis of degree " << basis.NumCols;
+  if (basis.numberOfRows == basis.numberOfColumns) {
+    global.fatal << "Programming error: attempting to add the " << basis.numberOfRows
+    << " vector to a Basis of degree " << basis.numberOfColumns;
     global.fatal << global.fatal;
   }
   haveGramMatrix = false;
   for (int i = 0; i < v.size; i ++) {
-    basis.elements[basis.NumRows][i] = v[i];
+    basis.elements[basis.numberOfRows][i] = v[i];
   }
-  basis.NumRows ++;
+  basis.numberOfRows ++;
 }
 
 template <typename coefficient>
 void Basis<coefficient>::ComputeGramMatrix() {
-  int r = basis.NumRows;
-  int d = basis.NumCols;
+  int r = basis.numberOfRows;
+  int d = basis.numberOfColumns;
   gramMatrix.MakeZeroMatrix(r);
   for (int i = 0; i < r; i ++) {
     for (int j = 0; j < r; j ++) {
@@ -94,7 +94,7 @@ Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& in
     if (!haveGramMatrix) {
       ComputeGramMatrix();
     }
-    return gramMatrix*(basis * input);
+    return gramMatrix * (basis * input);
   }
 }
 
@@ -114,7 +114,7 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v) {
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
-  if (fastbasis.NumRows == 0) {
+  if (fastbasis.numberOfRows == 0) {
     this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
     int nzi = 0;
@@ -125,18 +125,18 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
     }
     if (nzi == degree) {
       rank = 0;
-      fastbasis.NumRows = 0;
+      fastbasis.numberOfRows = 0;
       return false;
     }
     for (int i = 0; i < v.size; i ++) {
       fastbasis.elements[0][i] = v[i] / v[nzi];
     }
     rank = 1;
-    this->fastbasis.NumRows = 1;
+    this->fastbasis.numberOfRows = 1;
     return true;
   }
   int jj = 0;
-  for (int i = 0; i < fastbasis.NumRows; i ++) {
+  for (int i = 0; i < fastbasis.numberOfRows; i ++) {
     while ((jj < v.size) && (v[jj] == 0)) {
       jj ++;
     }
@@ -144,19 +144,19 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
       return false;
     }
     int j = i;
-    for (; (j < fastbasis.NumCols) && (fastbasis.elements[i][j] == 0); j ++);
+    for (; (j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++);
     if (jj < j) {
-      if (fastbasis.ActualNumRows >= fastbasis.NumRows + 1) {
-        fastbasis.NumRows ++;
+      if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
+        fastbasis.numberOfRows ++;
       } else {
-        fastbasis.Resize(fastbasis.NumRows + 1,fastbasis.NumCols, true);
+        fastbasis.Resize(fastbasis.numberOfRows + 1,fastbasis.numberOfColumns, true);
       }
-      coefficient* tmp = fastbasis.elements[fastbasis.NumRows - 1];
-      for (int bi = fastbasis.NumRows - 1; bi > i; bi --) {
+      coefficient* tmp = fastbasis.elements[fastbasis.numberOfRows - 1];
+      for (int bi = fastbasis.numberOfRows - 1; bi > i; bi --) {
         fastbasis.elements[bi] = fastbasis.elements[bi - 1];
       }
       fastbasis.elements[i] = tmp;
-      for (int bj = 0; bj < fastbasis.NumCols; bj ++) {
+      for (int bj = 0; bj < fastbasis.numberOfColumns; bj ++) {
         fastbasis.elements[i][bj] = v[bj];
       }
       fastbasis.GaussianEliminationByRows();
@@ -175,13 +175,13 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
     return false;
   }
   // this should take the same amount of time either way
-  if (fastbasis.ActualNumRows >= fastbasis.NumRows + 1) {
-    fastbasis.NumRows ++;
+  if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
+    fastbasis.numberOfRows ++;
   } else {
-    fastbasis.Resize(fastbasis.NumRows + 1, fastbasis.NumCols, true);
+    fastbasis.Resize(fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true);
   }
-  for (int j = 0; j < fastbasis.NumCols; j ++) {
-    fastbasis.elements[fastbasis.NumRows - 1][j] = v[j];
+  for (int j = 0; j < fastbasis.numberOfColumns; j ++) {
+    fastbasis.elements[fastbasis.numberOfRows - 1][j] = v[j];
   }
   rank ++;
   return true;
@@ -367,7 +367,7 @@ Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const {
     global.fatal << "Bad vector index. " << global.fatal;
   }
   Vector<coefficient> out;
-  if (basis.basis.NumRows > i) {
+  if (basis.basis.numberOfRows > i) {
     basis.basis.GetVectorFromRow(i, out);
     return out;
   }

@@ -318,18 +318,18 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(
       return false;
     }
     leftAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
-    leftAN.CheckConsistency();
+    leftAN.checkConsistency();
   } else if (!input[2].IsOfType(&rightAN)) {
     if (!input[2].IsOfType(&tempRat)) {
       return false;
     }
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
-    rightAN.CheckConsistency();
+    rightAN.checkConsistency();
   }
-  leftAN.CheckConsistency();
-  rightAN.CheckConsistency();
+  leftAN.checkConsistency();
+  rightAN.checkConsistency();
   leftAN += rightAN;
-  leftAN.CheckConsistency();
+  leftAN.checkConsistency();
   return output.AssignValue(leftAN, theCommands);
 }
 
@@ -559,9 +559,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   SemisimpleLieAlgebra& theSSalg =
   inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerSS();
   Expression leftE;
-  inputConverted[1].CheckConsistency();
-  input[1].CheckConsistency();
-  input[2].CheckConsistency();
+  inputConverted[1].checkConsistency();
+  input[1].checkConsistency();
+  input[2].checkConsistency();
   if (!inputConverted[1].ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
     return false;
   }
@@ -876,7 +876,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
   const Expression& matrixE = input[1];
   Matrix<Rational> baseRat;
   if (theCommands.functionGetMatrix(matrixE, baseRat)) {
-    if (!baseRat.IsSquare() || baseRat.NumCols == 0) {
+    if (!baseRat.IsSquare() || baseRat.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseRat.toString() << " is not square. ";
@@ -896,13 +896,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
       largePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.MakeIdMatrix(baseRat.NumRows);
+    idMat.MakeIdMatrix(baseRat.numberOfRows);
     MathRoutines::RaiseToPower(baseRat, largePower, idMat);
     return output.AssignMatrix(baseRat, theCommands);
   }
   Matrix<AlgebraicNumber> baseAlg;
   if (theCommands.functionGetMatrix(matrixE, baseAlg)) {
-    if (!baseAlg.IsSquare() || baseAlg.NumCols == 0) {
+    if (!baseAlg.IsSquare() || baseAlg.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseAlg.toString() << " is not square. ";
@@ -922,7 +922,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.MakeIdMatrix(baseAlg.NumRows);
+    idMat.MakeIdMatrix(baseAlg.numberOfRows);
     MathRoutines::RaiseToPower(baseAlg, largePower, idMat);
     return output.AssignMatrix(baseAlg, theCommands);
   }  
@@ -948,7 +948,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
   }
   Matrix<Rational> baseRat;
   if (theCommands.functionGetMatrix(matrixE, baseRat)) {
-    if (!baseRat.IsSquare() || baseRat.NumCols == 0) {
+    if (!baseRat.IsSquare() || baseRat.numberOfColumns == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseRat.toString() << " is not square. ";
@@ -964,13 +964,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.MakeIdMatrix(baseRat.NumRows);
+    idMat.MakeIdMatrix(baseRat.numberOfRows);
     MathRoutines::RaiseToPower(baseRat, thePower, idMat);
     return output.AssignMatrix(baseRat, theCommands);
   }
   Matrix<AlgebraicNumber> baseAlg;
   if (theCommands.functionGetMatrix(matrixE, baseAlg)) {
-    if (!baseAlg.IsSquare() || baseAlg.NumCols == 0) {
+    if (!baseAlg.IsSquare() || baseAlg.numberOfColumns == 0) {
       return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
     }
     if (thePower <= 0) {
@@ -983,14 +983,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.MakeIdMatrix(baseAlg.NumRows);
+    idMat.MakeIdMatrix(baseAlg.numberOfRows);
     MathRoutines::RaiseToPower(baseAlg, thePower, idMat);
     return output.AssignMatrix(baseAlg, theCommands);
   }
   Matrix<RationalFunction> baseRF;
   ExpressionContext theContext(theCommands);
   if (theCommands.functionGetMatrix(matrixE, baseRF, &theContext)) {
-    if (!baseRF.IsSquare() || baseRF.NumCols == 0) {
+    if (!baseRF.IsSquare() || baseRF.numberOfColumns == 0) {
       return output.MakeError(
         "Exponentiating non-square matrices or matrices "
         "with zero rows is not allowed.",
@@ -1011,7 +1011,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       << "negative powers not implemented yet. ";
     }
     Matrix<RationalFunction> idMat;
-    idMat.MakeIdMatrix(baseRF.NumRows);
+    idMat.MakeIdMatrix(baseRF.numberOfRows);
     MathRoutines::RaiseToPower(baseRF, thePower, idMat);
     return output.AssignMatrix(baseRF, theCommands, &theContext);
   }
@@ -1126,7 +1126,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
           theCommands.theObjectContainer.theAlgebraicClosure,
           &theCommands.Comments
         )) {
-          base.CheckConsistency();
+          base.checkConsistency();
           output = input;
           Expression newPower, newBase;
           newPower.AssignValue(powerRat * 2, theCommands);
@@ -1333,16 +1333,16 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   }
   LargeInteger expectedNumTerms;
-  expectedNumTerms = theMat.NumCols;
+  expectedNumTerms = theMat.numberOfColumns;
   expectedNumTerms.RaiseToPower(thePower);
   if (expectedNumTerms > 10000) {
     return theCommands << "The expected number terms in the result of the exponentiation "
     << theMat.toString() << " to the power of " << thePower << " is approximately ("
-    << theMat.NumCols << ")^" << thePower << "=" << expectedNumTerms
+    << theMat.numberOfColumns << ")^" << thePower << "=" << expectedNumTerms
     << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
-  idMatE.MakeIdMatrix(theMat.NumRows, theCommands.EOne(), theCommands.EZero());
+  idMatE.MakeIdMatrix(theMat.numberOfRows, theCommands.EOne(), theCommands.EZero());
   MathRoutines::RaiseToPower(theMat, thePower, idMatE);
   return output.AssignMatrixExpressions(theMat, theCommands, true, true);
 }
@@ -1638,8 +1638,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(
   if (!theCommands.GetMatrixExpressions(theMatE, theMat)) {
     return false;
   }
-  for (int i = 0; i < theMat.NumRows; i ++) {
-    for (int j = 0; j < theMat.NumCols; j ++) {
+  for (int i = 0; i < theMat.numberOfRows; i ++) {
+    for (int j = 0; j < theMat.numberOfColumns; j ++) {
       theMat(i, j) = theScalarE * theMat(i, j);
     }
   }
@@ -1661,7 +1661,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(
   }
   output.reset(theCommands);
   output.children.Reserve(input[2].size());
-  output.AddChildAtomOnTop(theCommands.opSequence());
+  output.addChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
   for (int i = 1; i < input[2].size(); i ++) {
     tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
@@ -1721,18 +1721,18 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
   if (!theCommands.GetMatrixExpressions(left, leftMat)) {
     return false;
   }
-  if (!theCommands.GetMatrixExpressions(input[2], rightMat, leftMat.NumCols)) {
+  if (!theCommands.GetMatrixExpressions(input[2], rightMat, leftMat.numberOfColumns)) {
     return false;
   }
-  if (leftMat.NumCols != rightMat.NumRows) {
+  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
     return false;
   }
   Matrix<Expression> outputMat;
-  outputMat.init(leftMat.NumRows, rightMat.NumCols);
+  outputMat.init(leftMat.numberOfRows, rightMat.numberOfColumns);
   Expression leftSummand, rightSummand;
-  for (int i = 0; i < leftMat.NumRows; i ++) {
-    for (int j = 0; j < rightMat.NumCols; j ++) {
-      for (int k = 0; k < leftMat.NumCols; k ++) {
+  for (int i = 0; i < leftMat.numberOfRows; i ++) {
+    for (int j = 0; j < rightMat.numberOfColumns; j ++) {
+      for (int k = 0; k < leftMat.numberOfColumns; k ++) {
         if (k == 0) {
           outputMat(i, j).MakeProducT(theCommands, leftMat(i, k), rightMat(k, j));
         } else {
@@ -1896,11 +1896,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(
       return false;
     }
   }
-  if (matAlgLeft.NumCols != matAlgRight.NumRows) {
+  if (matAlgLeft.numberOfColumns != matAlgRight.numberOfRows) {
     std::stringstream errorStream;
     errorStream << "Error: attempting to multiply matrix with "
-    << matAlgLeft.NumCols << " columns by a "
-    << "matrix with " << matAlgRight.NumRows << " rows. ";
+    << matAlgLeft.numberOfColumns << " columns by a "
+    << "matrix with " << matAlgRight.numberOfRows << " rows. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
   matAlgLeft *= matAlgRight;
@@ -1934,7 +1934,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   if (!theCommands.functionGetMatrix(leftE, rightMat)) {
     return false;
   }
-  if (leftMat.NumCols != rightMat.NumRows) {
+  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
     return false;
   }
   leftMat.MultiplyOnTheRight(rightMat);
@@ -1982,7 +1982,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   if (!theCommands.functionGetMatrix(leftE, leftMat)) {
     return false;
   }
-  if (leftMat.NumCols != rightMat.NumRows) {
+  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
     return false;
   }
   leftMat.MultiplyOnTheRight(rightMat);
@@ -2205,11 +2205,11 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix(
   ) {
     return false;
   }
-  if (leftMat.NumCols != rightMat.NumCols || leftMat.NumRows != rightMat.NumRows) {
+  if (leftMat.numberOfColumns != rightMat.numberOfColumns || leftMat.numberOfRows != rightMat.numberOfRows) {
     return false;
   }
-  for (int i = 0; i < leftMat.NumRows; i ++) {
-    for (int j = 0; j < leftMat.NumCols; j ++) {
+  for (int i = 0; i < leftMat.numberOfRows; i ++) {
+    for (int j = 0; j < leftMat.numberOfColumns; j ++) {
       leftMat(i, j) += rightMat(i, j);
     }
   }
@@ -2230,10 +2230,10 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
   ) {
     return false;
   }
-  if (leftMat.NumRows != rightMat.NumRows) {
-    return theCommands << "Cannot augment the left matrix with: " << leftMat.NumRows
+  if (leftMat.numberOfRows != rightMat.numberOfRows) {
+    return theCommands << "Cannot augment the left matrix with: " << leftMat.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
-    << rightMat.NumRows << ". ";
+    << rightMat.numberOfRows << ". ";
   }
   leftMat.AppendMatrixOnTheRight(rightMat);
   return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
@@ -2253,10 +2253,10 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
   ) {
     return false;
   }
-  if (leftMat.NumRows != rightMat.NumRows) {
-    return theCommands << "Cannot augment the left matrix with: " << leftMat.NumRows
+  if (leftMat.numberOfRows != rightMat.numberOfRows) {
+    return theCommands << "Cannot augment the left matrix with: " << leftMat.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
-    << rightMat.NumRows << ". ";
+    << rightMat.numberOfRows << ". ";
   }
   leftMat.AppendMatrixToTheBottom(rightMat);
   return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
@@ -2315,8 +2315,8 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
         return false;
       }
       if (
-        rightMatAlg.NumRows != leftMatAlg.NumRows ||
-        rightMatAlg.NumCols != leftMatAlg.NumCols
+        rightMatAlg.numberOfRows != leftMatAlg.numberOfRows ||
+        rightMatAlg.numberOfColumns != leftMatAlg.numberOfColumns
       ) {
         return false;
       }
@@ -2330,8 +2330,8 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
       return false;
     }
     if (
-      rightMatAlg.NumRows != leftMatAlg.NumRows ||
-      rightMatAlg.NumCols != leftMatAlg.NumCols
+      rightMatAlg.numberOfRows != leftMatAlg.numberOfRows ||
+      rightMatAlg.numberOfColumns != leftMatAlg.numberOfColumns
     ) {
       return false;
     }
@@ -2345,15 +2345,15 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
     return false;
   }
   if (
-    leftMatRat.NumRows != rightMatRat.NumRows ||
-    leftMatRat.NumCols != rightMatRat.NumCols
+    leftMatRat.numberOfRows != rightMatRat.numberOfRows ||
+    leftMatRat.numberOfColumns != rightMatRat.numberOfColumns
   ) {
     std::stringstream errorStream;
     errorStream << "Error: attempting to add a "
-    << rightMatRat.NumRows << " by "
-    << rightMatRat.NumCols << " matrix to a "
-    << leftMatRat.NumRows
-    << " by " << leftMatRat.NumCols << " matrix. ";
+    << rightMatRat.numberOfRows << " by "
+    << rightMatRat.numberOfColumns << " matrix to a "
+    << leftMatRat.numberOfRows
+    << " by " << leftMatRat.numberOfColumns << " matrix. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
   leftMatRat += rightMatRat;
@@ -2382,7 +2382,7 @@ bool CalculatorFunctionsBinaryOps::innerSetMinus(
   }
   for (int i = 1; i < rightSetE.children.size; i ++) {
     if (resultEs.contains(rightSetE[i])) {
-      resultEs.RemoveIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
+      resultEs.removeIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
     }
   }
   resultEs.quickSortAscending();
@@ -2415,8 +2415,8 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
     return false;
   }
   if (
-    rightMat.NumRows != leftMat.NumRows ||
-    rightMat.NumCols != leftMat.NumCols
+    rightMat.numberOfRows != leftMat.numberOfRows ||
+    rightMat.numberOfColumns != leftMat.numberOfColumns
   ) {
     return false;
   }
@@ -2475,7 +2475,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
   }
   output.reset(theCommands);
   output.children.Reserve(input[1].size());
-  output.AddChildAtomOnTop(theCommands.opSequence());
+  output.addChildAtomOnTop(theCommands.opSequence());
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {
     tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);

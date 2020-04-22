@@ -103,13 +103,13 @@ template <class coefficient>
 void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
   const Matrix<Polynomial<coefficient> >& theMat
 ) {
-  if (theMat.NumCols != theMat.NumRows) {
+  if (theMat.numberOfColumns != theMat.numberOfRows) {
     global.fatal << "Cannot compute determinant: matrix has "
-    << theMat.NumRows << " rows and " << theMat.NumCols
+    << theMat.numberOfRows << " rows and " << theMat.numberOfColumns
     << " columns. " << global.fatal;
   }
   permutation thePerm;
-  thePerm.initPermutation(theMat.NumRows);
+  thePerm.initPermutation(theMat.numberOfRows);
   int numCycles = thePerm.GetNumPermutations();
   List<int> permutationIndices;
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
@@ -439,8 +439,8 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(
   // for univariate polynomials only
   MacroRegisterFunctionWithName("Polynomial::EvaluateUnivariatePoly");
   Matrix<coefficient> output, tempElt, idMat;
-  idMat.MakeIdMatrix(input.NumCols);
-  output.MakeZeroMatrix(input.NumCols);
+  idMat.MakeIdMatrix(input.numberOfColumns);
+  output.MakeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
@@ -820,12 +820,12 @@ void Polynomial<coefficient>::TimesInteger(int a) {
 template <class coefficient>
 void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
-  if (input.NumCols != input.NumRows) {
+  if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "
     << global.fatal;
   }
-  int n = input.NumCols;
+  int n = input.numberOfColumns;
   if (n == 0) {
     global.fatal
     << "At present, the characteristic polynomial of "
@@ -851,12 +851,12 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
 template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
-  if (input.NumCols != input.NumRows) {
+  if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "
     << global.fatal;
   }
-  int theDim = input.NumCols;
+  int theDim = input.numberOfColumns;
   this->makeOne(1);
   Vectors<coefficient> theBasis;
   Vector<coefficient> theVectorPowers;
@@ -1330,8 +1330,8 @@ template<class coefficient>
 unsigned int ElementOneVariablePolynomialQuotientRing<coefficient>::hashFunction(
 ) {
   return
-  this->value.hashFunction() * SomeRandomPrimes[0] +
-  this->value.hashFunction() * SomeRandomPrimes[1];
+  this->value.hashFunction() * someRandomPrimes[0] +
+  this->value.hashFunction() * someRandomPrimes[1];
 }
 
 template<class coefficient>

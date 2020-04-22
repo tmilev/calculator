@@ -197,7 +197,7 @@ bool Calculator::innerAnimateLittelmannPaths(
   SemisimpleLieAlgebra* theSSowner = algebra.content;
   Vector<Rational> theWeight;
   ExpressionContext tempContext(theCommands);
-  if (!theCommands.GetVector<Rational>(
+  if (!theCommands.getVector<Rational>(
     input[2],
     theWeight,
     &tempContext,
@@ -934,7 +934,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   Vector<Rational> splittingParSel;
   splittingParSel = theG2B3Data.SelSplittingParSel;
 
-  theCommands.theObjectContainer.theCategoryOmodules.AddNoRepetitionOrReturnIndexFirst(theModCopy);
+  theCommands.theObjectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
   int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
   ModuleSSalgebra<RationalFunction>& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder = true;
@@ -1006,8 +1006,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   *theG2B3Data.theEigenVectorS.LastObject() = theHWV;
   Vector<RationalFunction> weightDifference;
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3);
-  theG2Casimir.CheckConsistency();
-  imageCasimirInB3.CheckConsistency();
+  theG2Casimir.checkConsistency();
+  imageCasimirInB3.checkConsistency();
   RationalFunction charDiff;
   theG2B3Data.theHmm.theRange().OrderNilradical(
     theMod.parabolicSelectionNonSelectedAreElementsLevi,
@@ -1082,7 +1082,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
   ExpressionContext theContext(theCommands);
   Vector<Rational> theHW;
-  if (!theCommands.GetVector<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
+  if (!theCommands.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
     return output.MakeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
@@ -1368,7 +1368,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   Vectors<Rational> waypoints;
   waypoints.setSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
-    if (!theCommands.GetVector<Rational>(
+    if (!theCommands.getVector<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
     )) {
       return output.MakeError("Failed to extract waypoints", theCommands);
@@ -1417,7 +1417,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
       factorization.reduced[i], polynomial.context, theCommands
     );
     expressionE.children.clear();
-    expressionE.AddChildAtomOnTop("MakeExpression");
+    expressionE.addChildAtomOnTop("MakeExpression");
     expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
   }
@@ -1518,29 +1518,29 @@ bool Expression::AssignMatrixExpressions(
   bool dontReduceTypes
 ) {
   MacroRegisterFunctionWithName("Expression::AssignMatrixExpressions");
-  if (reduceOneRowToSequenceAndOneByOneToNonMatrix && input.NumRows == 1) {
-    if (input.NumCols == 1) {
+  if (reduceOneRowToSequenceAndOneByOneToNonMatrix && input.numberOfRows == 1) {
+    if (input.numberOfColumns == 1) {
       (*this) = input(0, 0);
       return true;
     }
     this->MakeSequence(owner);
-    for (int i = 0; i < input.NumCols; i ++) {
+    for (int i = 0; i < input.numberOfColumns; i ++) {
       this->addChildOnTop(input(0, i));
     }
     return true;
   }
-  this->reset(owner, input.NumRows + 1);
+  this->reset(owner, input.numberOfRows + 1);
   Expression theMatType(owner);
-  theMatType.AddChildAtomOnTop(owner.opMatriX());
+  theMatType.addChildAtomOnTop(owner.opMatriX());
   this->addChildOnTop(theMatType);
   enum mType{typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
   mType outType = typeUnknown;
   Expression currentRow;
-  for (int i = 0; i < input.NumRows; i ++) {
+  for (int i = 0; i < input.numberOfRows; i ++) {
     currentRow.reset(owner);
-    currentRow.children.Reserve(input.NumCols + 1);
-    currentRow.AddChildAtomOnTop(owner.opSequence());
-    for (int j = 0; j < input.NumCols; j ++) {
+    currentRow.children.Reserve(input.numberOfColumns + 1);
+    currentRow.addChildAtomOnTop(owner.opSequence());
+    for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));
       mType inType;
       if (input(i, j).IsOfType<Rational>()) {
@@ -1611,28 +1611,28 @@ bool Expression::AssignMatrixExpressions(
   }
   switch(outType) {
     case typeRat:
-      theMatType.AddChildAtomOnTop(owner.opRational());
+      theMatType.addChildAtomOnTop(owner.opRational());
       break;
     case typeDouble:
-      theMatType.AddChildAtomOnTop(owner.opDouble());
+      theMatType.addChildAtomOnTop(owner.opDouble());
       break;
     case typeAlgebraic:
-      theMatType.AddChildAtomOnTop(owner.opAlgNumber());
+      theMatType.addChildAtomOnTop(owner.opAlgNumber());
       break;
     case typePolyRat:
-      theMatType.AddChildAtomOnTop(owner.opPolynomialRational());
+      theMatType.addChildAtomOnTop(owner.opPolynomialRational());
       break;
     case typePolyAlg:
-      theMatType.AddChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
+      theMatType.addChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
       break;
     case typeRF:
-      theMatType.AddChildAtomOnTop(owner.opRationalFunction());
+      theMatType.addChildAtomOnTop(owner.opRationalFunction());
       break;
     default:
       break;
   }
   if (outType != typeUnknown && outType != typeExpression && !dontReduceTypes) {
-    this->SetChilD(0, theMatType);
+    this->setChild(0, theMatType);
   }
   return true;
 }
@@ -1695,8 +1695,8 @@ bool Calculator::GetMatrixExpressions(
   output.init(input.size() - 1, input[1].size() - 1);
   for (int i = 1; i < input.size(); i ++) {
     if (
-      input[i].IsSequenceNElementS(output.NumCols) ||
-      input[i].StartsWith(this->opIntervalOpen(), output.NumCols + 1)
+      input[i].IsSequenceNElementS(output.numberOfColumns) ||
+      input[i].StartsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
     ) {
       for (int j = 1; j < input[i].size(); j ++) {
         output(i - 1, j - 1) = input[i][j];
@@ -1758,8 +1758,8 @@ bool Calculator::Test::ProcessOneTest(JSData& input) {
   std::string command = input["input"].theString;
   if (!this->commands.contains(command)) {
     std::stringstream reportStream;
-    reportStream << "Command " << command
-    << " not recognized. "
+    reportStream << "Command [" << command
+    << "] not recognized. "
     << "If the testing commands have recently changed, this is OK, "
     << "otherwise, it isn't.";
     global << Logger::red << reportStream.str() << Logger::endL;
@@ -1972,7 +1972,8 @@ bool Calculator::Test::ProcessResults() {
     << " and rerun the present test to store the expected results. "
     ;
     out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
-    global << Logger::red << "There were " << this->inconsistencies << " inconsistencies. " << Logger::endL;
+    global << Logger::red << "There were "
+    << this->inconsistencies << " inconsistencies. " << Logger::endL;
     global << badCommandsConsole.str() << Logger::endL;
   }
   if (this->unknown > 0) {
@@ -1985,7 +1986,7 @@ bool Calculator::Test::ProcessResults() {
       << "<b>Erase file " << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.</b>";
       global << Logger::yellow << "Erase file " << WebAPI::calculator::testFileNameVirtual
-      << " and rerun the present test to store the expected results.";
+      << " and rerun the present test to store the expected results. ";
     }
     out << "<table>" << unknownCommands.str() << "</table>";
   }

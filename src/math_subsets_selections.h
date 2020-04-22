@@ -117,7 +117,7 @@ public:
   static unsigned int hashFunction(const SelectionWithMultiplicities& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.elements.size; i ++) {
-      result += static_cast<unsigned int>(input.Multiplicities[input.elements[i]]) * SomeRandomPrimes[input.elements[i]];
+      result += static_cast<unsigned int>(input.Multiplicities[input.elements[i]]) * someRandomPrimes[input.elements[i]];
     }
     return result;
   }
@@ -147,7 +147,7 @@ public:
   }
   int CardinalitySelectionWithMultiplicities();
   static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
-    return static_cast<unsigned int>(input.MaxMultiplicity) * SomeRandomPrimes[0] +
+    return static_cast<unsigned int>(input.MaxMultiplicity) * someRandomPrimes[0] +
     input.::SelectionWithMultiplicities::hashFunction(input);
   }
 };

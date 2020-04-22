@@ -113,7 +113,7 @@ void MatrixInBasis(
 
 template <typename coefficient>
 void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, const Matrix<coefficient>& BM) {
-  int d = BM.NumRows;
+  int d = BM.numberOfRows;
   Matrix<coefficient> M = BM;
   Matrix<coefficient> inT = in;
   inT.Transpose();
@@ -122,10 +122,10 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
   for (int i = 0; i < d; i ++) {
     int jj = 0;
     for (int j = 0; j < d; j ++) {
-      while ((jj < M.NumCols) and (M.elements[i][jj] == 0)) {
+      while ((jj < M.numberOfColumns) and (M.elements[i][jj] == 0)) {
         jj ++;
       }
-      if (jj == M.NumCols) {
+      if (jj == M.numberOfColumns) {
         out.elements[i][j] = 0;
         continue;
       }
@@ -134,7 +134,7 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
         continue;
       }
       out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-      for (int k = jj; k < M.NumCols; k ++) {
+      for (int k = jj; k < M.numberOfColumns; k ++) {
         M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
       }
     }
@@ -240,7 +240,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
   if ((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0)) {
     U.classFunctionMatrices.setSize(G->ccCount);
     for (int i = 0; i <classFunctionMatrices.size; i ++) {
-      if ((classFunctionMatrices[i].NumCols > 0) && (other.classFunctionMatrices[i].NumCols > 0))
+      if ((classFunctionMatrices[i].numberOfColumns > 0) && (other.classFunctionMatrices[i].numberOfColumns > 0))
       U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
     }
   }*/
@@ -272,7 +272,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
    if (classFunctionMatrices.size > 0) {
      out.classFunctionMatrices.setSize(G->ccCount);
      for (int i = 0; i <classFunctionMatrices.size; i ++) {
-        if (classFunctionMatrices[i].NumRows > 0) {
+        if (classFunctionMatrices[i].numberOfRows > 0) {
           //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
           MatrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
         }
@@ -285,7 +285,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
 template <typename somegroup, typename coefficient>
 VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::FindDecentBasis() const {
   VectorSpace<coefficient> V;
-  int d = this->generators[0].NumCols;
+  int d = this->generators[0].numberOfColumns;
   for (int geni = 0; geni < this->generators.size; geni ++) {
     List<Vector<coefficient> > ess = eigenspaces(this->generators[geni]);
     for (int essi = 0; essi < ess.size; essi ++) {
@@ -572,7 +572,7 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
   M.GaussianEliminationByRows(M);
   output.setSize(0);
   Vector<coefficient> v;
-  for (int i = 0; i < M.NumRows; i ++) {
+  for (int i = 0; i < M.numberOfRows; i ++) {
     v.setSize(d);
     for (int j = 0; j < d; j ++) {
       v[j] = M.elements[i][j];
@@ -672,7 +672,7 @@ List<Vector<coefficient> > orthogonal_complement(
   Selection s;
   outm.GaussianEliminationByRows(outm,tmp,s);
   List<Vector<coefficient> > out;
-  for (int i = 0; i < outm.NumRows; i ++) {
+  for (int i = 0; i < outm.numberOfRows; i ++) {
     Vector<coefficient> v;
     v.setSize(d);
     for (int j = 0; j < d; j ++) {
@@ -729,11 +729,11 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
   M.GaussianEliminationByRows(M, dummy1, dummy2);
   List<Vector<coefficient> > out;
   bool zerov;
-  for (int i = 0; i < M.NumRows; i ++) {
+  for (int i = 0; i < M.numberOfRows; i ++) {
     Vector<coefficient> v;
-    v.makeZero(M.NumCols); // initializing is not necessary
+    v.makeZero(M.numberOfColumns); // initializing is not necessary
     zerov = true;
-    for (int j = 0; j < M.NumCols; j ++) {
+    for (int j = 0; j < M.numberOfColumns; j ++) {
       v[j] = M.elements[i][j];
       if (zerov && M.elements[i][j] != 0) {
         zerov = false;
@@ -749,7 +749,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
 // guess at integers
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0) {
   (void) checkDivisorsOf;//avoid unused parameter warning, portable.
-  int n = M.NumCols;
+  int n = M.numberOfColumns;
   List<List<Vector<Rational> > > spaces;
   int found = 0;
 // for (int i = 0; found < n; i ++){
@@ -767,7 +767,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
       M2.GetEigenspaceModifyMe(r, V);
       found += V.size;
       spaces.addOnTop(V);
-      if (found == M.NumCols) {
+      if (found == M.numberOfColumns) {
         break;
       }
     }
@@ -1052,7 +1052,7 @@ void SubgroupDataRootReflections::InitGenerators() {
     this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
     return;
   }
-  int d = this->SubCartanSymmetric.NumRows;
+  int d = this->SubCartanSymmetric.numberOfRows;
   this->theSubgroupData.generatorPreimages.setSize(d);
   this->theSubgroupData.theSubgroup->generators.setSize(d);
   ElementWeylGroup currentReflection;
@@ -1065,7 +1065,7 @@ void SubgroupDataRootReflections::InitGenerators() {
 
 void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots) {
   MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeParabolicSubgroup");
-  G.CheckConsistency();
+  G.checkConsistency();
   this->theWeylData = &G;
   this->theSubgroupData.MakeSubgroupOf(G.theGroup);
   this->CheckInitialization();

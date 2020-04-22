@@ -488,8 +488,8 @@ std::string ProblemDataAdministrative::toString() const {
   return out.str();
 }
 
-bool ProblemData::CheckConsistency() const {
-  MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
+bool ProblemData::checkConsistency() const {
+  MacroRegisterFunctionWithName("ProblemData::checkConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
       global.fatal << "This is not supposed to happen: empty answer id." << global.fatal;
@@ -1038,7 +1038,7 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }
-//  this->CheckConsistency();
+//  this->checkConsistency();
   return result;
 }
 
@@ -1082,7 +1082,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
       //say, by an older version of the calculator
     }
   }
-//  this->CheckConsistency();
+//  this->checkConsistency();
   return result;
 }
 

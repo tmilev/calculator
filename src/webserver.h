@@ -99,7 +99,7 @@ public:
   int Run();
   bool RunOnce();
   bool FailReceiveReturnFalse();
-  bool CheckConsistency();
+  bool checkConsistency();
 
   bool IsFileServedRaw();
 
@@ -278,7 +278,7 @@ public:
   void ReleaseEverything();
   bool CreateNewActiveWorker();
   bool EmergencyRemoval_LastCreatedWorker();
-  bool CheckConsistency();
+  bool checkConsistency();
   int Daemon();
   int Run();
   // Wraps the system level fork() call.

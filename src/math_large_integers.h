@@ -440,7 +440,7 @@ private:
   ParallelComputing::GlobalPointerCounter ++;
   ParallelComputing::CheckPointerCounters();
 #endif
-    this->Extended->den.AssignShiftedUInt( static_cast<unsigned int>(this->DenShort), 0);
+    this->Extended->den.AssignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
     this->Extended->num.AssignInt(this->NumShort);
     return true;
   }
@@ -460,7 +460,7 @@ public:
   int NumShort;
   //the requirement that the below be unsigned caused a huge problem, so I
   //changed it back to int. Grrrrr.
-  int DenShort;
+  int denominatorShort;
   LargeRationalExtended *Extended;
   static unsigned long long int TotalSmallAdditions;
   static unsigned long long int TotalLargeAdditions;
@@ -517,16 +517,16 @@ public:
   }
   void MultiplyBy(const Rational& r);
   // The Hash function of zero must be equal to zero.
-  // See Note on Hashes before the definition of SomeRandomPrimes;
+  // See Note on Hashes before the definition of someRandomPrimes;
   unsigned int hashFunction() const {
     if (this->Extended == nullptr) {
       if (this->NumShort == 0) {
         return 0;
       }
-      return static_cast<unsigned int>(this->NumShort) * SomeRandomPrimes[0] + static_cast<unsigned int>(this->DenShort) * ::SomeRandomPrimes[1];
+      return static_cast<unsigned int>(this->NumShort) * someRandomPrimes[0] + static_cast<unsigned int>(this->denominatorShort) * ::someRandomPrimes[1];
     }
-    return this->Extended->num.hashFunction() * SomeRandomPrimes[0] +
-    this->Extended->den.hashFunction() * SomeRandomPrimes[1];
+    return this->Extended->num.hashFunction() * someRandomPrimes[0] +
+    this->Extended->den.hashFunction() * someRandomPrimes[1];
   }
   static inline unsigned int hashFunction(const Rational& input) {
     return input.hashFunction();
@@ -549,7 +549,7 @@ public:
     if (this->Extended != nullptr) {
       return false;
     }
-    if (this->DenShort != 1) {
+    if (this->denominatorShort != 1) {
       return false;
     }
     if (whichInteger != nullptr) {
@@ -564,7 +564,7 @@ public:
       n = - n;
     }
     this->NumShort = n;
-    this->DenShort = d;
+    this->denominatorShort = d;
     this->FreeExtended();
     this->simplify();
   }
@@ -609,7 +609,7 @@ public:
   }
   inline bool IsEqualToOne() const {
     if (this->Extended == nullptr) {
-      return (this->NumShort == 1 && this->DenShort == 1);
+      return (this->NumShort == 1 && this->denominatorShort == 1);
     } else {
       return (this->Extended->num.IsEqualToOne() && this->Extended->den.IsEqualToOne());
     }
@@ -665,17 +665,17 @@ public:
   int floorIfSmall();
   void makeZero() {
     this->NumShort = 0;
-    this->DenShort = 1;
+    this->denominatorShort = 1;
     this->FreeExtended();
   }
   void makeOne() {
     this->NumShort = 1;
-    this->DenShort = 1;
+    this->denominatorShort = 1;
     this->FreeExtended();
   }
   void MakeMOne() {
     this->NumShort = - 1;
-    this->DenShort = 1;
+    this->denominatorShort = 1;
     this->FreeExtended();
   }
   void WriteToFile(std::fstream& output);
@@ -715,7 +715,7 @@ public:
     this->Extended = nullptr;
     *this = other;
   }
-  Rational(): NumShort(0), DenShort(0), Extended(nullptr) {
+  Rational(): NumShort(0), denominatorShort(0), Extended(nullptr) {
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
   Rational(int n) {
@@ -728,7 +728,7 @@ public:
     this->Assign(right);
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
-  Rational(const std::string& input): NumShort(0), DenShort(0), Extended(nullptr) {
+  Rational(const std::string& input): NumShort(0), denominatorShort(0), Extended(nullptr) {
     this->AssignString(input);
   }
   ~Rational() {
@@ -748,15 +748,9 @@ public:
     }
     return Rational::gcd(a, b);
   }
-  inline bool CheckForElementSanity() {
-    return this->Extended == nullptr;
-  }
-  inline bool checkConsistency() {
-    return this->CheckConsistency();
-  }
-  inline bool CheckConsistency() {
+  bool checkConsistency() {
     if (this->Extended == nullptr) {
-      return this->DenShort > 0;
+      return this->denominatorShort > 0;
     }
     return true;
   }
@@ -782,7 +776,7 @@ public:
   inline void operator+=(const Rational& r) {
     //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
     if (r.Extended == nullptr && this->Extended == nullptr) {
-      if (this->TryToAddQuickly(r.NumShort, r.DenShort)) {
+      if (this->TryToAddQuickly(r.NumShort, r.denominatorShort)) {
         return;
       }
     }
@@ -841,7 +835,7 @@ public:
     tempRat.DivideByInteger(right);
     return tempRat;
   }
-  Vector<Rational> operator*(const Vector<Rational> & right) const;
+  Vector<Rational> operator*(const Vector<Rational>& right) const;
   Rational operator+(const Rational& right) const;
   Rational operator-(const Rational& right) const;
   Rational operator/(const Rational& right) const;

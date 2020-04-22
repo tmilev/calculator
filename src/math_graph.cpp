@@ -79,7 +79,7 @@ void GraphWeightedLabeledEdges::AddEdge(int i, int j, const std::string& inputLa
   this->theEdges.AddMonomial(theEdge, 1);
 }
 
-bool GraphWeightedLabeledEdges:: CheckConsistency() const {
+bool GraphWeightedLabeledEdges:: checkConsistency() const {
   for (int i = 0; i < this->theEdges.size(); i ++) {
     if (
       this->theEdges[i].vStart < 0 ||
@@ -112,7 +112,7 @@ void GraphWeightedLabeledEdges::ComputeEdgesPerNodesNoMultiplicities() {
   MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
-  this->CheckConsistency();
+  this->checkConsistency();
   for (int i = 0; i < this->theEdges.size(); i ++) {
     this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].addOnTop(this->theEdges[i].vEnd);
   }
@@ -298,7 +298,7 @@ std::string GraphWeightedLabeledEdges::ToStringPsTricks(FormatExpressions* theFo
   this->ComputeEdgesPerNodesNoMultiplicities();
   this->ComputeConnectedComponentsAndBaseNodeDistances();
   this->ComputeDisplayGroups();
-  this->CheckConsistency();
+  this->checkConsistency();
   std::stringstream out;
 //  out << this->ToStringNodesAndEdges(theFormat);
   out << "<br>\\documentclass{article}<br>\n\n";

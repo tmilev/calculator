@@ -147,7 +147,7 @@ void TimeoutThread::Run() {
   this->reset();
   for (;;) {
     this->counter ++;
-    global.CheckConsistency();
+    global.checkConsistency();
     this->HandleComputationTimer();
     global.FallAsleep(this->intervalBetweenChecksInMilliseconds);
     this->HandleComputationTimeout();
@@ -160,7 +160,7 @@ void TimeoutThread::Run() {
       break;
     }
   }
-  global.CheckConsistency();
+  global.checkConsistency();
 }
 
 void RunTimerThread(int threadIndex) {

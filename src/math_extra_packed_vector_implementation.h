@@ -37,14 +37,14 @@ PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const {
 template <typename scalar>
 scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
   PackedVector<scalar> Bv;
-  Bv.makeZero(B.NumRows);
-  for (int i = 0; i < B.NumRows; i ++) {
-    for (int j = 0; j < B.NumCols; j ++) {
+  Bv.makeZero(B.numberOfRows);
+  for (int i = 0; i < B.numberOfRows; i ++) {
+    for (int j = 0; j < B.numberOfColumns; j ++) {
       Bv[i] += B.elements[i][j] * v[j];
     }
   }
   scalar wBv = 0;
-  for (int i = 0; i < B.NumRows; i ++) {
+  for (int i = 0; i < B.numberOfRows; i ++) {
     wBv += this->data[i] * Bv[i];
   }
   return wBv;
@@ -58,7 +58,7 @@ scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const 
     for (int j = 0; j < this->size; j ++)
       Bv[i] += B[i][j]*v[j]
   scalar wBv = 0;
-  for (int i = 0; i <B.NumRows; i ++)
+  for (int i = 0; i <B.numberOfRows; i ++)
     wBv += this->data[i]*Bv[i];
   return wBv;
 }
@@ -137,7 +137,7 @@ template <typename scalar>
 unsigned int PackedVector<scalar>::hashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += this->data[i].hashFunction() * SomeRandomPrimes[i];
+    result += this->data[i].hashFunction() * someRandomPrimes[i];
   }
   return result;
 }

@@ -284,7 +284,7 @@ ElementEllipticCurve<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.EllipticCurveElementsRational
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -293,7 +293,7 @@ ElementEllipticCurve<ElementZmodP>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.EllipticCurveElementsZmodP
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -314,7 +314,7 @@ ElementHyperoctahedralGroupR2
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theElementsHyperOctGroup
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -334,7 +334,7 @@ std::string
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theStrings
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -343,7 +343,7 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theHyperoctahedralReps
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -352,7 +352,7 @@ Rational
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRationals
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -364,7 +364,7 @@ double
     return 0;
   }
   return this->owner->theObjectContainer.theDoubles
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -373,7 +373,7 @@ RationalFunction
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRFs
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -382,7 +382,7 @@ MatrixTensor<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theMatTensorRats
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -391,7 +391,7 @@ ElementUniversalEnveloping<RationalFunction>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theUEs
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -400,7 +400,7 @@ Weight<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeights
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -409,7 +409,7 @@ Weight<Polynomial<Rational> >
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeightsPoly
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -418,7 +418,7 @@ int
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRationals
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -427,7 +427,7 @@ LargeIntegerUnsigned
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRationals
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -436,7 +436,7 @@ Polynomial<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.polynomialsRational
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -445,7 +445,7 @@ Polynomial<ElementZmodP>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.polynomialsModular
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -454,7 +454,7 @@ Polynomial<AlgebraicNumber>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.polynomialsAlgebraic
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -463,7 +463,7 @@ ElementWeylAlgebra<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylAlgebraElements
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -484,7 +484,7 @@ AlgebraicNumber
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theAlgebraicNumbers
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -493,7 +493,7 @@ ElementZmodP
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theEltsModP
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -502,7 +502,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theLittelmannOperators
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -511,7 +511,7 @@ ElementTensorsGeneralizedVermas<RationalFunction>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theTensorElts
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -520,7 +520,7 @@ charSSAlgMod<Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theCharsSSLieAlgFD
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -529,7 +529,7 @@ LittelmannPath
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theLSpaths
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -538,7 +538,7 @@ Plot
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.thePlots
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -549,7 +549,7 @@ PlotObject
   Plot plotContainer;
   plotContainer += inputValue;
   return this->owner->theObjectContainer.thePlots
-  .AddNoRepetitionOrReturnIndexFirst(plotContainer);
+  .addNoRepetitionOrReturnIndexFirst(plotContainer);
 }
 
 template < >
@@ -567,7 +567,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupReps
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -576,7 +576,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupVirtualReps
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
@@ -585,7 +585,7 @@ ElementWeylGroup
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupElements
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 //Expression::AddObjectReturnIndex specializations end
@@ -1085,15 +1085,15 @@ bool Expression::ConvertInternally<double>(Expression& output) const {
 
 bool Expression::CheckConsistencyRecursively() const {
   MacroRegisterFunctionWithName("Expression::CheckConsistencyRecursively");
-  this->CheckConsistency();
+  this->checkConsistency();
   for (int i = 0; i < this->children.size; i ++) {
-    (*this)[i].CheckConsistency();
+    (*this)[i].checkConsistency();
   }
   return true;
 }
 
-bool Expression::CheckConsistency() const {
-  MacroRegisterFunctionWithName("Expression::CheckConsistency");
+bool Expression::checkConsistency() const {
+  MacroRegisterFunctionWithName("Expression::checkConsistency");
   // warning: do not use toString method from here: toString itself calls CheckConosistency,
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
@@ -1164,7 +1164,7 @@ bool Expression::AddChildRationalOnTop(const Rational& inputRat) {
 bool Expression::addChildOnTop(const Expression& inputChild) {
   this->CheckInitialization();
   this->children.addOnTop(
-    this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild)
+    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
   );
   return true;
 }
@@ -1173,9 +1173,9 @@ bool Expression::SetChildAtomValue(int childIndex, int TheAtomValue) {
   this->CheckInitialization();
   Expression tempE;
   tempE.MakeAtom(TheAtomValue, *this->owner);
-  this->children.SetObjectAtIndex(
+  this->children.setObjectAtIndex(
     childIndex,
-    this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(tempE)
+    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
@@ -1184,38 +1184,38 @@ bool Expression::SetChildAtomValue(int childIndex, const std::string& theAtom) {
   this->CheckInitialization();
   Expression tempE;
   tempE.MakeAtom(theAtom, *this->owner);
-  this->children.SetObjectAtIndex(
-    childIndex, this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(tempE)
+  this->children.setObjectAtIndex(
+    childIndex, this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
 
-bool Expression::SetChilD(int childIndexInMe, const Expression& inputChild) {
+bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->CheckInitialization();
-  int theIndexOfTheExpression = this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild);
-  this->children.SetObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
+  int theIndexOfTheExpression = this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
+  this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
   return true;
 }
 
-bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss) {
+bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
   this->CheckInitialization();
-  this->children.SetObjectAtIndex(childIndexInMe, childIndexInBoss);
+  this->children.setObjectAtIndex(childIndexInMe, childIndexInBoss);
   if (this->children[childIndexInMe] != childIndexInBoss) {
     global.fatal << "This shouldn't happen." << global.fatal;
   }
   return true;
 }
 
-bool Expression::AddChildAtomOnTop(int theOp) {
+bool Expression::addChildAtomOnTop(int theOp) {
   this->CheckInitialization();
   Expression tempE;
   tempE.MakeAtom(theOp, *this->owner);
   return this->addChildOnTop(tempE);
 }
 
-bool Expression::AddChildAtomOnTop(const std::string& theOperationString) {
+bool Expression::addChildAtomOnTop(const std::string& theOperationString) {
   this->CheckInitialization();
-  return this->AddChildAtomOnTop(
+  return this->addChildAtomOnTop(
     this->owner->AddOperationNoRepetitionOrReturnIndexFirst(theOperationString)
   );
 }
@@ -1419,7 +1419,7 @@ bool Expression::IsIndefiniteIntegralfdx(
   Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet
 ) const {
   MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
-  this->CheckConsistency();
+  this->checkConsistency();
   Expression tempE;
   if (integrationSet == nullptr) {
     integrationSet = &tempE;
@@ -1434,7 +1434,7 @@ bool Expression::IsDefiniteIntegralOverIntervalfdx(
   Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet
 ) const {
   MacroRegisterFunctionWithName("Expression::IsDefiniteIntegralOverIntervalfdx");
-  this->CheckConsistency();
+  this->checkConsistency();
   Expression tempE;
   if (integrationSet == nullptr) {
     integrationSet = &tempE;
@@ -1661,9 +1661,9 @@ bool Expression::isEqualToZero() const {
 
 bool Expression::MakeError(const std::string& theError, Calculator& owner) {
   this->reset(owner, 2);
-  this->CheckConsistency();
-  this->AddChildAtomOnTop(owner.opError());
-  this->CheckConsistency();
+  this->checkConsistency();
+  this->addChildAtomOnTop(owner.opError());
+  this->checkConsistency();
   return this->AddChildValueOnTop(theError);
 }
 
@@ -2823,17 +2823,17 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
       return false;
     }
     Expression result(theCommands);
-    result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
+    result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
     if (input.size() == 2) {
       result.addChildOnTop(input[1]);
-      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
       output = result;
       return true;
     }
     for (int i = 1; i < input.size(); i ++) {
       result.addChildOnTop(input[i]);
     }
-    result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
     output = result;
     return true;
   }
@@ -2844,7 +2844,7 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opCommandEnclosure())) {
       bool processed = false;
-      result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
       if (input[i].size() == 2) {
         if (input[i][1].StartsWith(theCommands.opEndStatement())) {
           for (int j = 1; j < input[i][1].size(); j ++) {
@@ -2858,11 +2858,11 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
           result.addChildOnTop(input[i][j]);
         }
       }
-      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
     } else if (input[i].StartsWithGivenOperation("MatchesPattern")) {
-      result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
       result.addChildOnTop(input[i]);
-      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
     } else {
       result.addChildOnTop(input[i]);
     }
@@ -3182,7 +3182,7 @@ bool Expression::toStringPower(
       involvesExponentsInterpretedAsFunctions = true;
       Expression newFunE;
       newFunE.MakeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
-      newFunE.CheckConsistency();
+      newFunE.checkConsistency();
       out << "{" << newFunE.toString(theFormat) << "}{}";
       if (
         firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
@@ -4340,7 +4340,7 @@ std::string Expression::toString(
     return "(Error:NoOwner)";
   }
   RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
-  this->CheckConsistency();
+  this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
     if (
@@ -4620,7 +4620,7 @@ bool Expression::RemoveContext() {
   if (!this->hasContext()) {
     return true;
   }
-  this->children.RemoveIndexShiftDown(1);
+  this->children.removeIndexShiftDown(1);
   if (this->children.size == 1) {
     this->AssignMeMyChild(0);
   }
@@ -4796,7 +4796,7 @@ bool Expression::MakeSqrt(Calculator& owner, const Expression& argument, const R
   this->reset(owner,3);
   Expression radicalIndexE;
   radicalIndexE.AssignValue(radicalSuperIndex, owner);
-  this->AddChildAtomOnTop(owner.opSqrt());
+  this->addChildAtomOnTop(owner.opSqrt());
   this->addChildOnTop(radicalIndexE);
   return this->addChildOnTop(argument);
 }
@@ -4825,7 +4825,7 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
   right.CheckInitialization();
   this->reset(owner, 3);
   this->theData = owner.opLisT();
-  this->AddChildAtomOnTop(theOp);
+  this->addChildAtomOnTop(theOp);
   this->addChildOnTop(left);
   return this->addChildOnTop(right);
 }
@@ -4837,7 +4837,7 @@ bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgume
   }
   this->reset(owner);
   this->theData = owner.opLisT();
-  this->AddChildAtomOnTop(theOp);
+  this->addChildAtomOnTop(theOp);
   return this->addChildOnTop(opArgument);
 }
 

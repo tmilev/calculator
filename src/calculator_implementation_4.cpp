@@ -86,7 +86,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   if (!input.IsSequenceNElementS() && !input.StartsWith(this->opIntervalOpen())) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
-        return *this << "<hr>GetVector failure: target dim is "
+        return *this << "<hr>getVector failure: target dim is "
         << targetDimNonMandatory << " but the input " << input.toString()
         << " can only be interpreted as a single element";
       }
@@ -96,7 +96,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   }
   if (targetDimNonMandatory > 0) {
     if (targetDimNonMandatory != input.size() - 1) {
-      return *this << "<hr>Failed to GetVector: the input is required to have "
+      return *this << "<hr>Failed to getVector: the input is required to have "
       << targetDimNonMandatory << " columns but it has "
       << input.size() - 1 << " columns instead. <hr>";
     }
@@ -192,7 +192,7 @@ class quasiDiffMon {
   MonomialWeylAlgebra theWeylMon;
   MonomialMatrix theMatMon;
   static unsigned int hashFunction(const quasiDiffMon& input) {
-    return input.theWeylMon.hashFunction() * SomeRandomPrimes[0] + input.theMatMon.hashFunction() * SomeRandomPrimes[1];
+    return input.theWeylMon.hashFunction() * someRandomPrimes[0] + input.theMatMon.hashFunction() * someRandomPrimes[1];
   }
   unsigned int hashFunction() const {
     return hashFunction(*this);
@@ -320,7 +320,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         }
         for (int k = theEltsConverted.size - 1; k >= 0; k --) {
           if (theEltsConverted[k].isEqualToZero()) {
-            theEltsConverted.RemoveIndexSwapWithLast(k);
+            theEltsConverted.removeIndexSwapWithLast(k);
           } else {
             break;
           }
@@ -811,10 +811,10 @@ bool Calculator::CheckOperationHandlers() {
     current.getElement().CheckConsisitency();
     Calculator::OperationHandlers& allHandlers = current.getElement();
     for (int j = 0; j < allHandlers.compositeHandlers.size; j ++) {
-      allHandlers.compositeHandlers[j].CheckConsistency();
+      allHandlers.compositeHandlers[j].checkConsistency();
     }
     for (int j = 0; j < allHandlers.handlers.size; j ++) {
-      allHandlers.handlers[j].CheckConsistency();
+      allHandlers.handlers[j].checkConsistency();
     }
   }
   return true;
@@ -1059,7 +1059,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
     theCommands << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  tempSSpointer.content->CheckConsistency();
+  tempSSpointer.content->checkConsistency();
   tempSSpointer.context.checkInitialization();
   SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
   std::string result = theSSalgebra.ToHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
@@ -1430,10 +1430,10 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
   return true;
 }
 
-bool Calculator::GetVectoRInt(const Expression& input, List<int>& output) {
-  MacroRegisterFunctionWithName("Calculator::GetVectoRInt");
+bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
+  MacroRegisterFunctionWithName("Calculator::getVectorInt");
   Vector<Rational> theRats;
-  if (!this->GetVector(input, theRats)) {
+  if (!this->getVector(input, theRats)) {
     return false;
   }
   output.initializeFillInObject(theRats.size,0);
@@ -1469,10 +1469,10 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   const Expression& secondElt = input[2];
   if (secondElt.IsSequenceNElementS() || secondElt.StartsWith(theCommands.opIntervalOpen())) {
     output = secondElt;
-    return output.SetChilD(0, firstElt);
+    return output.setChild(0, firstElt);
   }
   output = input;
-  output.children.RemoveIndexShiftDown(0);
+  output.children.removeIndexShiftDown(0);
   return true;
 }
 
@@ -1599,7 +1599,7 @@ bool Calculator::CollectCoefficientsPowersVar(
     for (int j = 0; j < currentMultiplicands.size; j ++) {
       const Expression& currentE = currentMultiplicands[j];
       remainingMultiplicands = currentMultiplicands;
-      remainingMultiplicands.RemoveIndexShiftDown(j);
+      remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
         currentCoeff.AssignValue(1, theCommands);
       } else {
@@ -1762,7 +1762,9 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
 bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
   MacroRegisterFunctionWithName("Expression::MakeXOXOdotsOX");
   if (input.size == 0) {
-    global.fatal << "This is a programming error: cannot create operation sequence from an empty list. " << global.fatal;
+    global.fatal
+    << "This is a programming error: cannot "
+    << "create operation sequence from an empty list. " << global.fatal;
   }
   if (input.size == 1) {
     *this = input[0];
@@ -1772,7 +1774,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   Expression result;
   for (int i = input.size - 3; i >= 0; i --) {
     result.reset(owner, 3);
-    result.AddChildAtomOnTop(theOp);
+    result.addChildAtomOnTop(theOp);
     result.addChildOnTop(input[i]);
     result.addChildOnTop(*this);
     *this = result;
@@ -1973,7 +1975,7 @@ void Expression::operator/=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData /= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      global.fatal << "Attempting to divide non-initialized expressions" << global.fatal;
+      global.fatal << "Attempting to divide non-initialized expressions. " << global.fatal;
     }
     return;
   }
@@ -1999,7 +2001,7 @@ void Expression::operator*=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData *= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      global.fatal << "Attempting to add non-initialized expressions" << global.fatal;
+      global.fatal << "Attempting to add non-initialized expressions. " << global.fatal;
     }
     return;
   }
@@ -2151,7 +2153,8 @@ Function::Function(
 ) {
   this->owner = nullptr;
   if (&this->options == &inputOptions) {
-    global.fatal << "Input options and target options have the same address. " << global.fatal;
+    global.fatal << "Input options and target "
+    << "options have the same address. " << global.fatal;
   }
   this->reset(inputOwner);
   this->indexOperation = inputIndexOperation;
@@ -2167,7 +2170,7 @@ Function::Function(
   this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
 }
 
-void Calculator::AddOperationBinaryInnerHandlerWithTypes(
+void Calculator::addOperationBinaryInnerHandlerWithTypes(
   const std::string& theOpName,
   Expression::FunctionAddress innerHandler,
   int leftType,
@@ -2196,8 +2199,8 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
     - 1
   );
   innerFunction.theArgumentTypes.reset(*this, 2);
-  innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
-  innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
+  innerFunction.theArgumentTypes.addChildAtomOnTop(leftType);
+  innerFunction.theArgumentTypes.addChildAtomOnTop(rightType);
   this->RegisterCalculatorFunction(innerFunction, indexOp);
 }
 
@@ -2237,7 +2240,7 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
   );
 }
 
-void Calculator::AddOperationHandler(
+void Calculator::addOperationHandler(
   const std::string& theOpName,
   Expression::FunctionAddress handler,
   const std::string& opArgumentListIgnoredForTheTimeBeing,
@@ -2353,7 +2356,8 @@ bool Function::ShouldBeApplied(int parentOpIfAvailable) {
   }
   if (this->options.adminOnly) {
     if (!global.UserDefaultHasAdminRights()) {
-      return (*this->owner) << "Rule " << this->calculatorIdentifier << " requires logged-in administrator account. ";
+      return (*this->owner) << "Rule " << this->calculatorIdentifier
+      << " requires logged-in administrator account. ";
     }
   }
   return true;
@@ -3179,7 +3183,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
     return false;
   }
   output.reset(theCommands, input.children.size + ChildIncrease);
-  output.AddChildAtomOnTop(theCommands.opEndStatement());
+  output.addChildAtomOnTop(theCommands.opEndStatement());
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.IsMeltable()) {

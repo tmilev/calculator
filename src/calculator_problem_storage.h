@@ -171,7 +171,7 @@ public:
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   ProblemData();
-  bool CheckConsistency() const;
+  bool checkConsistency() const;
   bool CheckConsistencyMQids() const;
   bool LoadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure);
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);

@@ -193,7 +193,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
     bool addedNew = false;
     for (int i = this->basisCandidates.size - 1; i >= 0; i --) {
       if (this->basisCandidates[i].isEqualToZero()) {
-        this->basisCandidates.RemoveIndexSwapWithLast(i);
+        this->basisCandidates.removeIndexSwapWithLast(i);
       }
     }
     int oldBasisSize = this->basisCandidates.size;
@@ -202,7 +202,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
       this->RemainderDivisionByBasis(
         this->basisCandidates[selectedIndex], &this->remainderDivision
       );
-      this->basisCandidates.RemoveIndexSwapWithLast(selectedIndex);
+      this->basisCandidates.removeIndexSwapWithLast(selectedIndex);
       if (this->AddRemainderToBasis()) {
         changed = true;
         addedNew = true;
@@ -213,7 +213,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
       this->NumberGBComputations ++;
       if (this->MaxNumGBComputations > 0) {
         if (this->NumberGBComputations > this->MaxNumGBComputations) {
-          this->CheckConsistency();
+          this->checkConsistency();
           return true;
         }
       }
@@ -242,15 +242,15 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
       this->remainderDivision.scaleNormalizeLeadingMonomial();
       if (this->MaxNumGBComputations > 0) {
         if (this->NumberGBComputations > this->MaxNumGBComputations) {
-          this->CheckConsistency();
+          this->checkConsistency();
           return true;
         }
       }
       if (!(this->remainderDivision == this->theBasiS[i])) {
         this->basisCandidates.addOnTop(this->remainderDivision);
-        this->leadingMons.RemoveIndexShiftDown(i);
-        this->leadingCoeffs.RemoveIndexShiftDown(i);
-        this->theBasiS.RemoveIndexShiftDown(i);
+        this->leadingMons.removeIndexShiftDown(i);
+        this->leadingCoeffs.removeIndexShiftDown(i);
+        this->theBasiS.removeIndexShiftDown(i);
         i --;
         changed = true;
       }
@@ -266,8 +266,8 @@ void GroebnerBasisComputation<coefficient>::MakeMinimalBasis() {
     for (int j = 0; j < this->leadingMons.size; j ++) {
       if (i != j) {
         if (this->leadingMons[i].IsDivisibleBy(this->leadingMons[j])) {
-          this->leadingMons.RemoveIndexSwapWithLast(i);
-          this->theBasiS.RemoveIndexSwapWithLast(i);
+          this->leadingMons.removeIndexSwapWithLast(i);
+          this->theBasiS.removeIndexSwapWithLast(i);
           i --;
           break;
         }
@@ -391,7 +391,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
         }
       }
     }
-    indexPairs.RemoveIndexSwapWithLast(currentPairIndex);
+    indexPairs.removeIndexSwapWithLast(currentPairIndex);
   }
   this->MakeMinimalBasis();
   inputOutpuT = this->theBasiS;
@@ -759,7 +759,7 @@ void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(int expec
 }
 
 template<class coefficient>
-void GroebnerBasisComputation<coefficient>::CheckConsistency() {
+void GroebnerBasisComputation<coefficient>::checkConsistency() {
   //if (this->NumberOfComputations>this->MaxNumComputations+ 1000)
     //global.fatal << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
     //<< " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "

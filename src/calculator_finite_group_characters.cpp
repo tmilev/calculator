@@ -16,16 +16,16 @@ FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Ratio
 template < >
 WeylGroupData& Expression::GetValueNonConst() const;
 
-bool WeylGroupData::CheckConsistency() const {
+bool WeylGroupData::checkConsistency() const {
   //if (this == 0)
   //  global.fatal << "The this pointer of a Weyl group is zero. " << global.fatal;
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of WeylGroup. " << global.fatal;
   }
   for (int i = 0; i < this->theGroup.generators.size; i ++) {
-    this->theGroup.generators[i].CheckConsistency();
+    this->theGroup.generators[i].checkConsistency();
   }
-  this->RootsOfBorel.CheckConsistency();
+  this->RootsOfBorel.checkConsistency();
   return true;
 }
 
@@ -45,7 +45,7 @@ template <typename somegroup, typename coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimpleGensAreOK() const {
   this->CheckInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
-    if (this->generatorS[i].NumRows == 0) {
+    if (this->generatorS[i].numberOfRows == 0) {
       global.fatal << "This is a programming error: working with a "
       << "representation in which the action of the simple generators is not computed. " << global.fatal;
       return false;
@@ -232,7 +232,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   output.theCharacteR = remainingCharacter;
   ProgressReport theReport;
   for (int i = 0; i < this->generatorS.size; i ++) {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
       theReport.report(reportStream.str());
@@ -297,7 +297,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
         << " but the corresponding eigenspace is empty. " << global.fatal;
       }
       found += output.LastObject()->size;
-      if (found == this->NumCols) {
+      if (found == this->numberOfColumns) {
         return true;
       }
     }
@@ -434,7 +434,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   theHWs.setSize(input.children.size - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVector<Rational>(
+    if (!theCommands.getVector<Rational>(
       input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank()
     )) {
       isGood = false;
@@ -494,7 +494,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords;
   ExpressionContext theContext(theCommands);
-  if (!theCommands.GetVector(
+  if (!theCommands.getVector(
     vectorNode,
     theHWfundCoords,
     &theContext,
@@ -682,7 +682,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       }
     }
   }
-  integralPositiveRootReflectionGraph.CheckConsistency();
+  integralPositiveRootReflectionGraph.checkConsistency();
   out << integralPositiveRootReflectionGraph.ToStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
@@ -887,15 +887,15 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
     return false;
   }
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
-  theGroupData.CheckConsistency();
+  theGroupData.checkConsistency();
   if (theGroupData.getDimension() > 8) {
     return theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
     << " of rank " << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
-  theGroupData.CheckConsistency();
+  theGroupData.checkConsistency();
   double timeStart1 = global.GetElapsedSeconds();
-  theGroupData.CheckConsistency();
+  theGroupData.checkConsistency();
   theGroupData.theGroup.ComputeCCSizesAndRepresentatives();
   theCommands << "<hr> Computed conjugacy classes representatives of "
   << theGroupData.theDynkinType.toString() << " in " << global.GetElapsedSeconds()-timeStart1
@@ -1789,8 +1789,8 @@ bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, co
   }
   KostkaNumber theKN;
   if (
-    !theCommands.GetVectoRInt(input[1], theKN.partition) ||
-    !theCommands.GetVectoRInt(input[2], theKN.tuple)
+    !theCommands.getVectorInt(input[1], theKN.partition) ||
+    !theCommands.getVectorInt(input[2], theKN.tuple)
   ) {
     return theCommands << "Failed to extract partition and tuple from input: " << input.toString();
   }
@@ -1813,7 +1813,7 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   if (!input[1].IsSmallInteger(&theSel.rank)) {
     return false;
   }
-  if (!theCommands.GetVectoRInt(input[2], theSel.MaxMultiplicities)) {
+  if (!theCommands.getVectorInt(input[2], theSel.MaxMultiplicities)) {
     return theCommands << "Failed to extract list of multiplicities from "
     << input[2].toString();
   }
@@ -1956,9 +1956,9 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
   if (!theCommands.functionGetMatrix(input[2], theMat)) {
     return theCommands << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
-  if (theMat.NumCols != theMat.NumRows || theMat.NumCols != theType.GetRank()) {
+  if (theMat.numberOfColumns != theMat.numberOfRows || theMat.numberOfColumns != theType.GetRank()) {
     theCommands << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.GetRank()
-    << " but extracted linear operator has " << theMat.NumCols << " columns and " << theMat.NumRows << " rows.";
+    << " but extracted linear operator has " << theMat.numberOfColumns << " columns and " << theMat.numberOfRows << " rows.";
     return false;
   }
   WeylGroupData theWeyl;
@@ -1998,7 +1998,7 @@ public:
   MonomialMacdonald(): owner(nullptr), flagDeallocated(false) {
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  bool CheckConsistency() {
+  bool checkConsistency() {
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use after free of MonomialMacdonald. " << global.fatal;
       return false;
@@ -2208,7 +2208,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(
   )) {
     return theCommands << "<hr>Failed to load semisimple Lie algebra. ";
   }
-  theSSowner->CheckConsistency();
+  theSSowner->checkConsistency();
   ExpressionContext theContext(theCommands);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
   resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
@@ -2271,7 +2271,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   if (input.size() != 3) {
     return theCommands << "CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation needs two arguments";
   }
-  if (!theCommands.GetVector(input[1], inputLeftRat)|| !theCommands.GetVector(input[2], inputRightRat)) {
+  if (!theCommands.getVector(input[1], inputLeftRat)|| !theCommands.getVector(input[2], inputRightRat)) {
     return false;
   }
   if (inputLeftRat.size < 1 || inputRightRat.size < 1) {
@@ -2487,7 +2487,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
   }
   theCommands << "<hr>Generated a list of " << theSet.size << " elements";
   output.reset(theCommands, theSet.size + 1);
-  output.AddChildAtomOnTop(theCommands.opSequence());
+  output.addChildAtomOnTop(theCommands.opSequence());
   for (int i = 0; i < theSet.size; i ++) {
     output.addChildOnTop(theSet[i]);
   }

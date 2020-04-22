@@ -25,7 +25,7 @@ public:
     bool dontCrashOnFail
   );
   std::string GetLastRead();
-  bool CheckConsistency();
+  bool checkConsistency();
   bool SetPipeFlagsIfFailThenCrash(
     int inputFlags,
     int whichEnd,
@@ -86,7 +86,7 @@ public:
   );
   bool ResetNoAllocation();
 
-  bool CheckConsistency();
+  bool checkConsistency();
   // Acts in a similar fashion to single-process mutex lock.
   // If the lock is held in another process or another thread,
   // the current thread in the current process
@@ -181,7 +181,7 @@ public:
 
   std::string toString() const;
   void Release();
-  bool CheckConsistency();
+  bool checkConsistency();
   bool CreateMe(const std::string& inputPipeName);
   bool ResetNoAllocation();
   ~Pipe();

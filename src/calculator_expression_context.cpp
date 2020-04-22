@@ -60,7 +60,7 @@ int ExpressionContext::numberOfVariables() const {
 Expression ExpressionContext::toExpression() const {
   this->checkInitialization();
   Expression result(*this->owner);
-  result.AddChildAtomOnTop(this->owner->opContext());
+  result.addChildAtomOnTop(this->owner->opContext());
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     result.addChildOnTop(this->toExpressionSemisimpleLieAlgebra());
   }
@@ -75,14 +75,14 @@ Expression ExpressionContext::toExpression() const {
 
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
   Expression algebraContext(*this->owner);
-  algebraContext.AddChildAtomOnTop(this->owner->opSemisimpleLieAlgebrA());
+  algebraContext.addChildAtomOnTop(this->owner->opSemisimpleLieAlgebrA());
   algebraContext.addChildOnTop(this->indexAmbientSemisimpleLieAlgebra);
   return algebraContext;
 }
 
 Expression ExpressionContext::toExpressionDifferntialOperators() const {
   Expression diffVarsE(*this->owner);
-  diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
+  diffVarsE.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     diffVarsE.addChildOnTop(this->differentialOperatorVariables[i]);
   }
@@ -92,7 +92,7 @@ Expression ExpressionContext::toExpressionDifferntialOperators() const {
 Expression ExpressionContext::toExpressionPolynomialVariables() const {
   Expression polynomialVariables;
   polynomialVariables.reset(*this->owner);
-  polynomialVariables.AddChildAtomOnTop(this->owner->opPolynomialVariables());
+  polynomialVariables.addChildAtomOnTop(this->owner->opPolynomialVariables());
   for (int i = 0; i < this->variables.size; i ++) {
     polynomialVariables.addChildOnTop(this->variables[i]);
   }
@@ -215,19 +215,19 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
-  diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
+  diffVarsE.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
   diffVarsE.addChildOnTop(theDiffOpVar);
   polyVarsE.reset(*this->owner, 2);
-  polyVarsE.AddChildAtomOnTop(this->owner->opPolynomialVariables());
+  polyVarsE.addChildAtomOnTop(this->owner->opPolynomialVariables());
   polyVarsE.addChildOnTop(thePolyVar);
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
     if ((*this)[i].StartsWith(this->owner->opWeylAlgebraVariables())) {
-      this->SetChilD(i, diffVarsE);
+      this->setChild(i, diffVarsE);
       foundDiffVarsE = true;
     } else if ((*this)[i].StartsWith(this->owner->opPolynomialVariables())) {
-      this->SetChilD(i, polyVarsE);
+      this->setChild(i, polyVarsE);
       foundPolyVarsE = true;
     }
   }
@@ -368,7 +368,7 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
       continue;
     }
     Expression differentialOperator(*this->owner);
-    differentialOperator.AddChildAtomOnTop("\\partial");
+    differentialOperator.addChildAtomOnTop("\\partial");
     Expression variableIndex;
     variableIndex.AssignValue(i, *this->owner);
     differentialOperator.addChildOnTop(variableIndex);
@@ -537,7 +537,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   inputOutputMinContext = newContext;
   if (this->IsOfType<Rational>()) {
-    this->SetChilD(1, inputOutputMinContext.toExpression());
+    this->setChild(1, inputOutputMinContext.toExpression());
     return true;
   }
   if (this->IsOfType<ElementWeylGroup>()) {
@@ -546,7 +546,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     );
   }
   if (this->IsOfType<AlgebraicNumber>()) {
-    return this->SetChilD(1, inputOutputMinContext.toExpression());
+    return this->setChild(1, inputOutputMinContext.toExpression());
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> > ()) {
     ElementUniversalEnveloping<RationalFunction> newUE = this->getValue<ElementUniversalEnveloping<RationalFunction> >();
@@ -615,8 +615,8 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     this->owner->functionGetMatrix(*this, newMat, &newContext);
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
-    for (int i = 0; i < newMat.NumRows; i ++) {
-      for (int j = 0; j < newMat.NumCols; j ++) {
+    for (int i = 0; i < newMat.numberOfRows; i ++) {
+      for (int j = 0; j < newMat.numberOfColumns; j ++) {
         if (!newMat(i, j).Substitution(subPolyPart)) {
           return *this->owner << "Failed to carry out the substitution "
           << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";

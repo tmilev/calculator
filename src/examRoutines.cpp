@@ -436,7 +436,7 @@ bool CalculatorHTML::LoadMe(
       }
     }
   }
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
   if (!this->flagIsForReal) {
     std::string randString = inputRandomSeed;
     if (randString != "") {
@@ -513,7 +513,7 @@ void CalculatorHTML::LoadCurrentProblemItem(
   if (!this->LoadMe(needToLoadDatabaseMayIgnore, inputRandomSeed, commentsOnFailure)) {
     this->flagLoadedSuccessfully = false;
   }
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
 }
 
 bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
@@ -1919,7 +1919,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     std::stringstream commentsOnLastFailure;
     if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
-      this->theProblemData.CheckConsistency();
+      this->theProblemData.checkConsistency();
       return true;
     }
     this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
@@ -1941,7 +1941,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
       *comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
     }
   }
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
   return false;
 }
 
@@ -2477,7 +2477,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
   if (result) {
     result = this->CheckContent(comments);
   }
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
   return result;
 }
 
@@ -2638,7 +2638,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
       currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
     }
   }
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
   return true;
 }
 
@@ -3015,7 +3015,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   outHeadPt2 << this->topicListJavascriptWithTag;
   this->InterpretAnswerElements(comments);
-  this->theProblemData.CheckConsistency();
+  this->theProblemData.checkConsistency();
   this->theProblemData.CheckConsistencyMQids();
   bool headFinished = !this->flagTagHeadPresent;
   std::string tagClass;

@@ -277,7 +277,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   LargeInteger total = divisorSelection.totalCombinations();
   do {
-    if (theReport.TickAndWantReport()) {
+    if (theReport.tickAndWantReport()) {
       std::stringstream report;
       report << "Trying divisor combination "
       << theReport.ticks << " out of " << total.toString();

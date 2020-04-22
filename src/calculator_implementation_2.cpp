@@ -156,7 +156,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
   this->LastLogEvaluationTime = global.GetElapsedSeconds();
 }
 
-const List<Function>* Calculator::GetOperationCompositeHandlers(int theOp) {
+const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
   if (theOp < 0 || theOp >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -170,7 +170,7 @@ const List<Function>* Calculator::GetOperationCompositeHandlers(int theOp) {
   return &this->operations.theValues[theOp].GetElementConst().compositeHandlers;
 }
 
-const List<Function>* Calculator::GetOperationHandlers(int theOp) {
+const List<Function>* Calculator::getOperationHandlers(int theOp) {
   if (theOp < 0 || theOp >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -198,7 +198,7 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.StartsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
+  const List<Function>* theHandlers = theCommands.getOperationCompositeHandlers(functionNameNode[0].theData);
   if (theHandlers == nullptr) {
     return false;
   }
@@ -216,7 +216,7 @@ bool Calculator::outerStandardCompositeHandler(
   return false;
 }
 
-bool Function::CheckConsistency() const {
+bool Function::checkConsistency() const {
   if (this->options.visible != 0 && this->options.visible != 1) {
     global.fatal << "Invalid visible flag: " << this->options.visible << global.fatal;
   }
@@ -239,7 +239,7 @@ bool Function::Apply(
   if (!this->options.flagIsInner) {
     if (this->theFunction(theCommands, input, output)) {
       if (output != input) {
-        output.CheckConsistency();
+        output.checkConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
         if (outputHandler != nullptr) {
           *outputHandler = this;
@@ -251,7 +251,7 @@ bool Function::Apply(
   }
   if (this->inputFitsMyInnerType(input)) {
     if (this->theFunction(theCommands, input, output)) {
-      output.CheckConsistency();
+      output.checkConsistency();
       theCommands.DoLogEvaluationIfNeedBe(*this);
       if (outputHandler != nullptr) {
         *outputHandler = this;
@@ -485,7 +485,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
 
 Expression Calculator::GetNewBoundVar() {
   Expression result(*this);
-  result.AddChildAtomOnTop(this->opBind());
+  result.addChildAtomOnTop(this->opBind());
   result.addChildOnTop(this->GetNewAtom());
   return result;
 }
@@ -620,7 +620,7 @@ void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::stri
   }
   if (this->history->size() == 0) {
     this->history->reset(*(this->owner));
-    this->history->AddChildAtomOnTop(this->owner->opExpressionHistory());
+    this->history->addChildAtomOnTop(this->owner->opExpressionHistory());
   }
   std::stringstream description;
   if (handler != nullptr) {
@@ -636,7 +636,7 @@ void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::stri
     *(this->outpuT),
     extraInformation
   );
-  incomingHistory.CheckConsistency();
+  incomingHistory.checkConsistency();
   this->history->addChildOnTop(incomingHistory);
 }
 
@@ -671,7 +671,7 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
       // We "undo" the caching process by
       // replacing the cached value with the minusOneExpression,
       // which, having no context, will never match another expression.
-      this->owner->cachedExpressions.SetObjectAtIndex(
+      this->owner->cachedExpressions.setObjectAtIndex(
         this->indexInCache, this->owner->EMOne()
       );
     }
@@ -708,7 +708,7 @@ bool Calculator::EvaluateLoop::OutputHasErrors() {
 }
 
 void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int childIndex) {
-  if (!this->theReport.TickAndWantReport()) {
+  if (!this->theReport.tickAndWantReport()) {
     return;
   }
   std::stringstream reportStream;
@@ -762,7 +762,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
       indexOp,
       historyChild
     )) {
-      this->outpuT->SetChilD(i, childEvaluation);
+      this->outpuT->setChild(i, childEvaluation);
     }
     this->AccountHistoryChildTransformation(childEvaluation, historyContainer, i);
     // If the child is non-cache-able, so is the current one.
@@ -884,7 +884,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   this->owner->EvaluatedExpressionsStack.addOnTop(*(this->outpuT));
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
-  theExpressionWithContext.AddChildAtomOnTop(this->owner->opSequence());
+  theExpressionWithContext.addChildAtomOnTop(this->owner->opSequence());
   theExpressionWithContext.AddChildValueOnTop(this->owner->RuleStackCacheIndex);
   theExpressionWithContext.addChildOnTop(*(this->outpuT));
   this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
@@ -1061,7 +1061,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expressio
   for (int i = 0; i < toBeSubbedIn.size(); i ++) {
     subbedE = toBeSubbedIn[i];
     this->SpecializeBoundVars(subbedE, matchedPairs);
-    toBeSubbedIn.SetChilD(i, subbedE);
+    toBeSubbedIn.setChild(i, subbedE);
   }
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
 }

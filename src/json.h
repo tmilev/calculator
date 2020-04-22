@@ -157,8 +157,8 @@ void JSData::operator=(const Vector<coefficient>& other) {
 
 template <typename coefficient>
 void JSData::operator=(const Matrix<coefficient>& other) {
-  for (int i = 0; i < other.NumRows; i ++) {
-    for (int j = 0; j < other.NumCols; j ++) {
+  for (int i = 0; i < other.numberOfRows; i ++) {
+    for (int j = 0; j < other.numberOfColumns; j ++) {
       (*this)[i][j] = other(i, j);
     }
   }

@@ -90,7 +90,7 @@ void SignalsInfrastructure::blockSignals() {
   this->flagSignalsAreBlocked = true;
 }
 
-bool WebWorker::CheckConsistency() {
+bool WebWorker::checkConsistency() {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of webworker." << global.fatal;
   }
@@ -217,7 +217,7 @@ bool WebWorker::ReceiveAll() {
   }
   this->messageBody.clear(); //<- needed else the length error check will pop.
   if (this->ContentLength > 10000000) {
-    this->CheckConsistency();
+    this->checkConsistency();
     error = "Content-length parsed to be more than 10 million bytes, aborting.";
     global << this->error << Logger::endL;
     this->displayUserInput = this->error;
@@ -281,7 +281,7 @@ bool WebWorker::ReceiveAll() {
 
 void WebWorker::SendAllBytesNoHeaderS() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaderS");
-  this->CheckConsistency();
+  this->checkConsistency();
   global << "Worker " << this->indexInParent + 1
   << " sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
   double startTime = global.GetElapsedSeconds();
@@ -317,7 +317,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
       numTimesRunWithoutSending = 0;
     }
     global << numBytesSent;
-    this->remainingBytesToSenD.SliceInPlace(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
+    this->remainingBytesToSenD.sliceInPlace(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
     if (this->remainingBytesToSenD.size > 0) {
       global << ", ";
     }
@@ -2304,7 +2304,7 @@ std::string WebWorker::ToStringStatus() const {
   return out.str();
 }
 
-bool WebServer::CheckConsistency() {
+bool WebServer::checkConsistency() {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of WebServer." << global.fatal;
   }
@@ -3519,7 +3519,7 @@ void WebServer::ComputeSSLFlags() {
 
 bool WebWorker::RunInitialize() {
   global.millisecondOffset = this->millisecondsAfterSelect;
-  this->CheckConsistency();
+  this->checkConsistency();
   if (this->connectedSocketID == - 1) {
     global.fatal << "Worker::Run() started on a connecting with ID equal to - 1. " << global.fatal;
   }

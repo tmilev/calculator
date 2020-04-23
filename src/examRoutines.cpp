@@ -686,7 +686,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
   out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].theString;
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem(
@@ -712,7 +712,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
   }
   out << "<br>Interpretation times (per attempt): "
   << theProblem.timePerAttempt.toStringCommaDelimited();
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 std::string CalculatorHTML::ToStringExtractedCommands() {
@@ -2734,7 +2734,7 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
   if (!theFile.ParseHTML(&theCommands.comments)) {
     return false;
   }
-  return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
+  return output.assignValue(theFile.ToStringExtractedCommands(), theCommands);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";
@@ -3415,7 +3415,7 @@ void TopicElementParser::AddTopic(TopicElement& inputElt, int index) {
   this->theTopics.SetKeyValue(inputElt.id, inputElt);
 }
 
-void TopicElement::MakeError(const std::string& message) {
+void TopicElement::makeError(const std::string& message) {
   this->type = TopicElement::types::error;
   this->error = message;
   this->immediateChildren.setSize(0);
@@ -3616,7 +3616,7 @@ bool TopicElementParser::CheckInitialization() {
   return true;
 }
 
-void TopicElementParser::TopicLine::MakeError(const std::string& message) {
+void TopicElementParser::TopicLine::makeError(const std::string& message) {
   this->contentTrimmedWhiteSpace = StringRoutines::StringTrimWhiteSpace(message);
   this->tag = "Error";
   this->theType = TopicElement::types::error;
@@ -3634,7 +3634,7 @@ void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input)
   if (!this->knownTopicBundles.contains(bundleId)) {
     std::stringstream out;
     out << "Failed to find bundle: " << bundleId << ". ";
-    input.MakeError(out.str());
+    input.makeError(out.str());
     this->bundleStack.addOnTop(input);
     return;
   }
@@ -3656,13 +3656,13 @@ void TopicElementParser::LoadTopicBundleFile(
   std::stringstream errorStream;
   if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream)) {
     errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
-    input.MakeError(errorStream.str());
+    input.makeError(errorStream.str());
     this->bundleStack.addOnTop(input);
     return;
   }
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
     errorStream << "Could not open topic bundle file. ";
-    input.MakeError(errorStream.str());
+    input.makeError(errorStream.str());
     this->bundleStack.addOnTop(input);
     return;
   }
@@ -3679,7 +3679,7 @@ void TopicElementParser::LoadTopicBundleFile(
         bundleNameStack.removeLastObject();
       } else {
         errorStream << "BundleEnd command without BungleBegin.";
-        input.MakeError(errorStream.str());
+        input.makeError(errorStream.str());
         this->bundleStack.addOnTop(input);
         return;
       }
@@ -3729,7 +3729,7 @@ void TopicElementParser::ExhaustCrawlStack() {
       TopicElementParser::TopicLine errorLine;
       std::stringstream errorStream;
       errorStream << "Too many topics (" << this->crawled.size << ") while crawling bundles. ";
-      errorLine.MakeError(errorStream.str());
+      errorLine.makeError(errorStream.str());
       this->crawled.addOnTop(errorLine);
       return;
     }
@@ -3756,7 +3756,7 @@ void TopicElementParser::Crawl(const std::string& inputString) {
       TopicElementParser::TopicLine errorLine;
       std::stringstream errorStream;
       errorStream << "Too many topics (" << this->crawled.size << "). ";
-      errorLine.MakeError(errorStream.str());
+      errorLine.makeError(errorStream.str());
       this->crawled.addOnTop(errorLine);
       return;
     }

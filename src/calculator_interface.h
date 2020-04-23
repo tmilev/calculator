@@ -134,12 +134,12 @@ private:
   void operator=(const Rational& other) {
     MacroRegisterFunctionWithName("Expression::operator=(Rational)");
     this->CheckInitialization();
-    this->AssignValue(other, *this->owner);
+    this->assignValue(other, *this->owner);
   }
   void operator=(int other) {
     MacroRegisterFunctionWithName("Expression::operator=(int)");
     this->CheckInitialization();
-    this->AssignValue(other, *this->owner);
+    this->assignValue(other, *this->owner);
   }
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
     output << theMon.toString();
@@ -345,20 +345,20 @@ private:
   bool IsOfTypeWithContext(WithContext<theType>* whichElement) const;
   template <class theType>
   const theType& getValue() const {
-    return this->GetValueNonConst<theType>();
+    return this->getValueNonConst<theType>();
   }
   template <class theType>
-  theType& GetValueNonConst() const;
+  theType& getValueNonConst() const;
   template<class theType>
   int getTypeOperation() const;
   template<class theType>
   int AddObjectReturnIndex(const theType& inputValue) const;
   // note: the following always returns true:
   template <class theType>
-  bool AssignValue(const theType& inputValue, Calculator& owner);
+  bool assignValue(const theType& inputValue, Calculator& owner);
   // note: the following always returns true:
   template <class theType>
-  bool AssignValueWithContext(
+  bool assignValueWithContext(
     const theType& inputValue,
     const ExpressionContext& theContext,
     Calculator& owner
@@ -367,7 +367,7 @@ private:
   bool AddChildValueOnTop(const theType& inputValue) {
     this->CheckInitialization();
     Expression tempE;
-    tempE.AssignValue(inputValue, *this->owner);
+    tempE.assignValue(inputValue, *this->owner);
     tempE.checkConsistency();
     return this->addChildOnTop(tempE);
   }
@@ -379,7 +379,7 @@ private:
     Calculator& owner
   ) {
     Expression tempE;
-    tempE.AssignValueWithContext(inputValue, theContext, owner);
+    tempE.assignValueWithContext(inputValue, theContext, owner);
     return this->setChild(childIndex, tempE);
   }
   bool setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
@@ -600,7 +600,7 @@ private:
   const Expression& GetLastChild() const {
     return (*this)[this->children.size - 1];
   }
-  bool MakeError (const std::string& theError, Calculator& owner);
+  bool makeError (const std::string& theError, Calculator& owner);
   Expression(const Expression& other): flagDeallocated(false) {
     this->operator=(other);
   }
@@ -1067,7 +1067,7 @@ public:
   HashedListReferences<Polynomial<Rational> > polynomialsRational;
   HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
   HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
-  HashedListReferences<Polynomial<ElementOneVariablePolynomialQuotientRing<ElementZmodP> > > polynomialQuotientsModular;
+  HashedListReferences<PolynomialModuloPolynomial<ElementZmodP> > polynomialQuotientsModular;
 
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunction> > theUEs;
@@ -1294,7 +1294,7 @@ public:
   bool flagLogRules;
   bool flagUseBracketsForIntervals;
   bool flagLogCache;
-  bool flagLogPatternMatching;
+  bool flagLogpatternMatching;
   bool flagLogFullTreeCrunching;
   bool flagHideLHS;
   bool flagHidePolynomialBuiltInTypeIndicator;
@@ -1325,7 +1325,7 @@ public:
   long long int NumLargeMultiplicationsStart;
   long long int NumLargeGCDcallsStart;
   ////////////////////////////////////////////////
-  int TotalNumPatternMatchedPerformed;
+  int TotalNumpatternMatchedPerformed;
   int NumPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
@@ -1375,7 +1375,7 @@ public:
   std::string toString();
   std::string ToStringPerformance();
   Expression GetNewBoundVar();
-  Expression GetNewAtom();
+  Expression getNewAtom();
   void ComputeAutoCompleteKeyWords();
   void WriteAutoCompleteKeyWordsToFile();
   JSData ToJSONOutputAndSpecials();
@@ -1853,6 +1853,9 @@ public:
   int opPolynomialAlgebraicNumbers() {
     return this->operations.getIndexNoFail("PolynomialOverANs");
   }
+  int opPolynomialModuloPolynomialModuloInteger() {
+    return this->operations.getIndexNoFail("PolynomialModuloPolynomialModuloInteger");
+  }
   int opEllipticCurveElementsRational() {
     return this->operations.getIndexNoFail("EllipticCurveElementsRational");
   }
@@ -2077,14 +2080,14 @@ public:
     return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
   void SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
-  Expression* PatternMatch(
+  Expression* patternMatch(
     const Expression& thePattern,
     Expression& theExpression,
     MapList<Expression, Expression>& bufferPairs,
     const Expression* condition = nullptr,
     std::stringstream* theLog = nullptr
   );
-  bool ProcessOneExpressionOnePatternOneSub(
+  bool processOneExpressionOnePatternOneSub(
     const Expression& thePattern,
     Expression& theExpression,
     MapList<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
@@ -2386,7 +2389,7 @@ public:
   static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
   }
-  bool GetListPolynomialVariableLabelsLexicographic(
+  bool getListPolynomialVariableLabelsLexicographic(
     const Expression& input,
     Vector<Polynomial<AlgebraicNumber> >& output,
     ExpressionContext& outputContext
@@ -2435,7 +2438,7 @@ public:
   static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);
   template<class Coefficient>
-  bool GetTypeWeight(
+  bool getTypeWeight(
     Calculator& theCommands,
     const Expression& input,
     Vector<Coefficient>& outputWeightSimpleCoords,
@@ -2443,7 +2446,7 @@ public:
     Expression::FunctionAddress ConversionFun
   );
   template<class Coefficient>
-  bool GetTypeHighestWeightParabolic(
+  bool getTypeHighestWeightParabolic(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
@@ -2570,7 +2573,7 @@ public:
   int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
   void AddOperationNoRepetitionAllowed(const std::string& theOpName);
   void AddOperationBuiltInType(const std::string& theOpName);
-  void AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars);
+  void addTrigonometricSplit(const std::string& trigFun, const List<std::string>& theVars);
   void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void addOperationBinaryInnerHandlerWithTypes(
     const std::string& theOpName,
@@ -3018,16 +3021,16 @@ bool Expression::makeSum(
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
-  oneE.AssignValue<Rational>(1, theCommands);
+  oneE.assignValue<Rational>(1, theCommands);
   if (theSum.isEqualToZero()) {
-    return this->AssignValue<Rational>(0, theCommands);
+    return this->assignValue<Rational>(0, theCommands);
   }
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.setSize(theSum.size());
   for (int i = 0; i < theSum.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (theSum[i] == oneE) {
-      current.AssignValue(theSum.coefficients[i], theCommands);
+      current.assignValue(theSum.coefficients[i], theCommands);
     } else if (!(theSum.coefficients[i] == 1)) {
       current.reset(theCommands, 3);
       current.addChildAtomOnTop(theCommands.opTimes());
@@ -3064,7 +3067,7 @@ int Expression::AddObjectReturnIndex(const theType& inputValue) const {
 }
 
 template <class theType>
-bool Expression::AssignValueWithContext(
+bool Expression::assignValueWithContext(
   const theType& inputValue,
   const ExpressionContext& theContext,
   Calculator& owner
@@ -3082,7 +3085,7 @@ int Expression::getTypeOperation() const {
 }
 
 template <class theType>
-bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
+bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   Expression tempE;
   tempE.owner = &owner;
   // std::stringstream comments;
@@ -3103,7 +3106,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
     << global.fatal;
   }
   ExpressionContext emptyContext(owner);
-  return this->AssignValueWithContext(inputValue, emptyContext, owner);
+  return this->assignValueWithContext(inputValue, emptyContext, owner);
 }
 
 template <class theType>
@@ -3133,14 +3136,14 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
 }
 
 template<class Coefficient>
-bool Calculator::GetTypeWeight(
+bool Calculator::getTypeWeight(
   Calculator& theCommands,
   const Expression& input,
   Vector<Coefficient>& outputWeightSimpleCoords,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra,
   Expression::FunctionAddress ConversionFun
 ) {
-  MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
+  MacroRegisterFunctionWithName("Calculator::getTypeWeight");
   if (input.size() != 3) {
     return theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
@@ -3195,7 +3198,7 @@ void Calculator::addOneBuiltInHandler() {
 }
 
 template<class Coefficient>
-bool Calculator::GetTypeHighestWeightParabolic(
+bool Calculator::getTypeHighestWeightParabolic(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
@@ -3205,7 +3208,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
   Expression::FunctionAddress ConversionFun
 ) {
   if (!input.isListNElements(4) && !input.isListNElements(3)) {
-    return output.MakeError(
+    return output.makeError(
       "Function TypeHighestWeightParabolic is "
       "expected to have two or three arguments: "
       "SS algebra type, highest weight, [optional] parabolic selection. ",
@@ -3219,7 +3222,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSSalgebra
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSSalgebra.content;
   if (!theCommands.getVector<Coefficient>(
@@ -3235,7 +3238,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
-    return output.MakeError(tempStream.str(), theCommands);
+    return output.makeError(tempStream.str(), theCommands);
   }
   if (input.isListNElements(4)) {
     Vector<Rational> parabolicSel;
@@ -3253,7 +3256,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
       << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is "
       << rightE.toString() << ".";
-      return output.MakeError(tempStream.str(), theCommands);
+      return output.makeError(tempStream.str(), theCommands);
     }
     outputInducingSel = parabolicSel;
   } else {
@@ -3293,9 +3296,9 @@ bool Expression::AssignMatrix(
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (inputContext == nullptr) {
-        currentElt.AssignValue(input(i, j), owner);
+        currentElt.assignValue(input(i, j), owner);
       } else {
-        currentElt.AssignValueWithContext(input(i, j), *inputContext, owner);
+        currentElt.assignValueWithContext(input(i, j), *inputContext, owner);
       }
       theMatEs(i, j) = currentElt;
     }
@@ -3324,7 +3327,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   }
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].IsConstant()) {
-      currentTerm.AssignValue(1, theCommands);
+      currentTerm.assignValue(1, theCommands);
       theTerms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
@@ -3341,7 +3344,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;
         } else {
-          currentPower.AssignValue(input[i](j), theCommands);
+          currentPower.assignValue(input[i](j), theCommands);
           currentMultTermE.MakeXOX(
             theCommands, theCommands.opThePower(), currentBase, currentPower
           );

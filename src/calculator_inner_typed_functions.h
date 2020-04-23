@@ -97,6 +97,7 @@ public:
   static bool innerPowerPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgebraicNumberPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& theCommands, const Expression& input, Expression& output);
@@ -133,7 +134,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
   }
   theType result = inputContextsMerged[1].getValue<theType>();
   result *= inputContextsMerged[2].getValue<theType>();
-  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 template <class theType>
@@ -149,7 +150,7 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
   theType result;
   result = inputContextsMerged[1].getValue<theType>();
   result += inputContextsMerged[2].getValue<theType>();
-  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 template <class theType>
@@ -163,11 +164,11 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
     return false;
   }
   if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
-    return output.MakeError("Division by zero. ", theCommands);
+    return output.makeError("Division by zero. ", theCommands);
   }
   theType result = inputContextsMerged[1].getValue<theType>();
   result /= inputContextsMerged[2].getValue<theType>();
-  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 template <class Coefficient>
@@ -198,7 +199,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     Polynomial<Coefficient> converted;
     input.IsOfType(&thePolynomial);
     converted = thePolynomial;
-    return output.AssignValueWithContext(converted, input.GetContext(), theCommands);
+    return output.assignValueWithContext(converted, input.GetContext(), theCommands);
   }
   if (input.IsOfType<Coefficient>() || input.IsOfType<Rational>()) {
     if (!input.ConvertInternally<Polynomial<Coefficient> >(output)) {
@@ -269,20 +270,20 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
           monomial.makeMonomial(0, 1, 1);
           ExpressionContext theContext(theCommands);
           theContext.makeOneVariable(input);
-          return output.AssignValueWithContext(monomial, theContext, theCommands);
+          return output.assignValueWithContext(monomial, theContext, theCommands);
         }
         theConst.invert();
         thePower *= - 1;
         resultP = theConst;
       }
       resultP.raiseToPower(thePower, 1);
-      return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
+      return output.assignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
   }
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariable(input);
-  return output.AssignValueWithContext(monomial, theContext, theCommands);
+  return output.assignValueWithContext(monomial, theContext, theCommands);
 }
 #endif

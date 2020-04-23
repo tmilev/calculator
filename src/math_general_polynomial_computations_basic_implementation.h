@@ -1313,8 +1313,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
 }
 
 template<class Coefficient>
-void ElementOneVariablePolynomialQuotientRing<Coefficient>::operator*=(
-  ElementOneVariablePolynomialQuotientRing& other
+void PolynomialModuloPolynomial<Coefficient>::operator*=(
+  PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
     global.fatal << "Not allowed to multiply quotient-ring "
@@ -1326,31 +1326,50 @@ void ElementOneVariablePolynomialQuotientRing<Coefficient>::operator*=(
 }
 
 template<class Coefficient>
-unsigned int ElementOneVariablePolynomialQuotientRing<Coefficient>::hashFunction(
-) {
+unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction() const {
   return
   this->value.hashFunction() * someRandomPrimes[0] +
-  this->value.hashFunction() * someRandomPrimes[1];
+  this->modulus.hashFunction() * someRandomPrimes[1];
 }
 
 template<class Coefficient>
-unsigned int ElementOneVariablePolynomialQuotientRing<Coefficient>::hashFunction(
-  const ElementOneVariablePolynomialQuotientRing<Coefficient>& input
+bool PolynomialModuloPolynomial<Coefficient>::operator==(
+  const PolynomialModuloPolynomial<Coefficient>& other
+) const {
+  return this->modulus == other.modulus && this->value == other.value;
+}
+
+template<class Coefficient>
+unsigned int PolynomialModuloPolynomial<Coefficient>::hashFunction(
+  const PolynomialModuloPolynomial<Coefficient>& input
 ) {
   return input.hashFunction();
 }
 
 template<class Coefficient>
-std::string ElementOneVariablePolynomialQuotientRing<Coefficient>::toString(
+std::string PolynomialModuloPolynomial<Coefficient>::toString(
   FormatExpressions* theFormat
 ) {
   std::stringstream out;
-  out << this->value.toString(theFormat) << " mod " << this->modulus.toString(theFormat);
+  out << this->value.toString(theFormat) << "(mod (" << this->modulus.toString(theFormat) << "))";
   return out.str();
 }
 
 template<class Coefficient>
-void ElementOneVariablePolynomialQuotientRing<Coefficient>::reduce() {
+PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>::one() {
+  PolynomialModuloPolynomial<Coefficient> result;
+  result.modulus = this->modulus;
+  result.value.makeConstant(this->modulus.coefficients[0].one());
+  return result;
+}
+
+template<class Coefficient>
+bool PolynomialModuloPolynomial<Coefficient>::isEqualToZero() const {
+  return this->value.isEqualToZero();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::reduce() {
   Polynomial<Coefficient> unusedQuotient;
   this->value.DivideBy(
     this->modulus,

@@ -3692,7 +3692,8 @@ void WebServer::CheckSystemInstallationMongoDB() {
   global.ConfigurationStore();
 
   StateMaintainerCurrentFolder preserveFolder;
-  global << "You appear to be missing an mongoDB installation. Let me try to install that for you. "
+  global << "You appear to be missing an mongoDB installation. "
+  << "Let me try to install that for you. "
   << Logger::green << "Enter your the sudo password as prompted please. " << Logger::endL;
   if (global.OperatingSystem == "Ubuntu") {
     global.externalCommandNoOutput("sudo apt-get install mongodb", true);
@@ -4215,7 +4216,9 @@ bool GlobalVariables::ConfigurationLoad() {
 bool GlobalVariables::ConfigurationStore() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
   if (global.configurationCommandLine.objects.size() > 0) {
-    global << Logger::yellow << "Command-line overrides in the present configuration: configuration file not stored. ";
+    global << Logger::yellow
+    << "Command-line overrides in the present configuration: "
+    << "configuration file not stored. ";
     return true;
   }
   std::string correctedConfiguration = global.configuration.toString(&JSData::PrintOptions::NewLine());
@@ -4239,7 +4242,8 @@ bool GlobalVariables::ConfigurationStore() {
     return false;
   }
   global << Logger::blue
-  << "Configuration has been reformatted/recomputed, overwriting previous configuration file." << Logger::endL;
+  << "Configuration has been reformatted/recomputed, "
+  << "overwriting previous configuration file." << Logger::endL;
   configurationFile << correctedConfiguration;
   return true;
 }

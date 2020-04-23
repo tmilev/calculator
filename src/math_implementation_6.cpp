@@ -58,10 +58,10 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   std::stringstream *commentsOnFailure
 ) {
-  ElementOneVariablePolynomialQuotientRing<ElementZmodP> x;
+  PolynomialModuloPolynomial<ElementZmodP> x;
   x.modulus = this->output->current;
   x.value.makeDegreeOne(1, 0, this->one, this->one.zero());
-  ElementOneVariablePolynomialQuotientRing<ElementZmodP> oneQuotientRing;
+  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
   oneQuotientRing.modulus = this->current;
   LargeInteger modulus = one.theModulus;
   this->degree = this->output->current.TotalDegreeInt();

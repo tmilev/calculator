@@ -582,7 +582,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     ModuleSSalgebra<RationalFunction>& theMod = theMods[i];
     tempV = theHws[i];
     if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
-      return output.MakeError("Failed to create module.", theCommands);
+      return output.makeError("Failed to create module.", theCommands);
     }
     if (i == 0) {
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
@@ -609,7 +609,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
           theWeylFormat.polyAlphabeT.contains(tempstream2.str()) ||
           theWeylFormat.polyAlphabeT.contains(tempstream3.str())
         ) {
-          return output.MakeError(
+          return output.makeError(
             "Error: the variable " +
             tempstream2.str() +
             " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ",
@@ -727,7 +727,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   out << reportFourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();
-  return output.AssignValue<std::string>(out.str(), theCommands);
+  return output.assignValue<std::string>(out.str(), theCommands);
 }
 
 bool Calculator::innerHWVCommon(
@@ -773,7 +773,7 @@ bool Calculator::innerHWVCommon(
       theCommands << theMod.toString();
     }
     if (!isGood) {
-      return output.MakeError("Error while generating highest weight module. See comments for details. ", theCommands);
+      return output.makeError("Error while generating highest weight module. See comments for details. ", theCommands);
     }
   }
   if (&theMod.GetOwner() != owner) {
@@ -784,7 +784,7 @@ bool Calculator::innerHWVCommon(
     global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
-  return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction> >(theElt, hwContext, theCommands);
+  return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction> >(theElt, hwContext, theCommands);
 }
 
 bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
@@ -883,8 +883,8 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   Expression leftIE, rightIE;
   for (int i = 0; i < numRows; i ++) {
     for (int j = 0; j < numCols; j ++) {
-      leftIE.AssignValue(i + 1, theCommands);
-      rightIE.AssignValue(j + 1, theCommands);
+      leftIE.assignValue(i + 1, theCommands);
+      rightIE.assignValue(j + 1, theCommands);
       resultMat.elements[i][j].reset(theCommands, 3);
       resultMat.elements[i][j].addChildOnTop(leftE);
       resultMat.elements[i][j].addChildOnTop(leftIE);
@@ -905,14 +905,14 @@ bool Calculator::innerGetChevGen(
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
   }
   if (theIndex > theSSalg.content->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg.content->GetNumPosRoots()) {
-    return output.MakeError("Bad Chevalley-Weyl generator index.", theCommands);
+    return output.makeError("Bad Chevalley-Weyl generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex > 0) {
@@ -927,7 +927,7 @@ bool Calculator::innerGetChevGen(
     theSSalg.content->theWeyl.theDynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
-  return output.AssignValueWithContext(theUE, context, theCommands);
+  return output.assignValueWithContext(theUE, context, theCommands);
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -939,7 +939,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   if (theSSalg.content == nullptr) {
     global.fatal << "This is a programming error: called conversion function successfully, "
@@ -955,7 +955,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     theIndex > theSSalg.content->GetNumPosRoots() ||
     theIndex < - theSSalg.content->GetNumPosRoots()
   ) {
-    return output.MakeError("Bad Cartan subalgebra generator index.", theCommands);
+    return output.makeError("Bad Cartan subalgebra generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->GetRootIndexFromDisplayIndex(theIndex)];
@@ -965,7 +965,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   ExpressionContext theContext(theCommands);
   int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
   theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
-  return output.AssignValueWithContext(theUE, theContext, theCommands);
+  return output.assignValueWithContext(theUE, theContext, theCommands);
 }
 
 bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -981,7 +981,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgebra
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   std::stringstream out;
   WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
@@ -990,7 +990,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     << " have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.content->ToStringLieAlgebraName()
     << " has " << theWeyl.theGroup.GetSize().toString() << ".";
-    return output.AssignValue(out.str(), theCommands);
+    return output.assignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
   theFormat.polyAlphabeT.setSize(1);
@@ -1002,7 +1002,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   theKLpolys.ComputeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
   out << theKLpolys.toString(&theFormat);
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerPrintSSLieAlgebra(
@@ -1017,7 +1017,7 @@ bool Calculator::innerWriteSSLieAlgebraToHD(
   MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!global.UserDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
-    return output.MakeError(
+    return output.makeError(
       "Caching structure constants to HD available to admins only. ",
       theCommands);
   }
@@ -1057,13 +1057,13 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   )) {
 
     theCommands << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   tempSSpointer.content->checkConsistency();
   tempSSpointer.context.checkInitialization();
   SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
   std::string result = theSSalgebra.ToHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
-  return output.AssignValue(result, theCommands);
+  return output.assignValue(result, theCommands);
 }
 
 bool Expression::CheckInitializationRecursively() const {
@@ -1147,9 +1147,9 @@ bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expr
     return false;
   }
   if (theInt == 0) {
-    return output.AssignValue(1, theCommands);
+    return output.assignValue(1, theCommands);
   }
-  return output.AssignValue(0, theCommands);
+  return output.assignValue(0, theCommands);
 }
 
 bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1161,9 +1161,9 @@ bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input
     return false;
   }
   if (argument.IsInteger()) {
-    output.AssignValue(1, theCommands);
+    output.assignValue(1, theCommands);
   } else {
-    output.AssignValue(0, theCommands);
+    output.assignValue(0, theCommands);
   }
   return true;
 }
@@ -1177,9 +1177,9 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
     return false;
   }
   if (argument.IsRational()) {
-    output.AssignValue(1, theCommands);
+    output.assignValue(1, theCommands);
   } else {
-    output.AssignValue(0, theCommands);
+    output.assignValue(0, theCommands);
   }
   return true;
 }
@@ -1233,7 +1233,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
-    constPower.AssignValue(2, theCommands);
+    constPower.assignValue(2, theCommands);
     output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
     return true;
   }
@@ -1321,7 +1321,7 @@ bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input
   std::stringstream out;
   out << "Bad rule: you are asking me to substitute " << input[1] << " by itself ("
   << input[2] << ")" << " which is an infinite substitution cycle. ";
-  return output.MakeError(out.str(), theCommands);
+  return output.makeError(out.str(), theCommands);
 }
 
 bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1330,7 +1330,7 @@ bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const 
   }
   if (input[1].isEqualToZero()) {
     if (!input[2].isEqualToZero()) {
-      return output.AssignValue(0, theCommands);
+      return output.assignValue(0, theCommands);
     }
   }
   return false;
@@ -1601,7 +1601,7 @@ bool Calculator::CollectCoefficientsPowersVar(
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
-        currentCoeff.AssignValue(1, theCommands);
+        currentCoeff.assignValue(1, theCommands);
       } else {
         currentCoeff.MakeProducT(theCommands, remainingMultiplicands);
       }
@@ -1819,7 +1819,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
   if (!input.startsWith(theCommands.opDefineConditional(), 4)) {
-    return output.MakeError("Error: operation :if = takes three arguments.", theCommands);
+    return output.makeError("Error: operation :if = takes three arguments.", theCommands);
   }
   Rational conditionRat;
   if (!input[1].IsOfType<Rational>(&conditionRat)) {
@@ -1841,7 +1841,7 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
     return false;
   }
   Expression tempE, minusOne;
-  minusOne.AssignValue(- 1, theCommands);
+  minusOne.assignValue(- 1, theCommands);
   if (input.size() == 2) {
     output.MakeXOX(theCommands, theCommands.opTimes(), minusOne, input[1]);
   } else {
@@ -1862,12 +1862,12 @@ void Expression::operator+=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.theData, *this->owner);
     *this += otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->AssignValue(this->theData, *other.owner);
+    this->assignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
@@ -1888,12 +1888,12 @@ void Expression::operator-=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.theData, *this->owner);
     (*this) -= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->AssignValue(this->theData, *other.owner);
+    this->assignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
@@ -1926,7 +1926,7 @@ Expression Expression::operator*(int other) {
     << global.fatal;
   }
   Expression otherE;
-  otherE.AssignValue(other, *this->owner);
+  otherE.assignValue(other, *this->owner);
   result = *this;
   result *= otherE;
   return result;
@@ -1942,7 +1942,7 @@ Expression Expression::operator/(int other) {
     << global.fatal;
   }
   Expression otherE;
-  otherE.AssignValue(other, *this->owner);
+  otherE.assignValue(other, *this->owner);
   result = *this;
   result /= otherE;
   return result;
@@ -1981,12 +1981,12 @@ void Expression::operator/=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.theData, *this->owner);
     (*this) /= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->AssignValue(this->theData, *other.owner);
+    this->assignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
@@ -2007,12 +2007,12 @@ void Expression::operator*=(const Expression& other) {
   }
   if (other.owner == nullptr) {
     Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->owner);
+    otherCopy.assignValue(other.theData, *this->owner);
     (*this) *= otherCopy;
     return;
   }
   if (this->owner == nullptr) {
-    this->AssignValue(this->theData, *other.owner);
+    this->assignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
@@ -2568,7 +2568,7 @@ std::string Calculator::ToStringPerformance() {
   moreDetails << "<br>Expressions generated: " << this->theExpressionContainer.size << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->stats.expressionEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
-  << this->TotalNumPatternMatchedPerformed << "";
+  << this->TotalNumpatternMatchedPerformed << "";
   if (this->DepthRecursionReached > 0) {
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
@@ -2964,7 +2964,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
       truncatedInput.children.removeLastObject();
     }
   }
-  if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >(
+  if (!theCommands.getTypeHighestWeightParabolic<Polynomial<Rational> >(
     theCommands,
     truncatedInput,
     output,
@@ -2973,7 +2973,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     theSSalgebra,
     CalculatorConversions::functionPolynomial<Rational>)
   ) {
-    return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
+    return output.makeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   }
   if (output.IsError()) {
     return true;
@@ -3011,52 +3011,52 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
+  if (!theCommands.getTypeHighestWeightParabolic<Rational>(
     theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
-    return output.MakeError("Failed to extract highest weight and algebra", theCommands);
+    return output.makeError("Failed to extract highest weight and algebra", theCommands);
   }
   if (output.IsError()) {
     return true;
   }
   if (tempSel.CardinalitySelection > 0) {
-    return output.MakeError("Failed to extract highest weight. ", theCommands);
+    return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString)) {
-    return output.MakeError(reportString, theCommands);
+    return output.makeError(reportString, theCommands);
   }
   std::stringstream out;
   out << resultChar.toString();
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
+  if (!theCommands.getTypeHighestWeightParabolic<Rational>(
     theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
-    return output.MakeError("Failed to extract highest weight and algebra", theCommands);
+    return output.makeError("Failed to extract highest weight and algebra", theCommands);
   }
   if (output.IsError()) {
     return true;
   }
   if (tempSel.CardinalitySelection > 0) {
-    return output.MakeError("Failed to extract highest weight. ", theCommands);
+    return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
-    return output.MakeError(reportString, theCommands);
+    return output.makeError(reportString, theCommands);
   }
-  return output.AssignValue(resultChar, theCommands);
+  return output.assignValue(resultChar, theCommands);
 }
 
 bool Expression::IsMeltable(int* numResultingChildren) const {

@@ -604,7 +604,7 @@ void WebCrawler::FetchWebPagePart2(
 bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
   if (!global.UserDefaultHasAdminRights()) {
-    return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
+    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
   if (input.size() != 4) {
@@ -628,13 +628,13 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Ex
   << "<br>";
   theCrawler.FetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
   if (!global.UserDefaultHasAdminRights()) {
-    return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
+    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
   if (input.size() != 5) {
@@ -661,7 +661,7 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const E
   theCrawler.flagDoUseGET = false;
   theCrawler.FetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctions::innerFetchKnownPublicKeys(
@@ -672,12 +672,12 @@ bool CalculatorFunctions::innerFetchKnownPublicKeys(
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights()) {
     out << "You need to be a logged-in administrator to call this function. ";
-    return output.AssignValue(out.str(), theCommands);
+    return output.assignValue(out.str(), theCommands);
   }
   WebCrawler theCrawler;
   theCrawler.theTSL.openSSLData.name = "crawler";
   theCrawler.UpdatePublicKeys(&out, &out);
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {

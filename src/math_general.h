@@ -2868,15 +2868,18 @@ template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 
 template <class Coefficient>
-class ElementOneVariablePolynomialQuotientRing {
+class PolynomialModuloPolynomial {
 public:
   Polynomial<Coefficient> modulus;
   Polynomial<Coefficient> value;
   void reduce();
-  void operator*=(ElementOneVariablePolynomialQuotientRing<Coefficient>& other);
+  void operator*=(PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* theFormat = nullptr);
-  static unsigned int hashFunction(const ElementOneVariablePolynomialQuotientRing<Coefficient>& input);
-  unsigned int hashFunction();
+  PolynomialModuloPolynomial<Coefficient> one();
+  static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
+  unsigned int hashFunction() const;
+  bool operator==(const PolynomialModuloPolynomial<Coefficient>& other)const;
+  bool isEqualToZero() const;
 };
 
 template <class Coefficient, class oneFactorFinder>

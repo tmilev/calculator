@@ -60,37 +60,37 @@ Calculator::NamedRuleLocation::NamedRuleLocation() {
 
 Expression Calculator::EZero() {
   Expression result;
-  result.AssignValue(0, *this);
+  result.assignValue(0, *this);
   return result;
 }
 
 Expression Calculator::EOne() {
   Expression result;
-  result.AssignValue(1, *this);
+  result.assignValue(1, *this);
   return result;
 }
 
 Expression Calculator::EMOne() {
   Expression result;
-  result.AssignValue(- 1, *this);
+  result.assignValue(- 1, *this);
   return result;
 }
 
 Expression Calculator::EFour() {
   Expression result;
-  result.AssignValue(4, *this);
+  result.assignValue(4, *this);
   return result;
 }
 
 Expression Calculator::ETwo() {
   Expression result;
-  result.AssignValue(2, *this);
+  result.assignValue(2, *this);
   return result;
 }
 
 Expression Calculator::EMHalf() {
   Expression result;
-  result.AssignValue(Rational(- 1, 2), *this);
+  result.assignValue(Rational(- 1, 2), *this);
   return result;
 }
 
@@ -486,11 +486,11 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
 Expression Calculator::GetNewBoundVar() {
   Expression result(*this);
   result.addChildAtomOnTop(this->opBind());
-  result.addChildOnTop(this->GetNewAtom());
+  result.addChildOnTop(this->getNewAtom());
   return result;
 }
 
-Expression Calculator::GetNewAtom() {
+Expression Calculator::getNewAtom() {
   std::string atomPrefix;
   std::string candidate;
   while (true) {
@@ -590,7 +590,7 @@ void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
     return;
   }
   Expression incomingHistory, indexE;
-  indexE.AssignValue(childIndex, *this->owner);
+  indexE.assignValue(childIndex, *this->owner);
   incomingHistory.MakeXOX(
     *this->owner,
     this->owner->opExpressionHistorySetChild(),
@@ -629,7 +629,7 @@ void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::stri
     description << info;
   }
   Expression extraInformation;
-  extraInformation.AssignValue(description.str(), *this->owner);
+  extraInformation.assignValue(description.str(), *this->owner);
   incomingHistory.MakeXOX(
     *this->owner,
     this->owner->opExpressionHistorySet(),
@@ -699,7 +699,7 @@ bool Calculator::EvaluateLoop::OutputHasErrors() {
     << this->outpuT->toString(&this->owner->formatVisibleStrings)
     << "<br>Maximum number of algebraic transformations of "
     << this->owner->MaxAlgTransformationsPerExpression << " exceeded.";
-    this->outpuT->MakeError(out.str(), *this->owner);
+    this->outpuT->makeError(out.str(), *this->owner);
     this->reductionOccurred = true;
     this->owner->flagAbortComputationASAP = true;
     this->owner->flagMaxTransformationsErrorEncountered = true;
@@ -781,7 +781,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
         out
         << "Failed to account rule: " << (*this->outpuT)[i].toString()
         << ". Most likely the cause is too deeply nested recursion. ";
-        this->outpuT->MakeError(out.str(), *this->owner);
+        this->outpuT->makeError(out.str(), *this->owner);
         this->owner->flagAbortComputationASAP = true;
       }
     }
@@ -794,34 +794,34 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
 
 bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::UserDefinedEvaluation");
-  Expression beforePatternMatch, afterPatternMatch;
+  Expression beforepatternMatch, afterpatternMatch;
   for (
     int i = 0;
     i < this->owner->RuleStack.size() && !this->owner->flagAbortComputationASAP;
     i ++
   ) {
     const Expression& currentPattern = this->owner->RuleStack[i];
-    this->owner->TotalNumPatternMatchedPerformed ++;
+    this->owner->TotalNumpatternMatchedPerformed ++;
     if (this->owner->flagLogEvaluatioN) {
-      beforePatternMatch = *this->outpuT;
+      beforepatternMatch = *this->outpuT;
     }
     MapList<Expression, Expression> bufferPairs;
-    std::stringstream* theLog = this->owner->flagLogPatternMatching ? &this->owner->comments : nullptr;
-    afterPatternMatch = *(this->outpuT);
-    if (this->owner->ProcessOneExpressionOnePatternOneSub(
-      currentPattern, afterPatternMatch, bufferPairs, theLog
+    std::stringstream* theLog = this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
+    afterpatternMatch = *(this->outpuT);
+    if (this->owner->processOneExpressionOnePatternOneSub(
+      currentPattern, afterpatternMatch, bufferPairs, theLog
     )) {
       std::stringstream substitutionComment;
       if (this->history == nullptr) {
         substitutionComment << "User-defined substition: " << currentPattern.toString();
       }
-      this->SetOutput(afterPatternMatch, nullptr, substitutionComment.str());
+      this->SetOutput(afterpatternMatch, nullptr, substitutionComment.str());
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluatioN) {
         *this->owner
         << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
         << "<br>Rule: " << currentPattern.toString() << "<br>"
-        << HtmlRoutines::GetMathSpanPure(beforePatternMatch.toString())
+        << HtmlRoutines::GetMathSpanPure(beforepatternMatch.toString())
         << " -> " << HtmlRoutines::GetMathSpanPure(this->outpuT->toString());
       }
       return true;
@@ -915,7 +915,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   this->owner->cachedExpressions.addOnTop(theExpressionWithContext);
   this->indexInCache = this->owner->cachedExpressions.size - 1;
   this->owner->imagesCachedExpressions.setSize(this->indexInCache + 1);
-  this->owner->imagesCachedExpressions.lastObject()->MakeError("Error: not computed yet.", *this->owner);
+  this->owner->imagesCachedExpressions.lastObject()->makeError("Error: not computed yet.", *this->owner);
 }
 
 bool Calculator::EvaluateExpression(
@@ -970,7 +970,7 @@ bool Calculator::EvaluateExpression(
     << " but I have already seen that expression in the expression stack. ";
     theCommands.flagAbortComputationASAP = true;
     Expression errorE;
-    errorE.MakeError(errorStream.str(), theCommands);
+    errorE.makeError(errorStream.str(), theCommands);
     return state.SetOutput(errorE, nullptr, "Error");
   }
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
@@ -994,21 +994,21 @@ bool Calculator::EvaluateExpression(
   return true;
 }
 
-Expression* Calculator::PatternMatch(
+Expression* Calculator::patternMatch(
   const Expression& thePattern,
   Expression& theExpression,
   MapList<Expression, Expression>& bufferPairs,
   const Expression* condition,
   std::stringstream* theLog
 ) {
-  MacroRegisterFunctionWithName("Calculator::PatternMatch");
+  MacroRegisterFunctionWithName("Calculator::patternMatch");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH >= this->MaxRecursionDeptH) {
     std::stringstream out;
     out << "Error: while trying to evaluate expression, "
     << "the maximum recursion depth of "
     << this->MaxRecursionDeptH << " was exceeded";
-    theExpression.MakeError(out.str(), *this);
+    theExpression.makeError(out.str(), *this);
     return nullptr;
   }
   thePattern.CheckInitialization();
@@ -1066,13 +1066,13 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expressio
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
 }
 
-bool Calculator::ProcessOneExpressionOnePatternOneSub(
+bool Calculator::processOneExpressionOnePatternOneSub(
   const Expression& thePattern,
   Expression& theExpression,
   MapList<Expression, Expression>& bufferPairs,
   std::stringstream* theLog
 ) {
-  MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
+  MacroRegisterFunctionWithName("Calculator::processOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (
     !thePattern.startsWith(this->opDefine(), 3) &&
@@ -1091,7 +1091,7 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   if (isConditionalDefine) {
     theCondition = &thePattern[2];
   }
-  Expression* toBeSubbed = this->PatternMatch(
+  Expression* toBeSubbed = this->patternMatch(
     currentPattern, theExpression, bufferPairs, theCondition, theLog
   );
   if (toBeSubbed == nullptr) {

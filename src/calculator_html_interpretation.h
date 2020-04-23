@@ -21,7 +21,7 @@ public:
     int theType;
     std::string tag;
     std::string contentTrimmedWhiteSpace;
-    void MakeError(const std::string& message);
+    void makeError(const std::string& message);
     void MakeEmpty();
     TopicElement ToTopicElement() const;
     std::string toString() const;
@@ -175,7 +175,7 @@ public:
   JSData ComputeHomeworkJSON(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement();
-  void MakeError(const std::string& message);
+  void makeError(const std::string& message);
   bool MergeTopicLine(const TopicElementParser::TopicLine& input);
 };
 

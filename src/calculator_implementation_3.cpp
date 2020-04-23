@@ -186,13 +186,13 @@ bool Calculator::innerAnimateLittelmannPaths(
   MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.isListNElements(3)) {
-    return output.MakeError("This function takes 2 arguments", theCommands);
+    return output.makeError("This function takes 2 arguments", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* theSSowner = algebra.content;
   Vector<Rational> theWeight;
@@ -204,7 +204,7 @@ bool Calculator::innerAnimateLittelmannPaths(
     theSSowner->GetRank(),
     nullptr
   )) {
-    return output.MakeError(
+    return output.makeError(
       "Failed to convert the argument of the function to a highest weight vector",
       theCommands
     );
@@ -215,7 +215,7 @@ bool Calculator::innerAnimateLittelmannPaths(
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  return output.AssignValue(thePath.GenerateOrbitAndAnimate(), theCommands);
+  return output.assignValue(thePath.GenerateOrbitAndAnimate(), theCommands);
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -227,7 +227,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra& algebraReference = *algebra.content;
   ElementUniversalEnveloping<RationalFunction> theCasimir;
@@ -237,7 +237,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   <<  ". The Casimir element of the ambient Lie algebra. ";
   ExpressionContext context(theCommands);
   context.setAmbientSemisimpleLieAlgebra(algebraReference);
-  return output.AssignValueWithContext(theCasimir, context, theCommands);
+  return output.assignValueWithContext(theCasimir, context, theCommands);
 }
 
 bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -247,11 +247,11 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 
   output = input[1];
   if (!output.IsOfType < ElementUniversalEnveloping<RationalFunction> >()) {
-    return output.MakeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
+    return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   }
   SemisimpleLieAlgebra& ownerSS = *output.GetAmbientSSAlgebraNonConstUseWithCaution();
   if (!ownerSS.IsOfSimpleType('G', 2)) {
-    return output.MakeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
+    return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   }
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
@@ -259,12 +259,12 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   ElementUniversalEnveloping<RationalFunction> argument = output.getValue<ElementUniversalEnveloping<RationalFunction> >();
   ElementUniversalEnveloping<RationalFunction> outputUE;
   if (!theHmm.ApplyHomomorphism(argument, outputUE)) {
-    return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
+    return output.makeError("Failed to apply homomorphism for unspecified reason", theCommands);
   }
   outputUE.simplify();
   ExpressionContext context(theCommands);
   context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
-  return output.AssignValueWithContext(outputUE, context, theCommands);
+  return output.assignValueWithContext(outputUE, context, theCommands);
 }
 
 std::string HtmlRoutines::GetSliderSpanStartsHidden(
@@ -729,7 +729,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   out << "<br><br><br>";
   out << latexTable.str();
   out << "<br>";
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerPrintB3G2branchingTable(
@@ -884,7 +884,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   out << "<br><b>Ready for LaTeX consumption:</b><br>%preamble: "
   << "<br>\\documentclass{article}<br>\\usepackage{longtable, amssymb}"
   << "<br>\\begin{document}<br>%text body<br>" << latexTable.str() << "<br>%end of text body <br>\\end{document}";
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 void branchingData::resetOutputData() {
@@ -1045,7 +1045,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
       currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
     );
   }
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1069,13 +1069,13 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (input.size() != 3) {
-    return output.MakeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
+    return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* theSSowner = algebra.content;
 
@@ -1083,13 +1083,13 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   ExpressionContext theContext(theCommands);
   Vector<Rational> theHW;
   if (!theCommands.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
-    return output.MakeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
+    return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
   theHWint.setSize(theHW.size);
   for (int i = 0; i < theHW.size; i ++) {
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i] < 0) {
-      return output.MakeError(
+      return output.makeError(
         "The input weight you gave is bad: "
         "it must consist of non-negative small integers",
         theCommands
@@ -1132,7 +1132,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   }
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
@@ -1166,17 +1166,17 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.isListNElements(3)) {
-    return output.MakeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
+    return output.makeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
   }
   const Expression& rankE = input[1];
   const Expression& dimE = input[2];
   int rankBound = 0;
   int dimBound = 0;
   if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound)) {
-    return output.MakeError("The rank and  dim bounds must be small integers", theCommands);
+    return output.makeError("The rank and  dim bounds must be small integers", theCommands);
   }
   if (rankBound < 2 || rankBound > 100 || dimBound < 1 || dimBound > 10000) {
-    return output.MakeError(
+    return output.makeError(
       "The rank bound must be an integer between 2 and 100, "
       "and the dim bound must be an integer between 1 and 10000. ",
       theCommands
@@ -1328,7 +1328,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   }
   latexReport << "\\end{document}";
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1339,7 +1339,7 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
   }
   int theIndex = 0;
   if (!input.IsSmallInteger(&theIndex)) {
-    return output.MakeError(
+    return output.makeError(
       "The argument of the Littelmann root operator is "
       "expected to be a small integer, instead you gave me " +
       input.toString(),
@@ -1347,22 +1347,22 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
     );
   }
   if (theIndex == 0) {
-    return output.MakeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
+    return output.makeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
   }
-  return output.AssignValue(theIndex, theCommands);
+  return output.assignValue(theIndex, theCommands);
 }
 
 bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, Expression& output) {
   RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLSPath");
   if (input.size() < 3) {
-    return output.MakeError("LSPath needs at least two arguments.", theCommands);
+    return output.makeError("LSPath needs at least two arguments.", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> theSSowner;
   if (!theCommands.Convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSowner
   )) {
-    return output.MakeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner.content;
   Vectors<Rational> waypoints;
@@ -1371,13 +1371,13 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
     if (!theCommands.getVector<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
     )) {
-      return output.MakeError("Failed to extract waypoints", theCommands);
+      return output.makeError("Failed to extract waypoints", theCommands);
     }
   }
   waypoints = ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
   theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
-  return output.AssignValue(theLSpath, theCommands);
+  return output.assignValue(theLSpath, theCommands);
 }
 
 template <>
@@ -1394,7 +1394,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.MakeError(
+    return output.makeError(
       "I have been taught to factor one variable polynomials only. ",
       theCommands
     );
@@ -1408,12 +1408,12 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   }
   List<Expression> resultSequence;
   Expression constantFactor;
-  constantFactor.AssignValue(factorization.constantFactor, theCommands);
+  constantFactor.assignValue(factorization.constantFactor, theCommands);
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE, expressionE(theCommands);
 
   for (int i = 0; i < factorization.reduced.size; i ++) {
-    polynomialE.AssignValueWithContext(
+    polynomialE.assignValueWithContext(
       factorization.reduced[i], polynomial.context, theCommands
     );
     expressionE.children.clear();
@@ -1448,7 +1448,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   ElementZmodP outputElt;
   outputElt.theModulus = base.value;
   outputElt = left.GetNumerator();
-  return output.AssignValue(outputElt, theCommands);
+  return output.assignValue(outputElt, theCommands);
 }
 
 bool Calculator::innerInterpolatePoly(
@@ -1477,7 +1477,7 @@ bool Calculator::innerInterpolatePoly(
   interPoly.Interpolate(theArgs, theValues);
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariableFromString("x");
-  return output.AssignValueWithContext(interPoly, theContext, theCommands);
+  return output.assignValueWithContext(interPoly, theContext, theCommands);
 }
 
 bool Calculator::innerPrintZnEnumeration(
@@ -1508,7 +1508,7 @@ bool Calculator::innerPrintZnEnumeration(
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();
-  return output.AssignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), theCommands);
 }
 
 bool Expression::AssignMatrixExpressions(
@@ -1747,7 +1747,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   } else {
     outputEWA.Makedi(0, 1);
   }
-  return output.AssignValueWithContext(outputEWA, endContext, theCommands);
+  return output.assignValueWithContext(outputEWA, endContext, theCommands);
 }
 
 bool Calculator::Test::ProcessOneTest(JSData& input) {
@@ -1880,7 +1880,7 @@ bool Calculator::innerAutomatedTest(
     << "number of tests to run after that. ";
   }
   test.CalculatorTestRun();
-  return output.AssignValue(test.reportHtml, theCommands);
+  return output.assignValue(test.reportHtml, theCommands);
 }
 
 bool Calculator::Test::ProcessResults() {

@@ -6,7 +6,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
 ) {
   MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::innerExecuteMongoQuery");
   if (!global.UserDefaultHasAdminRights()) {
-    return output.AssignValue(std::string("Administrator rights needed for mongoDB queries. "), theCommands);
+    return output.assignValue(std::string("Administrator rights needed for mongoDB queries. "), theCommands);
   }
   if (input.size() < 3) {
     return theCommands << "Expected at least 2 arguments: collection name and query. ";
@@ -27,10 +27,10 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   if (!Database::get().FindFromString(
     inputCollection, inputQuery, outputList, - 1, nullptr, &commentsOnFailure
   )) {
-    return output.AssignValue(commentsOnFailure.str(), theCommands);
+    return output.assignValue(commentsOnFailure.str(), theCommands);
   }
   JSData finalOutput;
   finalOutput.theType = JSData::token::tokenArray;
   finalOutput.theList = outputList;
-  return output.AssignValue(HtmlRoutines::ToHtmlTableRowsFromJSON(finalOutput), theCommands);
+  return output.assignValue(HtmlRoutines::ToHtmlTableRowsFromJSON(finalOutput), theCommands);
 }

@@ -70,7 +70,7 @@ void Calculator::reset() {
   this->flagUseNumberColors = false;
   this->flagLogRules = false;
   this->flagLogCache = false;
-  this->flagLogPatternMatching = false;
+  this->flagLogpatternMatching = false;
   this->flagUseLnAbsInsteadOfLogForIntegrationNotation = false;
   this->flagLogFullTreeCrunching = false;
   this->flagNewContextNeeded = true;
@@ -199,6 +199,7 @@ void Calculator::initialize() {
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("PolynomialOverANs");
   this->AddOperationBuiltInType("PolynomialModuloInteger");
+  this->AddOperationBuiltInType("PolynomialModuloPolynomialModuloInteger");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
@@ -312,7 +313,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\text");
 
   this->initializePredefinedStandardOperationsWithoutHandler();
-  this->TotalNumPatternMatchedPerformed = 0;
+  this->TotalNumpatternMatchedPerformed = 0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initCalculusTestingFunctions();
@@ -674,7 +675,7 @@ bool Calculator::ReplaceOEXByE() {
 bool Calculator::ReplaceXXByEmptyString() {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
-  left.theData.AssignValue(std::string(""), *this);
+  left.theData.assignValue(std::string(""), *this);
   left.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(1);
 }
@@ -904,7 +905,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       currentElement.theData.reset(*this);
       output.addOnTop(currentElement);
     } else if (MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable) {
-      currentElement.theData.AssignValue(current, *this);
+      currentElement.theData.assignValue(current, *this);
       currentElement.controlIndex = this->conInteger();
       output.addOnTop(currentElement);
     } else {
@@ -1130,7 +1131,7 @@ bool Calculator::ReplaceMatrixXByE() {
     for (int i = 0; i < numRows; i ++) {
       for (int j = 0; j < numCols; j ++) {
         if (j + 1 >= theMatElt.dataList[i].size()) {
-          theMat.elements[i][j].AssignValue(0, *this);
+          theMat.elements[i][j].assignValue(0, *this);
           continue;
         }
         theMat.elements[i][j] = theMatElt.dataList[i][j + 1];
@@ -1213,7 +1214,7 @@ bool Calculator::ReplaceIntegerDotIntegerByE() {
   result += afterDecimalPoint;
   result /= denominator;
   left.controlIndex = this->conExpression();
-  left.theData.AssignValue(result, *this);
+  left.theData.assignValue(result, *this);
   this->DecreaseStackSetCharacterRangeS(2);
   return true;
 }
@@ -1223,7 +1224,7 @@ bool Calculator::ReplaceIntegerXbyEX() {
   theElt.controlIndex = this->conExpression();
   Rational value;
   value.AssignString(theElt.theData.getValue<std::string>());
-  theElt.theData.AssignValue(value, *this);
+  theElt.theData.assignValue(value, *this);
   return true;
 }
 

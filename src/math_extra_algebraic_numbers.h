@@ -287,7 +287,7 @@ public:
     this->flagDeallocated = true;
   }
   void CheckIamInitialized() const;
-  void invert();
+  bool invert();
   bool isEqualToZero() const {
     return this->theValue.isEqualToZero();
   }

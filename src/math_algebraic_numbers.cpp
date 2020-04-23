@@ -1593,10 +1593,11 @@ void ElementZmodP::operator=(const LargeIntegerUnsigned& other) {
   this->theValue %= this->theModulus;
 }
 
-void ElementZmodP::invert() {
+bool ElementZmodP::invert() {
   ElementZmodP copy = *this;
   this->makeOne(this->theModulus);
-  *this /= copy;
+  bool result = (*this /= copy);
+  return result;
 }
 
 void ElementZmodP::makeOne(const LargeIntegerUnsigned& newModulo) {

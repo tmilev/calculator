@@ -5,7 +5,7 @@
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
 
-void LargeIntegerUnsigned::AssignString(const std::string& input) {
+void LargeIntegerUnsigned::assignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
     this->AssignShiftedUInt(x, 0);
@@ -16,10 +16,10 @@ void LargeIntegerUnsigned::AssignString(const std::string& input) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
-      global.fatal << "This is a programming error: LargeIntUnsigned::AssignString "
+      global.fatal << "This is a programming error: LargeIntUnsigned::assignString "
       << "called on the string " << input
       << " which does not consist entirely of digits. "
-      << "Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
+      << "Please note that LargeIntUnsigned::assignString is a no-fail function, intended for "
       << "internal use only. If you want to parse arbitrary unsafe "
       << "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
       << global.fatal;
@@ -1184,14 +1184,14 @@ void LargeInteger::WriteToFile(std::fstream& output) {
 void LargeInteger::ReadFromFile(std::fstream& input) {
   std::string tempS;
   input >> tempS;
-  this->AssignString(tempS);
+  this->assignString(tempS);
 }
 
-void LargeInteger::AssignString(const std::string& input) {
+void LargeInteger::assignString(const std::string& input) {
   bool success = this->AssignStringFailureAllowed(input, nullptr);
   if (!success) {
     global.fatal
-    << "LargeInt::AssignString is not allowed to fail." << global.fatal;
+    << "LargeInt::assignString is not allowed to fail." << global.fatal;
   }
 }
 
@@ -1394,7 +1394,7 @@ void LargeInteger::makeZero() {
 }
 
 void LargeInteger::operator=(const Rational& other) {
-  if (!other.IsInteger(this)) {
+  if (!other.isInteger(this)) {
     global.fatal << "This is a programming error: converting implicitly rational number " << other.toString()
     << " to integer is not possible as the Rational number is not integral. " << global.fatal;
   }
@@ -1517,7 +1517,7 @@ void Rational::invert() {
 void Rational::ReadFromFile(std::istream& input) {
   std::string tempS;
   input >> tempS;
-  this->AssignString(tempS);
+  this->assignString(tempS);
 }
 
 void Rational::MultiplyByInt(int x) {
@@ -1978,7 +1978,7 @@ Rational Rational::NtoTheKth(int n, int k) {
   return result;
 }
 
-bool Rational::IsInteger(LargeInteger* whichInteger) const {
+bool Rational::isInteger(LargeInteger* whichInteger) const {
   bool result = false;
   if (this->extended == nullptr) {
     result = (this->denominatorShort == 1);
@@ -1996,8 +1996,8 @@ bool Rational::IsInteger(LargeInteger* whichInteger) const {
   return result;
 }
 
-bool MathRoutines::IsInteger(Rational x) {
-  return x.IsInteger();
+bool MathRoutines::isInteger(Rational x) {
+  return x.isInteger();
 }
 
 double Rational::GetDoubleValue() const {
@@ -2154,7 +2154,7 @@ std::string Rational::ToStringFrac() const {
 }
 
 void Rational::operator=(const AlgebraicNumber& other) {
-  bool isGood = other.IsRational(this);
+  bool isGood = other.isRational(this);
   if (!isGood) {
     global.fatal << "This is a programming error: attempting to assign the "
     << "non-rational algebraic number " << other.toString()
@@ -2224,10 +2224,10 @@ bool Rational::AssignStringFailureAllowed(const std::string& input) {
   return true;
 }
 
-void Rational::AssignString(const std::string& input) {
+void Rational::assignString(const std::string& input) {
   if (!Rational::AssignStringFailureAllowed(input)) {
     global.fatal << "Programming error: "
-    << "Rational::AssignString failed (likely a zero denominator). "
+    << "Rational::assignString failed (likely a zero denominator). "
     << global.fatal;
   }
 }

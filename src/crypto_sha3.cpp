@@ -36,15 +36,15 @@ public:
   Sha3();
   void transform();
   void transformIfFilledUp();
-  void Theta();
-  void PiOfRho();
-  void Chi();
+  void theta();
+  void piOfRho();
+  void chi();
   void reset();
   void sha3_Init256();
   void sha3_Init384();
   void sha3_Init512();
-  std::string ToStringState();
-  static uint64_t RotateLeft(uint64_t x, unsigned y) {
+  std::string toStringState();
+  static uint64_t rotateLeft(uint64_t x, unsigned y) {
     return ((x << y) | (x >> ((sizeof(uint64_t) * 8) - y)));
   }
 };
@@ -105,7 +105,7 @@ const signed Sha3::powersOfA[24] = {
   10, 7, 11, 17, 18,  3,  5, 16,  8, 21, 24,  4, 15, 23, 19, 13, 12,  2, 20, 14, 22,  9,  6,  1
 };
 
-void Sha3::Theta() {
+void Sha3::theta() {
   uint64_t columnXORed[5];
   for (int i = 0; i < 5; i ++) {
     columnXORed[i] =
@@ -116,26 +116,26 @@ void Sha3::Theta() {
     this->stateStorage[i + 20];
   }
   for (int i = 0; i < 5; i ++) {
-    uint64_t t = columnXORed[(i + 4) % 5] xor Sha3::RotateLeft(columnXORed[(i + 1) % 5], 1);
+    uint64_t t = columnXORed[(i + 4) % 5] xor Sha3::rotateLeft(columnXORed[(i + 1) % 5], 1);
     for (int j = 0; j < 25; j += 5) {
       this->stateStorage[j + i] ^= t;
     }
   }
 }
 
-void Sha3::PiOfRho() {
+void Sha3::piOfRho() {
   uint64_t x, y;
   x = this->stateStorage[1];
   for (int i = 0; i < 24; i ++) {
     int j = Sha3::powersOfA[i];
     y = this->stateStorage[j];
-    this->stateStorage[j] = Sha3::RotateLeft(x, Sha3::triangularNumbers[i]);
+    this->stateStorage[j] = Sha3::rotateLeft(x, Sha3::triangularNumbers[i]);
     x = y;
   }
 
 }
 
-void Sha3::Chi() {
+void Sha3::chi() {
   uint64_t combined[5];
   for (int j = 0; j < 25; j += 5) {
     for(int i = 0; i < 5; i ++) {
@@ -149,9 +149,9 @@ void Sha3::Chi() {
 
 void Sha3::transform() {
   for (int round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
-    this->Theta();
-    this->PiOfRho();
-    this->Chi();
+    this->theta();
+    this->piOfRho();
+    this->chi();
     // Iota
     this->stateStorage[0] ^= Sha3::roundEndXORConstants[round];
   }
@@ -202,7 +202,7 @@ void Sha3::transformIfFilledUp() {
   this->transform();
 }
 
-std::string Sha3::ToStringState() {
+std::string Sha3::toStringState() {
   std::stringstream out;
   out << "SHA3 state:\n";
   int intermediate = Sha3::numberOfSpongeWords - this->capacityWords;

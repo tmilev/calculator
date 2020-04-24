@@ -299,7 +299,7 @@ class SelectionPositiveIntegers {
   public:
   Vector<LargeIntegerUnsigned> theInts;
   std::string toString(FormatExpressions* theFormat = nullptr) {
-    (void) theFormat;//avoid unused parameter warning, portable
+    (void) theFormat;
     return this->theInts.toString();
   }
   LargeIntegerUnsigned GetGrading() {

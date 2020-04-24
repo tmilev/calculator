@@ -84,7 +84,7 @@ public:
   void (*theOutputFunction)(const std::string& stringToOutput);
   void (*flushOutputFunction)();
   StdoutClass(): theOutputFunction(nullptr), flushOutputFunction(nullptr){}
-  void Flush() {
+  void flush() {
     if (this->flushOutputFunction == nullptr) {
       std::cout.flush();
       return;

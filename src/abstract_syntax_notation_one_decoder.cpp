@@ -47,7 +47,7 @@ AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder()
 AbstractSyntaxNotationOneSubsetDecoder::~AbstractSyntaxNotationOneSubsetDecoder() {
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::CheckInitialization() const {
+bool AbstractSyntaxNotationOneSubsetDecoder::checkInitialization() const {
   if (this->decodedData == nullptr) {
     global.fatal << "Uninitialized ASN1 output json. " << global.fatal;
   }
@@ -558,7 +558,7 @@ void ASNElement::toJSON(JSData& output) const {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
-  output[ASNElement::JSLabels::lengthEncoding] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding);
+  output[ASNElement::JSLabels::lengthEncoding] = Crypto::convertListUnsignedCharsToHex(lengthEncoding);
   if (this->flagHeaderPadded) {
     output[ASNElement::JSLabels::lengthEncoding] = output[ASNElement::JSLabels::lengthEncoding].theString + "00";
   }
@@ -579,7 +579,7 @@ void ASNElement::toJSON(JSData& output) const {
     output[ASNElement::JSLabels::children] = children;
   }
   if (this->ASNAtom.size > 0 || !this->isComposite()) {
-    output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom);
+    output[ASNElement::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(this->ASNAtom);
     if (
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c ||
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13 ||
@@ -592,7 +592,7 @@ void ASNElement::toJSON(JSData& output) const {
       output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04) {
-      output[ASNElement::JSLabels::interpretation] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom);
+      output[ASNElement::JSLabels::interpretation] = Crypto::convertListUnsignedCharsToHex(this->ASNAtom);
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01) {
       if (this->ASNAtom.size > 0) {
@@ -843,7 +843,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
   this->dataPointer = inputOffset;
   this->decodedData = &output;
   this->rawDatA = &inputRawData;
-  this->CheckInitialization();
+  this->checkInitialization();
   this->decodedData->reset();
   if (!this->DecodeCurrent(*this->decodedData)) {
     if (commentsOnError != nullptr) {
@@ -900,19 +900,19 @@ bool ASNObject::isEmpty() const {
 }
 
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
-  if (!this->CheckInitialization()) {
+  if (!this->checkInitialization()) {
     return "ASN1 not initialized properly. ";
   }
   std::stringstream out;
   out << "<script>";
   out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
-  out << "\"" << Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA) << "\"";
+  out << "\"" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "\"";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";
   List<unsigned char> idNonHexed;
   Crypto::computeSha256(*this->rawDatA, idNonHexed);
-  std::string theID = Crypto::ConvertListUnsignedCharsToHex(idNonHexed);
+  std::string theID = Crypto::convertListUnsignedCharsToHex(idNonHexed);
   out << "\"" << theID << "\"";
   out << ");";
   out << "</script>";
@@ -1177,8 +1177,8 @@ int ASNObject::LoadField(
 
 std::string ASNObject::toString() const {
   std::stringstream out;
-  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom)
-  << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false);
+  out << "objectId: " << Crypto::convertListUnsignedCharsToHex(this->objectId.ASNAtom)
+  << ", name: " << Crypto::convertStringToHex(this->name, 0, false);
   std::string content = this->content.ASNAtom.toStringConcatenate();
   out << ", content: " << StringRoutines::ConvertStringToHexIfNonReadable(content, 0, false);
   return out.str();
@@ -1325,12 +1325,12 @@ void ASNElement::MakeSet(
   this->theElements.setSize(numberOfEmptyElements);
 }
 
-void ASNElement::MakeSequence(const List<ASNElement>& input) {
-  this->MakeSequence(input.size);
+void ASNElement::makeSequence(const List<ASNElement>& input) {
+  this->makeSequence(input.size);
   this->theElements = input;
 }
 
-void ASNElement::MakeSequence(int numberOfEmptyElements) {
+void ASNElement::makeSequence(int numberOfEmptyElements) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10;
   this->startByte = this->tag + 32;
@@ -1338,13 +1338,13 @@ void ASNElement::MakeSequence(int numberOfEmptyElements) {
 }
 
 void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& output) {
-  output.MakeSequence(2);
+  output.makeSequence(2);
   output[0] = this->signatureAlgorithmIdentifier;
   output[1].MakeNull();
 }
 
 void TBSCertificateInfo::ComputeASNValidityWrapper(ASNElement& output) {
-  output.MakeSequence(2);
+  output.makeSequence(2);
   output[0] = this->validityNotBefore;
   output[0].comment = "Validity not before";
   output[1] = this->validityNotAfter;
@@ -1400,15 +1400,15 @@ void ASNElement::MakeOctetString(const List<unsigned char>& input) {
 }
 
 void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
-  output.MakeSequence(2);
+  output.makeSequence(2);
   output.comment = "signature";
-  output[0].MakeSequence(2);
+  output[0].makeSequence(2);
   output[0][0].MakeObjectId(ASNObject::ObjectIdFromNameNoFail(ASNObject::names::RSAEncryption));
   output[0][1].MakeNull();
   output[1].MakeBitStringEmpty(false, false, false);
   output[1].theElements.setSize(1);
   ASNElement& signatureSerializer = output[1][0];
-  signatureSerializer.MakeSequence(2);
+  signatureSerializer.makeSequence(2);
   signatureSerializer[0].MakeInteger(this->subjectPublicKey.theExponent);
   signatureSerializer[1].MakeInteger(this->subjectPublicKey.theModulus);
   signatureSerializer.WriteBytesUpdatePromisedLength(output[1].ASNAtom);
@@ -1417,7 +1417,7 @@ void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
 }
 
 void TBSCertificateInfo::ComputeASN(ASNElement& output) {
-  output.MakeSequence(8);
+  output.makeSequence(8);
   this->ComputeASNVersionWrapper(output[0]);
   output[1].MakeInteger(this->serialNumber);
   output[1].comment = "serial number";
@@ -1434,7 +1434,7 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
 }
 
 void ASNElement::MakeBitStringSequence(const List<ASNElement>& input) {
-  this->MakeSequence(input);
+  this->makeSequence(input);
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->startByte = this->tag + 128 + 32;
   for (int i = 0; i < this->theElements.size; i ++) {
@@ -1449,7 +1449,7 @@ void TBSCertificateInfo::ComputeASNExtensions(ASNElement& output) {
 
 void ASNObject::ComputeASN(ASNElement& output) {
   output.MakeSet(1, false, false, true);
-  output[0].MakeSequence(2);
+  output[0].makeSequence(2);
   output[0][0] = this->objectId;
   output[0][1] = this->content;
   std::stringstream comment;
@@ -1459,7 +1459,7 @@ void ASNObject::ComputeASN(ASNElement& output) {
 }
 
 void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
-  output.MakeSequence(0);
+  output.makeSequence(0);
   List<ASNObject*> serializationOrder({
     &this->countryName,
     &this->stateOrProvinceName,
@@ -1482,7 +1482,7 @@ void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
 
 void X509Certificate::ComputeASN(ASNElement& output) {
   output.reset();
-  output.MakeSequence(3);
+  output.makeSequence(3);
   output.comment = "X509 certificate";
   this->information.ComputeASN(output[0]);
   this->ComputeASNSignatureAlgorithm(output[1]);
@@ -1490,7 +1490,7 @@ void X509Certificate::ComputeASN(ASNElement& output) {
 }
 
 void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
-  output.MakeSequence(2);
+  output.makeSequence(2);
   output[0] = this->signatureAlgorithmId;
   output[1].MakeNull();
 }
@@ -1508,10 +1508,10 @@ void X509Certificate::WriteBytesASN1(
 
 std::string X509Certificate::ToStringTestEncode() {
   std::stringstream out;
-  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary);
+  std::string sourceHex = Crypto::convertListUnsignedCharsToHex(this->sourceBinary);
   List<unsigned char> recoded;
   this->WriteBytesASN1(recoded, nullptr);
-  std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded);
+  std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
   out << "Original, recoded binary source:<br>"
   << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex, "sourceHex", "recodedHex");
   return out.str();
@@ -1520,7 +1520,7 @@ std::string X509Certificate::ToStringTestEncode() {
 std::string X509Certificate::ToHex() {
   List<unsigned char> bytes;
   this->WriteBytesASN1(bytes, nullptr);
-  return Crypto::ConvertListUnsignedCharsToHex(bytes);
+  return Crypto::convertListUnsignedCharsToHex(bytes);
 }
 
 std::string X509Certificate::toString() {
@@ -1647,7 +1647,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   }
   theElement.theModulus = this->thePublicKey.theModulus;
   theOne.makeOne(this->thePublicKey.theModulus);
-  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     inputHashedPadded, theElement.theValue
   );
   MathRoutines::raiseToPower(theElement, this->privateExponent, theOne);
@@ -1710,8 +1710,8 @@ bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int num
     }
     return false;
   }
-  Crypto::Random::GetRandomLargePrime(this->primeOne, numberOfBytes);
-  Crypto::Random::GetRandomLargePrime(this->primeTwo, numberOfBytes);
+  Crypto::Random::getRandomLargePrime(this->primeOne, numberOfBytes);
+  Crypto::Random::getRandomLargePrime(this->primeTwo, numberOfBytes);
   return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, false, commentsOnFailure);
 }
 
@@ -1720,7 +1720,7 @@ void PrivateKeyRSA::HashAndPadPKCS1(
 ) {
   List<unsigned char> inputHashed;
   ASNElement encoder;
-  encoder.MakeSequence(2);
+  encoder.makeSequence(2);
   ASNObject hashObject;
   switch (hash) {
   case SignatureAlgorithmSpecification::HashAlgorithm::sha256:

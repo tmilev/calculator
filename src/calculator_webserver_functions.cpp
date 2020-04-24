@@ -23,7 +23,7 @@ bool CalculatorFunctions::innerX509CertificateDecode(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerX509CertificateDecode");
   std::string binary;
-  if (!input.IsOfType(&binary)) {
+  if (!input.isOfType(&binary)) {
     return output.makeError("Input is not a string. ", theCommands);
   }
   X509Certificate theCertificate;

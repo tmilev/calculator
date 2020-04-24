@@ -154,7 +154,7 @@ public:
   }
   bool IsIntegral() {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].IsInteger()) {
+      if (!this->theObjects[i].isInteger()) {
         return false;
       }
     }
@@ -162,7 +162,7 @@ public:
   }
   static Vector<Coefficient> GetEi(int theDimension, int theIndex) {
     Vector<Coefficient> output;
-    output.MakeEi(theDimension, theIndex);
+    output.makeEi(theDimension, theIndex);
     return output;
   }
   bool isNegativeOrZero() {
@@ -245,7 +245,7 @@ public:
       this->theObjects[i] *= - 1;
     }
   }
-  void MakeEi(int DesiredDimension, int NonZeroIndex) {
+  void makeEi(int DesiredDimension, int NonZeroIndex) {
     this->makeZero(DesiredDimension);
     (*this)[NonZeroIndex] = 1;
   }
@@ -414,7 +414,7 @@ public:
     for (int i = 0; i < this->size; i ++) {
       if (i != Pivot) {
         Vector<Coefficient>& current = output.theObjects[i];
-        current.MakeEi(this->size, i);
+        current.makeEi(this->size, i);
         current.theObjects[Pivot] -= this->theObjects[i];
       }
     }
@@ -515,10 +515,10 @@ public:
     result += right;
     return result;
   }
-  bool AssignString(const std::string& input);
+  bool assignString(const std::string& input);
 
   void operator=(const std::string& input) {
-    this->AssignString(input);
+    this->assignString(input);
   }
   // The following function is required else
   // some compilers generate warning:
@@ -790,7 +790,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void MakeEiBasis(int theDimension) {
     this->setSize(theDimension);
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].MakeEi(theDimension, i);
+      this->theObjects[i].makeEi(theDimension, i);
     }
   }
   bool LinSpanContainsVector(const Vector<Coefficient>& input) const;
@@ -990,8 +990,8 @@ class Vectors: public List<Vector<Coefficient> > {
 };
 
 template <class Coefficient>
-bool Vector<Coefficient>::AssignString(const std::string& input) {
-  MacroRegisterFunctionWithName("Vector::AssignString");
+bool Vector<Coefficient>::assignString(const std::string& input) {
+  MacroRegisterFunctionWithName("Vector::assignString");
   this->setSize(0);
   int currentDigit = - 1;
   int sign = 1;

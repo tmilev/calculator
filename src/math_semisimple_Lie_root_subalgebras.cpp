@@ -25,12 +25,12 @@ void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     if (this->SimpleBasisK.size == 1) {
       outputBasis1 = this->SimpleBasisK[0].GetVectorDouble();
     } else {
-      outputBasis1.MakeEi(theDimension, 0);
+      outputBasis1.makeEi(theDimension, 0);
     }
     if (outputBasis1[0] == 0.0) {
-      outputBasis2.MakeEi(theDimension, 0);
+      outputBasis2.makeEi(theDimension, 0);
     } else {
-      outputBasis2.MakeEi(theDimension, 1);
+      outputBasis2.makeEi(theDimension, 1);
     }
     return;
   }
@@ -122,7 +122,7 @@ void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   this->SimpleBasisCentralizerRoots.size = 0;
   this->SimpleBasisCentralizerRoots.reserve(this->Modules.size);
   if (this->SimpleBasisK.size == 0) {
-    if (this->Modules.size != this->GetOwnerSSalg().GetNumGenerators()) {
+    if (this->Modules.size != this->getOwnerLieAlgebra().GetNumGenerators()) {
       global.fatal << " bad number of modules!" << global.fatal;
     }
   } else {
@@ -483,7 +483,7 @@ void RootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
 }
 
 bool RootSubalgebra::IsARoot(const Vector<Rational>& input) {
-  if (input.size != this->GetOwnerSSalg().GetRank()) {
+  if (input.size != this->getOwnerLieAlgebra().GetRank()) {
     return false;
   }
   return this->GetAmbientWeyl().RootSystem.contains(input);
@@ -501,7 +501,7 @@ void RootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
     for (int j = 0; j < this->Modules[index2].size; j ++) {
       Vector<Rational>& leftWeight = this->WeightsModulesPrimalSimple[index1][i];
       Vector<Rational>& rightWeight = this->WeightsModulesPrimalSimple[index2][j];
-      this->GetOwnerSSalg().LieBracket(this->Modules[index1][i],this->Modules[index2][j], theLieBracket);
+      this->getOwnerLieAlgebra().LieBracket(this->Modules[index1][i],this->Modules[index2][j], theLieBracket);
       if (theLieBracket.isEqualToZero()) {
         continue;
       }
@@ -548,9 +548,9 @@ Vector<Rational> RootSubalgebra::GetSimpleCoordsOverKss(const Vector<Rational>& 
 
 void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   MacroRegisterFunctionWithName("RootSubalgebra::ComputeHighestVectorsHighestWeights");
-  this->HighestVectors.setExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
-  this->HighestWeightsPrimalSimple.setExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
-  this->HighestWeightsNONPrimalFundamental.setExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
+  this->HighestVectors.setExpectedSize(this->getOwnerLieAlgebra().GetNumGenerators());
+  this->HighestWeightsPrimalSimple.setExpectedSize(this->getOwnerLieAlgebra().GetNumGenerators());
+  this->HighestWeightsNONPrimalFundamental.setExpectedSize(this->getOwnerLieAlgebra().GetNumGenerators());
   this->HighestWeightsPrimalSimple.setSize(0);
   this->HighestVectors.setSize(0);
   this->HighestWeightsNONPrimalFundamental.setSize(0);
@@ -558,7 +558,7 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   List<Vector<Rational> >& ambientRootSystem= this->GetAmbientWeyl().RootSystem;
   for (int i = 0; i <ambientRootSystem.size; i ++) {
     if (this->IsBKhighest(ambientRootSystem[i])) {
-      currentElt.MakeGGenerator(ambientRootSystem[i], this->GetOwnerSSalg());
+      currentElt.MakeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
       this->HighestVectors.addOnTop(currentElt);
       this->HighestWeightsPrimalSimple.addOnTop(ambientRootSystem[i]);
       this->HighestWeightsNONPrimalFundamental.addOnTop(this->GetFundamentalCoordsOverKss(ambientRootSystem[i]));
@@ -569,7 +569,7 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->SimpleBasisK.size);
   for (int i = 0; i <cartanCentralizer.size; i ++) {
-    currentElt.MakeHgenerator(cartanCentralizer[i], this->GetOwnerSSalg());
+    currentElt.MakeHgenerator(cartanCentralizer[i], this->getOwnerLieAlgebra());
     this->HighestVectors.addOnTop(currentElt);
     this->HighestWeightsPrimalSimple.addOnTop(currentElt.GetRootIMustBeWeight());
     this->HighestWeightsNONPrimalFundamental.addOnTop(zeroRoot);
@@ -612,7 +612,7 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
         }
       }
     }
-    currentWeight.makeZero(this->GetOwnerSSalg().GetRank());
+    currentWeight.makeZero(this->getOwnerLieAlgebra().GetRank());
     for (int i = 0; i <zeroSpace.size; i ++) {
       currentWeights.addOnTop(currentWeight);
     }
@@ -643,10 +643,10 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
   for (int i = 0; i < wPrimalSimple.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt = theMod[i];
     if (!wPrimalSimple[i].isEqualToZero()) {
-      currentElt.MakeGGenerator(wPrimalSimple[i], this->GetOwnerSSalg());
+      currentElt.MakeGGenerator(wPrimalSimple[i], this->getOwnerLieAlgebra());
       continue;
     }
-    currentElt.MakeHgenerator(zeroSpace[indexInZeroSpace], this->GetOwnerSSalg());
+    currentElt.MakeHgenerator(zeroSpace[indexInZeroSpace], this->getOwnerLieAlgebra());
     indexInZeroSpace ++;
   }
 }
@@ -690,7 +690,7 @@ void RootSubalgebra::ComputeKModules() {
   for (int i = 0; i < this->Modules.size; i ++) {
     dimFinal += this->Modules[i].size;
   }
-  if (dimFinal != this->GetOwnerSSalg().GetNumGenerators()) {
+  if (dimFinal != this->getOwnerLieAlgebra().GetNumGenerators()) {
     global.fatal << "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. " << global.fatal;
   }
 }
@@ -856,7 +856,7 @@ void RootSubalgebra::ExtractRelations(
   int indexInOwner,
   Vectors<Rational>& Ksingular
 ) {
-  int theDimension = this->GetOwnerSSalg().GetRank();
+  int theDimension = this->getOwnerLieAlgebra().GetRank();
   Vector<Rational> tempRoot;
   tempRoot.makeZero(theDimension);
   ConeRelation theRel; theRel.IndexOwnerRootSubalgebra = indexInOwner;
@@ -923,7 +923,7 @@ bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
   Vector<Rational> tempRoot, Accum;
   SelectionWithMaxMultiplicity tempSel;
   Vectors<Rational> chosenAlphas;
-  int theRank = this->GetOwnerSSalg().GetRank();
+  int theRank = this->getOwnerLieAlgebra().GetRank();
   DynkinDiagramRootSubalgebra theDiagram;
   for (int i = 2; i <= MathRoutines::Maximum(highestWeightsAllowed.size, theRank); i ++) {
     tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
@@ -1245,9 +1245,9 @@ bool RootSubalgebra::IsAnIsomorphism(
   return true;
 }
 
-void RootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("RootSubalgebra::ToHTML");
-  this->CheckInitialization();
+void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("RootSubalgebra::toHTML");
+  this->checkInitialization();
   std::fstream output;
   std::stringstream myPath;
   myPath << this->ownEr->owner->ToStringVirtualFolderName();
@@ -1680,11 +1680,11 @@ std::string RootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, RootS
 }
 
 WeylGroupData& RootSubalgebra::GetAmbientWeyl() const {
-  return this->GetOwnerSSalg().theWeyl;
+  return this->getOwnerLieAlgebra().theWeyl;
 }
 
 WeylGroupAutomorphisms& RootSubalgebra::GetAmbientWeylAutomorphisms() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->ownEr->theWeylGroupAutomorphisms;
 }
 
@@ -1724,7 +1724,7 @@ bool RootSubalgebra::LinCombToStringDistinguishedIndex(
   return true;
 }
 
-SemisimpleLieAlgebra& RootSubalgebra::GetOwnerSSalg() const {
+SemisimpleLieAlgebra& RootSubalgebra::getOwnerLieAlgebra() const {
   if (this->ownEr == nullptr) {
     global.fatal << "This is a programming error. Attempting to "
     << "access ambient Lie algebra of non-initialized root subalgebras. " << global.fatal;
@@ -2082,7 +2082,7 @@ bool RootSubalgebra::checkConsistency() const {
   return true;
 }
 
-bool RootSubalgebra::CheckInitialization() const {
+bool RootSubalgebra::checkInitialization() const {
   this->checkConsistency();
   if (this->ownEr == nullptr) {
     global.fatal << "Root subalgebra is not initialized properly. " << global.fatal;
@@ -2265,7 +2265,7 @@ void RootSubalgebra::ComputeEssentialS() {
 bool RootSubalgebra::ComputeEssentialsIfNew() {
   MacroRegisterFunctionWithName("RootSubalgebra::ComputeEssentialsIfNew");
   this->genK = this->SimpleBasisK;
-  this->CheckInitialization();
+  this->checkInitialization();
   ProgressReport theReport;
   std::stringstream reportStream;
   this->SimpleBasisKScaledToActByTwo = this->SimpleBasisK;
@@ -2619,8 +2619,8 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   this->PositiveRootsK.getCoordinatesInBasis(this->SimpleBasisK, relativeRootSystem);
   SlTwoSubalgebra theSl2;
   theSl2.container = &output;
-  theSl2.owner = &this->GetOwnerSSalg();
-  SemisimpleLieAlgebra& theLieAlgebra = this->GetOwnerSSalg();
+  theSl2.owner = &this->getOwnerLieAlgebra();
+  SemisimpleLieAlgebra& theLieAlgebra = this->getOwnerLieAlgebra();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
   for (int cyclecounter = 0; cyclecounter<numCycles; cyclecounter ++, selectionRootsWithZeroCharacteristic.incrementSelection()) {
     this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
@@ -2941,7 +2941,7 @@ WeylGroupData& RootSubalgebras::GetOwnerWeyl() const {
 }
 
 SemisimpleLieAlgebra& RootSubalgebras::GetOwnerSSalgebra() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return *this->owner;
 }
 
@@ -3013,9 +3013,9 @@ void RootSubalgebras::SortDescendingOrderBySSRank() {
   }
 }
 
-void RootSubalgebras::ToHTML(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("RootSubalgebras::ToHTML");
-  this->CheckInitialization();
+void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("RootSubalgebras::toHTML");
+  this->checkInitialization();
   std::string myPathVirtual = this->owner->ToStringVirtualFolderName() + this->owner->ToStringFileNameNoPathRootSubalgebras();
   std::fstream output;
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
@@ -3046,7 +3046,7 @@ void RootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   << "</body></html>";
   output.close();
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
-    this->theSubalgebras[i].ToHTML(i, theFormat);
+    this->theSubalgebras[i].toHTML(i, theFormat);
   }
 }
 
@@ -3315,7 +3315,7 @@ void RootSubalgebras::ComputeKmodMultTables() {
   }
 }
 
-bool RootSubalgebras::CheckInitialization() const {
+bool RootSubalgebras::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: root subalgebras with non-initialized owner. " << global.fatal;
   }
@@ -3324,7 +3324,7 @@ bool RootSubalgebras::CheckInitialization() const {
 
 void RootSubalgebras::initOwnerMustBeNonZero() {
   MacroRegisterFunctionWithName("RootSubalgebras::initOwnerMustBeNonZero");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->theSubalgebras.setSize(0);
   this->owner->theWeyl.ComputeRho(false);
 }

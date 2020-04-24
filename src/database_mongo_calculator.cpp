@@ -12,12 +12,12 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
     return theCommands << "Expected at least 2 arguments: collection name and query. ";
   }
   std::string inputCollection, inputQuery;
-  if (!input[2].IsOfType(&inputQuery)) {
+  if (!input[2].isOfType(&inputQuery)) {
     theCommands << "Expected string as second argument. Using the string: "
     << input[2].toString() << " as second name. ";
     inputQuery = input[2].toString();
   }
-  if (!input[1].IsOfType(&inputCollection)) {
+  if (!input[1].isOfType(&inputCollection)) {
     theCommands << "Expected string as first argument. Using the string: "
     << input[1].toString() << " as collection name. ";
     inputCollection = input[1].toString();

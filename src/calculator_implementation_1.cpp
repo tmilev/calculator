@@ -149,31 +149,84 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   return true;
 }
 
-bool Calculator::innerGCDOrLCMPoly(
+template <class Coefficient>
+bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+  Calculator& theCommands,
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  const ExpressionContext &context,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo");
+  Polynomial<Coefficient> outputPolynomial;
+  if (left.isEqualToZero()) {
+    return theCommands << "Not allowed to take gcd/lcm of zero. ";
+  }
+  Coefficient one = left.coefficients[0].one();
+  if (doGCD) {
+    Polynomial<Coefficient>::greatestCommonDivisor(left, right, outputPolynomial, one, &theCommands.comments);
+  } else {
+    Polynomial<Coefficient>::leastCommonMultiple(left, right, outputPolynomial, one, &theCommands.comments);
+  }
+  return output.assignValueWithContext(outputPolynomial, context, theCommands);
+}
+
+template <class Coefficient>
+bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
   bool doGCD
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
-  Vector<Polynomial<Rational> > polynomialsRational;
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.MergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<Coefficient> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    theCommands, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial");
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression& left = input[1];
+  if (left.isOfType<Polynomial<ElementZmodP> >()) {
+    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType<ElementZmodP>(theCommands, input, output, doGCD);
+  }
+  if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
+    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType<AlgebraicNumber>(theCommands, input, output, doGCD);
+  }
+  Vector<Polynomial<Rational> > polynomials;
   ExpressionContext theContext(theCommands);
   if (!theCommands.GetVectorFromFunctionArguments(
     input,
-    polynomialsRational,
+    polynomials,
     &theContext,
     2,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.makeError("Failed to extract a list of 2 polynomials. ", theCommands);
   }
-  Polynomial<Rational> outputPolynomial;
-  if (doGCD) {
-    RationalFunction::gcd(polynomialsRational[0], polynomialsRational[1], outputPolynomial);
-  } else {
-    RationalFunction::lcm(polynomialsRational[0], polynomialsRational[1], outputPolynomial);
-  }
-  return output.assignValueWithContext(outputPolynomial, theContext, theCommands);
+  return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    theCommands, polynomials[0], polynomials[1], theContext, output, doGCD
+  );
 }
 
 bool Calculator::getListPolynomialVariableLabelsLexicographic(
@@ -343,7 +396,7 @@ void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
 }
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output) {
-  (void) input;//avoid unused parameter warning, portable
+  (void) input;
   std::stringstream outFromHD, outRecomputeLinks;
 
   outFromHD << "\n\n<p>\n\n<table>"
@@ -357,7 +410,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
     if (precomputedTypes[i].HasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
       recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].toString() << ")";
-      outRecomputeLinks << "<br>" << HtmlRoutines::GetCalculatorComputationAnchor(recomputeCommand.str());
+      outRecomputeLinks << "<br>" << HtmlRoutines::getCalculatorComputationAnchor(recomputeCommand.str());
     }
   }
   outFromHD << "</table></p>";
@@ -417,7 +470,7 @@ bool Calculator::innerPrintSSSubalgebras(
   std::stringstream out;
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
-  bool isAlreadySubalgebrasObject = input[1].IsOfType<SemisimpleSubalgebras>();
+  bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject) {
     if (!theCommands.Convert(
       input[1],
@@ -446,7 +499,7 @@ bool Calculator::innerPrintSSSubalgebras(
   global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
-  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
+  theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.ComputeStructureWriteFiles(
     ownerLieAlgebra,
     theCommands.theObjectContainer.theAlgebraicClosure,
@@ -607,7 +660,7 @@ bool Calculator::innerGroebner(
   }
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
-  if (!numComputationsE.IsOfType(&upperBound)) {
+  if (!numComputationsE.isOfType(&upperBound)) {
     return output.makeError(
       "Failed to convert the first argument of "
       "the expression to rational number. ",
@@ -630,7 +683,7 @@ bool Calculator::innerGroebner(
   }
   int theMod = 0;
   if (useModZp) {
-    if (!output[1].IsSmallInteger(&theMod)) {
+    if (!output[1].isSmallInteger(&theMod)) {
       return output.makeError(
         "Error: failed to extract modulo from the second argument. ",
         theCommands
@@ -674,27 +727,27 @@ bool Calculator::innerGroebner(
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
   if (order == MonomialP::Order::gradedLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_totalDegree_leftLargerWins
     );
   } else if (order == MonomialP::Order::gradedReverseLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_totalDegree_rightSmallerWins
     );
   } else if (order == MonomialP::Order::lexicographicOpposite) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_rightLargerWins
     );
   } else if (order == MonomialP::Order::lexicographic){
-    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_leftLargerWins
     );
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;
   }
-  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
-  theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;
-  bool success = theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner);
+  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.monomialOrder;
+  theGroebnerComputation.maximumPolynomialComputations = upperBoundComputations;
+  bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
@@ -792,7 +845,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   MacroRegisterFunctionWithName("Calculator::innerTranspose");
   if (
     !input.IsSequenceNElementS() &&
-    !input.IsMatrix() &&
+    !input.isMatrix() &&
     !input.StartsWithGivenOperation("Transpose")
   ) {
     return false;
@@ -801,7 +854,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   if (input.StartsWithGivenOperation("Transpose")) {
     theCommands.GetMatrixExpressionsFromArguments(input, theMat);
   } else {
-    theCommands.GetMatrixExpressions(input, theMat);
+    theCommands.getMatrixExpressions(input, theMat);
   }
   // The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
   // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
@@ -1094,8 +1147,8 @@ std::string Plot::commonCanvasSetup() {
   return out.str();
 }
 
-std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
+std::string Plot::getPlotHtml3d(Calculator& owner) {
+  MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
   std::stringstream outContent, outScript;
   this->ComputeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
@@ -1218,20 +1271,20 @@ std::string Plot::GetCanvasName() const {
   return this->canvasNamE;
 }
 
-std::string Plot::ToStringDebug() {
+std::string Plot::toStringDebug() {
   std::stringstream out;
   out <<  "Objects: " << this->thePlots.size << "<br>";
   for (int i = 0; i < this->thePlots.size; i ++) {
     if (this->thePlots[i].thePlotType == "surface") {
       PlotObject& theSurface = this->thePlots[i];
-      out << theSurface.ToStringDebug();
+      out << theSurface.toStringDebug();
     }
   }
   return out.str();
 }
 
-std::string PlotObject::ToStringDebug() {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::ToStringDebug");
+std::string PlotObject::toStringDebug() {
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::toStringDebug");
   std::stringstream out;
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
@@ -1342,12 +1395,12 @@ std::string PlotObject::GetJavascriptSurfaceImmersion(
   return out.str();
 }
 
-std::string Plot::GetPlotHtml(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+std::string Plot::getPlotHtml(Calculator& owner) {
+  MacroRegisterFunctionWithName("Plot::getPlotHtml");
   if (this->dimension == 3) {
-    return this->GetPlotHtml3d_New(owner);
+    return this->getPlotHtml3d(owner);
   } else if (this->dimension == 2) {
-    return this->GetPlotHtml2d_New(owner);
+    return this->getPlotHtml2d(owner);
   } else {
     std::stringstream out;
     out << "Error:dimension =" << this->dimension;
@@ -1556,8 +1609,8 @@ void Plot::ComputeCanvasNameIfNecessary(int& canvasCounter) {
   this->SetCanvasName(canvasNameStream.str());
 }
 
-std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
-  MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
+std::string Plot::getPlotHtml2d(Calculator& owner) {
+  MacroRegisterFunctionWithName("Plot::getPlotHtml2d");
   owner.flagHasGraphics = true;
   if (this->flagDivAlreadyDisplayed) {
     return "[plot alredy displayed]";
@@ -1785,7 +1838,7 @@ bool Expression::AssignStringParsed(
       theSubbed.makeAtom(substitutions->theKeys[i], owner);
       theSubs.SetKeyValue(theSubbed, substitutions->theValues[i]);
     }
-    result.SubstituteRecursively(theSubs);
+    result.substituteRecursively(theSubs);
   }
   *this = result;
   return true;
@@ -1795,7 +1848,7 @@ bool Expression::IsSuitableForSubstitution() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsBuiltInTypE() || this->startsWith(this->owner->opBind())) {
+  if (this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
@@ -1805,13 +1858,13 @@ bool Expression::IsSuitableForRecursion() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsAtom() || this->IsBuiltInTypE() || this->startsWith(this->owner->opBind())) {
+  if (this->IsAtom() || this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
 }
 
-void Expression::SubstituteRecursively(MapList<Expression, Expression>& theSubs) {
+void Expression::substituteRecursively(MapList<Expression, Expression>& theSubs) {
   if (theSubs.contains(*this)) {
     (*this) = theSubs.GetValueCreate(*this);
     return;
@@ -1837,7 +1890,7 @@ void Expression::SubstituteRecursivelyInChildren(MapList<Expression, Expression>
   }
 }
 
-void Expression::SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
+void Expression::substituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
   if ((*this) == toBeSubbed) {
     (*this) = toBeSubbedWith;
     return;
@@ -1929,7 +1982,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   bool hasDoubleValue = false;
   double theDoubleValue = - 1;
   Rational theRat;
-  if (input.IsOfType<Rational>(&theRat)) {
+  if (input.isOfType<Rational>(&theRat)) {
     if (
       theRat.GetDenominator().IsIntegerFittingInInt(nullptr) &&
       theRat.GetNumerator().IsIntegerFittingInInt(nullptr)
@@ -1940,10 +1993,10 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     hasDoubleValue = true;
     theDoubleValue = input.getValue<Rational>().GetDoubleValue();
   }
-  if (input.IsOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.getValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+  if (input.isOfType<AlgebraicNumber>()) {
+    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
   }
-  if (input.IsOfType<double>()) {
+  if (input.isOfType<double>()) {
     hasDoubleValue = true;
     theDoubleValue = input.getValue<double>();
   }
@@ -1960,7 +2013,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
         return output.makeError("Failed to convert " + input[i].toString(), theCommands);
       }
-      if (!currentE.IsOfType(&currentString)) {
+      if (!currentE.isOfType(&currentString)) {
         return output.makeError("Failed to convert " + input[i].toString(), theCommands);
       }
       out << currentString << " ";
@@ -1970,7 +2023,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
         return output.makeError("Failed to convert " + input[i].toString(), theCommands);
       }
-      if (!currentE.IsOfType(&currentString)) {
+      if (!currentE.isOfType(&currentString)) {
         return output.makeError("Failed to convert " + input[i].toString(), theCommands);
       }
       out << currentString << " ";
@@ -1979,7 +2032,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE)) {
     return output.makeError("Failed to convert " + input[0].toString(), theCommands);
   }
-  if (!currentE.IsOfType(&currentString)) {
+  if (!currentE.isOfType(&currentString)) {
     return output.makeError("Failed to convert " + input[0].toString(), theCommands);
   }
   out << currentString << " ";
@@ -2183,17 +2236,17 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   }
   Expression leftE = input[1];
   Expression rightE = input[2];
-  if (!leftE.IsBuiltInTypE() || !rightE.IsBuiltInTypE()) {
+  if (!leftE.isBuiltInType() || !rightE.isBuiltInType()) {
     return false;
   }
   if (!Expression::MergeContexts(leftE, rightE)) {
     return false;
   }
-  ExpressionContext theContext = leftE.GetContext();
+  ExpressionContext theContext = leftE.getContext();
   ElementUniversalEnveloping<RationalFunction> left, right;
   if (
-    !leftE.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&left) ||
-    !rightE.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&right)
+    !leftE.isOfType<ElementUniversalEnveloping<RationalFunction> >(&left) ||
+    !rightE.isOfType<ElementUniversalEnveloping<RationalFunction> >(&right)
   ) {
     return false;
   }
@@ -2227,7 +2280,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   Vectors<Rational> outputRoots;
   WeylGroupData& theWeyl = theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple()) {
-    return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
+    return theCommands << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
     if (!theCommands.getVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
@@ -2334,14 +2387,14 @@ public:
   const Expression* getCurrentE(const List<Expression>& input);
   ExpressionHistoryEnumerator();
   bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
-  bool CheckInitialization() {
+  bool checkInitialization() {
     if (this->owner == nullptr) {
       global.fatal << "Expression history enumerator has zero owner. " << global.fatal;
     }
     return true;
   }
   std::string ToStringExpressionHistoryMerged();
-  std::string ToStringDebug();
+  std::string toStringDebug();
   Expression GetExpression(
     const TreeNode<HistorySubExpression>& currentNode,
     List<std::string>& outputRuleNames
@@ -2474,7 +2527,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
       }
       return false;
     }
-    if (!current[1].IsSmallInteger(&indicesInParent[i])) {
+    if (!current[1].isSmallInteger(&indicesInParent[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ExpressionHistorySetChild: bad child index. "
         << current.toString() ;
@@ -2549,8 +2602,8 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
   return true;
 }
 
-std::string ExpressionHistoryEnumerator::ToStringDebug() {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ToStringDebug");
+std::string ExpressionHistoryEnumerator::toStringDebug() {
+  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::toStringDebug");
   std::stringstream out;
   out << "<b>History</b><br>" << this->theHistory.toStringTreeHtml(- 1) << "<hr>";
   out << "" << this->theHistory.toStringSemiFull() << "<hr>";
@@ -2633,7 +2686,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   history.ComputeRecursively(0, &out);
   out << history.ToStringExpressionHistoryMerged();
   if (doDebug) {
-    out << "<hr>" << history.ToStringDebug();
+    out << "<hr>" << history.toStringDebug();
   }
   return output.assignValue(out.str(), theCommands);
 }

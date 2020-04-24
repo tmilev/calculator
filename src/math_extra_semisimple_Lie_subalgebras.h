@@ -51,7 +51,7 @@ class NilradicalCandidate {
 
   NilradicalCandidate();
   void reset();
-  void CheckInitialization() const;
+  void checkInitialization() const;
   bool IsStronglySingular(int moduleIndex);
   bool IsStronglySingularRelativeToSubset(int nonFKweightIndex);
   Vector<Rational> GetConeStrongIntersectionWeight() const;
@@ -85,7 +85,7 @@ public:
   void ComputeBasis();
   void ComputeCartanSA();
   SubalgebraSemisimpleLieAlgebra();
-  bool CheckInitialization();
+  bool checkInitialization();
 
 };
 
@@ -487,8 +487,8 @@ public:
   bool SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate);
   bool CheckConsistencyHs() const;
   bool checkConsistency() const;
-  bool CheckInitialization() const;
-  std::string ToStringState(FormatExpressions* theFormat = nullptr);
+  bool checkInitialization() const;
+  std::string toStringState(FormatExpressions* theFormat = nullptr);
   std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
   std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
   std::string toString(FormatExpressions* theFormat = nullptr);

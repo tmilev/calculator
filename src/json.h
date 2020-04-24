@@ -140,7 +140,7 @@ public:
   static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
   class Test {
   public:
-    static bool All();
+    static bool all();
     static bool TestRecode();
     static bool TestBadInput();
   };

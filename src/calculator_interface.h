@@ -133,12 +133,12 @@ private:
   }
   void operator=(const Rational& other) {
     MacroRegisterFunctionWithName("Expression::operator=(Rational)");
-    this->CheckInitialization();
+    this->checkInitialization();
     this->assignValue(other, *this->owner);
   }
   void operator=(int other) {
     MacroRegisterFunctionWithName("Expression::operator=(int)");
-    this->CheckInitialization();
+    this->checkInitialization();
     this->assignValue(other, *this->owner);
   }
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
@@ -238,9 +238,9 @@ private:
   bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
-  bool IsMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
+  bool isMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
   template<class theType>
-  bool IsMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
+  bool isMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
 
   bool IsAtom() const;
   bool IsOperationGiven(const std::string& desiredAtom) const;
@@ -274,8 +274,8 @@ private:
   bool IsCacheableExpression() const;
   bool IsBuiltInScalar() const;
   bool IsElementaryObject() const;
-  bool IsBuiltInTypE(std::string* outputWhichOperation = nullptr) const;
-  bool IsBuiltInTypE(int* outputWhichType) const;
+  bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
+  bool isBuiltInType(int* outputWhichType) const;
   const Expression& operator[](int n) const;
   bool IsIntervalRealLine() const;
   bool IsSequenceDoubleButNotTripleNested() const;
@@ -295,8 +295,8 @@ private:
   bool ConvertsInternally(WithContext<theType>* whichElement = nullptr) const;
 
   template <class theType>
-  bool IsOfType() const {
-    MacroRegisterFunctionWithName("Expression::IsOfType");
+  bool isOfType() const {
+    MacroRegisterFunctionWithName("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
@@ -309,23 +309,23 @@ private:
     return true;
   }
   template <class theType>
-  bool HasType() const {
-    if (this->IsOfType<theType>()) {
+  bool hasType() const {
+    if (this->isOfType<theType>()) {
       return true;
     }
     if (this->IsElementaryObject()) {
       return false;
     }
     for (int i = 0; i < this->size(); i ++) {
-      if ((*this)[i].HasType<theType>()) {
+      if ((*this)[i].hasType<theType>()) {
         return true;
       }
     }
     return false;
   }
   template <class theType>
-  bool IsOfType(theType* whichElement) const {
-    MacroRegisterFunctionWithName("Expression::IsOfType");
+  bool isOfType(theType* whichElement) const {
+    MacroRegisterFunctionWithName("Expression::isOfType");
     if (this->owner == nullptr) {
       return false;
     }
@@ -342,7 +342,7 @@ private:
     return true;
   }
   template <class theType>
-  bool IsOfTypeWithContext(WithContext<theType>* whichElement) const;
+  bool isOfTypeWithContext(WithContext<theType>* whichElement) const;
   template <class theType>
   const theType& getValue() const {
     return this->getValueNonConst<theType>();
@@ -352,7 +352,7 @@ private:
   template<class theType>
   int getTypeOperation() const;
   template<class theType>
-  int AddObjectReturnIndex(const theType& inputValue) const;
+  int addObjectReturnIndex(const theType& inputValue) const;
   // note: the following always returns true:
   template <class theType>
   bool assignValue(const theType& inputValue, Calculator& owner);
@@ -365,7 +365,7 @@ private:
   );
   template <class theType>
   bool AddChildValueOnTop(const theType& inputValue) {
-    this->CheckInitialization();
+    this->checkInitialization();
     Expression tempE;
     tempE.assignValue(inputValue, *this->owner);
     tempE.checkConsistency();
@@ -386,10 +386,10 @@ private:
   bool RemoveContext();
   bool hasContext() const;
   bool hasNonEmptyContext() const;
-  ExpressionContext GetContext() const;
-  bool GetContext(ExpressionContext& output) const;
+  ExpressionContext getContext() const;
+  bool getContext(ExpressionContext& output) const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
-  bool MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
+  bool mergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
   template <class theType>
   bool MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
 
@@ -422,7 +422,7 @@ private:
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound() const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
-  bool MakeIntegral(
+  bool makeIntegral(
     Calculator& theCommands,
     const Expression& integrationSet,
     const Expression& theFunction,
@@ -431,16 +431,16 @@ private:
   template<class Coefficient>
   bool makeSum(Calculator& theCommands, const LinearCombination<Expression, Coefficient>& theSum);
   bool makeSum(Calculator& theCommands, const List<Expression>& theSum);
-  bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
-  bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
-  int GetNumCols() const;
-  bool MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
-  bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
-  bool MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat = nullptr);
-  bool MakeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
+  bool makeProduct(Calculator& owner, const List<Expression>& theMultiplicands);
+  bool makeProduct(Calculator& owner, const Expression& left, const Expression& right);
+  int getNumberOfColumns() const;
+  bool makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
+  bool makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
+  bool makeMatrix(Calculator& owner, Matrix<Expression>* inputMat = nullptr);
+  bool makeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
-  bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
-  bool MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
+  bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
+  bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
   bool MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
   bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
@@ -449,7 +449,7 @@ private:
   bool IsSuitableForSubstitution() const;
   bool IsSuitableForRecursion() const;
 
-  void SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
+  void substituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
   void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
   void AssignXOXToChild(
     int childIndex,
@@ -610,19 +610,19 @@ private:
   ~Expression() {
     this->flagDeallocated = true;
   }
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   bool CheckInitializationRecursively() const;
   bool checkConsistency() const;
   bool CheckConsistencyRecursively() const;
   bool IsIntegerFittingInInt(int* whichInteger = nullptr) const;
-  bool IsSmallInteger(int* whichInteger = nullptr) const;
-  bool IsInteger(LargeInteger* whichInteger = nullptr) const;
-  bool IsIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const;
-  bool IsRational(Rational* whichRational = nullptr) const;
+  bool isSmallInteger(int* whichInteger = nullptr) const;
+  bool isInteger(LargeInteger* whichInteger = nullptr) const;
+  bool isIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const;
+  bool isRational(Rational* whichRational = nullptr) const;
   bool IsAlgebraicRadical() const;
-  bool IsConstantNumber() const;
-  bool IsPositiveNumber() const;
-  bool EvaluatesToDoubleInRange(
+  bool isConstantNumber() const;
+  bool isPositiveNumber() const;
+  bool evaluatesToDoubleInRange(
     const std::string& varName,
     double lowBound,
     double highBound,
@@ -631,17 +631,17 @@ private:
     double* outputYmax = nullptr,
     Vectors<double>* outputPoints = nullptr
   ) const;
-  bool EvaluatesToDouble(double* whichDouble = nullptr) const;
+  bool evaluatesToDouble(double* whichDouble = nullptr) const;
   bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
   bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const;
   bool AllowedAsFreeVariableAtom(const std::string& input) const;
-  bool GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const;
+  bool getBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const;
   bool EvaluatesToDoubleUnderSubstitutions(
     const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
-  bool HasBoundVariables() const;
+  bool hasBoundVariables() const;
   bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = nullptr) const;
-  bool IsMeltable(int* numResultingChildren = nullptr) const;
+  bool isMeltable(int* numResultingChildren = nullptr) const;
   bool AreEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
     this->theData == other.theData &&
@@ -684,11 +684,11 @@ private:
   // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool GreaterThanNoCoeff(const Expression& other) const;
-  void SubstituteRecursively(MapList<Expression, Expression>& theSubs);
+  void substituteRecursively(MapList<Expression, Expression>& theSubs);
   void SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
   class Test {
   public:
-    static bool All();
+    static bool all();
     static bool ToStringTestRecode(Calculator& ownerInitialized);
     static bool ToStringTestRecodeOnce(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
   };
@@ -842,7 +842,7 @@ class Function {
   std::string ToStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
-  bool ShouldBeApplied(int parentOpIfAvailable);
+  bool shouldBeApplied(int parentOpIfAvailable);
   bool operator==(const Function& other) const {
     return
     this->theArgumentTypes == other.theArgumentTypes &&
@@ -881,7 +881,7 @@ class Function {
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
-  bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
+  bool apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
   bool checkConsistency() const;
 };
 
@@ -963,7 +963,7 @@ public:
   std::string GetJavascriptCurveImmersionIn3d(
     std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
   );
-  std::string ToStringDebug();
+  std::string toStringDebug();
   void ComputeYbounds();
   std::string ToStringPointsList();
   std::string GetPlotStringFromFunctionStringAndRanges(
@@ -1017,12 +1017,12 @@ public:
   void SetCanvasName(const std::string& inputName);
   std::string GetCanvasName() const;
 
-  std::string ToStringDebug();
-  std::string GetPlotHtml(Calculator& owner);
+  std::string toStringDebug();
+  std::string getPlotHtml(Calculator& owner);
   void ComputeCanvasNameIfNecessary(int& canvasCounter);
   std::string commonCanvasSetup();
-  std::string GetPlotHtml3d_New(Calculator& owner);
-  std::string GetPlotHtml2d_New(Calculator& owner);
+  std::string getPlotHtml3d(Calculator& owner);
+  std::string getPlotHtml2d(Calculator& owner);
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);
   Plot();
@@ -1045,7 +1045,7 @@ public:
   Expression max;
   Expression step;
   std::string GetSliderName() const;
-  std::string GetUserInputBox() const;
+  std::string getUserInputBox() const;
 };
 
 class ObjectContainer {
@@ -1095,7 +1095,7 @@ public:
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
-  SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
+  SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   int CurrentRandomSeed;
   int canvasPlotCounter;
   void reset();
@@ -1160,7 +1160,7 @@ public:
     OperationHandlers();
     ~OperationHandlers();
     List<Function> mergeHandlers();
-    bool CheckConsisitency();
+    bool checkConsistency();
     JSData toJSON();
     std::string ToStringRuleStatusUser();
   };
@@ -1613,7 +1613,7 @@ public:
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool ReplaceXXbyE();
-  bool GetMatrixExpressions(
+  bool getMatrixExpressions(
     const Expression& input,
     Matrix<Expression>& output,
     int desiredNumRows = - 1,
@@ -1631,7 +1631,7 @@ public:
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
-  bool AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
+  bool accountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
   bool ApplyOneRule();
   void resetStack() {
     SyntacticElement emptyElement = this->GetEmptySyntacticElement();
@@ -2105,7 +2105,7 @@ public:
     Expression::FunctionAddress theFun, const Expression& input, Expression& output
   ) {
     MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
-    if (input.IsOfType<theType>()) {
+    if (input.isOfType<theType>()) {
       output = input;
       return true;
     }
@@ -2116,7 +2116,7 @@ public:
       this->comments << "<hr>Conversion function failed on " << input.toString() << ". ";
       return false;
     }
-    return output.IsOfType<theType>();
+    return output.isOfType<theType>();
   }
   // TODO: move to calculator conversions.
   template <class theType>
@@ -2130,10 +2130,10 @@ public:
     if (!this->ConvertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
       return false;
     }
-    if (!conversionExpression.IsOfType(&output.content)) {
+    if (!conversionExpression.isOfType(&output.content)) {
       return false;
     }
-    output.context = conversionExpression.GetContext();
+    output.context = conversionExpression.getContext();
     return true;
   }
   bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
@@ -2216,7 +2216,7 @@ public:
     bool LoadTestStrings(std::stringstream *commentsOnFailure);
     bool WriteTestStrings(std::stringstream* commentsOnFailure);
     bool ProcessOneTest(JSData& input);
-    static bool All();
+    static bool all();
     static bool NumberOfTestFunctions(Calculator& ownerInitialized);
     static bool ParseDecimal(Calculator& ownerInitialized);
     static bool ParseAllExamples(Calculator& ownerInitialized);
@@ -2349,7 +2349,7 @@ public:
     );
   }
   bool GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
-  bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory = - 1);
+  bool getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory = - 1);
   bool ConvertExpressionsToCommonContext(
     List<Expression>& inputOutputEs,
     ExpressionContext* inputOutputStartingContext = nullptr
@@ -2382,12 +2382,34 @@ public:
   static bool innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD);
+  template<class Coefficient>
+  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  template<class Coefficient>
+  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    Calculator& theCommands,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    const ExpressionContext& context,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+    Calculator& theCommands, const Expression& input, Expression& output, bool doGCD
+  );
   static bool innerLCMPoly(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGCDOrLCMPoly(theCommands, input, output, false);
+    return theCommands.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      theCommands, input, output, false
+    );
   }
   static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
+    return theCommands.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      theCommands, input, output, true
+    );
   }
   bool getListPolynomialVariableLabelsLexicographic(
     const Expression& input,
@@ -2403,7 +2425,7 @@ public:
     const Expression& input,
     Expression& output,
     Vectors<RationalFunction>& theHWs,
-    branchingData& theG2B3Data,
+    BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
   static bool innerPrintB3G2branchingTable(
@@ -2414,7 +2436,7 @@ public:
     const Expression& input,
     Expression& output,
     Vectors<RationalFunction>& outputHWs,
-    branchingData& theG2B3Data,
+    BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
   static bool innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2479,7 +2501,7 @@ public:
   );
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
+  static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output);
   static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2634,8 +2656,8 @@ public:
   void initAdminFunctions();
   void initPredefinedOperationsComposite();
   void initComputationStats();
-  bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
-  void EvaluateCommands();
+  bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
+  void evaluateCommands();
   bool TimedOut();
   static bool EvaluateExpression(
     Calculator& theCommands, const Expression& input, Expression& output
@@ -2659,7 +2681,7 @@ public:
     Expression* outpuT;
     Expression* history;
     Expression currentChild;
-    bool ReduceOnce();
+    bool reduceOnce();
     bool BuiltInEvaluation();
     bool UserDefinedEvaluation();
     void InitializeOneRun();
@@ -2672,7 +2694,7 @@ public:
       const Expression& input, Function* handler, const std::string& info
     );
     void AccountHistory(Function *handler, const std::string &info);
-    bool CheckInitialization();
+    bool checkInitialization();
     void AccountHistoryChildTransformation(
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
@@ -2852,7 +2874,7 @@ bool Calculator::getVector(const Expression& input,
 ) {
   MacroRegisterFunctionWithName("Calculator::getVector");
   List<Expression> nonConvertedEs;
-  if (!this->GetVectorExpressions(input, nonConvertedEs, targetDimNonMandatory)) {
+  if (!this->getVectorExpressions(input, nonConvertedEs, targetDimNonMandatory)) {
     return false;
   }
   List<Expression> convertedEs;
@@ -2882,17 +2904,17 @@ bool CalculatorConversions::functionExpressionFromPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPoly");
-  if (!input.IsOfType<Polynomial<Coefficient> >()) {
+  if (!input.isOfType<Polynomial<Coefficient> >()) {
     return false;
   }
   const Polynomial<Coefficient>& thePoly = input.getValue<Polynomial<Coefficient> >();
-  ExpressionContext context = input.GetContext();
+  ExpressionContext context = input.getContext();
   return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &context);
 }
 
 template <class theType>
-bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
-  if (!this->IsMatrix()) {
+bool Expression::isMatrixOfType(int* outputNumRows, int* outputNumCols) const {
+  if (!this->isMatrix()) {
     return false;
   }
   if (!(*this)[0].startsWith(this->owner->opMatriX(), 2)) {
@@ -2925,8 +2947,8 @@ bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
 }
 
 template <class theType>
-bool Expression::IsOfTypeWithContext(WithContext<theType>* whichElement) const {
-  MacroRegisterFunctionWithName("Expression::IsOfTypeWithContext");
+bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
+  MacroRegisterFunctionWithName("Expression::isOfTypeWithContext");
   if (this->owner == nullptr) {
     return false;
   }
@@ -2939,7 +2961,7 @@ bool Expression::IsOfTypeWithContext(WithContext<theType>* whichElement) const {
   if (whichElement == 0) {
     return true;
   }
-  whichElement->context = this->GetContext();
+  whichElement->context = this->getContext();
   whichElement->content = this->getValue<theType>();
   return true;
 }
@@ -2955,7 +2977,7 @@ bool Calculator::functionGetMatrix(
 ) {
   MacroRegisterFunctionWithName("Calculator::functionGetMatrix");
   Matrix<Expression> nonConvertedEs, convertedEs;
-  if (!this->GetMatrixExpressions(
+  if (!this->getMatrixExpressions(
     input, nonConvertedEs, - 1, targetNumColsNonMandatory
   )) {
     if (commentsOnError != nullptr) {
@@ -2984,7 +3006,7 @@ bool Calculator::functionGetMatrix(
           return false;
         }
       }
-      theContext.mergeContexts(convertedEs(i, j).GetContext(), theContext);
+      theContext.mergeContexts(convertedEs(i, j).getContext(), theContext);
     }
   }
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
@@ -3060,9 +3082,9 @@ bool Expression::makeSum(
 }
 
 template <typename theType>
-int Expression::AddObjectReturnIndex(const theType& inputValue) const {
+int Expression::addObjectReturnIndex(const theType& inputValue) const {
   (void) inputValue;
-  global.fatal << "Please implement AddObjectReturnIndex for the current type. " << global.fatal;
+  global.fatal << "Please implement addObjectReturnIndex for the current type. " << global.fatal;
   return - 1;
 }
 
@@ -3075,7 +3097,7 @@ bool Expression::assignValueWithContext(
   this->reset(owner, 3);
   this->addChildAtomOnTop(this->getTypeOperation<theType>());
   this->addChildOnTop(theContext.toExpression());
-  return this->addChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
+  return this->addChildAtomOnTop(this->addObjectReturnIndex(inputValue));
 }
 
 template<class theType>
@@ -3114,9 +3136,9 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
   MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
-  this->CheckInitialization();
+  this->checkInitialization();
   Expression mergedContexts;
-  if (!this->MergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
+  if (!this->mergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
     return false;
   }
   output.reset(*this->owner, this->children.size);
@@ -3262,7 +3284,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   } else {
     outputInducingSel.init(ambientSSalgebra->GetRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
-      if (!outputWeightHWFundcoords[i].IsSmallInteger()) {
+      if (!outputWeightHWFundcoords[i].isSmallInteger()) {
         outputInducingSel.AddSelectionAppendNewIndex(i);
       }
     }

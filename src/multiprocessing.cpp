@@ -876,7 +876,7 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
     }
     incoming.theType = "";
     LargeInteger theLI;
-    theLI.AssignString(current);
+    theLI.assignString(current);
     if (!theLI.IsIntegerFittingInInt(&incoming.length)) {
       global.fatal << "StringHighligher is not allowed to fail: this is an internal function, "
       << "please do not expose to the outside world. " << global.fatal;

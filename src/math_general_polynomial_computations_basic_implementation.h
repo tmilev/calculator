@@ -29,7 +29,7 @@ bool MonomialP::substitution(
       << theSubstitution.toString() << ". " << global.fatal;
     }
     int theExponent = 0;
-    if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
+    if (!this->monBody[i].isSmallInteger(&theExponent) || this->monBody[i] < 0) {
       if (theSubstitution[i].IsMonomialCoeffOne()) {
         MonomialP tempMon = theSubstitution[i][0];
         tempMon.raiseToPower(this->monBody[i]);
@@ -143,7 +143,7 @@ void Polynomial<Coefficient>::MakeDeterminantFromSquareMatrix(
 template <class Coefficient>
 int Polynomial<Coefficient>::TotalDegreeInt() const {
   int result = - 1;
-  if (!this->totalDegree().IsSmallInteger(&result)) {
+  if (!this->totalDegree().isSmallInteger(&result)) {
     global.fatal
     << "This is a programming error: requested total degree of a "
     << "polynomial in int formal, but the "
@@ -190,7 +190,7 @@ void Polynomial<Coefficient>::makeDegreeOne(
 ) {
   this->makeZero();
   MonomialP tempM;
-  tempM.MakeEi(NonZeroIndex, 1, NVar);
+  tempM.makeEi(NonZeroIndex, 1, NVar);
   this->addMonomial(tempM, coeff);
 }
 
@@ -205,9 +205,9 @@ void Polynomial<Coefficient>::makeDegreeOne(
   (void) NVar;
   this->makeZero();
   MonomialP tempM;
-  tempM.MakeEi(NonZeroIndex1);
+  tempM.makeEi(NonZeroIndex1);
   this->addMonomial(tempM, coeff1);
-  tempM.MakeEi(NonZeroIndex2);
+  tempM.makeEi(NonZeroIndex2);
   this->addMonomial(tempM, coeff2);
 }
 
@@ -232,7 +232,7 @@ Coefficient Polynomial<Coefficient>::Evaluate(const Vector<Coefficient>& input) 
     Coefficient tempElt;
     for (int j = 0; j < currentMon.minimalNumberOfVariables(); j ++) {
       int numCycles = 0;
-      if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
+      if (!(*this)[i](j).isSmallInteger(&numCycles)) {
         global.fatal << "This is a programming error. "
         << "Attempting to evaluate a polynomial whose "
         << i + 1 << "^{th} variable is raised to the power "
@@ -450,7 +450,7 @@ Matrix<Coefficient> Polynomial<Coefficient>::EvaluateUnivariatePoly(
   for (int i = 0; i < this->size; i ++) {
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
-    if (!currentMon(0).IsSmallInteger(&numCycles) ) {
+    if (!currentMon(0).isSmallInteger(&numCycles) ) {
       global.fatal
       << "This is a programming error. "
       << "Attempting to evaluate a polynomial whose "
@@ -863,7 +863,7 @@ void Polynomial<Coefficient>::AssignMinPoly(const Matrix<Coefficient>& input) {
   Polynomial<Coefficient> currentFactor;
   MonomialP tempM;
   for (int col = 0; col < theDim; col ++) {
-    theVectorPowers.MakeEi(theDim,col);
+    theVectorPowers.makeEi(theDim,col);
     theBasis.setSize(0);
     theBasis.addOnTop(theVectorPowers);
     for (int i = 0; i < theDim; i ++) {
@@ -877,10 +877,10 @@ void Polynomial<Coefficient>::AssignMinPoly(const Matrix<Coefficient>& input) {
     currentFactor.setExpectedSize(theBasis.size + 1);
     currentFactor.makeZero();
     for (int i = 0; i < theBasis.size; i ++) {
-      tempM.MakeEi(0, i, 1);
+      tempM.makeEi(0, i, 1);
       currentFactor.addMonomial(tempM, - firstDependentPower[i]);
     }
-    tempM.MakeEi(0, theBasis.size, 1);
+    tempM.makeEi(0, theBasis.size, 1);
     currentFactor.addMonomial(tempM, 1);
     *this = MathRoutines::lcm(*this, currentFactor);
   }
@@ -892,7 +892,7 @@ int Polynomial<Coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).numeratorShort);
-    if (!(*this)[i](VariableIndex).IsSmallInteger()) {
+    if (!(*this)[i](VariableIndex).isSmallInteger()) {
       global.fatal << " This is a programming error: "
       << "GetMaxPowerOfVariableIndex called on a polynomial whose monomials "
       << "have degrees that are not small integers. "
@@ -939,7 +939,7 @@ void Polynomial<Coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
   int index, Coefficient& output
 ) {
   MonomialP tempM;
-  tempM.MakeEi(index);
+  tempM.makeEi(index);
   int i = this->theMonomials.getIndex(tempM);
   if (i == - 1) {
     output = 0;
@@ -985,7 +985,7 @@ bool Polynomial<Coefficient>::differential(
       Coefficient newCoefficient = currentCoefficient;
       Rational power = currentMonomial(j);
       LargeInteger powerInteger;
-      if (!power.IsInteger(&powerInteger)) {
+      if (!power.isInteger(&powerInteger)) {
         if (comments != nullptr) {
           *comments << "Monomial has non-integer power " << power << ". ";
         }
@@ -1033,8 +1033,8 @@ bool PolynomialOrder<Coefficient>::CompareLeftGreaterThanRight(
   MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
   List<MonomialP> sortedLeft = left.theMonomials;
   List<MonomialP> sortedRight = right.theMonomials;
-  sortedLeft.quickSortAscending(&this->theMonOrder);
-  sortedRight.quickSortAscending(&this->theMonOrder);
+  sortedLeft.quickSortAscending(&this->monomialOrder);
+  sortedRight.quickSortAscending(&this->monomialOrder);
   int leftIndex = sortedLeft.size - 1;
   int rightIndex = sortedRight.size - 1;
   for (; leftIndex >= 0 && rightIndex >= 0; leftIndex --, rightIndex--) {
@@ -1131,7 +1131,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
-  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   std::string HighlightedColor = "red";
   this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -1142,7 +1142,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasiS.size);
-  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.monomialOrder);
   this->theFormat.flagUseLatex = true;
   out << this->ToStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
@@ -1249,7 +1249,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
-  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
@@ -1261,7 +1261,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasiS.size);
-  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.monomialOrder);
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";

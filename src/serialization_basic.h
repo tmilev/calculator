@@ -276,7 +276,7 @@ public:
     List<Serialization::Marker>* annotations,
     const std::string &label
   );
-  static std::string ConvertListUnsignedCharsToHex(const List<unsigned char>& input);
+  static std::string convertListUnsignedCharsToHex(const List<unsigned char>& input);
   static std::string ConvertListUnsignedCharsToString(const List<unsigned char>& input);
 };
 

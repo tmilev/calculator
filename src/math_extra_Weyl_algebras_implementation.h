@@ -43,7 +43,7 @@ void ElementWeylAlgebra<Coefficient>::MultiplyTwoMonomials(
   int theExpectedSize = 1;
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
-    if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp)) {
+    if (!left.differentialPart(i).isSmallInteger(&powerDiffOp)) {
       global.fatal << "This is a programming error. Requested operations with elements of Weyl algebra "
       << "that have monomials of exponent "
       << left.differentialPart(i).toString()
@@ -269,14 +269,14 @@ void ElementWeylAlgebra<Coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   MonomialWeylAlgebra tempMon;
   outputDO.makeZero();
   int inputPower = 0;
-  if (!inputRationalPower.IsSmallInteger(&inputPower)) {
+  if (!inputRationalPower.isSmallInteger(&inputPower)) {
     global.fatal << "This is a programming error: "
     << " I can give you a differential operator only from integer exponent. " << global.fatal;
   }
   if (inputPower >= 0) {
-    tempMon.polynomialPart.MakeEi(indexVar, inputPower);
+    tempMon.polynomialPart.makeEi(indexVar, inputPower);
   } else {
-    tempMon.differentialPart.MakeEi(indexVar, - inputPower);
+    tempMon.differentialPart.makeEi(indexVar, - inputPower);
   }
   outputDO.addMonomial(tempMon, 1);
   inputPower *= - 1;
@@ -336,7 +336,7 @@ void ElementWeylAlgebra<Coefficient>::FourierTransform(ElementWeylAlgebra<Coeffi
   MonomialWeylAlgebra theMon;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg)) {
+    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).isInteger(&totalDeg)) {
       global.fatal << "This is a programming error: calling Fourier transoform "
       << "on differential operator with non-integral exponents. " << global.fatal;
     }
@@ -365,7 +365,7 @@ bool ElementWeylAlgebra<Coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
       coeff *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {
         int numDiff = 0;
-        if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff)) {
+        if (!currentOpMon.differentialPart(k).isSmallInteger(&numDiff)) {
           return false;
         }
         for (; numDiff > 0; numDiff --) {

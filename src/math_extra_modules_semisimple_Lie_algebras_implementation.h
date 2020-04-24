@@ -180,7 +180,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::GetActionGeneratorIndeX
     MonomialMatrix theMon;
     Vector<Coefficient> weightH;
     Coefficient tempCF, hwCFshift;
-    weightH.MakeEi(this->GetOwner().GetRank(), generatorIndex - this->GetOwner().GetNumPosRoots());
+    weightH.makeEi(this->GetOwner().GetRank(), generatorIndex - this->GetOwner().GetNumPosRoots());
     hwCFshift = this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
     hwCFshift -= this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
     for (int i = 0; i < this->theGeneratingWordsNonReduced.size; i ++) {
@@ -392,7 +392,7 @@ void ModuleSSalgebra<Coefficient>::SplitOverLevi(
   CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::SplitOverLevi");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->theChaR.size() != 1) {
     if (report != nullptr) {
       std::stringstream out;
@@ -594,7 +594,7 @@ bool ModuleSSalgebra<Coefficient>::MakeFromHW(
     this->theHWFDpartFundamentalCoordS[i] = 0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i]) {
       int theCoord;
-      if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(&theCoord)) {
+      if (!this->theHWFundamentalCoordsBaseField[i].isSmallInteger(&theCoord)) {
         if (outputReport != nullptr) {
           *outputReport = "The given module over the Levi part is not finite dimensional";
         }
@@ -1150,7 +1150,7 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   ElementTensorsGeneralizedVermas<Coefficient> buffer;
   for (int i = theUE.Powers.size - 1; i >= 0; i --) {
     int thePower;
-    if (!theUE.Powers[i].IsSmallInteger(&thePower)) {
+    if (!theUE.Powers[i].isSmallInteger(&thePower)) {
       return false;
     }
     int theIndex = theUE.generatorsIndices[i];

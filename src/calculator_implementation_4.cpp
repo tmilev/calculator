@@ -79,8 +79,8 @@ int IntIdentity(const int& x) {
   return x;
 }
 
-bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
-  MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
+bool Calculator::getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
+  MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
   output.reserve(input.size());
   output.setSize(0);
   if (!input.IsSequenceNElementS() && !input.startsWith(this->opIntervalOpen())) {
@@ -398,7 +398,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionEulerOperatorPart(
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.makeOne();
   for (int i = 0; i < theCoeff.minimalNumberOfVariables(); i ++) {
-    if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
+    if (!theCoeff(i).isSmallInteger(&powerMonCoeff)) {
       global.fatal << "This is a programming error. "
       << "Getting euler operator part of action on generalized Verma module: "
       << "I have an exponent with non-small integer entry. "
@@ -446,7 +446,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
     endoPart = idMT;
     for (int j = currentMon.Powers.size - 1; j >= indicesNilrad.size; j --) {
       int thePower = 0;
-      if (!currentMon.Powers[j].IsSmallInteger(&thePower)) {
+      if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
         return false;
       }
       tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
@@ -546,7 +546,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   if (!AllGenerators) {
     for (int j = 0; j < theSSalgebra.GetRank(); j ++) {
       Vector<Rational> ei;
-      ei.MakeEi(theSSalgebra.GetRank(), j);
+      ei.makeEi(theSSalgebra.GetRank(), j);
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
       ei.Minus();
@@ -590,24 +590,24 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       Pone.makeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
       Pzero.makeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
-      theWeylFormat.polyAlphabeT.setSize(numStartingVars + elementsNegativeNilrad.size);
+      theWeylFormat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
       theWeylFormat.weylAlgebraLetters.setSize(numStartingVars + elementsNegativeNilrad.size);
-      theUEformat.polyAlphabeT.setSize(numStartingVars + elementsNegativeNilrad.size);
+      theUEformat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
       for (int k = 0; k < numStartingVars; k ++) {
         theWeylFormat.weylAlgebraLetters[k] = "error";
       }
       std::string theFinalXletter = (xLetter == nullptr) ? "x": *xLetter;
       std::string theFinalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
-      for (int k = numStartingVars; k < theUEformat.polyAlphabeT.size; k ++) {
+      for (int k = numStartingVars; k < theUEformat.polynomialAlphabet.size; k ++) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
         tmpStream << theUEformat.polyDefaultLetter << "_{" << k - hwContext.numberOfVariables() + 1 << "}";
-        theUEformat.polyAlphabeT[k] = tmpStream.str();
+        theUEformat.polynomialAlphabet[k] = tmpStream.str();
         tempstream2 << theFinalXletter << "_{" << k-numStartingVars + 1 << "}";
         tempstream3 << theFinalXletter << "_" << k-numStartingVars + 1;
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars + 1 << "}";
         if (
-          theWeylFormat.polyAlphabeT.contains(tempstream2.str()) ||
-          theWeylFormat.polyAlphabeT.contains(tempstream3.str())
+          theWeylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
+          theWeylFormat.polynomialAlphabet.contains(tempstream3.str())
         ) {
           return output.makeError(
             "Error: the variable " +
@@ -616,7 +616,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
             theCommands
           );
         }
-        theWeylFormat.polyAlphabeT[k] = tempstream2.str();
+        theWeylFormat.polynomialAlphabet[k] = tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
@@ -808,7 +808,7 @@ bool Calculator::CheckOperationHandlers() {
     if (current.IsZeroPointer()) {
       continue;
     }
-    current.getElement().CheckConsisitency();
+    current.getElement().checkConsistency();
     Calculator::OperationHandlers& allHandlers = current.getElement();
     for (int j = 0; j < allHandlers.compositeHandlers.size; j ++) {
       allHandlers.compositeHandlers[j].checkConsistency();
@@ -908,7 +908,7 @@ bool Calculator::innerGetChevGen(
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex)) {
+  if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   if (theIndex > theSSalg.content->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg.content->GetNumPosRoots()) {
@@ -947,7 +947,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     << global.fatal;
   }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex)) {
+  if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   if (
@@ -985,16 +985,16 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   }
   std::stringstream out;
   WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
-  if (theWeyl.theGroup.GetSize() > 192) {
+  if (theWeyl.theGroup.getSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.content->ToStringLieAlgebraName()
-    << " has " << theWeyl.theGroup.GetSize().toString() << ".";
+    << " has " << theWeyl.theGroup.getSize().toString() << ".";
     return output.assignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
-  theFormat.polyAlphabeT.setSize(1);
-  theFormat.polyAlphabeT[0] = "q";
+  theFormat.polynomialAlphabet.setSize(1);
+  theFormat.polynomialAlphabet[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra.content->ToStringLieAlgebraName();
@@ -1049,7 +1049,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
 ) {
   MacroRegisterFunctionWithName("Calculator::functionWriteToHDOrPrintSSLieAlgebra");
   WithContext<SemisimpleLieAlgebra*> tempSSpointer;
-  input.CheckInitialization();
+  input.checkInitialization();
   if (!theCommands.Convert(
     input,
     CalculatorConversions::functionSemisimpleLieAlgebra,
@@ -1068,14 +1068,14 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
 
 bool Expression::CheckInitializationRecursively() const {
   MacroRegisterFunctionWithName("Expression::CheckInitializationRecursively");
-  this->CheckInitialization();
+  this->checkInitialization();
   for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].CheckInitializationRecursively();
   }
   return true;
 }
 
-bool Expression::CheckInitialization() const {
+bool Expression::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: " << "Expression has non-initialized owner. " << global.fatal;
     return false;
@@ -1096,7 +1096,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
   }
   bool result = false;
   InputBox tempBox;
-  if (this->IsOfType<InputBox>(&tempBox)) {
+  if (this->isOfType<InputBox>(&tempBox)) {
     if (boxNames == nullptr) {
       return true;
     } else {
@@ -1116,21 +1116,21 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
   return result;
 }
 
-bool Expression::HasBoundVariables() const {
+bool Expression::hasBoundVariables() const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: calling function "
-    << "HasBoundVariables on non-initialized expression. " << global.fatal;
+    << "hasBoundVariables on non-initialized expression. " << global.fatal;
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
-  MacroRegisterFunctionWithName("Expression::HasBoundVariables");
+  MacroRegisterFunctionWithName("Expression::hasBoundVariables");
   if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH) {
-    global.fatal << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. " << global.fatal;
+    global.fatal << "This is a programming error: function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
   if (this->IsListOfTwoAtomsStartingWith(this->owner->opBind())) {
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].HasBoundVariables()) {
+    if ((*this)[i].hasBoundVariables()) {
       return true;
     }
   }
@@ -1143,7 +1143,7 @@ bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expr
   }
   const Expression& argument = input[1];
   int theInt;
-  if (!argument.IsSmallInteger(&theInt)) {
+  if (!argument.isSmallInteger(&theInt)) {
     return false;
   }
   if (theInt == 0) {
@@ -1157,10 +1157,10 @@ bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input
     return false;
   }
   const Expression& argument = input[1];
-  if (argument.HasBoundVariables()) {
+  if (argument.hasBoundVariables()) {
     return false;
   }
-  if (argument.IsInteger()) {
+  if (argument.isInteger()) {
     output.assignValue(1, theCommands);
   } else {
     output.assignValue(0, theCommands);
@@ -1173,10 +1173,10 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
     return false;
   }
   const Expression& argument = input[1];
-  if (argument.HasBoundVariables()) {
+  if (argument.hasBoundVariables()) {
     return false;
   }
-  if (argument.IsRational()) {
+  if (argument.isRational()) {
     output.assignValue(1, theCommands);
   } else {
     output.assignValue(0, theCommands);
@@ -1241,10 +1241,10 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
     if (right->startsWith(theCommands.opThePower(), 3)) {
       if ((*right)[1] == (*left)) {
         bool isGood = true;
-        if ((*right)[2].IsOfType<Rational>()) {
-          if (!(*right)[2].getValue<Rational>().IsInteger()) {
+        if ((*right)[2].isOfType<Rational>()) {
+          if (!(*right)[2].getValue<Rational>().isInteger()) {
             Rational ratBase;
-            if ((*right)[1].IsRational(&ratBase)) {
+            if ((*right)[1].isRational(&ratBase)) {
               if (ratBase > 0) {
                 isGood = false;
               }
@@ -1258,7 +1258,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
       }
       if (left->startsWith(theCommands.opThePower(), 3)) {
         if ((*left)[1] == (*right)[1]) {
-          bool isGood = (*left)[2].IsInteger() || (*right)[2].IsInteger();
+          bool isGood = (*left)[2].isInteger() || (*right)[2].isInteger();
           if (!isGood) {
             isGood = (*left)[1].IsKnownToBeNonNegative();
           }
@@ -1267,11 +1267,11 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           }
           Rational leftRat, rightRat;
           if (!isGood) {
-            if ((*left)[2].IsOfType<Rational>(&leftRat) && (*right)[2].IsOfType<Rational>(&rightRat)) {
-              if (leftRat.IsInteger() && !rightRat.IsInteger()) {
+            if ((*left)[2].isOfType<Rational>(&leftRat) && (*right)[2].isOfType<Rational>(&rightRat)) {
+              if (leftRat.isInteger() && !rightRat.isInteger()) {
                 isGood = true;
               }
-              if (!leftRat.IsInteger() && rightRat.IsInteger()) {
+              if (!leftRat.isInteger() && rightRat.isInteger()) {
                 isGood = true;
               }
             }
@@ -1392,7 +1392,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   output = input;
   output.setChildAtomValue(0, theCommands.opDefine());
   ////
-  if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
       MonomialGeneralizedVerma<RationalFunction>& theElt =
       withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
@@ -1422,7 +1422,7 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
   }
   output.initializeFillInObject(theRats.size, 0);
   for (int i = 0; i < theRats.size; i ++) {
-    if (!theRats[i].IsInteger(&output[i])) {
+    if (!theRats[i].isInteger(&output[i])) {
       return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
       << theRats.toString() << " but failed to convert that to list of integers. ";
     }
@@ -1438,7 +1438,7 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   }
   output.initializeFillInObject(theRats.size,0);
   for (int i = 0; i < theRats.size; i ++) {
-    if (!theRats[i].IsSmallInteger(&output[i])) {
+    if (!theRats[i].isSmallInteger(&output[i])) {
       return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
       << theRats.toString() << " but failed to convert that to list of small integers. ";
     }
@@ -1541,7 +1541,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
     return false;
   }
   if (constantsOnly) {
-    if (!input[2].IsConstantNumber()) {
+    if (!input[2].isConstantNumber()) {
       return false;
     }
   }
@@ -1573,7 +1573,7 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
     return false;
   }
   if (constantsOnly) {
-    if (!input[1].IsConstantNumber()) {
+    if (!input[1].isConstantNumber()) {
       return false;
     }
   }
@@ -1603,7 +1603,7 @@ bool Calculator::CollectCoefficientsPowersVar(
       if (remainingMultiplicands.size == 0) {
         currentCoeff.assignValue(1, theCommands);
       } else {
-        currentCoeff.MakeProducT(theCommands, remainingMultiplicands);
+        currentCoeff.makeProduct(theCommands, remainingMultiplicands);
       }
       if (currentE == theVariable) {
         outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(1), currentCoeff);
@@ -1613,7 +1613,7 @@ bool Calculator::CollectCoefficientsPowersVar(
       if (currentE.startsWith(theCommands.opThePower(), 3)) {
         int thePower;
         if (currentE[1] == theVariable) {
-          if (currentE[2].IsSmallInteger(&thePower)) {
+          if (currentE[2].isSmallInteger(&thePower)) {
             outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(thePower), currentCoeff);
             found = true;
             break;
@@ -1668,17 +1668,17 @@ bool Calculator::functionCollectSummands(
       continue;
     }
     if (summands[i].startsWith(theCommands.opTimes(), 3)) {
-      if (summands[i][1].IsOfType<Rational>(&coeffRat)) {
+      if (summands[i][1].isOfType<Rational>(&coeffRat)) {
         outputSum.addMonomial(summands[i][2], coeffRat);
         continue;
-      } else if (summands[i][1].IsOfType<AlgebraicNumber>(&coeffAlg)) {
-        if (coeffAlg.IsRational(&coeffRat)) {
+      } else if (summands[i][1].isOfType<AlgebraicNumber>(&coeffAlg)) {
+        if (coeffAlg.isRational(&coeffRat)) {
           outputSum.addMonomial(summands[i][2], coeffRat);
           continue;
         }
         sumOverAlgebraicNumbers.addMonomial(summands[i][2], coeffAlg);
         continue;
-      } else if (summands[i][1].IsOfType<double>(&coeffDouble)) {
+      } else if (summands[i][1].isOfType<double>(&coeffDouble)) {
         sumOverDoubles.addMonomial(summands[i][2], coeffDouble);
         if (std::isnan(coeffDouble)) {
           hasNAN = true;
@@ -1686,7 +1686,7 @@ bool Calculator::functionCollectSummands(
         continue;
       }
     }
-    if (summands[i].IsRational(&coeffRat)) {
+    if (summands[i].isRational(&coeffRat)) {
       outputSum.addMonomial(theCommands.EOne(), coeffRat);
     } else {
       outputSum.addMonomial(summands[i], 1);
@@ -1721,12 +1721,12 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
   if (input[1][1].IsKnownToBeNonNegative()) {
     isGood = true;
   }
-  if (input[2].IsInteger()) {
+  if (input[2].isInteger()) {
     isGood = true;
   }
   if (!isGood) {
     Rational powerInner, powerOuter;
-    if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner)) {
+    if (input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)) {
       if ((powerInner * powerOuter).IsEven()) {
         isGood = true;
       }
@@ -1736,7 +1736,7 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
     return false;
   }
   Expression tempE;
-  tempE.MakeProducT(theCommands, input[1][2], input[2]);
+  tempE.makeProduct(theCommands, input[1][2], input[2]);
   output.MakeXOX(theCommands, opPower, input[1][1], tempE);
   return true;
 }
@@ -1822,7 +1822,7 @@ bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Ex
     return output.makeError("Error: operation :if = takes three arguments.", theCommands);
   }
   Rational conditionRat;
-  if (!input[1].IsOfType<Rational>(&conditionRat)) {
+  if (!input[1].isOfType<Rational>(&conditionRat)) {
     return false;
   }
   if (conditionRat.IsEqualToOne()) {
@@ -1919,7 +1919,7 @@ Expression Expression::operator*(int other) {
     // hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
     // Rational resultRat = this->theData;
     // resultRat*= other;
-    // if (resultRat.IsSmallInteger(&result.theData))
+    // if (resultRat.isSmallInteger(&result.theData))
     //  return result;
     global.fatal << "Multiplying non-initialized expression with data: "
     << this->theData << " by integer " << other << " is not allowed. "
@@ -2042,17 +2042,17 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
   }
   Rational theRat, theRatTwo;
   AlgebraicNumber theAlgebraic;
-  if (this->IsOfType(&theRat) && other.IsOfType(&theRatTwo)) {
+  if (this->isOfType(&theRat) && other.isOfType(&theRatTwo)) {
     return theRat == theRatTwo;
   }
-  if (this->IsOfType(&theRat) && other.IsOfType(&theAlgebraic)) {
+  if (this->isOfType(&theRat) && other.isOfType(&theAlgebraic)) {
     return theAlgebraic == theRat;
   }
-  if (other.IsOfType(&theRat) && this->IsOfType(&theAlgebraic)) {
+  if (other.isOfType(&theRat) && this->isOfType(&theAlgebraic)) {
     return theAlgebraic == theRat;
   }
   double leftD = - 1, rightD = - 1;
-  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD)) {
+  if (this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)) {
     return (leftD - rightD == 0.0);
   }
   Expression differenceE = *this;
@@ -2087,8 +2087,8 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
 }
 
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() const {
-  this->CheckInitialization();
-  ExpressionContext myContext = this->GetContext();
+  this->checkInitialization();
+  ExpressionContext myContext = this->getContext();
   int indexSSalg = myContext.indexAmbientSemisimpleLieAlgebra;
   if (indexSSalg == - 1) {
     return nullptr;
@@ -2213,7 +2213,7 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
   }
   MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.theValues[indexOp];
   Calculator::OperationHandlers& handler = handlerPointer.getElement();
-  handler.CheckConsisitency();
+  handler.checkConsistency();
   if (theFun.options.flagIsCompositeHandler) {
     theFun.indexInOperationHandlers = handler.compositeHandlers.size;
     handler.compositeHandlers.addOnTop(theFun);
@@ -2343,7 +2343,7 @@ std::string Function::ToStringSummary() const {
   return out.str();
 }
 
-bool Function::ShouldBeApplied(int parentOpIfAvailable) {
+bool Function::shouldBeApplied(int parentOpIfAvailable) {
   if (this->options.disabledByUser) {
     return false;
   }
@@ -2445,7 +2445,7 @@ std::string Function::toStringFull() const {
     if (this->theExample != "") {
       out2 << "<a href=\"" << global.DisplayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
-      << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
+      << HtmlRoutines::convertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
     }
   } else {
@@ -2763,8 +2763,8 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
   return this->ToStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
 }
 
-SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
+SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
+  MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
   SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
   return currentSAs;
 }
@@ -2884,7 +2884,7 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   // HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   // WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   // SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
-  // SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
+  // SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   return true;
 }
 
@@ -2934,7 +2934,7 @@ void ObjectContainer::reset() {
   this->EllipticCurveElementsZmodP.clear();
   this->EllipticCurveElementsRational.clear();
    //Setting up a random seed.
-  global.unsecurePseudoRandomGenerator.SetRandomSeed(this->CurrentRandomSeed);
+  global.unsecurePseudoRandomGenerator.setRandomSeed(this->CurrentRandomSeed);
   this->canvasPlotCounter = 0;
   this->resetPlots();
   this->resetSliders();
@@ -3059,8 +3059,8 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   return output.assignValue(resultChar, theCommands);
 }
 
-bool Expression::IsMeltable(int* numResultingChildren) const {
-  this->CheckInitialization();
+bool Expression::isMeltable(int* numResultingChildren) const {
+  this->checkInitialization();
   if (!this->startsWith(this->owner->opMelt(), 2)) {
     return false;
   }
@@ -3074,16 +3074,16 @@ bool Expression::IsMeltable(int* numResultingChildren) const {
   return true;
 }
 
-bool Expression::MergeContextsMyAruments(
+bool Expression::mergeContextsMyAruments(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
-  this->CheckInitialization();
+  MacroRegisterFunctionWithName("Expression::mergeContextsMyAruments");
+  this->checkInitialization();
   if (this->size() < 2) {
     return false;
   }
   for (int i = 1; i < this->size(); i ++) {
-    if (!(*this)[i].IsBuiltInTypE()) {
+    if (!(*this)[i].isBuiltInType()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "<hr>Failed to merge the arguments of the expression "
@@ -3093,10 +3093,10 @@ bool Expression::MergeContextsMyAruments(
       return false;
     }
   }
-  ExpressionContext commonContext = (*this)[1].GetContext();
+  ExpressionContext commonContext = (*this)[1].getContext();
   bool needsMerge = false;
   for (int i = 2; i < this->size(); i ++) {
-    if (!(commonContext == (*this)[i].GetContext())) {
+    if (!(commonContext == (*this)[i].getContext())) {
       needsMerge = true;
       break;
     }
@@ -3106,7 +3106,7 @@ bool Expression::MergeContextsMyAruments(
     return true;
   }
   for (int i = 2; i < this->size(); i ++) {
-    if (!(*this)[i].IsBuiltInTypE()) {
+    if (!(*this)[i].isBuiltInType()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "<hr>Failed to merge contexts of arguments: "
@@ -3114,9 +3114,9 @@ bool Expression::MergeContextsMyAruments(
       }
       return false;
     }
-    if (!commonContext.mergeContexts((*this)[i].GetContext(), commonContext)) {
+    if (!commonContext.mergeContexts((*this)[i].getContext(), commonContext)) {
       *this->owner << "<hr>Failed to merge context " << commonContext.toString()
-      << " with " << (*this)[i].GetContext().toString();
+      << " with " << (*this)[i].getContext().toString();
       return false;
     }
   }
@@ -3144,17 +3144,17 @@ bool Calculator::ConvertExpressionsToCommonContext(
     commonContext = *inputOutputStartingContext;
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
-    if (!inputOutputEs[i].IsBuiltInTypE()) {
+    if (!inputOutputEs[i].isBuiltInType()) {
       return
       *this << "<hr>Possible programming error: "
       << "calling ConvertExpressionsToCommonContext "
       << "on expressions without context. "
       << global.fatal.GetStackTraceEtcErrorMessageHTML();
     }
-    if (!commonContext.mergeContexts(inputOutputEs[i].GetContext(), commonContext)) {
+    if (!commonContext.mergeContexts(inputOutputEs[i].getContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "
       << commonContext.toString() << " with "
-      << inputOutputEs[i].GetContext().toString();
+      << inputOutputEs[i].getContext().toString();
     }
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
@@ -3179,7 +3179,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   bool found = false;
   for (int i = 0; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
-    if (currentChild.IsMeltable(&tempInt)) {
+    if (currentChild.isMeltable(&tempInt)) {
       found = true;
       ChildIncrease += tempInt - 1;
     }
@@ -3191,7 +3191,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   output.addChildAtomOnTop(theCommands.opEndStatement());
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
-    if (!currentChild.IsMeltable()) {
+    if (!currentChild.isMeltable()) {
       output.addChildOnTop(input[i]);
       continue;
     }

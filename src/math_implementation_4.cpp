@@ -159,7 +159,7 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
+    ListReferences<StackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
@@ -189,7 +189,7 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageConsole() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
+    ListReferences<StackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << currentInfo[i].functionName << "\n";
     }
@@ -448,7 +448,7 @@ std::string GlobalVariables::ToStringCalculatorComputation(
   request[WebAPI::request::calculatorInput] = computation;
   request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
   out << "<a href = \"" << global.DisplayNameExecutableApp << "#"
-  << HtmlRoutines::ConvertStringToURLString(request.toString(), false) << "\">";
+  << HtmlRoutines::convertStringToURLString(request.toString(), false) << "\">";
   out << HtmlRoutines::ConvertStringToHtmlString(display, true) << "</a>";
   return out.str();
 }
@@ -693,7 +693,7 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const 
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
   }
@@ -851,8 +851,8 @@ std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) 
   return theType.toString(theFormat);
 }
 
-bool DynkinDiagramRootSubalgebra::CheckInitialization() const {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::CheckInitialization");
+bool DynkinDiagramRootSubalgebra::checkInitialization() const {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::checkInitialization");
   if (this->AmbientRootSystem.size != 0) {
     if (this->AmbientBilinearForm.numberOfRows != this->AmbientRootSystem[0].size) {
       global.fatal << "Ambient bilinear form of Dynkin subdiagram not initialized. " << global.fatal;
@@ -863,7 +863,7 @@ bool DynkinDiagramRootSubalgebra::CheckInitialization() const {
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->SimpleBasesConnectedComponents.size = 0;
   this->SimpleBasesConnectedComponents.reserve(simpleBasisInput.size);
   for (int i = 0; i < simpleBasisInput.size; i ++) {
@@ -1340,7 +1340,7 @@ bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational
   }
   return true;
 }
-void WeylGroupData::GenerateRootSubsystem(Vectors<Rational>& theRoots) {
+void WeylGroupData::generateRootSubsystem(Vectors<Rational>& theRoots) {
   Vector<Rational> tempRoot;
   int oldsize = theRoots.size;
   for (int i = 0; i < oldsize; i ++) {
@@ -1541,7 +1541,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities() {
 
 std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits() {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits");
-  this->CheckInitialization();
+  this->checkInitialization();
   std::stringstream out;
   int totalDimAffine = this->WeylLarger->getDimension() + this->WeylSmaller->getDimension();
   int smallDim = this->WeylSmaller->getDimension();
@@ -1627,7 +1627,7 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
   this->WeylSmaller = nullptr;
 }
 
-bool GeneralizedVermaModuleCharacters::CheckInitialization() const {
+bool GeneralizedVermaModuleCharacters::checkInitialization() const {
   if (this->WeylLarger == nullptr || this->WeylSmaller == nullptr) {
     global.fatal << "Use of non-initialized Weyl group within generalized Verma module characters. " << global.fatal;
   }
@@ -1693,7 +1693,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
   theProjectionBasisChanged.init(input.theDomain().GetRank(), input.theRange().GetRank());
   for (int i = 0; i < input.theRange().GetRank(); i ++) {
-    startingWeight.MakeEi(input.theRange().GetRank(), i);
+    startingWeight.makeEi(input.theRange().GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight);
     this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
@@ -1781,12 +1781,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   tempMatPoly.init(input.theDomain().theWeyl.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
-  theFormat.polyAlphabeT.setSize(5);
-  theFormat.polyAlphabeT[0] = "x_1";
-  theFormat.polyAlphabeT[1] = "x_2";
-  theFormat.polyAlphabeT[2] = "y_1";
-  theFormat.polyAlphabeT[3] = "y_2";
-  theFormat.polyAlphabeT[4] = "y_3";
+  theFormat.polynomialAlphabet.setSize(5);
+  theFormat.polynomialAlphabet[0] = "x_1";
+  theFormat.polynomialAlphabet[1] = "x_2";
+  theFormat.polynomialAlphabet[2] = "y_1";
+  theFormat.polynomialAlphabet[3] = "y_2";
+  theFormat.polynomialAlphabet[4] = "y_3";
   tempRoot = theSubgroup.GetRho();
   this->theLinearOperators[0].actOnVectorColumn(tempRoot);
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
@@ -1887,7 +1887,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     this->PreimageWeylChamberSmallerAlgebra.Normals[i] = tempRoot;
   }
 
-  tempRoot.MakeEi(
+  tempRoot.makeEi(
     input.theRange().GetRank() + input.theDomain().GetRank() + 1,
     input.theRange().GetRank() + input.theDomain().GetRank()
   );
@@ -1904,16 +1904,16 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport() {
   std::stringstream out;
   FormatExpressions theFormat;
   int tempI = 0;
-  theFormat.polyAlphabeT.setSize(5);
-  theFormat.polyAlphabeT[tempI] = "x_1";
+  theFormat.polynomialAlphabet.setSize(5);
+  theFormat.polynomialAlphabet[tempI] = "x_1";
   tempI ++;
-  theFormat.polyAlphabeT[tempI] = "x_2";
+  theFormat.polynomialAlphabet[tempI] = "x_2";
   tempI ++;
-  theFormat.polyAlphabeT[tempI] = "y_1";
+  theFormat.polynomialAlphabet[tempI] = "y_1";
   tempI ++;
-  theFormat.polyAlphabeT[tempI] = "y_2";
+  theFormat.polynomialAlphabet[tempI] = "y_2";
   tempI ++;
-  theFormat.polyAlphabeT[tempI] = "y_3";
+  theFormat.polynomialAlphabet[tempI] = "y_3";
   tempI ++;
   out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
@@ -2058,12 +2058,12 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   }
   std::stringstream out;
   FormatExpressions theFormat;
-  theFormat.polyAlphabeT.setSize(5);
-  theFormat.polyAlphabeT[0] = "x_1";
-  theFormat.polyAlphabeT[1] = "x_2";
-  theFormat.polyAlphabeT[2] = "y_1";
-  theFormat.polyAlphabeT[3] = "y_2";
-  theFormat.polyAlphabeT[4] = "y_3";
+  theFormat.polynomialAlphabet.setSize(5);
+  theFormat.polynomialAlphabet[0] = "x_1";
+  theFormat.polynomialAlphabet[1] = "x_2";
+  theFormat.polynomialAlphabet[2] = "y_1";
+  theFormat.polynomialAlphabet[3] = "y_2";
+  theFormat.polynomialAlphabet[4] = "y_3";
   out << "Number chambers: " << projectivizedChambeR.size << " of them " << this->numNonZeroMults << " non-zero.";
   int numInequalities = 0;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {

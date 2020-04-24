@@ -86,7 +86,7 @@ template<class Coefficient>
 class MonomialTensorGeneralizedVermas;
 template<class Coefficient>
 class ElementTensorsGeneralizedVermas;
-struct branchingData;
+struct BranchingData;
 class QuasiDifferentialMononomial;
 template<class Coefficient>
 class QuasiDifferentialOperator;
@@ -167,9 +167,9 @@ public:
   int bytesConsumed;
   List<unsigned char>& state();
   UnsecurePseudoRandomGenerator();
-  void SetRandomSeed(int32_t inputRandomSeed);
-  unsigned int GetRandomLessThanBillion();
-  signed GetRandomPositiveLessThanBillion();
+  void setRandomSeed(int32_t inputRandomSeed);
+  unsigned int getRandomLessThanBillion();
+  signed getRandomPositiveLessThanBillion();
 };
 
 class MathRoutines {
@@ -345,7 +345,7 @@ public:
   static double ComplexConjugate(double x) {
     return x;
   }
-  static bool IsInteger(Rational x);
+  static bool isInteger(Rational x);
   template <typename hashobject>
   static unsigned int hashFunction(const hashobject& in) {
     return in.hashFunction();
@@ -1748,12 +1748,12 @@ template <class Object>
 class HashedListSpecialized: public HashedList<Object, Object::hashFunction> {
 };
 
-struct stackInfo {
+struct StackInfo {
 public:
   std::string fileName;
   int line;
   std::string functionName;
-  void operator=(const stackInfo& other) {
+  void operator=(const StackInfo& other) {
     this->fileName = other.fileName;
     this->line = other.line;
     this->functionName = other.functionName;
@@ -1906,7 +1906,6 @@ void List<Object>::CycleIndices(const List<int>& cycle) {
       fatalCrash(commentsOnCrash.str());
     }
   }
-  // ironically, it's easier to program the cycles to go backwards XD
   Object tail;
   tail = this->theObjects[cycle[cycle.size - 1]];
   for (int i = cycle.size - 1; i != 0; i --) {

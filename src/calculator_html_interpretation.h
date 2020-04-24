@@ -52,7 +52,7 @@ public:
   void ExhaustCrawlStack();
   void LoadTopicBundleFile(TopicLine& input);
   void InsertTopicBundle(TopicLine& input);
-  bool CheckInitialization();
+  bool checkInitialization();
   bool CheckConsistencyParsed();
   bool CheckNoErrors(std::stringstream* commentsOnFailure);
   bool CheckProblemsOpen(std::stringstream* commentsOnFailure);
@@ -64,7 +64,7 @@ public:
   class Test {
   public:
     std::stringstream comments;
-    static bool All();
+    static bool all();
     static bool DefaultTopicListsOKCrashOnFailure();
     static bool DefaultPdfsOKCrashOnFailure();
     bool DefaultPdfsOK();
@@ -285,23 +285,23 @@ public:
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   /////////////////
-  int GetAnswerIndex(const std::string& desiredAnswerId);
+  int getAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream* comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
-  bool LoadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
+  bool loadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
-  bool ParseHTML(std::stringstream* comments);
-  bool ParseHTMLPrepareCommands(std::stringstream* comments);
+  bool parseHTML(std::stringstream* comments);
+  bool parseHTMLPrepareCommands(std::stringstream* comments);
   bool IsSplittingChar(const std::string& input);
   void LoadFileNames();
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   bool ExtractAnswerIds(std::stringstream* comments);
-  bool InterpretHtml(std::stringstream* comments);
-  bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
+  bool interpretHtml(std::stringstream* comments);
+  bool interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   void ComputeProblemLabel();
   void ComputeBodyDebugString();
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
@@ -491,7 +491,7 @@ public:
       int inputRandomSeed
     );
     static bool BuiltInCrashOnFailure();
-    static bool All();
+    static bool all();
     std::string ToStringSummary();
     std::string ToHTMLBuiltIn();
     std::string ToHTMLDebug();
@@ -516,8 +516,8 @@ public:
   List<Course> theCourses;
   std::string errorMessage;
   bool LoadFromString(const std::string& input);
-  std::string ToHtml();
-  bool Load();
+  std::string toHtml();
+  bool load();
   JSData toJSON();
 };
 

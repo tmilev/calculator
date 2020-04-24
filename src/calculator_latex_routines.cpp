@@ -682,7 +682,7 @@ bool LaTeXCrawler::ExtractFileNames(std::stringstream* commentsOnFailure, std::s
     }
   }
   this->targetPDFNoPath += this->desiredPresentationTitle;
-  this->targetPDFNoPath = HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
+  this->targetPDFNoPath = HtmlRoutines::convertStringToURLString(this->targetPDFNoPath, false);
   StringRoutines::StringTrimToLengthWithHash(this->targetPDFNoPath, 230);
   this->targetPDFNoPath += ".pdf";
   this->targetPDFFileNameWithPathVirtual = this->targetPDFVirtualPath + this->targetPDFNoPath;

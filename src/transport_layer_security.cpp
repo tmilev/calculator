@@ -203,7 +203,7 @@ CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(i
   CipherSuiteSpecification result;
   result.id = inputId;
   result.owner = this;
-  result.ComputeName();
+  result.computeName();
   return result;
 }
 
@@ -509,7 +509,7 @@ JSData SSLContent::toJSON() const {
   result[SSLContent::JSLabels::version] = this->ToStringVersion();
   result[SSLContent::JSLabels::length] = this->length;
   result[SSLContent::JSLabels::cipherSpecLength] = this->cipherSpecLength;
-  result[SSLContent::JSLabels::sessionId] = Crypto::ConvertListUnsignedCharsToHex(this->sessionId);
+  result[SSLContent::JSLabels::sessionId] = Crypto::convertListUnsignedCharsToHex(this->sessionId);
   result[SSLContent::JSLabels::extensionsLength ] = this->extensionsLength;
   result[SSLContent::JSLabels::compressionMethod] = Crypto::ConvertIntToHex(this->compressionMethod, 2);
   JSData extensionsObject;
@@ -534,16 +534,16 @@ CipherSuiteSpecification::CipherSuiteSpecification() {
   this->owner = nullptr;
 }
 
-bool CipherSuiteSpecification::CheckInitialization() const {
+bool CipherSuiteSpecification::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "CipherSuiteSpecification not initialized correctly. " << global.fatal;
   }
   return true;
 }
 
-bool CipherSuiteSpecification::ComputeName() {
-  MacroRegisterFunctionWithName("CipherSuiteSpecification::ComputeName");
-  this->CheckInitialization();
+bool CipherSuiteSpecification::computeName() {
+  MacroRegisterFunctionWithName("CipherSuiteSpecification::computeName");
+  this->checkInitialization();
   if (!this->owner->cipherSuiteNames.contains(this->id)) {
     // GREASE = deliberately invalid cipher suite code.
     // [Generate Random Extensions and Sustain Extensibility]
@@ -676,7 +676,7 @@ void SSLContent::WriteBytesHandshakeSecretExchange(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::WriteBytesHandshakeSecretExchange");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->theType != SSLContent::tokens::serverKeyExchange) {
     global.fatal << "Not allowed to serialize non-server key exchange as such. " << global.fatal;
   }
@@ -788,7 +788,7 @@ bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
       // this should not happen.
       return false;
     }
-    ciphers[i].ComputeName();
+    ciphers[i].computeName();
   }
   if (!this->owner->owner->session.ChooseCipher(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -985,7 +985,7 @@ void SSLHelloExtension::MakeEllipticCurvePointFormat(SSLContent* inputOwner) {
   this->content.addOnTop(2);
 }
 
-bool SSLHelloExtension::CheckInitialization() {
+bool SSLHelloExtension::checkInitialization() {
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized owner of ssl hello extension. " << global.fatal;
   }
@@ -999,12 +999,12 @@ JSData SSLHelloExtension::toJSON() {
   std::stringstream hex;
   hex << std::hex << std::setfill('0') << std::setw(4) << this->theType;
   result["type"] = hex.str();
-  result["data"] = Crypto::ConvertListUnsignedCharsToHex(this->content);
+  result["data"] = Crypto::convertListUnsignedCharsToHex(this->content);
   return result;
 }
 
 std::string SSLHelloExtension::Name() {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->owner->owner->owner->extensionNames.contains(this->theType)) {
     return this->owner->owner->owner->extensionNames.getValueNoFail(this->theType);
   }
@@ -1365,7 +1365,7 @@ void Serialization::WriteTwoByteLengthFollowedByBytes(
   );
 }
 
-std::string Serialization::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
+std::string Serialization::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
   return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
@@ -1403,7 +1403,7 @@ void Serialization::WriteNByteLengthFollowedByBytes(
   output.addListOnTop(input);
 }
 
-bool SSLRecord::CheckInitialization() const {
+bool SSLRecord::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "Uninitialized ssl record. " << global.fatal;
   }
@@ -1545,13 +1545,13 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   result.theType = JSData::token::tokenArray;
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher                     ] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                 ] = this->ToStringChosenCipher();
-  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes              ] = Crypto::ConvertListUnsignedCharsToHex(this->incomingRandomBytes);
-  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes              ] = Crypto::convertListUnsignedCharsToHex(this->incomingRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::convertListUnsignedCharsToHex(this->myRandomBytes);
   result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
   result[TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
   result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                  ] = static_cast<int>(this->chosenEllipticCurve);
   result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                ] = this->chosenEllipticCurveName;
-  result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::ConvertListUnsignedCharsToHex(this->bytesToSign);
+  result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::convertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
   ciphers.theList.setSize(this->incomingCiphers.size);
@@ -1569,7 +1569,7 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   if (this->serverName.size > 0) {
     result[
       TransportLayerSecurityServer::Session::JSLabels::serverName
-    ] = Crypto::ConvertListUnsignedCharsToHex(
+    ] = Crypto::convertListUnsignedCharsToHex(
       this->serverName
     );
   }
@@ -1588,7 +1588,7 @@ JSData SSLRecord::ToJSONSerialization() {
     jsMarkers.theList.addOnTop(markers[i].toJSON());
   }
   result[Serialization::JSLabels::markers] = jsMarkers;
-  result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization);
+  result[Serialization::JSLabels::body] = Crypto::convertListUnsignedCharsToHex(serialization);
   return result;
 }
 
@@ -1621,7 +1621,7 @@ std::string SSLRecord::toString() const {
     result["hello"] = this->content.toJSON();
   }
   std::string hexVersion;
-  Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
+  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
     LargeIntegerUnsigned(static_cast<unsigned>(this->version)), 0, hexVersion
   );
   result["version"] = hexVersion;
@@ -1630,7 +1630,7 @@ std::string SSLRecord::toString() const {
 
 bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLRecord::Decode");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->incomingBytes.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: "
@@ -1714,18 +1714,18 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
   return true;
 }
 
-bool SSLContent::CheckInitialization() const {
+bool SSLContent::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "Uninitialized ssl content. " << global.fatal;
   }
-  this->owner->CheckInitialization();
+  this->owner->checkInitialization();
   return true;
 }
 
 std::string CipherSuiteSpecification::toString() const {
   std::stringstream out;
   std::string hexVersion;
-  Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
+  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
     LargeIntegerUnsigned(static_cast<unsigned>(this->id)), 0, hexVersion
   );
   out << hexVersion << "[" << this->name << "]";
@@ -1735,7 +1735,7 @@ std::string CipherSuiteSpecification::toString() const {
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
 void SSLContent::PrepareServerHello2Certificate() {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello2Certificate");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->version = 3 * 256 + 3;
   this->theType = SSLContent::tokens::certificate;
 }
@@ -1743,7 +1743,7 @@ void SSLContent::PrepareServerHello2Certificate() {
 bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey");
   (void) commentsOnError;
-  Crypto::Random::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
+  Crypto::Random::getRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
   this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
   this->bytesToSign.setSize(0);
@@ -1802,7 +1802,7 @@ bool TransportLayerSecurityServer::Session::ChooseCipher(std::stringstream* comm
 
 void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello1Start");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->version = 3 * 256 + 3;
   this->theType = SSLContent::tokens::serverHello;
   this->compressionMethod = clientHello.compressionMethod;
@@ -1920,7 +1920,7 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->chosenSignatureAlgorithm = 0;
   this->chosenEllipticCurve = 0;
   this->chosenEllipticCurveName = "";
-  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
   this->ephemerealPrivateKey = 0;

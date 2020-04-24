@@ -8,8 +8,8 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
-void Crypto::Random::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
-  return Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
+void Crypto::Random::getRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
+  return Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
 }
 
 void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
@@ -25,7 +25,7 @@ void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
   Crypto::computeSha512(global.randomBytesCurrent, global.randomBytesCurrent);
 }
 
-void Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
+void Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
   Crypto::Random::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
     global.fatal << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << global.fatal;
@@ -33,15 +33,15 @@ void Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<uns
   global.randomBytesCurrent.slice(0, numberOfBytesMax32, output);
 }
 
-bool Crypto::HaveEqualHashes(const std::string& left, const std::string& right) {
+bool Crypto::haveEqualHashes(const std::string& left, const std::string& right) {
   List<uint32_t> leftSHA, rightSHA;
   Crypto::computeSha256(left, leftSHA);
   Crypto::computeSha256(right, rightSHA);
   return leftSHA == rightSHA;
 }
 
-void Crypto::Random::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
-  Crypto::Random::GetRandomLargeIntegerSecure(output, numBytes);
+void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
+  Crypto::Random::getRandomLargeIntegerSecure(output, numBytes);
   if (output.IsEven()) {
     output ++;
   }
@@ -53,10 +53,10 @@ void Crypto::Random::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBy
   }
 }
 
-void Crypto::Random::GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
+void Crypto::Random::getRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
   ListZeroAfterUse<unsigned char> randomBytes;
-  Crypto::Random::GetRandomBytesSecureInternal(randomBytes, numBytes);
-  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
+  Crypto::Random::getRandomBytesSecureInternal(randomBytes, numBytes);
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
 }
 
 char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
@@ -642,7 +642,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
   return result;
 }
 
-bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntegerUnsigned& output, int& outputNumLeadingZeroPairs) {
+bool Crypto::convertHexToInteger(const std::string& input, LargeIntegerUnsigned& output, int& outputNumLeadingZeroPairs) {
   output.makeZero();
   bool foundNonZero = false;
   outputNumLeadingZeroPairs = 0;
@@ -675,9 +675,9 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntegerUnsigned&
   return true;
 }
 
-std::string Crypto::ConvertStringToHex(const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml) {
+std::string Crypto::convertStringToHex(const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml) {
   std::string result;
-  Crypto::ConvertStringToHex(input, result, byteWidthLineBreakZeroForNone, useHtml);
+  Crypto::convertStringToHex(input, result, byteWidthLineBreakZeroForNone, useHtml);
   return result;
 }
 
@@ -696,17 +696,17 @@ std::string Crypto::ConvertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
-  return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
-  return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::convertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-std::string Crypto::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
+std::string Crypto::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
   return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
@@ -714,17 +714,17 @@ std::string Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
-  return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<const char*>(input.theObjects), static_cast<unsigned>(input.size));
-  return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
+  return Crypto::convertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-bool Crypto::ConvertStringToHex(
+bool Crypto::convertStringToHex(
   const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::stringstream out;
@@ -1022,43 +1022,43 @@ void Crypto::initSha512() {
   };
 }
 
-bool Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(
+bool Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
   const LargeIntegerUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output
 ) {
   std::string outputString;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, numberOfLeadingZeroesToPadWith, outputString);
-  Crypto::ConvertStringToHex(outputString, output, 0, false);
+  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(input, numberOfLeadingZeroesToPadWith, outputString);
+  Crypto::convertStringToHex(outputString, output, 0, false);
   return true;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(
+bool Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(
   const LargeIntegerUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output
 ) {
   input.GetHexBigEndian(numberOfLeadingZeroesToPadWith, output);
   return true;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToBase64SignificantDigitsFirst(
+bool Crypto::convertLargeUnsignedToBase64SignificantDigitsFirst(
   const LargeIntegerUnsigned& input, std::string& outputBase64
 ) {
   std::string theString;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, 0, theString);
+  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(input, 0, theString);
   outputBase64 = Crypto::ConvertListUnsignedCharsToBase64(theString, false);
   return true;
 }
 
-bool Crypto::ConvertBase64ToLargeUnsignedInt(
+bool Crypto::convertBase64ToLargeUnsigned(
   const std::string& inputBase64, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure
 ) {
   List<unsigned char> theBitStream;
   if (!Crypto::ConvertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure)) {
     return false;
   }
-  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(theBitStream, output);
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(theBitStream, output);
   return true;
 }
 
-void Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(
+void Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
   List<uint32_t>& input, LargeIntegerUnsigned& output
 ) {
   output = 0;
@@ -1071,7 +1071,7 @@ void Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(
   }
 }
 
-void Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
+void Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
   const List<unsigned char>& input, LargeIntegerUnsigned& output
 ) {
   output = 0;
@@ -1125,7 +1125,8 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
       currentChar = 0;
       if (result) {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Failed to extract base 58 digit from: " << input[i] << " (position " << i << "). ";
+          *commentsOnFailure << "Failed to extract base 58 digit from: "
+          << input[i] << " (position " << i << "). ";
         }
       }
       result = false;
@@ -1150,7 +1151,7 @@ bool Crypto::ConvertBase58ToHexSignificantDigitsFirst(
   )) {
     result = false;
   }
-  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(outputLIU, numberOfLeadingZeroes, output)) {
+  if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(outputLIU, numberOfLeadingZeroes, output)) {
     return false;
   }
   return result;
@@ -1480,10 +1481,10 @@ bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFail
 
 bool PublicKeyRSA::LoadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("CertificateRSA::LoadFromModulusAndExponentStrings");
-  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModulus, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->theModulusString, this->theModulus, commentsOnFailure)) {
     return false;
   }
-  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponent, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->theExponentString, this->theExponent, commentsOnFailure)) {
     return false;
   }
   return true;
@@ -1598,7 +1599,7 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
   theElt.theModulus = theModulus;
   theOne.theValue = 1;
   theOne.theModulus = theModulus;
-  theElt.AssignRational(theMessage);
+  theElt.assignRational(theMessage);
   MathRoutines::raiseToPower(theElt, theExponent, theOne);
   return theElt.theValue;
 }
@@ -1612,7 +1613,7 @@ std::string JSONWebToken::toString() {
   return out.str();
 }
 
-bool JSONWebToken::VerifyRSA256(
+bool JSONWebToken::verifyRSA256(
   const LargeIntegerUnsigned& theModulus,
   const LargeIntegerUnsigned& theExponent,
   std::stringstream* commentsOnFailure,
@@ -1626,11 +1627,11 @@ bool JSONWebToken::VerifyRSA256(
   Crypto::computeSha256(payload, outputSha);
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned theSha;
-    Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
+    Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
     *commentsGeneral << "<br>Sha256 of payload: " << theSha.toString();
   }
   LargeIntegerUnsigned theSignatureInt;
-  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
     return false;
   }
   // In order to have reproducible comments, we don't want to log time.
@@ -1653,7 +1654,7 @@ bool JSONWebToken::VerifyRSA256(
   //   << global.GetElapsedSeconds() - timeStart << " second(s).<br>";
   // }
   std::string RSAresultBitstream, RSAresultLast32bytes;
-  Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);
+  Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);
   if (RSAresultBitstream.size() > 32) {
     RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
   }
@@ -1666,13 +1667,13 @@ bool JSONWebToken::VerifyRSA256(
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
     std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntegerUnsigned theShaUI;
-    Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(
+    Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
       outputSha, theShaUI
     );
     RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
-    Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
-    Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
-    Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
+    Crypto::convertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
+    Crypto::convertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
+    Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
     if (!result && commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br><b style =\"color:red\">Token invalid: the "
       << "SHA does not match the RSA result. </b>";
@@ -1692,8 +1693,8 @@ bool JSONWebToken::VerifyRSA256(
   return result;
 }
 
-bool JSONWebToken::AssignString(const std::string& other, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("JSONWebToken::AssignString");
+bool JSONWebToken::assignString(const std::string& other, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("JSONWebToken::assignString");
   List<std::string> theStrings;
   StringRoutines::StringSplitExcludeDelimiter(other, '.', theStrings);
   if (theStrings.size != 3) {
@@ -1724,10 +1725,10 @@ UnsecurePseudoRandomGenerator::UnsecurePseudoRandomGenerator() {
   this->randomSeed = 0;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
-  this->SetRandomSeed(0);
+  this->setRandomSeed(0);
 }
 
-void UnsecurePseudoRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
+void UnsecurePseudoRandomGenerator::setRandomSeed(int32_t inputRandomSeed) {
   if (inputRandomSeed < 0) {
     inputRandomSeed *= - 1;
   }
@@ -1744,11 +1745,11 @@ void UnsecurePseudoRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
   Crypto::computeSha256(this->state(), this->state());
 }
 
-signed UnsecurePseudoRandomGenerator::GetRandomPositiveLessThanBillion() {
-  return static_cast<signed>(this->GetRandomLessThanBillion());
+signed UnsecurePseudoRandomGenerator::getRandomPositiveLessThanBillion() {
+  return static_cast<signed>(this->getRandomLessThanBillion());
 }
 
-unsigned int UnsecurePseudoRandomGenerator::GetRandomLessThanBillion() {
+unsigned int UnsecurePseudoRandomGenerator::getRandomLessThanBillion() {
   if (this->bytesConsumed + 4 >= this->state().size) {
     Crypto::computeSha256(this->state(), this->state());
     this->bytesConsumed = 0;

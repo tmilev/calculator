@@ -189,9 +189,9 @@ public:
   }
   WeylGroupData& GetAmbientWeyl() const;
   WeylGroupAutomorphisms& GetAmbientWeylAutomorphisms() const;
-  SemisimpleLieAlgebra& GetOwnerSSalg() const;
+  SemisimpleLieAlgebra& getOwnerLieAlgebra() const;
   //returns - 1 if the weight/root  is not in g/k
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   bool checkConsistency() const;
   bool CheckScalarProdMatrixOrdered() const;
   Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
@@ -307,7 +307,7 @@ public:
   );
   void PossibleNilradicalComputation(Selection& selKmods, RootSubalgebras& owner, int indexInOwner);
   std::string toString(FormatExpressions* theFormat = nullptr);
-  void ToHTML(int index, FormatExpressions* theFormat);
+  void toHTML(int index, FormatExpressions* theFormat);
   std::string ToStringMultTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner);
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
   void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods);
@@ -390,7 +390,7 @@ public:
   bool flagPrintParabolicPseudoParabolicInfo;
   SemisimpleLieAlgebra& GetOwnerSSalgebra() const;
   WeylGroupData& GetOwnerWeyl() const;
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots) const;
   void ComputeKmodMultTables();
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel);
@@ -417,7 +417,7 @@ public:
   void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input);
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess);
-  void ToHTML(FormatExpressions* theFormat);
+  void toHTML(FormatExpressions* theFormat);
   std::string toString(FormatExpressions* theFormat);
   std::string ToStringAlgebraLink(int index);
   std::string ToStringDynkinTableHTML(FormatExpressions* theFormat);
@@ -540,7 +540,7 @@ public:
   void MakeReportPrecomputations(int indexMinimalContainingRegularSA, RootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroupData& theWeyl);
-  void ToHTML(std::string& filePath);
+  void toHTML(std::string& filePath);
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
   unsigned int hashFunction() const {
@@ -607,7 +607,7 @@ public:
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
-  void ToHTML(FormatExpressions* theFormat = nullptr);
+  void toHTML(FormatExpressions* theFormat = nullptr);
   std::string ToStringSummary(FormatExpressions* theFormat = nullptr);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string toString(FormatExpressions* theFormat = nullptr);

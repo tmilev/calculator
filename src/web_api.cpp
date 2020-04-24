@@ -263,23 +263,23 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     result[WebAPI::result::error] = "Please enter (old) password. " + reasonForNoAuthentication;
     return global.theResponse.WriteResponse(result);
   }
-  std::string newPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("newPassword"), true),
+  std::string newPassword = HtmlRoutines::convertStringToURLString(
+    HtmlRoutines::convertURLStringToNormal(global.GetWebInput("newPassword"), true),
     false
   );
   // <-Passwords are ONE-LAYER url-encoded
   // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
 
-  std::string reenteredPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
+  std::string reenteredPassword = HtmlRoutines::convertStringToURLString(
+    HtmlRoutines::convertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
     false
   );
   // <-Passwords are ONE-LAYER url-encoded
   // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
 
-  std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
+  std::string newEmail = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
   if (newEmail != "") {
     JSData notUsed;
     QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
@@ -325,7 +325,7 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
     << global.DisplayNameExecutable  << "?request=logout"
     << "&username="
-    << HtmlRoutines::ConvertStringToURLString(global.userDefault.username, false)
+    << HtmlRoutines::convertStringToURLString(global.userDefault.username, false)
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
@@ -344,12 +344,12 @@ bool WebAPIResponse::ProcessCompute() {
   }
   Calculator& theCalculator = global.calculator().getElement();
 
-  theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
+  theCalculator.inputString = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput(WebAPI::request::calculatorInput),
     false
   );
   global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::ConvertStringToURLString(theCalculator.inputString, false),
+    HtmlRoutines::convertStringToURLString(theCalculator.inputString, false),
     theCalculator.inputString
   );
   ////////////////////////////////////////////////
@@ -386,7 +386,7 @@ bool WebAPIResponse::ProcessLogout() {
 bool WebAPIResponse::ProcessSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSelectCourseJSON");
   this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetSelectCourseJSON());
+  return global.theResponse.WriteResponse(WebAPIResponse::getSelectCourseJSON());
 }
 
 bool WebAPIResponse::ProcessTopicListJSON() {

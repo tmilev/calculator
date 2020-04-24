@@ -114,7 +114,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    List<MonomialP>::Comparator* theMonOrder
+    List<MonomialP>::Comparator* monomialOrder
   );
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
@@ -449,7 +449,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    branchingData& theG2B3Data,
+    BranchingData& theG2B3Data,
     ExpressionContext& outputContext
   );
   static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
@@ -467,13 +467,13 @@ public:
   static bool innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2CharsOutput(
-    Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data
+    Calculator& theCommands, const Expression& input, Expression& output, BranchingData& theG2B3Data
   );
   static bool innerPrintB3G2branchingTableInit(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    branchingData& theG2B3data,
+    BranchingData& theG2B3data,
     int& desiredHeight,
     ExpressionContext& outputContext
   );
@@ -547,6 +547,9 @@ public:
   static bool innerSendEmailWithMailGun(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerElementEllipticCurveNormalForm(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerValueOfModularExpression(
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerFormatCPPSourceCode(

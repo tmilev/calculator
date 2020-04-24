@@ -8,7 +8,7 @@
 
 // the following data is isolated in a struct because it is
 // way too large a lump to pass separately
-struct branchingData {
+struct BranchingData {
   HomomorphismSemisimpleLieAlgebra theHmm;
   FormatExpressions theFormat;
   Vector<RationalFunction> theWeightFundCoords;
@@ -51,11 +51,11 @@ struct branchingData {
   void initAssumingParSelAndHmmInittedPart1NoSubgroups();
   void initAssumingParSelAndHmmInittedPart2Subgroups();
   void initAssumingParSelAndHmmInitted() {
-    MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInitted");
+    MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInitted");
     this->initAssumingParSelAndHmmInittedPart1NoSubgroups();
     this->initAssumingParSelAndHmmInittedPart2Subgroups();
   }
-  branchingData();
+  BranchingData();
 };
 
 class SemisimpleLieAlgebraOrdered {
@@ -76,7 +76,7 @@ public:
     output.operator=(this->theOrder[theIndex]);
   }
   SemisimpleLieAlgebraOrdered();
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
   void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
@@ -84,7 +84,7 @@ public:
 };
 
 template <class Coefficient>
-Vector<Coefficient> branchingData::ProjectWeight(Vector<Coefficient>& input) {
+Vector<Coefficient> BranchingData::ProjectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> result;
   Vector<Coefficient> fundCoordsSmaller;
   fundCoordsSmaller.makeZero(this->theHmm.theDomain().GetRank());
@@ -148,7 +148,7 @@ public:
   void IncrementComputation(Vector<Rational>& parabolicSel);
   std::string PrepareReport();
   GeneralizedVermaModuleCharacters();
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
   void GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);

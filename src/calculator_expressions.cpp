@@ -14,28 +14,28 @@
 
 Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");
-  left.CheckInitialization();
+  left.checkInitialization();
   Expression result;
   result.MakeXOX(*left.owner, left.owner->opTimes(), left, right);
   return result;
 }
 
 Expression operator/(const Expression& left, const Expression& right) {
-  left.CheckInitialization();
+  left.checkInitialization();
   Expression result;
   result.MakeXOX(*left.owner, left.owner->opDivide(), left, right);
   return result;
 }
 
 Expression operator+(const Expression& left, const Expression& right) {
-  left.CheckInitialization();
+  left.checkInitialization();
   Expression result;
   result.MakeXOX(*left.owner, left.owner->opPlus(), left, right);
   return result;
 }
 
 Expression operator-(const Expression& left, const Expression& right) {
-  left.CheckInitialization();
+  left.checkInitialization();
   Expression result;
   result.MakeXOX(*left.owner, left.owner->opMinus(), left, right);
   return result;
@@ -54,205 +54,205 @@ FormatExpressions::GetMonOrder<Expression>() {
 //Expression::getTypeOperation specializations follow
 template < >
 int Expression::getTypeOperation<ElementEllipticCurve<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opEllipticCurveElementsRational();
 }
 
 template < >
 int Expression::getTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opEllipticCurveElementsZmodP();
 }
 
 template < >
 int Expression::getTypeOperation<RationalFunction>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opRationalFunction();
 }
 
 template < >
 int Expression::getTypeOperation<InputBox>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opUserInputTextBox();
 }
 
 template < >
 int Expression::getTypeOperation<Rational>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
 int Expression::getTypeOperation<ElementHyperoctahedralGroupR2>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opElementHyperOctahedral();
 }
 
 template < >
 int Expression::getTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opHyperoctahedralGroupRep();
 }
 
 template < >
 int Expression::getTypeOperation<std::string>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opString();
 }
 
 template < >
 int Expression::getTypeOperation<AlgebraicNumber>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opAlgNumber();
 }
 
 template < >
 int Expression::getTypeOperation<ElementZmodP>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opEltZmodP();
 }
 
 template < >
 int Expression::getTypeOperation<ElementUniversalEnveloping<RationalFunction> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opElementUEoverRF();
 }
 
 template < >
 int Expression::getTypeOperation<Weight<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeightLieAlg();
 }
 
 template < >
 int Expression::getTypeOperation<Weight<Polynomial<Rational> > >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeightLieAlgPoly();
 }
 
 template < >
 int Expression::getTypeOperation<MatrixTensor<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opMatTensorRat();
 }
 
 template < >
 int Expression::getTypeOperation<int>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
 int Expression::getTypeOperation<LargeIntegerUnsigned>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opRational();
 }
 
 template < >
 int Expression::getTypeOperation<double>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opDouble();
 }
 
 template < >
 int Expression::getTypeOperation<Polynomial<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opPolynomialRational();
 }
 
 template < >
 int Expression::getTypeOperation<Polynomial<AlgebraicNumber> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opPolynomialAlgebraicNumbers();
 }
 
 template < >
 int Expression::getTypeOperation<Polynomial<ElementZmodP> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opPolynomialModuloInteger();
 }
 
 template < >
 int Expression::getTypeOperation<PolynomialModuloPolynomial<ElementZmodP> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opPolynomialModuloPolynomialModuloInteger();
 }
 
 template < >
 int Expression::getTypeOperation<ElementWeylAlgebra<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opElementWeylAlgebra();
 }
 
 template < >
 int Expression::getTypeOperation<SemisimpleLieAlgebra*>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opSemisimpleLieAlgebrA();
 }
 
 template < >
 int Expression::getTypeOperation<LittelmannPath>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opLittelmannPath();
 }
 
 template < >
 int Expression::getTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opLRO();
 }
 
 template < >
 int Expression::getTypeOperation<ElementTensorsGeneralizedVermas<RationalFunction> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opElementTensorGVM();
 }
 
 template < >
 int Expression::getTypeOperation<CharacterSemisimpleLieAlgebraModule<Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opCharSSAlgMod();
 }
 
 template < >
 int Expression::getTypeOperation<Plot>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
 int Expression::getTypeOperation<PlotObject>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opCalculusPlot();
 }
 
 template < >
 int Expression::getTypeOperation<SemisimpleSubalgebras>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opSemisimpleSubalgebras();
 }
 
 template < >
 int Expression::getTypeOperation<WeylGroupData>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeylGroup();
 }
 
 template < >
 int Expression::getTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeylGroupRep();
 }
 
 template < >
 int Expression::getTypeOperation<ElementWeylGroup>() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeylGroupElement();
 }
 
 template < >
 int Expression::getTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >() const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->opWeylGroupVirtualRep();
 }
 
@@ -267,7 +267,7 @@ bool Expression::ConvertsInternally(
     return false;
   }
   ElementUniversalEnveloping<RationalFunction> element;
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >(&element)) {
+  if (!this->isOfType<ElementUniversalEnveloping<RationalFunction> >(&element)) {
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> elementSemisimple;
@@ -275,39 +275,39 @@ bool Expression::ConvertsInternally(
     return false;
   }
   if (whichElement != nullptr) {
-    this->GetContext(whichElement->context);
+    this->getContext(whichElement->context);
     whichElement->content = elementSemisimple;
   }
   return true;
 }
 
 //Expression::ConvertsToType specializations end.
-//Expression::AddObjectReturnIndex specializations follow
+//Expression::addObjectReturnIndex specializations follow
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementEllipticCurve<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.EllipticCurveElementsRational
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementEllipticCurve<ElementZmodP>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.EllipticCurveElementsZmodP
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 SemisimpleSubalgebras
 & inputValue) const {
-  this->CheckInitialization();
-  inputValue.CheckInitialization();
+  this->checkInitialization();
+  inputValue.checkInitialization();
   if (!this->owner->theObjectContainer.theSSSubalgebraS.contains(inputValue.owner->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple subalgebras must be allocated directly in the object container. " << global.fatal;
   }
@@ -315,19 +315,19 @@ SemisimpleSubalgebras
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementHyperoctahedralGroupR2
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theElementsHyperOctGroup
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 InputBox
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   this->owner->theObjectContainer.theUserInputTextBoxesWithValues
   .SetKeyValue(inputValue.name, inputValue);
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues
@@ -335,37 +335,37 @@ InputBox
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 std::string
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theStrings
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theHyperoctahedralReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Rational
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 double
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (std::isnan(inputValue)) {
     return 0;
   }
@@ -374,118 +374,118 @@ double
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 RationalFunction
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theRFs
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 MatrixTensor<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theMatTensorRats
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementUniversalEnveloping<RationalFunction>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theUEs
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Weight<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeights
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Weight<Polynomial<Rational> >
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeightsPoly
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 int
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 LargeIntegerUnsigned
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theRationals
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Polynomial<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.polynomialsRational
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Polynomial<ElementZmodP>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.polynomialsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 PolynomialModuloPolynomial<ElementZmodP>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.polynomialQuotientsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Polynomial<AlgebraicNumber>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.polynomialsAlgebraic
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementWeylAlgebra<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeylAlgebraElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(
+int Expression::addObjectReturnIndex(
 SemisimpleLieAlgebra* const
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (!this->owner->theObjectContainer.semisimpleLieAlgebras.contains(inputValue->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
@@ -494,73 +494,73 @@ SemisimpleLieAlgebra* const
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 AlgebraicNumber
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theAlgebraicNumbers
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementZmodP
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theEltsModP
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theLittelmannOperators
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementTensorsGeneralizedVermas<RationalFunction>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theTensorElts
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 CharacterSemisimpleLieAlgebraModule<Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theCharsSSLieAlgFD
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 LittelmannPath
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theLSpaths
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 Plot
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.thePlots
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 PlotObject
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   Plot plotContainer;
   plotContainer += inputValue;
   return this->owner->theObjectContainer.thePlots
@@ -568,47 +568,47 @@ PlotObject
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 WeylGroupData
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   this->owner->theObjectContainer.GetLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
   return this->owner->theObjectContainer.semisimpleLieAlgebras.getIndex(inputValue.theDynkinType);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeylGroupReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeylGroupVirtualReps
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
+int Expression::addObjectReturnIndex(const
 ElementWeylGroup
 & inputValue) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theObjectContainer.theWeylGroupElements
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
-//Expression::AddObjectReturnIndex specializations end
+//Expression::addObjectReturnIndex specializations end
 
 //start Expression::getValueNonConst specializations.
 template < >
 Rational& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Rational>()) {
+  if (!this->isOfType<Rational>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -617,7 +617,7 @@ Rational& Expression::getValueNonConst() const {
 
 template < >
 ElementEllipticCurve<Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementEllipticCurve<Rational> >()) {
+  if (!this->isOfType<ElementEllipticCurve<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -626,7 +626,7 @@ ElementEllipticCurve<Rational>& Expression::getValueNonConst() const {
 
 template < >
 Polynomial<ElementZmodP>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Polynomial<ElementZmodP> >()) {
+  if (!this->isOfType<Polynomial<ElementZmodP> >()) {
     global.fatal << "This is a programming error: expression not of required type Polynomial mod integer. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -635,7 +635,7 @@ Polynomial<ElementZmodP>& Expression::getValueNonConst() const {
 
 template < >
 PolynomialModuloPolynomial<ElementZmodP>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<PolynomialModuloPolynomial<ElementZmodP> >()) {
+  if (!this->isOfType<PolynomialModuloPolynomial<ElementZmodP> >()) {
     global.fatal
     << "This is a programming error: expression not of "
     << "required type Polynomial mod Polynomial mod integer. "
@@ -647,7 +647,7 @@ PolynomialModuloPolynomial<ElementZmodP>& Expression::getValueNonConst() const {
 
 template < >
 ElementEllipticCurve<ElementZmodP>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
+  if (!this->isOfType<ElementEllipticCurve<ElementZmodP> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. The expression equals "
     << this->toString() << "." << global.fatal;
   }
@@ -656,7 +656,7 @@ ElementEllipticCurve<ElementZmodP>& Expression::getValueNonConst() const {
 
 template < >
 ElementHyperoctahedralGroupR2& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementHyperoctahedralGroupR2>()) {
+  if (!this->isOfType<ElementHyperoctahedralGroupR2>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -665,7 +665,7 @@ ElementHyperoctahedralGroupR2& Expression::getValueNonConst() const {
 
 template < >
 InputBox& Expression::getValueNonConst() const {
-  if (!this->IsOfType<InputBox>()) {
+  if (!this->isOfType<InputBox>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -674,7 +674,7 @@ InputBox& Expression::getValueNonConst() const {
 
 template < >
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::getValueNonConst() const {
-  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
+  if (!this->isOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -683,7 +683,7 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expr
 
 template < >
 ElementZmodP& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementZmodP>())
+  if (!this->isOfType<ElementZmodP>())
     global.fatal << "This is a programming error: expression not of required type ElementZmodP. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   return this->owner->theObjectContainer.theEltsModP.getElement(this->GetLastChild().theData);
@@ -691,7 +691,7 @@ ElementZmodP& Expression::getValueNonConst() const {
 
 template < >
 AlgebraicNumber& Expression::getValueNonConst() const {
-  if (!this->IsOfType<AlgebraicNumber>()) {
+  if (!this->isOfType<AlgebraicNumber>()) {
     global.fatal << "This is a programming error: expression not of required type AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -700,7 +700,7 @@ AlgebraicNumber& Expression::getValueNonConst() const {
 
 template < >
 double& Expression::getValueNonConst() const {
-  if (!this->IsOfType<double>()) {
+  if (!this->isOfType<double>()) {
     global.fatal << "This is a programming error: expression not of required type double. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -709,7 +709,7 @@ double& Expression::getValueNonConst() const {
 
 template < >
 std::string& Expression::getValueNonConst() const {
-  if (!this->IsOfType<std::string>()) {
+  if (!this->isOfType<std::string>()) {
     global.fatal << "This is a programming error: expression not of required type std::string. "
     << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->comments.str() << global.fatal;
@@ -719,7 +719,7 @@ std::string& Expression::getValueNonConst() const {
 
 template < >
 RationalFunction& Expression::getValueNonConst() const {
-  if (!this->IsOfType<RationalFunction>()) {
+  if (!this->isOfType<RationalFunction>()) {
     global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -728,7 +728,7 @@ RationalFunction& Expression::getValueNonConst() const {
 
 template < >
 ElementUniversalEnveloping<RationalFunction>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
+  if (!this->isOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -737,7 +737,7 @@ ElementUniversalEnveloping<RationalFunction>& Expression::getValueNonConst() con
 
 template < >
 Polynomial<Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Polynomial<Rational> >()) {
+  if (!this->isOfType<Polynomial<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Polynomial_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -746,7 +746,7 @@ Polynomial<Rational>& Expression::getValueNonConst() const {
 
 template < >
 Polynomial<AlgebraicNumber>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Polynomial<AlgebraicNumber> >()) {
+  if (!this->isOfType<Polynomial<AlgebraicNumber> >()) {
     global.fatal << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -755,7 +755,7 @@ Polynomial<AlgebraicNumber>& Expression::getValueNonConst() const {
 
 template < >
 ElementWeylAlgebra<Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementWeylAlgebra<Rational> >()) {
+  if (!this->isOfType<ElementWeylAlgebra<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "ElementWeylAlgebra_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -764,7 +764,7 @@ ElementWeylAlgebra<Rational>& Expression::getValueNonConst() const {
 
 template < >
 LittelmannPath& Expression::getValueNonConst() const {
-  if (!this->IsOfType<LittelmannPath>()) {
+  if (!this->isOfType<LittelmannPath>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -773,7 +773,7 @@ LittelmannPath& Expression::getValueNonConst() const {
 
 template < >
 Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Weight<Polynomial<Rational> > >()) {
+  if (!this->isOfType<Weight<Polynomial<Rational> > >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -782,7 +782,7 @@ Weight<Polynomial<Rational> >& Expression::getValueNonConst() const {
 
 template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
+  if (!this->isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -791,7 +791,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::getValueNonCon
 
 template < >
 ElementTensorsGeneralizedVermas<RationalFunction>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+  if (!this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -800,7 +800,7 @@ ElementTensorsGeneralizedVermas<RationalFunction>& Expression::getValueNonConst(
 
 template < >
 CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<CharacterSemisimpleLieAlgebraModule<Rational> >()) {
+  if (!this->isOfType<CharacterSemisimpleLieAlgebraModule<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -809,7 +809,7 @@ CharacterSemisimpleLieAlgebraModule<Rational>& Expression::getValueNonConst() co
 
 template < >
 SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
-  if (!this->IsOfType<SemisimpleLieAlgebra*>()) {
+  if (!this->isOfType<SemisimpleLieAlgebra*>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "SemisimpleLieAlgebra. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -818,7 +818,7 @@ SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
 
 template < >
 MatrixTensor<Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<MatrixTensor<Rational> >()) {
+  if (!this->isOfType<MatrixTensor<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "MatrixTensorRational. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -827,7 +827,7 @@ MatrixTensor<Rational>& Expression::getValueNonConst() const {
 
 template < >
 SemisimpleSubalgebras& Expression::getValueNonConst() const {
-  if (!this->IsOfType<SemisimpleSubalgebras>()) {
+  if (!this->isOfType<SemisimpleSubalgebras>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -836,7 +836,7 @@ SemisimpleSubalgebras& Expression::getValueNonConst() const {
 
 template < >
 Plot& Expression::getValueNonConst() const {
-  if (!this->IsOfType<Plot>()) {
+  if (!this->isOfType<Plot>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "Plot. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -845,7 +845,7 @@ Plot& Expression::getValueNonConst() const {
 
 template < >
 WeylGroupData& Expression::getValueNonConst() const {
-  if (!this->IsOfType<WeylGroupData>()) {
+  if (!this->isOfType<WeylGroupData>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupData. The expression equals "
     << this->toString() << "." << global.fatal;
@@ -857,7 +857,7 @@ WeylGroupData& Expression::getValueNonConst() const {
 
 template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
+  if (!this->isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupRepresentation_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -866,7 +866,7 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getVal
 
 template < >
 ElementWeylGroup& Expression::getValueNonConst() const {
-  if (!this->IsOfType<ElementWeylGroup>()) {
+  if (!this->isOfType<ElementWeylGroup>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "ElementWeylGroup. The expression equals " << this->toString() << "." << global.fatal;
   }
@@ -875,7 +875,7 @@ ElementWeylGroup& Expression::getValueNonConst() const {
 
 template < >
 VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getValueNonConst() const {
-  if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
+  if (!this->isOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupVirtualRepresentation. The expression equals "
     << this->toString() << "." << global.fatal;
@@ -883,8 +883,8 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getV
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.getElement(this->GetLastChild().theData);
 }
 
-bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
-  MacroRegisterFunctionWithName("Expression::IsMatrix");
+bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
+  MacroRegisterFunctionWithName("Expression::isMatrix");
   if (this->owner == nullptr) {
     return false;
   }
@@ -913,23 +913,23 @@ bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
 template< >
 bool Expression::ConvertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
-  this->CheckInitialization();
-  if (this->IsOfType<Rational>()) {
+  this->checkInitialization();
+  if (this->isOfType<Rational>()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultP, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<AlgebraicNumber>()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP.makeConstant(this->getValue<AlgebraicNumber>());
-    return output.assignValueWithContext(resultP, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<Polynomial<Rational> >()) {
+  if (this->isOfType<Polynomial<Rational> >()) {
     Polynomial<AlgebraicNumber> resultP;
     resultP = this->getValue<Polynomial<Rational> >();
-    return output.assignValueWithContext(resultP, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
+  if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
     output = *this;
     return true;
   }
@@ -939,13 +939,13 @@ bool Expression::ConvertInternally<Polynomial<AlgebraicNumber> >(Expression& out
 template< >
 bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
-  this->CheckInitialization();
-  if (this->IsOfType<Rational>()) {
+  this->checkInitialization();
+  if (this->isOfType<Rational>()) {
     Polynomial<Rational> resultP;
     resultP.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultP, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultP, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<Polynomial<Rational> >()) {
+  if (this->isOfType<Polynomial<Rational> >()) {
     output = *this;
     return true;
   }
@@ -955,8 +955,8 @@ bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) co
 template< >
 bool Expression::ConvertInternally<Polynomial<ElementZmodP> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
-  this->CheckInitialization();
-  if (this->IsOfType<Polynomial<ElementZmodP> >()) {
+  this->checkInitialization();
+  if (this->isOfType<Polynomial<ElementZmodP> >()) {
     output = *this;
     return true;
   }
@@ -966,22 +966,22 @@ bool Expression::ConvertInternally<Polynomial<ElementZmodP> >(Expression& output
 template< >
 bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  this->CheckInitialization();
-  if (this->IsOfType<Rational>()) {
+  this->checkInitialization();
+  if (this->isOfType<Rational>()) {
     RationalFunction resultRF;
     resultRF.makeConstant(this->getValue<Rational>());
     return output.assignValueWithContext(
-      resultRF, this->GetContext(), *this->owner
+      resultRF, this->getContext(), *this->owner
     );
   }
-  if (this->IsOfType<Polynomial<Rational> >()) {
+  if (this->isOfType<Polynomial<Rational> >()) {
     RationalFunction resultRF;
     resultRF = this->getValue<Polynomial<Rational> >();
     return output.assignValueWithContext(
-      resultRF, this->GetContext(), *this->owner
+      resultRF, this->getContext(), *this->owner
     );
   }
-  if (this->IsOfType<RationalFunction>()) {
+  if (this->isOfType<RationalFunction>()) {
     output = *this;
     return true;
   }
@@ -994,18 +994,18 @@ bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
 template< >
 bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
-  this->CheckInitialization();
-  if (this->IsOfType<Rational>()) {
+  this->checkInitialization();
+  if (this->isOfType<Rational>()) {
     ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.makeConstant(this->getValue<Rational>());
-    return output.assignValueWithContext(resultEWA, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultEWA, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<Polynomial<Rational> >()) {
+  if (this->isOfType<Polynomial<Rational> >()) {
     ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.AssignPolynomial(this->getValue<Polynomial<Rational> >());
-    return output.assignValueWithContext(resultEWA, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(resultEWA, this->getContext(), *this->owner);
   }
-  if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
+  if (this->isOfType<ElementWeylAlgebra<Rational> >()) {
     output = *this;
     return true;
   }
@@ -1015,8 +1015,8 @@ bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
 template< >
 bool Expression::ConvertInternally<Weight<Polynomial<Rational> > >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Weight_Polynomial");
-  this->CheckInitialization();
-  if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
+  this->checkInitialization();
+  if (this->isOfType<Weight<Polynomial<Rational> > >()) {
     output = *this;
     return true;
   }
@@ -1026,10 +1026,10 @@ bool Expression::ConvertInternally<Weight<Polynomial<Rational> > >(Expression& o
 template< >
 bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  this->CheckInitialization();
-  if (!this->IsBuiltInTypE())
+  this->checkInitialization();
+  if (!this->isBuiltInType())
     return false;
-  if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
+  if (this->isOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     output = *this;
     return true;
   }
@@ -1040,17 +1040,17 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
     return false;
   }
   ElementUniversalEnveloping<RationalFunction> outputUE;
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     outputUE.makeConstant(this->getValue<Rational>(), *theOwner);
-    return output.assignValueWithContext(outputUE, this->GetContext(), *this->owner);
-  } else if (this->IsOfType<Polynomial<Rational> >()) {
+    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
+  } else if (this->isOfType<Polynomial<Rational> >()) {
     RationalFunction tempRF;
     tempRF = this->getValue<Polynomial<Rational> >();
     outputUE.makeConstant(tempRF, *theOwner);
-    return output.assignValueWithContext(outputUE, this->GetContext(), *this->owner);
-  } else if (this->IsOfType<RationalFunction>()) {
+    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
+  } else if (this->isOfType<RationalFunction>()) {
     outputUE.makeConstant(this->getValue<RationalFunction>(), *theOwner);
-    return output.assignValueWithContext(outputUE, this->GetContext(), *this->owner);
+    return output.assignValueWithContext(outputUE, this->getContext(), *this->owner);
   }
   return *this->owner << "<hr>Failed to convert " << this->toString()
   << " to element of universal enveloping -  I don't know how. ";
@@ -1059,8 +1059,8 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
 template< >
 bool Expression::ConvertInternally<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  this->CheckInitialization();
-  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+  this->checkInitialization();
+  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     output = *this;
     return true;
   }
@@ -1070,8 +1070,8 @@ bool Expression::ConvertInternally<ElementTensorsGeneralizedVermas<RationalFunct
 template< >
 bool Expression::ConvertInternally<Rational>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Rational");
-  this->CheckInitialization();
-  if (this->IsOfType<Rational>()) {
+  this->checkInitialization();
+  if (this->isOfType<Rational>()) {
     output = *this;
     return true;
   }
@@ -1081,13 +1081,13 @@ bool Expression::ConvertInternally<Rational>(Expression& output) const {
 template< >
 bool Expression::ConvertInternally<AlgebraicNumber>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
-  this->CheckInitialization();
-  if (this->IsOfType<AlgebraicNumber>()) {
+  this->checkInitialization();
+  if (this->isOfType<AlgebraicNumber>()) {
     output = *this;
     return true;
   }
   Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat)) {
+  if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
   AlgebraicNumber outRat = theRat;
@@ -1097,13 +1097,13 @@ bool Expression::ConvertInternally<AlgebraicNumber>(Expression& output) const {
 template< >
 bool Expression::ConvertInternally<double>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_double");
-  this->CheckInitialization();
-  if (this->IsOfType<double>()) {
+  this->checkInitialization();
+  if (this->isOfType<double>()) {
     output = *this;
     return true;
   }
   double outputDouble = 0;
-  if (this->EvaluatesToDouble(&outputDouble)) {
+  if (this->evaluatesToDouble(&outputDouble)) {
     return output.assignValue(outputDouble, *this->owner);
   }
   return false;
@@ -1127,11 +1127,11 @@ bool Expression::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of Expression. " << global.fatal;
   }
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->children.size == 0) {
     return false;
   }
-  if (this->IsBuiltInTypE()) {
+  if (this->isBuiltInType()) {
     if (this->children.size != 3) {
       global.fatal << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
       << "children: type, context, and index in Calculator. The expression is " << this->toStringFull()
@@ -1166,7 +1166,7 @@ bool Expression::checkConsistency() const {
 }
 
 const Expression& Expression::operator[](int n) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   int childIndex = this->children[n];
   if (childIndex < 0) {
     global.fatal << "<hr>This is a programming error: the child of position "
@@ -1190,14 +1190,14 @@ Expression Expression::zeroStatic() {
 }
 
 bool Expression::AddChildRationalOnTop(const Rational& inputRat) {
-  this->CheckInitialization();
+  this->checkInitialization();
   Expression ratE;
   ratE.assignValue(inputRat, *this->owner);
   return this->addChildOnTop(ratE);
 }
 
 bool Expression::addChildOnTop(const Expression& inputChild) {
-  this->CheckInitialization();
+  this->checkInitialization();
   this->children.addOnTop(
     this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
   );
@@ -1205,7 +1205,7 @@ bool Expression::addChildOnTop(const Expression& inputChild) {
 }
 
 bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
-  this->CheckInitialization();
+  this->checkInitialization();
   Expression tempE;
   tempE.makeAtom(TheAtomValue, *this->owner);
   this->children.setObjectAtIndex(
@@ -1216,7 +1216,7 @@ bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
 }
 
 bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
-  this->CheckInitialization();
+  this->checkInitialization();
   Expression tempE;
   tempE.makeAtom(theAtom, *this->owner);
   this->children.setObjectAtIndex(
@@ -1226,14 +1226,14 @@ bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
 }
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
-  this->CheckInitialization();
+  this->checkInitialization();
   int theIndexOfTheExpression = this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
   this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
   return true;
 }
 
 bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
-  this->CheckInitialization();
+  this->checkInitialization();
   this->children.setObjectAtIndex(childIndexInMe, childIndexInBoss);
   if (this->children[childIndexInMe] != childIndexInBoss) {
     global.fatal << "This shouldn't happen." << global.fatal;
@@ -1242,14 +1242,14 @@ bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
 }
 
 bool Expression::addChildAtomOnTop(int theOp) {
-  this->CheckInitialization();
+  this->checkInitialization();
   Expression tempE;
   tempE.makeAtom(theOp, *this->owner);
   return this->addChildOnTop(tempE);
 }
 
 bool Expression::addChildAtomOnTop(const std::string& theOperationString) {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->addChildAtomOnTop(
     this->owner->AddOperationNoRepetitionOrReturnIndexFirst(theOperationString)
   );
@@ -1332,7 +1332,7 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:")) {
     return false;
   }
-  if (this->IsBuiltInTypE() || this->IsAtom()) {
+  if (this->isBuiltInType() || this->IsAtom()) {
     outputAccumulateLeafs.addOnTopNoRepetition(*this);
     return true;
   }
@@ -1344,8 +1344,8 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   return true;
 }
 
-bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const {
-  MacroRegisterFunctionWithName("Expression::GetBoundVariables");
+bool Expression::getBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const {
+  MacroRegisterFunctionWithName("Expression::getBoundVariables");
   if (this->owner == nullptr) {
     return true;
   }
@@ -1353,7 +1353,7 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
     return false;
   }
-  if (this->IsBuiltInTypE()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
+  if (this->isBuiltInType()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
   }
   if (this->startsWith(this->owner->opBind(), 2)) {
@@ -1361,7 +1361,7 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (!((*this)[i].GetBoundVariables(outputAccumulateBoundVariables))) {
+    if (!((*this)[i].getBoundVariables(outputAccumulateBoundVariables))) {
       return false;
     }
   }
@@ -1401,10 +1401,10 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
     return false;
   }
-  if (this->IsBuiltInTypE()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
+  if (this->isBuiltInType()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
   }
-  if (this->IsOfType<InputBox>()) {
+  if (this->isOfType<InputBox>()) {
     return true;
   }
   std::string atomName;
@@ -1544,7 +1544,7 @@ bool Expression::IsError(std::string* outputErrorMessage) const {
   if (!this->startsWith(this->owner->opError(), 2)) {
     return false;
   }
-  return (*this)[1].IsOfType<std::string>(outputErrorMessage);
+  return (*this)[1].isOfType<std::string>(outputErrorMessage);
 }
 
 bool Expression::IsSequenceDoubleButNotTripleNested() const {
@@ -1597,7 +1597,7 @@ bool Expression::IsIntervalRealLine() const {
 
 bool Expression::IsEqualToOne() const {
   int theInt;
-  if (this->IsSmallInteger(&theInt)) {
+  if (this->isSmallInteger(&theInt)) {
     return theInt == 1;
   }
   return false;
@@ -1605,7 +1605,7 @@ bool Expression::IsEqualToOne() const {
 
 bool Expression::IsEqualToTwo() const {
   int theInt;
-  if (this->IsSmallInteger(&theInt)) {
+  if (this->isSmallInteger(&theInt)) {
     return theInt == 2;
   }
   return false;
@@ -1613,7 +1613,7 @@ bool Expression::IsEqualToTwo() const {
 
 bool Expression::IsEqualToHalf() const {
   Rational theRat;
-  if (this->IsRational(&theRat)) {
+  if (this->isRational(&theRat)) {
     Rational half(1, 2);
     return theRat == half;
   }
@@ -1623,7 +1623,7 @@ bool Expression::IsEqualToHalf() const {
 bool Expression::IsKnownToBeNonNegative() const {
   MacroRegisterFunctionWithName("Expression::IsKnownToBeNonNegative");
   double theDouble = 0;
-  if (this->EvaluatesToDouble(&theDouble)) {
+  if (this->evaluatesToDouble(&theDouble)) {
     return theDouble >= 0;
   }
   if (this->owner == nullptr) {
@@ -1651,14 +1651,14 @@ bool Expression::IsNegativeConstant() const {
     return false;
   }
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat)) {
+  if (this->isOfType<Rational>(&theRat)) {
     return theRat.isNegative();
   }
-  if (!this->IsConstantNumber()) {
+  if (!this->isConstantNumber()) {
     return false;
   }
   double tempD = - 1;
-  if (!this->EvaluatesToDouble(&tempD)) {
+  if (!this->evaluatesToDouble(&tempD)) {
     return false;
   }
   return tempD < 0;
@@ -1666,29 +1666,29 @@ bool Expression::IsNegativeConstant() const {
 
 bool Expression::IsEqualToMOne() const {
   MacroRegisterFunctionWithName("Expression::IsEqualToMOne");
-  if (!this->IsConstantNumber()) {
+  if (!this->isConstantNumber()) {
     return false;
   }
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     return this->getValue<Rational>() == - 1;
   }
   return false;
 }
 
 bool Expression::isEqualToZero() const {
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     return this->getValue<Rational>().isEqualToZero();
   }
-  if (this->IsOfType<double>()) {
+  if (this->isOfType<double>()) {
     return this->getValue<double>() == 0.0;
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<AlgebraicNumber>()) {
     return this->getValue<AlgebraicNumber>().isEqualToZero();
   }
-  if (this->IsOfType<Polynomial<Rational> >()) {
+  if (this->isOfType<Polynomial<Rational> >()) {
     return this->getValue<Polynomial<Rational> >().isEqualToZero();
   }
-  if (this->IsOfType<RationalFunction>()) {
+  if (this->isOfType<RationalFunction>()) {
     return this->getValue<RationalFunction>().isEqualToZero();
   }
   return false;
@@ -1702,25 +1702,25 @@ bool Expression::makeError(const std::string& theError, Calculator& owner) {
   return this->AddChildValueOnTop(theError);
 }
 
-bool Expression::IsSmallInteger(int* whichInteger) const {
+bool Expression::isSmallInteger(int* whichInteger) const {
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat)) {
-    return theRat.IsSmallInteger(whichInteger);
+  if (this->isOfType<Rational>(&theRat)) {
+    return theRat.isSmallInteger(whichInteger);
   }
   AlgebraicNumber theAlgNum;
-  if (this->IsOfType<AlgebraicNumber>(&theAlgNum)) {
-    return theAlgNum.IsSmallInteger(whichInteger);
+  if (this->isOfType<AlgebraicNumber>(&theAlgNum)) {
+    return theAlgNum.isSmallInteger(whichInteger);
   }
   return false;
 }
 
-bool Expression::IsRational(Rational* whichRational) const {
-  if (this->IsOfType<Rational>(whichRational)) {
+bool Expression::isRational(Rational* whichRational) const {
+  if (this->isOfType<Rational>(whichRational)) {
     return true;
   }
   AlgebraicNumber theAlgNum;
-  if (this->IsOfType<AlgebraicNumber>(&theAlgNum)) {
-    return theAlgNum.IsRational(whichRational);
+  if (this->isOfType<AlgebraicNumber>(&theAlgNum)) {
+    return theAlgNum.isRational(whichRational);
   }
   return false;
 }
@@ -1749,14 +1749,14 @@ bool Expression::DivisionByMeShouldBeWrittenInExponentForm() const {
   return true;
 }
 
-bool Expression::IsPositiveNumber() const {
-  MacroRegisterFunctionWithName("Expression::IsPositiveNumber");
+bool Expression::isPositiveNumber() const {
+  MacroRegisterFunctionWithName("Expression::isPositiveNumber");
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat)) {
+  if (this->isOfType<Rational>(&theRat)) {
     return theRat.isPositive();
   }
   double theDouble = - 1;
-  if (!this->EvaluatesToDouble(&theDouble)) {
+  if (!this->evaluatesToDouble(&theDouble)) {
     return false;
   }
   if (std::isnan(theDouble)) {
@@ -1765,16 +1765,16 @@ bool Expression::IsPositiveNumber() const {
   return theDouble > 0;
 }
 
-bool Expression::IsConstantNumber() const {
-  MacroRegisterFunctionWithName("Expression::IsConstantNumber");
+bool Expression::isConstantNumber() const {
+  MacroRegisterFunctionWithName("Expression::isConstantNumber");
   if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsConstantNumber: ")) {
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::isConstantNumber: ")) {
     return false;
   }
-  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>()) {
+  if (this->isOfType<Rational>() || this->isOfType<AlgebraicNumber>() || this->isOfType<double>()) {
     return true;
   }
   if (this->IsOperationGiven(this->owner->opPi())) {
@@ -1785,7 +1785,7 @@ bool Expression::IsConstantNumber() const {
   }
   if (this->StartsWithFunctionWithComplexRange()) {
     for (int i = 1; i < this->size(); i ++) {
-      if (!(*this)[i].IsConstantNumber()) {
+      if (!(*this)[i].isConstantNumber()) {
         return false;
       }
     }
@@ -1803,7 +1803,7 @@ bool Expression::IsAlgebraicRadical() const {
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsAlgebraicRadical: ")) {
     return false;
   }
-  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<Rational>() || this->isOfType<AlgebraicNumber>()) {
     return true;
   }
   if (
@@ -1820,13 +1820,13 @@ bool Expression::IsAlgebraicRadical() const {
     return true;
   }
   if (this->startsWith(this->owner->opThePower(), 3)) {
-    if (!(*this)[2].IsRational()) {
+    if (!(*this)[2].isRational()) {
       return false;
     }
     return (*this)[1].IsAlgebraicRadical();
   }
   if (this->startsWith(this->owner->opSqrt(), 3)) {
-    if (!(*this)[1].IsRational()) {
+    if (!(*this)[1].isRational()) {
       return false;
     }
     return (*this)[2].IsAlgebraicRadical();
@@ -1834,27 +1834,27 @@ bool Expression::IsAlgebraicRadical() const {
   return false;
 }
 
-bool Expression::IsInteger(LargeInteger* whichInteger) const {
+bool Expression::isInteger(LargeInteger* whichInteger) const {
   Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat)) {
+  if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
-  return theRat.IsInteger(whichInteger);
+  return theRat.isInteger(whichInteger);
 }
 
-bool Expression::IsIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const {
+bool Expression::isIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const {
   Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat)) {
+  if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
   if (theRat.IsNonPositive()) {
     return false;
   }
   if (whichInteger == nullptr) {
-    return theRat.IsInteger();
+    return theRat.isInteger();
   }
   LargeInteger container;
-  if (!theRat.IsInteger(&container)) {
+  if (!theRat.isInteger(&container)) {
     return false;
   }
   *whichInteger = container.value;
@@ -1863,7 +1863,7 @@ bool Expression::IsIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const 
 
 bool Expression::IsIntegerFittingInInt(int* whichInteger) const {
   Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat)) {
+  if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
   return theRat.IsIntegerFittingInInt(whichInteger);
@@ -1876,7 +1876,7 @@ bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
 }
 
 void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputExponent) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->startsWith(this->owner->opThePower(), 3)) {
     outputBase = (*this)[1];
     outputExponent = (*this)[2];
@@ -1886,19 +1886,19 @@ void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputE
   outputExponent.assignValue(1, *this->owner);
 }
 
-bool Expression::GetContext(ExpressionContext& output) const {
-  output = this->GetContext();
+bool Expression::getContext(ExpressionContext& output) const {
+  output = this->getContext();
   return true;
 }
 
-ExpressionContext Expression::GetContext() const {
-  this->CheckInitialization();
+ExpressionContext Expression::getContext() const {
+  this->checkInitialization();
   ExpressionContext result(*this->owner);
-  if (this->IsBuiltInTypE()) {
+  if (this->isBuiltInType()) {
     result.fromExpression((*this)[1]);
     return result;
   }
-  if (this->IsMatrix()) {
+  if (this->isMatrix()) {
     if ((*this)[0].startsWith(this->owner->opMatriX())) {
       if ((*this)[0].size() > 2) {
         result.fromExpression((*this)[0][2]);
@@ -1907,7 +1907,7 @@ ExpressionContext Expression::GetContext() const {
     }
   }
   global.fatal
-  << "This is a programming error: GetContext called on an Expression "
+  << "This is a programming error: getContext called on an Expression "
   << "that is not a built-in data type. "
   << "I can't display the expression as this may cause ``infinite'' "
   << "recursion if the error is caused by the toString method. "
@@ -1917,8 +1917,8 @@ ExpressionContext Expression::GetContext() const {
   return ExpressionContext(*this->owner);
 }
 
-int Expression::GetNumCols() const {
-  MacroRegisterFunctionWithName("Expression::GetNumCols");
+int Expression::getNumberOfColumns() const {
+  MacroRegisterFunctionWithName("Expression::getNumberOfColumns");
   if (!this->IsSequenceNElementS()) {
     return - 1;
   }
@@ -1933,7 +1933,7 @@ int Expression::GetNumCols() const {
 
 void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, int depth) const {
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsRecursive");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (depth == 0) {
     outputAppendList.setSize(0);
   }
@@ -1948,7 +1948,7 @@ void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, i
 
 void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth) const {
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsDivisorsRecursive");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (depth == 0) {
     outputAppendList.setSize(0);
   }
@@ -1963,9 +1963,9 @@ void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppen
 
 void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const {
   MacroRegisterFunctionWithName("Expression::GetCoefficientMultiplicandForm");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->startsWith(this->owner->opTimes(), 3)) {
-    if ((*this)[1].IsConstantNumber()) {
+    if ((*this)[1].isConstantNumber()) {
       outputNoCoeff = (*this)[2];
       outputCoeff = (*this)[1];
       return;
@@ -1976,9 +1976,9 @@ void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Express
 }
 
 void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->startsWith(this->owner->opTimes(), 3)) {
-    if ((*this)[1].IsOfType(&outputCoeff)) {
+    if ((*this)[1].isOfType(&outputCoeff)) {
       outputNoCoeff = (*this)[2];
       return;
     }
@@ -1992,7 +1992,7 @@ int Expression::GetExpressionTreeSize() const {
   if (this->owner == nullptr) {
     return 1;
   }
-  this->CheckInitialization();
+  this->checkInitialization();
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDepthExceededHandleRoughly("While computing Expression::GetExpressionTreeSize: ")) {
     return 1;
@@ -2010,8 +2010,8 @@ int Expression::GetExpressionTreeSize() const {
 bool Expression::operator>(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
   double left = 0, right = 0;
-  bool leftEvalsToDouble = this->EvaluatesToDouble(&left);
-  bool rightEvalsToDouble = other.EvaluatesToDouble(&right);
+  bool leftEvalsToDouble = this->evaluatesToDouble(&left);
+  bool rightEvalsToDouble = other.evaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble) {
     if (std::isnan(left) && std::isnan(right)) {
       return false; //WARNING nan == nan evaluates to false!
@@ -2053,13 +2053,13 @@ bool Expression::operator>(const Expression& other) const {
 
 bool Expression::GreaterThanNoCoeff(const Expression& other) const {
   MacroRegisterFunctionWithName("Expression::GreaterThanNoCoeff");
-  if (this->IsOfType<Rational>() && other.IsOfType<Rational>()) {
+  if (this->isOfType<Rational>() && other.isOfType<Rational>()) {
     return this->getValue<Rational>() > other.getValue<Rational>();
   }
-  if (this->IsBuiltInTypE() && !other.IsBuiltInTypE()) {
+  if (this->isBuiltInType() && !other.isBuiltInType()) {
     return false;
   }
-  if (!this->IsBuiltInTypE() && other.IsBuiltInTypE()) {
+  if (!this->isBuiltInType() && other.isBuiltInType()) {
     return true;
   }
   int thisExpressionTreeSize = this->GetExpressionTreeSize();
@@ -2145,7 +2145,7 @@ bool Expression::toStringBuiltIn<ElementEllipticCurve<Rational> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   out << input.getValue<ElementEllipticCurve<Rational> >().toString(&format);
   return true;
@@ -2159,7 +2159,7 @@ bool Expression::toStringBuiltIn<ElementEllipticCurve<ElementZmodP> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   out << input.getValue<ElementEllipticCurve<ElementZmodP> >().toString(&format);
   return true;
@@ -2183,7 +2183,7 @@ bool Expression::toStringBuiltIn<InputBox>(
   FormatExpressions* theFormat
 ) {
   (void) theFormat;
-  out << input.getValue<InputBox>().GetUserInputBox();
+  out << input.getValue<InputBox>().getUserInputBox();
   return true;
 }
 
@@ -2217,7 +2217,7 @@ bool Expression::toStringBuiltIn<Polynomial<Rational> >(
   (void) theFormat;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
     out << "Polynomial{}(";
@@ -2227,7 +2227,7 @@ bool Expression::toStringBuiltIn<Polynomial<Rational> >(
     out << ")";
   }
   if (showContext) {
-    out << "[" << input.GetContext().toString() << "]";
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }
@@ -2243,7 +2243,7 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   FormatExpressions format;
   format.flagSuppressModP = !input.owner->flagHidePolynomialBuiltInTypeIndicator;
   const Polynomial<ElementZmodP>& polynomial = input.getValue<Polynomial<ElementZmodP> >();
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
     out << "PolynomialModP{}(";
@@ -2256,7 +2256,7 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
     out << ")";
   }
   if (showContext) {
-    out << "[" << input.GetContext().toString() << "]";
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }
@@ -2269,7 +2269,7 @@ bool Expression::toStringBuiltIn<Polynomial<AlgebraicNumber> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
   format.flagUseFrac = true;
   out << "PolynomialAlgebraicNumbers{}(";
@@ -2289,7 +2289,7 @@ bool Expression::toStringBuiltIn<Polynomial<AlgebraicNumber> >(
   }
   out << ")";
   if (showContext) {
-    out << "[" << input.GetContext().toString() << "]";
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }
@@ -2302,7 +2302,7 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   LargeIntegerUnsigned modulus;
@@ -2331,12 +2331,12 @@ bool Expression::toStringBuiltIn<RationalFunction>(
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseFrac = true;
   out << "MakeRationalFunction{}("
   << input.getValue<RationalFunction>().toString(&format) << ")";
   if (showContext) {
-    out << "[" << input.GetContext().toString() << "]";
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }
@@ -2349,7 +2349,7 @@ bool Expression::toStringBuiltIn<Weight<Polynomial<Rational> > >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagFormatWeightAsVectorSpaceIndex = false;
   out << input.getValue<Weight<Polynomial<Rational> > >().toString(&format);
   return true;
@@ -2376,8 +2376,8 @@ bool Expression::toStringBuiltIn<ElementUniversalEnveloping<RationalFunction> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
-  out << "UEE{}(" //<< input.GetContext().toString() << ", "
+  input.getContext().getFormat(format);
+  out << "UEE{}(" //<< input.getContext().toString() << ", "
   << input.getValue<ElementUniversalEnveloping<RationalFunction> >().toString(&format)
   << ")";
   return true;
@@ -2391,7 +2391,7 @@ bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseLatex = true;
   format.flagUseHTML = false;
   if (input.getValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
@@ -2412,7 +2412,7 @@ bool Expression::toStringBuiltIn<ElementTensorsGeneralizedVermas<RationalFunctio
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   out << "ETGVM{}(";
   out << input.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().toString(&format);
   out << ")";
@@ -2430,7 +2430,7 @@ bool Expression::toStringBuiltIn<Plot>(
     Plot& thePlot = input.getValueNonConst<Plot>();
     thePlot.flagIncludeExtraHtmlDescriptions = (theFormat == nullptr) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
     thePlot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
-    out << thePlot.GetPlotHtml(*input.owner);
+    out << thePlot.getPlotHtml(*input.owner);
     if (input.owner->flagWriteLatexPlots) {
       out << input.owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), nullptr, true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>"
@@ -2499,7 +2499,7 @@ bool Expression::toStringBuiltIn<VirtualRepresentation<FiniteGroup<ElementWeylGr
 ) {
   (void) theFormat;
   FormatExpressions format;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
   input.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   format.flagUseLatex = true;
@@ -2611,14 +2611,14 @@ bool Expression::toStringBuiltIn<ElementWeylAlgebra<Rational> >(
   (void) theFormat;
   FormatExpressions format;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
-  input.GetContext().getFormat(format);
+  input.getContext().getFormat(format);
   format.flagUseHTML = false;
   format.flagUseLatex = true;
   out << "ElementWeylAlgebra{}(";
   out << input.getValue<ElementWeylAlgebra<Rational> >().toString(&format);
   out << ")";
   if (showContext) {
-    out << "[" << input.GetContext().toString() << "]";
+    out << "[" << input.getContext().toString() << "]";
   }
   return true;
 }
@@ -2643,9 +2643,9 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* theForm
     }
     return true;
   }
-  if (this->IsMatrixOfType<RationalFunction>()) {
+  if (this->isMatrixOfType<RationalFunction>()) {
     FormatExpressions format;
-    this->GetContext().getFormat(format);
+    this->getContext().getFormat(format);
     format.flagUseHTML = false;
     format.flagUseLatex = true;
     Matrix<RationalFunction> theMat;
@@ -2654,7 +2654,7 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* theForm
     return true;
   }
   int theType = - 1;
-  if (!this->IsBuiltInTypE(&theType)) {
+  if (!this->isBuiltInType(&theType)) {
     return false;
   }
   Calculator& commands = *this->owner;
@@ -2717,15 +2717,15 @@ bool Expression::NeedsParenthesisForBaseOfExponent() const {
   if (this->startsWith(this->owner->opPlus()) || this->startsWith(this->owner->opMinus())) {
     return true;
   }
-  if (this->IsOfType<Rational>()) {
-    return this->getValue<Rational>() < 0 || !this->getValue<Rational>().IsInteger();
+  if (this->isOfType<Rational>()) {
+    return this->getValue<Rational>() < 0 || !this->getValue<Rational>().isInteger();
   }
-  if (this->IsOfType<double>()) {
+  if (this->isOfType<double>()) {
     return this->getValue<double>() < 0;
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<AlgebraicNumber>()) {
     LargeInteger tempI;
-    if (!this->getValue<AlgebraicNumber>().IsInteger(&tempI)) {
+    if (!this->getValue<AlgebraicNumber>().isInteger(&tempI)) {
       return true;
     }
     return tempI > 0;
@@ -2754,10 +2754,10 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
   ) {
     return true;
   }
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     return this->getValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<AlgebraicNumber>()) {
     return this->getValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   }
   if (this->IsAtom() || this->size() == 0) {
@@ -2767,7 +2767,7 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
     return false;
   }
   if (this->startsWith(this->owner->opTimes(), 3)) {
-    if ((*this)[1].IsOfType<Rational>()) {
+    if ((*this)[1].isOfType<Rational>()) {
       return (*this)[1].getValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     }
     return false;
@@ -2805,13 +2805,13 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsOfType<std::string>()) {
+  if (this->isOfType<std::string>()) {
     return false;
   }
   if (this->startsWith(this->owner->opAbsoluteValue())) {
     return false;
   }
-  if (this->IsMatrix()) {
+  if (this->isMatrix()) {
     return false;
   }
   if (
@@ -2832,10 +2832,10 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
       return false;
     }
   }
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     return this->getValue<Rational>().needsParenthesisForMultiplication(theFormat);
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
+  if (this->isOfType<AlgebraicNumber>()) {
     return this->getValue<AlgebraicNumber>().needsParenthesisForMultiplication(theFormat);
   }
   if (this->IsAtom() || this->children.size == 0) {
@@ -2966,16 +2966,16 @@ std::string Expression::toStringAllSlidersInExpression() const {
     double theReader = 0;
     out << std::fixed;
     out.precision(4);
-    if (theBox.min.EvaluatesToDouble(&theReader)) {
+    if (theBox.min.evaluatesToDouble(&theReader)) {
       out << "min =\"" << theReader << "\" ";
     }
-    if (theBox.max.EvaluatesToDouble(&theReader)) {
+    if (theBox.max.evaluatesToDouble(&theReader)) {
       out << "max =\"" << theReader << "\" ";
     }
-    if (theBox.step.EvaluatesToDouble(&theReader)) {
+    if (theBox.step.evaluatesToDouble(&theReader)) {
       out << "step =\"" << theReader << "\" ";
     }
-    if (theBox.value.EvaluatesToDouble(&theReader)) {
+    if (theBox.value.evaluatesToDouble(&theReader)) {
       out << "value =\"" << theReader << "\" ";
     } else {
       out << "value =\"1\" ";
@@ -3007,13 +3007,13 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
         input[i - 1] = "...";
       }
       std::stringstream out;
-      if (currentE.IsOfType<std::string>()) {
+      if (currentE.isOfType<std::string>()) {
         out << currentE.getValue<std::string>();
       } else if (
-        currentE.HasType<Plot> () ||
-        currentE.IsOfType<SemisimpleSubalgebras>() ||
-        currentE.IsOfType<WeylGroupData>() ||
-        currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
+        currentE.hasType<Plot> () ||
+        currentE.isOfType<SemisimpleSubalgebras>() ||
+        currentE.isOfType<WeylGroupData>() ||
+        currentE.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
       ) {
         out << currentE.toString(theFormat);
       } else {
@@ -3025,8 +3025,8 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   } else {
     input[0] = HtmlRoutines::GetMathSpanPure(startingExpression.toString(theFormat), 1700);
     if (
-      this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
-      this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()
+      this->isOfType<std::string>() || this->isOfType<Plot>() ||
+      this->isOfType<SemisimpleSubalgebras>() || this->isOfType<WeylGroupData>()
     ) {
       output[0] = this->toString(theFormat);
     } else {
@@ -3146,7 +3146,7 @@ std::string Expression::toStringTreeHtml(int depth) const {
     for (int i = 0; i < depth; i ++) {
       out << "_";
     }
-    if (data.str() == "" && this->IsOfType<std::string>()) {
+    if (data.str() == "" && this->isOfType<std::string>()) {
       out << "[empty string]";
     }
     out << data.str();
@@ -3191,8 +3191,8 @@ bool Expression::toStringDivide(
       !(input[1].IsListStartingWithAtom(commands.opTimes()) ||
       input[1].IsListStartingWithAtom(commands.opDivide()));
     bool secondNeedsBrackets = true;
-    if (input[2].IsOfType<Rational>()) {
-      if (input[2].getValue<Rational>().IsInteger()) {
+    if (input[2].isOfType<Rational>()) {
+      if (input[2].getValue<Rational>().isInteger()) {
         secondNeedsBrackets = false;
       }
     }
@@ -3234,7 +3234,7 @@ bool Expression::toStringPower(
   const Expression& secondE = input[2];
   if (firstE.startsWith(- 1, 2)) {
     bool shouldProceed = firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !secondE.IsEqualToMOne() && secondE.IsRational();
+    !secondE.IsEqualToMOne() && secondE.isRational();
     if (
       shouldProceed && firstE[0].IsOperationGiven(commands.opLog()) &&
       commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
@@ -3259,7 +3259,7 @@ bool Expression::toStringPower(
   }
   if (!involvesExponentsInterpretedAsFunctions) {
     bool isSqrt = false;
-    if (input[2].IsOfType<Rational>()) {
+    if (input[2].isOfType<Rational>()) {
       if (input[2].getValue<Rational>().IsEqualTo(Rational(1, 2))) {
         isSqrt = true;
       }
@@ -3380,13 +3380,13 @@ bool Expression::toStringEndStatement(
         out << ";";
       }
       out << "</td><td class =\"cellCalculatorResult\">";
-      if ((*this)[i].IsOfType<std::string>() && isFinal) {
+      if ((*this)[i].isOfType<std::string>() && isFinal) {
         currentOutput = StringRoutines::ConvertStringToCalculatorDisplay(currentE.getValue<std::string>());
       } else if ((
-          currentE.HasType<Plot> () ||
-          currentE.IsOfType<SemisimpleSubalgebras>() ||
-          currentE.IsOfType<WeylGroupData>() ||
-          currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
+          currentE.hasType<Plot> () ||
+          currentE.isOfType<SemisimpleSubalgebras>() ||
+          currentE.isOfType<WeylGroupData>() ||
+          currentE.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
         ) && isFinal
       ) {
         theFormat->flagDontCollalpseProductsByUnits = false;
@@ -3406,7 +3406,7 @@ bool Expression::toStringEndStatement(
       std::stringstream outWithDelimiter;
       if (createSingleTable) {
         out << "<tr><td>\n";
-        addLatexDelimiter = !currentE.HasType<Plot>();
+        addLatexDelimiter = !currentE.hasType<Plot>();
         if (addLatexDelimiter) {
           outWithDelimiter << "\\(";
         }
@@ -3556,14 +3556,14 @@ bool Expression::toStringSequence(
 }
 
 bool Expression::toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
-  if (!input.IsMatrix()) {
+  if (!input.isMatrix()) {
     return false;
   }
   if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
     out << "\\left(";
   }
   if (!theFormat->flagUsePmatrix) {
-    int numCols = input.GetNumCols();
+    int numCols = input.getNumberOfColumns();
     out << "\\begin{array}{";
     for (int i = 0; i < numCols; i ++) {
       out << "c";
@@ -3667,7 +3667,7 @@ bool Expression::toStringDifferential3(
   if (input[2].startsWith(input.owner->opDivide())) {
     needsParen = false;
   }
-  bool rightNeedsParen = (!input[1].IsAtom()) && (!input[1].IsBuiltInTypE());
+  bool rightNeedsParen = (!input[1].IsAtom()) && (!input[1].isBuiltInType());
   std::string theCoeff = input[2].toString(theFormat);
   if (theCoeff == "1") {
     needsParen = false;
@@ -3715,7 +3715,7 @@ bool Expression::toStringDifferential2(
   if (!input.startsWith(input.owner->opDifferential(), 2)) {
     return false;
   }
-  bool needsParen = (!input[1].IsAtom()) && (!input[1].IsBuiltInTypE());
+  bool needsParen = (!input[1].IsAtom()) && (!input[1].isBuiltInType());
   out << "{\\text{d}}{}";
   if (needsParen) {
     out << "\\left(";
@@ -3770,7 +3770,7 @@ bool Expression::toStringSqrt3(
     return false;
   }
   int thePower = 0;
-  bool hasPowerTwo = input[1].IsSmallInteger(&thePower);
+  bool hasPowerTwo = input[1].isSmallInteger(&thePower);
   if (hasPowerTwo) {
     hasPowerTwo = (thePower == 2);
   }
@@ -3839,7 +3839,7 @@ bool Expression::toStringError(
   if (!input.startsWith(input.owner->opError(), 2)) {
     return false;
   }
-  input.CheckInitialization();
+  input.checkInitialization();
   input.owner->NumErrors ++;
   out << "\\text{Error number "
   << input.owner->NumErrors
@@ -3978,10 +3978,10 @@ std::string Expression::toStringWithStartingExpression(
     }
     outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
     if ((
-        this->IsOfType<std::string>() ||
-        this->IsOfType<Plot>() ||
-        this->IsOfType<SemisimpleSubalgebras>() ||
-        this->IsOfType<WeylGroupData>()
+        this->isOfType<std::string>() ||
+        this->isOfType<Plot>() ||
+        this->isOfType<SemisimpleSubalgebras>() ||
+        this->isOfType<WeylGroupData>()
       ) && isFinal
     ) {
       output = out.str();
@@ -4419,7 +4419,7 @@ std::string Expression::toString(
   }
   std::stringstream out;
   if (
-    !this->IsOfType<std::string>() &&
+    !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opEndStatement())
   ) {
     if (startingExpression == nullptr) {
@@ -4678,21 +4678,9 @@ bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation) c
   return !this->owner->atomsNotAllowingChainRule.contains(this->owner->GetOperations()[this->theData]);
 }
 
-bool Expression::RemoveContext() {
-  this->CheckInitialization();
-  if (!this->hasContext()) {
-    return true;
-  }
-  this->children.removeIndexShiftDown(1);
-  if (this->children.size == 1) {
-    this->AssignMeMyChild(0);
-  }
-  return true;
-}
-
 bool Expression::hasContext() const {
-  this->CheckInitialization();
-  if (!this->IsBuiltInTypE() || !(this->size() == 3)) {
+  this->checkInitialization();
+  if (!this->isBuiltInType() || !(this->size() == 3)) {
     return false;
   }
   return (*this)[1].IsListStartingWithAtom(this->owner->opContext());
@@ -4702,7 +4690,7 @@ bool Expression::hasNonEmptyContext() const {
   if (!this->hasContext()) {
     return false;
   }
-  return !this->GetContext().isEmpty();
+  return !this->getContext().isEmpty();
 }
 
 bool Expression::IsCacheableExpression() const {
@@ -4710,7 +4698,7 @@ bool Expression::IsCacheableExpression() const {
   if (this->owner == nullptr) {
     return true;
   }
-  if (this->IsBuiltInTypE()) {
+  if (this->isBuiltInType()) {
     return true;
   }
   for (int i = 0; i < this->children.size; i ++) {
@@ -4729,15 +4717,15 @@ bool Expression::IsCacheableExpression() const {
 }
 
 bool Expression::IsBuiltInScalar() const {
-  return this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >() ||
-  this->IsOfType<RationalFunction>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();
+  return this->isOfType<Rational>() || this->isOfType<Polynomial<Rational> >() ||
+  this->isOfType<RationalFunction>() || this->isOfType<double>() || this->isOfType<AlgebraicNumber>();
 }
 
 bool Expression::IsElementaryObject() const {
   if (this->IsAtom()) {
     return true;
   }
-  if (this->IsBuiltInTypE()) {
+  if (this->isBuiltInType()) {
     return true;
   }
   if (this->owner == nullptr) {
@@ -4749,7 +4737,7 @@ bool Expression::IsElementaryObject() const {
   return false;
 }
 
-bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
+bool Expression::isBuiltInType(std::string* outputWhichOperation) const {
   std::string tempS;
   if (!this->startsWith()) {
     return false;
@@ -4766,9 +4754,9 @@ bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
   return false;
 }
 
-bool Expression::IsBuiltInTypE(int* outputWhichType) const {
+bool Expression::isBuiltInType(int* outputWhichType) const {
   std::string theType;
-  if (!this->IsBuiltInTypE(&theType)) {
+  if (!this->isBuiltInType(&theType)) {
     return false;
   }
   if (outputWhichType != nullptr) {
@@ -4777,11 +4765,11 @@ bool Expression::IsBuiltInTypE(int* outputWhichType) const {
   return true;
 }
 
-bool Expression::MakeProducT(Calculator& owner, const Expression& left, const Expression& right) {
+bool Expression::makeProduct(Calculator& owner, const Expression& left, const Expression& right) {
   return this->MakeXOX(owner, owner.opTimes(), left, right);
 }
 
-bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands) {
+bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMultiplicands) {
   if (theMultiplicands.size == 0) {
     return this->assignValue(1, owner);
   }
@@ -4847,15 +4835,15 @@ void ExpressionContext::makeOneVariableFromString(
   this->variables.addOnTop(converted);
 }
 
-bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {
-  MacroRegisterFunctionWithName("Expression::MakeSqrt");
+bool Expression::makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {
+  MacroRegisterFunctionWithName("Expression::makeSqrt");
   Expression argumentE;
   argumentE.assignValue(argument, owner);
-  return this->MakeSqrt(owner, argumentE, radicalSuperIndex);
+  return this->makeSqrt(owner, argumentE, radicalSuperIndex);
 }
 
-bool Expression::MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex) {
-  MacroRegisterFunctionWithName("Expression::MakeSqrt");
+bool Expression::makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex) {
+  MacroRegisterFunctionWithName("Expression::makeSqrt");
   this->reset(owner,3);
   Expression radicalIndexE;
   radicalIndexE.assignValue(radicalSuperIndex, owner);
@@ -4884,8 +4872,8 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
     leftCopy.assignValue(left.theData, *right.owner);
     return this->MakeXOX(owner, theOp, leftCopy, right);
   }
-  left.CheckInitialization();
-  right.CheckInitialization();
+  left.checkInitialization();
+  right.checkInitialization();
   this->reset(owner, 3);
   this->theData = owner.opLisT();
   this->addChildAtomOnTop(theOp);
@@ -4905,7 +4893,7 @@ bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgume
 }
 
 bool Expression::Sequencefy() {
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->IsSequenceNElementS()) {
     return true;
   }
@@ -4917,7 +4905,7 @@ bool Expression::operator==(int other) const {
     return false;
   }
   int theInt;
-  if (!this->IsSmallInteger(&theInt)) {
+  if (!this->isSmallInteger(&theInt)) {
     return false;
   }
   return theInt == other;
@@ -4934,7 +4922,7 @@ std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
   }
   std::stringstream out;
   Rational theRat;
-  if (this->IsOfType<Rational>(&theRat)) {
+  if (this->isOfType<Rational>(&theRat)) {
     FormatExpressions tempFormat;
     tempFormat.flagUseFrac = false;
     return theRat.toString(&tempFormat);

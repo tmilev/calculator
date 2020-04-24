@@ -43,16 +43,16 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   theRecord.WriteBytes(encoded, nullptr);
   if (encoded != theRecord.incomingBytes) {
     global << "Decoded:\n" << theRecord.content.getStringHighlighter()
-    << Crypto::ConvertListUnsignedCharsToHex(theRecord.incomingBytes) << Logger::endL;
+    << Crypto::convertListUnsignedCharsToHex(theRecord.incomingBytes) << Logger::endL;
     global << "Encoded:\n" << theRecord.content.getStringHighlighter()
-    << Crypto::ConvertListUnsignedCharsToHex(encoded) << Logger::endL;
+    << Crypto::convertListUnsignedCharsToHex(encoded) << Logger::endL;
     global.fatal << "Decode->Encode did not reproduce the original input. " << global.fatal;
   }
   return true;
 }
 
-bool SSLRecord::Test::All() {
-  MacroRegisterFunctionWithName("SSLRecord::Test::All");
+bool SSLRecord::Test::all() {
+  MacroRegisterFunctionWithName("SSLRecord::Test::all");
   SSLRecord::Test::Serialization();
   return true;
 }

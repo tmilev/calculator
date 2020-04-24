@@ -20,7 +20,7 @@ public:
   bool operator>(const PackedVector<scalar>& other) const;
   // passing in d for compatibility with Vector
   void makeZero(int d);
-  void MakeEi(int d, int i);
+  void makeEi(int d, int i);
   // for compatibility
   void setSize(int s);
 
@@ -226,7 +226,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   this->rank = this->unrationalCartanSymmetric.numberOfRows;
   for (int rvi = 0; rvi < rank; rvi ++) {
     templateVector vi;
-    vi.MakeEi(rank, rvi);
+    vi.makeEi(rank, rvi);
     if (this->RootSystem.contains(vi)) {
       continue;
     }
@@ -432,11 +432,11 @@ List<VectorSpace<Coefficient> > GetEigenspaces(const Matrix<Coefficient> &M) {
 template <typename somegroup>
 List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   if (G.ConjugacyClassCount() == 0) {
-    G.ComputeCCfromAllElements();
+    G.computeConjugacyClassesFromAllElements();
   }
   List<int> classmap;
   int sizeOfG = - 1;
-  G.GetSize().IsIntegerFittingInInt(&sizeOfG);
+  G.getSize().IsIntegerFittingInInt(&sizeOfG);
   classmap.setSize(sizeOfG);
 //  classmap.setSize(G.theElements.size);
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {

@@ -22,8 +22,8 @@ void Database::Test::TearDown() {
   DatabaseStrings::theDatabaseName = "calculator";
 }
 
-bool Database::Test::All() {
-  MacroRegisterFunctionWithName("Database::Test::All");
+bool Database::Test::all() {
+  MacroRegisterFunctionWithName("Database::Test::all");
   Database::Test tester;
   tester.DeleteDatabase();
   tester.AdminAccountCreation();

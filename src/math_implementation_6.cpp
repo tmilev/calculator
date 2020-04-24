@@ -123,7 +123,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
     return true;
   }
   highestCoefficient = this->GetLeadingCoefficient(monomialOrder);
-  if (!highestCoefficient.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
+  if (!highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()) {
     return false;
   }
   Vector<Rational> tempV;
@@ -214,7 +214,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     return true;
   }
   int degree = 0;
-  if (!this->current.totalDegree().IsSmallInteger(&degree)) {
+  if (!this->current.totalDegree().isSmallInteger(&degree)) {
     return false;
   }
   int degreeLeft = degree / 2;
@@ -245,7 +245,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     if (i > degreeLeft) {
       continue;
     }
-    theValuesAtPoints[i].IsInteger(&tempLI);
+    theValuesAtPoints[i].isInteger(&tempLI);
     if (!tempLI.value.factor(
       thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, 3, comments
     )) {
@@ -313,7 +313,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
         break;
       }
       currentPointContribution = theValuesAtPoints[j] / theValuesAtPointsLeft[j];
-      if (!currentPointContribution.IsInteger()) {
+      if (!currentPointContribution.isInteger()) {
         isGood = false;
         break;
       }

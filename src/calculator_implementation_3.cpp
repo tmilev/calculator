@@ -21,7 +21,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
   const Vector<RationalFunction>& theWeight, int generatorIndex
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::IsDominantWRTgenerator");
-  this->CheckInitialization();
+  this->checkInitialization();
   Vector<RationalFunction> tempVect;
   RationalFunction tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
@@ -52,7 +52,7 @@ template <>
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWRTgenerator<Rational>(
   const Vector<Rational>& theWeight, int generatorIndex
 ) {
-  this->CheckInitialization();
+  this->checkInitialization();
   return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
 }
 
@@ -62,7 +62,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction>(
 ) {
   Vector<Rational> tempVect;
   RationalFunction tempRF;
-  tempVect.MakeEi(this->getDimension(), generatorIndex);
+  tempVect.makeEi(this->getDimension(), generatorIndex);
   tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
     global.fatal << "This might or might not be a programming mistake: "
@@ -107,7 +107,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   std::string& outputDetails
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
-  this->CheckInitialization();
+  this->checkInitialization();
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
@@ -115,7 +115,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoords().IsSmallInteger()) {
+  if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
     return false;
   }
   int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().GetDoubleValue()) + 1;
@@ -246,7 +246,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   }
 
   output = input[1];
-  if (!output.IsOfType < ElementUniversalEnveloping<RationalFunction> >()) {
+  if (!output.isOfType < ElementUniversalEnveloping<RationalFunction> >()) {
     return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   }
   SemisimpleLieAlgebra& ownerSS = *output.GetAmbientSSAlgebraNonConstUseWithCaution();
@@ -270,7 +270,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 std::string HtmlRoutines::GetSliderSpanStartsHidden(
   const std::string& content, const std::string& label, const std::string& desiredID
 ) {
-  (void) label;//avoid unused parameter warning, portable
+  (void) label;
   std::stringstream out;
   HtmlRoutines::GlobalGeneralPurposeID ++;
   std::stringstream idStringStream;
@@ -545,11 +545,11 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   const Expression& input,
   Expression& output,
   Vectors<RationalFunction>& theHWs,
-  branchingData& theG2B3Data,
+  BranchingData& theG2B3Data,
   ExpressionContext& theContext
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingIntermediate");
-  (void) input;//avoid unused parameter warning, portable
+  (void) input;
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
   bool isFD = (theG2B3Data.selInducing.CardinalitySelection == 0);
@@ -613,7 +613,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
       CharacterSemisimpleLieAlgebraModule<RationalFunction> tempChar;
       tempChar.addMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.coefficients[k]);
       int multiplicity = 0;
-      theG2B3Data.theSmallCharFDpart.coefficients[k].IsSmallInteger(&multiplicity);
+      theG2B3Data.theSmallCharFDpart.coefficients[k].isSmallInteger(&multiplicity);
       for (int counter = 0; counter < multiplicity; counter ++, eigenIndexcounter ++) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
@@ -682,7 +682,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex = - 1;
-          numEigenVectors.IsSmallInteger(&theIndex);
+          numEigenVectors.isSmallInteger(&theIndex);
           if (theIndex - eigenIndexcounter - 1 > 0) {
             List<Rational> tempList, tempList2;
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
@@ -737,7 +737,7 @@ bool Calculator::innerPrintB3G2branchingTable(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTable");
   Vectors<RationalFunction> theHWs;
-  branchingData theG2B3Data;
+  BranchingData theG2B3Data;
   ExpressionContext context(theCommands);
   if (!theCommands.innerPrintB3G2branchingTableCommon(
     theCommands, input, output, theHWs, theG2B3Data, context
@@ -754,7 +754,7 @@ bool Calculator::innerPrintB3G2branchingTable(
 
 bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCharsOnly");
-  branchingData theg2b3data;
+  BranchingData theg2b3data;
   ExpressionContext theContext(theCommands);
   Vectors<RationalFunction> theHWs;
   theCommands.innerPrintB3G2branchingTableCommon(
@@ -887,7 +887,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   return output.assignValue(out.str(), theCommands);
 }
 
-void branchingData::resetOutputData() {
+void BranchingData::resetOutputData() {
   this->theEigenVectorS.setSize(0);
   this->theEigenVectorsLevi.setSize(0);
   this->outputEigenWords.setSize(0);
@@ -918,7 +918,7 @@ bool ElementSumGeneralizedVermas<Coefficient>::ExtractElementUE(
   return true;
 }
 
-bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output) {
+bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunction> theModCopy;
   theModCopy.MakeFromHW(
@@ -1051,7 +1051,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;
-  (void) theCommands;//avoid unused parameter warning, portable
+  (void) theCommands;
   (void) output;
   if (input.children.size != 3) {
     return false;
@@ -1059,7 +1059,7 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   int leftInt, rightInt;
-  if (!leftE.IsSmallInteger(&leftInt) || !rightE.IsSmallInteger(&rightInt)) {
+  if (!leftE.isSmallInteger(&leftInt) || !rightE.isSmallInteger(&rightInt)) {
     return false;
   }
   return true;
@@ -1088,7 +1088,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   Vector<int> theHWint;
   theHWint.setSize(theHW.size);
   for (int i = 0; i < theHW.size; i ++) {
-    if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i] < 0) {
+    if (!theHW[i].isSmallInteger(&theHWint[i]) || theHW[i] < 0) {
       return output.makeError(
         "The input weight you gave is bad: "
         "it must consist of non-negative small integers",
@@ -1172,7 +1172,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   const Expression& dimE = input[2];
   int rankBound = 0;
   int dimBound = 0;
-  if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound)) {
+  if (!rankE.isSmallInteger(&rankBound) || !dimE.isSmallInteger(&dimBound)) {
     return output.makeError("The rank and  dim bounds must be small integers", theCommands);
   }
   if (rankBound < 2 || rankBound > 100 || dimBound < 1 || dimBound > 10000) {
@@ -1334,11 +1334,11 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerLittelmannOperator");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   int theIndex = 0;
-  if (!input.IsSmallInteger(&theIndex)) {
+  if (!input.isSmallInteger(&theIndex)) {
     return output.makeError(
       "The argument of the Littelmann root operator is "
       "expected to be a small integer, instead you gave me " +
@@ -1421,7 +1421,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
     expressionE.addChildOnTop(polynomialE);
     resultSequence.addOnTop(expressionE);
   }
-  return output.MakeSequence(theCommands, &resultSequence);
+  return output.makeSequence(theCommands, &resultSequence);
 }
 
 bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1430,11 +1430,11 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
     return false;
   }
   Rational left, right;
-  if (!input[1].IsRational(&left) || !input[2].IsRational(&right)) {
+  if (!input[1].isRational(&left) || !input[2].isRational(&right)) {
     return false;
   }
   LargeInteger base;
-  if (!right.IsInteger(&base)) {
+  if (!right.isInteger(&base)) {
     return false;
   }
   if (base.isEqualToZero()) {
@@ -1488,7 +1488,7 @@ bool Calculator::innerPrintZnEnumeration(
     return false;
   }
   int grade, dimension;
-  if (!input[2].IsSmallInteger(&grade) || !input[1].IsSmallInteger(&dimension)) {
+  if (!input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)) {
     return false;
   }
   if (grade > 10 || dimension > 5 || grade < 0 || dimension < 0) {
@@ -1523,7 +1523,7 @@ bool Expression::AssignMatrixExpressions(
       (*this) = input(0, 0);
       return true;
     }
-    this->MakeSequence(owner);
+    this->makeSequence(owner);
     for (int i = 0; i < input.numberOfColumns; i ++) {
       this->addChildOnTop(input(0, i));
     }
@@ -1543,17 +1543,17 @@ bool Expression::AssignMatrixExpressions(
     for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));
       mType inType;
-      if (input(i, j).IsOfType<Rational>()) {
+      if (input(i, j).isOfType<Rational>()) {
         inType = typeRat;
-      } else if (input(i, j).IsOfType<AlgebraicNumber>()) {
+      } else if (input(i, j).isOfType<AlgebraicNumber>()) {
         inType = typeAlgebraic;
-      } else if (input(i, j).IsOfType<double>()) {
+      } else if (input(i, j).isOfType<double>()) {
         inType = typeDouble;
-      } else if (input(i, j).IsOfType<Polynomial<Rational> >()) {
+      } else if (input(i, j).isOfType<Polynomial<Rational> >()) {
         inType = typePolyRat;
-      } else if (input(i, j).IsOfType<Polynomial<AlgebraicNumber> >()) {
+      } else if (input(i, j).isOfType<Polynomial<AlgebraicNumber> >()) {
         inType = typeAlgebraic;
-      } else if (input(i, j).IsOfType<RationalFunction>()) {
+      } else if (input(i, j).isOfType<RationalFunction>()) {
         inType = typeRF;
       } else {
         inType = typeExpression;
@@ -1646,20 +1646,20 @@ bool Calculator::GetMatrixExpressionsFromArguments(
   }
   Expression inputModified = input;
   inputModified.setChildAtomValue(0, this->opSequence());
-  return this->GetMatrixExpressions(inputModified, output, desiredNumRows, desiredNumCols);
+  return this->getMatrixExpressions(inputModified, output, desiredNumRows, desiredNumCols);
 }
 
-bool Calculator::GetMatrixExpressions(
+bool Calculator::getMatrixExpressions(
   const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
 ) {
-  MacroRegisterFunctionWithName("Calculator::GetMatrixExpressions");
-  if (!input.IsSequenceNElementS() && !input.IsMatrix() && !input.IsIntervalRealLine()) {
+  MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
+  if (!input.IsSequenceNElementS() && !input.isMatrix() && !input.IsIntervalRealLine()) {
     output.init(1, 1);
     output(0, 0) = input;
     return true;
   }
   if (input.size() < 2) {
-    if (input.IsMatrix()) {
+    if (input.isMatrix()) {
       output.init(0, 0);
       return true;
     }
@@ -1871,8 +1871,8 @@ bool Calculator::innerAutomatedTest(
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access
   Calculator::Test test(theCommands);
   if (
-    !input[1].IsSmallInteger(&test.startIndex) ||
-    !input[2].IsSmallInteger(&test.numberOfTests)
+    !input[1].isSmallInteger(&test.startIndex) ||
+    !input[2].isSmallInteger(&test.numberOfTests)
   ) {
     return theCommands
     << "Automated test takes two arguments: "

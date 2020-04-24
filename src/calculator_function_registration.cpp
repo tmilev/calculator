@@ -2978,6 +2978,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) "
     "has positive coefficient.",
     "GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\n"
+    "GCDPoly(PolynomialModP((x^2+3)(x^3+1), 7), PolynomialModP((x^2+3)(x^3+x+1), 7));\n"
+    "f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\n"
+    "y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\n"
+    "GCDPoly(f, y);\n"
     "GCDPoly{}("
     "-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}"
     "-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
@@ -6946,6 +6950,20 @@ void Calculator::initPredefinedStandardOperations() {
     innerStandard
   );
   this->addOperationHandler(
+    "Value",
+    CalculatorFunctions::innerValueOfModularExpression,
+    "",
+    "Given an expression of the form a mod b, returns the element a. "
+    "When the input is a modular polynomial, converts the polynomial to a rational. ",
+    "Value(3 mod 7);\n"
+    "Value(9 mod 7);\n"
+    "a = Value((PolynomialModP(x^9, 7)) mod (PolynomialModP(x^5+x+1, 7)));\n"
+    "Value a",
+    "CalculatorFunctions::innerValueOfModularExpression",
+    "Value",
+    innerStandard
+  );
+  this->addOperationHandler(
     "mod",
     Calculator::innerZmodP,
     "",
@@ -7380,7 +7398,7 @@ void Calculator::initPredefinedStandardOperations() {
     "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
     "a^20",
     "CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger",
-    "innerPowerPolynomialModuloIntegerBySmallInteger",
+    "PowerPolynomialModuloIntegerBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -7391,8 +7409,8 @@ void Calculator::initPredefinedStandardOperations() {
     "Raises polynomial modulo an integer to a small integer power. ",
     "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
     "a^20",
-    "CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger",
-    "innerPowerPolynomialModuloIntegerBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPBySmallInteger",
+    "PowerPolynomialModPModuloPolynomialModPBySmallInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

@@ -114,7 +114,7 @@ class WebAPIResponse {
     FormatExpressions& theFormat
   );
 
-  static JSData GetSelectCourseJSON();
+  static JSData getSelectCourseJSON();
   static std::string GetScoresPage();
   static std::string GetApp(bool appendBuildHash);
   static std::string GetOnePageJS(bool appendBuildHash);
@@ -157,17 +157,17 @@ public:
   static int shiftX;
   static int shiftY;
   static int scale;
-  static void LoadStrings();
+  static void loadStrings();
   static std::string gitRepository;
 
   static std::string URLKeyValuePairsToNormalRecursiveHtml(
     const std::string& input, int recursionDepth = 0
   );
 
-  static void ConvertURLStringToNormal(
+  static void convertURLStringToNormal(
     const std::string& input, std::string& output, bool replacePlusBySpace
   );
-  static std::string ConvertURLStringToNormal(
+  static std::string convertURLStringToNormal(
     const std::string& input, bool replacePlusBySpace
   );
   static bool ConvertStringToHtmlStringReturnTrueIfModified(
@@ -176,7 +176,7 @@ public:
   static std::string ConvertStringToURLStringExceptDashesAndSlashes(
     const std::string& input
   );
-  static std::string ConvertStringToURLString(
+  static std::string convertStringToURLString(
     const std::string& input, bool usePlusesForSpacebars
   );
   static std::string ConvertStringToHtmlString(
@@ -200,7 +200,7 @@ public:
   static std::string GetCalculatorComputationURL(
     const std::string& inputNoEncoding
   );
-  static std::string GetCalculatorComputationAnchor(
+  static std::string getCalculatorComputationAnchor(
     const std::string& inputNoEncoding
   );
   static std::string GetSliderSpanStartsHidden(

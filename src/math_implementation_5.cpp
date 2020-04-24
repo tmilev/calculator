@@ -21,7 +21,7 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
     tempFormat.polyDefaultLetter = "\\partial";
   } else {
     tempFormat.polyDefaultLetter = theFormat->WeylAlgebraDefaultLetter;
-    tempFormat.polyAlphabeT = theFormat->weylAlgebraLetters;
+    tempFormat.polynomialAlphabet = theFormat->weylAlgebraLetters;
   }
   std::string firstS = this->polynomialPart.toString(theFormat);
   std::string secondS = this->differentialPart.toString(&tempFormat);
@@ -46,7 +46,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
 ) const {
   Vectors<Rational> startBasis, imageBasis;
   startBasis.MakeEiBasis(this->AmbientWeyl->getDimension());
-  this->ActByElement(input, startBasis, imageBasis);
+  this->actByElement(input, startBasis, imageBasis);
   outputMatrix.AssignVectorsToRows(imageBasis);
   outputMatrix.Transpose();
 }
@@ -58,7 +58,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   bool recomputeAmbientRho
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms");
-  this->CheckInitialization();
+  this->checkInitialization();
   HashedList<Vector<Rational> > orbitRho;
   this->truncated = false;
   this->allElements.clear();
@@ -442,7 +442,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   Domain.setSize(numRoots + theDimension);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i = 0; i < theDimension; i ++) {
-    domainRoot.MakeEi(theDimension, i);
+    domainRoot.makeEi(theDimension, i);
     mapOnRootSpaces.actOnVectorColumn(domainRoot, rangeRoot);
     tempElt.MakeHgenerator(domainRoot, *this);
     Domain[numRoots + i] = tempElt;
@@ -463,7 +463,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
       int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
       for (int j = 0; j < theDimension; j ++) {
-        left.MakeEi(theDimension, j);
+        left.makeEi(theDimension, j);
         for (int k = 0; k < 2; k ++, left.Minus()) {
           right = current - left;
           if (this->theWeyl.IsARoot(right)) {
@@ -564,7 +564,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
     current.init(weightSupport.size, weightSupport.size);
     current.makeZero();
     Vector<Rational> tempRoot;
-    tempRoot.MakeEi(theDimension, i);
+    tempRoot.makeEi(theDimension, i);
     for (int j = 0; j<weightSupport.size; j ++)
       current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.theObjects[j]);
   }*/
@@ -603,7 +603,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   tempRange.setSize(numRoots+theDomainDimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < theDomainDimension; i ++) {
-    tempRoot.MakeEi(theDomainDimension, i);
+    tempRoot.makeEi(theDomainDimension, i);
     for (int j = 0; j < 2; j ++, tempRoot.Minus()) {
       int index = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
       tempDomain[index].makeZero();
@@ -642,7 +642,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
     }
   }
   for (int i = 0; i < theDomainDimension; i ++) {
-    tempRoot.MakeEi(theDomainDimension, i);
+    tempRoot.makeEi(theDomainDimension, i);
     int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
     int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(- tempRoot);
     this->theDomain().LieBracket(tempDomain[leftIndex], tempDomain[rightIndex], tempDomain[numRoots + i]);
@@ -713,7 +713,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
     );
     RationalFunction& thePower = input.Powers[i];
     int theIntegralPower;
-    if (!thePower.IsSmallInteger(&theIntegralPower)) {
+    if (!thePower.isSmallInteger(&theIntegralPower)) {
       return false;
     }
     for (int j = 0; j < theIntegralPower; j ++) {
@@ -871,7 +871,7 @@ void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& oth
   }
 }
 
-bool ChevalleyGenerator::CheckInitialization() const {
+bool ChevalleyGenerator::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << global.fatal;
     return false;
@@ -880,7 +880,7 @@ bool ChevalleyGenerator::CheckInitialization() const {
 }
 
 std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
 
@@ -1876,13 +1876,13 @@ bool RationalFunction::IsConstant(Rational* whichConstant) const {
   return true;
 }
 
-bool RationalFunction::IsInteger() const {
-  return this->expressionType == this->typeRational && this->ratValue.IsInteger();
+bool RationalFunction::isInteger() const {
+  return this->expressionType == this->typeRational && this->ratValue.isInteger();
 }
 
-bool RationalFunction::IsSmallInteger(int* whichInteger) const {
+bool RationalFunction::isSmallInteger(int* whichInteger) const {
   return this->expressionType == this->typeRational &&
-  this->ratValue.IsSmallInteger(whichInteger);
+  this->ratValue.isSmallInteger(whichInteger);
 }
 
 
@@ -1926,7 +1926,7 @@ RationalFunction RationalFunction::scaleNormalizeIndex(
   return scale;
 }
 
-bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
+bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
   if (this->theOwner == nullptr) {
     global.fatal << "Use of semisimple Lie algebra without an owner. " << global.fatal;
   }
@@ -1939,7 +1939,7 @@ bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
 void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
   ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs
 ) {
-  this->CheckInitialization();
+  this->checkInitialization();
   theCoeffs.makeZero(this->theOwner->GetNumGenerators());
   for (int i = 0; i < input.size(); i ++) {
     int theIndex = input[i].theGeneratorIndex;
@@ -2752,7 +2752,7 @@ bool RationalFunction::operator<=(const RationalFunction& other) const {
   return other > *this;
 }
 
-void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars) {
+void MonomialP::makeEi(int LetterIndex, int Power, int ExpectedNumVars) {
   this->makeOne(ExpectedNumVars);
   if (Power == 0) {
     return;

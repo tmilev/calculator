@@ -34,7 +34,7 @@ Database::User::User() {
   this->owner = nullptr;
 }
 
-bool Database::CheckInitialization() {
+bool Database::checkInitialization() {
   if (!this->flagInitializedServer) {
     global.fatal << "Database not initialized at a place it should be. " << global.fatal;
   }
@@ -149,7 +149,7 @@ public:
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
   bool InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure);
   bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
-  std::string ToStringDebug();
+  std::string toStringDebug();
   // Abbreviation to get the default database.
   Database::Mongo& getDB() {
     return Database::get().mongoDB;
@@ -237,7 +237,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-std::string MongoQuery::ToStringDebug() {
+std::string MongoQuery::toStringDebug() {
   std::stringstream out;
   out << this->collectionName << ", " << this->findQuery << ", "
   << this->updateQuery << ", " << this->optionsQuery;
@@ -656,7 +656,7 @@ bool Database::FindFromJSONWithOptions(
   query.collectionName = collectionName;
   query.findQuery = findQuery.toString(nullptr);
   query.maxOutputItems = maxOutputItems;
-  global << Logger::blue << "Query input JSON: " << query.ToStringDebug()
+  global << Logger::blue << "Query input JSON: " << query.toStringDebug()
   << ", options: " << options.toJSON().toString()
   << Logger::endL;
   bool result = query.FindMultiple(
@@ -1068,7 +1068,7 @@ QuerySet::QuerySet(const JSData& inputValue) {
   this->value = inputValue;
 }
 
-std::string QuerySet::ToStringDebug() const {
+std::string QuerySet::toStringDebug() const {
   std::stringstream out;
   JSData jsonSetMongo;
   if (!this->ToJSONSetMongo(jsonSetMongo, &out)) {
@@ -1139,7 +1139,7 @@ bool Database::Mongo::UpdateOne(
     }
     global << "Failed to update element found by: "
     << findQuery.toJSON().toString(nullptr)
-    << " with: " << updateQuery.ToStringDebug();
+    << " with: " << updateQuery.toStringDebug();
   }
   return true;
 }

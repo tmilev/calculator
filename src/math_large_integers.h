@@ -39,7 +39,7 @@ public:
   }
   class Test {
     public:
-    static bool All();
+    static bool all();
     static bool SerializationToHex(const LargeIntegerUnsigned& input);
     static bool SerializationToHex();
     static bool Comparisons();
@@ -110,7 +110,7 @@ public:
     int numberMillerRabinRuns,
     std::stringstream* commentsOnFailure
   ) const;
-  void AssignString(const std::string& input);
+  void assignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
   int operator%(unsigned int x);
@@ -184,7 +184,7 @@ public:
   void MultiplyByInt(int x);
   void toString(std::string& output) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;//avoid unused parameter warning, portable
+    (void) theFormat;
     std::string tempS;
     this->toString(tempS);
     return tempS;
@@ -236,7 +236,7 @@ public:
   //bool IsGEQ(LargeInt& x);
   bool CheckForConsistensy();
   void WriteToFile(std::fstream& output);
-  void AssignString(const std::string& input);
+  void assignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
   void ReadFromFile(std::fstream& input);
   void checkConsistency(){}
@@ -395,7 +395,7 @@ class Rational {
 private:
 //The following doesn't compile, when it should.
 //  friend int operator=(int& left, const Rational& right)
-//  { if (!right.IsSmallInteger(&left))
+//  { if (!right.isSmallInteger(&left))
 //      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
 //      << " number is either too large or is not an integer. Namely, the rational number equals " << this->toString()
 //      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
@@ -500,7 +500,7 @@ public:
   void AddInteger(int x);
   void AssignLargeIntUnsigned(const LargeIntegerUnsigned& other);
   void AssignLargeInteger(const LargeInteger& other);
-  void AssignString(const std::string& input);
+  void assignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input);
   static Rational zero();
   static Rational zeroStatic();
@@ -533,15 +533,15 @@ public:
   void MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x);
   void Assign(const Rational& r);
   void AssignInteger(int x);
-  bool IsInteger(LargeInteger* whichInteger = nullptr) const;
+  bool isInteger(LargeInteger* whichInteger = nullptr) const;
   bool IsIntegerFittingInInt(int* whichInt) const {
     LargeInteger theInt;
-    if (!this->IsInteger(&theInt)) {
+    if (!this->isInteger(&theInt)) {
       return false;
     }
     return theInt.IsIntegerFittingInInt(whichInt);
   }
-  bool IsSmallInteger(int* whichInteger = nullptr) const {
+  bool isSmallInteger(int* whichInteger = nullptr) const {
     if (this->extended != nullptr) {
       return false;
     }
@@ -601,7 +601,7 @@ public:
   bool IsEven() const {
     Rational tempRat = *this;
     tempRat /= 2;
-    return tempRat.IsInteger();
+    return tempRat.isInteger();
   }
   inline bool IsEqualToOne() const {
     if (this->extended == nullptr) {
@@ -721,7 +721,7 @@ public:
     this->Assign(right);
   }
   Rational(const std::string& input): numeratorShort(0), denominatorShort(0), extended(nullptr) {
-    this->AssignString(input);
+    this->assignString(input);
   }
   ~Rational() {
     this->FreeExtended();
@@ -858,7 +858,7 @@ public:
   }
   class Test {
   public:
-    static bool All();
+    static bool all();
     static bool TestScale();
   };
 };

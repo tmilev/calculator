@@ -32,7 +32,7 @@ public:
   QuerySet(const JSData& inputValue);
   bool ToJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   bool ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const;
-  std::string ToStringDebug() const;
+  std::string toStringDebug() const;
 };
 
 class QueryResultOptions {
@@ -58,7 +58,7 @@ public:
 
   bool initializeServer();
   bool initializeWorker();
-  bool CheckInitialization();
+  bool checkInitialization();
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
 
   class User {
@@ -360,7 +360,7 @@ public:
   class Test {
   public:
     void SetUp();
-    static bool All();
+    static bool all();
     bool DeleteDatabase();
     bool AdminAccountCreation();
     void TearDown();

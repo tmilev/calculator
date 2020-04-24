@@ -236,7 +236,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
           input.objects.theKeys[i]
         );
       } else {
-        theKey = HtmlRoutines::ConvertURLStringToNormal(input.objects.theKeys[i], false);
+        theKey = HtmlRoutines::convertURLStringToNormal(input.objects.theKeys[i], false);
       }
       output[theKey] = nextItem;
     }
@@ -686,7 +686,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   // Since the password hash is 32 bytes its base64 encoding ends in =
   // which in turn means passwords stored by older version of the calculator
   // have wrong endings.
-  this->actualHashedSaltedPassword = HtmlRoutines::ConvertURLStringToNormal(this->actualHashedSaltedPassword, false);
+  this->actualHashedSaltedPassword = HtmlRoutines::convertURLStringToNormal(this->actualHashedSaltedPassword, false);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.theType == JSData::token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.theList.size; i ++) {
@@ -744,13 +744,13 @@ bool UserCalculatorData::ComputeCourseInfo() {
     // <- warning, the user may not be
     // fully logged-in yet so global.UserDefaultHasAdminRights()
     // does not work right.
-    this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("studentSection"), false);
+    this->sectionComputed = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("studentSection"), false);
   } else {
     this->sectionComputed = this->sectionInDB;
   }
   if (isAdmin && global.GetWebInput(WebAPI::problem::courseHome) != "") {
     this->courseComputed =
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+    HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
   } else {
     this->courseComputed = this->courseInDB;
   }
@@ -780,19 +780,19 @@ std::string ProblemData::StorE(){
     if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
     }
-    out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
+    out << HtmlRoutines::convertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions =" << currentA.numCorrectSubmissions
     << "&numSubmissions =" << currentA.numSubmissions
-    << "&firstCorrectAnswer =" << HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
-    out << HtmlRoutines::ConvertStringToURLString(questionsStream.str(), false);
+    << "&firstCorrectAnswer =" << HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    out << HtmlRoutines::convertStringToURLString(questionsStream.str(), false);
   }
   return out.str();
 }
 
-JSData ProblemData::StoreJSON() const {
-  MacroRegisterFunctionWithName("ProblemData::StoreJSON");
+JSData ProblemData::storeJSON() const {
+  MacroRegisterFunctionWithName("ProblemData::storeJSON");
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
@@ -803,8 +803,8 @@ JSData ProblemData::StoreJSON() const {
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
-    currentAnswerJSON["firstCorrectAnswer"] = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
-    result[HtmlRoutines::ConvertStringToURLString(currentA.answerId, false)] = currentAnswerJSON;
+    currentAnswerJSON["firstCorrectAnswer"] = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    result[HtmlRoutines::convertStringToURLString(currentA.answerId, false)] = currentAnswerJSON;
   }
   return result;
 }
@@ -868,7 +868,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   now.AssignLocalTime();
   std::stringstream out;
   List<unsigned char> authenticationToken;
-  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(authenticationToken, 20);
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(authenticationToken, 20);
   this->actualAuthenticationToken = Crypto::ConvertListUnsignedCharsToBase64(authenticationToken, true);
   QueryExact findUser(
     DatabaseStrings::tableUsers,
@@ -1014,9 +1014,9 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
     if (theMap.theKeys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    this->AddEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.lastObject();
-    std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
+    std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.theValues[i], false);
     result = HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
       commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1033,8 +1033,8 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
     }
     if (currentQuestionMap.contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
-      currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
+      currentA.firstCorrectAnswerClean = HtmlRoutines::convertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
+      currentA.firstCorrectAnswerURLed = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }
@@ -1063,7 +1063,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
     if (inputData.objects.theKeys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
-    this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
+    this->AddEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(inputData.objects.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.lastObject();
     JSData currentQuestionJSON = inputData.objects.theValues[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
@@ -1076,8 +1076,8 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
     }
     if (currentQuestionJSON.objects.contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").theString;
-      currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
-      currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
+      currentA.firstCorrectAnswerClean = HtmlRoutines::convertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
+      currentA.firstCorrectAnswerURLed = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly,
       //say, by an older version of the calculator
     }
@@ -1098,11 +1098,11 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (!reader.LoadFromOldFormat(HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
+    if (!reader.LoadFromOldFormat(HtmlRoutines::convertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
     if (probNameNoWhiteSpace == "") {
       continue;
     }
@@ -1147,7 +1147,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   TimeWrapper now;
   now.AssignLocalTime();
   List<unsigned char> activationToken;
-  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
   this->actualActivationToken = Crypto::ConvertListUnsignedCharsToBase64(activationToken, true);
   QueryExact findUserQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   QuerySet updateUser;
@@ -1198,7 +1198,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
 
   LargeInteger numActivationsThisEmail = 0;
   if (emailCountForThisEmail != "") {
-    numActivationsThisEmail.AssignString(emailCountForThisEmail);
+    numActivationsThisEmail.assignString(emailCountForThisEmail);
   }
   numActivationsThisEmail ++;
   TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
@@ -1290,7 +1290,7 @@ bool UserCalculator::StoreProblemData(
   const ProblemData& problem = this->theProblemData.getValueNoFail(fileNamE);
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
-  update.value[fileNamE] = problem.StoreJSON();
+  update.value[fileNamE] = problem.storeJSON();
   return Database::get().UpdateOneFromSome(
     this->GetFindMeFromUserNameQuery(), update, commentsOnFailure
   );
@@ -1378,7 +1378,7 @@ bool Database::User::AddUsersFromEmails(
         }
       }
     } else {
-      currentUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(thePasswords[i], false);
+      currentUser.enteredPassword = HtmlRoutines::convertStringToURLString(thePasswords[i], false);
       //<-Passwords are ONE-LAYER url-encoded
       //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
       //<-Incoming pluses must be re-coded as spaces (%20).
@@ -1466,7 +1466,7 @@ bool EmailRoutines::SendEmailWithMailGun(
     hostnameToSendEmailFrom = StringRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
     if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
-      << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false);
+      << HtmlRoutines::convertStringToURLString(hostnameToSendEmailFrom, false);
     }
   }
   if (mailGunKey.size() > 0) {
@@ -1599,7 +1599,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   }
   tokenIsGood = true;
   JSONWebToken theToken;
-  if (!theToken.AssignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
+  if (!theToken.assignString(userWrapper.enteredGoogleToken, commentsOnFailure)) {
     return false;
   }
   JSData theData;
@@ -1810,6 +1810,6 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << global.DisplayNameExecutableApp
-  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.toString(nullptr), false);
+  << "#" << HtmlRoutines::convertStringToURLString(theJS.toString(nullptr), false);
   return out.str();
 }

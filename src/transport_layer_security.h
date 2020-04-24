@@ -125,8 +125,8 @@ public:
   int id;
   std::string name;
   TransportLayerSecurityServer* owner;
-  bool ComputeName();
-  bool CheckInitialization() const;
+  bool computeName();
+  bool checkInitialization() const;
   CipherSuiteSpecification();
   CipherSuiteSpecification(TransportLayerSecurityServer* owner, int inputType);
   std::string toString() const;
@@ -224,7 +224,7 @@ public:
   std::string Name();
   SSLHelloExtension();
   JSData toJSON();
-  bool CheckInitialization();
+  bool checkInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
   bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
   bool ProcessServerName(std::stringstream* commentsOnError);
@@ -315,7 +315,7 @@ public:
   static std::string GetType(unsigned char theToken);
   void resetExceptOwner();
   TransportLayerSecurityServer& GetServer() const;
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   Logger::StringHighligher getStringHighlighter();
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
@@ -388,7 +388,7 @@ public:
   class Test {
   public:
     static std::string sampleClientHelloHex;
-    static bool All();
+    static bool all();
     static bool Serialization();
     static bool SerializationClientHello(TransportLayerSecurityServer& testServer);
   };
@@ -401,7 +401,7 @@ public:
   TransportLayerSecurityServer* owner;
   SSLRecord();
   void resetExceptOwner();
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToBytes() const;

@@ -50,42 +50,42 @@ void Test::Run() {
   global << "Testing ..." << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->ShouldTest(Test::Suites::database)) {
-    Database::Test::All();
+    Database::Test::all();
   }
   if (this->flagTestAll) {
-    JSData::Test::All();
-    Expression::Test::All();
-    LargeIntegerUnsigned::Test::All();
-    Rational::Test::All();
+    JSData::Test::all();
+    Expression::Test::all();
+    LargeIntegerUnsigned::Test::all();
+    Rational::Test::all();
     ElementZmodP::Test::all();
     RationalFunction::Test::all();
   }
   if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
     Crypto::Random::initializeRandomBytes();
-    PrivateKeyRSA::Test::All();
-    Crypto::Test::All();
-    X509Certificate::Test::All();
-    SSLRecord::Test::All();
+    PrivateKeyRSA::Test::all();
+    Crypto::Test::all();
+    X509Certificate::Test::all();
+    SSLRecord::Test::all();
   }
   if (this->ShouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::all();
     Polynomial<Rational>::Test::all();
   }
   if (this->ShouldTest(Test::Suites::calculator)) {
-    Calculator::Test::All();
+    Calculator::Test::all();
   }
   if (this->ShouldTest(Test::Suites::problems)) {
-    CalculatorHTML::Test::All();
+    CalculatorHTML::Test::all();
   }
   if (
     this->ShouldTest(Test::Suites::topicLists) ||
     this->ShouldTest(Test::Suites::topiclists)
   ) {
-    TopicElementParser::Test::All();
+    TopicElementParser::Test::all();
   }
   if (this->ShouldTest(Test::Suites::build)) {
-    GlobalVariables::Test::All();
+    GlobalVariables::Test::all();
   }
   global << Logger::green << "All tests passed. " << Logger::endL;
 }

@@ -438,7 +438,7 @@ JSData WebWorker::GetDatabaseJSON() {
   }
   if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     std::string operation = global.GetWebInput(WebAPI::databaseParameters::operation);
-    std::string labels = HtmlRoutines::ConvertURLStringToNormal(
+    std::string labels = HtmlRoutines::convertURLStringToNormal(
       global.GetWebInput(WebAPI::databaseParameters::labels), false
     );
     if (operation == WebAPI::databaseParameters::fetch) {
@@ -463,7 +463,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
   }
   std::stringstream commentsStream;
   std::string inputEncoded = global.GetWebInput("item");
-  std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
+  std::string inputString = HtmlRoutines::convertURLStringToNormal(inputEncoded, false);
   JSData inputParsed;
   if (!inputParsed.readstring(inputString, &commentsStream)) {
     commentsStream << "Failed to parse input string. ";
@@ -554,23 +554,23 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
 
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   UserCalculatorData& theUser = global.userDefault;
-  theUser.username = HtmlRoutines::ConvertURLStringToNormal(
+  theUser.username = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput("username"), true
   );
   if (theUser.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   }
-  theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal(
+  theUser.enteredAuthenticationToken = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput("authenticationToken"), false
   );
-  theUser.enteredGoogleToken = HtmlRoutines::ConvertURLStringToNormal(
+  theUser.enteredGoogleToken = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput("googleToken"), false
   );
-  theUser.enteredActivationToken = HtmlRoutines::ConvertURLStringToNormal(
+  theUser.enteredActivationToken = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput("activationToken"), false
   );
-  theUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("password"), true), false
+  theUser.enteredPassword = HtmlRoutines::convertStringToURLString(
+    HtmlRoutines::convertURLStringToNormal(global.GetWebInput("password"), true), false
   );
   // <-Passwords are ONE-LAYER url-encoded
   // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
@@ -666,7 +666,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   }
   global.CookiesToSetUsingHeaders.SetKeyValue(
     "username",
-    HtmlRoutines::ConvertStringToURLString(theUser.username, false)
+    HtmlRoutines::convertStringToURLString(theUser.username, false)
     // <-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
   if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
@@ -674,12 +674,12 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     // to give the user the correct authentication token.
     global.CookiesToSetUsingHeaders.SetKeyValue(
       DatabaseStrings::labelAuthenticationToken,
-      HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+      HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
       // <-URL-encoded fashion, NO PLUSES.
     );
     global.SetWebInpuT(
       DatabaseStrings::labelAuthenticationToken,
-      HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+      HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
     );
   } else {
     global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
@@ -887,7 +887,7 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   }
   global << Logger::red << "Unknown request. " << Logger::endL;
   global << Logger::blue << "Message head length: " << this->messageHead.size() << Logger::endL;
-  std::string messageHeadHexed = Crypto::ConvertStringToHex(this->messageHead, 100, false);
+  std::string messageHeadHexed = Crypto::convertStringToHex(this->messageHead, 100, false);
   global << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << Logger::endL;
   global << Logger::orange << "Message body length: " << this->messageBody.size() << ". " << Logger::endL;
   global << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << Logger::endL;
@@ -1260,7 +1260,7 @@ int WebWorker::ProcessFolder() {
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
+    currentStream << "<a href=\"" << HtmlRoutines::convertStringToURLString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -1561,9 +1561,9 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPagePartOne");
   std::stringstream out;
   std::string claimedActivationToken =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("activationToken"), false);
+  HtmlRoutines::convertURLStringToNormal(global.GetWebInput("activationToken"), false);
   std::string claimedEmail =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
+  HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
   out << "<input type =\"hidden\" id =\"activationToken\" value =\""
   << claimedActivationToken << "\">";
   if (claimedActivationToken == "") {
@@ -1737,10 +1737,10 @@ std::string WebAPIResponse::ModifyProblemReport() {
     return "<b>Modifying problems allowed only for "
     "logged-in admins under ssl connection. </b>";
   }
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(
+  std::string mainInput = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput(WebAPI::problem::fileContent), false
   );
-  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(
+  std::string fileName = HtmlRoutines::convertURLStringToNormal(
     global.GetWebInput(WebAPI::problem::fileName), false
   );
   std::stringstream commentsOnFailure;
@@ -1846,7 +1846,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   }
   if (argumentProcessingFailureComments.str() != "") {
     redirectedAddress << "error="
-    << HtmlRoutines::ConvertStringToURLString(argumentProcessingFailureComments.str(), false)
+    << HtmlRoutines::convertStringToURLString(argumentProcessingFailureComments.str(), false)
     << "&";
   }
   std::stringstream headerStream;
@@ -2094,7 +2094,7 @@ int WebWorker::ServeClient() {
   }
   if (global.UserDefaultHasAdminRights() && global.flagLoggedIn) {
     if (global.GetWebInput("spoofHostName") != "") {
-      global.hostNoPort = HtmlRoutines::ConvertURLStringToNormal(
+      global.hostNoPort = HtmlRoutines::convertURLStringToNormal(
         global.GetWebInput("spoofHostName"), false
       );
       global.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", global.hostNoPort);
@@ -2110,7 +2110,7 @@ int WebWorker::ServeClient() {
 
 int WebWorker::ProcessFolderOrFile() {
   MacroRegisterFunctionWithName("WebWorker::ProcessFolderOrFile");
-  this->VirtualFileName = HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
+  this->VirtualFileName = HtmlRoutines::convertURLStringToNormal(this->addressComputed, true);
   this->SanitizeVirtualFileName();
   std::stringstream commentsOnFailure;
   if (
@@ -2784,7 +2784,7 @@ void segfault_sigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
   // <- This signal should never happen in
   // <- server, so even if racy, we take the risk of a hang.
   // <- Racy-ness in child process does not bother us: hanged children are still fine.
-  (void) signal; //avoid unused parameter warning, portable.
+  (void) signal;
   (void) arg;
   global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal;
   exit(0);
@@ -3348,7 +3348,7 @@ int WebServer::Run() {
   global.calculator().getElement().WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
   global.initModifiableDatabaseFields();
-  HtmlRoutines::LoadStrings();
+  HtmlRoutines::loadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
   global.calculator().getElement().flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {

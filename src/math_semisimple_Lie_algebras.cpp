@@ -170,12 +170,12 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out << "<h1>Lie algebra " << this->ToStringLieAlgebraNameFullHTML() << "</h1>";
-  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().toString() << ".<br>";
+  out << "<br>Weyl group size: " << theWeyl.theGroup.getSize().toString() << ".<br>";
   if (!Verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
     tempStream << "PrintSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
-    out << HtmlRoutines::GetCalculatorComputationAnchor(tempStream.str()) << "<br>";
+    out << HtmlRoutines::getCalculatorComputationAnchor(tempStream.str()) << "<br>";
   } else {
     DrawingVariables theDV;
     theWeyl.drawRootSystem(theDV, true, true, nullptr, true, nullptr);
@@ -515,7 +515,7 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
       }
       if (leftWeight.isEqualToZero() && !rightWeight.isEqualToZero()) {
         this->theLiebrackets.elements[i][j].MakeGenerator(j, *this);
-        hRoot.MakeEi(theRank, i - numPosRoots);
+        hRoot.makeEi(theRank, i - numPosRoots);
         this->theLiebrackets.elements[i][j] *= Vector<Rational>::scalarProduct(
           hRoot, rightWeight, this->theWeyl.cartanSymmetric
         );
@@ -523,7 +523,7 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
       }
       if (!leftWeight.isEqualToZero() && rightWeight.isEqualToZero()) {
         this->theLiebrackets.elements[i][j].MakeGenerator(i, *this);
-        hRoot.MakeEi(theRank, j - numPosRoots);
+        hRoot.makeEi(theRank, j - numPosRoots);
         this->theLiebrackets.elements[i][j] *= - Vector<Rational>::scalarProduct(
           hRoot, leftWeight, this->theWeyl.cartanSymmetric
         );

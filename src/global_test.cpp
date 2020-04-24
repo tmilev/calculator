@@ -3,7 +3,7 @@
 
 #include "general_logging_global_variables.h"
 
-bool GlobalVariables::Test::All() {
+bool GlobalVariables::Test::all() {
   GlobalVariables::Test::Builds();
   return true;
 }

@@ -11,7 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
@@ -119,7 +119,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
     return false;
   }
   int upperBound = - 1;
-  if (!input[1].IsSmallInteger(&upperBound)) {
+  if (!input[1].isSmallInteger(&upperBound)) {
     return theCommands << "<hr>Failed to extract upper bound "
     << "for the vector space dimension from the first argument. ";
   }
@@ -197,7 +197,7 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
     return false;
   }
   std::string binaryString;
-  if (!input[1].IsOfType(&binaryString)) {
+  if (!input[1].isOfType(&binaryString)) {
     return false;
   }
   X509Certificate theCertificate;
@@ -222,7 +222,7 @@ bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   TransportLayerSecurityServer testServer;
@@ -295,7 +295,7 @@ bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
     return  false;
   }
   std::string privateKeyString;
-  if (!input[1].IsOfType(&privateKeyString)) {
+  if (!input[1].isOfType(&privateKeyString)) {
     return false;
   }
   List<unsigned char> privateKeyBytes;
@@ -416,7 +416,7 @@ bool CalculatorFunctions::functionHashString(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionHashString");
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
+  if (!input.isOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
@@ -480,7 +480,7 @@ bool CalculatorFunctions::innerConvertBase64ToString(
     return false;
   }
   std::string inputString, result;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     inputString = input[1].toString();
   }
   if (!Crypto::ConvertBase64ToString(inputString, result, &theCommands.comments)) {
@@ -497,7 +497,7 @@ bool CalculatorFunctions::innerNISTEllipticCurveOrder(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return theCommands
     << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
@@ -524,7 +524,7 @@ bool CalculatorFunctions::innerNISTEllipticCurveGenerator(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return theCommands
     << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
@@ -551,7 +551,7 @@ bool CalculatorFunctions::innerStringDifference(
     return false;
   }
   std::string left, right;
-  if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right)) {
+  if (!input[1].isOfType(&left) || !input[2].isOfType(&right)) {
     return false;
   }
   return output.assignValue(
@@ -568,11 +568,11 @@ bool CalculatorFunctions::innerSliceString(Calculator& theCommands, const Expres
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType<std::string>(&inputString)) {
+  if (!input[1].isOfType<std::string>(&inputString)) {
     return false;
   }
   int leftIndex = 0;
-  if (!input[2].IsSmallInteger(&leftIndex)) {
+  if (!input[2].isSmallInteger(&leftIndex)) {
     return theCommands << "Failed to convert slice input " << input[2] << " to small integer. ";
   }
   if (leftIndex < 0) {
@@ -585,7 +585,7 @@ bool CalculatorFunctions::innerSliceString(Calculator& theCommands, const Expres
     return output.assignValue(inputString.substr(static_cast<unsigned>(leftIndex)), theCommands);
   }
   int rightIndex = 0;
-  if (!input[3].IsSmallInteger(&rightIndex)) {
+  if (!input[3].isSmallInteger(&rightIndex)) {
     return theCommands << "Failed to convert slice input " << input[3] << " to small integer. ";
   }
   if (rightIndex < 0) {
@@ -609,7 +609,7 @@ bool CalculatorFunctions::innerConvertIntegerUnsignedToBase58(
     return false;
   }
   LargeInteger theInt;
-  if (!input[1].IsInteger(&theInt)) {
+  if (!input[1].isInteger(&theInt)) {
     return false;
   }
   if (theInt < 0) {
@@ -628,7 +628,7 @@ bool CalculatorFunctions::innerAppendDoubleSha256Check(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   std::string outputString;
@@ -644,10 +644,10 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
     return theCommands << "AES decrypt function expects two arguments: key and plain text. ";
   }
   std::string text, key;
-  if (!input[1].IsOfType<std::string>(&key)) {
+  if (!input[1].isOfType<std::string>(&key)) {
     return false;
   }
-  if (!input[2].IsOfType<std::string>(&text)) {
+  if (!input[2].isOfType<std::string>(&text)) {
     return false;
   }
   std::string cipherText;
@@ -669,10 +669,10 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
     return theCommands << "AES function expects two arguments: key and plain text. ";
   }
   std::string text, key;
-  if (!input[1].IsOfType<std::string>(&key)) {
+  if (!input[1].isOfType<std::string>(&key)) {
     return false;
   }
-  if (!input[2].IsOfType<std::string>(&text)) {
+  if (!input[2].isOfType<std::string>(&text)) {
     return false;
   }
   std::string cipherText;
@@ -694,7 +694,7 @@ bool CalculatorFunctions::innerConvertBase58ToHex(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   std::string outputString;
@@ -714,13 +714,13 @@ bool CalculatorFunctions::innerConvertHexToBase58(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   LargeIntegerUnsigned outputInteger;
   std::string outputString;
   int numLeadingZeroBytes = 0;
-  if (!Crypto::ConvertHexToInteger(inputString, outputInteger, numLeadingZeroBytes)) {
+  if (!Crypto::convertHexToInteger(inputString, outputInteger, numLeadingZeroBytes)) {
     return theCommands << "Failed to convert " << inputString << " from hex to integer. ";
   }
   Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString, numLeadingZeroBytes);
@@ -735,10 +735,10 @@ bool CalculatorFunctions::innerConvertStringToHex(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
-  return output.assignValue(Crypto::ConvertStringToHex(inputString, 0, false), theCommands);
+  return output.assignValue(Crypto::convertStringToHex(inputString, 0, false), theCommands);
 }
 
 bool CalculatorFunctions::innerCharToBase64(
@@ -749,7 +749,7 @@ bool CalculatorFunctions::innerCharToBase64(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
@@ -765,7 +765,7 @@ bool CalculatorFunctions::innerBase64ToCharToBase64Test(
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
@@ -791,7 +791,7 @@ bool CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive(
   }
   const Expression& argument = input[1];
   std::string theString;
-  if (!argument.IsOfType<std::string>(&theString)) {
+  if (!argument.isOfType<std::string>(&theString)) {
     return false;
   }
   return output.assignValue(HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
@@ -806,7 +806,7 @@ bool CalculatorFunctions::innerConvertElementZmodPToInteger(
   }
   const Expression& argument = input[1];
   ElementZmodP theElement;
-  if (!argument.IsOfType<ElementZmodP>(&theElement)) {
+  if (!argument.isOfType<ElementZmodP>(&theElement)) {
     return false;
   }
   return output.assignValue(theElement.theValue, theCommands);
@@ -821,10 +821,10 @@ bool CalculatorFunctions::innerUrlStringToNormalString(
   }
   const Expression& argument = input[1];
   std::string theString;
-  if (!argument.IsOfType<std::string>(&theString)) {
+  if (!argument.isOfType<std::string>(&theString)) {
     return false;
   }
-  return output.assignValue(HtmlRoutines::ConvertURLStringToNormal(theString, false), theCommands);
+  return output.assignValue(HtmlRoutines::convertURLStringToNormal(theString, false), theCommands);
 }
 
 bool CalculatorFunctions::innerStringToURL(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -834,10 +834,10 @@ bool CalculatorFunctions::innerStringToURL(Calculator& theCommands, const Expres
   }
   const Expression& argument = input[1];
   std::string theString;
-  if (!argument.IsOfType<std::string>(&theString)) {
+  if (!argument.isOfType<std::string>(&theString)) {
     return false;
   }
-  return output.assignValue(HtmlRoutines::ConvertStringToURLString(theString, false), theCommands);
+  return output.assignValue(HtmlRoutines::convertStringToURLString(theString, false), theCommands);
 }
 
 bool CalculatorFunctions::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -847,7 +847,7 @@ bool CalculatorFunctions::innerStringToAtom(Calculator& theCommands, const Expre
   }
   const Expression& argument = input[1];
   std::string theString;
-  if (!argument.IsOfType(&theString)) {
+  if (!argument.isOfType(&theString)) {
     return false;
   }
   return output.makeAtom(theString, theCommands);
@@ -893,12 +893,12 @@ bool CalculatorFunctions::innerFourierTransformEWA(
     return false;
   }
   const Expression& argument = input[1];
-  if (!argument.IsOfType<ElementWeylAlgebra<Rational> >()) {
+  if (!argument.isOfType<ElementWeylAlgebra<Rational> >()) {
     return false;
   }
   ElementWeylAlgebra<Rational> theElt;
   argument.getValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
-  return output.assignValueWithContext(theElt, argument.GetContext(), theCommands);
+  return output.assignValueWithContext(theElt, argument.getContext(), theCommands);
 }
 
 bool CalculatorFunctions::innerCasimirWRTlevi(
@@ -956,7 +956,7 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
     return false;
   }
   double theArgument;
-  if (!input[1].EvaluatesToDouble(&theArgument)) {
+  if (!input[1].evaluatesToDouble(&theArgument)) {
     if (input[1].IsOperationGiven(theCommands.opE())) {
       return output.assignValue(Rational(1), theCommands);
     }
@@ -970,7 +970,7 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
   }
   theArgument *= - 1;
   Expression iE, ipiE, piE, lnPart;
-  iE.MakeSqrt(theCommands, Rational(- 1), 2);
+  iE.makeSqrt(theCommands, Rational(- 1), 2);
   piE.makeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
   lnPart.assignValue(FloatingPoint::Log(theArgument), theCommands);
@@ -1018,7 +1018,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
     return false;
   }
   double theArgument;
-  if (!argument.EvaluatesToDouble(&theArgument)) {
+  if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.assignValue(FloatingPoint::Arctan(theArgument), theCommands);
@@ -1034,7 +1034,7 @@ bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression&
   }
   const Expression& argument = input[1];
   double doubleArgument;
-  if (!argument.EvaluatesToDouble(&doubleArgument)) {
+  if (!argument.evaluatesToDouble(&doubleArgument)) {
     return false;
   }
   return output.assignValue(FloatingPoint::Arccos(doubleArgument), theCommands);
@@ -1049,7 +1049,7 @@ bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression&
     return false;
   }
   double theArgument;
-  if (!input[1].EvaluatesToDouble(&theArgument)) {
+  if (!input[1].evaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.assignValue(FloatingPoint::Arcsin(theArgument), theCommands);
@@ -1062,14 +1062,14 @@ bool CalculatorFunctions::innerAbs(Calculator& theCommands, const Expression& in
   }
   const Expression& argument = input[1];
   Rational theRat;
-  if (argument.IsRational(&theRat)) {
+  if (argument.isRational(&theRat)) {
     if (theRat < 0) {
       return output.assignValue(- theRat, theCommands);
     }
     return output.assignValue(theRat, theCommands);
   }
   double theDouble = 0;
-  if (argument.EvaluatesToDouble(&theDouble)) {
+  if (argument.evaluatesToDouble(&theDouble)) {
     if (theDouble < 0) {
       Expression moneE;
       moneE.assignValue(- 1, theCommands);
@@ -1098,11 +1098,11 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
   Rational piProportion;
   if (argument.startsWith(theCommands.opTimes(), 3)) {
     if (argument[2].IsOperationGiven(theCommands.opPi())) {
-      if (argument[1].IsOfType<Rational>(&piProportion)) {
+      if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
         if (algOutput.AssignSinRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
-          if (algOutput.IsRational(&ratOutput)) {
+          if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, theCommands);
           }
           return output.assignValue(algOutput, theCommands);
@@ -1114,7 +1114,7 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
     return false;
   }
   double theArgument = 0;
-  if (!argument.EvaluatesToDouble(&theArgument)) {
+  if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.assignValue(FloatingPoint::Sin(theArgument), theCommands);
@@ -1135,11 +1135,11 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
   Rational piProportion;
   if (argument.startsWith(theCommands.opTimes(), 3)) {
     if (argument[2].IsOperationGiven(theCommands.opPi())) {
-      if (argument[1].IsOfType<Rational>(&piProportion)) {
+      if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
         if (algOutput.AssignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
-          if (algOutput.IsRational(&ratOutput)) {
+          if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, theCommands);
           }
           return output.assignValue(algOutput, theCommands);
@@ -1151,7 +1151,7 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
     return false;
   }
   double theArgument = 0;
-  if (!argument.EvaluatesToDouble(&theArgument)) {
+  if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.assignValue(FloatingPoint::Cos(theArgument), theCommands );
@@ -1259,7 +1259,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& theCommands, const Expr
         currentListMultiplicands.addOnTop(theSummands[i][j]);
       }
     }
-    currentMultiplicand.MakeProducT(theCommands, currentListMultiplicands);
+    currentMultiplicand.makeProduct(theCommands, currentListMultiplicands);
     survivingSummands.addOnTop(currentMultiplicand);
   }
   return output.makeSum(theCommands, survivingSummands);
@@ -1272,7 +1272,7 @@ bool CalculatorFunctions::innerChildExpression(Calculator& theCommands, const Ex
     return false;
   }
   int theIndex = 0;
-  if (!input[2].IsSmallInteger(&theIndex)) {
+  if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   theIndex --;
@@ -1313,12 +1313,12 @@ bool CalculatorFunctions::innerDereferenceSequenceOrMatrix(
   }
   if (
     !input[1].startsWith(theCommands.opSequence()) &&
-    !input[1].IsMatrix()
+    !input[1].isMatrix()
   ) {
     return false;
   }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex)) {
+  if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   if (theIndex > 0 && theIndex < input[1].size()) {
@@ -1340,7 +1340,7 @@ bool CalculatorFunctions::innerDereferenceSequenceStatements(
     return false;
   }
   int theIndex;
-  if (!input[2].IsSmallInteger(&theIndex)) {
+  if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   if (theIndex > 0 && theIndex < input[1].size()) {
@@ -1401,9 +1401,9 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic = thePolysRational;
   //int numVars = theContext.GetNumContextVariables();
-  theComputation.MaxNumGBComputations = upperLimit;
+  theComputation.maximumPolynomialComputations = upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
-  theComputation.thePolynomialOrder.theMonOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  theComputation.thePolynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = theComputation.theFormat;
@@ -1437,7 +1437,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   }
   const Expression& argument = input[1];
   AlgebraicNumber theNumber;
-  if (!argument.IsOfType(&theNumber)) {
+  if (!argument.isOfType(&theNumber)) {
     return theCommands << "Failed to convert "
     << argument.toString() << " to algebraic number. ";
   }
@@ -1474,7 +1474,7 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
     << input.toString() << " to polynomial. ";
   }
   WithContext<Polynomial<AlgebraicNumber> > polynomial;
-  if (!polynomialExpression.IsOfTypeWithContext(&polynomial)) {
+  if (!polynomialExpression.isOfTypeWithContext(&polynomial)) {
     return theCommands << "<hr>Failed to convert " << input.toString()
     << " to polynomial, instead got " << polynomialExpression.toString();
   }
@@ -1486,7 +1486,7 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
   }
   AlgebraicNumber theAN;
   std::stringstream commentsOnFailure;
-  if (!theAN.ConstructFromMinPoly(
+  if (!theAN.constructFromMinimalPolynomial(
     polynomial.content,
     theCommands.theObjectContainer.theAlgebraicClosure,
     &commentsOnFailure
@@ -1526,7 +1526,7 @@ bool CalculatorFunctions::innerConstantFunction(Calculator& theCommands, const E
   if (!input.isListNElements()) {
     return false;
   }
-  if (!input[0].IsConstantNumber()) {
+  if (!input[0].isConstantNumber()) {
     return false;
   }
   output = input[0];
@@ -1810,7 +1810,7 @@ bool IntegralRFComputation::IntegrateRF() {
       }
       currentIntegrand = currentNum;
       currentIntegrand /= currentDen;
-      currentIntegralNoCoeff.MakeIntegral(
+      currentIntegralNoCoeff.makeIntegral(
         *this->owner,
         this->integrationSetE,
         currentIntegrand,
@@ -1835,7 +1835,7 @@ bool IntegralRFComputation::IntegrateRF() {
       << " to expression. This shouldn't happen. ";
       return false;
     }
-    currentIntegralWithCoeff.MakeIntegral(
+    currentIntegralWithCoeff.makeIntegral(
       *this->owner,
       this->integrationSetE,
       currentIntegrand,
@@ -1857,7 +1857,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
   int varCounter = 0;
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
+    this->theDenominatorFactorsWithMults.coefficients[i].isSmallInteger(&tempSize);
     for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       rfStream << "\\frac{";
       if (this->theDenominatorFactorsWithMults[i].totalDegree() > 1) {
@@ -1869,7 +1869,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
         varNameStream << "A_{" << varCounter << "} ";
         rfStream << varNameStream.str();
         polyStream << varNameStream.str();
-        this->currentFormaT.polyAlphabeT.addOnTop(varNameStream.str());
+        this->currentFormaT.polynomialAlphabet.addOnTop(varNameStream.str());
         if (j > 0) {
           rfStream << "x";
           polyStream << "x";
@@ -1935,14 +1935,14 @@ void IntegralRFComputation::PrepareNumerators() {
   this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
+    this->theDenominatorFactorsWithMults.coefficients[i].isSmallInteger(&tempSize);
     this->theNumerators[i].setSize(tempSize);
     for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       currentSummand.makeZero();
       this->theNumerators[i][k].makeZero();
       for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
         this->NumberOfSystemVariables ++;
-        currentMon.MakeEi(this->NumberOfSystemVariables);
+        currentMon.makeEi(this->NumberOfSystemVariables);
         currentMon.setVariable(0, j);
         this->theNumerators[i][k].addMonomial(currentMon, 1);
         currentSummand.addMonomial(currentMon, 1);
@@ -2036,7 +2036,7 @@ void IntegralRFComputation::PrepareDenominatorFactors() {
 bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->checkConsistency();
-  this->context = this->inpuTE.GetContext();
+  this->context = this->inpuTE.getContext();
   this->context.getFormat(this->currentFormaT);
   if (
     this->theRF.minimalNumberOfVariables() < 1 ||
@@ -2109,7 +2109,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     theGB.theBasiS.setSize(1);
     theGB.theBasiS[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
-    theGB.thePolynomialOrder.theMonOrder = monomialOrder;
+    theGB.thePolynomialOrder.monomialOrder = monomialOrder;
     theGB.initializeForDivision(theGB.theBasiS);
     Polynomial<Rational> theNumCopy = this->theNum;
     theGB.RemainderDivisionByBasis(theNumCopy, &theGB.remainderDivision, - 1);
@@ -2243,7 +2243,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   IntegralRFComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::functionRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.IsOfType<RationalFunction>();
+    isGood = theComputation.inpuTE.isOfType<RationalFunction>();
   }
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
@@ -2265,7 +2265,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
     << "while splitting "
     << input.toString() << " into partial fractions. ";
   }
-  return output.MakeSequence(theCommands, &theComputation.thePFSummands);
+  return output.makeSequence(theCommands, &theComputation.thePFSummands);
 }
 
 bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
@@ -2275,7 +2275,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   IntegralRFComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::innerRationalFunctioN(theCommands, input, theComputation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.IsOfType<RationalFunction>();
+    isGood = theComputation.inpuTE.isOfType<RationalFunction>();
   }
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
@@ -2331,7 +2331,7 @@ bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
   if (!input[0].startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (!input[0][1].IsConstantNumber()) {
+  if (!input[0][1].isConstantNumber()) {
     return false;
   }
   Expression functionActsOnE;
@@ -2354,7 +2354,7 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   if (!theEWAE.IsListStartingWithAtom(theCommands.opElementWeylAlgebra())) {
     return false;
   }
-  if (!theArgument.IsBuiltInTypE()) {
+  if (!theArgument.isBuiltInType()) {
     return false;
   }
   if (!theEWAE.MergeContexts(theEWAE, theArgument)) {
@@ -2383,7 +2383,7 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
     << " (possibly the weyl algebra element has non-integral exponents)";
     return output.makeError(out.str(), theCommands);
   }
-  return output.assignValueWithContext(theArgumentPoly, theEWAE.GetContext(), theCommands);
+  return output.assignValueWithContext(theArgumentPoly, theEWAE.getContext(), theCommands);
 }
 
 bool CalculatorFunctions::innerFormatCPPSourceCode(
@@ -2393,7 +2393,7 @@ bool CalculatorFunctions::innerFormatCPPSourceCode(
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
-  if (!input.IsOfType(&fileName)) {
+  if (!input.isOfType(&fileName)) {
     return false;
   }
   std::stringstream report;
@@ -2409,7 +2409,7 @@ bool CalculatorFunctions::innerFormatCPPDirectory(
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
-  if (!input.IsOfType(&fileName)) {
+  if (!input.isOfType(&fileName)) {
     return false;
   }
   std::stringstream report;
@@ -2445,7 +2445,7 @@ bool CalculatorFunctions::innerIntersection(Calculator& theCommands, const Expre
   for (int i = 1; i < theListsToBeIntersected.size; i ++) {
     outputList.intersectWith(theListsToBeIntersected[i], outputList);
   }
-  return output.MakeSequence(theCommands, &outputList);
+  return output.makeSequence(theCommands, &outputList);
 }
 
 
@@ -2520,7 +2520,7 @@ bool CalculatorFunctions::innerCrossProduct(Calculator& theCommands, const Expre
   outputSequence[0] = leftE[2] * rightE[3] - leftE[3] * rightE[2];
   outputSequence[1] = leftE[3] * rightE[1] - leftE[1] * rightE[3];
   outputSequence[2] = leftE[1] * rightE[2] - leftE[2] * rightE[1];
-  return output.MakeSequence(theCommands, &outputSequence);
+  return output.makeSequence(theCommands, &outputSequence);
 }
 
 bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2539,7 +2539,7 @@ bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& theCommands, 
   if (!theArgument.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!theArgument[2].IsConstantNumber()) {
+  if (!theArgument[2].isConstantNumber()) {
     return false;
   }
   Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
@@ -2589,7 +2589,7 @@ bool CalculatorFunctions::innerDifferentiateConstant(Calculator& theCommands, co
   }
   const Expression& theArgument = input[2];
   //////////////////////
-  if (!theArgument.IsConstantNumber()) {
+  if (!theArgument.isConstantNumber()) {
     return false;
   }
   return output.assignValue<Rational>(0, theCommands);
@@ -2738,17 +2738,17 @@ bool CalculatorFunctions::outerDivideByNumber(
   double theDoubleValue;
   Expression theInvertedE;
   bool result = false;
-  if (input[2].IsOfType<Rational>(&theRatValue)) {
+  if (input[2].isOfType<Rational>(&theRatValue)) {
     theRatValue.invert();
     theInvertedE.assignValue(theRatValue, theCommands);
     result = true;
   }
-  if (input[2].IsOfType<AlgebraicNumber>(&theAlgValue)) {
+  if (input[2].isOfType<AlgebraicNumber>(&theAlgValue)) {
     theAlgValue.invert();
     theInvertedE.assignValue(theAlgValue, theCommands);
     result = true;
   }
-  if (input[2].IsOfType<double>(&theDoubleValue)) {
+  if (input[2].isOfType<double>(&theDoubleValue)) {
     theDoubleValue = 1 / theDoubleValue;
     theInvertedE.assignValue(theDoubleValue, theCommands);
     result = true;
@@ -2769,7 +2769,7 @@ bool CalculatorFunctions::innerMax(Calculator& theCommands, const Expression& in
   double theMax = 0, current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
-    if (!input[i].EvaluatesToDouble(&current)) {
+    if (!input[i].evaluatesToDouble(&current)) {
       return false;
     }
     if (i == 1) {
@@ -2792,7 +2792,7 @@ bool CalculatorFunctions::innerMin(Calculator& theCommands, const Expression& in
   double theMin = 0, current = 0;
   int bestIndex = 1;
   for (int i = 1; i < input.size(); i ++) {
-    if (!input[i].EvaluatesToDouble(& current)) {
+    if (!input[i].evaluatesToDouble(& current)) {
       return false;
     }
     if (i == 1) {
@@ -2831,7 +2831,7 @@ bool CalculatorFunctions::outerEqualEqual(
   }
   const Expression& left = input[1];
   const Expression& right = input[2];
-  if (left.HasBoundVariables() || right.HasBoundVariables()) {
+  if (left.hasBoundVariables() || right.hasBoundVariables()) {
     return false;
   }
   if (left == right) {
@@ -3047,7 +3047,7 @@ bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
   eOne.assignValue(1, theCommands);
   bool denBaseFound = false;
   if (theArgument[2].startsWith(theCommands.opThePower(), 3)) {
-    if (theArgument[2][2].IsConstantNumber()) {
+    if (theArgument[2][2].isConstantNumber()) {
       denBaseFound = true;
       theDenominatorBase = theArgument[2][1];
       theDenominatorExponent = theArgument[2][2];
@@ -3109,7 +3109,7 @@ bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
   if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (input[1].IsConstantNumber()) {
+  if (input[1].isConstantNumber()) {
     return false;
   }
   HashedListSpecialized<Expression> theList;
@@ -3133,7 +3133,7 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
     return false;
   }
   const Expression& leftE = input[1];
-  if (leftE.IsConstantNumber()) {
+  if (leftE.isConstantNumber()) {
     return false;
   }
   if (!input[2].startsWith(theCommands.opTimes(), 3)) {
@@ -3166,7 +3166,7 @@ bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(
   if (!input[1].GetFreeVariables(outputList, false)) {
     return theCommands << "Function GetFreeVariables failed, this shouldn't happen. ";
   }
-  return output.MakeSequence(theCommands, &outputList);
+  return output.makeSequence(theCommands, &outputList);
 }
 
 bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
@@ -3180,7 +3180,7 @@ bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
   if (!input[1].GetFreeVariables(outputList, true)) {
     return theCommands << "Function GetFreeVariables failed, this shouldn't happen.";
   }
-  return output.MakeSequence(theCommands, &outputList);
+  return output.makeSequence(theCommands, &outputList);
 }
 
 bool CalculatorFunctions::innerCompareFunctionsNumerically(
@@ -3208,20 +3208,20 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   }
   double leftBoundary = 0;
   double rightBoundary = 0;
-  if (!input[3].EvaluatesToDouble(&leftBoundary)) {
+  if (!input[3].evaluatesToDouble(&leftBoundary)) {
     return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
   }
-  if (!input[4].EvaluatesToDouble(&rightBoundary)) {
+  if (!input[4].evaluatesToDouble(&rightBoundary)) {
     return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
   }
   int numPoints = 50;
   if (input.size() > 5) {
-    if (!input[5].IsSmallInteger(&numPoints)) {
+    if (!input[5].isSmallInteger(&numPoints)) {
       return theCommands << "Failed to convert argument: " << input[5].toString() << " to a small integer. ";
     }
   }
   double minDiff = 0, maxDiff = 0;
-  if (!theFunE.EvaluatesToDoubleInRange(
+  if (!theFunE.evaluatesToDoubleInRange(
     theVars[0].toString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
   )) {
     return theCommands << "Failed to evaluate your function to a number. "
@@ -3229,7 +3229,7 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   }
   double tolerance = 0.0001;
   if (input.size() > 6) {
-    if (!input[6].EvaluatesToDouble(&tolerance)) {
+    if (!input[6].evaluatesToDouble(&tolerance)) {
       return theCommands << "Failed to evaluate the argument " << input[6].toString() << " to a floating point number. ";
     }
   }
@@ -3259,7 +3259,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   double tolerance = 0.0001;
-  if (!input[3].EvaluatesToDouble(&tolerance)) {
+  if (!input[3].evaluatesToDouble(&tolerance)) {
     return theCommands << "Failed to evaluate tolerance limit from " << input[3].toString()
     << " to a floating point number. ";
   }
@@ -3367,10 +3367,10 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
       return theCommands << "Could not get a two-element sequence from " << currentIntervalWithVariable[2].toString();
     }
     double currentLeft, currentRight;
-    if (!currentIntervalWithVariable[2][1].EvaluatesToDouble(&currentLeft)) {
+    if (!currentIntervalWithVariable[2][1].evaluatesToDouble(&currentLeft)) {
       return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][1].toString();
     }
-    if (!currentIntervalWithVariable[2][2].EvaluatesToDouble(&currentRight)) {
+    if (!currentIntervalWithVariable[2][2].evaluatesToDouble(&currentRight)) {
       return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][2].toString();
     }
     if (theBoundaryVars.contains(currentIntervalWithVariable[1])) {
@@ -3383,7 +3383,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
     numSamples.addOnTop(10);
     int currentNumSamplingPoints = 0;
     if (i + 1 < input.size()) {
-      if (input[i + 1].IsSmallInteger(&currentNumSamplingPoints)) {
+      if (input[i + 1].isSmallInteger(&currentNumSamplingPoints)) {
         *numSamples.lastObject() = currentNumSamplingPoints;
       } else {
         return theCommands << "Failed to extract a small integer for the number of sampling points from: "
@@ -3423,7 +3423,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
     << "the hard-coded limit of 1000000. ";
   }
   double tolerance = 0.0001;
-  if (!input[3].EvaluatesToDouble(&tolerance)) {
+  if (!input[3].evaluatesToDouble(&tolerance)) {
     return theCommands << "Failed to evaluate tolerance limit from " << input[3].toString()
     << " to a floating point number. ";
   }
@@ -3488,11 +3488,11 @@ bool CalculatorFunctions::innerIsEven(Calculator& theCommands, const Expression&
     return false;
   }
   const Expression& argument = input[1];
-  if (argument.HasBoundVariables()) {
+  if (argument.hasBoundVariables()) {
     return false;
   }
   LargeInteger theInt;
-  if (!argument.IsInteger(&theInt)) {
+  if (!argument.isInteger(&theInt)) {
     return output.assignValue(0, theCommands);
   }
   if (theInt.IsEven()) {
@@ -3508,7 +3508,7 @@ bool CalculatorFunctions::innerIsConstant(
   if (input.size() != 2) {
     return false;
   }
-  int result = static_cast<int>(input[1].IsConstantNumber());
+  int result = static_cast<int>(input[1].isConstantNumber());
   return output.assignValue(result, theCommands);
 }
 
@@ -3516,7 +3516,7 @@ bool CalculatorFunctions::innerIsNonEmptySequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsNonEmptySequence");
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   if (!input.IsSequenceNElementS() || input.size() < 2) {
@@ -3547,7 +3547,7 @@ bool CalculatorFunctions::innerDifferentialOfPolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!input[1].IsOfTypeWithContext(&polynomial)) {
+  if (!input[1].isOfTypeWithContext(&polynomial)) {
     return false;
   }
   std::stringstream comments;
@@ -3668,7 +3668,7 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[0].IsOfType<RationalFunction>()) {
+  if (!input[0].isOfType<RationalFunction>()) {
     return false;
   }
   if (input[0].getValue<RationalFunction>().minimalNumberOfVariables() > 1) {
@@ -3695,7 +3695,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   if (theCommands.functionGetMatrix(converted, theMatrix)) {
     return theCommands << "Failed to get matrix of rational functions. ";
   }
-  ExpressionContext theContext = converted.GetContext();
+  ExpressionContext theContext = converted.getContext();
   if (theMatrix.numberOfRows != theMatrix.numberOfColumns || theMatrix.numberOfColumns < 1) {
     std::stringstream out;
     out << "The matrix " << theMatrix.toString( ) << " has "
@@ -3916,7 +3916,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
   }
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
-  if (!numComputationsE.IsOfType(&upperBound)) {
+  if (!numComputationsE.isOfType(&upperBound)) {
     return output.makeError("Failed to convert the first argument of the expression to rational number.", theCommands);
   }
   if (upperBound > 1000000) {
@@ -3947,8 +3947,8 @@ bool CalculatorFunctions::innerPolynomialRelations(
     char currentLetter = 'a' + i;
     std::string currentStr;
     currentStr = currentLetter;
-    if (!theFormat.polyAlphabeT.contains(currentStr)) {
-      theFormat.polyAlphabeT.addOnTop(currentStr);
+    if (!theFormat.polynomialAlphabet.contains(currentStr)) {
+      theFormat.polynomialAlphabet.addOnTop(currentStr);
     }
   }
   if (!RationalFunction::GetRelations(inputVector, theGens, theRels, theCommands.comments)) {
@@ -3972,7 +3972,7 @@ bool CalculatorFunctions::functionPolynomialize(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionPolynomialize");
   Expression thePolyE;
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   if (!CalculatorConversions::functionPolynomial<Rational>(
@@ -4012,26 +4012,26 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
     << "failed, input was: "
     << theFunctionE.toString();
   }
-  if (!theComputation.inpuTE.IsOfType<RationalFunction>()) {
+  if (!theComputation.inpuTE.isOfType<RationalFunction>()) {
     return theCommands
     << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
     << theFunctionE.toString() << " to rational function. "
     << "Attempt to converted expression yielded: " << theComputation.inpuTE.toString();
   }
-  ExpressionContext context = theComputation.inpuTE.GetContext();
+  ExpressionContext context = theComputation.inpuTE.getContext();
   if (context.numberOfVariables() > 1) {
     return theCommands << "<hr>I converted " << theFunctionE.toString()
     << " to rational function, but it is of "
     << context.numberOfVariables()
     << " variables. I have been taught to work with 1 variable only. "
     << "<br>The context of the rational function is: "
-    << theComputation.inpuTE.GetContext().toString();
+    << theComputation.inpuTE.getContext().toString();
   }
   if (context.numberOfVariables() == 1) {
     if (context.getVariable(0) != theVariableE) {
       return theCommands << "<hr>The univariate rational function was in variable "
-      << theComputation.inpuTE.GetContext().toString()
+      << theComputation.inpuTE.getContext().toString()
       << " but the variable of integration is " << theVariableE.toString();
     }
   }
@@ -4082,7 +4082,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
     }
     theCFsIncludingZeros.addOnTop(currentCF);
   }
-  return output.MakeSequence(theCommands, &theCFsIncludingZeros);
+  return output.makeSequence(theCommands, &theCFsIncludingZeros);
 }
 
 bool CalculatorFunctions::innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -4119,13 +4119,13 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa(
   const Expression& A = theFunctionE[1];
   Expression a, b;
   const Expression& axPlusb = theFunctionE[2];
-  if (!A.IsConstantNumber()) {
+  if (!A.isConstantNumber()) {
     return false;
   }
   if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(axPlusb, theVariableE, a, b)) {
     return false;
   }
-  if (!a.IsConstantNumber() || !b.IsConstantNumber()) {
+  if (!a.isConstantNumber() || !b.isConstantNumber()) {
     return false;
   }
   Expression logaxPlusb;
@@ -4153,14 +4153,14 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb(
   }
   const Expression& A = theFunctionE[1];
   const Expression& axPlusbPowerN = theFunctionE[2];
-  if (!A.IsConstantNumber()) {
+  if (!A.isConstantNumber()) {
     return false;
   }
   if (!axPlusbPowerN.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
   Expression N = axPlusbPowerN[2];
-  if (!N.IsConstantNumber()) {
+  if (!N.isConstantNumber()) {
     return false;
   }
   Expression a, b;
@@ -4168,7 +4168,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb(
   if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(axPlusb, theVariableE, a, b)) {
     return false;
   }
-  if (!a.IsConstantNumber() || !b.IsConstantNumber()) {
+  if (!a.isConstantNumber() || !b.isConstantNumber()) {
     return false;
   }
   Expression base, OneMinusN;
@@ -4266,15 +4266,15 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
     return false;
   }
   if (
-    !a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
-    !A.IsConstantNumber() || !B.IsConstantNumber()
+    !a.isConstantNumber() || !b.isConstantNumber() || !c.isConstantNumber()||
+    !A.isConstantNumber() || !B.isConstantNumber()
   ) {
     return theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
     << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ", "
     << A.toString() << ", " << B.toString() << ". ";
   }
   double approxa, approxb, approxc;
-  if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
+  if (!a.evaluatesToDouble(&approxa) || !b.evaluatesToDouble(&approxb) || !c.evaluatesToDouble(&approxc)) {
     return theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
   }
@@ -4294,7 +4294,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
   Expression xplusbdiv2a = x + b / (twoE * a);
   Expression D = (fourE * a * c - bSquared) / (fourE * aSquared);
   Expression sqrtD;
-  sqrtD.MakeSqrt(theCommands, D, 2);
+  sqrtD.makeSqrt(theCommands, D, 2);
   Expression arcTanArgument = xplusbdiv2a / sqrtD;
   Expression theArcTan(theCommands);
   theArcTan.addChildAtomOnTop(theCommands.opArcTan());
@@ -4325,7 +4325,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   }
   Expression numPowerE = theFunctionE[2][2];
   int numPower = 0;
-  if (!numPowerE.IsSmallInteger(&numPower)) {
+  if (!numPowerE.isSmallInteger(&numPower)) {
     return false;
   }
   if (numPower <= 1) {
@@ -4339,13 +4339,13 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c)) {
     return false;
   }
-  if (!a.IsEqualToOne() || !b.IsConstantNumber() || !c.IsConstantNumber()) {
+  if (!a.IsEqualToOne() || !b.isConstantNumber() || !c.isConstantNumber()) {
     theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIIb integral."
     << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
-  if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
+  if (!a.evaluatesToDouble(&approxa) || !b.evaluatesToDouble(&approxb) || !c.evaluatesToDouble(&approxc)) {
     theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
     return false;
@@ -4369,7 +4369,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   theQuadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE - numPowerE);
   theQuadraticPowerNMinusOne.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE - oneE);
   functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
-  remainingIntegral.MakeIntegral(theCommands, integrationSetE, functionRemainingToIntegrate, x);
+  remainingIntegral.makeIntegral(theCommands, integrationSetE, functionRemainingToIntegrate, x);
   output = oneE / D *
   ((x + b / twoE) / (twoE * numPowerE - twoE) * theQuadraticPowerOneMinusN +
   (twoE * numPowerE - threeE) / (twoE * numPowerE - twoE) * remainingIntegral);
@@ -4394,7 +4394,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
   }
   Expression nE = theFunctionE[2][2];
   int numPower = 0;
-  if (!nE.IsSmallInteger(&numPower)) {
+  if (!nE.isSmallInteger(&numPower)) {
     return false;
   }
   if (numPower <= 1) {
@@ -4412,8 +4412,8 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
     return false;
   }
   if (
-    !a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
-    !A.IsConstantNumber() || !B.IsConstantNumber()
+    !a.isConstantNumber() || !b.isConstantNumber() || !c.isConstantNumber()||
+    !A.isConstantNumber() || !B.isConstantNumber()
   ) {
     theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIb integral."
     << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ", "
@@ -4421,7 +4421,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
     return false;
   }
   double approxa, approxb, approxc;
-  if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
+  if (!a.evaluatesToDouble(&approxa) || !b.evaluatesToDouble(&approxb) || !c.evaluatesToDouble(&approxc)) {
     theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
     return false;
@@ -4443,7 +4443,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
   quadraticPowerN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, nE);
   quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE - nE);
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
-  remainingIntegral.MakeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
+  remainingIntegral.makeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
   Expression C = B - (A * b) / (twoE * a);
   oneE.CheckInitializationRecursively();
   apowerN.CheckInitializationRecursively();
@@ -4476,7 +4476,7 @@ bool CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst(
   if (integrandE == theFunctionE) {
     return false;
   }
-  newIntegralE.MakeIntegral(theCommands, integrationSetE, integrandE, theVariableE);
+  newIntegralE.makeIntegral(theCommands, integrationSetE, integrandE, theVariableE);
   if (!theCommands.EvaluateExpression(theCommands, newIntegralE, output)) {
     return false;
   }
@@ -4488,18 +4488,18 @@ bool CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst(
   return true;
 }
 
-bool Expression::MakeIntegral(
+bool Expression::makeIntegral(
   Calculator& theCommands,
   const Expression& integrationSet,
   const Expression& theFunction,
   const Expression& theVariable
 ) {
-  MacroRegisterFunctionWithName("Expression::MakeIntegral");
+  MacroRegisterFunctionWithName("Expression::makeIntegral");
   if (this == &theFunction || this == &theVariable || this == &integrationSet) {
     Expression theFunCopy = theFunction;
     Expression theVarCopy = theVariable;
     Expression integrationSetCopy = integrationSet;
-    return this->MakeIntegral(theCommands, integrationSetCopy, theFunCopy, theVarCopy);
+    return this->makeIntegral(theCommands, integrationSetCopy, theFunCopy, theVarCopy);
   }
   Expression theDiffForm;
   theDiffForm.MakeXOX(theCommands, theCommands.opDifferential(), theVariable, theFunction);
@@ -4536,7 +4536,7 @@ bool CalculatorFunctions::innerIntegratePullImaginaryUnit(
     return false;
   }
   theCF *= iE;
-  outputIntegralNoCF.MakeIntegral(theCommands, integrationSetE,theNoImIntegrand,theVariableE);
+  outputIntegralNoCF.makeIntegral(theCommands, integrationSetE,theNoImIntegrand,theVariableE);
   output = theCF * outputIntegralNoCF;
   return true;
 }
@@ -4554,7 +4554,7 @@ bool CalculatorFunctions::innerIntegrateSum(Calculator& theCommands, const Expre
   integralsOfSummands.setSize(theFunctionE.size() - 1);
   Expression newIntegralE, result, newSummand;
   for (int i = 1; i < theFunctionE.size(); i ++) {
-    newIntegralE.MakeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
+    newIntegralE.makeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
     if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand)) {
       return false;
     }
@@ -4580,7 +4580,7 @@ bool CalculatorFunctions::innerIntegrateXnDiffX(Calculator& theCommands, const E
     return false;
   }
   Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;
-  if (theFunctionE.IsConstantNumber()) {
+  if (theFunctionE.isConstantNumber()) {
     output = theFunctionE * theVariableE;
     return true;
   }
@@ -4596,7 +4596,7 @@ bool CalculatorFunctions::innerIntegrateXnDiffX(Calculator& theCommands, const E
   if (theFunNoCoeff[1] != theVariableE) {
     return false;
   }
-  if (!theFunNoCoeff[2].IsConstantNumber()) {
+  if (!theFunNoCoeff[2].isConstantNumber()) {
     return false;
   }
   if (theFunNoCoeff[2].IsEqualToMOne()) {
@@ -4630,10 +4630,10 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
   )) {
     return false;
   }
-  if (!polynomializedFunctionE.IsOfType<Polynomial<Rational> >()) {
+  if (!polynomializedFunctionE.isOfType<Polynomial<Rational> >()) {
     return false;
   }
-  ExpressionContext contextE = polynomializedFunctionE.GetContext();
+  ExpressionContext contextE = polynomializedFunctionE.getContext();
   int numVars = contextE.numberOfVariables();
   if (numVars > 2) {
     return false;
@@ -4690,7 +4690,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
   for (int i = 0; i < theTrigPoly.size(); i ++) {
     const MonomialP& currentMon = theTrigPoly[i];
     int powerSine = - 1, powerCosine = - 1;
-    if (!currentMon(0).IsSmallInteger(&powerSine) || !currentMon(1).IsSmallInteger(&powerCosine)) {
+    if (!currentMon(0).isSmallInteger(&powerSine) || !currentMon(1).isSmallInteger(&powerCosine)) {
       return false;
     }
     if (!firstIsSine) {
@@ -4729,7 +4729,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
       currentIntegrandE.reset(theCommands);
       currentIntegrandE.addChildAtomOnTop("Polynomialize");
       currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-      currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
+      currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
       outputCandidate += currentIntegral;
       continue;
     }
@@ -4737,7 +4737,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
     currentIntegrandE.reset(theCommands);
     currentIntegrandE.addChildAtomOnTop("Polynomialize");
     currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-    currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
+    currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
 
     currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(theCommands);
@@ -4770,10 +4770,10 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
   )) {
     return false;
   }
-  if (!polynomializedFunctionE.IsOfType<Polynomial<Rational> >()) {
+  if (!polynomializedFunctionE.isOfType<Polynomial<Rational> >()) {
     return false;
   }
-  ExpressionContext context = polynomializedFunctionE.GetContext();
+  ExpressionContext context = polynomializedFunctionE.getContext();
   int numVars = context.numberOfVariables();
   if (numVars > 2) {
     return false;
@@ -4827,7 +4827,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
   for (int i = 0; i < theTrigPoly.size(); i ++) {
     const MonomialP& currentMon = theTrigPoly[i];
     int powerTan = - 1, powerSec = - 1;
-    if (!currentMon(0).IsSmallInteger(&powerTan) || !currentMon(1).IsSmallInteger(&powerSec)) {
+    if (!currentMon(0).isSmallInteger(&powerTan) || !currentMon(1).isSmallInteger(&powerSec)) {
       return false;
     }
     if (!firstIsTan) {
@@ -4870,7 +4870,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
       currentIntegrandE.reset(theCommands);
       currentIntegrandE.addChildAtomOnTop("Polynomialize");
       currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-      currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
+      currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
       outputCandidate += currentIntegral;
       continue;*/
     }
@@ -4878,7 +4878,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
     currentIntegrandE.reset(theCommands);
     currentIntegrandE.addChildAtomOnTop("Polynomialize");
     currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-    currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
+    currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
 
     currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(theCommands);
@@ -4908,7 +4908,7 @@ bool CalculatorFunctions::innerExploitCosEvenness(
   Expression cfE, nonCFpart;
   argument.GetCoefficientMultiplicandForm(cfE, nonCFpart);
   Rational theRat;
-  if (!cfE.IsRational(&theRat)) {
+  if (!cfE.isRational(&theRat)) {
     return false;
   }
   if (theRat >= 0) {
@@ -4930,7 +4930,7 @@ bool CalculatorFunctions::innerExploitSinOddness(
   Expression cfE, nonCFpart;
   argument.GetCoefficientMultiplicandForm(cfE, nonCFpart);
   Rational theRat;
-  if (!cfE.IsRational(&theRat)) {
+  if (!cfE.isRational(&theRat)) {
     return false;
   }
   if (theRat >= 0) {
@@ -4990,7 +4990,7 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& theCommands, const
     return false;
   }
   LargeInteger thePower;
-  if (!input[2].IsInteger(&thePower)) {
+  if (!input[2].isInteger(&thePower)) {
     return false;
   }
   Expression iE;
@@ -5214,20 +5214,20 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
     return false;
   }
   if (
-    !input[1][1].IsOfType<Rational>() && !input[1][1].IsOfType<AlgebraicNumber>() &&
-    !input[1][1].IsOfType<double>()
+    !input[1][1].isOfType<Rational>() && !input[1][1].isOfType<AlgebraicNumber>() &&
+    !input[1][1].isOfType<double>()
   ) {
     return false;
   }
   if (
-    !input[2][1].IsOfType<Rational>() &&
-    !input[2][1].IsOfType<AlgebraicNumber>() &&
-    !input[2][1].IsOfType<double>()
+    !input[2][1].isOfType<Rational>() &&
+    !input[2][1].isOfType<AlgebraicNumber>() &&
+    !input[2][1].isOfType<double>()
   ) {
     return false;
   }
   Expression theProduct;
-  theProduct.MakeProducT(theCommands, input[1][1], input[2][1]);
+  theProduct.makeProduct(theCommands, input[1][1], input[2][1]);
   return output.MakeXOX(theCommands, theCommands.opThePower(), theProduct, input[1][2]);
 }
 
@@ -5236,13 +5236,13 @@ bool CalculatorFunctions::outerCommuteConstants(Calculator& theCommands, const E
   if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (!input[2].IsConstantNumber()) {
+  if (!input[2].isConstantNumber()) {
     return false;
   }
-  if (input[1].IsConstantNumber()) {
+  if (input[1].isConstantNumber()) {
     return false;
   }
-  output.MakeProducT(theCommands, input[2], input[1]);
+  output.makeProduct(theCommands, input[2], input[1]);
   output.CheckInitializationRecursively();
   return true;
 }
@@ -5280,7 +5280,7 @@ bool Expression::SplitProduct(
   if (numDesiredMultiplicandsLeft <= 0) {
     return false;
   }
-  this->CheckInitialization();
+  this->checkInitialization();
   List<Expression> theMultiplicandsLeft, theMultiplicandsRight;
   this->owner->AppendOpandsReturnTrueIfOrderNonCanonical(*this, theMultiplicandsLeft, this->owner->opTimes());
   if (theMultiplicandsLeft.size <= numDesiredMultiplicandsLeft) {
@@ -5315,7 +5315,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
   mOneE.assignValue(- 1, theCommands);
   for (int i = 0; i < numerators.size(); i ++) {
-    if (numerators[i].IsConstantNumber()) {
+    if (numerators[i].isConstantNumber()) {
       newNumSummandRightPart.MakeXOX(
         theCommands,
         theCommands.opThePower(),
@@ -5432,12 +5432,12 @@ bool CalculatorFunctions::innerGrowDynkinType(
 
 void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const {
   MacroRegisterFunctionWithName("Expression::GetBlocksOfCommutativity");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->IsAtom()) {
     inputOutputList.addOnTopNoRepetition(*this);
     return;
   }
-  if (this->IsConstantNumber()) {
+  if (this->isConstantNumber()) {
     return;
   }
   std::string whichOperation;
@@ -5452,8 +5452,8 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
   inputOutputList.addOnTopNoRepetition(*this);
 }
 
-bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
-  MacroRegisterFunctionWithName("Expression::MakeMatrix");
+bool Expression::makeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
+  MacroRegisterFunctionWithName("Expression::makeMatrix");
   if (inputMat == nullptr) {
     this->reset(owner);
     Expression theMatID(owner);
@@ -5464,8 +5464,8 @@ bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
   return this->AssignMatrixExpressions(*inputMat, owner, true, true);
 }
 
-bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence) {
-  MacroRegisterFunctionWithName("Expression::MakeSequence");
+bool Expression::makeSequence(Calculator& owner, List<Expression>* inputSequence) {
+  MacroRegisterFunctionWithName("Expression::makeSequence");
   this->reset(owner, inputSequence == nullptr ? 1 : inputSequence->size + 1);
   this->addChildAtomOnTop(owner.opSequence());
   if (inputSequence != nullptr) {
@@ -5476,8 +5476,8 @@ bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence
   return true;
 }
 
-bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues) {
-  MacroRegisterFunctionWithName("Expression::MakeSequenceCommands");
+bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues) {
+  MacroRegisterFunctionWithName("Expression::makeSequenceCommands");
   List<Expression> theStatements;
   Expression currentStatement, currentKey;
   if (inputValues.size != inputKeys.size) {
@@ -5490,11 +5490,11 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
     currentStatement.MakeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
     theStatements.addOnTop(currentStatement);
   }
-  return this->MakeSequenceStatements(owner, &theStatements);
+  return this->makeSequenceStatements(owner, &theStatements);
 }
 
-bool Expression::MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements) {
-  MacroRegisterFunctionWithName("Expression::MakeSequenceStatements");
+bool Expression::makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements) {
+  MacroRegisterFunctionWithName("Expression::makeSequenceStatements");
   this->reset(owner, inputStatements == nullptr ? 1 : inputStatements->size + 1);
   this->addChildAtomOnTop(owner.opEndStatement());
   if (inputStatements != nullptr) {
@@ -5514,7 +5514,7 @@ bool CalculatorFunctions::innerGetUserDefinedSubExpressions(
   }
   HashedListSpecialized<Expression> theList;
   input[1].GetBlocksOfCommutativity(theList);
-  return output.MakeSequence(theCommands, &theList);
+  return output.makeSequence(theCommands, &theList);
 }
 
 bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
@@ -5540,7 +5540,7 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.flagComputePairingTable = false;
   theSSsubalgebras.flagComputeNilradicals = false;
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
@@ -5592,8 +5592,8 @@ bool CalculatorFunctions::innerMinPolyMatrix(
     return output.makeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
-  tempF.polyAlphabeT.setSize(1);
-  tempF.polyAlphabeT[0] = "q";
+  tempF.polynomialAlphabet.setSize(1);
+  tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theMinPoly;
   theMinPoly.AssignMinPoly(theMat);
   return output.assignValue(theMinPoly.toString(&tempF), theCommands);
@@ -5617,8 +5617,8 @@ bool CalculatorFunctions::innerCharPolyMatrix(
     return output.makeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
-  tempF.polyAlphabeT.setSize(1);
-  tempF.polyAlphabeT[0] = "q";
+  tempF.polynomialAlphabet.setSize(1);
+  tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theCharPoly;
   theCharPoly.AssignCharPoly(theMat);
   return output.assignValue(theCharPoly.toString(&tempF), theCommands);
@@ -5630,7 +5630,7 @@ bool CalculatorFunctions::innerReverseBytes(Calculator& theCommands, const Expre
     return false;
   }
   std::string inputString;
-  if (!input[1].IsOfType(&inputString)) {
+  if (!input[1].isOfType(&inputString)) {
     return false;
   }
   std::string result;
@@ -5715,12 +5715,12 @@ bool CalculatorFunctions::innerExpressionLeafs(
   } else if (!input.GetExpressionLeafs(theLeafs)) {
     return theCommands << "Failed to extract expression leafs from " << input.toString() << ".";
   }
-  return output.MakeSequence(theCommands, &theLeafs);
+  return output.makeSequence(theCommands, &theLeafs);
 }
 
 bool CalculatorFunctions::innerLastElement(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLastElement");
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   if (input.IsAtom()) {
@@ -5741,7 +5741,7 @@ bool CalculatorFunctions::innerLastElement(Calculator& theCommands, const Expres
 
 bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveLastElement");
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   if (input.IsAtom() || input.size() == 1) {
@@ -5797,7 +5797,7 @@ bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Ex
     return false;
   }
   LargeInteger theInt;
-  if (!input[1].IsInteger(&theInt)) {
+  if (!input[1].isInteger(&theInt)) {
     return false;
   }
   bool resultBool = theInt.value.IsPossiblyPrime(10, true, &theCommands.comments);
@@ -5814,7 +5814,7 @@ bool CalculatorFunctions::innerIsPrimeMillerRabin(Calculator& theCommands, const
     return false;
   }
   LargeInteger theInt;
-  if (!input[1].IsInteger(&theInt)) {
+  if (!input[1].isInteger(&theInt)) {
     return false;
   }
   bool resultBool = theInt.value.IsPossiblyPrimeMillerRabiN(10, &theCommands.comments);
@@ -5839,7 +5839,7 @@ bool CalculatorFunctions::innerIsNilpotent(
   if (theCommands.functionGetMatrix(converted, theMat)) {
     found = true;
     theMatTensor = theMat;
-  } else if (input.IsOfType<MatrixTensor<Rational> >(&theMatTensor)) {
+  } else if (input.isOfType<MatrixTensor<Rational> >(&theMatTensor)) {
     found = true;
   }
   if (!found) {
@@ -5894,13 +5894,13 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   }
   double xInitial, yInitial, leftEndpoint, rightEndpoint;
   int numPoints;
-  if (!input[2].EvaluatesToDouble(&xInitial) || !input[3].EvaluatesToDouble(&yInitial)) {
+  if (!input[2].evaluatesToDouble(&xInitial) || !input[3].evaluatesToDouble(&yInitial)) {
     return theCommands << "Failed to extract initial x,y values from " << input.toString();
   }
-  if (!input[4].IsSmallInteger(&numPoints)) {
+  if (!input[4].isSmallInteger(&numPoints)) {
     return theCommands << "Failed to extract number of points from " << input.toString();
   }
-  if (!input[5].EvaluatesToDouble(&leftEndpoint) || !input[6].EvaluatesToDouble(&rightEndpoint)) {
+  if (!input[5].evaluatesToDouble(&leftEndpoint) || !input[6].evaluatesToDouble(&rightEndpoint)) {
     return theCommands << "Failed to extract left and right endpoints from " << input.toString();
   }
   if (leftEndpoint > rightEndpoint) {
@@ -6065,12 +6065,12 @@ bool CalculatorFunctions::innerPlotViewWindow(
       isGood = false;
     } else {
       if (theMap.contains("width")) {
-        if (!theMap.GetValueCreateNoInit("width").EvaluatesToDouble(&widthHeight[0])) {
+        if (!theMap.GetValueCreateNoInit("width").evaluatesToDouble(&widthHeight[0])) {
           isGood = false;
         }
       }
       if (theMap.contains("height")) {
-        if (!theMap.GetValueCreateNoInit("height").EvaluatesToDouble(&widthHeight[1])) {
+        if (!theMap.GetValueCreateNoInit("height").evaluatesToDouble(&widthHeight[1])) {
           isGood = false;
         }
       }
@@ -6094,7 +6094,7 @@ bool CalculatorFunctions::innerPlotSetId(
   emptyPlot.DesiredHtmlHeightInPixels = 100;
   emptyPlot.DesiredHtmlWidthInPixels = 100;
   std::string incomingName;
-  if (!input.IsOfType(&incomingName)) {
+  if (!input.isOfType(&incomingName)) {
    incomingName = input.toString();
   }
   emptyPlot.SetCanvasName(incomingName);
@@ -6138,11 +6138,11 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
   Plot outputPlot, startPlot;
   outputPlot.dimension = 2;
   PlotObject theFilledPlot;
-  if (!thePlotE.IsOfType<Plot>(&startPlot)) {
+  if (!thePlotE.isOfType<Plot>(&startPlot)) {
     return false;
   }
   std::string colorString;
-  if (!colorE.IsOfType<std::string>(&colorString)) {
+  if (!colorE.isOfType<std::string>(&colorString)) {
     colorString = colorE.toString();
   }
   if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.colorFillRGB)) {
@@ -6168,7 +6168,7 @@ bool CalculatorFunctions::innerIsPlot(Calculator& theCommands, const Expression&
   if (input.size() != 2) {
     return false;
   }
-  if (input[1].IsOfType<Plot>()) {
+  if (input[1].isOfType<Plot>()) {
     return output.assignValue(1, theCommands);
   }
   return output.assignValue(0, theCommands);
@@ -6215,7 +6215,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
       theCommands
     );
   }
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   Plot thePlot;
@@ -6224,7 +6224,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   thePlotObj.leftPtE = input[2];
   thePlotObj.rightPtE = input[3];
   if (input.size() >= 5) {
-    if (!input[4].IsOfType<std::string>(&thePlotObj.colorJS)) {
+    if (!input[4].isOfType<std::string>(&thePlotObj.colorJS)) {
       thePlotObj.colorJS = input[4].toString();
     }
   } else {
@@ -6234,7 +6234,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 6) {
-    input[5].EvaluatesToDouble(&thePlotObj.lineWidth);
+    input[5].evaluatesToDouble(&thePlotObj.lineWidth);
   }
   if (input.size() >= 7) {
     thePlotObj.numSegmentsE = input[6];
@@ -6242,14 +6242,14 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     thePlotObj.numSegmentsE.assignValue(500, theCommands);
   }
   int numIntervals = - 1;
-  if (!thePlotObj.numSegmentsE.IsSmallInteger(&numIntervals)) {
+  if (!thePlotObj.numSegmentsE.isSmallInteger(&numIntervals)) {
     numIntervals = 500;
   }
   if (numIntervals < 2) {
     numIntervals = 2;
   }
-  bool leftIsDouble = thePlotObj.leftPtE.EvaluatesToDouble(&thePlotObj.xLow);
-  bool rightIsDouble = thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh);
+  bool leftIsDouble = thePlotObj.leftPtE.evaluatesToDouble(&thePlotObj.xLow);
+  bool rightIsDouble = thePlotObj.rightPtE.evaluatesToDouble(&thePlotObj.xHigh);
   if (!leftIsDouble) {
     if (thePlotObj.leftPtE != theCommands.EMInfinity()) {
       return theCommands
@@ -6324,7 +6324,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   }
   Vectors<double>& thePointsDouble = thePlotObj.thePointsDouble;
   if (thePlot.boxesThatUpdateMe.size == 0) {
-    if (!input[1].EvaluatesToDoubleInRange(
+    if (!input[1].evaluatesToDoubleInRange(
       theVarString,
       thePlotObj.xLow,
       thePlotObj.xHigh,
@@ -6378,7 +6378,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   }
   Plot theFinalPlot;
   PlotObject thePlot;
-  if (!theCommands.GetMatrixExpressions(input[1], thePlot.thePointS)) {
+  if (!theCommands.getMatrixExpressions(input[1], thePlot.thePointS)) {
     return theCommands << "The first argument of PlotPoint is "
     << "expected to be a sequence, instead I had: " << input[1].toString();
   }
@@ -6402,7 +6402,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   }
   thePlot.dimension = theFinalPlot.dimension;
   thePlot.colorRGB =static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
-  if (input[2].IsOfType<std::string>()) {
+  if (input[2].isOfType<std::string>()) {
     DrawingVariables::GetColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
   }
   thePlot.colorJS = input[2].toString();
@@ -6428,12 +6428,12 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   Plot outputPlot;
   outputPlot.dimension = 2;
   bool tempB = CalculatorFunctions::innerPlot2D(theCommands, lowerEplot, output);
-  if (!tempB || !output.IsOfType<Plot>(&outputPlot)) {
+  if (!tempB || !output.isOfType<Plot>(&outputPlot)) {
     return theCommands << "<hr>Failed to get a plot from "
     << lowerEplot.toString() << ", not proceding with bar plot.";
   }
   tempB = CalculatorFunctions::innerPlot2D(theCommands, upperEplot, output);
-  if (!tempB || !output.IsOfType<Plot>()) {
+  if (!tempB || !output.isOfType<Plot>()) {
     return theCommands << "<hr>Failed to get a plot from "
     << upperEplot.toString() << ", not proceding with bar plot.";
   }
@@ -6444,7 +6444,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   const Expression& upperE = input[4];
   const Expression& deltaE = input[5];
   double theDeltaNoSign, theDeltaWithSign;
-  if (!deltaE.EvaluatesToDouble(&theDeltaWithSign)) {
+  if (!deltaE.evaluatesToDouble(&theDeltaWithSign)) {
     return false;
   }
   theDeltaNoSign = theDeltaWithSign;
@@ -6455,7 +6455,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
     theDeltaNoSign = 1;
   }
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound)) {
+  if (!lowerE.evaluatesToDouble(&lowerBound) || !upperE.evaluatesToDouble(&upperBound)) {
     return theCommands
     << "Couldn't convert bounds of drawing function to floating point numbers. ";
   }
@@ -6476,9 +6476,9 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   List<Rational> rValues;
   Rational lowerBoundRat, upperBoundRat, deltaRat;
   if (
-    lowerE.IsOfType<Rational>(&lowerBoundRat) &&
-    upperE.IsOfType<Rational>(&upperBoundRat) &&
-    deltaE.IsOfType<Rational>(&deltaRat)
+    lowerE.isOfType<Rational>(&lowerBoundRat) &&
+    upperE.isOfType<Rational>(&upperBoundRat) &&
+    deltaE.isOfType<Rational>(&deltaRat)
   ) {
     if (upperBoundRat<lowerBoundRat) {
       MathRoutines::swap(upperBoundRat, lowerBoundRat);
@@ -6504,12 +6504,12 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
       }
       xValueE.assignValue(i, theCommands);
       theFunValueEnonEvaluated = (j == 0) ? lowerFunctionE : upperFunctionE;
-      theFunValueEnonEvaluated.SubstituteRecursively(xExpression, xValueE);
+      theFunValueEnonEvaluated.substituteRecursively(xExpression, xValueE);
       if (!theCommands.EvaluateExpression(theCommands, theFunValueEnonEvaluated, theFunValueFinal)) {
         return false;
       }
       double finalResultDouble;
-      if (!theFunValueFinal.EvaluatesToDouble(&finalResultDouble)) {
+      if (!theFunValueFinal.evaluatesToDouble(&finalResultDouble)) {
         return theCommands << "<hr>Failed to evaluate your function at point " << i
         << ", instead " << "I evaluated to " << theFunValueFinal.toString();
       }
@@ -6563,7 +6563,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   for (int i = 0; i < rValues.size; i ++) {
     std::stringstream tempStream;
     tempStream << "\\rput[t](" << std::fixed << rValues[i].GetDoubleValue() << ",-0.03)" << "{$";
-    if (rValues[i].IsInteger()) {
+    if (rValues[i].isInteger()) {
       tempStream << rValues[i].toString();
     } else {
       tempStream << "\\frac{" << rValues[i].GetNumerator().toString() << "}"
@@ -6604,7 +6604,7 @@ bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& theCommands, 
     << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
     << " the next two arguments stands for the variable range.";
   }
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   const Expression& polarE = input[1];
@@ -6626,7 +6626,7 @@ bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& theCommands, 
   Expression theX = theCosine * polarE;
   Expression theY = theSine * polarE;
   Expression newArg;
-  newArg.MakeSequence(theCommands);
+  newArg.makeSequence(theCommands);
   newArg.addChildOnTop(theX);
   newArg.addChildOnTop(theY);
   output.reset(theCommands);
@@ -6669,7 +6669,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
     << " the next two arguments stands for the variable range. ";
   }
-  if (input.HasBoundVariables()) {
+  if (input.hasBoundVariables()) {
     return false;
   }
   PlotObject thePlot;
@@ -6701,20 +6701,20 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   thePlot.colorJS = "red";
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
-    if (!input[4].IsOfType<std::string>(&thePlot.colorJS)) {
+    if (!input[4].isOfType<std::string>(&thePlot.colorJS)) {
       thePlot.colorJS = input[4].toString();
     }
   }
   DrawingVariables::GetColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
   thePlot.lineWidth = 1;
   if (input.size() >= 6) {
-    if (!input[5].EvaluatesToDouble(&thePlot.lineWidth)) {
+    if (!input[5].evaluatesToDouble(&thePlot.lineWidth)) {
       thePlot.lineWidth = 1;
     }
   }
   int numPoints = 1000;
   if (input.size() >= 7) {
-    if (!input[6].IsSmallInteger(&numPoints)) {
+    if (!input[6].isSmallInteger(&numPoints)) {
       numPoints = 1000;
       theCommands << "<hr>Could not extract number of points from "
       << input[6].toString();
@@ -6734,8 +6734,8 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   thePlot.paramLowE = input[2];
   thePlot.paramHighE = input[3];
   if (
-    !thePlot.paramLowE.EvaluatesToDouble(&thePlot.paramLow) ||
-    !thePlot.paramHighE.EvaluatesToDouble(&thePlot.paramHigh)
+    !thePlot.paramLowE.evaluatesToDouble(&thePlot.paramLow) ||
+    !thePlot.paramHighE.evaluatesToDouble(&thePlot.paramHigh)
   ) {
     theCommands << "Failed to convert "
     << thePlot.paramLowE.toString() << " and "
@@ -6815,7 +6815,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     theCommands << "Failed to convert: " << thePlot.paramHighE << " to js. ";
   }
   if (thePlot.dimension == 2) {
-    if (!thePlot.coordinateFunctionsE[0].EvaluatesToDoubleInRange(
+    if (!thePlot.coordinateFunctionsE[0].evaluatesToDoubleInRange(
       thePlot.variablesInPlay[0].toString(),
       thePlot.paramLow,
       thePlot.paramHigh,
@@ -6826,7 +6826,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     )) {
       theCommands << "<hr>Failed to evaluate curve function. ";
     }
-    if (!thePlot.coordinateFunctionsE[1].EvaluatesToDoubleInRange(
+    if (!thePlot.coordinateFunctionsE[1].evaluatesToDoubleInRange(
       thePlot.variablesInPlay[0].toString(),
       thePlot.paramLow,
       thePlot.paramHigh,
@@ -6857,7 +6857,7 @@ bool CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras");
-  if (!input.IsOfType<SemisimpleSubalgebras>()) {
+  if (!input.isOfType<SemisimpleSubalgebras>()) {
     return theCommands << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
@@ -6884,7 +6884,7 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras");
-  if (!input.IsOfType<SemisimpleSubalgebras>()) {
+  if (!input.isOfType<SemisimpleSubalgebras>()) {
     return theCommands << "<hr>Input of GetCentralizerChains must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
@@ -6917,7 +6917,7 @@ bool CalculatorFunctions::innerEvaluateToDoublE(Calculator& theCommands, const E
     return false;
   }
   double theValue = 0;
-  if (!input[1].EvaluatesToDouble(&theValue)) {
+  if (!input[1].evaluatesToDouble(&theValue)) {
     return false;
   }
   return output.assignValue(theValue, theCommands);
@@ -6928,7 +6928,7 @@ bool CalculatorFunctions::functionEvaluateToDouble(
 ) {
   MacroRegisterFunctionWithName("Expression::functionEvaluateToDouble");
   double theValue = 0;
-  if (!input.EvaluatesToDouble(&theValue)) {
+  if (!input.evaluatesToDouble(&theValue)) {
     return false;
   }
   return output.assignValue(theValue, theCommands);
@@ -7040,7 +7040,7 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   }
   SemisimpleSubalgebras& theSSsubalgebras =
-  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
@@ -7157,7 +7157,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  branchingData& theG2B3Data,
+  BranchingData& theG2B3Data,
   ExpressionContext& outputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2Init");
@@ -7183,7 +7183,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   theG2B3Data.selInducing.init(3);
   for (int i = 0; i < theG2B3Data.theWeightFundCoords.size; i ++) {
-    if (!theG2B3Data.theWeightFundCoords[i].IsSmallInteger()) {
+    if (!theG2B3Data.theWeightFundCoords[i].isSmallInteger()) {
       theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
     }
   }
@@ -7256,7 +7256,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   FormatExpressions theFormat;
   theSSalgPointer.context.getFormat(theFormat);
   if (theSubgroup.allElements.size > 498) {
-    if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.GetSize()) {
+    if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.getSize()) {
       out << "Weyl group is too large. <br>";
     } else {
       out << "Weyl group is too large for LaTeX. <br>";
@@ -7325,7 +7325,7 @@ bool CalculatorFunctions::innerAllPartitions(Calculator& theCommands, const Expr
     return false;
   }
   int theRank = - 1;
-  if (!input[1].IsSmallInteger(&theRank)) {
+  if (!input[1].isSmallInteger(&theRank)) {
     return false;
   }
   if (theRank > 33 || theRank < 0) {
@@ -7681,7 +7681,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     << genVemaWeightNode.toString() << ".";
   }
   int desiredHeight;
-  if (!levelNode.IsSmallInteger(&desiredHeight)) {
+  if (!levelNode.isSmallInteger(&desiredHeight)) {
     return output.makeError("second argument of " + input.toString() + " must be a small integer", theCommands);
   }
   RationalFunction RFOne, RFZero;
@@ -7691,7 +7691,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   selInducing.MakeFullSelection(theRank);
   int theCoeff;
   for (int i = 0; i < theRank; i ++) {
-    if (highestWeightFundCoords[i].IsSmallInteger(&theCoeff)) {
+    if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
       if (theCoeff == 0) {
         selInducing.RemoveSelection(i);
       }
@@ -7821,13 +7821,13 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   selFD.init(theRank);
   int theCoeff;
   for (int i = 0; i < theRank; i ++) {
-    if (highestWeightFundCoords[i].IsSmallInteger(&theCoeff)) {
+    if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
       if (theCoeff >= 0) {
         selParSel1.RemoveSelection(i);
       }
     }
     bool isGood = false;
-    if (theFDhw[i].IsSmallInteger(&theCoeff)) {
+    if (theFDhw[i].isSmallInteger(&theCoeff)) {
       if (theCoeff >= 0) {
         isGood = true;
       }
@@ -8039,7 +8039,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     return theCommands << "Could not get elements of universal enveloping algebra from inputs: " << input[1].toString()
     << " and " << input[2].toString();
   }
-  ExpressionContext finalContext = rightMerged.GetContext();
+  ExpressionContext finalContext = rightMerged.getContext();
   int algebraIndex = finalContext.indexAmbientSemisimpleLieAlgebra;
   if (algebraIndex == - 1) {
     return output.makeError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
@@ -8089,7 +8089,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  branchingData& theG2B3Data
+  BranchingData& theG2B3Data
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput");
   ExpressionContext context(theCommands);
@@ -8117,7 +8117,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableInit(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  branchingData& theG2B3data,
+  BranchingData& theG2B3data,
   int& desiredHeight,
   ExpressionContext& outputContext
 ) {
@@ -8126,7 +8126,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableInit(
     return output.makeError("I need two arguments: first is height, second is parabolic selection. ", theCommands);
   }
   desiredHeight = 0;
-  if (!input[1].IsSmallInteger(&desiredHeight)) {
+  if (!input[1].isSmallInteger(&desiredHeight)) {
     return output.makeError("the first argument must be a small integer", theCommands);
   }
   if (desiredHeight < 0) {
@@ -8144,7 +8144,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2");
-  branchingData theG2B3Data;
+  BranchingData theG2B3Data;
   ExpressionContext context(theCommands);
   CalculatorFunctions::innerSplitFDpartB3overG2Init(theCommands, input, output, theG2B3Data, context);
   if (output.IsError()) {
@@ -8156,7 +8156,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2(
 }
 
 bool Calculator::innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output) {
-  branchingData theG2B3Data;
+  BranchingData theG2B3Data;
   return CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
 }
 
@@ -8165,7 +8165,7 @@ bool Calculator::innerPrintB3G2branchingTableCommon(
   const Expression& input,
   Expression& output,
   Vectors<RationalFunction>& outputHWs,
-  branchingData& theG2B3Data,
+  BranchingData& theG2B3Data,
   ExpressionContext& theContext
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCommon");
@@ -8202,7 +8202,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2old");
-  branchingData theG2B3Data;
+  BranchingData theG2B3Data;
   CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
   if (output.IsError()) {
     return true;
@@ -8260,7 +8260,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
   return output.assignValue(out.str(), theCommands);
 }
 
-bool Expression::EvaluatesToDoubleInRange(
+bool Expression::evaluatesToDoubleInRange(
   const std::string& varName,
   double lowBound,
   double highBound,
@@ -8269,7 +8269,7 @@ bool Expression::EvaluatesToDoubleInRange(
   double* outputYmax,
   Vectors<double>* outputPoints
 ) const {
-  MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleInRange");
+  MacroRegisterFunctionWithName("Expression::evaluatesToDoubleInRange");
   if (numIntervals < 1 || this->owner == nullptr) {
     return false;
   }
@@ -8340,7 +8340,7 @@ bool Expression::EvaluatesToDoubleInRange(
   return result;
 }
 
-bool Expression::EvaluatesToDouble(double* whichDouble) const {
+bool Expression::evaluatesToDouble(double* whichDouble) const {
   return this->EvaluatesToDoubleUnderSubstitutions(
     this->owner->knownDoubleConstants, this->owner->knownDoubleConstantValues, whichDouble
   );
@@ -8356,17 +8356,17 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions(
     return false;
   }
   Calculator& theCommands = *this->owner;
-  if (this->IsOfType<double>(whichDouble)) {
+  if (this->isOfType<double>(whichDouble)) {
     return true;
   }
-  if (this->IsOfType<Rational>()) {
+  if (this->isOfType<Rational>()) {
     if (whichDouble != nullptr) {
       *whichDouble = this->getValue<Rational>().GetDoubleValue();
     }
     return true;
   }
-  if (this->IsOfType<AlgebraicNumber>()) {
-    if (this->getValue<AlgebraicNumber>().EvaluatesToDouble(whichDouble)) {
+  if (this->isOfType<AlgebraicNumber>()) {
+    if (this->getValue<AlgebraicNumber>().evaluatesToDouble(whichDouble)) {
       return true;
     }
   }
@@ -8431,7 +8431,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions(
       bool signChange = false;
       if (leftD < 0) {
         Rational theRat;
-        if ((*this)[2].IsRational(&theRat)) {
+        if ((*this)[2].isRational(&theRat)) {
           if (!theRat.GetDenominator().IsEven()) {
             if (!theRat.GetNumerator().IsEven()) {
               signChange = true;
@@ -8461,7 +8461,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions(
       bool signChange = false;
       if (rightD < 0) {
         Rational theRat;
-        if ((*this)[1].IsRational(&theRat)) {
+        if ((*this)[1].isRational(&theRat)) {
           if (!theRat.GetNumerator().IsEven()) {
             if (!theRat.GetDenominator().IsEven()) {
               signChange = true;
@@ -8735,7 +8735,7 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
     SltwoSubalgebras theSl2s(*ownerSS.content);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
     ownerSS.content->FindSl2Subalgebras(*ownerSS.content, theSl2s);
-    theSl2s.ToHTML(&theFormat);
+    theSl2s.toHTML(&theFormat);
   } else {
     out << "The table is precomputed and served from the hard disk. <br>";
   }
@@ -8755,7 +8755,7 @@ bool CalculatorFunctions::innerCrawlTexFile(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
   }
-  if (!input.IsOfType<std::string>()) {
+  if (!input.isOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
@@ -8793,7 +8793,7 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
   }
-  if (!input.IsOfType<std::string>()) {
+  if (!input.isOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
@@ -8815,7 +8815,7 @@ bool CalculatorFunctions::innerBuildFreecalc(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
   }
-  if (!input.IsOfType<std::string>()) {
+  if (!input.isOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
@@ -8974,7 +8974,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
     return theCommands << "<hr>Value theProduct not found. ";
   }
   LargeInteger goalProduct;
-  if (!theProductE.IsInteger(&goalProduct)) {
+  if (!theProductE.isInteger(&goalProduct)) {
     return theCommands << "<hr>Failed to extract integer from " << theProductE.toString();
   }
   if (goalProduct.isNegative()) {
@@ -8984,7 +8984,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
     return theCommands << "<hr>Value theSum not found. ";
   }
   int theSum = - 1;
-  if (!theSumE.IsSmallInteger(&theSum)) {
+  if (!theSumE.isSmallInteger(&theSum)) {
     return theCommands << "Failed to extract small integer from " << theSumE.toString();
   }
   VectorPartition thePartition;
@@ -9286,7 +9286,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
     outputSimpleStringCoords.makeZero(this->GetOwner()->GetRank());
     outputSimpleHalfStringCoords.makeZero(this->GetOwner()->GetRank());
     for (int j = 0; j < this->GetOwner()->GetRank(); j ++) {
-      theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
+      theSimpleRoot.makeEi(this->GetOwner()->GetRank(), j);
       theSimpleRootFundCoords =
       this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
       outputSimpleStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
@@ -9363,7 +9363,7 @@ public:
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEchildrenTruncated");
     this->currentEchildrenTruncated.setSize(0);
     if (!this->flagUseFullTree) {
-      if (this->GetCurrentE().IsBuiltInTypE()) {
+      if (this->GetCurrentE().isBuiltInType()) {
         return;
       }
     }
@@ -9381,7 +9381,7 @@ public:
     if (this->flagUseFullTree) {
       return input.IsAtom();
     }
-    if (input.IsAtom() || input.IsBuiltInTypE()) {
+    if (input.IsAtom() || input.isBuiltInType()) {
       return true;
     }
     return false;
@@ -9638,7 +9638,7 @@ bool CalculatorFunctions::innerSetRandomSeed(
   }
   std::stringstream out;
   theCommands.theObjectContainer.CurrentRandomSeed = theInt;
-  global.unsecurePseudoRandomGenerator.SetRandomSeed(theInt);
+  global.unsecurePseudoRandomGenerator.setRandomSeed(theInt);
   out << "Successfully set random seed to: " << static_cast<unsigned>(theInt);
   return output.assignValue(out.str(), theCommands);
 }
@@ -9685,7 +9685,7 @@ bool CalculatorFunctions::innerIfStandard(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIfStandard");
-  (void) theCommands; //portable way of avoiding unused parameter warning
+  (void) theCommands;
   if (input.size() != 4) {
     return false;
   }
@@ -9704,7 +9704,7 @@ bool CalculatorFunctions::innerIfFrozen(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIfFrozen");
-  (void) theCommands; // portable way of avoiding unused parameter warning
+  (void) theCommands;
   if (input.size() != 4) {
     return false;
   }
@@ -9743,7 +9743,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
     !input.startsWith(theCommands.opTurnOffRules()) &&
     !input.startsWith(theCommands.opTurnOnRules())
   ) {
-    if (input.IsOfType<std::string>(&currentRule)) {
+    if (input.isOfType<std::string>(&currentRule)) {
       rulesToConsider.addOnTop(currentRule);
     } else if (input.IsOperation(&currentRule)) {
       rulesToConsider.addOnTop(currentRule);
@@ -9753,7 +9753,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
     }
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (input[i].IsOfType<std::string>(&currentRule)) {
+      if (input[i].isOfType<std::string>(&currentRule)) {
         rulesToConsider.addOnTop(currentRule);
       } else if (input[i].IsOperation(&currentRule)) {
         rulesToConsider.addOnTop(currentRule);
@@ -9875,7 +9875,7 @@ bool CalculatorFunctions::innerRandomInteger(
   if (accum == 0) {
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
-  int generatedRandomInt = static_cast<signed>(global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % accum;
+  int generatedRandomInt = static_cast<signed>(global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % accum;
   int resultRandomValue = theIntervals[0][0];
   bool found = false;
   accum = 0;
@@ -9918,7 +9918,7 @@ bool CalculatorFunctions::innerSelectAtRandom(
     output = input[1]; // only one item to select from: return that item
     return true;
   }
-  int randomIndex = (global.unsecurePseudoRandomGenerator.GetRandomPositiveLessThanBillion() % (input.size() - 1)) + 1;
+  int randomIndex = (global.unsecurePseudoRandomGenerator.getRandomPositiveLessThanBillion() % (input.size() - 1)) + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }

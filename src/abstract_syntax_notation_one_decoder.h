@@ -83,8 +83,8 @@ public:
   std::string GetType() const;
   bool isTime() const;
   int GetLengthLengthEncoding();
-  void MakeSequence(int numberOfEmptyElements);
-  void MakeSequence(const List<ASNElement>& input);
+  void makeSequence(int numberOfEmptyElements);
+  void makeSequence(const List<ASNElement>& input);
   // The following method
   // serialize an object like a sequence but
   // changes the tag to a bitstring.
@@ -305,7 +305,7 @@ public:
   static void WriteNull(List<unsigned char>& output);
 
   std::string ToStringAnnotateBinary();
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   void reset();
   AbstractSyntaxNotationOneSubsetDecoder();
   ~AbstractSyntaxNotationOneSubsetDecoder();

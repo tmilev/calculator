@@ -508,7 +508,7 @@ PermutationR2 PermutationR2::operator*(const PermutationR2& right) const {
 }
 
 void PermutationR2::makeIdentity(const PermutationR2& unused) {
-  (void) unused;//avoid unused parameter warning, portable
+  (void) unused;
   this->cycles.setSize(0);
 }
 
@@ -856,7 +856,7 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
 }
 
 bool PermutationGroupData::GetWordjjPlus1Implementation(FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word) {
-  (void) G;//avoid unused parameter warning, portable
+  (void) G;
   g.GetWordjjPlus1(word);
   return true;
 }
@@ -1414,7 +1414,7 @@ int HyperoctahedralGroup::GetN() {
 
 LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
   HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
-  //global.Comments << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
+  //global.Comments << "HyperoctahedralGroup::getSize() called.  N =" << HD->N << '\n';
   if (!HD) {
     global.fatal << "Consistency error. " << global.fatal;
   }

@@ -348,7 +348,7 @@ bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
       Rational parser;
       if (parser.AssignStringFailureAllowed(this->theString)) {
         LargeInteger theInt;
-        if (parser.IsInteger(&theInt)) {
+        if (parser.isInteger(&theInt)) {
           this->theType = JSData::token::tokenLargeInteger;
           this->theInteger.getElement() = theInt;
           this->theString = "";
@@ -645,7 +645,7 @@ bool JSData::readstring(
       << "<a href=\""
       << global.DisplayNameExecutable
       << "?request=calculator&mainInput="
-      << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(), false)
+      << HtmlRoutines::convertStringToURLString(calculatorInput.str(), false)
       << "\">"
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"

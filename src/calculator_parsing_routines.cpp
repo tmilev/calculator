@@ -275,7 +275,7 @@ void Calculator::initialize() {
     this->knownOperationsInterpretedAsFunctionsMultiplicatively
   );
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MakeSequence");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("makeSequence");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixEnd");
@@ -1110,7 +1110,7 @@ bool Calculator::ReplaceXdotsXByMatrixStart(int numXes) {
   SyntacticElement& currentElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numXes];
   currentElt.dataList.setExpectedSize(10);
   currentElt.dataList.setSize(1);
-  currentElt.dataList.lastObject()->MakeSequence(*this);
+  currentElt.dataList.lastObject()->makeSequence(*this);
   currentElt.controlIndex = this->conMatrixStart();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceXdotsXByMatrixStart]";
@@ -1139,7 +1139,7 @@ bool Calculator::ReplaceMatrixXByE() {
     }
     theMatElt.theData.AssignMatrixExpressions(theMat, *this, true, true);
   } else {
-    theMatElt.theData.MakeMatrix(*this);
+    theMatElt.theData.makeMatrix(*this);
   }
   theMatElt.dataList.setSize(0);
   theMatElt.controlIndex = this->conExpression();
@@ -1154,7 +1154,7 @@ bool Calculator::ReplaceMatrixEXByMatrixNewRow() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theMatElt.dataList.lastObject()->addChildOnTop(theElt.theData);
   theMatElt.dataList.setSize(theMatElt.dataList.size + 1);
-  theMatElt.dataList.lastObject()->MakeSequence(*this);
+  theMatElt.dataList.lastObject()->makeSequence(*this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrixNewRow]";
   }
@@ -1209,7 +1209,7 @@ bool Calculator::ReplaceIntegerDotIntegerByE() {
   Rational denominator = 10;
   denominator.raiseToPower(powerOfTenToDivideBy);
   Rational result;
-  result.AssignString(beforeDecimalPoint);
+  result.assignString(beforeDecimalPoint);
   result *= denominator;
   result += afterDecimalPoint;
   result /= denominator;
@@ -1223,7 +1223,7 @@ bool Calculator::ReplaceIntegerXbyEX() {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theElt.controlIndex = this->conExpression();
   Rational value;
-  value.AssignString(theElt.theData.getValue<std::string>());
+  value.assignString(theElt.theData.getValue<std::string>());
   theElt.theData.assignValue(value, *this);
   return true;
 }
@@ -1855,8 +1855,8 @@ bool Calculator::AllowsDivideInPreceding(const std::string& lookAhead) {
   return this->AllowsTimesInPreceding(lookAhead);
 }
 
-bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* outputErrors) {
-  MacroRegisterFunctionWithName("Calculator::ExtractExpressions");
+bool Calculator::extractExpressions(Expression& outputExpression, std::string* outputErrors) {
+  MacroRegisterFunctionWithName("Calculator::extractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).reserve((*this->CurrrentSyntacticSouP).size + this->numEmptyTokensStart);
@@ -1906,7 +1906,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
         << " times without advancing to the next syntactic element in the syntactic soup. "
         << "If this is indeed an expression which requires that "
         << "many application of a single parsing rule, "
-        << "then you should modify function Calculator::ExtractExpressions. "
+        << "then you should modify function Calculator::extractExpressions. "
         << global.fatal;
       }
     }
@@ -2510,7 +2510,7 @@ bool Calculator::ApplyOneRule() {
     lastE.theData.size() == 0 &&
     lastE.theData.theData == this->opLisT()
   ) {
-    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("MakeSequence"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("makeSequence"));
   }
   if (thirdToLastS == "\\sqrt" && secondToLastS == "Expression") {
     return this->ReplaceSqrtEXByEX();
@@ -2622,10 +2622,10 @@ bool Calculator::ApplyOneRule() {
   ) {
     return this->ReplaceYXBySequenceX(this->conSequence());
   }
-  if (thirdToLastS == "MakeSequence" && secondToLastS == "{}" && lastS == "Expression") {
+  if (thirdToLastS == "makeSequence" && secondToLastS == "{}" && lastS == "Expression") {
     return this->ReplaceXXYBySequenceY(this->conExpression());
   }
-  if (fourthToLastS == "MakeSequence" && thirdToLastS == "{}" && secondToLastS == "Expression") {
+  if (fourthToLastS == "makeSequence" && thirdToLastS == "{}" && secondToLastS == "Expression") {
     return this->ReplaceXXYXBySequenceYX(this->conExpression());
   }
   if (

@@ -26,12 +26,12 @@ bool WebServer::CreateProcessMutex() {
 
 void WebServer::ComputeActiveWorkerId() {
   List<unsigned char> incomingId;
-  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
   WebWorker& worker = this->GetActiveWorker();
   if (worker.workerId != "") {
     this->workerIds.RemoveKey(worker.workerId);
   }
-  worker.workerId = Crypto::ConvertListUnsignedCharsToHex(incomingId);
+  worker.workerId = Crypto::convertListUnsignedCharsToHex(incomingId);
   this->workerIds.SetKeyValue(worker.workerId, this->activeWorker);
   if (this->workerIds.size() > 2 * this->theWorkers.size) {
     global << Logger::red

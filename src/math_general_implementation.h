@@ -406,7 +406,7 @@ void Vectors<Coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   }
   Vector<Coefficient> theVect;
   for (int i = 0; i < theDim && currentRank < theDim; i ++) {
-    theVect.MakeEi(theDim, i);
+    theVect.makeEi(theDim, i);
     this->addOnTop(theVect);
     int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
     if (candidateRank > currentRank) {

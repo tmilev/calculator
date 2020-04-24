@@ -47,7 +47,7 @@ public:
     output << theGen.toString();
     return output;
   }
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   static unsigned int hashFunction(const ChevalleyGenerator& input) {
     return static_cast<unsigned>(input.theGeneratorIndex);
   }
@@ -331,14 +331,14 @@ public:
     this->monBody.setExpectedSize(ExpectedNumVars);
     this->monBody.setSize(0);
   }
-  void MakeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
+  void makeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
   void setVariable(int variableIndex, const Rational& power);
   void trimTrailingZeroes();
   bool operator>(const MonomialP& other) const;
   bool IsDivisibleBy(const MonomialP& other) const;
   int TotalDegreeInt() const {
     int result = - 1;
-    if (!this->TotalDegree().IsSmallInteger(&result)) {
+    if (!this->TotalDegree().isSmallInteger(&result)) {
       global.fatal
       << "This is a programming error: total degree of monomial must be "
       << "a small integer to call this function. " << global.fatal;
@@ -1432,7 +1432,7 @@ template <typename Coefficient>
 bool Vectors<Coefficient>::ComputeNormal(Vector<Coefficient>& output, int inputDim) {
   if (this->size == 0) {
     if (inputDim == 1) {
-      output.MakeEi(1, 0);
+      output.makeEi(1, 0);
       return true;
     }
     return false;
@@ -1835,7 +1835,7 @@ public:
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   std::string simpleRootLetter;
-  List<std::string> polyAlphabeT;
+  List<std::string> polynomialAlphabet;
   List<std::string> weylAlgebraLetters;
   List<std::string> vectorSpaceEiBasisNames;
   Rational AmbientCartanSymmetricInverseScale;
@@ -1936,7 +1936,7 @@ class MonomialWeylAlgebra {
       i < this->differentialPart.minimalNumberOfVariables();
       i ++
     ) {
-      if (!this->differentialPart(i).IsSmallInteger()) {
+      if (!this->differentialPart(i).isSmallInteger()) {
         return true;
       }
     }
@@ -2201,7 +2201,7 @@ public:
       outputConversionToRationals->makeZero();
     }
     for (int i = 0; i < this->size(); i ++) {
-      if (!this->coefficients[i].IsRational(theCF)) {
+      if (!this->coefficients[i].isRational(theCF)) {
         return false;
       } else {
         if (outputConversionToRationals != nullptr) {
@@ -2359,8 +2359,8 @@ public:
     }
     return result;
   }
-  bool IsSmallInteger(int* whichInteger = nullptr) const;
-  bool IsInteger(LargeInteger* whichInteger = nullptr) const;
+  bool isSmallInteger(int* whichInteger = nullptr) const;
+  bool isInteger(LargeInteger* whichInteger = nullptr) const;
   void setExpectedSize(int theSize) {
     this->theMonomials.setExpectedSize(theSize);
     this->coefficients.setExpectedSize(theSize);
@@ -2371,7 +2371,7 @@ public:
     output.makeOne();
     Rational tempRat;
     for (int i = 0; i < this->size(); i ++) {
-      if (!this->coefficients[i].IsInteger()) {
+      if (!this->coefficients[i].isInteger()) {
         tempRat = this->coefficients[i].GetDenominator();
         *this *= tempRat;
         output *= tempRat;
@@ -2504,7 +2504,7 @@ class MonomialVector {
   bool operator==(const MonomialVector& other) const {
     return this->theIndex == other.theIndex;
   }
-  void MakeEi(int inputIndex) {
+  void makeEi(int inputIndex) {
     this->theIndex = inputIndex;
   }
   bool operator>(const MonomialVector& other) const {
@@ -2518,7 +2518,7 @@ class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   void MaKeEi(int NonZeroIndex, const Coefficient& theCoeff = 1) {
     this->makeZero();
     MonomialVector theMon;
-    theMon.MakeEi(NonZeroIndex);
+    theMon.makeEi(NonZeroIndex);
     this->addMonomial(theMon, theCoeff);
   }
   int GetLargestParticipatingBasisIndex() {
@@ -2602,7 +2602,7 @@ class ElementMonomialAlgebra: public LinearCombination<templateMonomial, Coeffic
 template<class Coefficient>
 class PolynomialOrder {
   public:
-  List<MonomialP>::Comparator theMonOrder;
+  List<MonomialP>::Comparator monomialOrder;
   bool CompareLeftGreaterThanRight(const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right) const;
 };
 
@@ -3092,7 +3092,7 @@ class GroebnerBasisComputation {
   int NumberGBComputations;
 
   int MaxNumSerreSystemComputationsPreferred;
-  int MaxNumGBComputations;
+  int maximumPolynomialComputations;
   int MaxNumBasisReductionComputations;
   int firstIndexLatexSlide;
   int numberOfIntermediateRemainders;
@@ -3168,12 +3168,12 @@ class GroebnerBasisComputation {
   std::string GetDivisionLaTeXSlide();
 
   int SelectPolyIndexToAddNext();
-  bool AddPolysAndReduceBasis();
+  bool addPolynomialsAndReduceBasis();
   bool TransformToReducedBasis(
     List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
   );
-  bool TransformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
-  bool TransformToReducedGroebnerBasisImprovedAlgorithm(
+  bool transformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
+  bool transformToReducedGroebnerBasisImprovedAlgorithm(
     List<Polynomial<Coefficient> >& inputOutpuT,
     int upperComputationBound = - 1
   );
@@ -3336,8 +3336,8 @@ public:
     this->ratValue = theCoeff;
   }
   bool IsConstant(Rational* whichConstant = nullptr) const;
-  bool IsInteger() const;
-  bool IsSmallInteger(int* whichInteger = nullptr) const;
+  bool isInteger() const;
+  bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isEqualToZero() const {
     return this->expressionType == this->typeRational && this->ratValue.isEqualToZero();
   }
@@ -3424,7 +3424,7 @@ bool LinearCombination<templateMonomial, Coefficient>::isEqualToZero() const {
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::IsInteger(LargeInteger* whichInteger) const {
+bool LinearCombination<templateMonomial, Coefficient>::isInteger(LargeInteger* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3436,13 +3436,13 @@ bool LinearCombination<templateMonomial, Coefficient>::IsInteger(LargeInteger* w
   }
   bool result = (*this)[0].IsConstant();
   if (result) {
-    result = this->coefficients[0].IsInteger(whichInteger);
+    result = this->coefficients[0].isInteger(whichInteger);
   }
   return result;
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::IsSmallInteger(int* whichInteger) const {
+bool LinearCombination<templateMonomial, Coefficient>::isSmallInteger(int* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3454,7 +3454,7 @@ bool LinearCombination<templateMonomial, Coefficient>::IsSmallInteger(int* which
   }
   bool result = (*this)[0].IsConstant();
   if (result) {
-    result = this->coefficients[0].IsSmallInteger(whichInteger);
+    result = this->coefficients[0].isSmallInteger(whichInteger);
   }
   return result;
 }
@@ -3478,7 +3478,7 @@ void Polynomial<Coefficient>::makeLinearWithConstantTerm(
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < inputLastCoordinateConstantTerm.size - 1; i ++) {
-    tempM.MakeEi(i);
+    tempM.makeEi(i);
     this->addMonomial(tempM, inputLastCoordinateConstantTerm[i]);
   }
   this->operator+=(*inputLastCoordinateConstantTerm.lastObject());
@@ -3491,8 +3491,8 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < inputCoefficients.size; i ++) {
-    tempM.MakeEi(i);
-    if (!inputCoefficients[i].IsInteger()) {
+    tempM.makeEi(i);
+    if (!inputCoefficients[i].isInteger()) {
       global.fatal << "This may or may not be a programming error: "
       << "requesting a monomial with non-integer exponent. "
       << "It appears this operation should be allowed, however "
@@ -4275,7 +4275,7 @@ void Polynomial<Coefficient>::MakePolyFromDirectionAndNormal(
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < direction.size; i ++) {
-    tempM.MakeEi(i);
+    tempM.makeEi(i);
     this->addMonomial(tempM, normal.theObjects[i] / tempRat2);
   }
   *this += Correction;
@@ -4419,7 +4419,7 @@ void Matrix<Coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& 
   if (this->numberOfRows == 0) {
     output.setSize(this->numberOfColumns);
     for (int i = 0; i < this->numberOfColumns; i ++) {
-      output[i].MakeEi(this->numberOfColumns, i);
+      output[i].makeEi(this->numberOfColumns, i);
     }
     return;
   }
@@ -4428,7 +4428,7 @@ void Matrix<Coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& 
   output.setSize(nonPivotPts.CardinalitySelection);
   for (int i = 0; i < nonPivotPts.CardinalitySelection; i ++) {
     int currentPivotIndex = nonPivotPts.elements[i];
-    output[i].MakeEi(this->numberOfColumns, currentPivotIndex);
+    output[i].makeEi(this->numberOfColumns, currentPivotIndex);
     int rowCounter = 0;
     for (int j = 0; j < this->numberOfColumns; j ++) {
       if (!nonPivotPts.selected[j]) {
@@ -5216,7 +5216,7 @@ public:
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
-    (void) input;//avoid unused parameter warning, portable
+    (void) input;
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
@@ -5957,7 +5957,7 @@ public:
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier) const {
     int result = 0;
-    if (!this->coefficients[SimpleTypeIdentifier].IsSmallInteger(&result)) {
+    if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
       global.fatal << "This is a programming error: "
       << "Dynkin type has multiplicity that is not a small integer. "
       << global.fatal;
@@ -5974,7 +5974,7 @@ public:
       result += this->coefficients[i] * (*this)[i].GetRootSystemSize();
     }
     int intResult = 0;
-    if (!result.IsSmallInteger(&intResult)) {
+    if (!result.isSmallInteger(&intResult)) {
       global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
@@ -5985,7 +5985,7 @@ public:
       result += this->coefficients[i] * (*this)[i].GetLieAlgebraDimension();
     }
     int intResult = 0;
-    if (!result.IsSmallInteger(&intResult)) {
+    if (!result.isSmallInteger(&intResult)) {
       global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
@@ -6037,7 +6037,7 @@ public:
   List<List<int> > sameTypeComponents;
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
-  bool CheckInitialization() const;
+  bool checkInitialization() const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
@@ -6369,7 +6369,7 @@ class MonomialMatrix {
     this->IsId = true;
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat;//avoid unused parameter warning, portable
+    (void) theFormat;
     std::stringstream out;
     if (!this->IsId) {
       out << "m_{" << this->vIndex + 1 << "}\\otimes " << "m^*_{" << this->dualIndex + 1 << "}";
@@ -7311,7 +7311,7 @@ void MonomialGeneralizedVerma<Coefficient>::ReduceMe(
       << " out of " << currentMon.Powers.size << "...";
       theReport.report(reportStream.str());
       int thePower = - 1;
-      if (!currentMon.Powers[k].IsSmallInteger(&thePower)) {
+      if (!currentMon.Powers[k].isSmallInteger(&thePower)) {
         break;
       }
       int theIndex = currentMon.generatorsIndices[k];

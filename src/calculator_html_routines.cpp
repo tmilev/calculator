@@ -48,7 +48,7 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
   }
   const Expression& argument = input[1];
   std::string theString;
-  if (!argument.IsOfType(&theString)) {
+  if (!argument.isOfType(&theString)) {
     return false;
   }
   List<SyntacticElement> theElts;
@@ -126,7 +126,7 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
     return "box-without-name";
   }
   std::string theBoxName = "faultyBoxName";
-  if (!theArguments.GetValueCreate("name").IsOfType<std::string>(&theBoxName)) {
+  if (!theArguments.GetValueCreate("name").isOfType<std::string>(&theBoxName)) {
     theBoxName = theArguments.GetValueCreate("name").toString();
   }
   return theBoxName;

@@ -37,12 +37,12 @@ public:
   int CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex);
   void ComputeImplicitPlot();
   void ComputeImplicitPlotPart2();
-  void PlotGrid(int theColor);
-  bool EvaluatesToDouble(double& whichDouble);
+  void plotGrid(int theColor);
+  bool evaluatesToDouble(double& whichDouble);
   double GetValueAtPoint(const Vector<double>& thePoint);
   void EvaluateFunAtTriangleVertices(int triangleIndex);
   double GetTriangleMaxSideLength(int triangleIndex);
-  void Subdivide(int triangleIndex);
+  void subdivide(int triangleIndex);
   void AddPointFromVerticesValues(
     Vectors<double>& outputAppend,
     const Vector<double>& left,
@@ -66,8 +66,8 @@ MeshTriangles::MeshTriangles() {
   this->flagFunctionEvaluationFailed = false;
 }
 
-void MeshTriangles::PlotGrid(int theColor) {
-  MacroRegisterFunctionWithName("MeshTriangles::PlotGrid");
+void MeshTriangles::plotGrid(int theColor) {
+  MacroRegisterFunctionWithName("MeshTriangles::plotGrid");
   this->theGrid.thePlots.setSize(0);
   this->theGrid.thePlots.setExpectedSize(this->theGrid.thePlots.size + this->theTriangles.size * 3);
   PlotObject currentLinePlot;
@@ -186,8 +186,8 @@ int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
   return currentIndex;
 }
 
-void MeshTriangles::Subdivide(int triangleIndex) {
-  MacroRegisterFunctionWithName("MeshTriangles::Subdivide");
+void MeshTriangles::subdivide(int triangleIndex) {
+  MacroRegisterFunctionWithName("MeshTriangles::subdivide");
   List<Vector<double> > currentTriangle = this->theTriangles[triangleIndex];
   if (currentTriangle.size != 3) {
     global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal;
@@ -261,7 +261,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
     }
     i = this->CleanUpTrianglesReturnUpdatedCurrentIndex(i);
     if (this->GetTriangleMaxSideLength(i) > minSide && !this->flagTriangleLimitReached) {
-      this->Subdivide(i);
+      this->subdivide(i);
       continue;
     }
     theSegment.setSize(0);
@@ -309,12 +309,12 @@ void MeshTriangles::ComputeImplicitPlot() {
     }
   }
   if (this->flagShowGrid) {
-    this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(240, 240, 0)));
+    this->plotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(240, 240, 0)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid) {
-    this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
+    this->plotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
   // this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
@@ -442,7 +442,7 @@ bool MeshTriangles::ComputePoints(
   this->XstartingGridCount = theGridCount[0];
   this->YstartingGridCount = theGridCount[1];
   if (input.size() >= 6) {
-    if (!input[5].IsSmallInteger(&this->maxNumTriangles)) {
+    if (!input[5].isSmallInteger(&this->maxNumTriangles)) {
       return theCommands << "Failed to extract small integer from: " << input[5].toString();
     }
     if (this->maxNumTriangles > 20000) {
@@ -501,7 +501,7 @@ bool CalculatorFunctions::innerIntegratePullConstant(
     return false;
   }
   Expression theNewIntegralE;
-  theNewIntegralE.MakeIntegral(theCommands, theSetE, theFunNoCoeff, theVariableE);
+  theNewIntegralE.makeIntegral(theCommands, theSetE, theFunNoCoeff, theVariableE);
   output = theFunCoeff * theNewIntegralE;
   return true;
 }
@@ -532,20 +532,20 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   if (!a.IsNegativeConstant()) {
     return false;
   }
-  if (!c.IsPositiveNumber()) {
+  if (!c.isPositiveNumber()) {
     return false;
   }
   Expression theSQRTedCoeff, theRadSquared, theRad;
-  theSQRTedCoeff.MakeSqrt(theCommands, a * (- 1));
+  theSQRTedCoeff.makeSqrt(theCommands, a * (- 1));
   theFunCoeff *= theSQRTedCoeff;
   theRadSquared = c / a * (- 1);
-  theRad.MakeSqrt(theCommands, theRadSquared);
+  theRad.makeSqrt(theCommands, theRadSquared);
   Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
   rescaledArgument = theVariableE / theRad;
   arcCosPart.MakeOX(theCommands, theCommands.opArcCos(), rescaledArgument);
   arcCosPart *= theRadSquared / - 2;
   algSQRTPart = theRadSquared - theVariableE * theVariableE;
-  algPart.MakeSqrt(theCommands, algSQRTPart);
+  algPart.makeSqrt(theCommands, algSQRTPart);
   algPart *= theVariableE / 2;
   output = theFunCoeff * (arcCosPart + algPart);
   return true;
@@ -565,7 +565,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
   Expression exponentPartE = theFunctionE[1]; //<- note: the seemingly odd order is intentional!
   Expression polyPartE = theFunctionE[2]; //<- note: the seemingly odd order is intentional!
   Expression powerOfXE, powerOfEE;
-  Expression aE, bE;//exponent is of form aX+b
+  Expression aE, bE; //exponent is of form aX+b
   powerOfXE.assignValue(1, theCommands);
   bool isGood = false;
   for (int i = 0; i < 2; i ++) {
@@ -580,7 +580,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
     if (!CalculatorFunctions::extractLinearCoeffsWRTvariable(powerOfEE, theVariableE, aE, bE)) {
       continue;
     }
-    if (!aE.IsConstantNumber() || !bE.IsConstantNumber()) {
+    if (!aE.isConstantNumber() || !bE.isConstantNumber()) {
       continue;
     }
     if (polyPartE != theVariableE) {
@@ -591,7 +591,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
         continue;
       }
       int theInt = - 1;
-      if (!polyPartE[2].IsSmallInteger(&theInt)) {
+      if (!polyPartE[2].isSmallInteger(&theInt)) {
         continue;
       }
       if (theInt <= 0) {
@@ -610,7 +610,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
     theCommands, theCommands.opThePower(), theVariableE, powerOfXE - theCommands.EOne()
   );
   remainingIntegrand *= exponentPartE;
-  integralPart.MakeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
+  integralPart.makeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
   output = (polyPartE * exponentPartE - powerOfXE * integralPart) / aE;
   return true;
 }
@@ -638,21 +638,21 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   if (!b.isEqualToZero()) {
     return false;
   }
-  if (!a.IsPositiveNumber()) {
+  if (!a.isPositiveNumber()) {
     return false;
   }
   if (!c.IsNegativeConstant()) {
     return false;
   }
   Expression extraCF, theVarChangeCF, theNewVarE;
-  extraCF.MakeSqrt(theCommands, c * (- 1));
+  extraCF.makeSqrt(theCommands, c * (- 1));
   theFunCoeff *= extraCF;
-  theVarChangeCF.MakeSqrt(theCommands, (a / c) * (- 1));
+  theVarChangeCF.makeSqrt(theCommands, (a / c) * (- 1));
   theNewVarE = theVariableE * theVarChangeCF;
   theFunCoeff /= theVarChangeCF;
   Expression algSQRTPart, algPart, lnPart;
   algSQRTPart = theNewVarE * theNewVarE - theCommands.EOne();
-  algPart.MakeSqrt(theCommands, algSQRTPart);
+  algPart.makeSqrt(theCommands, algSQRTPart);
   lnPart.MakeOX(theCommands, theCommands.opLog(), theNewVarE - algPart);
   output = theFunCoeff * (algPart * theNewVarE + lnPart) / 2;
   return true;
@@ -677,7 +677,7 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   }
   Expression theIndefiniteIntegral, indefiniteExpression;
   indefiniteExpression.makeAtom(theCommands.opIndefiniteIndicator(), theCommands);
-  theIndefiniteIntegral.MakeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
+  theIndefiniteIntegral.makeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
   Expression solvedIntegral;
   if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral)) {
     return false;
@@ -696,7 +696,7 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   theVar.addOnTop(theVariableE);
   theValue.addOnTop(0);
   for (int i = 1; i <= 2; i ++) {
-    if (theSetE[i].EvaluatesToDouble(&theValue[0])) {
+    if (theSetE[i].evaluatesToDouble(&theValue[0])) {
       double theResult = 0;
       if (!solvedIntegral.EvaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult)) {
         return false;
@@ -773,7 +773,7 @@ bool CalculatorFunctions::innerNumerator(Calculator& theCommands, const Expressi
   }
   const Expression& argument = input[1];
   Rational theRat;
-  if (argument.IsRational(&theRat)) {
+  if (argument.isRational(&theRat)) {
     return output.assignValue(Rational(theRat.GetNumerator()), theCommands);
   }
   if (argument.startsWith(theCommands.opDivide())) {
@@ -793,7 +793,7 @@ bool CalculatorFunctions::innerDenominator(Calculator& theCommands, const Expres
   }
   const Expression& argument = input[1];
   Rational theRat, theDen;
-  if (argument.IsRational(&theRat)) {
+  if (argument.isRational(&theRat)) {
     theDen = theRat.GetDenominator();
     return output.assignValue(theDen, theCommands);
   }
@@ -849,7 +849,7 @@ bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
     theRemaining.addOnTop(input[i]);
   }
   Expression argumentE;
-  argumentE.MakeSequence(theCommands, &theRemaining);
+  argumentE.makeSequence(theCommands, &theRemaining);
   return output.addChildOnTop(argumentE);
 }
 
@@ -925,7 +925,7 @@ bool CalculatorFunctions::innerMultiplySequence(
   for (int i = 1; i < input.size(); i ++) {
     theTerms.addOnTop(input[i]);
   }
-  return output.MakeProducT(theCommands, theTerms);
+  return output.makeProduct(theCommands, theTerms);
 }
 
 bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
@@ -981,7 +981,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
   for (int i = 1; i < input.size(); i ++) {
     result.addOnTopNoRepetition(input[i]);
   }
-  return output.MakeSequence(theCommands, &result);
+  return output.makeSequence(theCommands, &result);
 }
 
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1003,7 +1003,7 @@ bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& i
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.quickSortAscending();
-  return output.MakeSequence(theCommands, &sortedExpressions);
+  return output.makeSequence(theCommands, &sortedExpressions);
 }
 
 bool CalculatorFunctions::innerSortDescending(
@@ -1028,7 +1028,7 @@ bool CalculatorFunctions::innerSortDescending(
     sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.quickSortDescending();
-  return output.MakeSequence(theCommands, &sortedExpressions);
+  return output.makeSequence(theCommands, &sortedExpressions);
 }
 
 bool CalculatorFunctions::innerLength(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1150,7 +1150,7 @@ bool CalculatorFunctions::innerPlotLabel(
     return false;
   }
   std::string theLabel;
-  if (!input[2].IsOfType<std::string>(&theLabel)) {
+  if (!input[2].isOfType<std::string>(&theLabel)) {
     theLabel = input[2].toString();
   }
   PlotObject thePlot;
@@ -1208,10 +1208,10 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   if (input.size() != 3) {
     return theCommands << "SolveFor takes as input three arguments. ";
   }
-  if (input[1].HasBoundVariables()) {
+  if (input[1].hasBoundVariables()) {
     return false;
   }
-  if (input[2].HasBoundVariables()) {
+  if (input[2].hasBoundVariables()) {
     return false;
   }
   Expression thePowers;
@@ -1256,12 +1256,12 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     const Expression& a = thePowers[3];
     const Expression& b = thePowers[2];
     const Expression& c = thePowers[1];
-    output.MakeSequence(theCommands);
+    output.makeSequence(theCommands);
     Expression currentRoot;
     Expression theDiscriminant;
     theDiscriminant = b * b - a * c * 4;
     Expression sqrtDiscriminant;
-    sqrtDiscriminant.MakeSqrt(theCommands, theDiscriminant, 2);
+    sqrtDiscriminant.makeSqrt(theCommands, theDiscriminant, 2);
     currentRoot = (b * (- 1) - sqrtDiscriminant) / (a * 2);
     output.addChildOnTop(currentRoot);
     currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
@@ -1353,16 +1353,16 @@ bool CalculatorFunctions::innerDistributeExponent(
   if (!input[1].startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  if (!base[1].IsConstantNumber()) {
+  if (!base[1].isConstantNumber()) {
     return false;
   }
-  bool isGood =base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  bool isGood =base[1].isPositiveNumber() || base[2].isPositiveNumber();
   if (!isGood) {
-    if (exponentE.IsInteger()) {
+    if (exponentE.isInteger()) {
       isGood = true;
     } else {
       Rational exponentRat;
-      if (exponentE.IsRational(&exponentRat)) {
+      if (exponentE.isRational(&exponentRat)) {
         if (!exponentRat.GetDenominator().IsEven()) {
           isGood = true;
         }
@@ -1386,7 +1386,7 @@ bool CalculatorFunctions::innerSqrt(
     return false;
   }
   Rational ratPower;
-  if (input[1].IsRational(&ratPower)) {
+  if (input[1].isRational(&ratPower)) {
     if (ratPower != 0) {
       Expression powerE, powerEreduced, theExponentE;
       ratPower.invert();
@@ -1406,10 +1406,10 @@ bool CalculatorFunctions::innerSqrt(
     return output.assignValue(1, theCommands);
   }
   int thePower = 0;
-  if (!input[1].IsSmallInteger(&thePower)) {
+  if (!input[1].isSmallInteger(&thePower)) {
     return false;
   }
-  if (!input[2].IsRational() ) {
+  if (!input[2].isRational() ) {
     theCommands.CheckInputNotSameAsOutput(input, output);
     Expression theExponent;
     Rational thePowerRat(1, thePower);
@@ -1423,7 +1423,7 @@ bool CalculatorFunctions::innerSqrt(
     return output.assignValue(1, theCommands);
   }
   Rational rationalValue;
-  if (!input[2].IsRational(&rationalValue)) {
+  if (!input[2].isRational(&rationalValue)) {
     return false;
   }
   if (thePower < 0) {
@@ -1455,12 +1455,12 @@ bool CalculatorFunctions::innerFloor(
     return false;
   }
   Rational theRat;
-  if (input[1].IsOfType<Rational>(&theRat)) {
+  if (input[1].isOfType<Rational>(&theRat)) {
     theRat.AssignFloor();
     return output.assignValue(theRat, theCommands);
   }
   double theDouble = 0;
-  if (input[1].EvaluatesToDouble(&theDouble)) {
+  if (input[1].evaluatesToDouble(&theDouble)) {
     return output.assignValue(static_cast<int>(std::floor(theDouble)), theCommands);
   }
   return false;
@@ -1474,14 +1474,14 @@ bool CalculatorFunctions::innerLogarithmBaseNCeiling(
     return theCommands << "Logarithm ceiling function expects exactly two arguments. ";
   }
   int smallInt = 0;
-  if (!input[1].IsSmallInteger(&smallInt)) {
+  if (!input[1].isSmallInteger(&smallInt)) {
     return theCommands << "First argument expected to be a small integer. ";
   }
   if (smallInt <= 1) {
     return theCommands << "First argument must be larger than one. ";
   }
   LargeIntegerUnsigned argument;
-  if (!input[2].IsIntegerNonNegative(&argument)) {
+  if (!input[2].isIntegerNonNegative(&argument)) {
     return theCommands << "Failed to extract positive intger from second argument. ";
   }
   int result = static_cast<int>(
@@ -1498,7 +1498,7 @@ bool CalculatorFunctions::innerRound(
     return false;
   }
   Rational theRat;
-  if (input[1].IsOfType<Rational>(&theRat)) {
+  if (input[1].isOfType<Rational>(&theRat)) {
     Rational result = theRat;
     result.AssignFloor();
     if (theRat - result >= Rational(1, 2)) {
@@ -1507,7 +1507,7 @@ bool CalculatorFunctions::innerRound(
     return output.assignValue(result, theCommands);
   }
   double theDouble = 0;
-  if (input[1].EvaluatesToDouble(&theDouble)) {
+  if (input[1].evaluatesToDouble(&theDouble)) {
     return output.assignValue(
       static_cast<int>(std::round(theDouble)), theCommands
     );
@@ -1533,7 +1533,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
     theSegment.colorJS = "black";
     theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[2];
-    if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
+    if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
     }
     if (!DrawingVariables::GetColorIntFromColorString(
@@ -1544,7 +1544,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   }
   if (input.size() >= 4) {
     const Expression& lineWidthE = input[3];
-    if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth)) {
+    if (!lineWidthE.evaluatesToDouble(&theSegment.lineWidth)) {
       theCommands << "Failed to extract line width from: " << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
@@ -1556,7 +1556,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   theSegment.dimension = theMat.numberOfColumns;
   theMat.GetVectorsFromRows(theSegment.thePointsDouble);
   if (input.size() >= 4) {
-    if (!input[3].EvaluatesToDouble(&theSegment.lineWidth)) {
+    if (!input[3].evaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
     }
   }
@@ -1565,7 +1565,9 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   return output.assignValue(thePlot, theCommands);
 }
 
-bool CalculatorFunctions::innerPlotMarkSegment(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerPlotMarkSegment(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotMarkSegment");
   if (input.size() < 3) {
     return false;
@@ -1584,7 +1586,7 @@ bool CalculatorFunctions::innerPlotMarkSegment(Calculator& theCommands, const Ex
   }
   int numSegments = 1;
   if (input.size() >= 4) {
-    if (!input[3].IsSmallInteger(&numSegments)) {
+    if (!input[3].isSmallInteger(&numSegments)) {
       return theCommands << "Could not extract small integer from " << input[3].toString();
     }
   }
@@ -1632,7 +1634,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
     theSegment.colorJS = "black";
     theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[3];
-    if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
+    if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
     }
     if (!DrawingVariables::GetColorIntFromColorString(theSegment.colorJS, theSegment.colorRGB)) {
@@ -1641,7 +1643,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
   }
   if (input.size() >= 5) {
     const Expression& lineWidthE = input[4];
-    if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth)) {
+    if (!lineWidthE.evaluatesToDouble(&theSegment.lineWidth)) {
       theCommands << "Failed to extract line width from: "
       << lineWidthE.toString();
     }
@@ -1659,7 +1661,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
   theSegment.thePointsDouble.addOnTop(leftV);
   theSegment.thePointsDouble.addOnTop(rightV);
   if (input.size() >= 5) {
-    if (!input[4].EvaluatesToDouble(&theSegment.lineWidth)) {
+    if (!input[4].evaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
     }
   }
@@ -1760,8 +1762,8 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   }
   Rational theBase, theArg;
   if (
-    !input[1].IsOfType<Rational>(&theBase) ||
-    !input[2].IsOfType<Rational>(&theArg)
+    !input[1].isOfType<Rational>(&theBase) ||
+    !input[2].isOfType<Rational>(&theArg)
   ) {
     return false;
   }
@@ -1798,7 +1800,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
     return true;
   }
   LargeInteger baseInt, argNum;
-  if (!theBase.IsInteger(&baseInt)) {
+  if (!theBase.isInteger(&baseInt)) {
     return false;
   }
   LargeInteger simplerBase;
@@ -1849,16 +1851,16 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
 std::string InputBox::GetSliderName() const {
   List<unsigned char> hex;
   Crypto::computeSha256(this->name, hex);
-  return this->name + "_" + Crypto::ConvertListUnsignedCharsToHex(hex);
+  return this->name + "_" + Crypto::convertListUnsignedCharsToHex(hex);
 }
 
-std::string InputBox::GetUserInputBox() const {
-  MacroRegisterFunctionWithName("InputBox::GetUserInputBox");
+std::string InputBox::getUserInputBox() const {
+  MacroRegisterFunctionWithName("InputBox::getUserInputBox");
   std::stringstream out;
   double theReader = 0;
   out.precision(4);
   out << std::fixed;
-  if (this->value.EvaluatesToDouble(&theReader)) {
+  if (this->value.evaluatesToDouble(&theReader)) {
     out << "\\FormInput" << "[" << theReader
     << "]" << "{" << this->name << "}" ;
   } else {
@@ -1910,21 +1912,21 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   }
   std::stringstream out;
   InputBox theBox;
-  if (input.IsOfType(&theBox)) {
+  if (input.isOfType(&theBox)) {
     out << "parseFloat(document.getElementsByName('" << theBox.GetSliderName() << "')[0].value)";
     return output.assignValue(out.str(), theCommands);
   }
   out.precision(7);
   bool hasDoubleValue = false;
   double theDoubleValue = - 1;
-  if (input.IsOfType<Rational>()) {
+  if (input.isOfType<Rational>()) {
     hasDoubleValue = true;
     theDoubleValue = input.getValue<Rational>().GetDoubleValue();
   }
-  if (input.IsOfType<AlgebraicNumber>()) {
-    hasDoubleValue = input.getValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+  if (input.isOfType<AlgebraicNumber>()) {
+    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
   }
-  if (input.IsOfType<double>()) {
+  if (input.isOfType<double>()) {
     hasDoubleValue = true;
     theDoubleValue = input.getValue<double>();
   }
@@ -1963,7 +1965,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       if (!CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[i], *currentE)) {
         return output.assignValue("(Failed to convert " + input[i].toString() + ")", theCommands);
       }
-      if (!currentE->IsOfType(currentString)) {
+      if (!currentE->isOfType(currentString)) {
         return output.assignValue("(Failed to convert " + input[i].toString() + ")", theCommands);
       }
       logStream << "Converted: " << input[i].toString() << " to: "
@@ -2111,7 +2113,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   if (!found) {
     return theCommands << "Could not find a triple of "
     << "functions expressions to use for "
-    << " the surface. ";
+    << "the surface. ";
   }
   thePlot.manifoldImmersion.GetFreeVariables(thePlot.variablesInPlay, true);
   if (thePlot.variablesInPlay.size > 2) {
@@ -2152,7 +2154,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
       theCommands, thePlot.coordinateFunctionsE[i - 1], jsConverter
     );
     if (isGood) {
-      isGood = jsConverter.IsOfType<std::string>(&thePlot.coordinateFunctionsJS[i - 1]);
+      isGood = jsConverter.isOfType<std::string>(&thePlot.coordinateFunctionsJS[i - 1]);
     }
     if (!isGood) {
       return theCommands << "Failed to convert "
@@ -2175,7 +2177,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
           theCommands, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
-          isGood = jsConverter.IsOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
+          isGood = jsConverter.isOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
         }
         if (!isGood) {
           return theCommands << "Failed to convert "
@@ -2207,7 +2209,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
         theCommands, expressionToConvert, jsConverter
       );
       if (isGood) {
-        isGood = jsConverter.IsOfType<std::string>(&keysToConvert.theValues[i]);
+        isGood = jsConverter.isOfType<std::string>(&keysToConvert.theValues[i]);
       }
       if (!isGood) {
         return theCommands << "Failed to convert "
@@ -2235,7 +2237,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     return theCommands << "Could not extract variable ranges, got the var ranges: "
     << thePlot.theVarRangesJS;
   }
-  thePlot.thePlotType ="surface";
+  thePlot.thePlotType = "surface";
   thePlot.dimension = thePlot.coordinateFunctionsE.size;
   Plot result;
   result += thePlot;
@@ -2326,7 +2328,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  List<MonomialP>::Comparator* theMonOrder
+  List<MonomialP>::Comparator* monomialOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   ExpressionContext theContext(theCommands);
@@ -2350,8 +2352,8 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
     theGB.theBasiS[i - 1] = polynomialsRational[i];
   }
   theGB.initializeForDivision(theGB.theBasiS);
-  if (theMonOrder != nullptr) {
-    theGB.thePolynomialOrder.theMonOrder = *theMonOrder;
+  if (monomialOrder != nullptr) {
+    theGB.thePolynomialOrder.monomialOrder = *monomialOrder;
   }
   theGB.RemainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
   theContext.getFormat(theGB.theFormat);
@@ -2557,7 +2559,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   Polynomial<Coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
-    &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.theMonOrder
+    &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
     divisorLeadingMonomial
@@ -2565,7 +2567,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   MonomialP maxMonCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
   currentRemainder.GetIndexLeadingMonomial(
-    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.theMonOrder
+    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.monomialOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.getIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].addOnTop(currentSlideNumber);
@@ -2694,7 +2696,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
-  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
@@ -2715,7 +2717,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     constMon.makeOne();
     this->allMonomials.addOnTopNoRepetition(constMon);
   }
-  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.quickSortDescending(&this->thePolynomialOrder.monomialOrder);
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.setSize(this->allMonomials.size);
@@ -2745,7 +2747,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexLeadingMonomial(
       nullptr,
       nullptr,
-      &this->thePolynomialOrder.theMonOrder
+      &this->thePolynomialOrder.monomialOrder
     );
   }
   this->theFormat.flagUseLatex = true;
@@ -2907,11 +2909,11 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     }
     theGB.theBasiS[i - 2] = polynomialsRational[i];
   }
-  if (!polynomialsRational[0].IsSmallInteger(&theGB.firstIndexLatexSlide)) {
+  if (!polynomialsRational[0].isSmallInteger(&theGB.firstIndexLatexSlide)) {
     return theCommands << "Failed to extract integer from first argument";
   }
   theGB.initializeForDivision(theGB.theBasiS);
-  theGB.thePolynomialOrder.theMonOrder.setComparison(
+  theGB.thePolynomialOrder.monomialOrder.setComparison(
     MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
   theGB.RemainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
@@ -2957,14 +2959,14 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     converted = input[1];
   }
   WithContext<Polynomial<ElementZmodP> > polynomial;
-  if (!converted.IsOfTypeWithContext(&polynomial)) {
+  if (!converted.isOfTypeWithContext(&polynomial)) {
     return theCommands << "Failed to extract modular polynomial. ";
   }
   if (polynomial.content.isEqualToZero()) {
     return theCommands << "Factoring zero not allowed. ";
   }
   LargeInteger thePrime = polynomial.content.coefficients[0].theModulus;
-  if (!input[2].IsInteger(&thePrime)) {
+  if (!input[2].isInteger(&thePrime)) {
     return false;
   }
   if (thePrime < 0) {

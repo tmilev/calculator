@@ -265,9 +265,9 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   if (this->threadIndex == - 1) {
     return;
   }
-  ListReferences<stackInfo>& theStack = global.CustomStackTrace[this->threadIndex];
+  ListReferences<StackInfo>& theStack = global.CustomStackTrace[this->threadIndex];
   theStack.setSize(theStack.size + 1);
-  stackInfo& stackTop = theStack.lastObject();
+  StackInfo& stackTop = theStack.lastObject();
   stackTop.fileName = fileName;
   stackTop.line = line;
   stackTop.functionName = functionName;
@@ -1340,7 +1340,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
     return false;
   }
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(global.userDefault.instructorComputed, false);
+  HtmlRoutines::convertStringToURLString(global.userDefault.instructorComputed, false);
   if (customized == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Customizing files not available for non-logged-in users. ";
@@ -1391,7 +1391,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   }
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(global.userDefault.instructorComputed, false) + "/";
+  HtmlRoutines::convertStringToURLString(global.userDefault.instructorComputed, false) + "/";
   if (customized == "") {
     customized = "default/";
   }
@@ -1603,7 +1603,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   zeroRoot.makeZero(theDimension);
   std::string colorText ="#64c064";
   for (int i = 0; i < theDimension; i ++) {
-    tempRoot.MakeEi(theDimension, i);
+    tempRoot.makeEi(theDimension, i);
     std::string tempS;
     tempS = tempRoot.toString();
     TDV.drawLineBetweenTwoVectorsBufferRational(zeroRoot, tempRoot, "gray", 1);
@@ -2807,8 +2807,8 @@ FormatExpressions::FormatExpressions() {
 }
 
 std::string FormatExpressions::GetPolyLetter(int index) const {
-  if (index < this->polyAlphabeT.size) {
-    return this->polyAlphabeT[index];
+  if (index < this->polynomialAlphabet.size) {
+    return this->polynomialAlphabet[index];
   }
   std::stringstream out;
   out << this->polyDefaultLetter << "_{" << index + 1 << "}";
@@ -3744,7 +3744,7 @@ bool PartFraction::initFromRoots(PartFractions& owner, Vectors<Rational>& input)
   this->ComputeIndicesNonZeroMults();
   for (int i = 0; i < input.size; i ++) {
     for (int j = 0; j < input[i].size; j ++) {
-      if (!input[i][j].IsSmallInteger()) {
+      if (!input[i][j].isSmallInteger()) {
         return false;
       }
     }
@@ -5029,7 +5029,7 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
   output.setSize(0);
   int numRowsSoFar = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->coefficients[i].IsSmallInteger(&currentMult)) {
+    if (!this->coefficients[i].isSmallInteger(&currentMult)) {
       global.fatal << "This is not supposed to happen in function "
       << "DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << global.fatal;
     }
@@ -5276,7 +5276,7 @@ int DynkinType::GetNumSimpleComponentsOfGivenRank(int desiredRank) const {
     }
   }
   int output = 0;
-  if (!result.IsSmallInteger(&output)) {
+  if (!result.isSmallInteger(&output)) {
     global.fatal << "This is a programming error: "
     << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
@@ -5289,7 +5289,7 @@ int DynkinType::GetNumSimpleComponents() const {
     result += this->coefficients[i];
   }
   int output = 0;
-  if (!result.IsSmallInteger(&output)) {
+  if (!result.isSmallInteger(&output)) {
     global.fatal << "This is a programming error: "
     << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
@@ -5307,7 +5307,7 @@ Rational DynkinType::GetRankRational() const {
 int DynkinType::GetRank() const {
   Rational tempRat = this->GetRankRational();
   int result = 0;
-  if (!tempRat.IsSmallInteger(&result)) {
+  if (!tempRat.isSmallInteger(&result)) {
     global.fatal << "This is a programming error: attempting to get a small integer "
     << "rank from a Dynkin type whose rank is not a small integer, but is instead "
     << tempRat.toString() << ". " << global.fatal;
@@ -6102,7 +6102,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output) const {
 }
 
 Rational DynkinSimpleType::GetRatioLongRootToFirst(char inputWeylLetter, int inputRank) {
-  (void) inputRank; //avoid unused parameter warning, portable.
+  (void) inputRank;
   switch (inputWeylLetter) {
     case 'A': return 1;
     case 'B': return 1;
@@ -6178,7 +6178,7 @@ ElementWeylGroupAutomorphisms::~ElementWeylGroupAutomorphisms() {
   this->flagDeallocated = true;
 }
 
-bool ElementWeylGroupAutomorphisms::CheckInitialization() const {
+bool ElementWeylGroupAutomorphisms::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal << "Element of Weyl group automorphisms has zero owner. " << global.fatal;
   }
@@ -6191,7 +6191,7 @@ void ElementWeylGroupAutomorphisms::makeIdentity(WeylGroupAutomorphisms& inputAu
 }
 
 void ElementWeylGroupAutomorphisms::MultiplyOnTheRightByOuterAuto(int outerAutoIndex) {
-  simpleReflectionOrOuterAutomorphism generator;
+  SimpleReflectionOrOuterAutomorphism generator;
   generator.index = outerAutoIndex;
   generator.flagIsOuter = true;
   this->generatorsLastAppliedFirst.addOnTop(generator);
@@ -6232,13 +6232,13 @@ std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* theFormat
 }
 
 void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightBySimpleRootInner(int simpleRootIndex) {
-  simpleReflectionOrOuterAutomorphism generator;
+  SimpleReflectionOrOuterAutomorphism generator;
   generator.index = simpleRootIndex;
   this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
 void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism) {
-  simpleReflectionOrOuterAutomorphism generator;
+  SimpleReflectionOrOuterAutomorphism generator;
   generator.index = indexOuterAutomorphism;
   generator.flagIsOuter = true;
   this->generatorsLastAppliedFirst.addOnTop(generator);
@@ -6274,7 +6274,7 @@ bool ElementWeylGroup::checkConsistency() const {
   return true;
 }
 
-bool ElementWeylGroup::CheckInitialization() const {
+bool ElementWeylGroup::checkInitialization() const {
   this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: non-initialized element Weyl group. " << global.fatal;
@@ -6385,7 +6385,7 @@ void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, W
 
 void ElementWeylGroup::MakeCanonical() {
   MacroRegisterFunctionWithName("ElementWeylGroup::MakeCanonical");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->owner->rho.size == 0) {
     this->owner->ComputeRho(false);
   }
@@ -6405,7 +6405,7 @@ bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
     //just in case
     return false;
   }
-  this->CheckInitialization();
+  this->checkInitialization();
   Polynomial<Rational> leftCharPoly, rightCharPoly;
   this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
   right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
@@ -6437,7 +6437,7 @@ void ElementWeylGroup::GetCycleStructure(
   VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
 ) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
-  this->CheckInitialization();
+  this->checkInitialization();
   outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
   List<bool> Explored;
   HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
@@ -6462,9 +6462,9 @@ void ElementWeylGroup::GetCycleStructure(
 
 void ElementWeylGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::GetCharacteristicPolyStandardRepresentation");
-  this->CheckInitialization();
+  this->checkInitialization();
   Matrix<Rational> standardRepMat;
-  this->owner->GetMatrixStandardRep(*this, standardRepMat);
+  this->owner->getMatrixStandardRepresentation(*this, standardRepMat);
   output.AssignCharPoly(standardRepMat);
 }
 
@@ -6477,7 +6477,7 @@ ElementWeylGroup ElementWeylGroup::inverse() const {
 
 std::string ElementWeylGroup::toString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::toString");
-  (void) theFormat;//avoid unused parameter warning, portable
+  (void) theFormat;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "id";
   }
@@ -6573,9 +6573,9 @@ void WeylGroupData::SimpleReflectionRootAlg(
   }
 }
 
-Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex) const {
+Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(int elementIndex) const {
   Matrix<Rational> result;
-  this->GetMatrixStandardRep(this->theGroup.theElements[elementIndex], result);
+  this->getMatrixStandardRepresentation(this->theGroup.theElements[elementIndex], result);
   return result;
 }
 
@@ -6705,7 +6705,7 @@ void WeylGroupData::GetStandardRepresentationMatrix(int g, Matrix<Rational>& out
   output.init(this->cartanSymmetric.numberOfRows,this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
     Vector<Rational> v;
-    v.MakeEi(this->cartanSymmetric.numberOfRows, i);
+    v.makeEi(this->cartanSymmetric.numberOfRows, i);
     this->actOn(g, v);
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {
       output.elements[j][i] = v[j];
@@ -6921,11 +6921,11 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
   out << "bool LoadCharTable" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
-  out << " output.characterTable.setExpectedSize(" << this->theGroup.GetSize().toString() << "); output.characterTable.setSize(0);";
+  out << " output.characterTable.setExpectedSize(" << this->theGroup.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
   for (int i = 0; i < this->theGroup.characterTable.size; i ++) {
-    out << "\n<br>&nbsp;&nbsp;currentCF.data.AssignString(\"";
+    out << "\n<br>&nbsp;&nbsp;currentCF.data.assignString(\"";
     out << "(";
     //Print vector ensuring every number is at least 3 characters wide. (3 should suffice for E8... or does it?)
     for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++) {
@@ -7123,7 +7123,7 @@ void WeylGroupData::MakeFinalSteps() {
   this->ComputeCoCartanSymmetricFromCartanSymmetric();
 }
 
-void WeylGroupData::InitGenerators() {
+void WeylGroupData::initializeGenerators() {
   this->theGroup.generators.setSize(this->getDimension());
   if (this->getDimension() == 0) {
     this->theGroup.generators.setSize(1);
@@ -7153,8 +7153,8 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
       }
     }
   }
-  this->InitGenerators();
-  this->theGroup.CheckInitialization();
+  this->initializeGenerators();
+  this->theGroup.checkInitialization();
 }
 
 void WeylGroupData::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
@@ -7293,7 +7293,7 @@ void WeylGroupData::GetIntegralLatticeInSimpleCoordinates(Lattice& output) {
   output.basisRationalForm= this->cartanSymmetric;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->getDimension(); i ++) {
-    tempRoot.MakeEi(this->getDimension(), i);
+    tempRoot.makeEi(this->getDimension(), i);
     output.basisRationalForm.RowTimesScalar(i, 2 / this->RootScalarCartanRoot(tempRoot, tempRoot));
   }
   output.basisRationalForm.Transpose();
@@ -7401,7 +7401,7 @@ bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Ra
   this->theWeyl->RaiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
-  this->theWeyl->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
+  this->theWeyl->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
   theCandidateMatTensorForm = theCandidateMat;
   for (int i = 0; i < this->theOuterAutos.theElements.size; i ++) {
     theCandidateMatWithOuterAuto = this->theOuterAutos.theElements[i];
@@ -7436,7 +7436,7 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt, tempMat;
-  this->GetMatrixStandardRep(tempElt, matCoxeterElt);
+  this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   tempMat = matCoxeterElt;
   int coxeterNumber = this->RootSystem.lastObject()->SumCoords().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
@@ -7503,7 +7503,7 @@ void WeylGroupData::drawRootSystem(
   if (theDimension == 1) {
     Vector<Rational> tempRoot, tempZero;
     tempZero.makeZero(2);
-    tempRoot.MakeEi(2, 0);
+    tempRoot.makeEi(2, 0);
     std::string currentColor = "#ff00ff";
     for (int i = 0; i < 2; i ++) {
       output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, "green", 1);
@@ -7593,7 +7593,7 @@ void WeylGroupData::drawRootSystem(
   epsNotationSimpleBasis.MakeEiBasis(theDimension);
   this->getEpsilonCoordinates(epsNotationSimpleBasis, epsNotationSimpleBasis);
   for (int i = 0; i < theDimension; i ++) {
-    tempRootRat.MakeEi(theDimension, i);
+    tempRootRat.makeEi(theDimension, i);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 1);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 3);
     output.drawCircleAtVectorBufferRational(tempRootRat, "red", 4);
@@ -7637,7 +7637,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
 ) {
   HashedList<Vector<Rational> > theDominantWeights;
   (void) upperBoundWeights;//portable way to avoid non-used parameter warning.
-  double upperBoundDouble = 100000 / (Rational(this->theGroup.GetSize())).GetDoubleValue();
+  double upperBoundDouble = 100000 / (Rational(this->theGroup.getSize())).GetDoubleValue();
   int upperBoundInt = MathRoutines::Maximum(static_cast<int>(upperBoundDouble), 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
@@ -7657,7 +7657,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   }
   HashedList<Vector<Rational> > finalWeights;
-  int estimatedNumWeights = static_cast<int>((Rational(this->theGroup.GetSize())).GetDoubleValue() * theDominantWeights.size);
+  int estimatedNumWeights = static_cast<int>((Rational(this->theGroup.getSize())).GetDoubleValue() * theDominantWeights.size);
   estimatedNumWeights = MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.reserve(estimatedNumWeights);
   finalWeights.setHashSize(estimatedNumWeights);
@@ -7682,7 +7682,7 @@ bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
   ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt;
-  this->GetMatrixStandardRep(tempElt, matCoxeterElt);
+  this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   Vector<Rational> tempRoot = input;
   for (int i = 0; i < this->getDimension(); i ++) {
     matCoxeterElt.actOnVectorColumn(tempRoot);
@@ -7707,7 +7707,7 @@ bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
   this->RaiseToDominantWeight(theRhoImage, nullptr, nullptr, &theElementCandidate);
   Matrix<Rational> theCandidateMat, inputMat;
   input.GetMatrix(inputMat, this->getDimension());
-  this->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
+  this->getMatrixStandardRepresentation(theElementCandidate, theCandidateMat);
   return theCandidateMat == inputMat;
 }
 
@@ -7720,12 +7720,12 @@ bool WeylGroupData::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& t
   return false;
 }
 
-void WeylGroupData::GetMatrixStandardRep(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix) const {
+void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix) const {
   Vector<Rational> tempRoot;
   int theDim = this->cartanSymmetric.numberOfRows;
   outputMatrix.init(theDim, theDim);
   for (int i = 0; i < theDim; i ++) {
-    tempRoot.MakeEi(theDim, i);
+    tempRoot.makeEi(theDim, i);
     this->actOn(input, tempRoot, tempRoot);
     for (int j = 0; j < theDim; j ++) {
       outputMatrix(j, i) = tempRoot[j];
@@ -7763,7 +7763,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringFromLayersAndArrows");
-  this->CheckInitialization();
+  this->checkInitialization();
   std::stringstream out;
   List<int> DisplayIndicesSimpleGenerators;
   if (!useAmbientIndices) {
@@ -7832,7 +7832,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
 
 std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph() {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->allElements.size < 1) {
     return "Error, non-initialized group";
   }
@@ -7883,7 +7883,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString(std::string& output, bool displayElements) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString");
-  this->CheckInitialization();
+  this->checkInitialization();
   std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
   DisplayIndicesSimpleGenerators.setSize(this->simpleRootsInner.size);
@@ -7952,7 +7952,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::M
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
   this->AmbientWeyl = &inputWeyl;
-  this->CheckInitialization();
+  this->checkInitialization();
   Vectors<Rational> selectedRoots;
   selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize - ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   if (this->AmbientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize) {
@@ -7963,7 +7963,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::M
   for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i ++) {
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
-      selectedRoots.lastObject()->MakeEi(inputWeyl.getDimension(), i);
+      selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
     }
   }
   List<Vectors<Rational> > tempRootsCol;
@@ -7972,7 +7972,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::M
 
 std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph() {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (this->allElements.size < 1) {
     return "Error, non-initialized group";
   }
@@ -8022,7 +8022,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives(int UpperLimit) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->AmbientWeyl->theGroup.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size = 0;
@@ -8079,7 +8079,7 @@ SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::~Subgr
   this->flagDeallocated = true;
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::CheckInitialization() {
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::checkInitialization() {
   //if (this == 0)
   //  global.fatal << "Subgroup of Weyl Group has 0 this pointer. " << global.fatal;
   if (this->AmbientWeyl == nullptr) {
@@ -8732,7 +8732,7 @@ void LaTeXProcedures::GetStringFromColorIndex(int ColorIndex, std::string &outpu
 }
 
 void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output) {
-  (void) ColorIndex;//avoid unused parameter warning, portable.
+  (void) ColorIndex;
   output.precision(4);
   X1 -= theText.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
   Y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
@@ -9011,7 +9011,7 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
   global.comments << "<br>the movement: " << theMovement.toString() << ", (" << theShift.toString()
   << " - " << startingPoint.ScalarEuclidean(theNormal).toString() << ")/ "
   << theDirection.ScalarEuclidean(theNormal).toString() << ", ";
-  if (!theMovement.IsInteger()) {
+  if (!theMovement.isInteger()) {
     global.comments << "the movement is not integral; ";
     theMovement.AssignFloor();
     if (theDirection.ScalarEuclidean(theNormal).isPositive()) {
@@ -9714,7 +9714,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
     theZnLattice.basisRationalForm.GetVectorFromRow(i, tempRoot);
     orthogonalComponent = tempRoot.ScalarEuclidean(theScalarProducts) / theScalarProducts.ScalarEuclidean(theScalarProducts);
     tempRoot -= theScalarProducts * orthogonalComponent;
-    if (!orthogonalComponent.IsInteger()) {
+    if (!orthogonalComponent.isInteger()) {
       global.fatal << "Orthogonal component is supposed to be an integer. " << global.fatal;
     }
     if (!tempRoot.isEqualToZero()) {
@@ -9998,7 +9998,7 @@ std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const s
   return out.str();
 }
 
-std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars) {
+std::string HtmlRoutines::convertStringToURLString(const std::string& input, bool usePlusesForSpacebars) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
     if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i])) {
@@ -10430,7 +10430,7 @@ bool Cone::DrawMeLastCoordAffine(
   FormatExpressions& theFormat,
   const std::string& ChamberWallColor
 ) const {
-  (void) theFormat; //avoid unused parameter warning, portable.
+  (void) theFormat;
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(this->getDimension() - 1);
   Vectors<Rational> VerticesScaled;
@@ -10503,7 +10503,7 @@ bool Cone::DrawMeProjective(
   DrawingVariables& theDrawingVariables,
   FormatExpressions& theFormat
 ) const {
-  (void) theFormat;  //avoid unused parameter warning, portable.
+  (void) theFormat;
   Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.makeZero(this->getDimension());
   if (coordCenterTranslation == nullptr) {
@@ -10526,7 +10526,7 @@ bool Cone::DrawMeProjective(
   if (initTheDrawVars) {
     theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->getDimension());
     for (int i = 0; i < this->getDimension(); i ++) {
-      tempRoot.MakeEi(this->getDimension(), i);
+      tempRoot.makeEi(this->getDimension(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
         ZeroRoot + coordCenter, tempRoot + coordCenter, "gray", 1
       );
@@ -10753,7 +10753,7 @@ void DrawOperations::RotateOutOfPlane(
 
 void DrawOperations::ModifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2) {
   //if  (this->getScalarProduct(root2, root2) == 0)
-  //  root2.MakeEi(this->theWeyl.cartanSymmetric.numberOfRows,1);
+  //  root2.makeEi(this->theWeyl.cartanSymmetric.numberOfRows,1);
   double theScalar = this->theBilinearForm.scalarProduct(root1, root2) / this->theBilinearForm.scalarProduct(root2, root2);
   root1 -= root2 * theScalar;
   this->ScaleToUnitLength(root1);
@@ -10765,7 +10765,7 @@ void DrawOperations::ComputeProjectionsEiVectors() {
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
   Vector<double> tempRoot;
   for (int i = 0; i < theDimension; i ++) {
-    tempRoot.MakeEi(theDimension, i);
+    tempRoot.makeEi(theDimension, i);
     this->ProjectionsEiVectors[i][0] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[0]);
     this->ProjectionsEiVectors[i][1] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[1]);
   }
@@ -10865,7 +10865,7 @@ class ImpreciseDouble {
   double theValue;
   public:
   std::string toString(FormatExpressions* theFormat = nullptr) const {
-    (void) theFormat; //avoid unused parameter warning, portable.
+    (void) theFormat;
     std::stringstream out;
     out << this->theValue;
     return out.str();
@@ -10932,8 +10932,10 @@ class ImpreciseDouble {
     ImpreciseDouble result;
     result = *this;
     if (other.isEqualToZero()) {
-      //the below is written like this to avoid this->theValue/0;
-      //If the user attempts to divide by zero, I want a regular division by zero exception to be generated
+      // The following is written like this to
+      // avoid this->theValue / 0;
+      // If the user attempts to divide by zero,
+      // I want a regular division by zero exception to be generated.
       result.theValue = this->theValue / (other.theValue - other.theValue);
       return result;
     }
@@ -10969,8 +10971,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   Matrix<ImpreciseDouble> theMat;
   int theDim = theOps.theBilinearForm.numberOfRows;
   theMat.init(theDim, 2);
-//we assume that the ComputeProjectionsEiVectors has been called
-//  theOps.ComputeProjectionsEiVectors();
+  // We assume that the ComputeProjectionsEiVectors has been called.
   for (int i = 0; i < theOps.ProjectionsEiVectors.size; i ++) {
     for (int j = 0; j < 2; j ++) {
       theMat.elements[i][j] = theOps.ProjectionsEiVectors[i][j];
@@ -11024,22 +11025,14 @@ bool RationalFunction::substitution(const PolynomialSubstitution<Rational>& theS
   if (theSub.size < 1) {
     return false;
   }
-//  FormatExpressions tempFormat;
-//  int commentMEWhenDone;
   switch(this->expressionType) {
     case RationalFunction::typeRational:
-//      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
     case RationalFunction::typePoly:
-//      global.Comments << "<hr>subbing in<br>" << this->toString(tempFormat) << " using " << theSub.toString()
-//      << " to get ";
       if (!this->Numerator.getElement().substitution(theSub)) {
         return false;
       }
-//      global.Comments << "<br>finally:<br>" << this->Numerator.getElement().toString();
       this->simplify();
-//      global.Comments << ", which, simplified, yields<br> " << this->toString(tempFormat);
-//      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
     case RationalFunction::typeRationalFunction:
       if (!this->Numerator.getElement().substitution(theSub)) {
@@ -11103,7 +11096,7 @@ void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>&
     for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
       newNormals[j] = this->theObjects[i].Normals[j].GetProjectivizedNormal(affinePoint);
     }
-    newNormals.lastObject()->MakeEi(theAffineDim + 1, theAffineDim);
+    newNormals.lastObject()->makeEi(theAffineDim + 1, theAffineDim);
     tempCone.CreateFromNormals(newNormals);
     output.AddNonRefinedChamberOnTopNoRepetition(tempCone);
   }
@@ -11153,14 +11146,14 @@ bool Cone::GetLatticePointsInCone(
   }
   SelectionWithMaxMultiplicity boundingBox;
   boundingBox.initMaxMultiplicity(theDimAffine, upperBoundPointsInEachDim*2);
-  //format of the boundingBox:
+  // format of the boundingBox:
   // if bounding box shows a vector (x_1, ...) then
   // it corresponds to a vector with coodinates (x_1-upperBoundPointsInEachDim, x_2-upperBoundPointsInEachDim, ...)
   int numCycles = boundingBox.NumSelectionsTotal();
   if (numCycles <= 0 || numCycles > 1000000) {
-    //we test up to 1 million lattice points.
-    //This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
-    //we get a total of (2*2+ 1)^8=390625 points to test, which is a pretty darn small box
+    // We test up to 1 million lattice points.
+    // This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
+    // we get a total of (2*2+ 1)^8=390625 points to test, which is a pretty darn small box
     return false;
   }
   outputPoints.reserve(numCycles);
@@ -11224,12 +11217,12 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   out << HtmlRoutines::GetMathMouseHover(theFracs.toString(theFormat));
   theFracs.split(nullptr);
   out << HtmlRoutines::GetMathMouseHover(theFracs.toString(theFormat));
-  //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots);
+  // theFracs.theChambers.InitFromDirectionsAndRefine(theRoots);
   global.fatal << "Not implemented. " << global.fatal ;
-//  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;
-//  theFracs.theChambersOld.theDirections = theRoots;
-//  theFracs.theChambersOld.SliceTheEuclideanSpace(false);
-//  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld);
+  //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;
+  //  theFracs.theChambersOld.theDirections = theRoots;
+  //  theFracs.theChambersOld.SliceTheEuclideanSpace(false);
+  //  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld);
   this->theQPs.setSize(theFracs.theChambers.size);
   Vector<Rational> indicator;
   for (int i = 0; i < theFracs.theChambers.size; i ++) {
@@ -11473,8 +11466,9 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
     return 0;
   }
   result = this->theQPs[theIndex].Evaluate(AffineInput);
-  //the following for cycle is for self-check purposes only. Comment it out as soon as
-  // the code has been tested sufficiently
+  // The following for loop is for self-check purposes only.
+  // Comment it out as soon as
+  // the code has been tested sufficiently.
   bool firstFail = true;
   for (int i = 0; i < this->theProjectivizedComplex.size; i ++) {
     if (this->theProjectivizedComplex[i].IsInCone(input)) {
@@ -11878,15 +11872,12 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
     newNormals[i].ShiftToTheLeftOnePos();
     newNormals[i] += preferredNormal * firstCoordNewNormal;
   }
-  //bool tempBool =
   tempCLS.theProjectivizedCone.CreateFromNormals(newNormals);
   tempCLS.theShift = this->theShift;
   tempCLS.theShift.ShiftToTheLeftOnePos();
   this->theLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
   Vector<Rational> tempRoot;
   tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
-  //Vector<Rational> tempRoot2;
-  //tempRoot2= preferredNormal;
   tempRoot += preferredNormal * theLPToMaximizeAffine[0];
   if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
     outputAppend.addOnTop(tempCLS);
@@ -11908,7 +11899,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
   for (int i = 0; i < theProjectionLatticeLevel.numberOfRows; i ++) {
     theProjectionLatticeLevel.elements[i][i + 1] = 1;
   }
-  direction.MakeEi(theDimProjectivized, 0);
+  direction.makeEi(theDimProjectivized, 0);
   if (!this->theProjectivizedCone.Vertices.LinSpanContainsVector(direction)) {
     this->FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
       theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel
@@ -11938,7 +11929,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
   Vectors<Rational> exitRepresentatives, exitWallsShifted;
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
-  directionSmallerDim.MakeEi(theDimProjectivized - 1, 0);
+  directionSmallerDim.makeEi(theDimProjectivized - 1, 0);
   Vectors<Rational> theNewNormals;
   for (int i = 0; i < complexBeforeProjection.size; i ++) {
     const Cone& currentCone = complexBeforeProjection[i];
@@ -12334,7 +12325,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
     tempMat.GetZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size > 0) {
       matNormals.AssignVectorsToRows(NormalsToSubspace);
-//      global.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.toString();
+      // global.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.toString();
       gramMatrixInverted = matNormals;
       gramMatrixInverted.Transpose();
       gramMatrixInverted.multiplyOnTheLeft(matNormals);
@@ -12352,8 +12343,8 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
           i --;
         }
       }
-      //all normals should now lie in the subspace spanned by the vertices
-      //add the walls needed to go down to the subspace
+      // All normals should now lie in the subspace spanned by the vertices
+      // add the walls needed to go down to the subspace.
       this->Normals.reserve(this->Normals.size + 2 * NormalsToSubspace.size);
       for (int i = 0; i < NormalsToSubspace.size; i ++) {
         Cone::scaleNormalizeByPositive(NormalsToSubspace[i]);
@@ -12390,7 +12381,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       }
     }
   }
-  //eliminate identical normals
+  // Eliminate identical normals.
   this->Normals.quickSortAscending();
   int currentUniqueElementIndex = 0;
   for (int i = 1; i < this->Normals.size; i ++) {
@@ -12418,8 +12409,8 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
 bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection(
   Vector<Rational>& SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output
 ) {
-  // we are looking for a normal n of the form n = t1*normal1+t2*normal2
-  // such that  <t1*normal1+t2*normal2, slicingDirection>= 0
+  // We are looking for a normal n of the form n = t1 * normal1 + t2 * normal2
+  // such that <t1 * normal1 + t2 * normal2, slicingDirection> = 0
   Rational normal1ScalarDirection = normal1.ScalarEuclidean(SlicingDirection);
   if (normal1ScalarDirection.isEqualToZero()) {
     output = normal1;
@@ -12530,7 +12521,7 @@ bool Cone::CreateFromNormalS(
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
     for (int i = 0; i < theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++) {
       Vector<Rational> tempRoot;
-      tempRoot.MakeEi(theDim, i);
+      tempRoot.makeEi(theDim, i);
       if (!this->Normals.LinSpanContainsVector(tempRoot, tempMat, tempSel)) {
         numAddedFakeWalls ++;
         this->Normals.addOnTop(tempRoot);
@@ -12720,10 +12711,10 @@ bool RationalFunction::GetRelations(
     currentPoly -= currentGenerator;
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.theMonOrder.setComparison(
+  theComputation.thePolynomialOrder.monomialOrder.setComparison(
     MonomialP::greaterThan_leftLargerWins
   );
-  if (!theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis)) {
+  if (!theComputation.transformToReducedGroebnerBasis(theGroebnerBasis)) {
     comments << "Failed to find Groebner basis";
     return false;
   }

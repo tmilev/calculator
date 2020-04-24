@@ -27,10 +27,10 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
 bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
   MonomialP xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
   one.makeOne();
-  xOne.MakeEi(0, 1);
-  xTwo.MakeEi(1, 1);
-  xOneSquared.MakeEi(0, 2);
-  xTwoSquared.MakeEi(1, 2);
+  xOne.makeEi(0, 1);
+  xTwo.makeEi(1, 1);
+  xOneSquared.makeEi(0, 2);
+  xTwoSquared.makeEi(1, 2);
   xOneXtwo = xOne;
   xOneXtwo *= xTwo;
   List<List<MonomialP>::Comparator> allOrders;
@@ -129,9 +129,9 @@ bool Polynomial<Rational>::Test::all() {
 
 template <>
 void Polynomial<Rational>::Test::initialize() {
-  this->format.polyAlphabeT.addOnTop("x");
-  this->format.polyAlphabeT.addOnTop("y");
-  this->format.polyAlphabeT.addOnTop("z");
+  this->format.polynomialAlphabet.addOnTop("x");
+  this->format.polynomialAlphabet.addOnTop("y");
+  this->format.polynomialAlphabet.addOnTop("z");
   this->format.flagUseHTML = false;
 }
 
@@ -149,7 +149,7 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
     << global.fatal;
   }
   Polynomial<Rational> result;
-  if (!parser.theProgramExpression[1].IsOfType(&result)) {
+  if (!parser.theProgramExpression[1].isOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
     << parser.theProgramExpression.toString()
@@ -300,12 +300,12 @@ bool Polynomial<Rational>::Test::oneDifferential(
 
 template <>
 bool Polynomial<Rational>::Test::differential() {
-  this->formatDifferentials.polyAlphabeT.addOnTop("x");
-  this->formatDifferentials.polyAlphabeT.addOnTop("y");
-  this->formatDifferentials.polyAlphabeT.addOnTop("z");
-  this->formatDifferentials.polyAlphabeT.addOnTop("dx");
-  this->formatDifferentials.polyAlphabeT.addOnTop("dy");
-  this->formatDifferentials.polyAlphabeT.addOnTop("dz");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("x");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("y");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("z");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("dx");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("dy");
+  this->formatDifferentials.polynomialAlphabet.addOnTop("dz");
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
   this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");

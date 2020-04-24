@@ -123,7 +123,7 @@ public:
   int getDimension() const {
     return this->theGeneratingWordsNonReduced.size;
   }
-  bool CheckInitialization() const {
+  bool checkInitialization() const {
     if (this->flagDeallocated) {
       global.fatal << "Use after free of ModuleSSalgebra. " << global.fatal;
     }

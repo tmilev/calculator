@@ -42,7 +42,7 @@ Matrix<Rational> WeylGroupData::SimpleReflectionMatrix(int i) const {
 }
 
 ElementWeylGroup WeylGroupData::SimpleConjugation(int i, const ElementWeylGroup& vv) {
-  (void) vv;//avoid unused parameter warning, portable.
+  (void) vv;
   ElementWeylGroup eltSimpleReflection;
   eltSimpleReflection.MakeSimpleReflection(i, *this);
   return eltSimpleReflection * this->theGroup.theElements[i] * eltSimpleReflection;
@@ -52,7 +52,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps() {
   MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
   if (!this->flagCCsComputed) {
-    this->ComputeCCfromAllElements();
+    this->computeConjugacyClassesFromAllElements();
   }
   this->squaresCCReps.setExpectedSize(this->ConjugacyClassCount());
   this->squaresCCReps.setSize(this->ConjugacyClassCount());
@@ -65,7 +65,7 @@ void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps() {
 void WeylGroupData::ComputeInitialIrreps() {
   MacroRegisterFunctionWithName("WeylGroup::ComputeInitialIrreps");
   if (!this->theGroup.flagCCsComputed) {
-    this->theGroup.ComputeCCfromAllElements();
+    this->theGroup.computeConjugacyClassesFromAllElements();
   }
   if (this->theGroup.squaresCCReps.size == 0) {
     this->theGroup.ComputeSquaresCCReps();
@@ -300,7 +300,7 @@ VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coeffi
   // This should not be possible
   for (int i = 0; i < d; i ++) {
     Vector<Coefficient> v;
-    v.MakeEi(d, i);
+    v.makeEi(d, i);
     if (!V.AddVectorToBasis(v)) {
       return V;
     }
@@ -748,7 +748,7 @@ List<Vector<Coefficient> > DestructiveColumnSpace(Matrix<Coefficient>& M) {
 
 // guess at integers
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0) {
-  (void) checkDivisorsOf;//avoid unused parameter warning, portable.
+  (void) checkDivisorsOf;
   int n = M.numberOfColumns;
   List<List<Vector<Rational> > > spaces;
   int found = 0;
@@ -873,7 +873,7 @@ Matrix<Rational> matrixInBasis(
   }
   for (int i1 = 0; i1 < X.G->ConjugacyClassCount(); i1 ++) {
     for (int i2 = 0; i2 < X.G->conjugacyClasses[i1].size; i2 ++) {
-      for (int j = 0; j < X.G->GetSize(); j ++) {
+      for (int j = 0; j < X.G->getSize(); j ++) {
         for (int k = 0; k < B.size; k ++) {
           int l = X.G->theElements.getIndex(
             X.G->conjugacyClasses[i1].theElements[i2] * X.G->theElements[j]
@@ -937,7 +937,7 @@ SubgroupDataRootReflections::SubgroupDataRootReflections() {
   this->flagIsExtendedParabolic = false;
 }
 
-bool SubgroupDataWeylGroup::CheckInitialization() {
+bool SubgroupDataWeylGroup::checkInitialization() {
   if (this->theWeylData == nullptr) {
     global.fatal << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << global.fatal;
   }
@@ -947,7 +947,7 @@ bool SubgroupDataWeylGroup::CheckInitialization() {
 template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SubgroupData::toString");
-  (void) theFormat;//avoid unused parameter warning, portable.
+  (void) theFormat;
   if (this->theGroup == nullptr) {
     return "(not initialized (no owner group))";
   }
@@ -978,7 +978,7 @@ std::string SubgroupDataWeylGroup::toString(FormatExpressions* theFormat) {
 
 void SubgroupDataWeylGroup::ComputeTauSignature() {
   MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  this->CheckInitialization();
+  this->checkInitialization();
   if (!this->theSubgroupData.theGroup->flagCCRepresentativesComputed) {
     this->theSubgroupData.theGroup->computeConjugacyClassSizesAndRepresentatives();
   }
@@ -1013,7 +1013,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
     this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs, XiS);
     //global.Comments << "<br>Hermitian product of " << Xs.toString() << " and "
     //<< XiS.toString() << " = " << this->tauSignature[i];
-    if (!this->tauSignature[i].IsSmallInteger()) {
+    if (!this->tauSignature[i].isSmallInteger()) {
       global.fatal << " Tau signature is not integral, something is wrong. " << global.fatal ;
     }
   }
@@ -1036,7 +1036,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
     this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed = true;
   } else {
     if (this->theDynkinType.GetRank() <= 6) {
-      this->theSubgroupData.theSubgroup->ComputeCCfromAllElements();
+      this->theSubgroupData.theSubgroup->computeConjugacyClassesFromAllElements();
     } else {
       this->theSubgroupData.theSubgroup->computeConjugacyClassSizesAndRepresentatives();
     }
@@ -1045,8 +1045,8 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
   }
 }
 
-void SubgroupDataRootReflections::InitGenerators() {
-  MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
+void SubgroupDataRootReflections::initializeGenerators() {
+  MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
   if (this->theDynkinType.GetRank() == 0) {
     this->theSubgroupData.theSubgroup->generators.setSize(1);
     this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
@@ -1068,7 +1068,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   G.checkConsistency();
   this->theWeylData = &G;
   this->theSubgroupData.MakeSubgroupOf(G.theGroup);
-  this->CheckInitialization();
+  this->checkInitialization();
   this->flagIsParabolic = true;
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
@@ -1084,7 +1084,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
     }
   }
   this->ComputeDynkinType();
-  this->InitGenerators();
+  this->initializeGenerators();
 }
 
 void SubgroupDataRootReflections::MakeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
@@ -1109,7 +1109,7 @@ void SubgroupDataRootReflections::MakeFromRoots(WeylGroupData& G, const Vectors<
   if (this->theDynkinType != verificationType) {
     global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
   }
-  this->InitGenerators();
+  this->initializeGenerators();
 }
 
 template <class elementSomeGroup>

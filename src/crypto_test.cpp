@@ -1,6 +1,6 @@
 #include "crypto.h"
 
-bool Crypto::Test::All() {
+bool Crypto::Test::all() {
   Crypto::Test::Sha256();
   return true;
 }
@@ -26,7 +26,7 @@ bool Crypto::Test::Sha256() {
     if (result != desiredResult) {
       global.fatal
       << "Hash of:\n" << inputs[i] << "\nresulted in:\n"
-      << Crypto::ConvertStringToHex(result, 50, false)
+      << Crypto::convertStringToHex(result, 50, false)
       << "\ninstead of the desired:\n" << outputs[i] << global.fatal;
     }
   }

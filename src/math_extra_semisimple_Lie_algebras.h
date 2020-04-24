@@ -375,7 +375,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   bool SplitCharOverRedSubalg(
     std::string* report,
     CharacterSemisimpleLieAlgebraModule& output,
-    branchingData& inputData
+    BranchingData& inputData
   );
   bool GetDominantCharacterWRTsubalgebra(
     CharacterSemisimpleLieAlgebraModule& outputCharOwnerSetToZero, std::string& outputDetails, int upperBoundNumDominantWeights

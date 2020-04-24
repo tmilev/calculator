@@ -24,7 +24,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   Vector<Rational> genWeight, newWeight;
   while (!theWeight.isEqualToZero()) {
     for (int i = 0; i < this->GetRank(); i ++) {
-      genWeight.MakeEi(this->GetRank(), i);
+      genWeight.makeEi(this->GetRank(), i);
       if (theWeight.isPositive()) {
         genWeight.Minus();
       }
@@ -299,7 +299,7 @@ bool LittelmannPath::MinimaAreIntegral() {
     }
   }
   for (int i = 0; i < theDim; i ++) {
-    if (!theMinima[i].IsSmallInteger()) {
+    if (!theMinima[i].isSmallInteger()) {
       return false;
     }
   }
@@ -445,7 +445,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimen
       return false;
     }
     int thePower = 0;
-    if (!this->Powers[k].IsSmallInteger(thePower)) {
+    if (!this->Powers[k].isSmallInteger(thePower)) {
       return false;
     }
     int rootIndex = this->owner->theOwner->GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
@@ -591,7 +591,7 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyMinusTransposeAutoOnMe() {
     tempMon.generatorsIndices.size = 0;
     for (int j = 0; j < currentMon.Powers.size; j ++) {
       int thePower;
-      if (!currentMon.Powers[j].IsSmallInteger(&thePower)) {
+      if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
         return false;
       }
       int theGenerator = currentMon.generatorsIndices[j];
@@ -646,7 +646,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int thePower;
     for (int i = rightMon.Powers.size - 1; i >= 0; i --) {
-      if (rightMon.Powers[i].IsSmallInteger(&thePower)) {
+      if (rightMon.Powers[i].isSmallInteger(&thePower)) {
         for (int k = 0; k < thePower; k ++) {
           tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
@@ -740,8 +740,8 @@ bool ElementUniversalEnveloping<Coefficient>::ConvertToRationalCoeff(ElementUniv
   return true;
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
-  MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
+void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
+  MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
   this->WeylFDSmallAsSubInLarge.AmbientWeyl = &this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl = &this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl = &this->theHmm.theRange().theWeyl;
@@ -833,12 +833,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   }
 }
 
-branchingData::branchingData() {
+BranchingData::BranchingData() {
   this->flagUseNilWeightGeneratorOrder = false;
   this->flagAscendingGeneratorOrder = false;
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
+void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   List<Vectors<Rational> > emptyList;
   this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
   this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots(
@@ -850,7 +850,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->WeylFDSmall.ComputeRootSubsystem();
 }
 
-std::string branchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
+std::string BranchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
   Vector<RationalFunction> weightDifference;
   std::stringstream formulaStream1;
   HashedList<Vector<RationalFunction> > accountedDiffs;

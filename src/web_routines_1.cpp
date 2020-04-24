@@ -534,7 +534,7 @@ void WebCrawler::FetchWebPagePart2(
   }
   this->expectedLength = - 1;
   if (expectedLengthString != "") {
-    expectedLength.AssignString(expectedLengthString);
+    expectedLength.assignString(expectedLengthString);
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Expected length: " << this->expectedLength;
@@ -610,13 +610,13 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Ex
   if (input.size() != 4) {
     return theCommands << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
   }
-  if (!input[1].IsOfType(&theCrawler.serverToConnectTo)) {
+  if (!input[1].isOfType(&theCrawler.serverToConnectTo)) {
     theCrawler.serverToConnectTo = input[1].toString();
   }
-  if (!input[2].IsOfType(&theCrawler.portOrService)) {
+  if (!input[2].isOfType(&theCrawler.portOrService)) {
     theCrawler.portOrService = input[2].toString();
   }
-  if (!input[3].IsOfType(&theCrawler.addressToConnectTo)) {
+  if (!input[3].isOfType(&theCrawler.addressToConnectTo)) {
     theCrawler.addressToConnectTo = input[3].toString();
   }
   std::stringstream out;
@@ -640,16 +640,16 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const E
   if (input.size() != 5) {
     return theCommands << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
   }
-  if (!input[1].IsOfType(&theCrawler.serverToConnectTo)) {
+  if (!input[1].isOfType(&theCrawler.serverToConnectTo)) {
     theCrawler.serverToConnectTo = input[1].toString();
   }
-  if (!input[2].IsOfType(&theCrawler.portOrService)) {
+  if (!input[2].isOfType(&theCrawler.portOrService)) {
     theCrawler.portOrService = input[2].toString();
   }
-  if (!input[3].IsOfType(&theCrawler.addressToConnectTo)) {
+  if (!input[3].isOfType(&theCrawler.addressToConnectTo)) {
     theCrawler.addressToConnectTo = input[3].toString();
   }
-  if (!input[4].IsOfType(&theCrawler.postMessageToSend)) {
+  if (!input[4].isOfType(&theCrawler.postMessageToSend)) {
     theCrawler.postMessageToSend = input[4].toString();
   }
   std::stringstream out;
@@ -759,7 +759,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   // This is system dependent and a lot of work-> not doing now, but will do
   // in the future as the need arises.
   JSONWebToken theToken;
-  if (!theToken.AssignString(inputToken, commentsOnFailure)) {
+  if (!theToken.assignString(inputToken, commentsOnFailure)) {
     return false;
   }
   std::string keyIDstring = "";
@@ -819,7 +819,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     << keyIDstring << ".</b>";
   }
   PublicKeyRSA& currentCert = Crypto::knownCertificates[theIndex];
-  return theToken.VerifyRSA256(
+  return theToken.verifyRSA256(
     currentCert.theModulus, currentCert.theExponent, commentsOnFailure, commentsGeneral
   );
 }
@@ -930,7 +930,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
     Database::get().theUser.LogoutViaDatabase();
   }
   UserCalculator theUser;
-  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
+  theUser.email = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
   WebCrawler theCrawler;
   out << "<br><b> "
   << "Please excuse our verbose technical messages. </b>"
@@ -979,8 +979,8 @@ JSData WebWorker::GetSignUpRequestResult() {
   }
   Database::get().theUser.LogoutViaDatabase();
   UserCalculator theUser;
-  theUser.username = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("desiredUsername"), false);
-  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
+  theUser.username = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("desiredUsername"), false);
+  theUser.email = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream

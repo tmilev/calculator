@@ -238,7 +238,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   if (this->basisInjections.size > 1) {
     int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
     if (indexToSkipFirst < DimensionOverRationals) {
-      theSel.theInts.MakeEi(DimensionOverRationals, indexToSkipFirst);
+      theSel.theInts.makeEi(DimensionOverRationals, indexToSkipFirst);
     }
   }
   for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast()) {
@@ -255,13 +255,13 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
     this->GeneratingElemenT.element.makeZero();
     for (int i = 0; i < theSel.theInts.size; i ++) {
       MonomialVector tempV;
-      tempV.MakeEi(i);
+      tempV.makeEi(i);
       this->GeneratingElemenT.element.addMonomial(tempV, theSel.theInts[i]);
     }
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
     this->theGeneratingElementPowersBasis.setSize(0);
-    currentVect.MakeEi(DimensionOverRationals, 0);
+    currentVect.makeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
       this->GeneratingElementMatForm.actOnVectorColumn(currentVect);
@@ -341,7 +341,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
-  if (!smallestFactor.totalDegree().IsSmallInteger(&smallestFactorDegree)) {
+  if (!smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)) {
     global.fatal
     << "This is a programming error: "
     << smallestFactor.toString()
@@ -358,7 +358,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
-      remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
+      remainderAfterReduction[j](0).isSmallInteger(&theIndex);
       projectionGeneratorCoordinates.addMonomial(
         MonomialMatrix(theIndex, i),
         remainderAfterReduction.coefficients[j]
@@ -491,7 +491,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   Rational halfIntegerPart = input * 2;
   halfIntegerPart.AssignFloor();
   LargeInteger halfIntegerPartTimesTwo;
-  if (!halfIntegerPart.IsInteger(&halfIntegerPartTimesTwo)) {
+  if (!halfIntegerPart.isInteger(&halfIntegerPartTimesTwo)) {
     global.fatal << "something went wrong: floor function returns non-integer" << global.fatal;
   }
   halfIntegerPart /= 2;
@@ -591,7 +591,7 @@ bool AlgebraicNumber::needsParenthesisForMultiplication(
 bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {
     Rational tempRat;
-    if (this->IsRational(&tempRat)) {
+    if (this->isRational(&tempRat)) {
       return tempRat.NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     }
     return false;
@@ -612,12 +612,12 @@ bool AlgebraicNumber::CheckNonZeroOwner() const {
   return true;
 }
 
-bool AlgebraicNumber::ConstructFromMinPoly(
+bool AlgebraicNumber::constructFromMinimalPolynomial(
   const Polynomial<AlgebraicNumber>& thePoly,
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
+  MacroRegisterFunctionWithName("AlgebraicNumber::constructFromMinimalPolynomial");
   return inputOwner.AdjoinRootMinimalPolynomial(
     thePoly, *this, commentsOnFailure
   );
@@ -629,7 +629,7 @@ void AlgebraicClosureRationals::reset() {
   this->latestBasis[0].MakeId(1);
 
   this->theGeneratingElementPowersBasis.setSize(1);
-  this->theGeneratingElementPowersBasis[0].MakeEi(1, 0);
+  this->theGeneratingElementPowersBasis[0].makeEi(1, 0);
   this->basisInjections.setSize(1);
   this->basisInjections[0].setSize(1);
   this->basisInjections[0][0].MaKeEi(0);
@@ -657,7 +657,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.makeZero();
   Rational currentCF, theLinearTermCFdividedByTwo, theConstTermShifted;
   for (int i = 0; i < algNumPoly.size(); i ++) {
-    if (!algNumPoly.coefficients[i].IsRational(&currentCF)) {
+    if (!algNumPoly.coefficients[i].isRational(&currentCF)) {
       return false;
     } else {
       minPoly.addMonomial(algNumPoly[i], currentCF);
@@ -968,7 +968,7 @@ bool AlgebraicNumber::checkConsistency() const {
     global.fatal << "This is a programming error: use after free of AlgebraicNumber. " << global.fatal;
   }
   if (this->owner == nullptr) {
-    if (!this->IsRational()) {
+    if (!this->isRational()) {
       for (int i = 0; i < this->element.size(); i ++) {
         global.comments << "<br>index: " << this->element[i].theIndex << ", coefficient: "
         << this->element.coefficients[i];
@@ -1034,14 +1034,30 @@ void AlgebraicNumber::SqrtMeDefault(std::stringstream* commentsOnError) {
 
 bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
   Rational left, right;
-  if (this->IsRational(&left) && other.IsRational(&right)) {
+  if (this->isRational(&left) && other.isRational(&right)) {
     return left > right;
   }
   this->CheckCommonOwner(other);
   return this->element > other.element;
 }
 
-void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner) {
+bool AlgebraicNumber::constructFromMinimalPolynomial(
+  const Polynomial<Rational>& thePoly,
+  AlgebraicClosureRationals& inputOwner,
+  std::stringstream* commentsOnFailure
+) {
+  Polynomial<AlgebraicNumber> polyConverted;
+  polyConverted = thePoly;
+  return this->constructFromMinimalPolynomial(polyConverted, inputOwner, commentsOnFailure);
+}
+
+AlgebraicNumber AlgebraicNumber::one() {
+  AlgebraicNumber result;
+  result.assignRational(1, *this->owner);
+  return result;
+}
+
+void AlgebraicNumber::assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner) {
   this->basisIndex = 0;
   this->owner = &inputOwner;
   this->element.MaKeEi(0, input);
@@ -1074,15 +1090,15 @@ void AlgebraicNumber::ExpressViaLatestBasis() {
   this->basisIndex = this->owner->basisInjections.size - 1;
 }
 
-bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
-  MacroRegisterFunctionWithName("AlgebraicNumber::EvaluatesToDouble");
+bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
+  MacroRegisterFunctionWithName("AlgebraicNumber::evaluatesToDouble");
   if (!this->IsExpressedViaLatestBasis()) {
     AlgebraicNumber thisCopy = *this;
     thisCopy.ExpressViaLatestBasis();
-    return thisCopy.EvaluatesToDouble(outputWhichDouble);
+    return thisCopy.evaluatesToDouble(outputWhichDouble);
   }
   Rational ratValue;
-  if (this->IsRational(&ratValue)) {
+  if (this->isRational(&ratValue)) {
     if (outputWhichDouble != nullptr) {
       *outputWhichDouble = ratValue.GetDoubleValue();
     }
@@ -1136,7 +1152,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     Polynomial<AlgebraicNumber> minPoly;
     minPoly.makeMonomial(0, 2);
     minPoly -= inpuT;
-    bool result = this->ConstructFromMinPoly(minPoly, inputOwner, commentsOnFailure);
+    bool result = this->constructFromMinimalPolynomial(minPoly, inputOwner, commentsOnFailure);
     if (result) {
       this->checkConsistency();
     }
@@ -1171,7 +1187,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     theFactors.addOnTop(squareFreeInput);
   }
   if (theFactors.size == 0) {
-    this->AssignRational(squareRootRationalPart, inputOwner);
+    this->assignRational(squareRootRationalPart, inputOwner);
     this->checkConsistency();
     return true;
   }
@@ -1212,12 +1228,12 @@ bool AlgebraicNumber::RadicalMeDefault(
     return false;
   }
   AlgebraicNumber result, one, minusOne;
-  one.AssignRational(1, *this->owner);
-  minusOne.AssignRational(- 1, *this->owner);
+  one.assignRational(1, *this->owner);
+  minusOne.assignRational(- 1, *this->owner);
   Polynomial<AlgebraicNumber> thePolynomial;
   thePolynomial.AddConstant(*this * minusOne);
   MonomialP leadingMonomial;
-  leadingMonomial.MakeEi(0, radical);
+  leadingMonomial.makeEi(0, radical);
   thePolynomial.addMonomial(leadingMonomial, one);
   if (!this->owner->AdjoinRootMinimalPolynomial(
     thePolynomial, result, commentsOnError
@@ -1341,7 +1357,7 @@ std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) co
   return this->toStringFull(&tempFormat);
 }
 
-bool AlgebraicNumber::IsRational(Rational* whichRational) const {
+bool AlgebraicNumber::isRational(Rational* whichRational) const {
   if (this->isEqualToZero()) {
     if (whichRational != nullptr) {
       *whichRational = 0;
@@ -1413,10 +1429,10 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   Rational ratValue;
   this->checkConsistency();
   other.checkConsistency();
-  if (this->IsRational(&ratValue)) {
+  if (this->isRational(&ratValue)) {
     return other == ratValue;
   }
-  if (other.IsRational(&ratValue)) {
+  if (other.isRational(&ratValue)) {
     return *this == ratValue;
   }
   if (this->owner != other.owner) {
@@ -1488,7 +1504,7 @@ std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
 bool ElementZmodP::operator*=(const Rational& other) {
   ElementZmodP otherElement;
   otherElement.theModulus = this->theModulus;
-  if (!otherElement.AssignRational(other)) {
+  if (!otherElement.assignRational(other)) {
     return false;
   }
   *this *= otherElement;
@@ -1498,7 +1514,7 @@ bool ElementZmodP::operator*=(const Rational& other) {
 ElementZmodP ElementZmodP::operator*(const Rational& other) const {
   ElementZmodP otherElt;
   otherElt.theModulus = this->theModulus;
-  otherElt.AssignRational(other);
+  otherElt.assignRational(other);
   ElementZmodP result = *this;
   result *= otherElt;
   return result;
@@ -1679,7 +1695,7 @@ void ElementZmodP::operator*=(const LargeInteger& other) {
 bool ElementZmodP::operator+=(const Rational& other) {
   ElementZmodP otherElt;
   otherElt.theModulus = this->theModulus;
-  if (!otherElt.AssignRational(other)) {
+  if (!otherElt.assignRational(other)) {
     return false;
   }
   *this += otherElt;
@@ -1710,7 +1726,7 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
 }
 
 void ElementZmodP::operator=(const Rational& other) {
-  bool tempB = this->AssignRational(other);
+  bool tempB = this->assignRational(other);
   if (!tempB) {
     global.fatal << "This is a programming error: "
     << "using ElementZmodP::operator= to assign a Rational number failed. "
@@ -1730,7 +1746,7 @@ void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
   (*this) -= otherElt;
 }
 
-bool ElementZmodP::AssignRational(const Rational& other) {
+bool ElementZmodP::assignRational(const Rational& other) {
   this->CheckIamInitialized();
   *this = other.GetNumerator();
   ElementZmodP denominator;
@@ -1745,7 +1761,7 @@ bool ElementZmodP::AssignRational(const Rational& other) {
 bool ElementZmodP::operator/=(const LargeInteger& other) {
   ElementZmodP divisor;
   divisor.theModulus = this->theModulus;
-  if (!divisor.AssignRational(Rational(other))) {
+  if (!divisor.assignRational(Rational(other))) {
     return false;
   }
   bool result = ((*this) /= divisor);

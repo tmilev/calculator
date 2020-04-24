@@ -16,7 +16,7 @@ public:
   TreeNode(): owner(0), parent(- 1), myIndex(- 1) {
    
   }
-  bool CheckInitialization() const {
+  bool checkInitialization() const {
     if (this->owner == nullptr) {
       global.fatal << "Tree node without parent. " << global.fatal;
     }
@@ -65,7 +65,7 @@ void TreeNode<data>::RemoveAllChildren() {
 
 template <typename data>
 const TreeNode<data>& TreeNode<data>::GetChild(int i) const {
-  this->CheckInitialization();
+  this->checkInitialization();
   return this->owner->theNodes[this->children[i]];
 }
 

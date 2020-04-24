@@ -72,7 +72,7 @@ std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int u
   }
 }
 
-void HtmlRoutines::LoadStrings() {
+void HtmlRoutines::loadStrings() {
   if (HtmlRoutines::preLoadedFiles().size() > 0) {
     return;
   }
@@ -210,11 +210,11 @@ std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNo
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
   theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
-  out << "#" << HtmlRoutines::ConvertStringToURLString(theRequest.toString(nullptr), false);
+  out << "#" << HtmlRoutines::convertStringToURLString(theRequest.toString(nullptr), false);
   return out.str();
 }
 
-std::string HtmlRoutines::GetCalculatorComputationAnchor(const std::string& inputNoEncoding) {
+std::string HtmlRoutines::getCalculatorComputationAnchor(const std::string& inputNoEncoding) {
   std::stringstream out;
   out << "<a href = \"" << HtmlRoutines::GetCalculatorComputationURL(inputNoEncoding)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
@@ -270,7 +270,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   }
   if (currentMap.size() == 1) {
     if (currentMap.theValues[0] == "") {
-      return HtmlRoutines::ConvertURLStringToNormal(currentMap.theKeys[0], false);
+      return HtmlRoutines::convertURLStringToNormal(currentMap.theKeys[0], false);
     }
   }
   std::stringstream out;
@@ -278,12 +278,12 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   for (int i = 0; i < currentMap.size(); i ++) {
     out << "<tr>";
     out << "<td>"
-    << HtmlRoutines::ConvertURLStringToNormal(currentMap.theKeys[i], false) << " </td>";
+    << HtmlRoutines::convertURLStringToNormal(currentMap.theKeys[i], false) << " </td>";
     if (currentMap.theValues[i] != "") {
       out << "<td>=</td><td>";
       if (currentMap.theValues[i] != "") {
         out << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
-          HtmlRoutines::ConvertURLStringToNormal(currentMap.theValues[i], true), recursionDepth + 1
+          HtmlRoutines::convertURLStringToNormal(currentMap.theValues[i], true), recursionDepth + 1
         );
       }
       out << "</td>";
@@ -294,13 +294,13 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   return out.str();
 }
 
-std::string HtmlRoutines::ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace) {
+std::string HtmlRoutines::convertURLStringToNormal(const std::string& input, bool replacePlusBySpace) {
   std::string output;
-  HtmlRoutines::ConvertURLStringToNormal(input, output, replacePlusBySpace);
+  HtmlRoutines::convertURLStringToNormal(input, output, replacePlusBySpace);
   return output;
 }
 
-void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace) {
+void HtmlRoutines::convertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace) {
   std::string readAhead;
   std::stringstream out;
   unsigned inputSize = static_cast<unsigned>(input.size());

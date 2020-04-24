@@ -11,7 +11,7 @@ bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
   const std::string& curveName, LargeIntegerUnsigned &output, std::stringstream* commentsOnFailure
 ) {
   if (curveName == "secp256k1") {
-    output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
+    output.assignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
     return true;
   }
   if (commentsOnFailure != nullptr) {
@@ -28,16 +28,16 @@ bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstra
 template < >
 void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
   LargeIntegerUnsigned theModulo;
-  theModulo.AssignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
+  theModulo.assignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
   this->xCoordinate.theModulus = theModulo;
   this->yCoordinate.theModulus = theModulo;
-  this->xCoordinate.theValue.AssignString("55066263022277343669578718895168534326250603453777594175500187360389116729240");
-  this->yCoordinate.theValue.AssignString("32670510020758816978083085130507043184471273380659243275938904335757337482424");
+  this->xCoordinate.theValue.assignString("55066263022277343669578718895168534326250603453777594175500187360389116729240");
+  this->yCoordinate.theValue.assignString("32670510020758816978083085130507043184471273380659243275938904335757337482424");
   this->flagInfinity = false;
   this->owner.constantTerm = 7;
   this->owner.linearCoefficient = 0;
   this->owner.name = "secp256k1";
-  this->owner.order.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
+  this->owner.order.assignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
 }
 
 template < >

@@ -63,15 +63,15 @@ class AlgebraicNumber {
   );
   bool isPositive() {
     Rational ratPart;
-    if (this->IsRational(&ratPart)) {
+    if (this->isRational(&ratPart)) {
       return ratPart.isPositive();
     }
     return false;
   }
-  bool IsRational(Rational* whichRational = nullptr) const;
+  bool isRational(Rational* whichRational = nullptr) const;
   bool isNegative() const {
     Rational theRationalValue;
-    if (this->IsRational(&theRationalValue)) {
+    if (this->isRational(&theRationalValue)) {
       return theRationalValue.isNegative();
     }
     return false;
@@ -89,44 +89,41 @@ class AlgebraicNumber {
   void operator=(int other) {
     *this = Rational(other);
   }
-  bool ConstructFromMinPoly(
+  bool constructFromMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& thePoly,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  bool ConstructFromMinPoly(
+  bool constructFromMinimalPolynomial(
     const Polynomial<Rational>& thePoly,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
-  ) {
-    Polynomial<AlgebraicNumber> polyConverted;
-    polyConverted = thePoly;
-    return this->ConstructFromMinPoly(polyConverted, inputOwner, commentsOnFailure);
-  }
+  );
+  AlgebraicNumber one();
   bool AssignRationalQuadraticRadical(
     const Rational& inpuT,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  void assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void SqrtMeDefault(std::stringstream* commentsOnError);
-  bool IsSmallInteger(int* whichInteger) const {
+  bool isSmallInteger(int* whichInteger) const {
     Rational theRat;
-    if (!this->IsRational(&theRat)) {
+    if (!this->isRational(&theRat)) {
       return false;
     }
-    return theRat.IsSmallInteger(whichInteger);
+    return theRat.isSmallInteger(whichInteger);
   }
-  bool IsInteger(LargeInteger* whichInteger) const {
+  bool isInteger(LargeInteger* whichInteger) const {
     Rational theRat;
-    if (!this->IsRational(&theRat)) {
+    if (!this->isRational(&theRat)) {
       return false;
     }
-    return theRat.IsInteger(whichInteger);
+    return theRat.isInteger(whichInteger);
   }
   bool RadicalMeDefault(int radical, std::stringstream* commentsOnError);
   void invert();
-  bool EvaluatesToDouble(double* outputWhichDouble) const;
+  bool evaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
@@ -321,7 +318,7 @@ public:
   std::string toStringModP() const;
   static std::string toStringModP(const LargeIntegerUnsigned& modulus);
   void operator=(const LargeInteger& other);
-  bool AssignRational(const Rational& other);
+  bool assignRational(const Rational& other);
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);

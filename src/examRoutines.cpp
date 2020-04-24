@@ -324,7 +324,7 @@ bool CalculatorHTML::StoreProblemWeights(
       *commentsOnFailure << "Failed to update weight schema. ";
       global << Logger::red
       << "Failed to update weight schema with update query: "
-      << updateQuery.ToStringDebug() << Logger::endL;
+      << updateQuery.toStringDebug() << Logger::endL;
     }
     return false;
   }
@@ -393,12 +393,12 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
   return true;
 }
 
-bool CalculatorHTML::LoadMe(
+bool CalculatorHTML::loadMe(
   bool doLoadDatabase,
   const std::string& inputRandomSeed,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
+  MacroRegisterFunctionWithName("CalculatorHTML::loadMe");
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure
   )) {
@@ -420,7 +420,7 @@ bool CalculatorHTML::LoadMe(
   }
   this->flagIsForReal = global.UserRequestRequiresLoadingRealExamData();
   if (global.flagDatabaseCompiled) {
-    this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(
+    this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
       global.GetWebInput(WebAPI::problem::topicList), false
     );
     if (doLoadDatabase) {
@@ -458,7 +458,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     return WebAPI::problem::failedToLoadProblem;
   }
   std::stringstream out;
-  if (!this->InterpretHtml(commentsOnFailure)) {
+  if (!this->interpretHtml(commentsOnFailure)) {
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
     out << "<br>We limit the number of generation attemps to "
     << this->MaxInterpretationAttempts << " for performance reasons; "
@@ -489,9 +489,9 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
 }
 
 void CalculatorHTML::LoadFileNames() {
-  this->fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
-  this->courseHome = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
-  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  this->fileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
+  this->courseHome = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
 }
 
 void CalculatorHTML::LoadCurrentProblemItem(
@@ -510,7 +510,7 @@ void CalculatorHTML::LoadCurrentProblemItem(
       *commentsOnFailure << "<b>No problem file name found. </b>";
     }
   }
-  if (!this->LoadMe(needToLoadDatabaseMayIgnore, inputRandomSeed, commentsOnFailure)) {
+  if (!this->loadMe(needToLoadDatabaseMayIgnore, inputRandomSeed, commentsOnFailure)) {
     this->flagLoadedSuccessfully = false;
   }
   this->theProblemData.checkConsistency();
@@ -525,7 +525,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   if (tagClass == "setCalculatorExamHome") {
     this->flagIsExamHome = true;
     this->flagIsExamProblem = false;
-    global.SetWebInpuT(WebAPI::problem::courseHome, HtmlRoutines::ConvertStringToURLString(this->fileName, false));
+    global.SetWebInpuT(WebAPI::problem::courseHome, HtmlRoutines::convertStringToURLString(this->fileName, false));
   }
   if (tagClass == "setCalculatorExamProblem") {
     this->flagIsExamHome = false;
@@ -569,7 +569,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   std::stringstream out;
   out << "<a class =\"linkStandardButtonLike\" href=\"" << global.DisplayNameExecutable << "?request="
   << global.requestType << "&";
-  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
+  std::string urledProblem = HtmlRoutines::convertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
   randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
   out << "fileName=" << urledProblem << "&"
@@ -601,7 +601,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(theFileName, false);
+  std::string urledProblem = HtmlRoutines::convertStringToURLString(theFileName, false);
   refStreamNoRequest << global.ToStringCalcArgsNoNavigation(nullptr)
   << "fileName=" << urledProblem << "&";
   if (global.UserStudentVieWOn()) {
@@ -694,12 +694,12 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblem");
   CalculatorHTML theProblem;
-  if (!input.IsOfType<std::string>(&theProblem.inputHtml)) {
+  if (!input.isOfType<std::string>(&theProblem.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
   theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.CurrentRandomSeed);
-  theProblem.InterpretHtml(&theCommands.comments);
+  theProblem.interpretHtml(&theCommands.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
@@ -722,7 +722,7 @@ std::string CalculatorHTML::ToStringExtractedCommands() {
   out << "<table>";
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].syntacticRole != "") {
-      out << "<tr>" << "<td>" << this->theContent[i].ToStringDebug() << "</td>"
+      out << "<tr>" << "<td>" << this->theContent[i].toStringDebug() << "</td>"
       << "</tr>";
     } else {
       out << "<tr><td></td></tr>";
@@ -803,7 +803,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent() {
   if (this->children.size > 0) {
     out << "[";
     for (int i = 0; i < this->children.size; i ++) {
-      out << this->children[i].ToStringDebug();
+      out << this->children[i].toStringDebug();
       if (i != this->children.size - 1) {
         out << ", ";
       }
@@ -813,7 +813,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent() {
   return out.str();
 }
 
-std::string SyntacticElementHTML::ToStringDebug() {
+std::string SyntacticElementHTML::toStringDebug() {
   MacroRegisterFunctionWithName("SyntacticElementHTML::toString");
   if (this->syntacticRole == "") {
     return HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false);
@@ -999,7 +999,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "") {
         out << "setInputBox(name = "
         << inputNonAnswerReader
-        << ", value = " << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
+        << ", value = " << HtmlRoutines::convertURLStringToNormal(theArgs.theValues[i], false)
         << "); ";
       }
     }
@@ -1010,7 +1010,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
 std::string CalculatorHTML::GetProblemHeaderEnclosure() {
   std::stringstream out;
   out << "CommandEnclosure{}(";
-  out <<  " SetRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
   out << this->PrepareUserInputBoxes();
   out << "); ";
   return out.str();
@@ -1018,7 +1018,7 @@ std::string CalculatorHTML::GetProblemHeaderEnclosure() {
 
 std::string CalculatorHTML::GetProblemHeaderWithoutEnclosure() {
   std::stringstream out;
-  out <<  " SetRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
   out << this->PrepareUserInputBoxes();
   return out.str();
 }
@@ -1054,9 +1054,9 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
   return true;
 }
 
-bool CalculatorHTML::ParseHTMLPrepareCommands(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLPrepareCommands");
-  if (!this->ParseHTML(comments)) {
+bool CalculatorHTML::parseHTMLPrepareCommands(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::parseHTMLPrepareCommands");
+  if (!this->parseHTML(comments)) {
     return false;
   }
   return this->PrepareCommands(comments);
@@ -1310,7 +1310,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     "the answer tag does not have a valid id. Please fix the problem template.</b>";
     return false;
   }
-  int theIndex = this->GetAnswerIndex(desiredAnswerId);
+  int theIndex = this->getAnswerIndex(desiredAnswerId);
   if (theIndex == - 1) {
     global.fatal << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
@@ -1380,7 +1380,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (!this->ComputeAnswerRelatedStrings(inputOutput)) {
     return;
   }
-  Answer& currentA = this->theProblemData.theAnswers.theValues[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
+  Answer& currentA = this->theProblemData.theAnswers.theValues[this->getAnswerIndex(inputOutput.GetKeyValue("id"))];
   std::stringstream out;
   out << "<br><span class =\"panelAnswer\" id = \"" << currentA.idAnswerPanel << "\"></span>";
   inputOutput.interpretedCommand = out.str();
@@ -1611,7 +1611,7 @@ std::string CalculatorHTML::ToStringDeadline(
     global.UserDefaultHasAdminRights() &&
     global.UserStudentVieWOn()
   ) {
-    std::string sectionNum = HtmlRoutines::ConvertURLStringToNormal(
+    std::string sectionNum = HtmlRoutines::convertURLStringToNormal(
       global.GetWebInput("studentSection"), false
     );
     return this->ToStringOnEDeadlineFormatted(
@@ -1715,7 +1715,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton(
   }
   deadlineStream << "<button onclick=\"";
   deadlineStream << "submitStringAsMainInput('"
-  << HtmlRoutines::ConvertStringToURLString(inputOutput.id, false)
+  << HtmlRoutines::convertStringToURLString(inputOutput.id, false)
   << "='+encodeURIComponent('deadlines ='+encodeURIComponent(";
   bool isFirst = true;
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
@@ -1727,7 +1727,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton(
     }
     isFirst = false;
     deadlineStream << "'"
-    << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
+    << HtmlRoutines::convertStringToURLString(this->databaseStudentSections[i], false)
     << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << inputOutput.idsDeadlines[i] << "').value) +'&'";
@@ -1816,7 +1816,7 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
     ) {
       std::stringstream errorStream;
       errorStream << "<b>This is a programming error: syntactic element "
-      << currentElt.ToStringDebug() << " has wrongly computed commandIndex: "
+      << currentElt.toStringDebug() << " has wrongly computed commandIndex: "
       << currentElt.commandIndex << ". "
       << "Please report this error to the website admins. </b>";
       currentElt.interpretedCommand = errorStream.str();
@@ -1842,8 +1842,8 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
     currentElt.flagUseMathMode = true;
     currentElt.flagUseMathSpan = false;
     if (
-      currentExpr.IsOfType<std::string> () ||
-      currentExpr.IsOfType<Plot>() ||
+      currentExpr.isOfType<std::string> () ||
+      currentExpr.isOfType<Plot>() ||
       currentElt.GetKeyValue("noTags") == "true"
     ) {
       currentElt.flagUseMathMode = false;
@@ -1862,7 +1862,7 @@ void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter) {
     streamLog << "<tr>";
     for (int j = 0; j < this->theContent.size; j ++) {
       if (this->theContent[j].commandIndex == i) {
-        streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
+        streamLog << "<td>" << this->theContent[j].toStringDebug() << "</td>";
       }
     }
     streamLog << "<td>" << theInterpreter.theProgramExpression[i].toString()
@@ -1878,14 +1878,14 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments) {
     return;
   }
   this->flagParentInvestigated = true;
-  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
   this->LoadAndParseTopicList(comments);
 }
 
-bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
+bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::interpretHtml");
   double startTime = global.GetElapsedSeconds();
-  if (!this->ParseHTML(comments)) {
+  if (!this->parseHTML(comments)) {
     this->outputHtmlBodyNoTag = "<b>Failed to interpret html input. </b><br>" + this->ToStringContent();
     this->timeToParseHtml = global.GetElapsedSeconds() - startTime;
     return false;
@@ -1895,14 +1895,14 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   this->randomSeedsIfInterpretationFails.setSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
     int randomSeedFromTime = static_cast<signed>(time(nullptr));
-    global.unsecurePseudoRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
-    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % 100000000;
+    global.unsecurePseudoRandomGenerator.setRandomSeed(103 + randomSeedFromTime);
+    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
   } else {
     this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
   }
-  global.unsecurePseudoRandomGenerator.SetRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
+  global.unsecurePseudoRandomGenerator.setRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % 100000000;
+    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
   }
   this->timePerAttempt.setSize(0);
   this->timeIntermediatePerAttempt.setSize(0);
@@ -1917,7 +1917,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     Calculator theInterpreter;
     this->NumAttemptsToInterpret ++;
     std::stringstream commentsOnLastFailure;
-    if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
+    if (this->interpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
       this->theProblemData.checkConsistency();
       return true;
@@ -1959,7 +1959,7 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
   out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::ParsingNumDummyElements << ". ";
   for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < theStack.size; i ++) {
     out << "<span style =\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
-    std::string theContent = theStack[i].ToStringDebug();
+    std::string theContent = theStack[i].toStringDebug();
     if (theContent.size() == 0) {
       theContent = "<b>empty</b>";
     } else if (theContent == " ") {
@@ -1970,7 +1970,7 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
   return out.str();
 }
 
-int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId) {
+int CalculatorHTML::getAnswerIndex(const std::string& desiredAnswerId) {
   return this->theProblemData.theAnswers.getIndex(desiredAnswerId);
 }
 
@@ -2113,8 +2113,8 @@ void CalculatorHTML::initBuiltInSpanClasses() {
   }
 }
 
-bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("Problem::ParseHTML");
+bool CalculatorHTML::parseHTML(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("Problem::parseHTML");
   std::stringstream theReader(this->inputHtml);
   theReader.seekg(0);
   std::string word;
@@ -2446,7 +2446,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (eltsStack[i].syntacticRole != "command" && eltsStack[i].syntacticRole != "") {
       result = false;
       if (comments != nullptr) {
-        *comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()
+        *comments << "<br>Syntactic element: " << eltsStack[i].toStringDebug()
         << " is not a command but has non-empty syntactic role.";
       }
     }
@@ -2487,7 +2487,7 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
   if (!inputOutput.IsAnswerElement(&answerId)) {
     return true;
   }
-  int theIndex = this->GetAnswerIndex(answerId);
+  int theIndex = this->getAnswerIndex(answerId);
   std::string tagClass = inputOutput.GetTagClass();
   if (theIndex == - 1) {
     std::stringstream out;
@@ -2549,7 +2549,7 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments) {
   std::string currentId;
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].IsAnswerElement(&currentId)) {
-      int index = this->GetAnswerIndex(currentId);
+      int index = this->getAnswerIndex(currentId);
       if (index == - 1) {
         continue;
       }
@@ -2594,11 +2594,11 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
       std::string currentId = StringRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
       if (currentId == "") {
         if (comments != nullptr) {
-          *comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
+          *comments << "The answer element: " << currentE.toStringDebug() << " has empty id. This is not allowed. ";
         }
         return false;
       }
-      int theIndex = this->GetAnswerIndex(currentId);
+      int theIndex = this->getAnswerIndex(currentId);
       if (theIndex == - 1) {
         this->theProblemData.AddEmptyAnswerIdOnTop(currentId);
       }
@@ -2624,7 +2624,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
     }
     if (answerIdsSeenSoFar.size == 0 && currentE.GetKeyValue("name") == "") {
       if (comments != nullptr) {
-        *comments << "Auxilary answer element: " << currentE.ToStringDebug()
+        *comments << "Auxilary answer element: " << currentE.toStringDebug()
         << " has no name and appears before the first answer tag. "
         << "Auxilary answers apply the answer tag whose id is specified in the name "
         << "tag of the auxilary answer. If the auxilary answer has no "
@@ -2654,7 +2654,7 @@ bool CalculatorHTML::CheckContent(std::stringstream* comments) {
     ) {
       result = false;
       if (comments != nullptr) {
-        *comments << "Error: the id of tag " << currentElt.ToStringDebug()
+        *comments << "Error: the id of tag " << currentElt.toStringDebug()
         << " contains the equality sign which is not allowed. ";
       }
     }
@@ -2728,10 +2728,10 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
-  if (!input.IsOfType<std::string>(&theFile.inputHtml)) {
+  if (!input.isOfType<std::string>(&theFile.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.ParseHTML(&theCommands.comments)) {
+  if (!theFile.parseHTML(&theCommands.comments)) {
     return false;
   }
   return output.assignValue(theFile.ToStringExtractedCommands(), theCommands);
@@ -2814,7 +2814,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
   out << "];\n";
   out << "answerIdsPureLatex = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theAnswers.theValues[i].answerId, false) << "\"";
+    out << "\"" << HtmlRoutines::convertStringToURLString(this->theProblemData.theAnswers.theValues[i].answerId, false) << "\"";
     if (i != this->theProblemData.theAnswers.size() - 1) {
       out << ", ";
     }
@@ -2935,8 +2935,8 @@ void CalculatorHTML::ComputeBodyDebugString() {
   this->outputDebugInformationBody = out.str();
 }
 
-bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
+bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
   double startTime = global.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
@@ -3150,9 +3150,9 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         if (global.GetWebInput("studentSection") != "") {
           out << "studentSection=" << global.GetWebInput("studentSection") << "&";
         }
-        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
+        out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << HtmlRoutines::convertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else {
         out << "<a disabled =\"disabled\">&#8592;</a>" << linkSeparator;
@@ -3165,9 +3165,9 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         if (global.GetWebInput("studentSection") != "") {
           out << "studentSection=" << global.GetWebInput("studentSection") << "&";
         }
-        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
+        out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << HtmlRoutines::convertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
         << "\">&#8594;</a>" << linkSeparator;
       } else {
         out << "<a disabled =\"disabled\">&#8594;</a>" << linkSeparator;
@@ -3190,7 +3190,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       << this->ToStringCalculatorArgumentsForProblem(
         global.requestType,
         "false",
-        HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("studentSection"), false)
+        HtmlRoutines::convertURLStringToNormal(global.GetWebInput("studentSection"), false)
       ) << "\">Admin view</a>" << linkSeparator;
     } else {
       out << "<b>Admin view</b>" << linkSeparator;
@@ -3210,7 +3210,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       if (this->databaseStudentSections[i] != "") {
         if (
           global.UserStudentVieWOn() &&
-          this->databaseStudentSections[i] == HtmlRoutines::ConvertURLStringToNormal(
+          this->databaseStudentSections[i] == HtmlRoutines::convertURLStringToNormal(
             global.GetWebInput("studentSection"), false
           )
         ) {
@@ -3253,15 +3253,15 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   out << global.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << global.GetWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
-    out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
+    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(this->fileName, false) << "&";
   } else {
-    out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(global.GetWebInput(WebAPI::problem::fileName), false)
+    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(global.GetWebInput(WebAPI::problem::fileName), false)
     << "&";
   }
   out << "topicList=" << global.GetWebInput(WebAPI::problem::topicList) << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "") {
-    out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
+    out << "studentSection=" << HtmlRoutines::convertStringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate) {
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
@@ -3599,7 +3599,7 @@ bool TopicElementParser::CheckTopicPdfs(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TopicElementParser::CheckTopicPdfs");
-  this->CheckInitialization();
+  this->checkInitialization();
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
     if (!current.PdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
@@ -3609,7 +3609,7 @@ bool TopicElementParser::CheckTopicPdfs(
   return true;
 }
 
-bool TopicElementParser::CheckInitialization() {
+bool TopicElementParser::checkInitialization() {
   if (this->owner == nullptr) {
     global.fatal << "TopicElementParser not initialized when it should be. " << global.fatal;
   }
@@ -3881,7 +3881,7 @@ void TopicElementParser::CompressOneTopicLine(
 
 void TopicElementParser::CompressTopicLines() {
   MacroRegisterFunctionWithName("TopicElementParser::CompressTopicLines");
-  this->CheckInitialization();
+  this->checkInitialization();
   this->elements.setSize(0);
   for (int i = 0; i < this->crawled.size; i ++) {
     this->CompressOneTopicLine(this->crawled[i], *this->owner);
@@ -4282,7 +4282,7 @@ bool LaTeXCrawler::Slides::FromString(
     return false;
   }
   std::string decoded;
-  HtmlRoutines::ConvertURLStringToNormal(input, decoded, false);
+  HtmlRoutines::convertURLStringToNormal(input, decoded, false);
   JSData parsed;
   if (!parsed.readstring(decoded, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -4324,7 +4324,7 @@ void TopicElement::ComputeHomework(CalculatorHTML& owner) {
     return;
   }
   JSData resultJSON = this->ComputeHomeworkJSON(owner);
-  this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.toString(), false);
+  this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
 
 
@@ -4334,7 +4334,7 @@ void TopicElement::ComputeSlides(CalculatorHTML& owner) {
     return;
   }
   JSData resultJSON = this->ComputeSlidesJSON(owner);
-  this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.toString(), false);
+  this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
 
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {

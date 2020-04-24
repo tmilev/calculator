@@ -305,7 +305,7 @@ public:
   Response theResponse;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
-  ListReferences<ListReferences<stackInfo> > CustomStackTrace;
+  ListReferences<ListReferences<StackInfo> > CustomStackTrace;
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
 
@@ -463,7 +463,7 @@ public:
   void MakeReport();
   class Test {
   public:
-    static bool All();
+    static bool all();
     static bool Builds();
   };
   /// @endcond

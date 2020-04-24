@@ -5,7 +5,7 @@
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
 
-bool PrivateKeyRSA::Test::All() {
+bool PrivateKeyRSA::Test::all() {
   PrivateKeyRSA::Test::LoadFromPEMFile();
   PrivateKeyRSA::Test::LoadFromPEM();
   return true;
@@ -62,7 +62,7 @@ bool PrivateKeyRSA::Test::LoadFromPEM() {
   return true;
 }
 
-bool X509Certificate::Test::All() {
+bool X509Certificate::Test::all() {
   X509Certificate::Test::LoadFromPEMFile();
   X509Certificate::Test::LoadFromPEM();
   return true;

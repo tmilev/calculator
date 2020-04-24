@@ -52,7 +52,7 @@ public:
   std::string ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
   std::string ToStringCloseTag(const std::string& overrideTagIfNonEmpty);
   std::string GetTagClass();
-  std::string ToStringDebug();
+  std::string toStringDebug();
   SyntacticElementHTML() {
     this->flagUseDisplaystyleInMathMode = false;
     this->indexInOwner = - 1;
@@ -176,7 +176,7 @@ public:
   bool LoadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure);
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
   std::string StorE();
-  JSData StoreJSON() const;
+  JSData storeJSON() const;
   std::string toString() const;
   std::string ToStringAvailableAnswerIds();
 };

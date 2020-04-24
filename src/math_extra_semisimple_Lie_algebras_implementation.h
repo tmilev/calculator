@@ -4,7 +4,7 @@
 #define vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 
 #include "math_extra_semisimple_Lie_algebras.h"
-#include "math_extra_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct branchingData’
+#include "math_extra_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
 #include "math_extra_drawing_variables.h"
 
 template <class Coefficient>
@@ -514,7 +514,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(const C
 
 template <class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitCharOverRedSubalg(
-  std::string* report, CharacterSemisimpleLieAlgebraModule& output, branchingData& inputData
+  std::string* report, CharacterSemisimpleLieAlgebraModule& output, BranchingData& inputData
 ) {
   if (this->isEqualToZero()) {
     return false;

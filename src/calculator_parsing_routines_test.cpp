@@ -2,7 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-bool Calculator::Test::All() {
+bool Calculator::Test::all() {
   Calculator tester;
   tester.initialize();
   Calculator::Test::CheckBuiltInInitializations(tester);

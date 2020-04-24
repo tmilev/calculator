@@ -75,8 +75,8 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimirWRTLeviParabolic(
   killingRestrictedToCartan.init(theLeviRoots.CardinalitySelection, theLeviRoots.CardinalitySelection);
   for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++) {
     for (int j = i; j < theLeviRoots.CardinalitySelection; j ++) {
-      theWeightLeft.MakeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
-      theWeightRight.MakeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
+      theWeightLeft.makeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
+      theWeightRight.makeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
       leftE.MakeHgenerator(theWeightLeft, theOwner);
       rightE.MakeHgenerator(theWeightRight, theOwner);
       killingRestrictedToCartan(i, j) = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
@@ -87,10 +87,10 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimirWRTLeviParabolic(
   ElementUniversalEnveloping<Coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;
   for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++) {
-    theWeightLeft.MakeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
+    theWeightLeft.makeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
     theWeightRight.makeZero(theOwner.GetRank());
     for (int j = 0; j < theLeviRoots.CardinalitySelection; j ++) {
-      currentEj.MakeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
+      currentEj.makeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
       theWeightRight += currentEj * killingRestrictedToCartan(i, j);
     }
     leftUE.MakeHgenerator(theWeightLeft, theOwner);
@@ -139,7 +139,7 @@ bool MonomialUniversalEnveloping<Coefficient>::AdjointRepresentationAction(
   output = input;
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int nextCycleSize;
-    if (!this->Powers[i].IsSmallInteger(&nextCycleSize)) {
+    if (!this->Powers[i].isSmallInteger(&nextCycleSize)) {
       return false;
     }
     for (int j = 0; j < nextCycleSize; j ++) {
@@ -228,13 +228,13 @@ bool MonomialUniversalEnveloping<Coefficient>::CommutingABntoBnAPlusLowerOrderAl
   Coefficient& theLeftPower, int leftGeneratorIndex, Coefficient& theRightPower, int rightGeneratorIndex
 ) {
   int leftPower, rightPower;
-  if (!theLeftPower.IsSmallInteger(&leftPower)) {
+  if (!theLeftPower.isSmallInteger(&leftPower)) {
     return false;
   }
   if (leftPower < 0) {
     return false;
   }
-  if (theRightPower.IsSmallInteger(&rightPower)) {
+  if (theRightPower.isSmallInteger(&rightPower)) {
     if (rightPower >= 0) {
       return true;
     }
@@ -415,7 +415,7 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyTransposeAntiAutoOnMe() {
     tempMon.generatorsIndices.size = 0;
     for (int j = currentMon.Powers.size - 1; j >= 0; j --) {
       int thePower;
-      if (!currentMon.Powers[j].IsSmallInteger(&thePower)) {
+      if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
         return false;
       }
       int theGenerator = currentMon.generatorsIndices[j];
@@ -479,7 +479,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWTAAbilinearForm(
     leftMonCoeff = TAleft.coefficients[j];
     int thePower;
     for (int i = leftMon.Powers.size - 1; i >= 0; i --) {
-      if (leftMon.Powers[i].IsSmallInteger(&thePower)) {
+      if (leftMon.Powers[i].isSmallInteger(&thePower)) {
         for (int k = 0; k < thePower; k ++) {
           tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], this->GetOwner(), theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
@@ -550,7 +550,7 @@ void MonomialUniversalEnveloping<Coefficient>::ModOutVermaRelations(
         return;
       }
       int theDegree;
-      if (!this->Powers[i].IsSmallInteger(&theDegree)) {
+      if (!this->Powers[i].isSmallInteger(&theDegree)) {
         return;
       }
       int hIndex = IndexCurrentGenerator - numPosRoots;
@@ -634,10 +634,10 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //  Matrix<Rational> killingForm;
 //  killingForm.init(theDimension, theDimension);
 //  for (int i = 0; i < theDimension; i ++)
-//  { tempRoot1.MakeEi(theDimension, i);
+//  { tempRoot1.makeEi(theDimension, i);
 //    for (int j = 0; j < theDimension; j ++)
 //    { killingForm.elements[i][j] = 0;
-//      tempRoot2.MakeEi(theDimension, j);
+//      tempRoot2.makeEi(theDimension, j);
 //      for (int k = 0; k<theWeyl.RootSystem.size; k++)
 //        killingForm.elements[i][j] += theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.theObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.theObjects[k]);
 //    }
@@ -656,7 +656,7 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   invertedSymCartan.invert();
 ////////////////////////////////////////////////////////////////////////
   for (int i = 0; i < theDimension; i ++) {
-    tempRoot1.MakeEi(theDimension, i);
+    tempRoot1.makeEi(theDimension, i);
   //implementation without the ninja formula:
 //    killingForm.actOnVectorColumn(tempRoot1, tempRoot2);
 //    tempElt1.MakeHgenerator(tempRoot1, numVars, theOwner);
@@ -711,7 +711,7 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   //this->DebugString= out.str();
 //  Vector<Rational> tempRoot;
 //  for (int i = 0; i < theDimension; i ++)
-//  { tempRoot.MakeEi(theDimension, i);
+//  { tempRoot.makeEi(theDimension, i);
 //    if (!length1Explored)
 //    { length1= theWeyl.RootScalarCartanRoot(tempRoot, tempRoot);
 //      length1Explored = true;
@@ -921,7 +921,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::GetElementUniversalEnvelop
   int theDegree;
   Accum.makeConstant(this->Coefficient, inputOwner);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    if (this->Powers[i].IsSmallInteger(&theDegree)) {
+    if (this->Powers[i].isSmallInteger(&theDegree)) {
       tempMon.AssignElementLieAlgebra(
         this->owner->theOrder[this->generatorsIndices[i]],
         inputOwner,
@@ -1668,8 +1668,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::CommutingLeftIndexAroundRi
   Coefficient& theLeftPower, int leftGeneratorIndex, Coefficient& theRightPower, int rightGeneratorIndex
 ) {
   int tempInt;
-  if (theLeftPower.IsSmallInteger(&tempInt)) {
-    if (theRightPower.IsSmallInteger(&tempInt)) {
+  if (theLeftPower.isSmallInteger(&tempInt)) {
+    if (theRightPower.isSmallInteger(&tempInt)) {
       return true;
     }
     int numPosRoots = this->owner->theOwner->theWeyl.RootsOfBorel.size;
@@ -1863,7 +1863,7 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::AssignMonomialUniversalEnve
   this->makeConstant(theCoeff, owner);
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     int thePower;
-    bool isASmallInt = input.Powers.theObjects[i].IsSmallInteger(&thePower);
+    bool isASmallInt = input.Powers.theObjects[i].isSmallInteger(&thePower);
     if (isASmallInt) {
       tempElt.MakeGenerator(
         input.generatorsIndices.theObjects[i], *input.owners, input.indexInOwners
@@ -2010,7 +2010,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutVermaRelations(
     }
     if (IndexCurrentGenerator >= numPosRoots &&  IndexCurrentGenerator < numPosRoots + theDimension) {
       int theDegree;
-      if (!this->Powers[i].IsSmallInteger(theDegree)) {
+      if (!this->Powers[i].isSmallInteger(theDegree)) {
         return;
       }
       if (subHiGoesToIthElement == 0) {

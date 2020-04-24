@@ -407,7 +407,7 @@ public:
     return in.hashFunction();
   }
   bool HasDifferentConjugacyInvariantsFrom(const SemidirectProductElement& other) const {
-    (void) other;//avoid unused parameter warning, portable
+    (void) other;
     return false;
   }
   template <typename Coefficient>
@@ -528,7 +528,7 @@ public:
     return true;
   }
   void makeIdentity(const ElementZ2N& unused) {
-    (void) unused;//avoid unused parameter warning, portable
+    (void) unused;
     this->bits.setSize(0);
   }
 
@@ -607,7 +607,7 @@ public:
       }
     }
     MonomialP x;
-    x.MakeEi(0);
+    x.makeEi(0);
     p.addMonomial(x, 1);
     p.AddConstant(- m);
   }
@@ -1165,7 +1165,7 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
   ElementFiniteGroup() {
     this->data = nullptr;
     this->mul = nullptr;
-    this->inv= nullptr;
+    this->inv = nullptr;
   }
 
   ElementFiniteGroup operator*(ElementFiniteGroup right) {
@@ -1469,7 +1469,7 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<Coef
   coefficient acc = 0;
   for (int i = 0; i < this->conjugacyClasses.size; i ++)
     acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasses[i].size;
-  return  acc / this->GetSize();
+  return  acc / this->getSize();
 }
 */
 
@@ -1489,8 +1489,8 @@ void FiniteGroup<elementSomeGroup>::makeIdentity(elementSomeGroup& e) {
 // the intention here is to do representation theory.  so we need the sizes,
 // representatives, and words.
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords() {
-  MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesRepresentativesWords");
+void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesWords() {
+  MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassesSizesRepresentativesWords");
   this->checkConsistency();
   if (this->GetWordByFormula != 0) {
     this->flagWordsComputed = true;
@@ -1628,7 +1628,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
     this->irreps[i].ComputeCharacter();
   }
   std::stringstream out;
-  out << this->GetSize() << " elements.  Representatives and sizes are ";
+  out << this->getSize() << " elements.  Representatives and sizes are ";
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     out << this->conjugacyClasses[i].representative << " " << this->conjugacyClasses[i].size;
     if (i != this->conjugacyClasses.size - 1) {
@@ -1889,7 +1889,7 @@ somestream& PermutationGroupData::IntoStream(somestream& out) {
   if (this->flagHasGeneratorsjjPlus1) {
     out << "generators are (j j+ 1))";
   }
-  out << " thus having " << this->theGroup->GetSize() << " elements.";
+  out << " thus having " << this->theGroup->getSize() << " elements.";
   return out;
 }
 
@@ -1996,8 +1996,8 @@ bool GroupRepresentation<someGroup, Coefficient>::VerifyRepresentation() {
   if (badrep) {
     FiniteGroup<Matrix<Rational> > RG;
     RG.generators = this->generatorS;
-    LargeInteger GS = this->ownerGroup->GetSize();
-    LargeInteger RGS = RG.GetSize();
+    LargeInteger GS = this->ownerGroup->getSize();
+    LargeInteger RGS = RG.getSize();
     if ((GS % RGS) != 0) {
       global.comments << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
     }

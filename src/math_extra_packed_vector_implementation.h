@@ -120,7 +120,7 @@ void PackedVector<scalar>::makeZero(int n) {
 }
 
 template <typename scalar>
-void PackedVector<scalar>::MakeEi(int d, int ei) {
+void PackedVector<scalar>::makeEi(int d, int ei) {
   (void) d;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;

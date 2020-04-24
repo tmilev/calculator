@@ -1,8 +1,8 @@
 #include "json.h"
 #include "math_general.h"
 
-bool JSData::Test::All() {
-  MacroRegisterFunctionWithName("JSData::Test::All");
+bool JSData::Test::all() {
+  MacroRegisterFunctionWithName("JSData::Test::all");
   JSData::Test::TestRecode();
   JSData::Test::TestBadInput();
   return true;

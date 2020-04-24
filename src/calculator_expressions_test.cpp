@@ -2,7 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-bool Expression::Test::All() {
+bool Expression::Test::all() {
   Calculator tester;
   tester.initialize();
   Expression::Test::ToStringTestRecode(tester);

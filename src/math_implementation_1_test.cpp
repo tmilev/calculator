@@ -8,12 +8,12 @@
 bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
-  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
-    global.fatal << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
+  if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
+    global.fatal << "Function Crypto::convertLargeUnsignedToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
   }
   List<unsigned char> serialization;
   input.WriteBigEndianBytes(serialization, true);
-  resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization);
+  resultByteSerializationHex = Crypto::convertListUnsignedCharsToHex(serialization);
   if (resultByteSerializationHex != resultCryptoHex) {
     global.fatal << "Byte serialization hex: " << resultByteSerializationHex
     << " not equal to crypto hex conversion: "
@@ -23,8 +23,8 @@ bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& 
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::All() {
-  MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::All");
+bool LargeIntegerUnsigned::Test::all() {
+  MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::all");
   LargeIntegerUnsigned::Test::SerializationToHex(LargeIntegerUnsigned(100));
   LargeIntegerUnsigned::Test::Comparisons();
   return true;
@@ -44,7 +44,7 @@ bool LargeIntegerUnsigned::Test::Comparisons() {
   return true;
 }
 
-bool Rational::Test::All() {
+bool Rational::Test::all() {
   Rational::Test::TestScale();
   return true;
 }
@@ -102,8 +102,8 @@ bool ElementZmodP::Test::basicOperations() {
   ElementZmodP x, y;
   x.theModulus = 5;
   y.theModulus = 5;
-  x.AssignRational(Rational("-1/2"));
-  y.AssignRational(Rational("3"));
+  x.assignRational(Rational("-1/2"));
+  y.assignRational(Rational("3"));
   ElementZmodP z = y;
   z *= x;
   if (!(z.theValue == 1)) {
@@ -126,7 +126,7 @@ RationalFunction RationalFunction::Test::fromString(const std::string& input) {
     << global.fatal;
   }
   RationalFunction result;
-  if (!parser.theProgramExpression[1].IsOfType(&result)) {
+  if (!parser.theProgramExpression[1].isOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
     << parser.theProgramExpression.toString()

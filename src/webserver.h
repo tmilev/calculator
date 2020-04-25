@@ -118,19 +118,19 @@ public:
     int recursionDepth = 0
   );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
-  void WriteAfterTimeoutShowIndicator(const std::string& message);
-  void WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
+  void writeAfterTimeoutShowIndicator(const std::string& message);
+  void writeAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
   ///////
   void PauseIfRequested();
   // writes json to body, sanitizes.
-  bool WriteToBodyJSOn(const JSData& result);
+  bool writeToBodyJSON(const JSData& result);
   bool WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutString(
     const std::string& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  void WriteAfterTimeoutJSON(
+  void writeAfterTimeoutJSON(
     const JSData& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
@@ -156,7 +156,7 @@ public:
   void Release();
   void ReleaseKeepInUseFlag();
   bool EnsureAllBytesSent();
-  void SendPending();
+  void sendPending();
   void SendAllBytesNoHeaderS();
   std::string MIMETypeFromFileExtension(const std::string& fileExtension);
   std::string HeaderFromFileExtension(const std::string& fileExtension);
@@ -173,7 +173,7 @@ public:
   std::string GetHtmlHiddenInputs(
     bool includeUserName, bool includeAuthenticationToken
   );
-  void SetHeaderOKNoContentLength(
+  void setHeaderOKNoContentLength(
     const std::string& extraHeader,
     const std::string& contentType = "application/json"
   );
@@ -291,10 +291,10 @@ public:
   int Fork();
   void initializeRandomBytes();
   void WriteVersionJSFile();
-  WebWorker& GetActiveWorker();
+  WebWorker& getActiveWorker();
   static void WorkerTimerPing(int64_t pingTime);
   static void Release(int& theDescriptor);
-  static void WrapUp();
+  static void wrapUp();
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);

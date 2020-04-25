@@ -1050,7 +1050,7 @@ void Vectors<Coefficient>::GetLinearDependenceRunTheLinearAlgebra(
     return;
   }
   int Dimension = (*this)[0].size;
-  outputTheSystem.init(Dimension, this->size);
+  outputTheSystem.initialize(Dimension, this->size);
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < Dimension; j ++) {
       outputTheSystem(j, i) = (*this)[i][j];
@@ -1098,7 +1098,7 @@ bool Vector<Coefficient>::GetIntegralCoordsInBasisIfTheyExist(
   const Coefficient& theRingZero
 ) {
   int theDim = this->size;
-  bufferMatGaussianElimination.init(inputBasis.size, theDim);
+  bufferMatGaussianElimination.initialize(inputBasis.size, theDim);
   for (int i = 0; i < inputBasis.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];

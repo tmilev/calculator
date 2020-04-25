@@ -30,8 +30,8 @@ void AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection(
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection");
   outputOp.makeZero();
   Selection vectorActedOnSel, resultVectorSel;
-  vectorActedOnSel.init(this->theQuadraticRadicals.size);
-  resultVectorSel.init(this->theQuadraticRadicals.size);
+  vectorActedOnSel.initialize(this->theQuadraticRadicals.size);
+  resultVectorSel.initialize(this->theQuadraticRadicals.size);
   Rational theCoeff;
   MonomialMatrix tempM;
   do {
@@ -59,7 +59,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals() {
   }
   this->DisplayNamesBasisElements.setSize(this->latestBasis.size);
   Selection theSel;
-  theSel.init(this->theQuadraticRadicals.size);
+  theSel.initialize(this->theQuadraticRadicals.size);
   do {
     std::stringstream out;
     LargeInteger theRad = 1;
@@ -77,7 +77,7 @@ bool AlgebraicClosureRationals::GetRadicalSelectionFromIndex(int inputIndex, Sel
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
-  theSel.init(this->theQuadraticRadicals.size);
+  theSel.initialize(this->theQuadraticRadicals.size);
   int counter = 0;
   while (inputIndex > 0) {
     if (inputIndex % 2 == 1) {
@@ -156,8 +156,8 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
   MatrixTensor<Rational> currentInjection;
   currentInjection.makeZero();
   Selection largerFieldSel, smallerFieldSel;
-  largerFieldSel.init(radicalsNew.size);
-  smallerFieldSel.init(this->theQuadraticRadicals.size);
+  largerFieldSel.initialize(radicalsNew.size);
+  smallerFieldSel.initialize(this->theQuadraticRadicals.size);
   do {
     largerFieldSel.initNoMemoryAllocation();
     for (int j = 0; j < this->theQuadraticRadicals.size; j ++) {
@@ -180,7 +180,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
     );
   } while (smallerFieldSel.IncrementReturnFalseIfPastLast());
   this->theQuadraticRadicals = radicalsNew;
-  largerFieldSel.init(radicalsNew.size);
+  largerFieldSel.initialize(radicalsNew.size);
   do {
     this->GetMultiplicativeOperatorFromRadicalSelection(
       largerFieldSel,
@@ -229,7 +229,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ChooseGeneratingElement");
   SelectionPositiveIntegers theSel;
   int DimensionOverRationals = this->latestBasis.size;
-  theSel.init(DimensionOverRationals);
+  theSel.initialize(DimensionOverRationals);
   this->theGeneratingElementPowersBasis.setSize(0);
   Vector<Rational> currentVect;
   this->GeneratingElemenT.owner = this;
@@ -317,7 +317,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     return true;
   }
   Polynomial<Rational> theMinPoly, smallestFactor;
-  theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
+  theMinPoly.assignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->latestBasis.size;
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   bool mustBeTrue = factorization.factor(
@@ -764,7 +764,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minPoly;
   MonomialP leadingMonomial;
   AlgebraicNumber leadingCoefficientModified;
-  minusMinimalPolynomialMinusMaximalMonomial.GetIndexLeadingMonomial(
+  minusMinimalPolynomialMinusMaximalMonomial.getIndexLeadingMonomial(
     &leadingMonomial, &leadingCoefficientModified, monomialOrder
   );
   minusMinimalPolynomialMinusMaximalMonomial.SubtractMonomial(leadingMonomial, leadingCoefficientModified);
@@ -1195,7 +1195,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     return false;
   }
   Selection FactorSel;
-  FactorSel.init(inputOwner.theQuadraticRadicals.size);
+  FactorSel.initialize(inputOwner.theQuadraticRadicals.size);
   for (int i = 0; i < theFactors.size; i ++) {
     if (theFactors[i] == - 1) {
       FactorSel.AddSelectionAppendNewIndex(inputOwner.theQuadraticRadicals.getIndex(- 1));
@@ -1587,7 +1587,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
 ) {
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.scaleNormalizeLeadingMonomial();
+  rescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   output.setExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.theModulus = newModulo;

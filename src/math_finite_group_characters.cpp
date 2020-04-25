@@ -102,7 +102,7 @@ void matrixInBasis(
   const Matrix<Coefficient>& gramMatrix
 ) {
   int d = basis.size;
-  out.init(d, d);
+  out.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
       out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
@@ -252,7 +252,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>
 GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Reduced() const {
   int d = basis.size;
   Matrix<Coefficient> GM;
-  GM.init(d, d);
+  GM.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
@@ -558,7 +558,7 @@ void getunion(const List<Vector<Coefficient> >& V, const List<Vector<Coefficient
   }
   int d = V[0].size;
   Matrix<Coefficient> M;
-  M.init(V.size + W.size,d);
+  M.initialize(V.size + W.size,d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
       M.elements[i][j] = V[i][j];
@@ -597,7 +597,7 @@ void intersection(
   int d = V[0].size;
 
   Matrix<Coefficient> MV;
-  MV.init(V.size, d);
+  MV.initialize(V.size, d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
       MV.elements[i][j] = V[i][j];
@@ -607,7 +607,7 @@ void intersection(
   MV.GetZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<Coefficient> MW;
-  MW.init(W.size, d);
+  MW.initialize(W.size, d);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < d; j ++) {
       MW.elements[i][j] = W[i][j];
@@ -617,7 +617,7 @@ void intersection(
   MW.GetZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<Coefficient> M;
-  M.init(Vperp.size + Wperp.size,d);
+  M.initialize(Vperp.size + Wperp.size,d);
   int i = 0;
   for (; i < Vperp.size; i ++) {
     for (int j = 0; j < d; j ++) {
@@ -642,7 +642,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   }
   int d = W[0].size;
   Matrix<Coefficient> GM;
-  GM.init(W.size, W.size);
+  GM.initialize(W.size, W.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < W.size; j ++) {
       GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
@@ -650,7 +650,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   }
   GM.invert();
   Matrix<Coefficient> VM;
-  VM.init(W.size,V.size);
+  VM.initialize(W.size,V.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < V.size; j ++) {
       VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
@@ -658,7 +658,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   }
   VM.multiplyOnTheLeft(GM);
   Matrix<Coefficient> outm;
-  outm.init(V.size, d);
+  outm.initialize(V.size, d);
   for (int i = 0; i < V.size; i ++) {
     for (int j = 0; j < d; j ++) {
       Coefficient r = V[i][j];
@@ -756,7 +756,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 //   if ((i != 0) && (checkDivisorsOf%i != 0))
 //     continue;
   UDPolynomial<Rational> p;
-  p.AssignMinPoly(M);
+  p.assignMinPoly(M);
   for (int ii = 0; ii < 2 * n + 2; ii ++) {
     // lol, this did end up working though
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,- 1,2,-2,3,-3,...
@@ -884,7 +884,7 @@ Matrix<Rational> matrixInBasis(
     }
   }
   Matrix<Rational> M;
-  M.init(rows.size, rows.size);
+  M.initialize(rows.size, rows.size);
   for (int i = 0; i < rows.size; i ++) {
     Vector<Rational> v = PutInBasis(rows[i], B);
     for (int j = 0; j < rows.size; j ++) {
@@ -1075,7 +1075,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   EiBasis.MakeEiBasis(G.getDimension());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.CardinalitySelection;
-  this->SubCartanSymmetric.init(d, d);
+  this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
       this->SubCartanSymmetric(ii, jj) = G.RootScalarCartanRoot(
@@ -1095,7 +1095,7 @@ void SubgroupDataRootReflections::MakeFromRoots(WeylGroupData& G, const Vectors<
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
   int d = this->generatingSimpleRoots.size;
-  this->SubCartanSymmetric.init(d, d);
+  this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
       this->SubCartanSymmetric(ii, jj) = G.RootScalarCartanRoot(
@@ -1121,7 +1121,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
     return false;
   }
   OrbitIteratorWeylGroup theIterator;
-  theIterator.init(this->generators, left, ElementWeylGroup::conjugationAction);
+  theIterator.initialize(this->generators, left, ElementWeylGroup::conjugationAction);
   if (this->generators.size == 0) {
     global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
@@ -1159,7 +1159,7 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection sel;
-  sel.init(this->getDimension());
+  sel.initialize(this->getDimension());
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
@@ -1188,7 +1188,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
-  parSelrootsAreInLevi.init(this->getDimension() + 1);
+  parSelrootsAreInLevi.initialize(this->getDimension() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.MakeEiBasis(this->getDimension());
   extendedBasis.addOnTop(this->RootSystem[0]);

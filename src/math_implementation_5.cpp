@@ -414,7 +414,7 @@ void DrawingVariables::drawString(
 void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst) {
   global.fatal << "Not implemented yet!!!!!" << global.fatal;
   RootSubalgebra theRootSA;
-//  theRootSA.init(*this);
+//  theRootSA.initialize(*this);
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
@@ -432,7 +432,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
 //  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
   Selection NonExplored;
   int numRoots = this->theWeyl.RootSystem.size;
-  NonExplored.init(numRoots);
+  NonExplored.initialize(numRoots);
   NonExplored.MakeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
@@ -525,7 +525,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
       numExplored++;
       Explored.theObjects[i] = true;
       Matrix<Rational> & currentMat = this->EmbeddingsRootSpaces.theObjects[i];
-      currentMat.init(weightSupport.size, weightSupport.size);
+      currentMat.initialize(weightSupport.size, weightSupport.size);
       currentMat.makeZero();
       for (int j = 0; j<weightSupport.size; j ++) {
         int indexTarget = weightSupport.getIndex(current +weightSupport.theObjects[j]);
@@ -561,7 +561,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   this->EmbeddingsCartan.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     Matrix<Rational> & current = this->EmbeddingsCartan.theObjects[i];
-    current.init(weightSupport.size, weightSupport.size);
+    current.initialize(weightSupport.size, weightSupport.size);
     current.makeZero();
     Vector<Rational> tempRoot;
     tempRoot.makeEi(theDimension, i);
@@ -596,7 +596,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   int theDomainDimension = this->theDomain().theWeyl.cartanSymmetric.numberOfRows;
   Selection NonExplored;
   int numRoots = this->theDomain().theWeyl.RootSystem.size;
-  NonExplored.init(numRoots);
+  NonExplored.initialize(numRoots);
   NonExplored.MakeFullSelection();
   List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
   tempDomain.setSize(numRoots+theDomainDimension);
@@ -737,7 +737,7 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
 }
 
 void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output) {
-  output.init(this->theRange().GetRank(), this->theDomain().GetRank());
+  output.initialize(this->theRange().GetRank(), this->theDomain().GetRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().GetRank(); i ++) {
     domainElt.MakeHgenerator(Vector<Rational>::GetEi(this->theDomain().GetRank(), i), this->theDomain());
@@ -1107,8 +1107,8 @@ void HtmlRoutines::ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutp
   }
 }
 
-bool VectorPartition::init(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot) {
-  MacroRegisterFunctionWithName("VectorPartition::init");
+bool VectorPartition::initialize(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot) {
+  MacroRegisterFunctionWithName("VectorPartition::initialize");
   for (int i = 0; i < inputPartitioningRoots.size; i ++) {
     if (!inputPartitioningRoots[i].isPositive()) {
       return false;
@@ -1472,7 +1472,7 @@ std::string RationalFunction::toString(FormatExpressions* theFormat) const {
   } else {
     out << ")";
   }
-  //out << " Num vars: " << this->GetNumVars();
+  //out << " Num vars: " << this->getNumberOfVariables();
   return out.str();
 }
 
@@ -1493,7 +1493,7 @@ void RationalFunction::gcd(
     leastCommonMultipleBuffer,
     output,
     remainderBuffer,
-    &MonomialP::orderForGCD()
+    &MonomialP::orderForGreatestCommonDivisor()
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     global.fatal
@@ -1509,7 +1509,7 @@ void RationalFunction::gcd(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial();
+  output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
 }
 
 void RationalFunction::MakeOneLetterMoN(
@@ -1614,7 +1614,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   }
   RationalFunction::gcd(this->Denominator.getElement(), other, theGCD);
   this->Numerator.getElement() *= other;
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGCD();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
   this->Numerator.getElement().DivideBy(theGCD, theResult, tempP, monomialOrder);
   if (!tempP.isEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
@@ -1715,7 +1715,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   }
   RationalFunction::gcd(other.Denominator.GetElementConst(), this->Numerator.getElement(), theGCD1);
   RationalFunction::gcd(this->Denominator.getElement(), other.Numerator.GetElementConst(), theGCD2);
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGCD();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
   this->Numerator.getElement().DivideBy(theGCD1, tempP1, tempP2, monomialOrder);
   this->Numerator.getElement() = tempP1;
   if (!tempP2.isEqualToZero()) {
@@ -1791,7 +1791,7 @@ void RationalFunction::operator+=(const RationalFunction& other) {
 
 void RationalFunction::simplify() {
   MacroRegisterFunctionWithName("RationalFunctionOld::simplify");
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGCD();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
   if (this->expressionType == this->typeRationalFunction) {
     if (!this->Numerator.getElement().isEqualToZero()) {
       Polynomial<Rational> theGCD, tempP, tempP2;
@@ -1823,14 +1823,14 @@ Rational RationalFunction::scaleToIntegral() {
     return result;
   }
   if (this->expressionType == this->typePoly) {
-    return this->Numerator.getElement().scaleNormalizeLeadingMonomial();
+    return this->Numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   }
   if (this->expressionType != this->typeRationalFunction) {
     return Rational::one();
   }
   Rational result;
-  result = this->Numerator.getElement().scaleNormalizeLeadingMonomial();
-  result /= this->Denominator.getElement().scaleNormalizeLeadingMonomial();
+  result = this->Numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  result /= this->Denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   return result;
 }
 
@@ -1838,8 +1838,8 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Rational scaleNumerator = this->Numerator.getElement().scaleNormalizeLeadingMonomial();
-  Rational scaleDenominator = this->Denominator.getElement().scaleNormalizeLeadingMonomial();
+  Rational scaleNumerator = this->Numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  Rational scaleDenominator = this->Denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational scale = scaleDenominator / scaleNumerator;
   this->Denominator.getElement() *= scale.GetDenominator();
   this->Numerator.getElement() *= scale.GetNumerator();
@@ -1899,8 +1899,8 @@ RationalFunction RationalFunction::scaleNormalizeIndex(
     RationalFunction& current = input[i];
     current.GetNumerator(currentNumerator);
     current.GetDenominator(currentDenominator);
-    scale = currentNumerator.scaleNormalizeLeadingMonomial();
-    scale /= currentDenominator.scaleNormalizeLeadingMonomial();
+    scale = currentNumerator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+    scale /= currentDenominator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     scales.addOnTop(scale);
   }
   LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].GetNumerator().value;
@@ -1965,7 +1965,7 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
   return - numPosRoots + GeneratorIndex;
 }
 
-void SemisimpleLieAlgebraOrdered::init(
+void SemisimpleLieAlgebraOrdered::initialize(
   List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner
 ) {
   global.fatal << "not implemented" << global.fatal;
@@ -1974,7 +1974,7 @@ void SemisimpleLieAlgebraOrdered::init(
   }
   this->theOwner = &owner;
   this->theOrder = inputOrder;
-  this->ChevalleyGeneratorsInCurrentCoords.init(owner.GetNumGenerators(), owner.GetNumGenerators());
+  this->ChevalleyGeneratorsInCurrentCoords.initialize(owner.GetNumGenerators(), owner.GetNumGenerators());
   this->ChevalleyGeneratorsInCurrentCoords.makeZero();
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
@@ -1994,7 +1994,7 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) 
     ElementSemisimpleLieAlgebra<Rational>& currentElt = defaultOrder[i];
     currentElt.MakeGenerator(i, owner);
   }
-  this->init(defaultOrder, owner);
+  this->initialize(defaultOrder, owner);
 }
 
 template <class Coefficient>
@@ -2372,11 +2372,11 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   for (int i = 0; i < this->thePartition.size; i ++) {
     this->theDimension += this->thePartition[i];
   }
-  theH.init(this->theDimension, this->theDimension);
+  theH.initialize(this->theDimension, this->theDimension);
   theH.makeZero();
-  theE.init(this->theDimension, this->theDimension);
+  theE.initialize(this->theDimension, this->theDimension);
   theE.makeZero();
-  theF.init(this->theDimension, this->theDimension);
+  theF.initialize(this->theDimension, this->theDimension);
   theF.makeZero();
   this->theProjectors.setSize(this->thePartition.size);
   int currentOffset = 0;
@@ -2391,7 +2391,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     newLine = "\n\n\n";
   }
   for (int i = 0; i < this->thePartition.size; i ++) {
-    this->theProjectors[i].init(this->theDimension, this->theDimension);
+    this->theProjectors[i].initialize(this->theDimension, this->theDimension);
     this->theProjectors[i].makeZero();
     for (int j = 0; j < this->thePartition[i]; j ++) {
       theH.elements[currentOffset + j][currentOffset + j] = this->thePartition[i] - 1 - 2 * j;
@@ -2410,7 +2410,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   out << newLine << beginMath << "f =" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
   << this->theF.ElementToStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
-  tempMat.init(this->theDimension, this->theDimension);
+  tempMat.initialize(this->theDimension, this->theDimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
   this->theHighestWeightVectors.size = 0;
   this->theGmodKModules.size = 0;
@@ -2821,7 +2821,7 @@ bool MonomialP::operator>(const MonomialP& other) const {
   return MonomialP::greaterThan_totalDegree_leftLargerWins(*this, other);
 }
 
-bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
+bool MonomialP::isDivisibleBy(const MonomialP& other) const {
   for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
     if (other.monBody[i] > 0) {
       return false;
@@ -2921,7 +2921,7 @@ List<MonomialP>::Comparator& MonomialP::orderDefault() {
   return result;
 }
 
-List<MonomialP>::Comparator& MonomialP::orderForGCD() {
+List<MonomialP>::Comparator& MonomialP::orderForGreatestCommonDivisor() {
   static List<MonomialP>::Comparator result(MonomialP::greaterThan_rightLargerWins);
   return result;
 }

@@ -397,7 +397,7 @@ bool Database::initializeServer() {
   return true;
 }
 
-void GlobalVariables::init() {
+void GlobalVariables::initialize() {
   this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html";
   this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
   this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
@@ -631,7 +631,7 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   if (!Database::get().theUser.LoadUserInfo(*this, commentsOnFailure)) {
     return false;
   }
@@ -656,7 +656,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeight];
     }
   }
-  global.timeStats["userLoadTime"] = global.GetElapsedSeconds() - startTime;
+  global.timeStats["userLoadTime"] = global.getElapsedSeconds() - startTime;
   return true;
 }
 
@@ -739,18 +739,18 @@ bool UserCalculatorData::ComputeCourseInfo() {
   if (
     global.UserStudentVieWOn() &&
     isAdmin &&
-    global.GetWebInput("studentSection") != ""
+    global.getWebInput("studentSection") != ""
   ) {
     // <- warning, the user may not be
     // fully logged-in yet so global.UserDefaultHasAdminRights()
     // does not work right.
-    this->sectionComputed = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("studentSection"), false);
+    this->sectionComputed = HtmlRoutines::convertURLStringToNormal(global.getWebInput("studentSection"), false);
   } else {
     this->sectionComputed = this->sectionInDB;
   }
-  if (isAdmin && global.GetWebInput(WebAPI::problem::courseHome) != "") {
+  if (isAdmin && global.getWebInput(WebAPI::problem::courseHome) != "") {
     this->courseComputed =
-    HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+    HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
   } else {
     this->courseComputed = this->courseInDB;
   }
@@ -975,7 +975,7 @@ bool Database::User::SendActivationEmail(
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
-    global.server().GetActiveWorker().DoSetEmail(
+    global.server().getActiveWorker().DoSetEmail(
       currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
     );
   }
@@ -1328,7 +1328,7 @@ bool Database::User::AddUsersFromEmails(
   for (int i = 0; i < theEmails.size; i ++) {
     currentUser.reset();
     currentUser.username = theEmails[i];
-    currentUser.courseInDB = global.GetWebInput(WebAPI::problem::courseHome);
+    currentUser.courseInDB = global.getWebInput(WebAPI::problem::courseHome);
     currentUser.sectionInDB = userGroup;
     currentUser.instructorInDB = global.userDefault.username;
     currentUser.email = theEmails[i];
@@ -1809,7 +1809,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
-  out << global.DisplayNameExecutableApp
+  out << global.displayApplication
   << "#" << HtmlRoutines::convertStringToURLString(theJS.toString(nullptr), false);
   return out.str();
 }

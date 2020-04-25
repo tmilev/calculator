@@ -358,7 +358,7 @@ public:
     }
   }
   static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
-  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);  
+  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);
 };
 
 class DrawElementInputOutput {
@@ -724,13 +724,12 @@ public:
     }
   }
   void initializeFillInObject(int theSize, const Object& o);
-  void AddObjectOnTopCreateNew();
   void reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SortedInsert(const Object& o) {
     this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
-  void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
-    this->ShiftUpExpandOnTop(desiredIndex);
+  void insertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
+    this->shiftUpExpandOnTop(desiredIndex);
     (*this)[desiredIndex] = o;
   }
   void addOnTop(const Object& o);
@@ -794,7 +793,7 @@ public:
   }
   // The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
-  bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
+  bool quickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
     return this->quickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
   }
   template <class compareClass, class carbonCopyType = Object>
@@ -1059,7 +1058,7 @@ public:
     if (n == this->size) {
       this->addOnTop(o);
     } else {
-      this->InsertAtIndexShiftElementsUp(o, n);
+      this->insertAtIndexShiftElementsUp(o, n);
     }
     return n;
   }
@@ -1071,7 +1070,7 @@ public:
         return - 1;
       }
       if (this->theObjects[i] > o) {
-        this->InsertAtIndexShiftElementsUp(o, i);
+        this->insertAtIndexShiftElementsUp(o, i);
         return i;
       }
     }
@@ -1100,7 +1099,7 @@ public:
     } else {
       outdex = this->size;
     }
-    this->InsertAtIndexShiftElementsUp(o, outdex);
+    this->insertAtIndexShiftElementsUp(o, outdex);
     return outdex;
   }
 
@@ -1204,7 +1203,7 @@ public:
   }
   bool operator>(const List<Object>& other) const;
   bool operator<(const List<Object>& other) const;
-  void ShiftUpExpandOnTop(int StartingIndex);
+  void shiftUpExpandOnTop(int StartingIndex);
   void shiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
   void AssignListList(const List<List<Object> >& input) {
     int count = 0;
@@ -1291,7 +1290,7 @@ private:
   Object PopIndexShiftDown(int index);
   void assignLight(const ListLight<Object>& from);
   void reverseElements();
-  void ShiftUpExpandOnTop(int StartingIndex);
+  void shiftUpExpandOnTop(int StartingIndex);
 
 protected:
   List<List<int> > theHashedArrays;
@@ -1761,6 +1760,8 @@ public:
 };
 
 class ProgressReport {
+private:
+  void initialize();
 public:
   int currentLevel;
   int threadIndex;
@@ -1769,25 +1770,22 @@ public:
   // Constant GlobalVariables::Response::ReportType
   int reportType;
   bool flagInitialized;
+  std::string name;
   // Call tickAndWantReport before generating report.
   // If a report is not wanted, it is wise to not generate one:
-  // the string operations required to generate a progress report
-  // would are expected to cost more than the mathematical computations
+  // the string operations required to generate some progress reports
+  // are expected to cost more than the mathematical computations
   // they are reporting.
   void report(const std::string& theReport);
   bool tickAndWantReport();
-  void init();
-  ProgressReport() {
-    this->init();
+  ProgressReport(const std::string& inputName = "") {
+    this->name = inputName;
+    this->initialize();
   }
   ProgressReport(int inputTicksPerReport, int inputReportType) {
-    this->init();
+    this->initialize();
     this->ticksPerReport = inputTicksPerReport;
     this->reportType = inputReportType;
-  }
-  ProgressReport(const std::string& theReport) {
-    this->init();
-    this->report(theReport);
   }
   ~ProgressReport();
 };
@@ -1837,7 +1835,7 @@ bool List<Object>::quickSortAscendingCustomRecursive(
   }
   int highIndex = topIndex;
   for (int LowIndex = bottomIndex + 1; LowIndex <= highIndex; LowIndex ++) {
-    if (theComparator.CompareLeftGreaterThanRight(
+    if (theComparator.compareLeftGreaterThanRight(
       this->theObjects[LowIndex], this->theObjects[bottomIndex]
     )) {
       if (carbonCopy != nullptr) {
@@ -1848,7 +1846,7 @@ bool List<Object>::quickSortAscendingCustomRecursive(
       highIndex --;
     }
   }
-  if (theComparator.CompareLeftGreaterThanRight(this->theObjects[highIndex], this->theObjects[bottomIndex])) {
+  if (theComparator.compareLeftGreaterThanRight(this->theObjects[highIndex], this->theObjects[bottomIndex])) {
     highIndex --;
   }
   if (carbonCopy != nullptr) {
@@ -2002,7 +2000,7 @@ bool List<Object>::operator<(const List<Object>& other) const {
 }
 
 template <class Object>
-void List<Object>::ShiftUpExpandOnTop(int StartingIndex) {
+void List<Object>::shiftUpExpandOnTop(int StartingIndex) {
   this->shiftUpExpandOnTopRepeated(StartingIndex, 1);
 }
 
@@ -2178,11 +2176,6 @@ std::string List<Object>::toStringCommaDelimited(FormatExpressions* theFormat) c
     }
   }
   return out.str();
-}
-
-template <class Object>
-void List<Object>::AddObjectOnTopCreateNew() {
-  this->setSize(this->size + 1);
 }
 
 template <class Object>

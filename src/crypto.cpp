@@ -1637,7 +1637,7 @@ bool JSONWebToken::verifyRSA256(
   // In order to have reproducible comments, we don't want to log time.
   // double timeStart = - 1;
   // if (commentsGeneral != nullptr) {
-  //   timeStart = global.GetElapsedSeconds();
+  //   timeStart = global.getElapsedSeconds();
   // }
   if (theModulus == 0 || theExponent == 0) {
     if (commentsOnFailure != nullptr) {
@@ -1651,7 +1651,7 @@ bool JSONWebToken::verifyRSA256(
   // if (commentsGeneral != nullptr) {
   //
   //   *commentsGeneral << "<br>RSA encryption took: "
-  //   << global.GetElapsedSeconds() - timeStart << " second(s).<br>";
+  //   << global.getElapsedSeconds() - timeStart << " second(s).<br>";
   // }
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);

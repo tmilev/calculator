@@ -62,7 +62,7 @@ void Calculator::reset() {
   this->NumLargeAdditionsStart      = - 1;
   this->NumLargeMultiplicationsStart = - 1;
   this->NumLargeGCDcallsStart       = - 1;
-  this->LastLogEvaluationTime = global.GetElapsedSeconds();
+  this->LastLogEvaluationTime = global.getElapsedSeconds();
   this->DepthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
@@ -133,7 +133,7 @@ void Calculator::reset() {
 }
 
 void Calculator::initialize() {
-  MacroRegisterFunctionWithName("Calculator::init");
+  MacroRegisterFunctionWithName("Calculator::initialize");
   this->reset();
 
   this->operations.setExpectedSize(1000);
@@ -1127,7 +1127,7 @@ bool Calculator::ReplaceMatrixXByE() {
     numCols = MathRoutines::Maximum(theMatElt.dataList[i].size() - 1, numCols);
   }
   if (numCols > 0 && numRows > 0) {
-    theMat.init(numRows, numCols);
+    theMat.initialize(numRows, numCols);
     for (int i = 0; i < numRows; i ++) {
       for (int j = 0; j < numCols; j ++) {
         if (j + 1 >= theMatElt.dataList[i].size()) {

@@ -171,7 +171,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
     global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
   }
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
-  output.init(*this->ownerGroup);
+  output.initialize(*this->ownerGroup);
   output.theCharacteR = this->theCharacteR;
   output.theCharacteR *= other.theCharacteR;
   for (int i = 0; i < output.generatorS.size; i ++) {
@@ -225,7 +225,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Restrict(
     global.fatal << "This is a programming error: restriction of "
     << "representation to a zero subspace is not allowed. " << global.fatal;
   }
-  output.init(*this->ownerGroup);
+  output.initialize(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
   output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
@@ -279,7 +279,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   output.setSize(0);
   int found = 0;
   Polynomial<Element> theMinPoly;
-  theMinPoly.AssignMinPoly(*this);
+  theMinPoly.assignMinPoly(*this);
   Vector<Element> theEigenValueCandidate;
   theEigenValueCandidate.setSize(1);
   Matrix<Rational> tempMat;
@@ -557,7 +557,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
-  //double startTimeForDebug= global.GetElapsedSeconds();
+  //double startTimeForDebug= global.getElapsedSeconds();
   WithContext<SemisimpleLieAlgebra*> theAlgebra;
   Vector<Rational> theWeightRat;
   if (theCommands.getTypeWeight<Rational>(
@@ -870,11 +870,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
-  double timeStart1 = global.GetElapsedSeconds();
+  double timeStart1 = global.getElapsedSeconds();
   theGroupData.theGroup.computeConjugacyClassesFromAllElements();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes of "
-  << theGroupData.toString() << " in " << global.GetElapsedSeconds() - timeStart1
+  << theGroupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
   return output.assignValue(theGroupData, theCommands);
 }
@@ -894,11 +894,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
     << "not to compute when the rank is larger than 8. ";
   }
   theGroupData.checkConsistency();
-  double timeStart1 = global.GetElapsedSeconds();
+  double timeStart1 = global.getElapsedSeconds();
   theGroupData.checkConsistency();
   theGroupData.theGroup.computeConjugacyClassSizesAndRepresentatives();
   theCommands << "<hr> Computed conjugacy classes representatives of "
-  << theGroupData.theDynkinType.toString() << " in " << global.GetElapsedSeconds()-timeStart1
+  << theGroupData.theDynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.assignValue(theGroupData, theCommands);
 }
@@ -923,7 +923,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   out << "Character table: ";
   out << theGroupData.theGroup.PrettyPrintCharacterTable();
   //Matrix<Rational> charMat;
-  //charMat.init(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
+  //charMat.initialize(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
   //for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++)
   //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.toString();
   //  charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
@@ -1385,7 +1385,7 @@ public:
   List<int> MaxMultiplicities;
   int rank;
   bool flagFirstComputed;
-  bool init();
+  bool initialize();
   bool firstIncrement();
   bool IncrementReturnFalseIfPastLast();
   SelectionFixedRankDifferentMaxMultiplicities();
@@ -1479,7 +1479,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
     return true;
   }
   SelectionFixedRankDifferentMaxMultiplicities theSel;
-  theSel.init();
+  theSel.initialize();
   theSel.MaxMultiplicities.setSize(this->partition.size);
   for (int i = 0; i < this->partition.size; i ++) {
     if (i != this->partition.size - 1) {
@@ -1546,7 +1546,7 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   partitionPairs.quickSortAscending();
   partitionsParabolics.quickSortAscending();
   Matrix<Rational> theMultTable;
-  theMultTable.init(partitionPairs.size, partitionsParabolics.size);
+  theMultTable.initialize(partitionPairs.size, partitionsParabolics.size);
   for (int j = 0; j < partitionPairs.size; j ++) {
     out << "V_{\\lambda, \\mu}, "
     << "<br>\\lambda =" << partitionPairs[j].Object1.p
@@ -1726,7 +1726,7 @@ SelectionFixedRankDifferentMaxMultiplicities::SelectionFixedRankDifferentMaxMult
   this->flagFirstComputed = false;
 }
 
-bool SelectionFixedRankDifferentMaxMultiplicities::init() {
+bool SelectionFixedRankDifferentMaxMultiplicities::initialize() {
   this->flagFirstComputed = false;
   return true;
 }
@@ -1820,7 +1820,7 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   if (theSel.rank < 0) {
     return output.assignValue(0, theCommands);
   }
-  theSel.init();
+  theSel.initialize();
   std::stringstream out;
   out << "Max multiplicities: " << theSel.MaxMultiplicities << " rank: "
   << theSel.rank;
@@ -2062,7 +2062,7 @@ void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
 void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner) {
   MacroRegisterFunctionWithName("MonomialMacdonald::MakeFromRootSubsystem");
   this->owner = &inputOwner;
-  this->rootSel.init(inputOwner.theWeyl.RootSystem.size);
+  this->rootSel.initialize(inputOwner.theWeyl.RootSystem.size);
   Vector<Rational> currentV;
   for (int i = 0; i < inputRoots.size; i ++) {
     currentV = inputRoots[i];
@@ -2083,7 +2083,7 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
 void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
   Selection originalSel;
   originalSel = this->rootSel;
-  this->rootSel.init(this->owner->theWeyl.RootSystem.size);
+  this->rootSel.initialize(this->owner->theWeyl.RootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
   for (int i = 0; i <originalSel.CardinalitySelection; i ++) {

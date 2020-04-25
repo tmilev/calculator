@@ -46,7 +46,7 @@ public:
   ~WebCrawler();
   void UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void FetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void init();
+  void initialize();
   void PingCalculatorStatus();
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
@@ -81,7 +81,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
-    global.GetElapsedSeconds() - this->timeAtLastBackup < (24 * 3600)
+    global.getElapsedSeconds() - this->timeAtLastBackup < (24 * 3600)
   ) {
     return;
   }
@@ -94,7 +94,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   global << commandStream.str() << Logger::endL;
   global.externalCommandReturnOutput(commandStream.str());
   global << Logger::green << "Backing up completed. " << Logger::endL;
-  this->timeAtLastBackup = global.GetElapsedSeconds();
+  this->timeAtLastBackup = global.getElapsedSeconds();
 }
 
 void WebServerMonitor::Monitor(int pidServer) {
@@ -124,7 +124,7 @@ void WebServerMonitor::Monitor(int pidServer) {
   << GlobalVariables::GetDateForLogFiles() << "</a>" << "<br>\n";
   theFile.close();
   WebCrawler theCrawler;
-  theCrawler.init();
+  theCrawler.initialize();
   global << Logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep / 1000000) << " second(s). "
   << Logger::endL;
@@ -195,12 +195,12 @@ void WebCrawler::FreeAddressInfo() {
   this->serverInfo = nullptr;
 }
 
-void WebCrawler::init() {
+void WebCrawler::initialize() {
   if (this->flagInitialized) {
     return;
   }
   this->flagContinueWasNeeded = false;
-  MacroRegisterFunctionWithName("WebCrawler::init");
+  MacroRegisterFunctionWithName("WebCrawler::initialize");
   this->flagDoUseGET = true;
   buffer.initializeFillInObject(50000, 0);
   this->portOrService = "8155";
@@ -421,7 +421,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         connectionResult = connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
       }
       timeOut.tv_sec = 3;  // 5 Secs Timeout
-      timeOut.tv_usec = 0;  // Not init'ing this can cause strange errors
+      timeOut.tv_usec = 0;  // Not initialize'ing this can cause strange errors
       setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&timeOut), sizeof(timeval));
     }
     if (connectionResult == - 1) {
@@ -846,7 +846,7 @@ bool WebCrawler::VerifyRecaptcha(
     }
     return false;
   }
-  std::string recaptchaURLencoded = global.GetWebInput("recaptchaToken");
+  std::string recaptchaURLencoded = global.getWebInput("recaptchaToken");
   if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   }
@@ -917,20 +917,20 @@ bool WebCrawler::VerifyRecaptcha(
   return true;
 }
 
-bool WebAPIResponse::ProcessForgotLogin() {
-  MacroRegisterFunctionWithName("WebAPIResponse::ProcessForgotLogin");
-  this->owner->SetHeaderOKNoContentLength("");
+bool WebAPIResponse::processForgotLogin() {
+  MacroRegisterFunctionWithName("WebAPIResponse::processForgotLogin");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    return global.theResponse.WriteResponse(result, false);
+    return global.theResponse.writeResponse(result, false);
   }
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights()) {
     Database::get().theUser.LogoutViaDatabase();
   }
   UserCalculator theUser;
-  theUser.email = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
+  theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   WebCrawler theCrawler;
   out << "<br><b> "
   << "Please excuse our verbose technical messages. </b>"
@@ -939,21 +939,21 @@ bool WebAPIResponse::ProcessForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.WriteResponse(result, false);
+    return global.theResponse.writeResponse(result, false);
   }
   if (!theUser.Iexist(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.WriteResponse(result, false);
+    return global.theResponse.writeResponse(result, false);
   }
   if (!theUser.LoadFromDB(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theResponse.WriteResponse(result, false);
+    return global.theResponse.writeResponse(result, false);
   }
   out << "<b style ='color:green'>"
   << "Your email is on record. "
@@ -963,10 +963,10 @@ bool WebAPIResponse::ProcessForgotLogin() {
   } else {
     this->owner->DoSetEmail(theUser, &out, &out, &out);
   }
-  out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
-  << global.GetElapsedSeconds() << " second(s) spent creating account. ";
+  out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
+  << global.getElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  return global.theResponse.WriteResponse(result, false);
+  return global.theResponse.writeResponse(result, false);
 }
 
 JSData WebWorker::GetSignUpRequestResult() {
@@ -979,8 +979,8 @@ JSData WebWorker::GetSignUpRequestResult() {
   }
   Database::get().theUser.LogoutViaDatabase();
   UserCalculator theUser;
-  theUser.username = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("desiredUsername"), false);
-  theUser.email = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
+  theUser.username = HtmlRoutines::convertURLStringToNormal(global.getWebInput("desiredUsername"), false);
+  theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream
@@ -1041,13 +1041,13 @@ JSData WebWorker::GetSignUpRequestResult() {
   return result;
 }
 
-bool WebWorker::WriteToBodyJSOn(const JSData& result) {
+bool WebWorker::writeToBodyJSON(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
     result.toString(nullptr), false
   );
   if (toWrite.size() < 2000) {
     if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
-      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(global.DisplayNameExecutableApp, false);
+      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(global.displayApplication, false);
       std::stringstream outLinkApp;
       outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
       << sanitizedCalculatorApp << "'>app</a>";
@@ -1057,16 +1057,16 @@ bool WebWorker::WriteToBodyJSOn(const JSData& result) {
   return this->WriteToBody(toWrite);
 }
 
-bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCrash) {
-  MutexLockGuard guard(global.MutexReturnBytes);
-  MacroRegisterFunctionWithName("WebWorker::WriteResponse");
+bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCrash) {
+  MutexLockGuard guard(global.mutexReturnBytes);
+  MacroRegisterFunctionWithName("WebWorker::writeResponse");
   if (!global.flagRunningBuiltInWebServer) {
     if (!isCrash) {
       global << incoming.toString();
     }
     return true;
   }
-  WebWorker& worker = global.server().GetActiveWorker();
+  WebWorker& worker = global.server().getActiveWorker();
   std::string status = "finished";
   if (isCrash) {
     status = "crash";
@@ -1077,26 +1077,26 @@ bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCra
     output[WebAPI::result::commentsGlobal] = comments;
   }
   if (this->flagTimedOut) {
-    worker.WriteAfterTimeoutJSON(
+    worker.writeAfterTimeoutJSON(
       output,
       status,
-      global.RelativePhysicalNameOptionalResult
+      global.relativePhysicalNameOptionalResult
     );
   } else {
-    worker.SetHeaderOKNoContentLength("");
-    worker.WriteToBodyJSOn(output);
-    worker.SendPending();
+    worker.setHeaderOKNoContentLength("");
+    worker.writeToBodyJSON(output);
+    worker.sendPending();
   }
   if (isCrash) {
-    global.server().WrapUp();
+    global.server().wrapUp();
   }
   return true;
 }
 
 void GlobalVariables::Response::report(const std::string &input) {
-  MutexLockGuard guard(global.MutexReturnBytes);
+  MutexLockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::report");
-  return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
+  return global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
 }
 
 void GlobalVariables::Response::Initiate(const std::string& message) {
@@ -1104,14 +1104,14 @@ void GlobalVariables::Response::Initiate(const std::string& message) {
   if (global.theResponse.flagTimedOut) {
     return;
   }
-  MutexLockGuard guard(global.MutexReturnBytes);
+  MutexLockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
-  if (!global.theResponse.MonitoringAllowed()) {
+  if (!global.theResponse.monitoringAllowed()) {
     return;
   }
   if (!global.theResponse.flagReportDesired) {
     return;
   }
   global.theResponse.flagTimedOut = true;
-  global.server().GetActiveWorker().WriteAfterTimeoutShowIndicator(message);
+  global.server().getActiveWorker().writeAfterTimeoutShowIndicator(message);
 }

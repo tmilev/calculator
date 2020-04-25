@@ -225,7 +225,7 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   bool AmRegularSA() const;
-  bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
+  bool compareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void GetGenericLinearCombination(
     int numVars,
     int varOffset,
@@ -238,7 +238,7 @@ public:
   void ComputeCentralizerIsWellChosen();
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void ComputeRatioKillingsByComponent();
-  void AddToSystem(
+  void addToSystem(
     const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish
   );
   bool CreateAndAddExtendBaseSubalgebra(

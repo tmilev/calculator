@@ -42,10 +42,10 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   }
   int NumTrueVariables = matA.numberOfColumns;
   //tempMatb.Assign(matb);
-  tempMatA.init(matA.numberOfRows, NumTrueVariables + matA.numberOfRows);
+  tempMatA.initialize(matA.numberOfRows, NumTrueVariables + matA.numberOfRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.clear();
-  BaseVariables.init(tempMatA.numberOfColumns);
+  BaseVariables.initialize(tempMatA.numberOfColumns);
   tempMatA.makeZero();
   matX.makeZero(tempMatA.numberOfColumns);
   for (int j = 0; j < matA.numberOfColumns; j ++) {
@@ -115,7 +115,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           matX[BaseVariables.elements[i]] -= tempRat;
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.Minus();
-          tempMatA.AddTwoRows(LeavingVariableRow, i, 0, tempRat);
+          tempMatA.addTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
         if (i == LeavingVariableRow) {
           matX[BaseVariables.elements[i]] = 0;
@@ -461,7 +461,7 @@ bool Calculator::innerPrintSSSubalgebras(
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (global.theResponse.MonitoringAllowed()) {
+  if (global.theResponse.monitoringAllowed()) {
     global.theResponse.Initiate("Triggered by printSemisimpleSubalgebras.");
   }
   if (input.size() != 2) {
@@ -497,7 +497,7 @@ bool Calculator::innerPrintSSSubalgebras(
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.toString();
   global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
-  global.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
+  global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.ComputeStructureWriteFiles(
@@ -706,7 +706,7 @@ bool Calculator::innerGroebner(
     );
   }
   for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].scaleNormalizeLeadingMonomial();
+    inputVector[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.getFormat(theGroebnerComputation.theFormat);
@@ -749,7 +749,7 @@ bool Calculator::innerGroebner(
   theGroebnerComputation.maximumPolynomialComputations = upperBoundComputations;
   bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
-  out << theGroebnerComputation.ToStringLetterOrder(false);
+  out << theGroebnerComputation.toStringLetterOrder(false);
   out << "Letter/expression order: ";
   int numberOfVariables = theContext.numberOfVariables();
   for (int i = 0; i < numberOfVariables; i ++) {
@@ -769,7 +769,7 @@ bool Calculator::innerGroebner(
     out << "<br>Minimal Groebner basis with "
     << outputGroebner.size
     << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.NumberGBComputations
+    << theGroebnerComputation.numberPolynomialComputations
     << " polynomial operations. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
       out << "<br> " << HtmlRoutines::GetMathSpanPure(
@@ -790,12 +790,12 @@ bool Calculator::innerGroebner(
     << "exceeded the user-given limit of "
     << upperBoundComputations << " polynomial operations. ";
     out << "<br>An intermediate non-Groebner basis containing total "
-    << theGroebnerComputation.theBasiS.size
+    << theGroebnerComputation.theBasis.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
-    for (int i = 0; i < theGroebnerComputation.theBasiS.size; i ++) {
-      out << theGroebnerComputation.theBasiS[i].toString(&theGroebnerComputation.theFormat);
-      if (i != theGroebnerComputation.theBasiS.size - 1) {
+    for (int i = 0; i < theGroebnerComputation.theBasis.size; i ++) {
+      out << theGroebnerComputation.theBasis[i].toString(&theGroebnerComputation.theFormat);
+      if (i != theGroebnerComputation.theBasis.size - 1) {
         out << ", <br>";
       }
     }

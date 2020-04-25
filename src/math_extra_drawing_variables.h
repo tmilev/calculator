@@ -43,7 +43,7 @@ public:
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
     Matrix<double> tempMat;
-    tempMat.init(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
+    tempMat.initialize(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
     for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
       for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
         tempMat.elements[i][j] = bilinearForm.elements[i][j].GetDoubleValue();
@@ -164,7 +164,7 @@ public:
     this->specialOperationsOnBasisChange = nullptr;
     this->indexStartingModifiableTextCommands = 0;
   }
-  void init();
+  void initialize();
   static std::string typeSegment;
   static std::string typePath;
   static std::string typeSegment2DFixed;

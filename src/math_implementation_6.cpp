@@ -106,7 +106,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   }
   Polynomial<Rational> myCopy;
   myCopy = *this;
-  myCopy.scaleNormalizeLeadingMonomial();
+  myCopy.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational lowestTerm, highestCoefficient;
   this->GetConstantTerm(lowestTerm);
   if (lowestTerm == 0) {

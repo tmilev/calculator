@@ -123,7 +123,7 @@ class Logger {
 // This causes a nasty and difficult to catch
 // crash before main.
 class GlobalVariables {
-  MutexRecursiveWrapper MutexReturnBytes;
+  MutexRecursiveWrapper mutexReturnBytes;
 public:
   MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
   MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
@@ -289,9 +289,9 @@ public:
     // Respond functions end here.
 
     // returns true
-    bool WriteResponse(const JSData& incoming, bool isCrash = false);
+    bool writeResponse(const JSData& incoming, bool isCrash = false);
 
-    bool MonitoringAllowed();
+    bool monitoringAllowed();
     bool ReportDesired(int type = Response::ReportType::general);
     void DisallowReport();
     void AllowReport();
@@ -346,7 +346,7 @@ public:
 
   std::string RelativePhysicalNameCrashReport;
   std::string RelativePhysicalNameOptionalProgressReport;
-  std::string RelativePhysicalNameOptionalResult;
+  std::string relativePhysicalNameOptionalResult;
 
   std::string PathExecutableUserInputOrDeduced;
 
@@ -362,8 +362,8 @@ public:
   // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
   // The app display name in the web browser,
-  // DisplayNameExecutableApp ="/app";
-  std::string DisplayNameExecutableApp;
+  // displayApplication ="/app";
+  std::string displayApplication;
   std::string DisplayNameExecutableAppNoCache;
 
   std::string IPAdressCaller;
@@ -379,7 +379,7 @@ public:
     std::stringstream crashReportHtml;
     std::stringstream crashReportConsolE;
     std::stringstream crashReportFile;
-    bool flagCrashInitiateD; //<-we crash only once, and we do not resume execution after a crash
+    bool flagCrashInitiated; //<-we crash only once, and we do not resume execution after a crash
     bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
     Crasher();
     void FirstRun();
@@ -418,7 +418,7 @@ public:
   void ConfigurationProcess();
   int GetGlobalTimeInSeconds();
   int64_t GetElapsedMilliseconds();
-  double GetElapsedSeconds() {
+  double getElapsedSeconds() {
     return static_cast<double>(this->GetElapsedMilliseconds()) / 1000;
   }
   static void InitThreadsExecutableStart();
@@ -433,8 +433,8 @@ public:
   static std::string GetTimeGM();
   static std::string GetTimeLocal();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
-  std::string GetWebInput(const std::string& inputName);
-  void init();
+  std::string getWebInput(const std::string& inputName);
+  void initialize();
   void initModifiableDatabaseFields();
   void initDefaultFolderAndFileNames();
   void initFoldersProjectBase(const std::string& inputPhysicalExecutable);
@@ -460,7 +460,7 @@ public:
   std::string ToStringProgressReportWithThreadData(bool useHTML);
   std::string ToStringProgressReportConsole();
   WebServer& server();
-  void MakeReport();
+  void makeReport();
   class Test {
   public:
     static bool all();

@@ -218,7 +218,7 @@ public:
 
   bool flagDeallocated;
   FiniteGroup(): flagDeallocated(false) {
-    this->init();
+    this->initialize();
   }
   ~FiniteGroup() {
     this->flagDeallocated = true;
@@ -238,7 +238,7 @@ public:
   void SetSizE(const LargeInteger& inputSize) {
     this->sizePrivate = inputSize;
   }
-  void init();
+  void initialize();
   std::string toString(FormatExpressions* theFormat = nullptr){
     std::stringstream out;
     out << this->ToStringElements(theFormat);
@@ -335,7 +335,7 @@ public:
 };
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::init() {
+void FiniteGroup<elementSomeGroup>::initialize() {
   this->generators.setSize(0);
   this->conjugacyClasses.setSize(0);
   this->squaresCCReps.setSize(0);
@@ -1430,7 +1430,7 @@ public:
   void GetLargestDenominatorSimpleGens(LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen) const;
 
   void reset();
-  void init(somegroup& inputOwner);
+  void initialize(somegroup& inputOwner);
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat);
   void ClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat);
@@ -1542,7 +1542,7 @@ public:
   const elementRepresentation& GetCurrentElement();
   bool IncrementReturnFalseIfPastLastFALSE();
   bool IncrementReturnFalseIfPastLast();
-  void init(
+  void initialize(
     const List<elementGroup>& inputGenerators,
     const elementRepresentation& inputElement,
     const OrbitIterator::GroupActionWithName& inputGroupAction
@@ -1615,9 +1615,9 @@ public:
   List<Coset<elementSomeGroup> > cosets;
   SubgroupData();
   bool checkInitialization();
-  void init();
+  void initialize();
   void MakeSubgroupOf(someGroup& G) {
-    this->init();
+    this->initialize();
     this->theGroup = &G;
     this->theSubgroup = &this->theSubgroupMayBeHere;
   }
@@ -1685,7 +1685,7 @@ int SubgroupData<someGroup, elementSomeGroup>::QIDMul(int i, int j) {
 template <typename someGroup, typename elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal() {
   Matrix<int> csmt;
-  csmt.init(cosets.size, cosets.size);
+  csmt.initialize(cosets.size, cosets.size);
   for (int i = 0; i < cosets.size; i ++) {
     for (int j = 0; j < cosets.size; j ++) {
       csmt(i, j) = QIDMul(i, j);
@@ -1760,7 +1760,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   global.comments << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
   out.generatorS.setSize(this->theGroup->generators.size);
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    out.generatorS[i].init(this->cosets.size, this->cosets.size);
+    out.generatorS[i].initialize(this->cosets.size, this->cosets.size);
     out.generatorS[i].makeZero();
     for (int ci = 0; ci <out.generatorS[i].numberOfColumns; ci ++) {
       elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
@@ -2258,12 +2258,12 @@ public:
   bool operator<(const UDPolynomial<Coefficient>& right) const;
   bool operator==(int other) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void AssignMinPoly(const Matrix<Coefficient>& input);
+  void assignMinPoly(const Matrix<Coefficient>& input);
   void AssignCharPoly(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
 };
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::AssignMinPoly(const Matrix<Coefficient>& input) {
+void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(1);
   this->data[0] = 1;

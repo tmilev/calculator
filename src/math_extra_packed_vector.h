@@ -205,7 +205,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
         den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].GetDenominator().GetUnsignedIntValueTruncated());
       }
     }
-    unrationalCartanSymmetric.init(cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns);
+    unrationalCartanSymmetric.initialize(cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns);
     //this->ucsm = malloc(cartanSymmetric.numberOfRows*sizeof(templateVector));
     //for (int i = 0; i <cartanSymmetric.numberOfRows; i ++)
     //  this->ucsm[i].setSize(cartanSymmetric.numberOfColumns);
@@ -564,7 +564,7 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
       }
     }
   Matrix<Rational> out;
-  out.init(M.numberOfRows, M.numberOfColumns);
+  out.initialize(M.numberOfRows, M.numberOfColumns);
   for (int i = 0; i < M.numberOfRows; i ++) {
     for (int j = 0; j < M.numberOfColumns; j ++) {
       out.elements[i][j] = M.elements[i][j];
@@ -624,7 +624,7 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 
 void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
   Selection sel;
-  sel.init(G->cartanSymmetric.numberOfColumns);
+  sel.initialize(G->cartanSymmetric.numberOfColumns);
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.setSize(numCycles);
@@ -649,7 +649,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   if (pseudo) {
     global.comments << "pseudo-parabolics" << "\n";
     ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
-    sel.init(G->cartanSymmetric.numberOfColumns);
+    sel.initialize(G->cartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
       theGenerators.setSize(sel.CardinalitySelection);
       for (int j = 0; j < sel.CardinalitySelection; j ++) {

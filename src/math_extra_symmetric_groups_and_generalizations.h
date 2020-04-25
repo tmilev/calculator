@@ -57,7 +57,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
     }
   }
   Matrix<Coefficient> basisMatrix;
-  basisMatrix.init(this->involvedMonomials.size, basis.size);
+  basisMatrix.initialize(this->involvedMonomials.size, basis.size);
   for (int j = 0; j < basis.size; j ++) {
     for (int i = 0; i < involvedMonomials.size; i ++) {
       basisMatrix.elements[i][j] = basis[j].GetMonomialCoefficient(involvedMonomials[i]);
@@ -428,12 +428,12 @@ class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, 
 public:
   hg* H;
   kg* K;
-  void init(hg* inH, kg* inK);
+  void initialize(hg* inH, kg* inK);
   void getWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out);
 };
 
 template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK) {
+void SemidirectProductGroup<hg, kg, helt, kelt, oa>::initialize(hg* inH, kg* inK) {
   this->H = inH;
   this->K = inK;
   this->generators.setSize(inH->generators.size + inK->generators.size);
@@ -1330,7 +1330,7 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   basis.SetBasis(basisvs);
   out.setSize(perms.size);
   for (int permi = 0; permi < perms.size; permi ++) {
-    out[permi].init(basis.rank, basis.rank);
+    out[permi].initialize(basis.rank, basis.rank);
     for (int bi = 0; bi < basis.rank; bi ++) {
       ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> sparse;
       perms[permi].ActOnTensor(sparse,basisvs[bi]);
@@ -1537,7 +1537,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
   if (this->generatorCommutationRelations.numberOfRows == this->generators.size) {
     return;
   }
-  this->generatorCommutationRelations.init(this->generators.size, this->generators.size);
+  this->generatorCommutationRelations.initialize(this->generators.size, this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
     for (int j = i; j < this->generators.size; j ++) {
       elementSomeGroup g;

@@ -809,7 +809,7 @@ std::string Logger::getStampShort() {
   }
   out << "c: " << global.server().NumConnectionsSoFar;
   if (global.server().activeWorker != -1) {
-    out << "." << global.server().GetActiveWorker().numberOfReceivesCurrentConnection;
+    out << "." << global.server().getActiveWorker().numberOfReceivesCurrentConnection;
   }
   out << "] ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
@@ -821,7 +821,7 @@ std::string Logger::getStamp() {
   out << global.logs.ToStringProcessType() << ", ";
   out
   << global.GetDateForLogFiles() << ", "
-  << global.GetElapsedSeconds() << " s, ";
+  << global.getElapsedSeconds() << " s, ";
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ",";
   }

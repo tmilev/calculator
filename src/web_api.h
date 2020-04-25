@@ -67,7 +67,7 @@ class WebAPIResponse {
   bool ProcessExamPageInterpreter();
   bool ProcessLogout();
   bool ProcessSignUP();
-  bool ProcessForgotLogin();
+  bool processForgotLogin();
   bool ProcessEditPageJSON();
 
   void reset(WebWorker& inputOwner);

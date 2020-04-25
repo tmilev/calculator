@@ -56,7 +56,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     theFile, "result/output.html", false, true, false
   );
-  theFile << " Elapsed calculator time: " << global.GetElapsedSeconds() << " second(s).";
+  theFile << " Elapsed calculator time: " << global.getElapsedSeconds() << " second(s).";
   theFile << input;
   theFile.flush();
   theFile.close();

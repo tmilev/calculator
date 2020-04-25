@@ -1590,7 +1590,7 @@ void Polynomial<Coefficient>::GetPolyUnivariateWithPolyCoeffs(
   int theVar, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   Selection theVars;
-  theVars.init(this->minimalNumberOfVariables());
+  theVars.initialize(this->minimalNumberOfVariables());
   theVars.AddSelectionAppendNewIndex(theVar);
   this->GetPolyWithPolyCoeff(theVars, output);
 }
@@ -1607,9 +1607,9 @@ bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
   for (int i = 0; i < theLinPolys.size; i ++) {
     numVars = MathRoutines::Maximum(theLinPolys[i].minimalNumberOfVariables(), numVars);
   }
-  homogenousPart.init(theLinPolys.size, numVars);
+  homogenousPart.initialize(theLinPolys.size, numVars);
   homogenousPart.makeZero();
-  constTerms.init(theLinPolys.size, 1);
+  constTerms.initialize(theLinPolys.size, 1);
   constTerms.makeZero();
   for (int i = 0; i < theLinPolys.size; i ++) {
     for (int j = 0; j < theLinPolys[i].size(); j ++) {
@@ -1715,11 +1715,11 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       }
       denominatorRescaled = this->theDenominatorFactorsWithMults[i];
       numeratorRescaled = this->theNumerators[i][j];
-      denominatorRescaled.GetIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
+      denominatorRescaled.getIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
       currentCoefficient.invert();
       denominatorRescaled *= currentCoefficient;
       MathRoutines::raiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numeratorRescaled.GetIndexLeadingMonomial(nullptr, &numScale, monomialOrder);
+      numeratorRescaled.getIndexLeadingMonomial(nullptr, &numScale, monomialOrder);
       numeratorRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.assignValueWithContext(numeratorRescaled, this->context, *this->owner);
@@ -2049,7 +2049,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
-  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial();
+  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->theDen,
@@ -2106,13 +2106,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     GroebnerBasisComputation<Rational> theGB;
     theGB.flagDoLogDivision = true;
     theGB.flagStoreQuotients = true;
-    theGB.theBasiS.setSize(1);
-    theGB.theBasiS[0] = this->theDen;
+    theGB.theBasis.setSize(1);
+    theGB.theBasis[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
     theGB.thePolynomialOrder.monomialOrder = monomialOrder;
-    theGB.initializeForDivision(theGB.theBasiS);
+    theGB.initializeForDivision(theGB.theBasis);
     Polynomial<Rational> theNumCopy = this->theNum;
-    theGB.RemainderDivisionByBasis(theNumCopy, &theGB.remainderDivision, - 1);
+    theGB.remainderDivisionByBasis(theNumCopy, &theGB.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
@@ -3758,8 +3758,8 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
           if (!theMatrix.elements[j][i].isEqualToZero()) {
             tempElement = theMatrix.elements[j][i];
             tempElement.Minus();
-            theMatrix.AddTwoRows(NumFoundPivots, j, i, tempElement);
-            outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            theMatrix.addTwoRows(NumFoundPivots, j, i, tempElement);
+            outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
               outLaTeX << "&";
@@ -3872,8 +3872,8 @@ bool Calculator::innerInvertMatrixVerbose(
           if (!mat.elements[j][i].isEqualToZero()) {
             tempElement = mat.elements[j][i];
             tempElement.Minus();
-            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
-            outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            mat.addTwoRows(NumFoundPivots, j, i, tempElement);
+            outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
             } else {
@@ -3961,7 +3961,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
   }
   out << "<br>Relations: ";
   for (int i = 0; i < theRels.size; i ++) {
-    theRels[i].scaleNormalizeLeadingMonomial();
+    theRels[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     out << "<br>" << theRels[i].toString(&theFormat);
   }
   return output.assignValue(out.str(), theCommands);
@@ -5595,7 +5595,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theMinPoly;
-  theMinPoly.AssignMinPoly(theMat);
+  theMinPoly.assignMinPoly(theMat);
   return output.assignValue(theMinPoly.toString(&tempF), theCommands);
 }
 
@@ -6387,7 +6387,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   thePlot.coordinateFunctionsE.setSize(thePlot.dimension);
   thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   Expression jsConverterE;
-  thePlot.thePointsJS.init(thePlot.thePointS.numberOfRows, thePlot.thePointS.numberOfColumns);
+  thePlot.thePointsJS.initialize(thePlot.thePointS.numberOfRows, thePlot.thePointS.numberOfColumns);
   for (int i = 0; i < thePlot.thePointS.numberOfRows; i ++) {
     for (int j = 0; j < thePlot.thePointS.numberOfColumns; j ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(
@@ -7181,7 +7181,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
     );
   }
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
-  theG2B3Data.selInducing.init(3);
+  theG2B3Data.selInducing.initialize(3);
   for (int i = 0; i < theG2B3Data.theWeightFundCoords.size; i ++) {
     if (!theG2B3Data.theWeightFundCoords[i].isSmallInteger()) {
       theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
@@ -7374,7 +7374,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
       << theInputVectors[i].toString() << " is non-positive";
     }
   }
-  if (!thePartition.init(theInputVectors, thePartition.goalVector)) {
+  if (!thePartition.initialize(theInputVectors, thePartition.goalVector)) {
     return theCommands << "<hr>Failed to initialize vector partition object";
   }
   std::stringstream out;
@@ -7818,7 +7818,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   Selection selParSel1, selFD;
   Expression hwvFD, hwvGenVerma;
   selParSel1.MakeFullSelection(theRank);
-  selFD.init(theRank);
+  selFD.initialize(theRank);
   int theCoeff;
   for (int i = 0; i < theRank; i ++) {
     if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
@@ -7991,7 +7991,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream << "(" << startingEltString << ")";
     tempStream << "\\end{array}";
     tempStream2 << " $(" << startingEltString << ")$ ";
-    RationalFunction scale = theElt.scaleNormalizeLeadingMonomial();
+    RationalFunction scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
     Rational tempRat;
     if (!scale.IsConstant(&tempRat)) {
       global.fatal << "Unexpected: scale not rational" << global.fatal;
@@ -8007,9 +8007,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
     if (theNumVars == 1) {
-      scale = theElt.scaleNormalizeLeadingMonomial();
+      scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
       scale.GetNumerator(tmpGCD);
-      tmpGCD.scaleNormalizeLeadingMonomial();
+      tmpGCD.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
       out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
     out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.toString(&tempFormat)) << "</td>";
@@ -8256,7 +8256,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
     << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].toString()) << "</td></tr>";
   }
   out << "</table>";
-  out << "<br>Time final: " << global.GetElapsedSeconds();
+  out << "<br>Time final: " << global.getElapsedSeconds();
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -8996,7 +8996,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   thePartition.goalVector.makeZero(1);
   thePartition.goalVector[0] = theSum;
-  if (!thePartition.init(theOneDimVectors, thePartition.goalVector)) {
+  if (!thePartition.initialize(theOneDimVectors, thePartition.goalVector)) {
     return theCommands << "Failed to initialize the computation. ";
   }
   LargeIntegerUnsigned theModLarge;
@@ -9067,7 +9067,7 @@ void Calculator::Test::CalculatorTestPrepare() {
 
 bool Calculator::Test::CalculatorTestRun() {
   MacroRegisterFunctionWithName("Calculator::Test::CalculatorTestRun");
-  this->debugFlagAtStart = global.GetWebInput(WebAPI::request::debugFlag);
+  this->debugFlagAtStart = global.getWebInput(WebAPI::request::debugFlag);
   global.SetWebInpuT(WebAPI::request::debugFlag, "false");
   this->CalculatorTestPrepare();
   Calculator theTester;
@@ -9100,7 +9100,7 @@ bool Calculator::Test::CalculatorTestRun() {
     theTester.Evaluate(currentTest.command);
     currentTest.actualResult = theTester.theProgramExpression.toString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.toString();
-    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - this->startTime << " seconds. ";
+    reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";
     theReport.report(reportStream.str());
   }
   global.SetWebInpuT(WebAPI::request::debugFlag, this->debugFlagAtStart);
@@ -9419,7 +9419,7 @@ public:
       this->arrows.addOnTop(emptyArrows);
     }
   }
-  void init() {
+  void initialize() {
     this->indexInCurrentLayer = 0;
     this->indexCurrentChild = 0;
     this->currentLayer.setSize(1);
@@ -9517,7 +9517,7 @@ public:
   }
   void DrawToDV() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ExtractDisplayedExpressions");
-    this->init();
+    this->initialize();
     while (this->IncrementReturnFalseIfPastLast()) {
     }
     this->thePlot.dimension = 2;

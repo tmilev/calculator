@@ -72,7 +72,7 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimirWRTLeviParabolic(
     this->addMonomial(theMon, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
-  killingRestrictedToCartan.init(theLeviRoots.CardinalitySelection, theLeviRoots.CardinalitySelection);
+  killingRestrictedToCartan.initialize(theLeviRoots.CardinalitySelection, theLeviRoots.CardinalitySelection);
   for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++) {
     for (int j = i; j < theLeviRoots.CardinalitySelection; j ++) {
       theWeightLeft.makeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
@@ -180,7 +180,7 @@ void ElementUniversalEnveloping<Coefficient>::simplify(const Coefficient& theRin
   for (; this->size() > 0;) {
     // FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    this->PopMonomial(this->size() - 1, tempMon, currentCoeff);
+    this->popMonomial(this->size() - 1, tempMon, currentCoeff);
     bool reductionOccurred = false;
     for (int i = 0; i < tempMon.generatorsIndices.size - 1; i ++) {
       if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i + 1])) {
@@ -632,7 +632,7 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   int theDimension = theWeyl.cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
-//  killingForm.init(theDimension, theDimension);
+//  killingForm.initialize(theDimension, theDimension);
 //  for (int i = 0; i < theDimension; i ++)
 //  { tempRoot1.makeEi(theDimension, i);
 //    for (int j = 0; j < theDimension; j ++)

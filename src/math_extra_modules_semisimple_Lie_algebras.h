@@ -300,13 +300,13 @@ public:
     MonomialGeneralizedVerma<Coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;
   }
-  int GetNumVars() {
+  int getNumberOfVariables() {
     if (this->size == 0) {
       return - 1;
     }
-    int theAnswer = this->theObjects[0].GetNumVars();
+    int theAnswer = this->theObjects[0].getNumberOfVariables();
     for (int i = 1; i < this->size; i ++) {
-      if (theAnswer != this->theObjects[i].GetNumVars()) {
+      if (theAnswer != this->theObjects[i].getNumberOfVariables()) {
         return - 1;
       }
     }

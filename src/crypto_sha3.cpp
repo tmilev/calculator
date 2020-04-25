@@ -29,7 +29,7 @@ public:
   std::string computeSha3_256(const std::string& input);
   void getResultVector(List<unsigned char>& output);
   std::string getResultString();
-  void init();
+  void initialize();
   void update(const std::string& input);
   void update(List<unsigned char> &input);
   void finalize();
@@ -266,7 +266,7 @@ void Sha3::finalize() {
   }
 }
 
-void Sha3::init() {
+void Sha3::initialize() {
   this->sha3_Init256();
 }
 
@@ -278,7 +278,7 @@ void Sha3::update(const std::string& input) {
 
 std::string Sha3::computeSha3_256(const std::string& input) {
   this->flagUseKeccak = false;
-  this->init();
+  this->initialize();
   this->update(input);
   this->finalize();
   return this->getResultString();
@@ -309,7 +309,7 @@ std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {
 void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output) {
   Sha3 theHasher;
   theHasher.flagUseKeccak = true;
-  theHasher.init();
+  theHasher.initialize();
   theHasher.update(input);
   theHasher.finalize();
   theHasher.getResultVector(output);
@@ -318,7 +318,7 @@ void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& o
 void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& output) {
   Sha3 theHasher;
   theHasher.flagUseKeccak = false;
-  theHasher.init();
+  theHasher.initialize();
   theHasher.update(input);
   theHasher.finalize();
   theHasher.getResultVector(output);

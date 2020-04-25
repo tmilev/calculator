@@ -2261,16 +2261,16 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  theGB.theBasis.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = polynomialsRational[i];
+    theGB.theBasis[i - 1] = polynomialsRational[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  theGB.initializeForDivision(theGB.theBasiS);
-  theGB.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
+  theGB.initializeForDivision(theGB.theBasis);
+  theGB.remainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
   Expression thePolyE;
   thePolyE.assignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
@@ -2344,18 +2344,18 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  theGB.theBasis.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = polynomialsRational[i];
+    theGB.theBasis[i - 1] = polynomialsRational[i];
   }
-  theGB.initializeForDivision(theGB.theBasiS);
+  theGB.initializeForDivision(theGB.theBasis);
   if (monomialOrder != nullptr) {
     theGB.thePolynomialOrder.monomialOrder = *monomialOrder;
   }
-  theGB.RemainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
+  theGB.remainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
   theContext.getFormat(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
@@ -2517,7 +2517,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
       this->highlightMonsRemainders[remainderIndex][i].addOnTop(currentSlideNumber);
     }
     currentSlideNumber ++;
-    for (int j = 0; j < this->theBasiS.size; j ++) {
+    for (int j = 0; j < this->theBasis.size; j ++) {
       for (int i = 0; i < this->allMonomials.size; i ++) {
         this->highlightMonsDivisors[j][i].addOnTop(currentSlideNumber);
       }
@@ -2542,7 +2542,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
     currentSlideNumber ++;
   }
   if (remainderIndex == this->intermediateRemainders.getElement().size - 1) {
-    for (int i = 0; i < this->theBasiS.size; i ++) {
+    for (int i = 0; i < this->theBasis.size; i ++) {
       this->uncoverAllMonsQuotients[i] = currentSlideNumber;
       for (int j = 0; j < this->allMonomials.size; j ++) {
         this->highlightMonsQuotients[i][j].addOnTop(currentSlideNumber);
@@ -2556,9 +2556,9 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   }
   Polynomial<Coefficient>& currentRemainder = this->intermediateRemainders.getElement()[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors.getElement()[remainderIndex];
-  Polynomial<Coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
+  Polynomial<Coefficient>& currentDivisor = this->theBasis[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
-  int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
+  int indexCurrentDivisorLeadingMoN = currentDivisor.getIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
@@ -2566,7 +2566,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   );
   MonomialP maxMonCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
-  currentRemainder.GetIndexLeadingMonomial(
+  currentRemainder.getIndexLeadingMonomial(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.monomialOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.getIndex(maxMonCurrentRemainder);
@@ -2613,9 +2613,9 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
-  for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
+  for (int i = 0; i < this->theBasis[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.getIndex(this->theBasiS[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(this->theBasis[indexCurrentDivisor][i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
@@ -2638,9 +2638,9 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   << "}";
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
-  for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
+  for (int i = 0; i < this->theBasis[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.getIndex(this->theBasiS[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(this->theBasis[indexCurrentDivisor][i])
     ].addOnTop(currentSlideNumber);
   }
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
@@ -2697,7 +2697,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
   this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
-  bool oneDivisor = (this->theBasiS.size == 1);
+  bool oneDivisor = (this->theBasis.size == 1);
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -2706,8 +2706,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   for (int i = 0; i < theSubtracands.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
-  for (int i = 0; i < this->theBasiS.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(this->theBasiS[i].theMonomials);
+  for (int i = 0; i < this->theBasis.size; i ++) {
+    this->allMonomials.addOnTopNoRepetition(this->theBasis[i].theMonomials);
   }
   for (int i = 0; i < this->theQuotients.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].theMonomials);
@@ -2725,16 +2725,16 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(theSubtracands.size, 0);
   this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
   this->highlightMonsSubtracands.initializeFillInObject(theSubtracands.size, dummyListList);
-  this->highlightMonsQuotients.initializeFillInObject(this->theBasiS.size,   dummyListList);
-  this->highlightMonsDivisors.initializeFillInObject (this->theBasiS.size,   dummyListList);
+  this->highlightMonsQuotients.initializeFillInObject(this->theBasis.size,   dummyListList);
+  this->highlightMonsDivisors.initializeFillInObject (this->theBasis.size,   dummyListList);
   this->fcAnswerMonsRemainders.initializeFillInObject(theRemainders.size,    dummyList);
   this->fcAnswerMonsSubtracands.initializeFillInObject(theSubtracands.size,  dummyList);
-  this->fcAnswerMonsQuotients.initializeFillInObject(this->theBasiS.size,    dummyList);
-  this->fcAnswerMonsDivisors.initializeFillInObject (this->theBasiS.size,    dummyList);
+  this->fcAnswerMonsQuotients.initializeFillInObject(this->theBasis.size,    dummyList);
+  this->fcAnswerMonsDivisors.initializeFillInObject (this->theBasis.size,    dummyList);
   this->uncoverAllMonsRemainders.initializeFillInObject (theRemainders.size, 1);
   this->uncoverAllMonsSubtracands.initializeFillInObject(theSubtracands.size, 1);
-  this->uncoverAllMonsQuotients.initializeFillInObject  (this->theBasiS.size, 1);
-  this->uncoverAllMonsDivisors.initializeFillInObject   (this->theBasiS.size, 1);
+  this->uncoverAllMonsQuotients.initializeFillInObject  (this->theBasis.size, 1);
+  this->uncoverAllMonsDivisors.initializeFillInObject   (this->theBasis.size, 1);
   this->uncoverMonsFinalRemainder.initializeFillInObject(this->allMonomials.size, - 1);
   this->additionalHighlightFinalRemainder.initializeFillInObject(this->allMonomials.size,- 1);
   this->additionalHighlightRemainders.initializeFillInObject(this->allMonomials.size, dummyList);
@@ -2744,7 +2744,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexLeadingMonomial(
+    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].getIndexLeadingMonomial(
       nullptr,
       nullptr,
       &this->thePolynomialOrder.monomialOrder
@@ -2779,10 +2779,10 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     << "}"
     << "\\\\";
   }
-  for (int i = 0; i < this->theBasiS.size; i ++) {
+  for (int i = 0; i < this->theBasis.size; i ++) {
     if (!oneDivisor) {
       out << this->GetSpacedMonomialsWithHighlightLaTeX(
-        this->theBasiS[i],
+        this->theBasis[i],
         &this->highlightMonsDivisors[i],
         &this->fcAnswerMonsDivisors[i],
         nullptr,
@@ -2821,7 +2821,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
       if (oneDivisor) {
         out << "\\multicolumn{1}{c|}{"
         << this->GetSpacedMonomialsWithHighlightLaTeX(
-          this->theBasiS[0],
+          this->theBasis[0],
           &this->highlightMonsDivisors[0],
           &this->fcAnswerMonsDivisors[i],
           nullptr,
@@ -2902,21 +2902,21 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.setSize(polynomialsRational.size - 2);
+  theGB.theBasis.setSize(polynomialsRational.size - 2);
   for (int i = 2; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 2] = polynomialsRational[i];
+    theGB.theBasis[i - 2] = polynomialsRational[i];
   }
   if (!polynomialsRational[0].isSmallInteger(&theGB.firstIndexLatexSlide)) {
     return theCommands << "Failed to extract integer from first argument";
   }
-  theGB.initializeForDivision(theGB.theBasiS);
+  theGB.initializeForDivision(theGB.theBasis);
   theGB.thePolynomialOrder.monomialOrder.setComparison(
     MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
-  theGB.RemainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
+  theGB.remainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
   theContext.getFormat(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;

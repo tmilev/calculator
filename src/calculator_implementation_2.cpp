@@ -149,11 +149,11 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
     return;
   }
   *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
-  << "<br>" << global.GetElapsedSeconds() - this->LastLogEvaluationTime
+  << "<br>" << global.getElapsedSeconds() - this->LastLogEvaluationTime
   << " second(s) since last log entry. "
   << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
-  this->LastLogEvaluationTime = global.GetElapsedSeconds();
+  this->LastLogEvaluationTime = global.getElapsedSeconds();
 }
 
 const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {

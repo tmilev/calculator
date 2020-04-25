@@ -48,7 +48,7 @@ void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
       if (!this->elements[j][i].isEqualToZero()) {
         tempRat = this->elements[j][i];
         tempRat.Minus();
-        this->AddTwoRows (i, j, i, tempRat);
+        this->addTwoRows (i, j, i, tempRat);
         if (doReport) {
           if (theReport2.tickAndWantReport()) {
             std::stringstream reportStream;
@@ -452,7 +452,7 @@ void Vectors<Coefficient>::SelectABasisInSubspace(
   }
   Matrix<Coefficient> theMat;
   int MaxNumRows = MathRoutines::Minimum(input.size, theDim);
-  theMat.init(MaxNumRows, theDim);
+  theMat.initialize(MaxNumRows, theDim);
   int currentRow = 0;
   for (int i = 0; i < input.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
@@ -480,7 +480,7 @@ void Vectors<Coefficient>::SelectABasisInSubspace(
 }
 
 template <typename Coefficient>
-void Matrix<Coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar) {
+void Matrix<Coefficient>::addTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Coefficient& scalar) {
   ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);
   Coefficient tempElement;
   for (int i = StartColIndex; i < this->numberOfColumns; i ++) {
@@ -522,10 +522,10 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   int MaxRankMat = MathRoutines::Minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
-    outputNonPivotColumns->init(this->numberOfColumns);
+    outputNonPivotColumns->initialize(this->numberOfColumns);
   }
   if (outputPivotColumns != nullptr) {
-    outputPivotColumns->init(this->numberOfColumns);
+    outputPivotColumns->initialize(this->numberOfColumns);
   }
   bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
@@ -605,9 +605,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
             << ".\n<br>Pivot row: " << NumFoundPivots + 1 << ", eliminating row " << j + 1 << " out of " << this->numberOfRows;
             theReport.report(reportStream.str());
           }
-          this->AddTwoRows(NumFoundPivots, j, i, tempElement);
+          this->addTwoRows(NumFoundPivots, j, i, tempElement);
           if (carbonCopyMat != 0) {
-            carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            carbonCopyMat->addTwoRows(NumFoundPivots, j, 0, tempElement);
           }
         }
       }

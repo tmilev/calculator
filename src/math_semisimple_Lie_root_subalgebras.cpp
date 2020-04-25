@@ -54,7 +54,7 @@ void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
   theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::Pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
-  eigenMat.init(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
+  eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
     for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
       eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].GetDoubleValue();
@@ -116,7 +116,7 @@ void RootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly() {
 
 void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   MacroRegisterFunctionWithName("RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules");
-  this->CentralizerKmods.init(this->Modules.size);
+  this->CentralizerKmods.initialize(this->Modules.size);
   this->CentralizerRoots.size = 0;
   this->CentralizerRoots.reserve(this->Modules.size);
   this->SimpleBasisCentralizerRoots.size = 0;
@@ -431,7 +431,7 @@ void RootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void RootSubalgebra::MakeProgressReportPossibleNilradicalComputation(RootSubalgebras& owner) {
   MacroRegisterFunctionWithName("RootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (!global.theResponse.MonitoringAllowed()) {
+  if (!global.theResponse.monitoringAllowed()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -576,7 +576,7 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   }
 }
 
-bool RootSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight) {
+bool RootSubalgebra::compareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight) {
   Vector<Rational> KssPartLeft = this->GetSimpleCoordsOverKss(weightLeft);
   Vector<Rational> KssPartRight = this->GetSimpleCoordsOverKss(weightRight);
   if (KssPartLeft>KssPartRight) {
@@ -880,7 +880,7 @@ void RootSubalgebra::ExtractRelations(
     if ((false)) {
       if (theRel.theDiagram.toString() == "C^{2}_3") {
         Selection tempSel;
-        tempSel.init(Ksingular.size);
+        tempSel.initialize(Ksingular.size);
         int tempNum=MathRoutines::NChooseK(Ksingular.size, 2);
         for (int i = 0; i < tempNum; i ++) {
           tempSel.incrementSelectionFixedCardinality(2);
@@ -1206,7 +1206,7 @@ bool RootSubalgebra::IsAnIsomorphism(
   Vectors<Rational> tempRoots;
   int theDimension = this->GetAmbientWeyl().cartanSymmetric.numberOfRows;
   tempRoots.setSize(theDimension);
-  matB.init(theDimension, theDimension);
+  matB.initialize(theDimension, theDimension);
   for (int i = 0; i < theDimension; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       matB.elements[i][j] = domain[i][j];
@@ -1765,7 +1765,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods);
   this->NumTotalSubalgebras = 0;
   Selection emptySel;
-  emptySel.init(this->SimpleBasisCentralizerRoots.size);
+  emptySel.initialize(this->SimpleBasisCentralizerRoots.size);
   owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this);
   int numCycles = MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
@@ -1779,9 +1779,9 @@ void RootSubalgebra::GeneratePossibleNilradicals(
   }
   if (useParabolicsInNilradical) {
     this->flagFirstRoundCounting = false;
-    ParabolicsGenerator.init(this->SimpleBasisCentralizerRoots.size);
+    ParabolicsGenerator.initialize(this->SimpleBasisCentralizerRoots.size);
     for (int i = 0; i < numCycles; i ++, ParabolicsGenerator.incrementSelection()) {
-      tempSel.init(this->Modules.size);
+      tempSel.initialize(this->Modules.size);
       for (int j = 0; j < this->CentralizerRoots.size; j ++) {
         if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsGenerator, this->CentralizerRoots[j])) {
           tempSel.AddSelectionAppendNewIndex(j);
@@ -1807,7 +1807,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
     }
   } else {
     this->flagFirstRoundCounting = false;
-    impliedSelections[0].init(this->Modules.size);
+    impliedSelections[0].initialize(this->Modules.size);
     owner.RecursionDepthNilradicalsGeneration = 0;
     owner.CountersNilradicalsGeneration[0] = 0;
     this->GeneratePossibleNilradicalsRecursive(
@@ -2009,7 +2009,7 @@ void RootSubalgebra::DoKRootsEnumeration() {
   Matrix<Rational> tempMat;
   Selection tempSel;
   for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
-    this->theKEnumerations[i].init(this->PosRootsKConnectedComponents[i].size);
+    this->theKEnumerations[i].initialize(this->PosRootsKConnectedComponents[i].size);
     this->theKComponentRanks[i] =
     this->PosRootsKConnectedComponents[i].GetRankOfSpanOfElements(&tempMat, &tempSel);
   }
@@ -2034,7 +2034,7 @@ void RootSubalgebra::KEnumerationsToLinComb() {
   int theDimension = this->GetAmbientWeyl().cartanSymmetric.numberOfRows;
   Matrix<Rational> tempMat;
   Selection tempSelection;
-  tempMat.init(theDimension, theDimension);
+  tempMat.initialize(theDimension, theDimension);
   int counter = 0;
   for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
     this->PosRootsKConnectedComponents[i].SelectionToMatrixAppend(
@@ -2259,7 +2259,7 @@ void RootSubalgebra::ComputeEssentialS() {
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
   this->CheckRankInequality();
-  this->NilradicalKmods.init(this->Modules.size);
+  this->NilradicalKmods.initialize(this->Modules.size);
 }
 
 bool RootSubalgebra::ComputeEssentialsIfNew() {
@@ -2452,7 +2452,7 @@ bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   MonomialP tempM;
   tempM.makeOne(numberVariables);
   Matrix<Rational> coeffsF;
-  coeffsF.init(1, halfNumberVariables);
+  coeffsF.initialize(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
     coeffsF.elements[0][i] = i * i + 1; //(i%2== 0)? 1: 2;
   }
@@ -2508,7 +2508,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
   RootSpacesThatNeedToBeKilled.setExpectedSize(this->GetOwnerWeyl().RootSystem.size);
   outputSystemToBeSolved.size = 0;
-  outputMatrixSystemToBeSolved.init(0, numberVariables);
+  outputMatrixSystemToBeSolved.initialize(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
       global.fatal << "The scalar product of the h element: " << targetH.toString()
@@ -2555,8 +2555,8 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   for (int i = 0; i < this->GetOwnerSSAlgebra().GetRank(); i ++) {
     outputSystemToBeSolved[i + oldSize].AddConstant(targetH[i] * (- 1));
   }
-  outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
-  outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
+  outputMatrixSystemToBeSolved.initialize(outputSystemToBeSolved.size, halfNumberVariables);
+  outputSystemColumnVector.initialize(outputSystemToBeSolved.size, 1);
   outputMatrixSystemToBeSolved.makeZero();
   outputSystemColumnVector.makeZero();
   for (int i = 0; i < outputSystemToBeSolved.size; i ++) {
@@ -2600,9 +2600,9 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   Vectors<Rational> reflectedSimpleBasisK;
   rootsScalarProduct2HnonRaised.reserve(this->PositiveRootsK.size);
   ElementWeylGroup raisingElt;
-  selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
+  selectionRootsWithZeroCharacteristic.initialize(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
-  InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
+  InvertedRelativeKillingForm.initialize(theRelativeDimension, theRelativeDimension);
   for (int k = 0; k < theRelativeDimension; k ++) {
     for (int j = 0; j < theRelativeDimension; j ++) {
       InvertedRelativeKillingForm(k, j) = this->GetAmbientWeyl().RootScalarCartanRoot(
@@ -2753,7 +2753,7 @@ void RootSubalgebras::ComputeAllReductiveRootSAsInit() {
 void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
   MacroRegisterFunctionWithName("RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder");
   Selection parSel;
-  parSel.init(this->owner->GetRank());
+  parSel.initialize(this->owner->GetRank());
   Vectors<Rational> basis, currentBasis;
   List<bool> Explored;
   Explored.initializeFillInObject(this->theSubalgebras.size, false);
@@ -2811,7 +2811,7 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
     currentList.quickSortAscending();
     this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
     basis.addOnTop(this->owner->theWeyl.RootSystem[0]);
-    parSel.init(this->owner->GetRank() + 1);
+    parSel.initialize(this->owner->GetRank() + 1);
   }
   this->NumNonPseudoParabolic = this->theSubalgebras.size - this->NumParabolic - this->NumPseudoParabolicNonParabolic;
   currentList.setSize(0);
@@ -3404,13 +3404,13 @@ void RootSubalgebras::MakeProgressReportAutomorphisms(
 
 void RootSubalgebras::GenerateActionKintersectBIsos(RootSubalgebra& theRootSA) {
   Selection emptySel;
-  emptySel.init(theRootSA.SimpleBasisCentralizerRoots.size);
+  emptySel.initialize(theRootSA.SimpleBasisCentralizerRoots.size);
   this->ComputeNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA);
 }
 
 void RootSubalgebras::GenerateKintersectBOuterIsos(RootSubalgebra& theRootSA) {
   Selection fullSel;
-  fullSel.init(theRootSA.SimpleBasisCentralizerRoots.size);
+  fullSel.initialize(theRootSA.SimpleBasisCentralizerRoots.size);
   fullSel.incrementSelectionFixedCardinality(theRootSA.SimpleBasisCentralizerRoots.size);
   this->ComputeNormalizerOfCentralizerIntersectNilradical(fullSel, theRootSA);
 }
@@ -3431,7 +3431,7 @@ void RootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (global.theResponse.MonitoringAllowed()) {
+    if (global.theResponse.monitoringAllowed()) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.report(out.str());
@@ -3817,7 +3817,7 @@ void RootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 
 void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
-  tempSel.init(targetSel.MaxSize);
+  tempSel.initialize(targetSel.MaxSize);
   for (int i = 0; i < targetSel.CardinalitySelection; i ++) {
     tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }
@@ -3826,7 +3826,7 @@ void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetS
 
 bool RootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
-  tempSel.init(targetSel.MaxSize);
+  tempSel.initialize(targetSel.MaxSize);
   for (int i = 0; i < targetSel.CardinalitySelection; i ++) {
     tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }

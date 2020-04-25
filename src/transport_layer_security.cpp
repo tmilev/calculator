@@ -331,7 +331,7 @@ bool TransportLayerSecurityServer::WriteBytesOnce(
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
   struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  tv.tv_usec = 0;  // Not initialize'ing this can cause strange errors
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   ssize_t numBytesSent = send(
     this->session.socketId,
@@ -419,7 +419,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   }
   struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  tv.tv_usec = 0;  // Not initialize'ing this can cause strange errors
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   this->incomingBytes.setSize(this->defaultBufferCapacity);
   int numBytesInBuffer = static_cast<int>(recv(

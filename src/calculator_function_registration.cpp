@@ -5119,7 +5119,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "<br>\n2. Move all input elements into the additional bucket. <br>\n"
     "3. Call the <b>reduce additional bucket</b> subroutine. "
     "In the c++ implementation the function is "
-    "called GroebnerBasisComputation::AddPolyAndReduceBasis. <br>\n"
+    "called GroebnerBasisComputation::addPolyAndReduceBasis. <br>\n"
     "4. Set changed to be true. <br>\n"
     "5. While (changed)<br>\n"
     "5.1 For all elements f_1, f_2 in the main bucket "

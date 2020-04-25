@@ -79,7 +79,7 @@ public:
   bool checkInitialization() const;
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
-  void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
+  void initialize(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
   void initDefaultOrder(SemisimpleLieAlgebra& owner);
 };
 
@@ -357,7 +357,7 @@ public:
     this->addMonomial(tempMon);
   }
   void simplify(const Coefficient& theRingUnit = 1,  const Coefficient& theRingZero = 0);
-  int GetNumVars() const {
+  int getNumberOfVariables() const {
     if (this->size == 0) {
       return 0;
     } else {

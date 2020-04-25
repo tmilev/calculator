@@ -1034,7 +1034,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
   { out.makeConstant(1);
     return;
   }
-  M.init(n, n);
+  M.initialize(n, n);
   M.makeZero();
   for (int i = 0; i < n; i ++) {
     int a = this->p*i;

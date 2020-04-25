@@ -1786,7 +1786,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
     return false;
   }
   Matrix<Expression> outputMat;
-  outputMat.init(leftMat.numberOfRows, rightMat.numberOfColumns);
+  outputMat.initialize(leftMat.numberOfRows, rightMat.numberOfColumns);
   Expression leftSummand, rightSummand;
   for (int i = 0; i < leftMat.numberOfRows; i ++) {
     for (int j = 0; j < rightMat.numberOfColumns; j ++) {

@@ -349,7 +349,7 @@ bool LittelmannPath::generateOrbit(
   LittelmannPath currentPath;
   bool result = true;
   Selection parabolicSelectionSelectedAreInLeviPart;
-  parabolicSelectionSelectedAreInLeviPart.init(theDim);
+  parabolicSelectionSelectedAreInLeviPart.initialize(theDim);
   if (parabolicNonSelectedAreInLeviPart != nullptr) {
     parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
     parabolicSelectionSelectedAreInLeviPart.InvertSelection();
@@ -745,7 +745,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->WeylFDSmallAsSubInLarge.AmbientWeyl = &this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl = &this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl = &this->theHmm.theRange().theWeyl;
-  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->getDimension());
+  this->selSmallParSel.initialize(WeylFDSmall.AmbientWeyl->getDimension());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
     this->generatorsSmallSub.addOnTop(currentV);

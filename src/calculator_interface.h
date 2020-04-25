@@ -2986,7 +2986,7 @@ bool Calculator::functionGetMatrix(
     }
     return false;
   }
-  convertedEs.init(nonConvertedEs.numberOfRows, nonConvertedEs.numberOfColumns);
+  convertedEs.initialize(nonConvertedEs.numberOfRows, nonConvertedEs.numberOfColumns);
   ExpressionContext theContext(*this);
   if (inputOutputStartingContext != nullptr) {
     theContext = *inputOutputStartingContext;
@@ -3024,7 +3024,7 @@ bool Calculator::functionGetMatrix(
       }
     }
   }
-  outputMat.init(convertedEs.numberOfRows, convertedEs.numberOfColumns);
+  outputMat.initialize(convertedEs.numberOfRows, convertedEs.numberOfColumns);
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
       outputMat(i, j) = convertedEs(i, j).getValue<theType>();
@@ -3282,7 +3282,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     }
     outputInducingSel = parabolicSel;
   } else {
-    outputInducingSel.init(ambientSSalgebra->GetRank());
+    outputInducingSel.initialize(ambientSSalgebra->GetRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
       if (!outputWeightHWFundcoords[i].isSmallInteger()) {
         outputInducingSel.AddSelectionAppendNewIndex(i);
@@ -3313,7 +3313,7 @@ bool Expression::AssignMatrix(
 ) {
   MacroRegisterFunctionWithName("Expression::AssignMatrix");
   Matrix<Expression> theMatEs;
-  theMatEs.init(input.numberOfRows, input.numberOfColumns);
+  theMatEs.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {

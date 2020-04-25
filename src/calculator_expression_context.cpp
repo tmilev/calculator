@@ -401,7 +401,7 @@ bool ExpressionContext::mergeDifferentialOperators(
     return true;
   }
   Selection foundEWAVar;
-  foundEWAVar.init(outputContext.variables.size);
+  foundEWAVar.initialize(outputContext.variables.size);
   outputContext.differentialOperatorVariables.setSize(outputContext.variables.size);
   if (!this->mergeDifferentialOperatorsOnce(foundEWAVar, outputContext)) {
     return false;

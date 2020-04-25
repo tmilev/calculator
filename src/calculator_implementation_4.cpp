@@ -655,13 +655,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
-      currentTime = global.GetElapsedSeconds();
+      currentTime = global.getElapsedSeconds();
       currentAdditions = Rational::TotalAdditions();
       currentMultiplications = Rational::TotalMultiplications();
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
       totalAdditions += Rational::TotalAdditions() - currentAdditions;
       totalMultiplications += Rational::TotalMultiplications() - currentMultiplications;
-      totalTime += global.GetElapsedSeconds() - currentTime;
+      totalTime += global.getElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
       out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
@@ -879,7 +879,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
     return false;
   }
   Matrix<Expression> resultMat;
-  resultMat.init(numRows, numCols);
+  resultMat.initialize(numRows, numCols);
   Expression leftIE, rightIE;
   for (int i = 0; i < numRows; i ++) {
     for (int j = 0; j < numCols; j ++) {

@@ -20,7 +20,7 @@ public:
     this->ComputeIndicesFromSelection();
   }
   void MakeFullSelection(int inputMaxSize) {
-    this->init(inputMaxSize);
+    this->initialize(inputMaxSize);
     this->MakeFullSelection();
   }
   void MakeFullSelection() {
@@ -41,7 +41,7 @@ public:
     }
     return true;
   }
-  void init(int maxNumElements);
+  void initialize(int maxNumElements);
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
   unsigned int hashFunction() const;
@@ -127,7 +127,7 @@ public:
 };
 
 class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
-  void init(int NumElements);
+  void initialize(int NumElements);
   void InitMe(int NumElements);
   void initWithMultiplicities(int NumElements);
 public:
@@ -275,7 +275,7 @@ public:
       << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << global.fatal;
     }
-    this->theSelection.init(inputNumItems);
+    this->theSelection.initialize(inputNumItems);
     this->DesiredSubsetSize = inputDesiredSubsetSize;
     if (this->DesiredSubsetSize > 0) {
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
@@ -305,7 +305,7 @@ class SelectionPositiveIntegers {
   LargeIntegerUnsigned GetGrading() {
     return this->theInts.SumCoords();
   }
-  void init(int numIntegers) {
+  void initialize(int numIntegers) {
     this->theInts.makeZero(numIntegers);
   }
   void SetFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
@@ -346,7 +346,7 @@ bool Vectors<Coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
   }
   int theDimension = this->theObjects[0].size;
   output.setSize(theDimension);
-  bufferMat.init(theSelection.CardinalitySelection + 2, theDimension);
+  bufferMat.initialize(theSelection.CardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
       bufferMat.elements[i][j].Assign(this->theObjects[theSelection.elements[i]].theObjects[j]);
@@ -366,7 +366,7 @@ template <typename Coefficient>
 void Vectors<Coefficient>::SelectionToMatrix(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output
 ) {
-  output.init(OutputDimension, theSelection.CardinalitySelection);
+  output.initialize(OutputDimension, theSelection.CardinalitySelection);
   this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
@@ -404,7 +404,7 @@ bool Vectors<Coefficient>::ComputeNormalExcludingIndex(
   }
   int theDimension = this->theObjects[0].size;
   output.setSize(theDimension);
-  bufferMatrix.init(this->size - 1, theDimension);
+  bufferMatrix.initialize(this->size - 1, theDimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (i != index) {
@@ -431,7 +431,7 @@ bool Vectors<Coefficient>::ComputeNormalFromSelection(
 ) const {
   Selection NonPivotPoints;
   output.setSize(theDimension);
-  bufferMatrix.init(theSelection.CardinalitySelection, theDimension);
+  bufferMatrix.initialize(theSelection.CardinalitySelection, theDimension);
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       bufferMatrix.elements[i][j] = this->theObjects[theSelection.elements[i]].theObjects[j];
@@ -460,8 +460,8 @@ bool Vectors<Coefficient>::ComputeNormalFromSelectionAndExtraRoot(
   output.setSize(theDimension);
   Matrix<Coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
-  bufferMatrix.init(theSelection.CardinalitySelection + 1, theDimension);
-  matOutputEmpty.init(- 1, - 1);
+  bufferMatrix.initialize(theSelection.CardinalitySelection + 1, theDimension);
+  matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
       bufferMatrix.elements[i][j].Assign(this->theObjects[theSelection.elements[i]][j]);
@@ -480,8 +480,8 @@ template <class Coefficient>
 void Vectors<Coefficient>::GaussianEliminationForNormalComputation(
   Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
 ) const {
-  inputMatrix.init(this->size, theDimension);
-  outputNonPivotPoints.init(theDimension);
+  inputMatrix.initialize(this->size, theDimension);
+  outputNonPivotPoints.initialize(theDimension);
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       inputMatrix(i, j) = (*this)[i][j];
@@ -556,7 +556,7 @@ bool Vectors<Coefficient>::LinearAlgebraForVertexComputation(
   if (theDimension - 1 != theSelection.CardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;
   }
-  buffer.init(theDimension - 1, theDimension);
+  buffer.initialize(theDimension - 1, theDimension);
   for (int i = 0; i < theDimension - 1; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);

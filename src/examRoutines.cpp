@@ -421,7 +421,7 @@ bool CalculatorHTML::loadMe(
   this->flagIsForReal = global.UserRequestRequiresLoadingRealExamData();
   if (global.flagDatabaseCompiled) {
     this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
-      global.GetWebInput(WebAPI::problem::topicList), false
+      global.getWebInput(WebAPI::problem::topicList), false
     );
     if (doLoadDatabase) {
       std::stringstream errorStream;
@@ -452,7 +452,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
   bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure);
   if (!this->flagLoadedSuccessfully) {
     return WebAPI::problem::failedToLoadProblem;
@@ -477,7 +477,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << "it's a bug. Please take a screenshot and email the site administrator/your instructor. </b>";
     out
     << "Generated in "
-    << MathRoutines::ReducePrecision(global.GetElapsedSeconds() - startTime)
+    << MathRoutines::ReducePrecision(global.getElapsedSeconds() - startTime)
     << " second(s). ";
     return out.str();
   }
@@ -489,9 +489,9 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
 }
 
 void CalculatorHTML::LoadFileNames() {
-  this->fileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
-  this->courseHome = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
-  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  this->fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileName), false);
+  this->courseHome = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
+  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
 }
 
 void CalculatorHTML::LoadCurrentProblemItem(
@@ -590,8 +590,8 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   }
   if (global.UserStudentVieWOn()) {
     out << "studentView=true&";
-    if (global.GetWebInput("studentSection") != "") {
-      out << "studentSection=" << global.GetWebInput("studentSection") << "&";
+    if (global.getWebInput("studentSection") != "") {
+      out << "studentSection=" << global.getWebInput("studentSection") << "&";
     }
   }
   out << "\">" << displayString << "</a>";
@@ -606,9 +606,9 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   << "fileName=" << urledProblem << "&";
   if (global.UserStudentVieWOn()) {
     refStreamNoRequest << "studentView=true&";
-    if (global.GetWebInput("studentSection") != "") {
+    if (global.getWebInput("studentSection") != "") {
       refStreamNoRequest << "studentSection="
-      << global.GetWebInput("studentSection") << "&";
+      << global.getWebInput("studentSection") << "&";
     }
   }
   if (this->topicListFileName != "") {
@@ -673,7 +673,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   if (input.size() != 4) {
     return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
-  std::string oldProblem = global.GetWebInput(WebAPI::problem::fileName);
+  std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
   std::string testedProblem = input[1].toString();
   global.SetWebInpuT(WebAPI::problem::fileName, testedProblem);
   std::string randomSeed = input[3].toString();
@@ -1216,14 +1216,14 @@ bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream*
 
 bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments) {
   MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   this->PrepareCommands(comments);
 
   theInterpreter.initialize();
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds()-startTime);
-  this->timeIntermediateComments.lastObject()->addOnTop("calculator init time");
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds()-startTime);
+  this->timeIntermediateComments.lastObject()->addOnTop("calculator initialize time");
   if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
     this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
@@ -1231,7 +1231,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << this->theProblemData.commandsGenerateProblem << "<br>";
   }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator evaluation time");
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
@@ -1612,7 +1612,7 @@ std::string CalculatorHTML::ToStringDeadline(
     global.UserStudentVieWOn()
   ) {
     std::string sectionNum = HtmlRoutines::convertURLStringToNormal(
-      global.GetWebInput("studentSection"), false
+      global.getWebInput("studentSection"), false
     );
     return this->ToStringOnEDeadlineFormatted(
       topicID, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline, isSection
@@ -1878,19 +1878,19 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments) {
     return;
   }
   this->flagParentInvestigated = true;
-  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  this->topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
   this->LoadAndParseTopicList(comments);
 }
 
 bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtml");
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   if (!this->parseHTML(comments)) {
     this->outputHtmlBodyNoTag = "<b>Failed to interpret html input. </b><br>" + this->ToStringContent();
-    this->timeToParseHtml = global.GetElapsedSeconds() - startTime;
+    this->timeToParseHtml = global.getElapsedSeconds() - startTime;
     return false;
   }
-  this->timeToParseHtml = global.GetElapsedSeconds() - startTime;
+  this->timeToParseHtml = global.getElapsedSeconds() - startTime;
   this->MaxInterpretationAttempts = 25;
   this->randomSeedsIfInterpretationFails.setSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
@@ -1909,7 +1909,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->timeIntermediateComments.setSize(0);
   this->NumAttemptsToInterpret = 0;
   while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts) {
-    startTime = global.GetElapsedSeconds();
+    startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
@@ -1918,11 +1918,11 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     this->NumAttemptsToInterpret ++;
     std::stringstream commentsOnLastFailure;
     if (this->interpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
-      this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
+      this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
       this->theProblemData.checkConsistency();
       return true;
     }
-    this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
+    this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->NumAttemptsToInterpret
       << " to interpret your file. Attempted random seeds: "
@@ -2937,7 +2937,7 @@ void CalculatorHTML::ComputeBodyDebugString() {
 
 bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretHtmlOneAttempt");
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeadPt2;
   this->flagIsExamHome =
@@ -2947,10 +2947,10 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->NumAttemptsToInterpret - 1
   ]);
   this->FigureOutCurrentProblemList(comments);
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
   outHeadPt2 << HtmlRoutines::GetJavascriptMathjax("");
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, &comments)) {
     return false;
@@ -2991,7 +2991,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   //////////////////////////////
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
   theInterpreter.theObjectContainer.resetSliders();
@@ -3000,7 +3000,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->outputHtmlBodyNoTag = outBody.str();
     return false;
   }
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before class management routines");
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled = 0;
@@ -3060,7 +3060,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
   //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //out << "<hr> Between the commands:" << this->betweenTheCommands.toStringCommaDelimited();
-  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before database storage");
   if (global.flagDatabaseCompiled) {
     bool shouldResetTheRandomSeed = false;
@@ -3147,8 +3147,8 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
-        if (global.GetWebInput("studentSection") != "") {
-          out << "studentSection=" << global.GetWebInput("studentSection") << "&";
+        if (global.getWebInput("studentSection") != "") {
+          out << "studentSection=" << global.getWebInput("studentSection") << "&";
         }
         out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
@@ -3162,8 +3162,8 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
-        if (global.GetWebInput("studentSection") != "") {
-          out << "studentSection=" << global.GetWebInput("studentSection") << "&";
+        if (global.getWebInput("studentSection") != "") {
+          out << "studentSection=" << global.getWebInput("studentSection") << "&";
         }
         out << "topicList=" << HtmlRoutines::convertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::convertStringToURLString(this->courseHome, false) << "&";
@@ -3190,7 +3190,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       << this->ToStringCalculatorArgumentsForProblem(
         global.requestType,
         "false",
-        HtmlRoutines::convertURLStringToNormal(global.GetWebInput("studentSection"), false)
+        HtmlRoutines::convertURLStringToNormal(global.getWebInput("studentSection"), false)
       ) << "\">Admin view</a>" << linkSeparator;
     } else {
       out << "<b>Admin view</b>" << linkSeparator;
@@ -3211,7 +3211,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         if (
           global.UserStudentVieWOn() &&
           this->databaseStudentSections[i] == HtmlRoutines::convertURLStringToNormal(
-            global.GetWebInput("studentSection"), false
+            global.getWebInput("studentSection"), false
           )
         ) {
           out << "<b>" << this->databaseStudentSections[i] << "</b>";
@@ -3251,14 +3251,14 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   List<std::string> excludedTags;
   excludedTags.addOnTop(WebAPI::problem::randomSeed);
   out << global.ToStringCalcArgsNoNavigation(&excludedTags)
-  << "courseHome=" << global.GetWebInput(WebAPI::problem::courseHome) << "&";
+  << "courseHome=" << global.getWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(this->fileName, false) << "&";
   } else {
-    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(global.GetWebInput(WebAPI::problem::fileName), false)
+    out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(global.getWebInput(WebAPI::problem::fileName), false)
     << "&";
   }
-  out << "topicList=" << global.GetWebInput(WebAPI::problem::topicList) << "&";
+  out << "topicList=" << global.getWebInput(WebAPI::problem::topicList) << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "") {
     out << "studentSection=" << HtmlRoutines::convertStringToURLString(studentSection, false) << "&";

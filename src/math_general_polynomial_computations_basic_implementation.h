@@ -554,8 +554,8 @@ bool Polynomial<Coefficient>::operator>(const Polynomial<Coefficient>& other) co
   }
   MonomialP thisMaximalMonomial, otherMaximalMonomial;
   List<MonomialP>::Comparator& monomialOrder = MonomialP::orderDefault();
-  int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
-  int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
+  int thisMaxMonIndex = this->getIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
+  int otherMaxMonIndex = other.getIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
   if (thisMaximalMonomial > otherMaximalMonomial) {
     return true;
   }
@@ -764,12 +764,12 @@ void Polynomial<Coefficient>::DivideBy(
   divisorShiftedExponents.ScaleToPositiveMonomialExponents(scaleInput);
   MonomialP remainderLeadingMonomial;
   Coefficient remainderLeadingCoefficient;
-  int remainderLeadingIndex = outputRemainder.GetIndexLeadingMonomial(
+  int remainderLeadingIndex = outputRemainder.getIndexLeadingMonomial(
     &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
   );
   MonomialP leadingMonomialShiftedDivisor;
   Coefficient leadingCoefficientShiftedDivisor;
-  divisorShiftedExponents.GetIndexLeadingMonomial(
+  divisorShiftedExponents.getIndexLeadingMonomial(
     &leadingMonomialShiftedDivisor,
     &leadingCoefficientShiftedDivisor,
     monomialOrder
@@ -794,7 +794,7 @@ void Polynomial<Coefficient>::DivideBy(
     subtracand = divisorShiftedExponents;
     subtracand.multiplyBy(quotientMonomial, quotientCoefficient);
     outputRemainder -= subtracand;
-    int remainderIndex = outputRemainder.GetIndexLeadingMonomial(
+    int remainderIndex = outputRemainder.getIndexLeadingMonomial(
       &remainderLeadingMonomial,
       &remainderLeadingCoefficient,
       monomialOrder
@@ -848,8 +848,8 @@ void Polynomial<Coefficient>::AssignCharPoly(const Matrix<Coefficient>& input) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::AssignMinPoly(const Matrix<Coefficient>& input) {
-  MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
+void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::assignMinPoly");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "
@@ -884,7 +884,7 @@ void Polynomial<Coefficient>::AssignMinPoly(const Matrix<Coefficient>& input) {
     currentFactor.addMonomial(tempM, 1);
     *this = MathRoutines::lcm(*this, currentFactor);
   }
-  this->scaleNormalizeLeadingMonomial();
+  this->scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
 }
 
 template <class Coefficient>
@@ -1027,10 +1027,10 @@ bool Polynomial<Coefficient>::differential(
 }
 
 template <class Coefficient>
-bool PolynomialOrder<Coefficient>::CompareLeftGreaterThanRight(
+bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
   const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
 ) const {
-  MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
+  MacroRegisterFunctionWithName("PolynomialOrder::compareLeftGreaterThanRight");
   List<MonomialP> sortedLeft = left.theMonomials;
   List<MonomialP> sortedRight = right.theMonomials;
   sortedLeft.quickSortAscending(&this->monomialOrder);
@@ -1141,10 +1141,10 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
     this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.setSize(this->theBasiS.size);
+  //basisColorStyles.setSize(this->theBasis.size);
   this->allMonomials.quickSortDescending(&this->thePolynomialOrder.monomialOrder);
   this->theFormat.flagUseLatex = true;
-  out << this->ToStringLetterOrder(true);
+  out << this->toStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
   out << "\\renewcommand{\\arraystretch}{1.2}";
   out << "\\begin{longtable}{|c";
@@ -1161,9 +1161,9 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
   << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
   << "\\\\";
-  for (int i = 0; i < this->theBasiS.size; i ++) {
+  for (int i = 0; i < this->theBasis.size; i ++) {
     out << "$";
-    out << this->theBasiS[i].toString(&this->theFormat);
+    out << this->theBasis[i].toString(&this->theFormat);
     out << "$";
     out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
     out << "$" << this->theQuotients[i].toString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
@@ -1260,9 +1260,9 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
     }
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.setSize(this->theBasiS.size);
+  //basisColorStyles.setSize(this->theBasis.size);
   this->allMonomials.quickSortDescending(&this->thePolynomialOrder.monomialOrder);
-  out << this->ToStringLetterOrder(false);
+  out << this->toStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style ='white-space: nowrap; border:1px solid black;'>";
@@ -1274,13 +1274,13 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
   out << "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"
   << this->allMonomials.size + 1 << "'><b>Quotient(s) </b></td>"
   << "</tr>";
-  for (int i = 0; i < this->theBasiS.size; i ++) {
+  for (int i = 0; i < this->theBasis.size; i ++) {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].toString(&this->theFormat), - 1);
+      out << HtmlRoutines::GetMathSpanPure(this->theBasis[i].toString(&this->theFormat), - 1);
     } else {
-      out << this->theBasiS[i].toString(&this->theFormat);
+      out << this->theBasis[i].toString(&this->theFormat);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"

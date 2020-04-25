@@ -522,7 +522,7 @@ bool CalculatorFunctions::innerTestProblemInterpretation(
     << "3) starting random seed, set to 0 if you don't know what this is. "
     ;
   }
-  if (global.theResponse.MonitoringAllowed()) {
+  if (global.theResponse.monitoringAllowed()) {
     global.theResponse.Initiate("Triggered by innerTestProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
@@ -1284,7 +1284,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (theV.isEqualToZero()) {
     return output.assignValue(0, theCommands);
   }
-  Rational theCF = theV.scaleNormalizeLeadingMonomial();
+  Rational theCF = theV.scaleNormalizeLeadingMonomial(nullptr);
   if (theCF == 0) {
     return false;
   }
@@ -1367,16 +1367,16 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
   computation.flagStoreQuotients = true;
-  computation.theBasiS.setSize(polynomialsRational.size - 1);
+  computation.theBasis.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    computation.theBasiS[i - 1] = polynomialsRational[i];
+    computation.theBasis[i - 1] = polynomialsRational[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  computation.initializeForDivision(computation.theBasiS);
-  computation.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
+  computation.initializeForDivision(computation.theBasis);
+  computation.remainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
   for (int i = 0; i < computation.theQuotients.size; i ++) {
@@ -2645,7 +2645,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   MonomialP leadingMonomial;
   List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
-  thePoly.GetIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
+  thePoly.getIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;
   if (leadingMonomial[indexX] != 3) {
@@ -2715,7 +2715,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
-  if (!global.theResponse.MonitoringAllowed()) {
+  if (!global.theResponse.monitoringAllowed()) {
     global.theResponse.Initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;

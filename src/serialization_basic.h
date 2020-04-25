@@ -48,7 +48,7 @@ public:
       List<Serialization::Marker>* theOutputMarkers,
       const std::string& label
     ) {
-      this->init(inputNumberOfBytes, static_cast<unsigned int>(input), output, theOutputMarkers, label);
+      this->initialize(inputNumberOfBytes, static_cast<unsigned int>(input), output, theOutputMarkers, label);
     }
     WriterIntegerWithMarker(
       int inputNumberOfBytes,
@@ -57,9 +57,9 @@ public:
       List<Serialization::Marker>* theOutputMarkers,
       const std::string& label
     ) {
-      this->init(inputNumberOfBytes, input, output, theOutputMarkers, label);
+      this->initialize(inputNumberOfBytes, input, output, theOutputMarkers, label);
     }
-    inline void init(
+    inline void initialize(
       int inputNumberOfBytes,
       unsigned int input,
       List<unsigned char>& output,

@@ -251,7 +251,7 @@ void SemisimpleLieAlgebra::GetAd(MatrixTensor<Coefficient>& output, ElementSemis
 template <class Coefficient>
 void SemisimpleLieAlgebra::GetAd(Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e) {
   int NumGenerators = this->GetNumGenerators();
-  output.init(NumGenerators, NumGenerators);
+  output.initialize(NumGenerators, NumGenerators);
   output.makeZero();
   ElementSemisimpleLieAlgebra<Coefficient> theGen, theResult;
   for (int i = 0; i < NumGenerators; i ++) {

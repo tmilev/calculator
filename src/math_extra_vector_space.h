@@ -51,7 +51,7 @@ public:
 template <typename Coefficient>
 void Basis<Coefficient>::AddVector(const Vector<Coefficient>& v) {
   if (basis.numberOfColumns == 0) {
-    basis.init(v.size, v.size);
+    basis.initialize(v.size, v.size);
     basis.numberOfRows = 0;
   }
   if (basis.numberOfRows == basis.numberOfColumns) {
@@ -270,7 +270,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::Intersection(const VectorSpac
   MW.GetZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<Coefficient> M;
-  M.init(Vperp.size + Wperp.size, this->degree);
+  M.initialize(Vperp.size + Wperp.size, this->degree);
   int i = 0;
   for (; i < Vperp.size; i ++) {
     for (int j = 0; j < this->degree; j ++) {
@@ -288,7 +288,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::Intersection(const VectorSpac
   if (outvecs.size == 0) {
     return output;
   }
-  output.fastbasis.init(outvecs.size,this->degree);
+  output.fastbasis.initialize(outvecs.size,this->degree);
   if (outvecs.size == 1) {
     int inz = 0;
     for (; inz < outvecs[0].size; inz ++) {

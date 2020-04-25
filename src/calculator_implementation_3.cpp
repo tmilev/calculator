@@ -140,7 +140,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
     lowestUnexploredHeightDiff ++
   ) {
-    //double startCycleTime = global.GetElapsedSeconds();
+    //double startCycleTime = global.getElapsedSeconds();
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights) {
       break;
     }
@@ -430,25 +430,25 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
       currentOp += tempMat;
     }
     std::stringstream tempStream3;
-    double timeAtStart1 = global.GetElapsedSeconds();
+    double timeAtStart1 = global.getElapsedSeconds();
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
     theReport.report(tempStream3.str());
     Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
-    tempStream3 << " done in " << global.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
+    tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
     theReport.report(tempStream3.str());
     if (i == 0) {
       theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
       std::stringstream tempStream4;
-      double timeAtStart2 = global.GetElapsedSeconds();
+      double timeAtStart2 = global.getElapsedSeconds();
       tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
       tempSpace1 = theFinalEigenSpace;
       theReport.report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
-      tempStream4 << " done in " << global.GetElapsedSeconds() - timeAtStart2 << " seconds. ";
+      tempStream4 << " done in " << global.getElapsedSeconds() - timeAtStart2 << " seconds. ";
       theReport.report(tempStream4.str());
     }
   }
@@ -688,7 +688,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
-            tempP.scaleNormalizeLeadingMonomial();
+            tempP.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.findOneVariableRationalRoots(tempList)) {
               tempList2.addOnTopNoRepetition(tempList);
@@ -851,7 +851,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
           resultChar.ModOutVermaRelations(&rightWeightDual);
           theCentralCharacter.ModOutVermaRelations(&leftWeightDual);
           resultChar -= theCentralCharacter;
-          resultChar.scaleNormalizeLeadingMonomial();
+          resultChar.scaleNormalizeLeadingMonomial(nullptr);
           resultChar *= - 1;
           theCentralChars.addOnTopNoRepetition(resultChar);
         }
@@ -939,8 +939,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   ModuleSSalgebra<RationalFunction>& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
-  theCommands << "<hr>Time elapsed before making B3 irrep: " << global.GetElapsedSeconds();
-  double timeAtStart = global.GetElapsedSeconds();
+  theCommands << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
+  double timeAtStart = global.getElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg(
     theG2B3Data.theHmm,
     theG2B3Data.selSmallParSel,
@@ -949,7 +949,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     &theG2B3Data.leviEigenSpace,
     nullptr
   );
-  theCommands << "<br>Time needed to make B3 irrep: " << global.GetElapsedSeconds() - timeAtStart;
+  theCommands << "<br>Time needed to make B3 irrep: " << global.getElapsedSeconds() - timeAtStart;
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
@@ -1036,7 +1036,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
         }
       }
     }
-    RationalFunction scale = currentTensorEltEigen.scaleNormalizeLeadingMonomial();
+    RationalFunction scale = currentTensorEltEigen.scaleNormalizeLeadingMonomial(nullptr);
     if (!scale.IsConstant(&theG2B3Data.additionalMultipliers[k])) {
       global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
     }
@@ -1235,7 +1235,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     out << "<br>" << " <table><tr><td  border =\"1\" colspan =\"3\">"
     << theWeylLetters[i] << "_{" << theRanks[i] << "}" << "</td></tr> <tr><td>highest weight</td><td>dim</td></tr>";
     List<Vector<Rational> >& theHws = theHighestWeights[i];
-    tempSel.init(theRanks[i]);
+    tempSel.initialize(theRanks[i]);
     for (int j = 0; j < theHws.size; j ++) {
       std::stringstream reportStream;
       Vector<Rational>& currentHW = theHws[j];
@@ -1258,7 +1258,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
         nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size
-      << " generated in " << global.GetElapsedSeconds() << " seconds. ";
+      << " generated in " << global.getElapsedSeconds() << " seconds. ";
       theReport.report(reportStream.str());
       for (int k = 0; k < theStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
@@ -1495,7 +1495,7 @@ bool Calculator::innerPrintZnEnumeration(
     return false;
   }
   SelectionPositiveIntegers theSel;
-  theSel.init(dimension);
+  theSel.initialize(dimension);
   std::stringstream out2, out;
   LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
@@ -1654,13 +1654,13 @@ bool Calculator::getMatrixExpressions(
 ) {
   MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
   if (!input.IsSequenceNElementS() && !input.isMatrix() && !input.IsIntervalRealLine()) {
-    output.init(1, 1);
+    output.initialize(1, 1);
     output(0, 0) = input;
     return true;
   }
   if (input.size() < 2) {
     if (input.isMatrix()) {
-      output.init(0, 0);
+      output.initialize(0, 0);
       return true;
     }
     return false;
@@ -1676,7 +1676,7 @@ bool Calculator::getMatrixExpressions(
         return false;
       }
     }
-    output.init(1, input.size() - 1);
+    output.initialize(1, input.size() - 1);
     for (int i = 1; i < input.size(); i ++) {
       output(0, i - 1) = input[i];
     }
@@ -1692,7 +1692,7 @@ bool Calculator::getMatrixExpressions(
       return false;
     }
   }
-  output.init(input.size() - 1, input[1].size() - 1);
+  output.initialize(input.size() - 1, input[1].size() - 1);
   for (int i = 1; i < input.size(); i ++) {
     if (
       input[i].IsSequenceNElementS(output.numberOfColumns) ||

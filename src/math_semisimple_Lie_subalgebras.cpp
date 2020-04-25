@@ -143,7 +143,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
     *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
   }
   PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
-  theComputation.GetSubFromPartialSolutionSerreLikeSystem(theSolutionSub);
+  theComputation.getSubstitutionFromPartialSolutionSerreLikeSystem(theSolutionSub);
   inputOutputF.SubstitutionCoefficients(theSolutionSub);
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
@@ -842,7 +842,7 @@ void SemisimpleSubalgebras::GetCentralizerChains(List<List<int> >& outputChains)
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetCentralizerChains");
   outputChains.setSize(0);
   Selection Explored;
-  Explored.init(this->theSubalgebras.theValues.size);
+  Explored.initialize(this->theSubalgebras.theValues.size);
   outputChains.reserve(this->theSubalgebras.theValues.size);
   for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
     if (!Explored.selected[i]) {
@@ -993,7 +993,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
-  if (global.theResponse.MonitoringAllowed()) {
+  if (global.theResponse.monitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) +
     ".html";
@@ -1359,7 +1359,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
   if (this->flagOrbitIsBuffered) {
     return;
   }
-  this->theIterator.init(
+  this->theIterator.initialize(
     this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction
   );
   if (this->theIterator.theGroupGeneratingElements.size > 0) {
@@ -1393,7 +1393,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
     this->orbitBuffer.setSize(0);
     this->orbitBuffer.addOnTop(this->orbitDefiningElement);
   }
-  this->theIterator.init(inputGenerators, this->orbitDefiningElement, this->theIterator.theGroupAction);
+  this->theIterator.initialize(inputGenerators, this->orbitDefiningElement, this->theIterator.theGroupAction);
 }
 
 OrbitIteratorRootActionWeylGroupAutomorphisms::OrbitIteratorRootActionWeylGroupAutomorphisms() {
@@ -2525,17 +2525,17 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owner);
     this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
     lieBracketMinusGoalValue -= goalValue;
-    this->AddToSystem(lieBracketMinusGoalValue);
+    this->addToSystem(lieBracketMinusGoalValue);
     for (int j = 0; j < this->theUnknownCartanCentralizerBasis.size; j ++) {
       this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], this->theUnknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
-      this->AddToSystem(lieBracketMinusGoalValue);
+      this->addToSystem(lieBracketMinusGoalValue);
       this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
-      this->AddToSystem(lieBracketMinusGoalValue);
+      this->addToSystem(lieBracketMinusGoalValue);
     }
     for (int j = 0; j < this->theUnknownPosGens.size; j ++) {
       if (i != j) {
         this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
-        this->AddToSystem(lieBracketMinusGoalValue);
+        this->addToSystem(lieBracketMinusGoalValue);
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.makeEi(this->theWeylNonEmbedded->getDimension(), i);
         posRoot2.makeEi(this->theWeylNonEmbedded->getDimension(), j);
@@ -2550,13 +2550,13 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
         for (int k = 0; k < alphaStringLength + 1; k ++) {
           this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
         }
-        this->AddToSystem(lieBracketMinusGoalValue);
+        this->addToSystem(lieBracketMinusGoalValue);
         // negative-negative generator Serre relations
         lieBracketMinusGoalValue = this->theUnknownNegGens[j];
         for (int k = 0; k < alphaStringLength + 1; k ++) {
           this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
         }
-        this->AddToSystem(lieBracketMinusGoalValue);
+        this->addToSystem(lieBracketMinusGoalValue);
       }
     }
   }
@@ -3266,7 +3266,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
   //  return true;
 //  Vectors<Rational> curentNilradicalCone;
   Vector<Rational> betterIntersection;
-  this->theNilradSubsel.init(this->theNilradicalWeights.size);
+  this->theNilradSubsel.initialize(this->theNilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
   for (int i = 1; i < this->theNilradicalWeights.size && i < 5; i ++) {
     int numcycles = MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
@@ -3381,7 +3381,7 @@ void NilradicalCandidate::reset() {
   this->theNilradicalElementOpposites.setSize(0);
   this->ownerModulesNilradicalElements.setSize(0);
   this->ownerModulestheNonFKhwVectors.setSize(0);
-  this->theNilradSubsel.init(0);
+  this->theNilradSubsel.initialize(0);
   this->theNilradicalSubset.setSize(0);
   this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
   this->theNilradicalSubsetWeights.setSize(0);
@@ -3766,7 +3766,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnly() {
   this->ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart();
 }
 
-bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right) {
+bool CandidateSSSubalgebra::compareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right) {
   Vector<Rational> leftSSpart = left;
   Vector<Rational> rightSSpart =right;
   leftSSpart.setSize(this->theHs.size);
@@ -3828,7 +3828,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWPrimal);
     sortingWeights.addOnTop(currentHWPrimal);
   }
-  sortingWeights.QuickSortAscendingCustom(*this, &this->HighestVectorsNonSorted);
+  sortingWeights.quickSortAscendingCustom(*this, &this->HighestVectorsNonSorted);
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > tempModules;
   HashedList<Vector<Rational> > tempHWs;
   tempModules.setExpectedSize(this->HighestVectorsNonSorted.size);
@@ -4143,11 +4143,11 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(
   );
 }
 
-void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish) {
+void CandidateSSSubalgebra::addToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish) {
   Polynomial<AlgebraicNumber> thePoly;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
     thePoly = elementThatMustVanish.coefficients[i];
-    thePoly.scaleNormalizeLeadingMonomial();
+    thePoly.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     this->theSystemToSolve.addOnTopNoRepetition(thePoly);
   }
 }
@@ -4427,7 +4427,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-void SlTwoSubalgebra::init() {
+void SlTwoSubalgebra::initialize() {
   this->owner = nullptr;
   this->container = nullptr;
   this->indexInContainer = - 1;
@@ -5253,7 +5253,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
 
   Vectors<Rational> BasisToDrawCirclesAt;
   DrawingVariables theDV;
-  theDV.theBuffer.theBilinearForm.init(thePrimalRank, thePrimalRank);
+  theDV.theBuffer.theBilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
     for (int j = 0; j < thePrimalRank; j ++) {
       theDV.theBuffer.theBilinearForm(i, j) = this->BilinearFormFundPrimal(i, j).GetDoubleValue();
@@ -7070,8 +7070,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted = this->BilinearFormSimplePrimal;
   bilinearFormInverted.invert();
-  diagMat.init(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
-  diagMatrix2.init(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
+  diagMat.initialize(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
+  diagMatrix2.initialize(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
   diagMat.makeZero();
   diagMatrix2.makeZero();
   for (int i = 0; i < this->BilinearFormSimplePrimal.numberOfRows; i ++) {
@@ -7091,7 +7091,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   this->BilinearFormFundPrimal.Transpose();
   this->BilinearFormFundPrimal *= this->BilinearFormSimplePrimal;
   this->BilinearFormFundPrimal *= matFundCoordsSimple;
-/*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.init(this->GetAmbientWeyl().getDimension(), this->GetPrimalRank());
+/*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->GetAmbientWeyl().getDimension(), this->GetPrimalRank());
   for (int i = 0; i < this->GetRank(); i ++)
     this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->theHs[i]);

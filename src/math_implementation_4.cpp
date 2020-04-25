@@ -21,16 +21,16 @@ void fatalCrash(const std::string& input) {
 }
 
 GlobalVariables::Crasher::Crasher() {
-  this->flagCrashInitiateD = false;
+  this->flagCrashInitiated = false;
   this->flagFinishingCrash = false;
 }
 
 void GlobalVariables::Crasher::FirstRun() {
   if (
-    !this->flagCrashInitiateD &&
+    !this->flagCrashInitiated &&
     global.flagRunningBuiltInWebServer
   ) {
-    double elapsedSeconds = global.GetElapsedSeconds();
+    double elapsedSeconds = global.getElapsedSeconds();
     this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
     << elapsedSeconds << " second(s) from the start.<hr>";
     this->crashReportConsolE << Logger::consoleRed() << "Crash " << elapsedSeconds
@@ -38,7 +38,7 @@ void GlobalVariables::Crasher::FirstRun() {
     this->crashReportFile << "Crash " << elapsedSeconds
     << " second(s) from the start.\n";
   }
-  this->flagCrashInitiateD = true;
+  this->flagCrashInitiated = true;
 }
 
 GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVariables::Crasher& dummyCrasherSignalsActualCrash) {
@@ -129,7 +129,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.comments.getCurrentReset();
-  global.theResponse.WriteResponse(output, true);
+  global.theResponse.writeResponse(output, true);
   assert(false);
   return *this;
 }
@@ -281,7 +281,7 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
       }
     }
   }
-  if (!global.fatal.flagCrashInitiateD) {
+  if (!global.fatal.flagCrashInitiated) {
     if (useHTML) {
       reportStream << global.fatal.GetStackTraceEtcErrorMessageHTML();
     } else {
@@ -346,7 +346,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   this->DisplayPathOutputFolder = "/output/";
 
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
-  this->DisplayNameExecutableApp = "/" + WebAPI::app;
+  this->displayApplication = "/" + WebAPI::app;
   this->DisplayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
@@ -361,11 +361,11 @@ bool GlobalVariables::UserSecureNonAdminOperationsAllowed() {
 }
 
 bool GlobalVariables::UserDebugFlagOn() {
-  return global.GetWebInput(WebAPI::request::debugFlag) == "true";
+  return global.getWebInput(WebAPI::request::debugFlag) == "true";
 }
 
 bool GlobalVariables::UserStudentVieWOn() {
-  return global.GetWebInput("studentView") == "true";
+  return global.getWebInput("studentView") == "true";
 }
 
 std::string GlobalVariables::LogData::ToStringProcessType() const {
@@ -447,7 +447,7 @@ std::string GlobalVariables::ToStringCalculatorComputation(
   request[WebAPI::request::requestAPI] = WebAPI::request::compute;
   request[WebAPI::request::calculatorInput] = computation;
   request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
-  out << "<a href = \"" << global.DisplayNameExecutableApp << "#"
+  out << "<a href = \"" << global.displayApplication << "#"
   << HtmlRoutines::convertStringToURLString(request.toString(), false) << "\">";
   out << HtmlRoutines::ConvertStringToHtmlString(display, true) << "</a>";
   return out.str();
@@ -494,13 +494,13 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   return out.str();
 }
 
-std::string GlobalVariables::GetWebInput(const std::string& inputName) {
+std::string GlobalVariables::getWebInput(const std::string& inputName) {
   return this->webArguments.GetValueCreate(inputName);
 }
 
-void GlobalVariables::MakeReport() {
-  MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (!global.theResponse.MonitoringAllowed()) {
+void GlobalVariables::makeReport() {
+  MacroRegisterFunctionWithName("GlobalVariables::makeReport");
+  if (!global.theResponse.monitoringAllowed()) {
     return;
   }
   std::string reportString;
@@ -1372,7 +1372,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
 //  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.setSize(this->projectivizedChambeR.size);
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
-//  this->thePfs.theChambersOld.init();
+//  this->thePfs.theChambersOld.initialize();
 //  this->thePfs.theChambersOld.theDirections = this->GmodKNegWeightsBasisChanged;
 //  this->thePfs.theChambersOld.SliceTheEuclideanSpace(false);
 //  this->theQPsNonSubstituted.setSize(this->thePfs.theChambersOld.size);
@@ -1391,7 +1391,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
-        global.MakeReport();
+        global.makeReport();
         currentQPNoSub.substitution(this->theLinearOperatorsExtended.theObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
@@ -1497,7 +1497,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     }
   }
   smallWeylChamber.CreateFromVertices(tempVertices);
-  tempMat.init(2, 2);
+  tempMat.initialize(2, 2);
   tempMat.elements[0][0] = 1; tempMat.elements[0][1] = 0;
   tempMat.elements[1][0] = 1; tempMat.elements[1][1] = 1;
   tempMat.Transpose();
@@ -1691,7 +1691,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.toString();
-  theProjectionBasisChanged.init(input.theDomain().GetRank(), input.theRange().GetRank());
+  theProjectionBasisChanged.initialize(input.theDomain().GetRank(), input.theRange().GetRank());
   for (int i = 0; i < input.theRange().GetRank(); i ++) {
     startingWeight.makeEi(input.theRange().GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight);
@@ -1706,7 +1706,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, tempRoot;
   ParabolicEvaluationRootImage = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  this->ParabolicSelectionSmallerAlgebra.init(input.theDomain().GetRank());
+  this->ParabolicSelectionSmallerAlgebra.initialize(input.theDomain().GetRank());
   for (int i = 0; i < input.theDomain().GetRank(); i ++) {
     DualCartanEmbedding.GetVectorFromColumn(i, tempRoot);
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).isPositive()) {
@@ -1778,7 +1778,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1), tempVect.size);
   }
-  tempMatPoly.init(input.theDomain().theWeyl.getDimension(), tempVect.size);
+  tempMatPoly.initialize(input.theDomain().theWeyl.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
   polyZero.makeZero();
   theFormat.polynomialAlphabet.setSize(5);
@@ -1897,7 +1897,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 
   //global.theIndicatorVariables.StatusString1NeedsRefresh = true;
   //global.theIndicatorVariables.StatusString1= this->log.str();
-  //global.MakeReport();
+  //global.makeReport();
 }
 
 std::string GeneralizedVermaModuleCharacters::PrepareReport() {
@@ -2081,7 +2081,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray(
 ) {
   //reminder: the very last variable comes from the projectivization and contributes to the translation only!
   int numNonParams = NonParams.size;
-  output.init(numParams + numNonParams - 1, numParams - 1);
+  output.initialize(numParams + numNonParams - 1, numParams - 1);
   outputTranslation.makeZero(numParams + numNonParams - 1);
   output.makeZero();
   for (int l = 0; l < numNonParams; l ++) {
@@ -2119,7 +2119,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex(
   int dimSmallerAlgebra = theOperator.numberOfRows;
   Vector<Rational>& theTranslation = this->theTranslationS[theIndex];
   Matrix<Rational> tempMat;
-  tempMat.init(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
+  tempMat.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
   tempMat.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
     tempMat.elements[j][j] = 1;
@@ -2165,7 +2165,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2() {
   Vectors<Rational> tempRoots;
   Vector<Rational> wallToSliceWith;
   ProgressReport theReport;
-  projectivizedChamberFinal.init();
+  projectivizedChamberFinal.initialize();
   for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
     Cone& currentAffineCone = this->smallerAlgebraChamber.theObjects[i];
     tempRoots.setSize(currentAffineCone.Normals.size);

@@ -29,7 +29,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
   this->checkConsistency();
-  //double startTimeDebug= global.GetElapsedSeconds();
+  //double startTimeDebug= global.getElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if (this->sizePrivate > 0 && MaxElements > 0 && this->sizePrivate > MaxElements) {
     return false;
@@ -103,7 +103,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
 }
 
 template <class elementGroup, class elementRepresentation>
-void OrbitIterator<elementGroup, elementRepresentation>::init(
+void OrbitIterator<elementGroup, elementRepresentation>::initialize(
   const List<elementGroup>& inputGenerators,
   const elementRepresentation& inputElement,
   const GroupActionWithName &inputGroupAction
@@ -283,10 +283,10 @@ void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCha
 }
 
 template <class someGroup, class elementSomeGroup>
-void SubgroupData<someGroup, elementSomeGroup>::init() {
+void SubgroupData<someGroup, elementSomeGroup>::initialize() {
   this->theGroup = 0;
   this->theSubgroup = 0;
-  this->theSubgroupMayBeHere.init();
+  this->theSubgroupMayBeHere.initialize();
   this->ccRepresentativesPreimages.setSize(0);
   this->generatorPreimages.setSize(0);
   this->flagCosetSetsComputed = false;
@@ -295,7 +295,7 @@ void SubgroupData<someGroup, elementSomeGroup>::init() {
 
 template <class someGroup, class elementSomeGroup>
 SubgroupData<someGroup, elementSomeGroup>::SubgroupData() {
-  this->init();
+  this->initialize();
 }
 
 template <typename elementSomeGroup>
@@ -518,7 +518,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
   theOrbitIterator.theGroupAction.actOn = elementSomeGroup::conjugationAction;
   theOrbitIterator.theGroupAction.name = "conjugation action";
-  theOrbitIterator.init(this->generators, inputOutputClass.representative, theOrbitIterator.theGroupAction);
+  theOrbitIterator.initialize(this->generators, inputOutputClass.representative, theOrbitIterator.theGroupAction);
   inputOutputClass.size = 1;
   if (storeCC) {
     inputOutputClass.theElements.setSize(0);
@@ -1307,7 +1307,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reset() {
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::init(somegroup& inputOwner) {
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::initialize(somegroup& inputOwner) {
   this->reset();
   this->ownerGroup = &inputOwner;
   this->ownerGroup->CheckInitializationConjugacyClasses();
@@ -1753,7 +1753,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
   int UpperBoundFreudenthal
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart");
-  //double startTimer = global.GetElapsedSeconds();
+  //double startTimer = global.getElapsedSeconds();
   this->ComputeRootSubsystem();
   Vector<Rational> EiVect;
   List<bool> Explored;

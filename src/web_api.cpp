@@ -64,7 +64,7 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
   } else if (global.requestType == WebAPI::request::signUp) {
     return this->ProcessSignUP();
   } else if (global.requestType == WebAPI::request::forgotLogin) {
-    return this->ProcessForgotLogin();
+    return this->processForgotLogin();
   } else if (global.requestType == WebAPI::request::login) {
     return this->ProcessLoginUserInfo(comments.str());
   } else if (global.requestType == WebAPI::request::logout) {
@@ -175,7 +175,7 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
 
 bool WebAPIResponse::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCalculatorExamplesJSON");
-  global.theResponse.WriteResponse(
+  global.theResponse.writeResponse(
     global.calculator().getElement().ToJSONFunctionHandlers(), false
   );
   return true;
@@ -183,7 +183,7 @@ bool WebAPIResponse::ProcessCalculatorExamplesJSON() {
 
 bool WebAPIResponse::ProcessServerStatusJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessServerStatusJSON");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   std::stringstream out;
   out << " <table><tr><td style =\"vertical-align:top\">"
   << this->owner->parent->ToStringStatusAll() << "</td><td>"
@@ -191,17 +191,17 @@ bool WebAPIResponse::ProcessServerStatusJSON() {
   << "</td></tr></table>";
   JSData outputJS;
   outputJS[WebAPI::result::resultHtml] = out.str();
-  return global.theResponse.WriteResponse(outputJS, false);
+  return global.theResponse.writeResponse(outputJS, false);
 }
 
 bool WebAPIResponse::ProcessUnpauseWorker() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessUnpauseWorker");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData progressReader, result;
   int indexWorker = this->owner->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
-    return global.theResponse.WriteResponse(progressReader, false);
+    return global.theResponse.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
   if (!otherWorker.PauseWorker.Unlock()) {
@@ -209,17 +209,17 @@ bool WebAPIResponse::ProcessUnpauseWorker() {
   } else {
     result[WebAPI::result::status] = "unpaused";
   }
-  return global.theResponse.WriteResponse(result, false);
+  return global.theResponse.writeResponse(result, false);
 }
 
 bool WebAPIResponse::ProcessPauseWorker() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessPauseWorker");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData progressReader, result;
   int indexWorker = this->owner->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
-    return global.theResponse.WriteResponse(progressReader, false);
+    return global.theResponse.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
   if (otherWorker.PauseWorker.Lock()) {
@@ -227,44 +227,44 @@ bool WebAPIResponse::ProcessPauseWorker() {
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";
   }
-  return global.theResponse.WriteResponse(result, false);
+  return global.theResponse.writeResponse(result, false);
 }
 
 bool WebAPIResponse::ProcessComputationIndicator() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessComputationIndicator");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   global << "Processing get request indicator." << Logger::endL;
   JSData result = this->owner->ProcessComputationIndicatorJSData();
-  return global.theResponse.WriteResponse(result, false);
+  return global.theResponse.writeResponse(result, false);
 }
 
 bool WebAPIResponse::ProcessSignUP() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSignUP");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(this->owner->GetSignUpRequestResult(), false);
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(this->owner->GetSignUpRequestResult(), false);
 }
 
 bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessChangePassword");
   (void) reasonForNoAuthentication;
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Database not compiled";
-    return global.theResponse.WriteResponse(result, false);
+    return global.theResponse.writeResponse(result, false);
   }
   UserCalculatorData& theUser = global.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!global.flagUsingSSLinCurrentConnection) {
     result[WebAPI::result::error] = "Please use secure connection.";
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   if (!global.flagLoggedIn) {
     result[WebAPI::result::error] = "Please enter (old) password. " + reasonForNoAuthentication;
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   std::string newPassword = HtmlRoutines::convertStringToURLString(
-    HtmlRoutines::convertURLStringToNormal(global.GetWebInput("newPassword"), true),
+    HtmlRoutines::convertURLStringToNormal(global.getWebInput("newPassword"), true),
     false
   );
   // <-Passwords are ONE-LAYER url-encoded
@@ -272,14 +272,14 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
   // <-Incoming pluses must be re-coded as spaces (%20).
 
   std::string reenteredPassword = HtmlRoutines::convertStringToURLString(
-    HtmlRoutines::convertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
+    HtmlRoutines::convertURLStringToNormal(global.getWebInput("reenteredPassword"), true),
     false
   );
   // <-Passwords are ONE-LAYER url-encoded
   // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
 
-  std::string newEmail = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("email"), false);
+  std::string newEmail = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   if (newEmail != "") {
     JSData notUsed;
     QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
@@ -287,16 +287,16 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
       queryEmailTaken, notUsed, nullptr
     )) {
       result[WebAPI::result::error] = "It appears the email is already taken. ";
-      return global.theResponse.WriteResponse(result);
+      return global.theResponse.writeResponse(result);
     }
   }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
     result = this->owner->SetEmail(newEmail);
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   if (newPassword != reenteredPassword) {
     result[WebAPI::result::error] = "Passwords don't match. ";
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
@@ -307,7 +307,7 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     commentsOnFailure
   )) {
     result[WebAPI::result::error] = commentsOnFailure.str();
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   JSData setQuery;
   QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
@@ -316,11 +316,11 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     findQuery, setQuery, &commentsOnFailure
   )) {
     result[WebAPI::result::error] = "Failed to set activationToken: " +commentsOnFailure.str();
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   std::stringstream out;
   out << "<b style = 'color:green'>Password change successful. </b>";
-  if (global.GetWebInput("doReload") != "false") {
+  if (global.getWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
     << global.DisplayNameExecutable  << "?request=logout"
@@ -330,14 +330,14 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     << "'\" />";
   }
   result[WebAPI::result::resultHtml] = out.str();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessCompute() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCompute");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   global.theResponse.flagReportDesired = true;
-  if (global.GetWebInput(WebAPI::request::monitoring) == "false") {
+  if (global.getWebInput(WebAPI::request::monitoring) == "false") {
     global.theResponse.flagReportDesired = false;
   } else {
     global.theResponse.flagReportDesired = true;
@@ -345,7 +345,7 @@ bool WebAPIResponse::ProcessCompute() {
   Calculator& theCalculator = global.calculator().getElement();
 
   theCalculator.inputString = HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput(WebAPI::request::calculatorInput),
+    global.getWebInput(WebAPI::request::calculatorInput),
     false
   );
   global.initOutputReportAndCrashFileNames(
@@ -354,7 +354,7 @@ bool WebAPIResponse::ProcessCompute() {
   );
   ////////////////////////////////////////////////
   // the initialization below moved to the start of the web server!
-  // theParser.init();
+  // theParser.initialize();
   ////////////////////////////////////////////////
   global.theResponse.AllowReport();
   theCalculator.Evaluate(theCalculator.inputString);
@@ -362,179 +362,179 @@ bool WebAPIResponse::ProcessCompute() {
   JSData result;
   result = theCalculator.ToJSONOutputAndSpecials();
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
-  global.theResponse.WriteResponse(result, false);
+  global.theResponse.writeResponse(result, false);
   global.flagComputationCompletE = true;
   return true;
 }
 
 bool WebAPIResponse::ProcessActivateAccount() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessActivateAccount");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   bool notUsed = false;
   result[WebAPI::result::resultHtml] = this->owner->GetChangePasswordPagePartOne(notUsed);
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessLogout() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessLogout");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   Database::get().theUser.LogoutViaDatabase();
   return this->ProcessLoginUserInfo("Coming from logout");
 }
 
 bool WebAPIResponse::ProcessSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSelectCourseJSON");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::getSelectCourseJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::getSelectCourseJSON());
 }
 
 bool WebAPIResponse::ProcessTopicListJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessTopicListJSON");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData resultJSON = WebAPIResponse::GetTopicTableJSON();
-  return global.theResponse.WriteResponse(resultJSON);
+  return global.theResponse.writeResponse(resultJSON);
 }
 
 bool WebAPIResponse::ProcessCalculatorOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCalculatorOnePageJS");
   if (appendBuildHash) {
-    this->owner->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
+    this->owner->setHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
   } else {
-    this->owner->SetHeaderOKNoContentLength("", "text/javascript");
+    this->owner->setHeaderOKNoContentLength("", "text/javascript");
   }
   this->owner->WriteToBody(WebAPIResponse::GetOnePageJS(appendBuildHash));
-  this->owner->SendPending();
+  this->owner->sendPending();
   return true;
 }
 
 bool WebAPIResponse::ProcessApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessApp");
-  this->owner->SetHeaderOKNoContentLength("", "text/html");
+  this->owner->setHeaderOKNoContentLength("", "text/html");
   if (global.server().RestartIsNeeded()) {
     return true;
   }
   this->owner->WriteToBody(WebAPIResponse::GetApp(appendBuildHash));
-  this->owner->SendPending();
+  this->owner->sendPending();
   return true;
 }
 
 bool WebAPIResponse::ProcessLoginUserInfo(const std::string& comments) {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessLoginUserInfo");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   if (global.server().RestartIsNeeded()) {
     return true;
   }
-  return global.theResponse.WriteResponse(WebAPIResponse::GetJSONUserInfo(comments), false);
+  return global.theResponse.writeResponse(WebAPIResponse::GetJSONUserInfo(comments), false);
 }
 
 bool WebAPIResponse::ProcessTemplateJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessTemplateJSON");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::GetJSONFromTemplate();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessExamPageJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessExamPageJSON");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetExamPageJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::GetExamPageJSON());
 }
 
 bool WebAPIResponse::ProcessSetProblemWeight() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSetProblemWeight");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemWeight();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessSetProblemDeadline() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSetProblemDatabaseInfo");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemDeadline();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessAddUserEmails() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessAddUserEmails");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = this->owner->GetAddUserEmails();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessModifyPage() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessModifyPage");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::ModifyProblemReport();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessAssignTeacherToSection() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessAssignTeacherToSection");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::AddTeachersSections();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessScores() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessScores");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresPage();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessScoresInCoursePage() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessScoresInCoursePage");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresInCoursePage();
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessAccountsJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessAccountsJSON");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetAccountsPageJSON(this->owner->hostWithPort));
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::GetAccountsPageJSON(this->owner->hostWithPort));
 }
 
 bool WebAPIResponse::ProcessDatabaseJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessDatabaseJSON");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(this->owner->GetDatabaseJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(this->owner->GetDatabaseJSON());
 }
 
 bool WebAPIResponse::ProcessDatabaseDeleteEntry() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessDatabaseDeleteEntry");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::resultHtml] = this->owner->GetDatabaseDeleteOneItem();
-  return global.theResponse.WriteResponse(this->owner->GetDatabaseJSON());
+  return global.theResponse.writeResponse(this->owner->GetDatabaseJSON());
 }
 
 bool WebAPIResponse::ProcessDatabaseModifyEntry() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessDatabaseModifyEntry");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   JSData result;
   result[WebAPI::result::error] = "WebAPIResponse::ProcessDatabaseModifyEntry not implemented yet";
-  return global.theResponse.WriteResponse(result);
+  return global.theResponse.writeResponse(result);
 }
 
 bool WebAPIResponse::ProcessEditPageJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessEditPageJSON");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetEditPageJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::GetEditPageJSON());
 }
 
 bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesOrHomeworkFromSource");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
 
   LaTeXCrawler theCrawler;
   JSData resultOnError;
@@ -542,13 +542,13 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
     commentsOnFailure << "Failed to process slides or homework from source. ";
     resultOnError[WebAPI::result::error] = commentsOnFailure.str();
-    return global.theResponse.WriteResponse(resultOnError);
+    return global.theResponse.writeResponse(resultOnError);
   }
   std::stringstream comments;
-  if (global.GetWebInput("layout") == "printable") {
+  if (global.getWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
   }
-  if (global.GetWebInput("answerKey") == "true") {
+  if (global.getWebInput("answerKey") == "true") {
     theCrawler.flagAnswerKey = true;
   }
   if (
@@ -561,13 +561,13 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
     resultOnError["targetPdfFileName"] = theCrawler.targetPDFFileNameWithPathVirtual;
     resultOnError[WebAPI::result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;
-    global.theResponse.WriteResponse(resultOnError);
+    global.theResponse.writeResponse(resultOnError);
     return true;
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
   this->owner->WriteToBody(theCrawler.targetPDFbinaryContent);
-  this->owner->SendPending();
+  this->owner->sendPending();
   return true;
 }
 
@@ -587,13 +587,13 @@ bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFa
 
 bool WebAPIResponse::ProcessSlidesSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesSource");
-  this->owner->SetHeaderOKNoContentLength("");
+  this->owner->setHeaderOKNoContentLength("");
   LaTeXCrawler theCrawler;
   JSData result;
   std::stringstream commentsOnFailure;
   if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
     result[WebAPI::result::error] = commentsOnFailure.str();
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   if (global.requestType == "homeworkSource") {
     theCrawler.flagHomeworkRatherThanSlides = true;
@@ -601,10 +601,10 @@ bool WebAPIResponse::ProcessSlidesSource() {
     theCrawler.flagHomeworkRatherThanSlides = false;
   }
   std::stringstream comments;
-  if (global.GetWebInput("layout") == "printable") {
+  if (global.getWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
   }
-  if (global.GetWebInput("answerKey") == "false") {
+  if (global.getWebInput("answerKey") == "false") {
     theCrawler.flagAnswerKey = false;
   } else {
     theCrawler.flagAnswerKey = true;
@@ -615,7 +615,7 @@ bool WebAPIResponse::ProcessSlidesSource() {
     this->owner->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
     result[WebAPI::result::error] = comments.str();
-    return global.theResponse.WriteResponse(result);
+    return global.theResponse.writeResponse(result);
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
@@ -624,30 +624,30 @@ bool WebAPIResponse::ProcessSlidesSource() {
 
 bool WebAPIResponse::ProcessClonePage() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessClonePage");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(this->owner->GetClonePageResult());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(this->owner->GetClonePageResult());
 }
 
 bool WebAPIResponse::ProcessProblemGiveUp() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessProblemGiveUp");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetAnswerOnGiveUp());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::GetAnswerOnGiveUp());
 }
 
 bool WebAPIResponse::ProcessProblemSolution() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessProblemSolution");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::GetProblemSolutionJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::GetProblemSolutionJSON());
 }
 
 bool WebAPIResponse::ProcessSubmitAnswersPreview() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSubmitAnswersPreview");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::SubmitAnswersPreviewJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::SubmitAnswersPreviewJSON());
 }
 
 bool WebAPIResponse::ProcessSubmitAnswers() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
-  this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::SubmitAnswersJSON());
+  this->owner->setHeaderOKNoContentLength("");
+  return global.theResponse.writeResponse(WebAPIResponse::SubmitAnswersJSON());
 }

@@ -10,7 +10,7 @@ void WebServer::initializeRandomBytes() {
 }
 
 bool WebServer::CreateProcessMutex() {
-  WebWorker& worker = this->GetActiveWorker();
+  WebWorker& worker = this->getActiveWorker();
   if (!worker.PauseWorker.CreateMe(this->ToStringWorkerToWorker() + "pause mutex", true)) {
     global << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
@@ -27,7 +27,7 @@ bool WebServer::CreateProcessMutex() {
 void WebServer::ComputeActiveWorkerId() {
   List<unsigned char> incomingId;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
-  WebWorker& worker = this->GetActiveWorker();
+  WebWorker& worker = this->getActiveWorker();
   if (worker.workerId != "") {
     this->workerIds.RemoveKey(worker.workerId);
   }

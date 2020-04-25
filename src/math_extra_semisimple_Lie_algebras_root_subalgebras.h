@@ -210,7 +210,7 @@ public:
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool IsBKhighest(const Vector<Rational>& input);
   bool IsBKlowest(const Vector<Rational>& input);
-  bool CompareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight);
+  bool compareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight);
   bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input);
   void ComputeEpsCoordsWRTk();
   bool AttemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots);
@@ -469,10 +469,10 @@ public:
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   bool flagDeallocated;
-  void init();
+  void initialize();
   SlTwoSubalgebra() {
     this->flagDeallocated = false;
-    this->init();
+    this->initialize();
   }
   ~SlTwoSubalgebra() {
     this->flagDeallocated = true;

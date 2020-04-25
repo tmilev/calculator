@@ -774,7 +774,7 @@ void ModuleSSalgebra<Coefficient>::IntermediateStepForMakeFromHW(
   Vector<Rational> targetWeight;
   this->theBilinearFormsAtEachWeightLevel.setSize(this->theGeneratingWordsGrouppedByWeight.size);
   this->theBilinearFormsInverted.setSize(this->theGeneratingWordsGrouppedByWeight.size);
-  this->ComputedGeneratorActions.init(this->GetOwner().GetNumGenerators());
+  this->ComputedGeneratorActions.initialize(this->GetOwner().GetNumGenerators());
   this->actionsGeneratorS.setSize(this->GetOwner().GetNumGenerators());
   this->actionsGeneratorsMaT.setSize(this->GetOwner().GetNumGenerators());
   int numScalarProducts = 0;
@@ -785,7 +785,7 @@ void ModuleSSalgebra<Coefficient>::IntermediateStepForMakeFromHW(
     List<MonomialUniversalEnveloping<Coefficient> >& currentWordList =
     this->theGeneratingWordsGrouppedByWeight[l];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordListInt = this->theGeneratingWordsIntGrouppedByWeight[l];
-    currentBF.init(currentWordList.size, currentWordList.size);
+    currentBF.initialize(currentWordList.size, currentWordList.size);
     for (int i = 0; i < currentWordList.size; i ++) {
       for (int j = i; j < currentWordList.size; j ++) {
         std::stringstream tempStream;
@@ -810,7 +810,7 @@ void ModuleSSalgebra<Coefficient>::IntermediateStepForMakeFromHW(
         this->flagConjectureBholds = false;
       }
     } else {
-      this->theBilinearFormsInverted[l].init(0, 0);
+      this->theBilinearFormsInverted[l].initialize(0, 0);
     }
   }
 }
@@ -967,7 +967,7 @@ template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::reset() {
   this->actionsGeneratorsMaT.setSize(0);
   this->actionsGeneratorS.setSize(0);
-  this->ComputedGeneratorActions.init(0);
+  this->ComputedGeneratorActions.initialize(0);
   this->owner = nullptr;
   this->theGeneratingWordsNonReduced.clear();
   // Note: for some reason, the linker fails to resolve without the explicit template
@@ -995,8 +995,8 @@ void ModuleSSalgebra<Coefficient>::reset() {
   this->theModuleWeightsSimpleCoords.clear();
   this->theCharOverH.makeZero();
   this->theChaR.makeZero();
-  this->parabolicSelectionNonSelectedAreElementsLevi.init(0);
-  this->parabolicSelectionSelectedAreElementsLevi.init(0);
+  this->parabolicSelectionNonSelectedAreElementsLevi.initialize(0);
+  this->parabolicSelectionSelectedAreElementsLevi.initialize(0);
   this->highestWeightVectorNotation = "";
   //Note: for some reason, the linker fails to resolve without the
   //explicit template specialization below.

@@ -15,7 +15,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
   JSData result;
-  theProblem.LoadCurrentProblemItem(false, global.GetWebInput(WebAPI::problem::randomSeed), &errorStream);
+  theProblem.LoadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -31,7 +31,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  if (global.GetWebInput(WebAPI::problem::randomSeed) == "") {
+  if (global.getWebInput(WebAPI::problem::randomSeed) == "") {
     out << "<b>I could not figure out the exercise problem (missing random seed). </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -135,7 +135,7 @@ std::string WebAPIResponse::SetProblemWeight() {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML theProblem;
-  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("mainInput"), false);
+  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
   if (theProblem.MergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<b style = 'color:green'>Modified.</b>";
@@ -154,7 +154,7 @@ std::string WebAPIResponse::SetProblemDeadline() {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML theProblem;
-  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("mainInput"), false);
+  std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
   if (theProblem.MergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<b style =\"color:green\">Modified. </b>";
@@ -233,7 +233,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   if (!global.UserDefaultHasAdminRights()) {
     global.theResponse.DisallowReport();
   }
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
@@ -253,7 +253,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   std::stringstream errorStream, comments;
   theProblem.LoadCurrentProblemItem(
     global.UserRequestRequiresLoadingRealExamData(),
-    global.GetWebInput(WebAPI::problem::randomSeed),
+    global.getWebInput(WebAPI::problem::randomSeed),
     &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
@@ -266,7 +266,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   if (indexLastAnswerId == - 1) {
     errorStream << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "<br>Response time: " << global.GetElapsedSeconds() - startTime
+    << "<br>Response time: " << global.getElapsedSeconds() - startTime
     << " second(s). ";
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
@@ -278,7 +278,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -300,14 +300,14 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   } else if (theInterpreteR.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
     << theInterpreteR.outputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
   }
   FormatExpressions theFormat;
@@ -363,7 +363,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
       << theInterpreterWithAdvice.outputCommentsString;
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP) {
@@ -380,13 +380,13 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
       << calculatorInputStream.str();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     return result;
   }
   if (hasCommentsBeforeSubmission){
     out << WebAPIResponse::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
-  result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
@@ -411,8 +411,8 @@ JSData WebAPIResponse::ClonePageResult() {
     result[WebAPI::result::error] = "Cloning problems allowed only for logged-in admins under ssl connection.";
     return result;
   }
-  std::string fileNameTarget = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileNameTarget), false);
-  std::string fileNameToBeCloned = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
+  std::string fileNameTarget = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileNameTarget), false);
+  std::string fileNameToBeCloned = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
@@ -716,17 +716,17 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
-  thePage.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
+  thePage.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
   JSData result;
   if (!thePage.LoadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!thePage.loadMe(true, global.GetWebInput(WebAPI::problem::randomSeed), &comments)) {
+  if (!thePage.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
     comments << "While loading topic table, failed to load file: ["
-    << global.GetWebInput(WebAPI::problem::courseHome) << "].";
+    << global.getWebInput(WebAPI::problem::courseHome) << "].";
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
@@ -743,14 +743,14 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (global.theResponse.MonitoringAllowed()) {
+  if (global.theResponse.monitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(global.millisecondsReplyAfterComputation);
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
-  if (global.GetWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(global.GetWebInput(WebAPI::result::error), false);
+  if (global.getWebInput(WebAPI::result::error) != "") {
+    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(global.getWebInput(WebAPI::result::error), false);
   }
   if (!global.flagLoggedIn) {
     outputAppend[WebAPI::result::status] = "not logged in";
@@ -786,21 +786,21 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
-  if (!thePage.loadMe(true, global.GetWebInput(WebAPI::problem::randomSeed), &comments)) {
+  thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
+  if (!thePage.loadMe(true, global.getWebInput(WebAPI::problem::randomSeed), &comments)) {
     out << "<b>Failed to load file: "
-    << global.GetWebInput(WebAPI::problem::courseHome) << ". </b>"
+    << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
   if (!thePage.interpretHtml(&comments)) {
     out << "<b>Failed to interpret as template the following file: "
-    << global.GetWebInput(WebAPI::problem::courseHome) << ". </b>"
+    << global.getWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
   out << "<!-- File automatically generated from template: "
-  << global.GetWebInput(WebAPI::problem::fileName)
+  << global.getWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
   out << "<small>Generated in " << global.GetElapsedMilliseconds() << " ms. </small>";
@@ -820,7 +820,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
     global.UserRequestRequiresLoadingRealExamData(),
-    global.GetWebInput(WebAPI::problem::randomSeed),
+    global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
   //<-must come after theFile.outputHtmlHeadNoTag
@@ -869,7 +869,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   std::stringstream failureStream;
-  if (!theFile.loadMe(false, global.GetWebInput(WebAPI::problem::randomSeed), &failureStream)) {
+  if (!theFile.loadMe(false, global.getWebInput(WebAPI::problem::randomSeed), &failureStream)) {
     std::stringstream errorStream;
     errorStream << " <b>Failed to load file: ["
     << theFile.fileName << "], perhaps the file does not exist. </b>"
@@ -913,7 +913,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON() {
-  return WebAPIResponse::SubmitAnswersJSON(global.GetWebInput(WebAPI::problem::randomSeed), nullptr, true);
+  return WebAPIResponse::SubmitAnswersJSON(global.getWebInput(WebAPI::problem::randomSeed), nullptr, true);
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON(
@@ -926,7 +926,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
 
   std::stringstream output, errorStream, comments;
   JSData result;
-  double startTime = global.GetElapsedSeconds();
+  double startTime = global.getElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem(
     global.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
@@ -949,7 +949,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     global.fatal << "This shouldn't happen: empty file name: theProblem.fileName." << global.fatal;
   }
   std::string studentAnswerNameReader;
-  theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
+  theProblem.studentTagsAnswered.initialize(theProblem.theProblemData.theAnswers.size());
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
@@ -1237,7 +1237,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   output << "</td></tr>";
   output << "</table>";
   result[WebAPI::result::resultHtml] = output.str();
-  result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   return result;
 }
 
@@ -1249,7 +1249,7 @@ std::string WebAPIResponse::AddTeachersSections() {
     return out.str();
   }
   std::string input = HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput("teachersAndSections"), false
+    global.getWebInput("teachersAndSections"), false
   );
   JSData inputParsed;
   if (!inputParsed.readstring(input, &out)) {
@@ -1327,16 +1327,16 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
     return out.str();
   }
   std::string inputEmails = HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput(WebAPI::request::userList), false
+    global.getWebInput(WebAPI::request::userList), false
   );
   std::string userPasswords = HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput(WebAPI::request::passwordList), false
+    global.getWebInput(WebAPI::request::passwordList), false
   );
   std::string userGroup =
   StringRoutines::StringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput(DatabaseStrings::labelSection), false
+    global.getWebInput(DatabaseStrings::labelSection), false
   ));
-  std::string userRole = HtmlRoutines::convertURLStringToNormal(global.GetWebInput("userRole"), false);
+  std::string userRole = HtmlRoutines::convertURLStringToNormal(global.getWebInput("userRole"), false);
 
   if (inputEmails == "") {
     out << "AddUserEmails failed: <b>No emails to add</b>";
@@ -1377,7 +1377,7 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "with a short explanation to the administrator of the web site. ";
 
 JSData WebAPIResponse::GetAnswerOnGiveUp() {
-  return WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput(WebAPI::problem::randomSeed));
+  return WebAPIResponse::GetAnswerOnGiveUp(global.getWebInput(WebAPI::problem::randomSeed));
 }
 
 JSData WebAPIResponse::GetAnswerOnGiveUp(
@@ -1717,9 +1717,9 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     return "Compiled without database support. ";
   }
   std::stringstream out;
-  bool flagFilterCourse = (!adminsOnly) && (global.GetWebInput("filterAccounts") == "true");
+  bool flagFilterCourse = (!adminsOnly) && (global.getWebInput("filterAccounts") == "true");
   std::string currentCourse = HtmlRoutines::convertURLStringToNormal(
-    global.GetWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::problem::courseHome), false
   );
   if (flagFilterCourse) {
     out << "<br>Displaying only students in course: <b style =\"color:blue\">"
@@ -2136,10 +2136,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = global.userDefault.sectionComputed;
-  this->currentCourse = global.GetWebInput(WebAPI::problem::courseHome);
-  if (global.GetWebInput("request") == "scoresInCoursePage") {
+  this->currentCourse = global.getWebInput(WebAPI::problem::courseHome);
+  if (global.getWebInput("request") == "scoresInCoursePage") {
     this->currentSection = StringRoutines::StringTrimWhiteSpace(
-      HtmlRoutines::convertURLStringToNormal(global.GetWebInput("mainInput"), false)
+      HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false)
     );
   }
   for (int i = 0; i < this->userProblemData.size; i ++) {
@@ -2392,7 +2392,7 @@ std::string WebAPIResponse::ToStringUserDetails(
   out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
   out << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class =\"currentCourseIndicator\">"
-  << HtmlRoutines::convertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false)
+  << HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false)
   << "</span></li>"
   << "<li>To change course use the select course link in the top panel.</li>"
   << "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"

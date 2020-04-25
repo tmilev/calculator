@@ -297,8 +297,9 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasisImpro
     leftShift.makeOne(numVars);
     rightShift.makeOne(numVars);
     for (int k = 0; k < numVars; k ++) {
-      if (leftHighestMon[k] > 0 && rightHighestMon[k] > 0)
+      if (leftHighestMon[k] > 0 && rightHighestMon[k] > 0) {
         isGood = true;
+      }
       if (leftHighestMon[k] > rightHighestMon[k]) {
         rightShift.setVariable(k, leftHighestMon[k] - rightHighestMon[k]);
         leftShift.setVariable(k, 0);

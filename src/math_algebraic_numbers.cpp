@@ -1646,9 +1646,7 @@ ElementZmodP ElementZmodP::scaleNormalizeIndex(
   List<ElementZmodP>& toBeScaled, int indexNonZeroElement
 ) {
   ElementZmodP scale = toBeScaled[indexNonZeroElement];
-  ElementZmodP one;
-  one.makeOne(scale.theModulus);
-  one /= scale;
+  scale.invert();
   for (int i = 0; i < toBeScaled.size; i ++) {
     toBeScaled[i] *= scale;
   }

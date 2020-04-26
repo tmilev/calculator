@@ -1385,7 +1385,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   }
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
   theContext.getFormat(theComputation.theFormat);
-  int upperLimit = 2001;
+  int upperLimit = 1001;
   if (useUpperLimit) {
     Rational upperLimitRat;
     if (!thePolysRational[0].isConstant(&upperLimitRat)) {
@@ -1400,11 +1400,9 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   }
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic = thePolysRational;
-  //int numVars = theContext.GetNumContextVariables();
   theComputation.maximumPolynomialComputations = upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
-  theComputation.thePolynomialOrder.monomialOrder  //= MonomialP::orderDefault();
-  .setComparison(MonomialP::greaterThan_leftLargerWins);
+  theComputation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = theComputation.theFormat;

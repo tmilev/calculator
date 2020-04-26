@@ -997,7 +997,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "") {
-        out << "setInputBox(name = "
+        out << Calculator::Atoms::setInputBox << "(name = "
         << inputNonAnswerReader
         << ", value = " << HtmlRoutines::convertURLStringToNormal(theArgs.theValues[i], false)
         << "); ";
@@ -1009,8 +1009,9 @@ std::string CalculatorHTML::PrepareUserInputBoxes() {
 
 std::string CalculatorHTML::GetProblemHeaderEnclosure() {
   std::stringstream out;
-  out << "CommandEnclosure{}(";
-  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out << Calculator::Atoms::commandEnclosure << "{}(";
+  out << Calculator::Atoms::setRandomSeed
+  << "{}(" << this->theProblemData.randomSeed << "); ";
   out << this->PrepareUserInputBoxes();
   out << "); ";
   return out.str();
@@ -1018,7 +1019,8 @@ std::string CalculatorHTML::GetProblemHeaderEnclosure() {
 
 std::string CalculatorHTML::GetProblemHeaderWithoutEnclosure() {
   std::stringstream out;
-  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out << Calculator::Atoms::setRandomSeed
+  << " {}(" << this->theProblemData.randomSeed << "); ";
   out << this->PrepareUserInputBoxes();
   return out.str();
 }
@@ -1037,7 +1039,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream* comments)
       continue;
     }
     std::string commandCleaned = this->CleanUpCommandString(currentElt.content);
-    std::string commandEnclosed = "CommandEnclosure{}( " + commandCleaned + " );";
+    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
     streamCommands << commandEnclosed;
     streamCommandsNoEnclosures << commandCleaned;
     currentElt.commandIndex = numCommandsSoFar;
@@ -1165,7 +1167,7 @@ bool CalculatorHTML::PrepareCommandsSolution(Answer& theAnswer, std::stringstrea
       }
       currentElt.commandIndex = numCommandsSoFar;
       numCommandsSoFar ++;
-      streamCommands << "CommandEnclosure{}("
+      streamCommands << Calculator::Atoms::commandEnclosure << "{}("
       << this->CleanUpCommandString(currentElt.content) << "); ";
     }
   }
@@ -1177,7 +1179,7 @@ bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream*
   MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
   std::stringstream streamCommandS;
   std::stringstream streamCommandsNoEnclosures;
-  streamCommandS << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  streamCommandS << this->GetProblemHeaderEnclosure(); // first calculator enclosure contains the header
   streamCommandsNoEnclosures << this->GetProblemHeaderWithoutEnclosure();
   std::stringstream streamCommandsBody;
   std::stringstream streamCommandsBodyNoEnclosures;
@@ -1190,11 +1192,11 @@ bool CalculatorHTML::PrepareCommandsAnswer(Answer& theAnswer, std::stringstream*
       continue;
     }
     std::string commandCleaned = this->CleanUpCommandString(this->theContent[i].content);
-    std::string commandEnclosed = "CommandEnclosure{}( " + commandCleaned + " );";
+    std::string commandEnclosed = Calculator::Atoms::commandEnclosure + "{}( " + commandCleaned + " );";
     if (currentElt.IsAnswer() && currentElt.GetKeyValue("id") == theAnswer.answerId) {
       std::string stringCommandsBody = streamCommandsBody.str();
       if (stringCommandsBody != "") {
-        streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
+        streamCommandS << Calculator::Atoms::commandEnclosure << "{}(" << stringCommandsBody << ");\n";
         streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
       }
       theAnswer.commandsBeforeAnswer = streamCommandS.str();
@@ -1246,7 +1248,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
       << theInterpreter.outputString << "<br><b>Comments</b><br>"
       << theInterpreter.outputCommentsString;
     } else {
-      *comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
+      *comments << "This may be a bug with the problem. "
+      << "Feel free to take a screenshot of the issue and "
       << "email it to the site admin(s). ";
     }
   }
@@ -1652,114 +1655,6 @@ void CalculatorHTML::ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
     inputOutput.deadlinesPerSectioN[i] =
     currentProb.deadlinesPerSection.GetValueCreate(this->databaseStudentSections[i]);
   }
-}
-
-void CalculatorHTML::ComputeDeadlineModifyButton(
-  TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup
-) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineModifyButton");
-  if (!global.UserDefaultHasProblemComposingRights()) {
-    return;
-  }
-  this->ComputeDeadlinesAllSections(inputOutput);
-  (void) problemAlreadySolved;
-  std::stringstream out;
-  std::stringstream deadlineStream;
-  inputOutput.idDeadlineTable = "deadlineTable" + Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
-  inputOutput.idDeadlineButton = "deadlineButton" + Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
-  deadlineStream << "<table class =\"deadlineTable\" id =\""
-  << inputOutput.idDeadlineTable
-  << "\">";
-  deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
-  inputOutput.idsDeadlines.setSize(this->databaseStudentSections.size);
-  inputOutput.deadlinesPerSectionFormatted.initializeFillInObject(this->databaseStudentSections.size, "");
-  for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
-    if (this->databaseStudentSections[i] == "") {
-      continue;
-    }
-    currentDeadlineId = "deadline" + Crypto::ConvertStringToBase64URL(
-      this->databaseStudentSections[i] + inputOutput.id
-    );
-    if (currentDeadlineId[currentDeadlineId.size() - 1] == '=') {
-      currentDeadlineId.resize(currentDeadlineId.size() - 1);
-    }
-    if (currentDeadlineId[currentDeadlineId.size() - 1] == '=') {
-      currentDeadlineId.resize(currentDeadlineId.size() - 1);
-    }
-    inputOutput.deadlinesAreInherited[i] = false;
-    deadlineStream << "<tr>";
-    deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
-    inputOutput.deadlinesPerSectionFormatted[i] =
-    this->ToStringOnEDeadlineFormatted(
-      inputOutput.id, this->databaseStudentSections[i], problemAlreadySolved, false, isProblemGroup
-    );
-    deadlineStream
-    << "<td> <input class =\"modifyDeadlineInput\" type =\"text\" id =\""
-    << currentDeadlineId << "\" value =\"";
-    if (!inputOutput.deadlinesAreInherited[i]) {
-      deadlineStream << inputOutput.deadlinesPerSectioN[i];
-    }
-    deadlineStream << "\"> " ;
-    deadlineStream << "</td>";
-    deadlineStream << "</tr>";
-  }
-  deadlineStream << "<tr><td>\n";
-  inputOutput.idDeadlineReport = "deadlineReport" + Crypto::computeSha3_256OutputBase64URL(inputOutput.id);
-
-  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size() - 1] == '=') {
-    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size() - 1);
-  }
-  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size() - 1] == '=') {
-    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size() - 1);
-  }
-  deadlineStream << "<button onclick=\"";
-  deadlineStream << "submitStringAsMainInput('"
-  << HtmlRoutines::convertStringToURLString(inputOutput.id, false)
-  << "='+encodeURIComponent('deadlines ='+encodeURIComponent(";
-  bool isFirst = true;
-  for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    if (this->databaseStudentSections[i] == "") {
-      continue;
-    }
-    if (!isFirst) {
-      deadlineStream << "+";
-    }
-    isFirst = false;
-    deadlineStream << "'"
-    << HtmlRoutines::convertStringToURLString(this->databaseStudentSections[i], false)
-    << "='";
-    deadlineStream << "+ encodeURIComponent(document.getElementById('"
-    << inputOutput.idsDeadlines[i] << "').value) +'&'";
-  }
-  deadlineStream << ")), '" << inputOutput.idDeadlineReport << "',"
-  << " 'setProblemData', "
-  << "null, "
-  << "'" << inputOutput.idDeadlineReport << "' ); "
-  << "updateDeadlines('" << inputOutput.idBase64 << "', '"
-  << inputOutput.idDeadlineTable << "');"
-  << "\""
-  << ">\n";
-  deadlineStream << "<b>Set</b></button>";
-  deadlineStream << "</td>";
-  deadlineStream << "<td>";
-  deadlineStream << "<span id =\"" << inputOutput.idDeadlineReport << "\"></span>";
-  deadlineStream << "</td>";
-  deadlineStream << "</tr>";
-  if (!isProblemGroup) {
-    deadlineStream << "<tr><td colspan =\"2\">(overrides section deadline).</td></tr> ";
-  } else {
-    deadlineStream << "<tr><td colspan =\"2\">(overriden by per-problem-deadline).</td></tr>";
-  }
-  deadlineStream << "</table>";
-  out << "<button class =\"accordion\" id =\""
-  << inputOutput.idDeadlineButton
-  << "\">"
-  << inputOutput.displayDeadlinE << "</button>";
-  out << "<span class =\"panel\">";
-  out << deadlineStream.str();
-  out << "</span>";
-  inputOutput.displayDeadlinE = out.str();
 }
 
 std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& theElements) {
@@ -2360,7 +2255,10 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
       continue;
     }
     if (
-      fifthToLast.syntacticRole == "<openTag" && thirdToLast == "=" && secondToLast == "\"" && last == "\""
+      fifthToLast.syntacticRole == "<openTag" &&
+      thirdToLast == "=" &&
+      secondToLast == "\"" &&
+      last == "\""
     ) {
       fifthToLast.SetKeyValue(fourthToLast.content, "");
       eltsStack.setSize(eltsStack.size - 4);
@@ -2469,7 +2367,7 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
     *comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
   }
   if (result) {
-    result = this->ExtractAnswerIds(comments);
+    result = this->extractAnswerIds(comments);
   }
   for (int i = 0; i < this->theContent.size; i ++) {
     this->theContent[i].indexInOwner = i;
@@ -2481,8 +2379,8 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
   return result;
 }
 
-bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretOneAnswerElement");
+bool CalculatorHTML::interpretOneAnswerElement(SyntacticElementHTML& inputOutput) {
+  MacroRegisterFunctionWithName("CalculatorHTML::interpretOneAnswerElement");
   std::string answerId;
   if (!inputOutput.IsAnswerElement(&answerId)) {
     return true;
@@ -2504,8 +2402,8 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
   return true;
 }
 
-bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerHighlights");
+bool CalculatorHTML::interpretAnswerHighlights(std::stringstream& comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::interpretAnswerHighlights");
   (void) comments;
   this->answerHighlights.setSize(0);
   bool answerHighlightStarted = false;
@@ -2538,13 +2436,13 @@ bool CalculatorHTML::InterpretAnswerElements(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerElements");
   (void) comments;
   for (int i = 0; i < this->theContent.size; i ++) {
-    this->InterpretOneAnswerElement(this->theContent[i]);
+    this->interpretOneAnswerElement(this->theContent[i]);
   }
   return true;
 }
 
-bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::PrepareAnswerElements");
+bool CalculatorHTML::prepareAnswerElements(std::stringstream &comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::prepareAnswerElements");
   (void) comments;
   std::string currentId;
   for (int i = 0; i < this->theContent.size; i ++) {
@@ -2582,11 +2480,11 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments) {
   return true;
 }
 
-bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ExtractAnswerIds");
-  //we shouldn't clear this->theProblemData.theAnswers: it may contain
-  //outdated information loaded from the database. We don't want to loose that info
-  //(say we renamed an answerId but students have already stored answers using the old answerId...).
+bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("CalculatorHTML::extractAnswerIds");
+  // we shouldn't clear this->theProblemData.theAnswers: it may contain
+  // outdated information loaded from the database. We don't want to loose that info
+  // (say we renamed an answerId but students have already stored answers using the old answerId...).
   List<std::string> answerIdsSeenSoFar;
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& currentE = this->theContent[i];
@@ -2791,81 +2689,6 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON() {
   return output;
 }
 
-std::string CalculatorHTML::GetJavascriptMathQuillBoxes() {
-  MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxes");
-  std::stringstream out;
-  ////////////////////////////////////////////////////////////////////
-  out << "<script type =\"text/javascript\">\n";
-  out << "answerMQspanIds = [";
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << this->theProblemData.theAnswers.theValues[i].idMQfielD << "\"";
-    if (i != this->theProblemData.theAnswers.size() - 1) {
-      out << ", ";
-    }
-  }
-  out << "];\n";
-  out << "preferredButtonContainers = [";
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << this->theProblemData.theAnswers.theValues[i].idMQButtonPanelLocation << "\"";
-    if (i != this->theProblemData.theAnswers.size() - 1) {
-      out << ", ";
-    }
-  }
-  out << "];\n";
-  out << "answerIdsPureLatex = [";
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++) {
-    out << "\"" << HtmlRoutines::convertStringToURLString(this->theProblemData.theAnswers.theValues[i].answerId, false) << "\"";
-    if (i != this->theProblemData.theAnswers.size() - 1) {
-      out << ", ";
-    }
-  }
-  out << "];\n";
-  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++) {
-    Answer& currentA = this->theProblemData.theAnswers.theValues[answerCounter];
-    out << "var " << currentA.varMQfield << ";\n";
-    out << "var " << currentA.varAnswerId << ";\n";
-    out
-    << "function " << currentA.MQUpdateFunction << "(){\n"
-    << "ignoreNextMathQuillUpdateEvent = true;\n"
-    << currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value +' ');\n"
-    //<< "alert('writing: ' +" << currentA.varAnswerId  << ".value);\n"
-    //<< currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value);\n"
-    << "ignoreNextMathQuillUpdateEvent = false;\n"
-    << "}\n";
-  }
-  out
-  << "var ignoreNextMathQuillUpdateEvent = false;\n"
-  << "function initializeMathQuill(){\n";
-
-  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++) {
-    Answer& currentA = this->theProblemData.theAnswers.theValues[answerCounter];
-    out << "////////////////////////\n";
-    out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfielD << "');\n"
-    << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
-    << "globalMQ.config({\n"
-    << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
-    << "  });\n"
-    << currentA.MQobject << " = globalMQ.MathField(" << currentA.varMQfield << ", {\n"
-    << "spaceBehavesLikeTab: true, // configurable\n"
-    << "supSubsRequireOperand: true, // configurable\n"
-    << "autoSubscriptNumerals: true, // configurable\n"
-    << "handlers: {\n"
-    << "edit: function() { // useful event handlers\n"
-    << "if (ignoreNextMathQuillUpdateEvent){\n"
-  //  << "  ignoreNextMathQuillUpdateEvent = false;\n"
-    << "  return;\n"
-    << "}\n"
-    << currentA.varAnswerId << ".value = processMathQuillLatex(" << currentA.MQobject << ".latex() ); // simple API\n"
-    << currentA.javascriptPreviewAnswer
-    << "}\n"
-    << "}\n"
-    << "});\n";
-  }
-  out << "}//closing initializeMathQuill\n";
-  out << "</script>";
-  return out.str();
-}
-
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
   if (!global.flagDatabaseCompiled) {
@@ -3002,14 +2825,14 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before class management routines");
-  this->PrepareAnswerElements(comments);
+  this->prepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled = 0;
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].IsInterpretedNotByCalculator()) {
       this->InterpretNotByCalculatorNotAnswer(this->theContent[i]);
     }
   }
-  this->InterpretAnswerHighlights(comments);
+  this->interpretAnswerHighlights(comments);
   for (int i = 0; i < this->theContent.size; i ++) {
     this->InterpretIfAnswer(this->theContent[i]);
   }
@@ -3047,7 +2870,6 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   if (this->flagIsExamProblem) {
-    outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics) {
       MapReferences<std::string, std::string, MathRoutines::HashString>& theScripts =
       theInterpreter.theObjectContainer.graphicsScripts;
@@ -4429,22 +4251,6 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
   } else {
     this->displayDeadlinE = owner.ToStringDeadline(
       this->id, problemSolved, returnEmptyStringIfNoDeadline, (this->type != TopicElement::types::problem)
-    );
-  }
-  if (
-    global.UserDefaultHasAdminRights() &&
-    !global.UserStudentVieWOn() &&
-    global.requestType != "templateNoLogin"
-  ) {
-    if (this->displayDeadlinE == "") {
-      this->displayDeadlinE += "Deadline";
-    }
-    owner.ComputeDeadlineModifyButton(
-      *this,
-      problemSolved,
-      this->type == TopicElement::types::topic ||
-      this->type == TopicElement::types::section ||
-      this->type == TopicElement::types::chapter
     );
   }
   std::stringstream displayResourcesLinksStream;

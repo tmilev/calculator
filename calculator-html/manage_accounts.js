@@ -99,7 +99,7 @@ function addEmailsOrUsers(
 }
 
 function getTeachersStudentsCallback(input, output) {
-  document.getElementById(output).innerHTML = input;
+  document.getElementById(output).innerHTML =  miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
 }
 
 function getTeachersStudents() {

@@ -1164,6 +1164,12 @@ public:
     JSData toJSON();
     std::string ToStringRuleStatusUser();
   };
+  class Atoms {
+  public:
+    static std::string setRandomSeed;
+    static std::string commandEnclosure;
+    static std::string setInputBox;
+  };
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
@@ -1725,7 +1731,7 @@ public:
     return this->operations.getIndexNoFail("CoefficientOf");
   }
   int opCommandEnclosure() {
-    return this->operations.getIndexNoFail("CommandEnclosure");
+    return this->operations.getIndexNoFail(Calculator::Atoms::commandEnclosure);
   }
   int opRulesOff() {
     return this->operations.getIndexNoFail("RulesOff");

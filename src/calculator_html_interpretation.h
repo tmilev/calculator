@@ -299,7 +299,7 @@ public:
   bool IsSplittingChar(const std::string& input);
   void LoadFileNames();
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
-  bool ExtractAnswerIds(std::stringstream* comments);
+  bool extractAnswerIds(std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);
   bool interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   void ComputeProblemLabel();
@@ -309,10 +309,10 @@ public:
   bool InterpretProcessExecutedCommands(
     Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
   );
-  bool PrepareAnswerElements(std::stringstream& comments);
-  bool InterpretAnswerHighlights(std::stringstream& comments);
+  bool prepareAnswerElements(std::stringstream& comments);
+  bool interpretAnswerHighlights(std::stringstream& comments);
   bool InterpretAnswerElements(std::stringstream& comments);
-  bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);
+  bool interpretOneAnswerElement(SyntacticElementHTML& inputOutput);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments);
   std::string PrepareUserInputBoxes();
   bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments);
@@ -381,7 +381,6 @@ public:
   );
   void ComputeDeadlinesAllSections(TopicElement& inputOutput);
   void ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
-  void ComputeDeadlineModifyButton(TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
   JSData ToStringTopicListJSON();
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
   static std::string ToStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
@@ -401,7 +400,6 @@ public:
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
-  std::string GetJavascriptMathQuillBoxes();
   JSData GetJavascriptMathQuillBoxesForJSON();
   void LoadCurrentProblemItem(
     bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure

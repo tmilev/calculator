@@ -12,6 +12,10 @@
 
 // This file lists calculator functions and various hard-coded rules.
 
+std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
+std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
+std::string Calculator::Atoms::setInputBox = "CommandEnclosure";
+
 void Calculator::initAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;
@@ -105,13 +109,15 @@ void Calculator::initPredefinedInnerFunctions() {
 
 
   this->addOperationHandler(
-    "SetRandomSeed",
+    Calculator::Atoms::setRandomSeed,
     CalculatorFunctions::innerSetRandomSeed,
     "",
     "Sets the random seed of the calculator to the given integer value",
-    "SetRandomSeed(123); RandomInteger(- 100,100); RandomInteger(- 100,100)",
+    "SetRandomSeed(123);\n"
+    "RandomInteger(- 100, 100);\n"
+    "RandomInteger(- 100, 100)",
     "CalculatorConversions::innerSetRandomSeed",
-    "SetRandomSeed",
+    Calculator::Atoms::setRandomSeed,
     innerStandard
   );
   this->addOperationHandler(
@@ -394,14 +400,14 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "SetInputBox",
+    Calculator::Atoms::setInputBox,
     CalculatorHtmlFunctions::innerSetInputBox,
     "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
     "SetInputBox(name = a, value =  3); "
     "MakeInputBox(name = a)",
     "CalculatorHtmlFunctions::innerSetInputBox",
-    "SetInputBox",
+    Calculator::Atoms::setInputBox,
     innerStandard
   );
   this->addOperationHandler(
@@ -4990,10 +4996,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "of a semisimple Lie algebra in a semisimple Lie algebra. "
     "This suggests a certain heuristic solution strategy "
     "(will be documented as the code matures). "
-    "To stress it out explicitly, the algorithm is heuristic "
-    "- i.e., is not guaranteed to work. "
+    "To emphasize, the algorithm is heuristic "
+    "and not guaranteed to work. "
     "The result of the function is a printout with one of "
-    "the possible outcomes. <br>"
+    "the possible outcomes.<br>"
     "Outcome 1. While processing the polynomial system, "
     "the computation limit was hit. "
     "The computation was aborted. "
@@ -5036,7 +5042,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
     "to the number of polynomial computations that can be carried out. ",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 2001, "
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "

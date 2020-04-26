@@ -77,7 +77,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     return result;
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
-  answerCommands << "CommandEnclosure{}(" << currentA.commandsBeforeAnswer << "); "
+  answerCommands << Calculator::Atoms::commandEnclosure << "{}(" << currentA.commandsBeforeAnswer << "); "
   << currentA.commandsSolutionOnly;
   answerCommandsNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
@@ -290,7 +290,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   theInterpreteR.flagPlotNoControls = true;
   std::stringstream studentAnswerWithComments;
   studentAnswerWithComments
-  << "CommandEnclosure{}("
+  << Calculator::Atoms::commandEnclosure << "{}("
   << currentA.commandsCommentsBeforeInterpretatioN
   << ");"
   << studentAnswerSream.str();
@@ -326,19 +326,19 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   std::stringstream calculatorInputStream,
   calculatorInputStreamNoEnclosures;
 
-  calculatorInputStream << "CommandEnclosure{}("
+  calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
   << currentA.commandsBeforeAnswer << ");";
   calculatorInputStreamNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
 
-  calculatorInputStream << "CommandEnclosure{}("
+  calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
   << currentA.answerId << " = " << lastAnswer
   << ");";
   calculatorInputStreamNoEnclosures
   << currentA.answerId << " = " << lastAnswer << "";
   bool hasCommentsBeforeSubmission = (StringRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
   if (hasCommentsBeforeSubmission) {
-    calculatorInputStream << "CommandEnclosure{}("
+    calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
     <<  currentA.commandsCommentsBeforeSubmission
     << ");";
     calculatorInputStreamNoEnclosures
@@ -1006,12 +1006,12 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   std::stringstream completedProblemStreamNoEnclosures;
 
   std::stringstream completedProblemStream;
-  completedProblemStream << "CommandEnclosure{}("
+  completedProblemStream << Calculator::Atoms::commandEnclosure << "{}("
   << currentA.commandsBeforeAnswer
   << ");";
   completedProblemStreamNoEnclosures << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
 
-  completedProblemStream << "CommandEnclosure{}("
+  completedProblemStream << Calculator::Atoms::commandEnclosure << "{}("
   << currentA.answerId << "= (" << currentA.currentAnswerClean << ");"
   << ");";
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
@@ -1021,7 +1021,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   );
   if (hasCommentsBeforeSubmission) {
     completedProblemStream
-    << "CommandEnclosure{}("
+    << Calculator::Atoms::commandEnclosure << "{}("
     << currentA.commandsCommentsBeforeSubmission
     << ");";
     completedProblemStreamNoEnclosures << currentA.commandsCommentsBeforeSubmission;
@@ -1467,7 +1467,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   std::stringstream answerCommands, answerCommandsNoEnclosure;
   answerCommands << currentA.commandsBeforeAnswer;
   answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-  answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
+  answerCommands << Calculator::Atoms::commandEnclosure
+  << "{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "") {

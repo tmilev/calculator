@@ -127,10 +127,10 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   inputModded.children.removeIndexShiftDown(1);
 
   ExpressionContext context(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(inputModded, theOps, &context)) {
+  if (!theCommands.getVectorFromFunctionArguments(inputModded, theOps, &context)) {
     Vector<ElementUniversalEnveloping<RationalFunction> > theLieAlgElts;
     context.initialize(theCommands);
-    if (!theCommands.GetVectorFromFunctionArguments(inputModded, theLieAlgElts, &context)) {
+    if (!theCommands.getVectorFromFunctionArguments(inputModded, theLieAlgElts, &context)) {
       return theCommands << "<hr>Failed to extract elements of Weyl algebra and "
       << "failed to extract elements of UE algebra from input "
       << input.toString();
@@ -249,7 +249,7 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTLSMessageSequence");
   Vector<std::string> inputMessages;
-  if (!theCommands.GetVectorFromFunctionArguments(input, inputMessages)) {
+  if (!theCommands.getVectorFromFunctionArguments(input, inputMessages)) {
     return theCommands << "Failed to extract input vector of strings. ";
   }
   if (inputMessages.size < 3) {
@@ -949,7 +949,7 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
   if (input[1].isEqualToZero()) {
     return output.makeError("Attempting to compute logarithm of zero.", theCommands);
   }
-  if (input[1].IsEqualToOne()) {
+  if (input[1].isEqualToOne()) {
     return output.assignValue(0, theCommands);
   }
   if (theCommands.flagNoApproximationS) {
@@ -1003,7 +1003,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
     return false;
   }
   const Expression& argument = input[1];
-  if (argument.IsEqualToOne()) {
+  if (argument.isEqualToOne()) {
     output.makeAtom(theCommands.opPi(), theCommands);
     output /= theCommands.EFour();
     return true;
@@ -1292,7 +1292,7 @@ bool CalculatorFunctions::innerDereferenceInterval(Calculator& theCommands, cons
   if (!input[1].IsIntervalRealLine()) {
     return false;
   }
-  if (input[2].IsEqualToOne()) {
+  if (input[2].isEqualToOne()) {
     output = input[1][1];
     return true;
   }
@@ -1363,7 +1363,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   input.startsWith(theCommands.GetOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments) {
-    if (!theCommands.GetVectorFromFunctionArguments(
+    if (!theCommands.getVectorFromFunctionArguments(
       input,
       thePolysRational,
       &theContext,
@@ -1388,7 +1388,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   int upperLimit = 2001;
   if (useUpperLimit) {
     Rational upperLimitRat;
-    if (!thePolysRational[0].IsConstant(&upperLimitRat)) {
+    if (!thePolysRational[0].isConstant(&upperLimitRat)) {
       return theCommands << "Failed to extract a constant from the first argument "
       << thePolysRational[0].toString(&theComputation.theFormat) << ". ";
     }
@@ -1403,12 +1403,13 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   //int numVars = theContext.GetNumContextVariables();
   theComputation.maximumPolynomialComputations = upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
-  theComputation.thePolynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  theComputation.thePolynomialOrder.monomialOrder  //= MonomialP::orderDefault();
+  .setComparison(MonomialP::greaterThan_leftLargerWins);
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = theComputation.theFormat;
   theComputation.flagUseTheMonomialBranchingOptimization = true;
-  theComputation.SolveSerreLikeSystem(thePolysAlgebraic);
+  theComputation.solveSerreLikeSystem(thePolysAlgebraic);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.toString();
   out << "<br>The polynomials: " << thePolysAlgebraic.toString(&theComputation.theFormat);
@@ -1420,7 +1421,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   }
   if (!theComputation.flagSystemProvenToHaveNoSolution) {
     if (theComputation.flagSystemSolvedOverBaseField) {
-      out << "<br>One solution follows. " << theComputation.ToStringSerreLikeSolution();
+      out << "<br>One solution follows. " << theComputation.toStringSerreLikeSolution();
     } else {
       out << "However, I was unable to find such a solution: my heuristics are not good enough.";
     }
@@ -1615,7 +1616,7 @@ bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
     for (int j = 0; j < theLinPolys[i].size(); j ++) {
       if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter)) {
         homogenousPart(i, theLetter) = theLinPolys[i].coefficients[j];
-      } else if (theLinPolys[i][j].IsConstant()) {
+      } else if (theLinPolys[i][j].isConstant()) {
         constTerms(i, 0) = theLinPolys[i].coefficients[j];
         constTerms(i, 0) *= - 1;
       } else {
@@ -1679,7 +1680,7 @@ public:
   List<Expression> thePFSummands;
   List<Expression> theIntegralSummands;
   Expression theIntegralSum;
-  bool ComputePartialFractionDecomposition();
+  bool computePartialFractionDecomposition();
   void PrepareFormatExpressions();
   void PrepareDenominatorFactors();
   void PrepareNumerators();
@@ -1767,7 +1768,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
 bool IntegralRFComputation::IntegrateRF() {
   MacroRegisterFunctionWithName("IntegralRFComputation::IntegrateRF");
   this->checkConsistency();
-  if (!this->ComputePartialFractionDecomposition()) {
+  if (!this->computePartialFractionDecomposition()) {
     printoutIntegration
     << "Failed to decompose rational function into partial fractions. "
     << this->printoutPFsHtml.str();
@@ -2033,8 +2034,8 @@ void IntegralRFComputation::PrepareDenominatorFactors() {
   this->printoutPFsHtml << ". <br>";
 }
 
-bool IntegralRFComputation::ComputePartialFractionDecomposition() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
+bool IntegralRFComputation::computePartialFractionDecomposition() {
+  MacroRegisterFunctionWithName("IntegralRFComputation::computePartialFractionDecomposition");
   this->checkConsistency();
   this->context = this->inpuTE.getContext();
   this->context.getFormat(this->currentFormaT);
@@ -2047,8 +2048,8 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     << " is already split into partial fractions. ";
     return true;
   }
-  this->theRF.GetDenominator(this->theDen);
-  this->theRF.GetNumerator(this->theNum);
+  this->theRF.getDenominator(this->theDen);
+  this->theRF.getNumerator(this->theNum);
   this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
@@ -2103,20 +2104,19 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     << HtmlRoutines::GetMathSpanPure(this->quotientRat.toString(&this->currentFormaT))
     << " with remainder "
     << HtmlRoutines::GetMathSpanPure(this->remainderRat.toString(&this->currentFormaT)) << ". ";
-    GroebnerBasisComputation<Rational> theGB;
-    theGB.flagDoLogDivision = true;
-    theGB.flagStoreQuotients = true;
-    theGB.theBasis.setSize(1);
-    theGB.theBasis[0] = this->theDen;
-    theGB.theFormat = this->currentFormaT;
-    theGB.thePolynomialOrder.monomialOrder = monomialOrder;
-    theGB.initializeForDivision(theGB.theBasis);
+    GroebnerBasisComputation<Rational> computation;
+    computation.flagDoLogDivision = true;
+    computation.flagStoreQuotients = true;
+    computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+    computation.addBasisElementNoReduction(this->theDen);
+    computation.theFormat = this->currentFormaT;
+    computation.thePolynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->theNum;
-    theGB.remainderDivisionByBasis(theNumCopy, &theGB.remainderDivision, - 1);
+    computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
-    this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
+    this->printoutPFsLatex << computation.getDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
-    this->printoutPFsHtml << theGB.GetDivisionStringHtml();
+    this->printoutPFsHtml << computation.getDivisionStringHtml();
   }
   LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.makeZero();
@@ -2204,7 +2204,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->currentFormaT.flagUseHTML = false;
   theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.MakeIdSubstitution(this->NumberOfSystemVariables + 1);
+  theSub.makeIdentitySubstitution(this->NumberOfSystemVariables + 1);
   for (int i = 1; i < theSub.size; i ++) {
     theSub[i].makeConstant(theConstTerms(i - 1, 0));
   }
@@ -2256,7 +2256,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
     << theComputation.theRF.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1.";
   }
-  if (!theComputation.ComputePartialFractionDecomposition()) {
+  if (!theComputation.computePartialFractionDecomposition()) {
     return theCommands << "Did not manage do decompose "
     << input.toString() << " into partial fractions. ";
   }
@@ -2284,10 +2284,11 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   }
   theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction>();
   if (theComputation.theRF.minimalNumberOfVariables() > 1) {
-    return theCommands << "The input rational function is of " << theComputation.theRF.minimalNumberOfVariables() << " variables and "
+    return theCommands << "The input rational function is of "
+    << theComputation.theRF.minimalNumberOfVariables() << " variables and "
     << " I can handle only 1. ";
   }
-  theComputation.ComputePartialFractionDecomposition();
+  theComputation.computePartialFractionDecomposition();
   return output.assignValue(theComputation.printoutPFsHtml.str(), theCommands);
 }
 
@@ -3757,7 +3758,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         if (j != NumFoundPivots) {
           if (!theMatrix.elements[j][i].isEqualToZero()) {
             tempElement = theMatrix.elements[j][i];
-            tempElement.Minus();
+            tempElement.minus();
             theMatrix.addTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
@@ -3871,7 +3872,7 @@ bool Calculator::innerInvertMatrixVerbose(
         if (j != NumFoundPivots) {
           if (!mat.elements[j][i].isEqualToZero()) {
             tempElement = mat.elements[j][i];
-            tempElement.Minus();
+            tempElement.minus();
             mat.addTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
@@ -3931,7 +3932,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
     output.children.addOnTop(input.children[i]);
   }
   ExpressionContext theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(
+  if (!theCommands.getVectorFromFunctionArguments<Polynomial<Rational> >(
     output,
     inputVector,
     &theContext,
@@ -3951,7 +3952,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
       theFormat.polynomialAlphabet.addOnTop(currentStr);
     }
   }
-  if (!RationalFunction::GetRelations(inputVector, theGens, theRels, theCommands.comments)) {
+  if (!RationalFunction::getRelations(inputVector, theGens, theRels, theCommands.comments)) {
     return theCommands << "Failed to extract relations. ";
   }
   std::stringstream out;
@@ -4037,8 +4038,8 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
   }
   theComputation.integrationSetE = integrationSetE;
   theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction>();
-  theComputation.theRF.GetDenominator(theComputation.theDen);
-  theComputation.theRF.GetNumerator(theComputation.theNum);
+  theComputation.theRF.getDenominator(theComputation.theDen);
+  theComputation.theRF.getNumerator(theComputation.theNum);
   if (theComputation.theDen.totalDegree() < 1) {
     return false;
   }
@@ -4333,13 +4334,13 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   }
   Expression denNoPower = theFunctionE[2][1];
   Expression a, b, c;
-  if (!theFunctionE[1].IsEqualToOne()) {
+  if (!theFunctionE[1].isEqualToOne()) {
     return false;
   }
   if (!CalculatorFunctions::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c)) {
     return false;
   }
-  if (!a.IsEqualToOne() || !b.isConstantNumber() || !c.isConstantNumber()) {
+  if (!a.isEqualToOne() || !b.isConstantNumber() || !c.isConstantNumber()) {
     theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIIb integral."
     << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ". ";
     return false;
@@ -5656,7 +5657,7 @@ bool CalculatorFunctions::innerTrace(
         theCommands
       );
     }
-    return output.assignValue(theMat.GetTrace(), theCommands);
+    return output.assignValue(theMat.getTrace(), theCommands);
   }
   Matrix<RationalFunction> theMatRF;
   if (theCommands.functionGetMatrix(input[1], theMatRF)) {
@@ -5666,7 +5667,7 @@ bool CalculatorFunctions::innerTrace(
         theCommands
       );
     }
-    return output.assignValue(theMatRF.GetTrace(), theCommands);
+    return output.assignValue(theMatRF.getTrace(), theCommands);
   }
   Matrix<Expression> theMatExp;
   if (!theCommands.GetMatrixExpressionsFromArguments(input[1], theMatExp)) {
@@ -5683,7 +5684,7 @@ bool CalculatorFunctions::innerTrace(
     << "interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
     return false;
   }
-  output = theMat.GetTrace();
+  output = theMat.getTrace();
   return true;
 }
 
@@ -6566,8 +6567,8 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
     if (rValues[i].isInteger()) {
       tempStream << rValues[i].toString();
     } else {
-      tempStream << "\\frac{" << rValues[i].GetNumerator().toString() << "}"
-      << "{" << rValues[i].GetDenominator().toString() << "}";
+      tempStream << "\\frac{" << rValues[i].getNumerator().toString() << "}"
+      << "{" << rValues[i].getDenominator().toString() << "}";
     }
     tempStream << "$}";
     outHtml << tempStream.str();
@@ -7168,7 +7169,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
       theCommands
     );
   }
-  if (!theCommands.GetVectorFromFunctionArguments<RationalFunction>(
+  if (!theCommands.getVectorFromFunctionArguments<RationalFunction>(
     input,
     theG2B3Data.theWeightFundCoords,
     &outputContext,
@@ -7993,7 +7994,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream2 << " $(" << startingEltString << ")$ ";
     RationalFunction scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
     Rational tempRat;
-    if (!scale.IsConstant(&tempRat)) {
+    if (!scale.isConstant(&tempRat)) {
       global.fatal << "Unexpected: scale not rational" << global.fatal;
     }
     currentHWsimplecoords = theGenMod.theHWSimpleCoordSBaseField;
@@ -8008,7 +8009,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempFormat.MaxLineLength = 80;
     if (theNumVars == 1) {
       scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
-      scale.GetNumerator(tmpGCD);
+      scale.getNumerator(tmpGCD);
       tmpGCD.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
       out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
@@ -8432,8 +8433,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions(
       if (leftD < 0) {
         Rational theRat;
         if ((*this)[2].isRational(&theRat)) {
-          if (!theRat.GetDenominator().IsEven()) {
-            if (!theRat.GetNumerator().IsEven()) {
+          if (!theRat.getDenominator().IsEven()) {
+            if (!theRat.getNumerator().IsEven()) {
               signChange = true;
             }
             leftD *= - 1;
@@ -8462,8 +8463,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions(
       if (rightD < 0) {
         Rational theRat;
         if ((*this)[1].isRational(&theRat)) {
-          if (!theRat.GetNumerator().IsEven()) {
-            if (!theRat.GetDenominator().IsEven()) {
+          if (!theRat.getNumerator().IsEven()) {
+            if (!theRat.getDenominator().IsEven()) {
               signChange = true;
             }
             rightD *= - 1;
@@ -9656,7 +9657,7 @@ bool CalculatorFunctions::innerAnd(
   if (input[2].isEqualToZero()) {
     return output.assignValue(0, theCommands);
   }
-  if (input[1].IsEqualToOne() && input[2].IsEqualToOne()) {
+  if (input[1].isEqualToOne() && input[2].isEqualToOne()) {
     return output.assignValue(1, theCommands);
   }
   return false;
@@ -9669,10 +9670,10 @@ bool CalculatorFunctions::innerOr(
   if (input.size() != 3) {
     return false;
   }
-  if (input[1].IsEqualToOne()) {
+  if (input[1].isEqualToOne()) {
     return output.assignValue(1, theCommands);
   }
-  if (input[2].IsEqualToOne()) {
+  if (input[2].isEqualToOne()) {
     return output.assignValue(1, theCommands);
   }
   if (input[1].isEqualToZero() && input[2].isEqualToZero()) {
@@ -9689,7 +9690,7 @@ bool CalculatorFunctions::innerIfStandard(
   if (input.size() != 4) {
     return false;
   }
-  if (input[1].IsEqualToOne()) {
+  if (input[1].isEqualToOne()) {
     output = input[2];
     return true;
   }
@@ -9720,7 +9721,7 @@ bool CalculatorFunctions::innerIfFrozen(
     output.addChildOnTop(input[3]);
     return true;
   }
-  if (firstArgument.IsEqualToOne()) {
+  if (firstArgument.isEqualToOne()) {
     output = input[2];
     return true;
   }

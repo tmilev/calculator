@@ -1041,7 +1041,7 @@ Expression* Calculator::patternMatch(
     (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.toString()
     << "; evaluating...";
   }
-  if (conditionResult.IsEqualToOne()) {
+  if (conditionResult.isEqualToOne()) {
     return &theExpression;
   }
   return nullptr;

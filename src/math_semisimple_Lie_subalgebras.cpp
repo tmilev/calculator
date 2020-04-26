@@ -126,7 +126,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   theComputation.MaxNumSerreSystemComputationsPreferred = 4001;
   theComputation.maximumPolynomialComputations = 2001;
   theComputation.thePolynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_rightLargerWins);
-  theComputation.SolveSerreLikeSystem(theSystem);
+  theComputation.solveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField) {
     if (logStream != nullptr) {
       if (theComputation.flagSystemProvenToHaveNoSolution) {
@@ -140,7 +140,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
     return false;
   }
   if (logStream != nullptr) {
-    *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
+    *logStream << "Solved successfully! One solution: " << theComputation.toStringSerreLikeSolution();
   }
   PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
   theComputation.getSubstitutionFromPartialSolutionSerreLikeSystem(theSolutionSub);
@@ -154,13 +154,13 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   return true;
 }
 
-bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan(
+bool SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
   std::stringstream* logStream
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan");
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan");
   Matrix<AlgebraicNumber> theM;
   this->GetAd(theM, theE);
   MatrixTensor<AlgebraicNumber> theMatTensor, theId;
@@ -2708,7 +2708,7 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent() {
     for (int k = 0; k < this->theBasis.size; k ++) {
       this->GetAmbientSS().LieBracket(currentElt, this->theBasis[k], adActionElt);
       this->GetAmbientSS().LieBracket(currentElt, adActionElt, adadActionElt);
-      bool tempB= currentElt.LinSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
+      bool tempB= currentElt.linearSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
       if (!tempB) {
         global.fatal << "Programming error: Candidate subalgebra not closed under Lie bracket. " << global.fatal;
       }
@@ -2716,7 +2716,7 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent() {
     }
     this->GetAmbientSS().GetAd(theAdMat, currentElt);
     theAdMat *= theAdMat;
-    this->RatioKillingsByComponent[i] = theAdMat.GetTrace();
+    this->RatioKillingsByComponent[i] = theAdMat.getTrace();
     this->RatioKillingsByComponent[i] /= result;
   }
 }
@@ -4064,7 +4064,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
     theComputation.maximumPolynomialComputations = i;
     theComputation.MaxNumSerreSystemComputationsPreferred = i;
     theComputation.theAlgebraicClosurE = this->owner->ownerField;
-    theComputation.SolveSerreLikeSystem(this->transformedSystem);
+    theComputation.solveSerreLikeSystem(this->transformedSystem);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution) {
       break;
     }
@@ -5845,7 +5845,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
         out << "}Relation&";
         for (int j = 0; j < currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j ++) {
           Rational theCF = currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size + j];
-          theCF.Minus();
+          theCF.minus();
           out << "$"
           << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).ToStringLetterFormat("\\omega", &tempFormat)
           << "$";
@@ -6800,7 +6800,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
   this->theWeylNonEmbedded->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
   for (int i = 0; i < theOuterAutos.theGenerators.size; i ++) {
-    theOuterAutos.theGenerators[i].Transpose();
+    theOuterAutos.theGenerators[i].transpose();
   }
   bool mustBeTrue = theOuterAutos.GenerateElements(100000);
   if (!mustBeTrue) {
@@ -7088,7 +7088,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   this->MatMultiplyFundCoordsToGetSimple = bilinearFormInverted;
   this->MatMultiplyFundCoordsToGetSimple *= diagMatrix2;
   this->BilinearFormFundPrimal = matFundCoordsSimple;
-  this->BilinearFormFundPrimal.Transpose();
+  this->BilinearFormFundPrimal.transpose();
   this->BilinearFormFundPrimal *= this->BilinearFormSimplePrimal;
   this->BilinearFormFundPrimal *= matFundCoordsSimple;
 /*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->GetAmbientWeyl().getDimension(), this->GetPrimalRank());

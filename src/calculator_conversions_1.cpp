@@ -787,7 +787,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromMonomialUE");
-  if (input.IsConstant()) {
+  if (input.isConstant()) {
     return output.assignValue(1, theCommands);
   }
   ChevalleyGenerator theGen;
@@ -1082,24 +1082,24 @@ bool CalculatorConversions::innerExpressionFromRF(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
   Rational aConst;
-  if (input.IsConstant(&aConst)) {
+  if (input.isConstant(&aConst)) {
     return output.assignValue(aConst, theCommands);
   }
   Polynomial<Rational> numP, denP;
-  input.GetNumerator(numP);
+  input.getNumerator(numP);
 
-  if (input.IsConstant() || input.expressionType == input.typePoly) {
+  if (input.isConstant() || input.expressionType == input.typePoly) {
     return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numP, output, inputContext);
   }
   Expression numE, denE;
-  input.GetDenominator(denP);
+  input.getDenominator(denP);
   Polynomial<Rational> numRescaled = numP;
   Polynomial<Rational> denRescaled = denP;
   Rational topMultiple = numRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational bottomMultiple = denRescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational multipleTopBottom = bottomMultiple / topMultiple;
-  numRescaled *= multipleTopBottom.GetNumerator();
-  denRescaled *= multipleTopBottom.GetDenominator();
+  numRescaled *= multipleTopBottom.getNumerator();
+  denRescaled *= multipleTopBottom.getDenominator();
   CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numRescaled, numE, inputContext);
   CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, denRescaled, denE, inputContext);
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
@@ -1198,7 +1198,7 @@ bool CalculatorConversions::functionRationalFunction(
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariable(input);
   RationalFunction theRF;
-  theRF.MakeOneLetterMoN(0, 1);
+  theRF.makeOneLetterMonomial(0, 1);
   return output.assignValueWithContext(theRF, theContext, theCommands);
 }
 
@@ -1384,7 +1384,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   }
   theElement.h.AddCycle(oneCycle);
   for (int i = 2; i < input.children.size; i ++) {
-    if (input[i].IsEqualToOne()) {
+    if (input[i].isEqualToOne()) {
       theElement.k.ToggleBit(i - 2);
     } else if (!input[i].isEqualToZero()) {
       return theCommands << "Your input: " << input.toString()

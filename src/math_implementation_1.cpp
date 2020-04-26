@@ -26,7 +26,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
     for (int i = 0; i < this->GetRank(); i ++) {
       genWeight.makeEi(this->GetRank(), i);
       if (theWeight.isPositive()) {
-        genWeight.Minus();
+        genWeight.minus();
       }
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
@@ -725,12 +725,12 @@ bool ElementUniversalEnveloping<Coefficient>::ConvertToRationalCoeff(ElementUniv
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->theObjects[i];
     tempMon.makeOne(*this->owner);
-    if (!this->coefficients[i].IsConstant(theCoeff)) {
+    if (!this->coefficients[i].isConstant(theCoeff)) {
       return false;
     }
     for (int j = 0; j < currentMon.Powers.size; j ++) {
       Rational tempRat;
-      if (!currentMon.Powers[j].IsConstant(tempRat)) {
+      if (!currentMon.Powers[j].isConstant(tempRat)) {
         return false;
       }
       tempMon.MultiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);

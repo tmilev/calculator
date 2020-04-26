@@ -595,7 +595,7 @@ void MonomialUniversalEnveloping<Coefficient>::setNumberOfVariables(int newNumVa
   // if (this->Coefficient.NumVars == newNumVars)
   //  return;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    this->Powers.theObjects[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
+    this->Powers.theObjects[i].setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
   }
 }
 
@@ -614,7 +614,7 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(FormatExpressions
     int theIndex = this->generatorsIndices[i];
     tempS = this->GetOwner().GetStringFromChevalleyGenerator(theIndex, theFormat);
     out << tempS;
-    if (!thePower.IsEqualToOne()) {
+    if (!thePower.isEqualToOne()) {
       out << "^";
       out << "{";
       out << thePower.toString(theFormat);
@@ -800,11 +800,11 @@ bool ElementUniversalEnveloping<Coefficient>::GetLieAlgebraElementIfPossible(
   for (int i = 0; i < this->size(); i ++) {
     const MonomialUniversalEnveloping<Coefficient>& tempMon = (*this)[i];
     tempMon.GetDegree(theExponent);
-    if (!theExponent.IsEqualToOne()) {
+    if (!theExponent.isEqualToOne()) {
       return false;
     }
     Rational theConst;
-    if (!this->coefficients[i].IsConstant(&theConst)) {
+    if (!this->coefficients[i].isConstant(&theConst)) {
       return false;
     }
     tempChevalley.MakeGenerator(*this->owner, tempMon.generatorsIndices[0]);
@@ -946,9 +946,9 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::GetElementUniversalEnvelop
 
 template <class Coefficient>
 void MonomialUniversalEnvelopingOrdered<Coefficient>::setNumberOfVariables(int newNumVars) {
-  this->Coefficient.SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  this->Coefficient.setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    this->Powers[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
+    this->Powers[i].setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
   }
 }
 

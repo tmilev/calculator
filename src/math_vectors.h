@@ -220,7 +220,7 @@ public:
     input.ScalarEuclidean(normal, t);
     ProjectionDirection.ScalarEuclidean(normal, tempRat);
     t /= tempRat;
-    t.Minus();
+    t.minus();
     Vector<Coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
   }
   static void VectorPlusVectorTimesScalar(
@@ -240,7 +240,7 @@ public:
       output.theObjects[i] += (tempRat);
     }
   }
-  void Minus() {
+  void minus() {
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i] *= - 1;
     }
@@ -316,7 +316,7 @@ public:
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
     this->RootScalarEuclideanRoot(normal, point, this->theObjects[newDimension - 1]);
-    this->theObjects[newDimension - 1].Minus();
+    this->theObjects[newDimension - 1].minus();
     for (int j = 0; j < newDimension - 1; j ++) {
       this->theObjects[j] = normal[j];
     }
@@ -589,7 +589,7 @@ void Vector<Coefficient>::ScaleToFirstNonZeroCoordinatePositive() {
       return;
     }
     if ((*this)[i].isNegative()) {
-      this->Minus();
+      this->minus();
       return;
     }
   }
@@ -629,7 +629,7 @@ void Vector<Coefficient>::FindLCMDenominators(LargeIntegerUnsigned& output) {
   LargeIntegerUnsigned tempI, tempI2;
   output.makeOne();
   for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i].GetDenominator(tempI2);
+    this->theObjects[i].getDenominator(tempI2);
     LargeIntegerUnsigned::gcd(output, tempI2, tempI);
     output.multiplyBy(tempI2);
     output.DivPositive(tempI, output, tempI2);
@@ -921,9 +921,9 @@ class Vectors: public List<Vector<Coefficient> > {
       Vector<Rational> tempRoot;
       for (int i = 0; i < this->size; i ++) {
         tempRoot = this->theObjects[i];
-        tempRoot.Minus();
+        tempRoot.minus();
         for (int j = i + 1; j < this->size; j ++) {
-          if (this->theObjects[j].IsEqualTo(tempRoot)) {
+          if (this->theObjects[j].isEqualTo(tempRoot)) {
             return true;
           }
         }
@@ -1035,7 +1035,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   bufferMat /= tempCF;
   output.setSize(bufferMat.numberOfRows - 1);
   for (int i = 0; i < bufferMat.numberOfRows - 1; i ++) {
-    bufferMat(i, 0).Minus();
+    bufferMat(i, 0).minus();
     output[i] = bufferMat(i, 0);
   }
   return true;
@@ -1225,7 +1225,7 @@ bool AffineHyperplane<Coefficient>::operator==(const AffineHyperplane& right) {
   Rational tempRat1, tempRat2;
   tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
   tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
-  return tempRat1.IsEqualTo(tempRat2);
+  return tempRat1.isEqualTo(tempRat2);
 }
 
 template <class Coefficient>
@@ -1250,7 +1250,7 @@ bool AffineHyperplane<Coefficient>::ProjectFromFacetNormal(Vector<Coefficient>& 
   this->affinePoint.makeZero(input.size);
   this->affinePoint.setSize(input.size - 1);
   this->affinePoint[tempI] = input[input.size - 1];
-  this->affinePoint[tempI].Minus();
+  this->affinePoint[tempI].minus();
   this->affinePoint[tempI].DivideBy(input[tempI]);
   this->normal = input;
   this->normal.setSize(input.size - 1);
@@ -1262,7 +1262,7 @@ bool AffineHyperplane<Coefficient>::ContainsPoint(Vector<Coefficient>& thePoint)
   Rational tempRat1, tempRat2;
   tempRat1 = this->normal.ScalarEuclidean(thePoint);
   tempRat2 = this->normal.ScalarEuclidean(this->affinePoint);
-  return tempRat2.IsEqualTo(tempRat1);
+  return tempRat2.isEqualTo(tempRat1);
 }
 
 template <class Coefficient>

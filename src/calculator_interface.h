@@ -401,7 +401,7 @@ private:
     return this->GetAmbientSSAlgebraNonConstUseWithCaution();
   }
   bool isEqualToZero() const;
-  bool IsEqualToOne() const;
+  bool isEqualToOne() const;
   bool IsEqualToTwo() const;
   bool IsEqualToHalf() const;
   bool IsEqualToMOne() const;
@@ -2329,7 +2329,7 @@ public:
     std::stringstream* commentsOnError = nullptr
   );
   template <class theType>
-  bool GetVectorFromFunctionArguments(
+  bool getVectorFromFunctionArguments(
     const Expression& input,
     Vector<theType>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
@@ -3340,7 +3340,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
   LinearCombination<Expression, Coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
-  if (!input.IsConstant() && inputContext == nullptr) {
+  if (!input.isConstant() && inputContext == nullptr) {
     theCommands << "While converting polynomial to expression, "
     << "I was given no variable names. Using the "
     << "default variable names x_1, x_2, ... "
@@ -3348,7 +3348,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
     << "variables for other purposes.";
   }
   for (int i = 0; i < input.size(); i ++) {
-    if (input[i].IsConstant()) {
+    if (input[i].isConstant()) {
       currentTerm.assignValue(1, theCommands);
       theTerms.addMonomial(currentTerm, input.coefficients[i]);
       continue;

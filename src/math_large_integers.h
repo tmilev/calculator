@@ -69,7 +69,7 @@ public:
     const LargeIntegerUnsigned& theOddFactorOfNminusOne,
     std::stringstream* comments
   );
-  bool IsEqualToOne() const;
+  bool isEqualToOne() const;
   bool IsGreaterThanOrEqualTo(const LargeIntegerUnsigned& x) const;
   static void getPrimesEratosthenesSieve(
     unsigned int primesUpToInclusive, List<unsigned int>& output
@@ -217,8 +217,8 @@ public:
     return this->value.isEqualToZero();
   }
   bool IsEven() const;
-  bool IsEqualToOne() const {
-    return this->value.IsEqualToOne() && this->sign == 1;
+  bool isEqualToOne() const {
+    return this->value.isEqualToOne() && this->sign == 1;
   }
   void AssignLargeIntUnsigned(const LargeIntegerUnsigned& x) {
     this->value = x;
@@ -246,7 +246,7 @@ public:
     this->value.makeOne();
     this->sign = 1;
   }
-  void MakeMOne() {
+  void makeMinusOne() {
     this->value.makeOne();
     this->sign = - 1;
   }
@@ -284,7 +284,7 @@ public:
   inline void operator*=(int x) {
     this->MultiplyByInt(x);
   }
-  inline void Minus() {
+  inline void minus() {
     if (!this->isEqualToZero()) {
       this->sign *= - 1;
     }
@@ -300,9 +300,9 @@ public:
     return !(*this == other);
   }
   inline void operator-=(const LargeInteger& other) {
-    this->Minus();
+    this->minus();
     *this += (other);
-    this->Minus();
+    this->minus();
   }
   inline bool operator<=(const LargeInteger& other) const {
     return !(other<*this);
@@ -480,9 +480,9 @@ public:
   // relatively prime integers such that the non-zero coefficient is positive.
   // Returns the number by which the vector was multiplied.
   static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
-  LargeIntegerUnsigned GetDenominator() const;
+  LargeIntegerUnsigned getDenominator() const;
   bool BeginsWithMinus();
-  LargeInteger GetNumerator() const;
+  LargeInteger getNumerator() const;
   bool GetPrimeFactorsAbsoluteValue(
     List<LargeInteger>& numeratorPrimeFactors,
     List<int>& numeratorMultiplicities,
@@ -596,18 +596,18 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringFrac() const;
   std::string ToStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
-  bool IsEqualTo(const Rational& r) const;
+  bool isEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right) const;
   bool IsEven() const {
     Rational tempRat = *this;
     tempRat /= 2;
     return tempRat.isInteger();
   }
-  inline bool IsEqualToOne() const {
+  inline bool isEqualToOne() const {
     if (this->extended == nullptr) {
       return (this->numeratorShort == 1 && this->denominatorShort == 1);
     } else {
-      return (this->extended->numerator.IsEqualToOne() && this->extended->denominator.IsEqualToOne());
+      return (this->extended->numerator.isEqualToOne() && this->extended->denominator.isEqualToOne());
     }
   }
   inline bool isEqualToZero() const {
@@ -650,7 +650,7 @@ public:
   }
   void simplify();
   void invert();
-  void Minus() {
+  void minus() {
     if (this->extended == nullptr) {
       this->numeratorShort *= - 1;
     } else {
@@ -669,7 +669,7 @@ public:
     this->denominatorShort = 1;
     this->FreeExtended();
   }
-  void MakeMOne() {
+  void makeMinusOne() {
     this->numeratorShort = - 1;
     this->denominatorShort = 1;
     this->FreeExtended();
@@ -679,7 +679,7 @@ public:
   void DrawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
-      this->Minus();
+      this->minus();
     }
   }
   static long long int TotalAdditions() {
@@ -760,10 +760,10 @@ public:
     if (other == 0) {
       return this->isEqualToZero();
     }
-    return this->IsEqualTo(other);
+    return this->isEqualTo(other);
   }
   inline bool operator==(const Rational& right) const {
-    return this->IsEqualTo(right);
+    return this->isEqualTo(right);
   }
   inline void operator+=(const Rational& r) {
     //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
@@ -832,7 +832,7 @@ public:
   Rational operator-(const Rational& right) const;
   Rational operator/(const Rational& right) const;
   inline bool operator!=(const Rational& right) const {
-    return !this->IsEqualTo(right);
+    return !this->isEqualTo(right);
   }
   inline bool operator!=(const int& right) const {
     return !((*this) == right);

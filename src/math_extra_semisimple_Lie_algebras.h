@@ -260,7 +260,7 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
     std::stringstream* logStream = nullptr
   );
-  bool AttemptExtendingEtoHEFwithHinCartan(
+  bool attemptExtendingEtoHEFwithHinCartan(
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
@@ -491,11 +491,11 @@ public:
   void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output);
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
   bool CheckClosednessLieBracket();
-  void ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
-  bool ApplyHomomorphism(
+  void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
+  bool applyHomomorphism(
     const ElementUniversalEnveloping<RationalFunction>& input, ElementUniversalEnveloping<RationalFunction>& output
   );
-  bool ApplyHomomorphism(
+  bool applyHomomorphism(
     const MonomialUniversalEnveloping<RationalFunction>& input,
     const RationalFunction& theCoeff,
     ElementUniversalEnveloping<RationalFunction>& output

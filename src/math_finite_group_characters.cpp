@@ -116,7 +116,7 @@ void MatrixInBasisFast(Matrix<Coefficient>& out, const Matrix<Coefficient>& in, 
   int d = BM.numberOfRows;
   Matrix<Coefficient> M = BM;
   Matrix<Coefficient> inT = in;
-  inT.Transpose();
+  inT.transpose();
   M.MultiplyOnTheRight(inT);
   out.MakeZeroMatrix(d);
   for (int i = 0; i < d; i ++) {
@@ -469,10 +469,10 @@ bool UDPolynomial<Coefficient>::operator==(const int other) const {
 
 template <typename Coefficient>
 //template <typename integral>
-void UDPolynomial<Coefficient>::ClearDenominators() {
+void UDPolynomial<Coefficient>::clearDenominators() {
   int acc = 1;
   for (int i = 0; i < data.size; i ++) {
-    acc = lcm(acc, data[i].GetDenominator());
+    acc = lcm(acc, data[i].getDenominator());
   }
   *this *= acc;
 }
@@ -723,7 +723,7 @@ List<int> factorpoly(List<Coefficient> p, int maxfac) {
 
 template <typename Coefficient>
 List<Vector<Coefficient> > DestructiveColumnSpace(Matrix<Coefficient>& M) {
-  M.Transpose();
+  M.transpose();
   Matrix<Coefficient> dummy1;
   Selection dummy2;
   M.gaussianEliminationByRows(M, dummy1, dummy2);

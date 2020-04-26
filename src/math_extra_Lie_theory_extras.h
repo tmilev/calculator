@@ -357,7 +357,7 @@ public:
     this->addMonomial(tempMon);
   }
   void simplify(const Coefficient& theRingUnit = 1,  const Coefficient& theRingZero = 0);
-  int getNumberOfVariables() const {
+  int minimalNumberOfVariables() const {
     if (this->size == 0) {
       return 0;
     } else {
@@ -412,7 +412,7 @@ public:
       return false;
     }
     MonomialUniversalEnvelopingOrdered<Coefficient>& tempMon = this->theObjects[0];
-    if (!tempMon.Coefficient.IsEqualToOne()) {
+    if (!tempMon.Coefficient.isEqualToOne()) {
       return false;
     }
     if (tempMon.generatorsIndices.size != 1) {
@@ -460,12 +460,12 @@ public:
   ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other) {
     this->operator=(other);
   }
-  void ClearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& theRingUnit) {
+  void clearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& theRingUnit) {
     outputWasMultipliedBy = theRingUnit;
     Coefficient currentCoeff;
     for (int i = 0; i < this->size; i ++) {
       MonomialUniversalEnvelopingOrdered<Coefficient>& currentMon = this->theObjects[i];
-      currentMon.Coefficient.ClearDenominators(currentCoeff);
+      currentMon.Coefficient.clearDenominators(currentCoeff);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
           this->theObjects[j].theCoefficient *= currentCoeff;
@@ -539,8 +539,8 @@ public:
     const Coefficient& theRingUnit,
     const Coefficient& theRingZero
   );
-  void ClearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& theRingUnit) {
-    this->theElT.ClearDenominators(outputWasMultipliedBy, theRingUnit);
+  void clearDenominators(Coefficient& outputWasMultipliedBy, const Coefficient& theRingUnit) {
+    this->theElT.clearDenominators(outputWasMultipliedBy, theRingUnit);
   }
   void operator/=(const Coefficient& theConst) {
     this->theElT.operator/=(theConst);

@@ -1120,8 +1120,8 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
     // exponent is not rational.
     return false;
   }
-  LargeInteger radicalLarge = power.GetDenominator();
-  LargeInteger powerIntegral = power.GetNumerator();
+  LargeInteger radicalLarge = power.getDenominator();
+  LargeInteger powerIntegral = power.getNumerator();
   int radical = 0;
   int powerSmallInteger = 0;
   if (
@@ -1177,7 +1177,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   }
   Rational powerRat, baseRat;
   if (input[2].isRational(&powerRat)) {
-    if (powerRat.GetDenominator() == 2) {
+    if (powerRat.getDenominator() == 2) {
       if (base.isRational(&baseRat)) {
         if (base.AssignRationalQuadraticRadical(
           baseRat,
@@ -1289,7 +1289,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
   if (!input[1].isRational(&base)) {
     return false;
   }
-  if (base.IsEqualToOne()) {
+  if (base.isEqualToOne()) {
     return output.assignValue(1, theCommands);
   }
   if (!input[2].isRational(&exp)) {
@@ -1426,20 +1426,20 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     return output.assignValue(0, theCommands);
   }
   if (!base.isInteger()) {
-    if (base.GetNumerator() == 1) {
+    if (base.getNumerator() == 1) {
       Expression theDenBase, theDenominator;
-      theDenBase.assignValue(Rational(base.GetDenominator()), theCommands);
+      theDenBase.assignValue(Rational(base.getDenominator()), theCommands);
       theDenominator.MakeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
       output = theCommands.EOne() / theDenominator;
       return true;
     }
   }
   exponentWorking = exponentStarting;
-  if (exponentWorking.GetDenominator() == 2) {
+  if (exponentWorking.getDenominator() == 2) {
     return false;
   }
-  LargeIntegerUnsigned exponentDenominator = exponentWorking.GetDenominator();
-  LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.GetNumerator().value;
+  LargeIntegerUnsigned exponentDenominator = exponentWorking.getDenominator();
+  LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.getNumerator().value;
   List<LargeInteger> numeratorFactors, denominatorFactors;
   List<int> numeratorPowersInt, denominatorPowersInt;
   if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowersInt, denominatorFactors, denominatorPowersInt)) {
@@ -1510,7 +1510,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       denominatorPowerS[i] /= theGCD;
     }
     exponentWorking *= theGCD;
-    exponentDenominator = exponentWorking.GetDenominator();
+    exponentDenominator = exponentWorking.getDenominator();
   }
   Rational insideTheRadical = 1;
   LargeInteger currentContribution, currentNumerator = 1, currentDenominator = 1;
@@ -1540,7 +1540,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   insideTheRadical = currentNumerator;
   insideTheRadical /= currentDenominator;
   if (base < 0) {
-    exponentDenominator = exponentWorking.GetDenominator();//<-just in case
+    exponentDenominator = exponentWorking.getDenominator();//<-just in case
     if (exponentDenominator % 2 == 1) {
       outsideOfTheRadical *= - 1;
     } else {

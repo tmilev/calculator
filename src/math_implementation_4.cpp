@@ -1500,7 +1500,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   tempMat.initialize(2, 2);
   tempMat.elements[0][0] = 1; tempMat.elements[0][1] = 0;
   tempMat.elements[1][0] = 1; tempMat.elements[1][1] = 1;
-  tempMat.Transpose();
+  tempMat.transpose();
   smallWeylChamber.ChangeBasis(tempMat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.toString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
@@ -1672,7 +1672,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   //this->preferredBasiS[1] ="(0,1)";
   ////////////////////////////////////////
   this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
-  this->preferredBasisChangE.Transpose();
+  this->preferredBasisChangE.transpose();
   this->preferredBasisChangeInversE = this->preferredBasisChangE;
   this->preferredBasisChangeInversE.invert();
   this->preferredBasisChangeInversE.actOnVectorsColumn
@@ -1736,7 +1736,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
     currentLinearOperator.actOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.GetRho();
-    this->theTranslationS[i].Minus();
+    this->theTranslationS[i].minus();
     theProjectionBasisChanged.actOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
       this->theCoeffs[i] = 1;
@@ -1776,7 +1776,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vector<Polynomial<Rational> > tempVect, tempVect2;
   tempVect.setSize(input.theDomain().theWeyl.getDimension() + input.theRange().theWeyl.getDimension());
   for (int i = 0; i < tempVect.size; i ++) {
-    tempVect[i].makeMonomial(i, 1, Rational(1), tempVect.size);
+    tempVect[i].makeMonomial(i, 1, Rational(1));
   }
   tempMatPoly.initialize(input.theDomain().theWeyl.getDimension(), tempVect.size);
   Polynomial<Rational> polyZero;
@@ -1790,7 +1790,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   tempRoot = theSubgroup.GetRho();
   this->theLinearOperators[0].actOnVectorColumn(tempRoot);
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
-  tempRoot.Minus();
+  tempRoot.minus();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
   << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
   << tempRoot.ToStringLetterFormat("\\alpha") << "$.";
@@ -1801,7 +1801,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLoExt = this->theLinearOperatorsExtended[i];
     for (int j = 0; j < currentLoExt.numberOfRows; j ++) {
       for (int k = 0; k < currentLoExt.numberOfColumns; k ++) {
-        tempMatPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k], tempVect.size);
+        tempMatPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k]);
       }
     }
     tempMatPoly.actOnVectorColumn(tempVect, tempVect2, polyZero);
@@ -1871,7 +1871,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nThe second operator extended:\n"
   << this->theLinearOperatorsExtended[1].toString(&global.theDefaultFormat.getElement()) << "\n";
   /*tempMat = this->theLinearOperatorsExtended.theObjects[0];
-  tempMat.Transpose();
+  tempMat.transpose();
   tempMat.actOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.size; i ++) {
     this->PreimageWeylChamberSmallerAlgebra.theObjects[i].setSize(input.theRange.GetRank() + input.theDomain.GetRank() + 1);
@@ -2140,7 +2140,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective(
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
   Rational theConst;
   startingNormal.ScalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, theConst);
-  theOperatorExtended.Transpose();
+  theOperatorExtended.transpose();
   outputNormal = startingNormal;
   theOperatorExtended.actOnVectorColumn(outputNormal);
   outputNormal.setSize(outputNormal.size + 1);

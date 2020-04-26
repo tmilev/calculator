@@ -1143,7 +1143,7 @@ bool LargeIntegerUnsigned::isPositive() const {
   return this->theDigits.size > 1 || this->theDigits[0] > 0;
 }
 
-bool LargeIntegerUnsigned::IsEqualToOne() const {
+bool LargeIntegerUnsigned::isEqualToOne() const {
   return this->theDigits.size == 1 && this->theDigits[0] == 1;
 }
 
@@ -1482,11 +1482,11 @@ void Rational::raiseToPower(int x) {
     x = - x;
     this->invert();
   }
-  LargeInteger tempNum = this->GetNumerator();
+  LargeInteger tempNum = this->getNumerator();
   LargeIntegerUnsigned oneLI;
   oneLI.makeOne();
   MathRoutines::raiseToPower(tempNum.value, x, oneLI);
-  LargeIntegerUnsigned tempDen = this->GetDenominator();
+  LargeIntegerUnsigned tempDen = this->getDenominator();
   MathRoutines::raiseToPower(tempDen, x, oneLI);
   char theSign = (this->isPositive() || x % 2 == 0) ? 1 : - 1;
   this->AllocateExtended();
@@ -1552,7 +1552,7 @@ Rational operator/(int left, const Rational& right) {
 Rational operator-(const Rational& argument) {
   Rational tempRat;
   tempRat.Assign(argument);
-  tempRat.Minus();
+  tempRat.minus();
   return tempRat;
 }
 
@@ -1640,7 +1640,7 @@ void Rational::AssignFracValue() {
   if (this->isEqualToZero()) {
     return;
   }
-  if (this->extended->denominator.IsEqualToOne()) {
+  if (this->extended->denominator.isEqualToOne()) {
     this->makeZero();
     return;
   }
@@ -1691,7 +1691,7 @@ bool Rational::IsGreaterThan(const Rational& r) const {
 void Rational::Subtract(const Rational& r) {
   Rational temp;
   temp.Assign(r);
-  temp.Minus();
+  temp.minus();
   this->operator+=(temp);
 }
 
@@ -1699,8 +1699,8 @@ bool Rational::GetSquareRootIfRational(Rational& output) const {
   if (*this < 0) {
     return false;
   }
-  LargeInteger theNum = this->GetNumerator();
-  LargeIntegerUnsigned theDen = this->GetDenominator();
+  LargeInteger theNum = this->getNumerator();
+  LargeIntegerUnsigned theDen = this->getDenominator();
   List<LargeInteger> primeFactorsNum, primeFactorsDen;
   List<int> multsNum, multsDen;
   if (!theNum.value.factor(primeFactorsNum, multsNum, 0, 3, nullptr)) {
@@ -1833,17 +1833,17 @@ Rational Rational::scaleNormalizeIndex(
   if (output.size == 0) {
     return 1;
   }
-  LargeIntegerUnsigned denominatorLCM = output[0].GetDenominator();
-  LargeIntegerUnsigned numeratorGCD = output[0].GetNumerator().value;
+  LargeIntegerUnsigned denominatorLCM = output[0].getDenominator();
+  LargeIntegerUnsigned numeratorGCD = output[0].getNumerator().value;
   for (int i = 1; i < output.size; i ++) {
     LargeIntegerUnsigned::lcm(
       denominatorLCM,
-      output[i].GetDenominator(),
+      output[i].getDenominator(),
       denominatorLCM
     );
     LargeIntegerUnsigned::gcd(
       numeratorGCD,
-      output[i].GetNumerator().value,
+      output[i].getNumerator().value,
       numeratorGCD
     );
   }
@@ -1858,7 +1858,7 @@ Rational Rational::scaleNormalizeIndex(
   return result;
 }
 
-LargeIntegerUnsigned Rational::GetDenominator() const {
+LargeIntegerUnsigned Rational::getDenominator() const {
   LargeIntegerUnsigned result;
   if (this->extended == nullptr) {
     unsigned int tempI = static_cast<unsigned int>(this->denominatorShort);
@@ -1873,7 +1873,7 @@ bool Rational::BeginsWithMinus() {
   return this->isNegative();
 }
 
-LargeInteger Rational::GetNumerator() const {
+LargeInteger Rational::getNumerator() const {
   LargeInteger result;
   if (this->extended == nullptr) {
     if (this->numeratorShort < 0) {
@@ -1902,12 +1902,12 @@ bool Rational::GetPrimeFactorsAbsoluteValue(
   List<int>& denominatorMultiplicities
 ) {
   MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
-  if (!this->GetNumerator().value.factor(
+  if (!this->getNumerator().value.factor(
     numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr
   )) {
     return false;
   }
-  return this->GetDenominator().factor(
+  return this->getDenominator().factor(
     denominatorPrimeFactors, denominatorMultiplicities, 0, 3, nullptr
   );
 }
@@ -1986,7 +1986,7 @@ bool Rational::isInteger(LargeInteger* whichInteger) const {
       *whichInteger = this->numeratorShort;
     }
   } else {
-    if (this->extended->denominator.IsEqualToOne()) {
+    if (this->extended->denominator.isEqualToOne()) {
       result = true;
       if (whichInteger != nullptr) {
         *whichInteger = this->extended->numerator;
@@ -2031,7 +2031,7 @@ void Rational::simplify() {
     this->makeZero();
     return;
   }
-  if (!this->extended->denominator.IsEqualToOne()) {
+  if (!this->extended->denominator.isEqualToOne()) {
     LargeIntegerUnsigned tempI;
     LargeIntegerUnsigned::gcd(this->extended->denominator, this->extended->numerator.value, tempI);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic) {
@@ -2047,14 +2047,14 @@ void Rational::simplify() {
 }
 
 void Rational::operator=(const Polynomial<Rational>& other) {
-  if (!other.IsConstant(this)) {
+  if (!other.isConstant(this)) {
     global.fatal << "This is a programming error: attempting to assign "
     << "non-constant polynomial to a Rational number is not allowed. "
     << global.fatal;
   }
 }
 
-bool Rational::IsEqualTo(const Rational& b) const {
+bool Rational::isEqualTo(const Rational& b) const {
   if (this->extended == nullptr && b.extended == nullptr) {
     return (this->numeratorShort * b.denominatorShort == b.numeratorShort * this->denominatorShort);
   }
@@ -2118,7 +2118,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
     out << "-";
     numAbsVal.sign = 1;
   }
-  if (this->extended->denominator.IsEqualToOne()) {
+  if (this->extended->denominator.isEqualToOne()) {
     out << numAbsVal.toString();
   } else {
     out << numAbsVal.toString() << "_div_" << this->extended->denominator.toString();
@@ -2145,7 +2145,7 @@ std::string Rational::ToStringFrac() const {
     out << "-";
     numAbsVal.sign = 1;
   }
-  if (this->extended->denominator.IsEqualToOne()) {
+  if (this->extended->denominator.isEqualToOne()) {
     out << numAbsVal.toString();
   } else {
     out << "\\frac{" << numAbsVal.toString() << "}{" << this->extended->denominator.toString() << "}";

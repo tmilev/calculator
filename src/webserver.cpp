@@ -4054,7 +4054,7 @@ void WebServer::InitializeMainHashes() {
   << global.GetGlobalTimeInSeconds();
   global.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
 
-  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot(
+  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().addOnTopNoRepetitionMustBeNew(
     WebAPI::request::calculatorHTML
   );
   WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);

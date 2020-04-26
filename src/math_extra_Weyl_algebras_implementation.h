@@ -12,7 +12,7 @@ bool ElementWeylAlgebra<Coefficient>::IsPolynomial(Polynomial<Coefficient>* whic
     whichPoly->makeZero();
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].differentialPart.IsConstant()) {
+    if (!(*this)[i].differentialPart.isConstant()) {
       return false;
     }
     if (whichPoly != 0) {
@@ -55,7 +55,7 @@ void ElementWeylAlgebra<Coefficient>::MultiplyTwoMonomials(
   }
   tempSel.elements.initializeFillInObject(theDimensioN, 0);
   MonomialWeylAlgebra buffer;
-  buffer.makeOne(theDimensioN);
+  buffer.makeOne();
   output.makeZero();
   int numCycles = tempSel.TotalNumSubsetsMustBeSmalInt();
   Rational coeffBuff;
@@ -77,12 +77,12 @@ void ElementWeylAlgebra<Coefficient>::MultiplyTwoMonomials(
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft) {
-  this->LieBracketOnTheLeft(standsOnTheLeft, global);
+  this->LieBracketOnTheLeft(standsOnTheLeft);
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight) {
-  this->LieBracketOnTheRight(standsOnTheRight, global);
+  this->LieBracketOnTheRight(standsOnTheRight);
 }
 
 template <class Coefficient>
@@ -108,13 +108,10 @@ void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeft(const ElementWeylAlgeb
   ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1 = *this;
   tempEl1.multiplyOnTheLeft(standsOnTheLeft);
-  //tempEl1.ComputeDebugString(false);
   tempEl2 = standsOnTheLeft;
   tempEl2.multiplyOnTheLeft(*this);
-  //tempEl2.ComputeDebugString(false);
   *this = tempEl1;
   *this -= tempEl2;
-  //this->ComputeDebugString(false);
 }
 
 template <class Coefficient>
@@ -123,7 +120,7 @@ void ElementWeylAlgebra<Coefficient>::LieBracketOnTheRight(const ElementWeylAlge
   tempEl1 = standsOnTheRight;
   tempEl1.multiplyOnTheLeft(*this);
   tempEl2 = *this;
-  tempEl2.multiplyOnTheLeft(standsOnTheRight, global);
+  tempEl2.multiplyOnTheLeft(standsOnTheRight);
   *this = tempEl1;
   *this -= tempEl2;
 }
@@ -167,7 +164,7 @@ void ElementWeylAlgebra<Coefficient>::operator*=(const ElementWeylAlgebra& stand
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::raiseToPower(int thePower) {
   ElementWeylAlgebra WeylOne;
-  WeylOne.makeOne(this->minimalNumberOfVariables());
+  WeylOne.makeOne();
   MathRoutines::raiseToPower(*this, thePower, WeylOne);
 }
 
@@ -175,11 +172,11 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
   tempMon.differentialPart.setVariable(j + NumVars, 1);
   this->addMonomial(tempMon, 1);
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(j, 1);
   tempMon.differentialPart.setVariable(i + NumVars, 1);
   this->addMonomial(tempMon, 1);
@@ -189,11 +186,11 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(j + NumVars, 1);
   tempMon.differentialPart.setVariable(i + NumVars, 1);
   this->addMonomial(tempMon, 1);
@@ -203,11 +200,11 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i + NumVars, 1);
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(j + NumVars, 1);
   tempMon.differentialPart.setVariable(i, 1);
   this->addMonomial(tempMon, 1);
@@ -217,7 +214,7 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::Makedidj(int i, int j, int NumVars) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.differentialPart.setVariable(i, 1);
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
@@ -227,7 +224,7 @@ template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::Makexixj(int i, int j, int NumVars) {
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
   tempMon.polynomialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
@@ -235,27 +232,30 @@ void ElementWeylAlgebra<Coefficient>::Makexixj(int i, int j, int NumVars) {
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::Makexi(int i, int NumVars) {
+  (void) NumVars;
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
   this->addMonomial(tempMon, 1);
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::Makedi(int i, int NumVars) {
+  (void) NumVars;
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.differentialPart.setVariable(i, 1);
   this->addMonomial(tempMon, 1);
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::Makexidj(int i, int j, int NumVars) {
+  (void) NumVars;
   this->makeZero();
   MonomialWeylAlgebra tempMon;
-  tempMon.makeOne(NumVars);
+  tempMon.makeOne();
   tempMon.polynomialPart.setVariable(i, 1);
   tempMon.differentialPart.setVariable(j, 1);
   this->addMonomial(tempMon, 1);
@@ -263,7 +263,10 @@ void ElementWeylAlgebra<Coefficient>::Makexidj(int i, int j, int NumVars) {
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo(
-  const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator
+  const Rational& inputRationalPower,
+  int indexVar,
+  ElementWeylAlgebra& outputDO,
+  Polynomial<Rational>& outputDenominator
 ) {
   outputDenominator.makeOne();
   MonomialWeylAlgebra tempMon;
@@ -271,7 +274,7 @@ void ElementWeylAlgebra<Coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   int inputPower = 0;
   if (!inputRationalPower.isSmallInteger(&inputPower)) {
     global.fatal << "This is a programming error: "
-    << " I can give you a differential operator only from integer exponent. " << global.fatal;
+    << "I can give you a differential operator only from integer exponent. " << global.fatal;
   }
   if (inputPower >= 0) {
     tempMon.polynomialPart.makeEi(indexVar, inputPower);
@@ -286,7 +289,6 @@ void ElementWeylAlgebra<Coefficient>::GetStandardOrderDiffOperatorCorrespondingT
     outputDenominator *= newMult;
     newMult -= 1;
   }
-  //output/= den;
 }
 
 template <class Coefficient>

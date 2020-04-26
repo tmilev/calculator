@@ -2982,6 +2982,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\n"
     "y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\n"
     "GCDPoly(f, y);\n"
+    "GCDPoly{}(x y, y+x z);\n"
     "GCDPoly{}("
     "-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}"
     "-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
@@ -8240,114 +8241,114 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
 void Calculator::initializeAtomsNonCacheable() {
   MacroRegisterFunctionWithName("Calculator::initializeAtomsNonCacheable");
   this->atomsThatMustNotBeCached.setExpectedSize(30);
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("GenerateRandomPrime");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOffApproximations");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOnApproximations");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintAlgebraicClosureStatus");
-//  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("RandomInteger");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("SelectAtRandom");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("GenerateRandomPrime");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("TurnOffApproximations");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("TurnOnApproximations");
+  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("PrintAlgebraicClosureStatus");
+//  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew("PrintRuleStack");
 }
 
 void Calculator::initializeAtomsNotGoodForChainRule() {
   MacroRegisterFunctionWithName("Calculator::initializeAtomsNotGoodForChainRule");
-  this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
+  this->atomsNotAllowingChainRule.addOnTopNoRepetitionMustBeNew("Bind");
 }
 
 void Calculator::initializeStringsThatSplitIfFollowedByDigit() {
   MacroRegisterFunctionWithName("Calculator::initializeStringsThatSplitIfFollowedByDigit");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arctan");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
-  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cdot");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\circ");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\frac");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\ln");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\log");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\sin");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cos");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\tan");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\cot");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\sec");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\csc");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arctan");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arcsin");
+  this->stringsThatSplitIfFollowedByDigit.addOnTopNoRepetitionMustBeNew("\\arccos");
 }
 
 void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
   MacroRegisterFunctionWithName("Calculator::initializeAtomsThatAllowCommutingOfArguments");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30);
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("|");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("+");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("*");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("/");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("^");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("|");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("\\sin");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("\\cos");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.addOnTopNoRepetitionMustBeNew("\\log");
 }
 
 void Calculator::initializeArithmeticOperations() {
   MacroRegisterFunctionWithName("Calculator::initializeArithmeticOperations");
-  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
-  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
-  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
-  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
-  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+  this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("+");
+  this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("-");
+  this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("*");
+  this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("/");
+  this->arithmeticOperations.addOnTopNoRepetitionMustBeNew("^");
 }
 
 void Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
   MacroRegisterFunctionWithName("Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
   //Related heavily to initializeOperationsInterpretedAsFunctionsMultiplicatively
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
-  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\sin");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\cos");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\tan");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\cot");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\sec");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\csc");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\log");
 }
 
 void Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively() {
   MacroRegisterFunctionWithName("Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively");
   //Related heavily to initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arctan");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
-  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\sin");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\cos");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\tan");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\cot");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\sec");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\csc");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\arctan");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\arcsin");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\arccos");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.addOnTopNoRepetitionMustBeNew("\\log");
 }
 
 void Calculator::initializeOperationsThatAreKnownFunctions() {
   MacroRegisterFunctionWithName("Calculator::initializeOperationsThatAreKnownFunctions");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("|");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sqrt");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arctan");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogBase");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("+");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("-");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("*");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("/");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("^");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("|");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\sqrt");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\sin");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\cos");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\tan");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\cot");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\sec");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\csc");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\arctan");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\arcsin");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\arccos");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\log");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("LogBase");
 }
 
 void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
-  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew(theConstantName);
   Expression theConstantE;
   theConstantE.makeAtom(theConstantName, *this);
-  this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
+  this->knownDoubleConstants.addOnTopNoRepetitionMustBeNew(theConstantE);
   this->knownDoubleConstantValues.addOnTop(theConstantValue);
 }
 
@@ -8357,8 +8358,8 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
 
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());
-  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\int");
-  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("i");
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\int");
+  this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
 }
 
 void Calculator::addTrigonometricSplit(const std::string& trigFun, const List<std::string>& theVars) {
@@ -8528,11 +8529,11 @@ void Calculator::initAtomsThatFreezeArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(this->builtInTypes.size + 100);
   this->atomsThatFreezeArguments.addOnTop(this->builtInTypes);
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("if");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationSteps");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsDebug");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("if");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationSteps");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("LogEvaluationStepsDebug");
 }

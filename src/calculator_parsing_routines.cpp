@@ -233,84 +233,84 @@ void Calculator::initialize() {
   this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
 
   // Empty token comes first.
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
   this->controlSequences.addOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Expression");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Integer");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{}");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(",");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(".");
-  //  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\"");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\choose");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("_");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("(");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(")");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("[");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("]");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("}");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(":");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\varnothing");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("pi");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infty");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infinity");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ln");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("log");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sin");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("cos");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("tan");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("cot");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("csc");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sec");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sqrt");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arcsin");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arccos");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arctan");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew(",");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew(".");
+  //  this->controlSequences.addOnTopNoRepetitionMustBeNew("\"");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\choose");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\frac");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\cdot");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("_");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("(");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew(")");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("[");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("]");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("{");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("}");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew(":");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\varnothing");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("pi");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("infty");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("infinity");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("ln");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\ln");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("log");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("sin");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("cos");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("tan");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("cot");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("csc");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("sec");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("sqrt");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("arcsin");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("arccos");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("arctan");
   this->controlSequences.addOnTopNoRepetition(
     this->knownOperationsInterpretedAsFunctionsMultiplicatively
   );
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("makeSequence");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixEnd");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\begin");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\left");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\right");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("array");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("pmatrix");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\end");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\\\");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\displaystyle");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("&");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("%");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoFrac");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ShowContext");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoLogarithmExponentShortcut");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogParsing");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluation");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HidePolynomialDataStructure");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NumberColors");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseBracketForIntervals");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotDetails");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnAbsInsteadOfLog");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HideLHS");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("EndProgram");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\text");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("SequenceStatements");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("MakeSequence");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\setminus");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("$");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("MatrixEnd");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\begin");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\left");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\right");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("array");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("pmatrix");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\end");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\\\");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\displaystyle");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("&");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("%");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("NoFrac");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("ShowContext");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("NoLogarithmExponentShortcut");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("LogParsing");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("LogEvaluation");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("HidePolynomialDataStructure");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("NumberColors");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("LogRules");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("LogCache");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("LogFull");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("UseBracketForIntervals");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("DontUsePredefinedWordSplits");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("PlotShowJavascriptOnly");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("PlotDetails");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("UseLnInsteadOfLog");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("UseLnAbsInsteadOfLog");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("CalculatorStatus");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("FullTree");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("HideLHS");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("EndProgram");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\text");
 
   this->initializePredefinedStandardOperationsWithoutHandler();
   this->TotalNumpatternMatchedPerformed = 0;
@@ -358,7 +358,7 @@ bool Calculator::CheckPredefinedFunctionNameRepetitions() {
         if (ruleIds.contains(currentName)) {
           global.fatal << "Calculator identifier: " << currentName << " is not unique. ";
         }
-        ruleIds.AddOnTopNoRepetitionMustBeNewCrashIfNot(currentName);
+        ruleIds.addOnTopNoRepetitionMustBeNew(currentName);
       }
       currentHandlers = &current.getElement().compositeHandlers;
     }
@@ -2510,7 +2510,7 @@ bool Calculator::ApplyOneRule() {
     lastE.theData.size() == 0 &&
     lastE.theData.theData == this->opLisT()
   ) {
-    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("makeSequence"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("MakeSequence"));
   }
   if (thirdToLastS == "\\sqrt" && secondToLastS == "Expression") {
     return this->ReplaceSqrtEXByEX();
@@ -2622,10 +2622,10 @@ bool Calculator::ApplyOneRule() {
   ) {
     return this->ReplaceYXBySequenceX(this->conSequence());
   }
-  if (thirdToLastS == "makeSequence" && secondToLastS == "{}" && lastS == "Expression") {
+  if (thirdToLastS == "MakeSequence" && secondToLastS == "{}" && lastS == "Expression") {
     return this->ReplaceXXYBySequenceY(this->conExpression());
   }
-  if (fourthToLastS == "makeSequence" && thirdToLastS == "{}" && secondToLastS == "Expression") {
+  if (fourthToLastS == "MakeSequence" && thirdToLastS == "{}" && secondToLastS == "Expression") {
     return this->ReplaceXXYXBySequenceYX(this->conExpression());
   }
   if (

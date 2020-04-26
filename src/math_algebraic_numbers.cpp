@@ -354,7 +354,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     projectionGeneratorCoordinates.addMonomial(MonomialMatrix(i, i), 1);
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
-    zToTheNth.makeMonomial(0, i, 1, 1);
+    zToTheNth.makeMonomial(0, i, 1);
     zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
@@ -454,7 +454,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
       << ". A printout of the algebraic closure follows. "
       << this->toString() << global.fatal;
     }
-    output.AddOtherTimesConst(
+    output.addOtherTimesConst(
       this->basisInjections[input.basisIndex][currentIndex],
       input.element.coefficients[i]
     );
@@ -703,7 +703,7 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
     << "The input poly is: " << input.toString() << global.fatal;
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.MakeIdSubstitution(indexVar + 1);
+  theSub.makeIdentitySubstitution(indexVar + 1);
   theSub[indexVar].makeMonomial(0, 1, 1);
   output = input;
   output.substitution(theSub);
@@ -1164,8 +1164,8 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     theFactors.addOnTop(- 1);
     absoluteInput *= - 1;
   }
-  LargeInteger squareFreeInput = absoluteInput.GetNumerator();
-  squareFreeInput *= absoluteInput.GetDenominator();
+  LargeInteger squareFreeInput = absoluteInput.getNumerator();
+  squareFreeInput *= absoluteInput.getDenominator();
   List<LargeInteger> primeFactors;
   List<int> theMults;
   if (!squareFreeInput.value.factor(
@@ -1175,7 +1175,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   }
   squareFreeInput.value = 1;
   Rational squareRootRationalPart = 1;
-  squareRootRationalPart /= absoluteInput.GetDenominator();
+  squareRootRationalPart /= absoluteInput.getDenominator();
   for (int i = 0; i < primeFactors.size; i ++) {
     if (theMults[i] % 2 == 1) {
       squareFreeInput *= primeFactors[i];
@@ -1183,7 +1183,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     primeFactors[i].raiseToPower(theMults[i] / 2);
     squareRootRationalPart *= primeFactors[i];
   }
-  if (!squareFreeInput.IsEqualToOne()) {
+  if (!squareFreeInput.isEqualToOne()) {
     theFactors.addOnTop(squareFreeInput);
   }
   if (theFactors.size == 0) {
@@ -1231,7 +1231,7 @@ bool AlgebraicNumber::RadicalMeDefault(
   one.assignRational(1, *this->owner);
   minusOne.assignRational(- 1, *this->owner);
   Polynomial<AlgebraicNumber> thePolynomial;
-  thePolynomial.AddConstant(*this * minusOne);
+  thePolynomial.addConstant(*this * minusOne);
   MonomialP leadingMonomial;
   leadingMonomial.makeEi(0, radical);
   thePolynomial.addMonomial(leadingMonomial, one);
@@ -1454,7 +1454,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
 }
 
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
-  if (!other.IsConstant(this)) {
+  if (!other.isConstant(this)) {
     global.fatal
     << "This is a programming error: attempting to assign non-constant "
     << "polynomial to a Rational number is not allowed. " << global.fatal;
@@ -1546,7 +1546,7 @@ void ElementZmodP::operator=(const LargeInteger& other) {
   this->theValue %= this->theModulus;
   if (other.sign == - 1) {
     ElementZmodP mOne;
-    mOne.MakeMOne(this->theModulus);
+    mOne.makeMinusOne(this->theModulus);
     *this *= mOne;
   }
 }
@@ -1621,7 +1621,7 @@ void ElementZmodP::makeOne(const LargeIntegerUnsigned& newModulo) {
   this->theValue = 1;
 }
 
-void ElementZmodP::MakeMOne(const LargeIntegerUnsigned& newModulo) {
+void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
   this->theModulus = newModulo;
   this->theValue = newModulo;
   this->theValue --;
@@ -1746,10 +1746,10 @@ void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
 
 bool ElementZmodP::assignRational(const Rational& other) {
   this->CheckIamInitialized();
-  *this = other.GetNumerator();
+  *this = other.getNumerator();
   ElementZmodP denominator;
   denominator.theModulus = this->theModulus;
-  denominator.theValue = other.GetDenominator();
+  denominator.theValue = other.getDenominator();
   if (denominator.isEqualToZero()) {
     return false;
   }

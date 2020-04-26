@@ -202,7 +202,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     int den = 1;
     for (int i = 0; i < cartanSymmetric.numberOfRows; i ++) {
       for (int j = 0; j < cartanSymmetric.numberOfColumns; j ++) {
-        den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].GetDenominator().GetUnsignedIntValueTruncated());
+        den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].getDenominator().GetUnsignedIntValueTruncated());
       }
     }
     unrationalCartanSymmetric.initialize(cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns);
@@ -211,7 +211,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     //  this->ucsm[i].setSize(cartanSymmetric.numberOfColumns);
     for (int i = 0; i < cartanSymmetric.numberOfRows; i ++) {
       for (int j = 0; j < cartanSymmetric.numberOfColumns; j ++) {
-        unrationalCartanSymmetric.elements[i][j] = (cartanSymmetric.elements[i][j] * den).GetNumerator().GetIntValueTruncated();
+        unrationalCartanSymmetric.elements[i][j] = (cartanSymmetric.elements[i][j] * den).getNumerator().GetIntValueTruncated();
         //ucsm[i][j] = unrationalCartanSymmetric.elements[i][j];
       }
     }
@@ -510,7 +510,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   }
   for (int i = 0; i < spaces.size; i ++) {
     Rational x = chars[i].InnerProduct(chars[i]);
-    int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
+    int x2 = x.getDenominator().GetUnsignedIntValueTruncated();
     x2 = static_cast<int>(FloatingPoint::Sqrt(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {
@@ -712,7 +712,7 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
   characters.theList.setSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].data.size; j ++) {
-      characters[i][j] = G.characterTable[i][j].GetNumerator();
+      characters[i][j] = G.characterTable[i][j].getNumerator();
     }
   }
 }

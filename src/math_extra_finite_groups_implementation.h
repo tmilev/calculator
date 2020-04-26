@@ -2148,10 +2148,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetLargestDe
   for (int gi = 0; gi < this->generatorS.size; gi ++) {
     for (int mi = 0; mi < this->generatorS[gi].numberOfRows; mi ++) {
       for (int mj = 0; mj < this->generatorS[gi].numberOfColumns; mj ++) {
-        if (this->generatorS[gi](mi, mj).GetDenominator() > outputDen) {
-          outputDen = this->generatorS[gi](mi, mj).GetDenominator();
+        if (this->generatorS[gi](mi, mj).getDenominator() > outputDen) {
+          outputDen = this->generatorS[gi](mi, mj).getDenominator();
         }
-        outputLCM = LargeIntegerUnsigned::lcm(outputLCM, this->generatorS[gi](mi, mj).GetDenominator());
+        outputLCM = LargeIntegerUnsigned::lcm(outputLCM, this->generatorS[gi](mi, mj).getDenominator());
       }
     }
   }
@@ -2421,7 +2421,7 @@ const ClassFunction<somegroup, Coefficient>& GroupRepresentationCarriesAllMatric
   this->theCharacteR.G = this->ownerGroup;
   this->theCharacteR.data.setSize(this->ownerGroup->ConjugacyClassCount());
   for (int cci = 0; cci < this->ownerGroup->ConjugacyClassCount(); cci ++) {
-    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).GetTrace();
+    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).getTrace();
   }
   this->flagCharacterIsComputed = true;
   return this->theCharacteR;

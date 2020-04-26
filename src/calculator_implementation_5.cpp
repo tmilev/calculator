@@ -348,7 +348,7 @@ bool Calculator::GetVectorDoubles(
 bool Calculator::GetVectorDoublesFromFunctionArguments(
   const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory
 ) {
-  return this->GetVectorFromFunctionArguments(
+  return this->getVectorFromFunctionArguments(
     input,
     output,
     nullptr,
@@ -424,8 +424,8 @@ bool MeshTriangles::ComputePoints(
     }
     theFreeVars.addOnTop(tempE);
   }
-  this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[0]);
-  this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[1]);
+  this->knownEs.addOnTopNoRepetitionMustBeNew(theFreeVars[0]);
+  this->knownEs.addOnTopNoRepetitionMustBeNew(theFreeVars[1]);
   if (!theCommands.GetVectorDoubles(input[2], this->lowerLeftCorner)) {
     return theCommands << "Failed to extract lower left corner from: " << input[2].toString();
   }
@@ -497,7 +497,7 @@ bool CalculatorFunctions::innerIntegratePullConstant(
   }
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
-  if (theFunCoeff.IsEqualToOne()) {
+  if (theFunCoeff.isEqualToOne()) {
     return false;
   }
   Expression theNewIntegralE;
@@ -774,7 +774,7 @@ bool CalculatorFunctions::innerNumerator(Calculator& theCommands, const Expressi
   const Expression& argument = input[1];
   Rational theRat;
   if (argument.isRational(&theRat)) {
-    return output.assignValue(Rational(theRat.GetNumerator()), theCommands);
+    return output.assignValue(Rational(theRat.getNumerator()), theCommands);
   }
   if (argument.startsWith(theCommands.opDivide())) {
     if (argument.size() > 1) {
@@ -794,7 +794,7 @@ bool CalculatorFunctions::innerDenominator(Calculator& theCommands, const Expres
   const Expression& argument = input[1];
   Rational theRat, theDen;
   if (argument.isRational(&theRat)) {
-    theDen = theRat.GetDenominator();
+    theDen = theRat.getDenominator();
     return output.assignValue(theDen, theCommands);
   }
   if (argument.startsWith(theCommands.opDivide())) {
@@ -1363,7 +1363,7 @@ bool CalculatorFunctions::innerDistributeExponent(
     } else {
       Rational exponentRat;
       if (exponentE.isRational(&exponentRat)) {
-        if (!exponentRat.GetDenominator().IsEven()) {
+        if (!exponentRat.getDenominator().IsEven()) {
           isGood = true;
         }
       }
@@ -1402,7 +1402,7 @@ bool CalculatorFunctions::innerSqrt(
       }
     }
   }
-  if (input[2].IsEqualToOne()) {
+  if (input[2].isEqualToOne()) {
     return output.assignValue(1, theCommands);
   }
   int thePower = 0;
@@ -1814,8 +1814,8 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
       return true;
     }
   }
-  argNum = theArg.GetNumerator();
-  LargeInteger argDen = theArg.GetDenominator();
+  argNum = theArg.getNumerator();
+  LargeInteger argDen = theArg.getDenominator();
   double doubleBase = baseInt.GetDoubleValue();
   double doubleArgNum = argNum.GetDoubleValue();
   if (FloatingPoint::Log(doubleArgNum) / FloatingPoint::Log(doubleBase) > 1000) {
@@ -2253,24 +2253,23 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
   ExpressionContext theContext(theCommands);
-  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
+  Vector<Polynomial<AlgebraicNumber> > polynomials;
   if (!theCommands.getListPolynomialVariableLabelsLexicographic(
-    input, polynomialsRational, theContext
+    input, polynomials, theContext
   )) {
     return output.makeError("Failed to extract list of polynomials. ", theCommands);
   }
-  GroebnerBasisComputation<AlgebraicNumber> theGB;
-  theGB.flagStoreQuotients = true;
-  theGB.theBasis.setSize(polynomialsRational.size - 1);
-  for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].isEqualToZero()) {
+  GroebnerBasisComputation<AlgebraicNumber> computation;
+  computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+  computation.flagStoreQuotients = true;
+  for (int i = 1; i < polynomials.size; i ++) {
+    if (polynomials[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasis[i - 1] = polynomialsRational[i];
+    computation.addBasisElementNoReduction(polynomials[i]);
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  theGB.initializeForDivision(theGB.theBasis);
-  theGB.remainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
+  computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
   Expression thePolyE;
   thePolyE.assignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
@@ -2341,39 +2340,38 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
       theCommands
     );
   }
-  GroebnerBasisComputation<AlgebraicNumber> theGB;
-  theGB.flagDoLogDivision = true;
-  theGB.flagStoreQuotients = true;
-  theGB.theBasis.setSize(polynomialsRational.size - 1);
+  GroebnerBasisComputation<AlgebraicNumber> computation;
+  computation.flagDoLogDivision = true;
+  computation.flagStoreQuotients = true;
+  computation.thePolynomialOrder.monomialOrder = *monomialOrder;
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasis[i - 1] = polynomialsRational[i];
+    computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
-  theGB.initializeForDivision(theGB.theBasis);
   if (monomialOrder != nullptr) {
-    theGB.thePolynomialOrder.monomialOrder = *monomialOrder;
+    computation.thePolynomialOrder.monomialOrder = *monomialOrder;
   }
-  theGB.remainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
-  theContext.getFormat(theGB.theFormat);
-  theGB.theFormat.flagUseLatex = true;
-  theGB.theFormat.flagUseFrac = true;
+  computation.remainderDivisionByBasis(polynomialsRational[0], computation.remainderDivision, - 1);
+  theContext.getFormat(computation.theFormat);
+  computation.theFormat.flagUseLatex = true;
+  computation.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput << "<br>In latex: <br>"
   << "\\documentclass{article}\\usepackage{longtable}"
   << "\\usepackage{xcolor}\\usepackage{multicol}"
   << "\\begin{document} "
-  << theGB.GetDivisionStringLaTeX()
+  << computation.getDivisionStringLaTeX()
   << "\\end{document}";
   std::stringstream out;
-  out << theGB.GetDivisionStringHtml();
+  out << computation.getDivisionStringHtml();
   out << latexOutput.str();
   return output.assignValue(out.str(), theCommands);
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetSpacedMonomialsWithHighlightLaTeX(
+std::string GroebnerBasisComputation<Coefficient>::getSpacedMonomialsWithHighlightLaTeX(
   const Polynomial<Coefficient>& thePoly,
   List<List<int> >* slidesToHighlightMon,
   List<int>* slidesToFcAnswer,
@@ -2382,7 +2380,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetSpacedMonomialsWithHighlig
   int slidesToUncoverAllMons,
   bool useColumnSeparator
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetSpacedMonomialsWithHighlightLaTeX");
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::getSpacedMonomialsWithHighlightLaTeX");
   (void) slidesToUncoverAllMons;
   std::stringstream out;
   bool found = false;
@@ -2508,10 +2506,10 @@ std::string GroebnerBasisComputation<Coefficient>::GetSpacedMonomialsWithHighlig
 }
 
 template <class Coefficient>
-void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
+void GroebnerBasisComputation<Coefficient>::computeHighLightsFromRemainder(
   int remainderIndex, int& currentSlideNumber
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::ComputeHighLightsFromRemainder");
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::computeHighLightsFromRemainder");
   if (remainderIndex == 0) {
     for (int i = 0; i < this->allMonomials.size; i ++) {
       this->highlightMonsRemainders[remainderIndex][i].addOnTop(currentSlideNumber);
@@ -2556,7 +2554,7 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   }
   Polynomial<Coefficient>& currentRemainder = this->intermediateRemainders.getElement()[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors.getElement()[remainderIndex];
-  Polynomial<Coefficient>& currentDivisor = this->theBasis[indexCurrentDivisor];
+  Polynomial<Coefficient>& currentDivisor = this->theBasis[indexCurrentDivisor].element;
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.getIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.monomialOrder
@@ -2613,9 +2611,9 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
-  for (int i = 0; i < this->theBasis[indexCurrentDivisor].size(); i ++) {
+  for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.getIndex(this->theBasis[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
@@ -2638,9 +2636,9 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
   << "}";
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
-  for (int i = 0; i < this->theBasis[indexCurrentDivisor].size(); i ++) {
+  for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.getIndex(this->theBasis[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(currentDivisor[i])
     ].addOnTop(currentSlideNumber);
   }
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
@@ -2691,8 +2689,8 @@ void GroebnerBasisComputation<Coefficient>::ComputeHighLightsFromRemainder(
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionLaTeXSlide");
+std::string GroebnerBasisComputation<Coefficient>::getDivisionLaTeXSlide() {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionLaTeXSlide");
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
@@ -2707,7 +2705,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
   for (int i = 0; i < this->theBasis.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(this->theBasis[i].theMonomials);
+    Polynomial<Coefficient>& current = this->theBasis[i].element;
+    this->allMonomials.addOnTopNoRepetition(current.theMonomials);
   }
   for (int i = 0; i < this->theQuotients.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].theMonomials);
@@ -2741,7 +2740,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   this->highlightAllMonsFinalRemainder = - 1;
   int currentSlideNumer = this->firstIndexLatexSlide + 1;
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
+    this->computeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
     this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].getIndexLeadingMonomial(
@@ -2759,7 +2758,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   out << "}";
   if (!oneDivisor) {
     out << "{\\color{orange}\\textbf{Remainder:} }&"
-    << this->GetSpacedMonomialsWithHighlightLaTeX(
+    << this->getSpacedMonomialsWithHighlightLaTeX(
       this->remainderDivision,
       nullptr,
       nullptr,
@@ -2781,8 +2780,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
   }
   for (int i = 0; i < this->theBasis.size; i ++) {
     if (!oneDivisor) {
-      out << this->GetSpacedMonomialsWithHighlightLaTeX(
-        this->theBasis[i],
+      out << this->getSpacedMonomialsWithHighlightLaTeX(
+        this->theBasis[i].element,
         &this->highlightMonsDivisors[i],
         &this->fcAnswerMonsDivisors[i],
         nullptr,
@@ -2799,7 +2798,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     }
     out << "&";
     out << "\\multicolumn{" << this->allMonomials.size * 2 << "}{c}{";
-    out << this->GetSpacedMonomialsWithHighlightLaTeX(
+    out << this->getSpacedMonomialsWithHighlightLaTeX(
       this->theQuotients[i],
       &this->highlightMonsQuotients[i],
       &this->fcAnswerMonsQuotients[i],
@@ -2820,8 +2819,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
     if (i == 0) {
       if (oneDivisor) {
         out << "\\multicolumn{1}{c|}{"
-        << this->GetSpacedMonomialsWithHighlightLaTeX(
-          this->theBasis[0],
+        << this->getSpacedMonomialsWithHighlightLaTeX(
+          this->theBasis[0].element,
           &this->highlightMonsDivisors[0],
           &this->fcAnswerMonsDivisors[i],
           nullptr,
@@ -2840,7 +2839,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
       << "}";
     }
     out << "&";
-    out << this->GetSpacedMonomialsWithHighlightLaTeX(
+    out << this->getSpacedMonomialsWithHighlightLaTeX(
       theRemainders[i],
       &this->highlightMonsRemainders[i],
       &this->fcAnswerMonsRemainders[i],
@@ -2859,7 +2858,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionLaTeXSlide() {
       << "$\\overline{\\phantom{A}}$"
       << "}}";
       out << "&";
-      out << this->GetSpacedMonomialsWithHighlightLaTeX(
+      out << this->getSpacedMonomialsWithHighlightLaTeX(
         theSubtracands[i],
         &this->highlightMonsSubtracands[i],
         &this->fcAnswerMonsSubtracands[i],
@@ -2899,27 +2898,25 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     << "Function takes at least 3 inputs: "
     << "index of first slide, dividend, divisor(s).";
   }
-  GroebnerBasisComputation<AlgebraicNumber> theGB;
-  theGB.flagDoLogDivision = true;
-  theGB.flagStoreQuotients = true;
-  theGB.theBasis.setSize(polynomialsRational.size - 2);
+  GroebnerBasisComputation<AlgebraicNumber> computation;
+  computation.flagDoLogDivision = true;
+  computation.flagStoreQuotients = true;
+  computation.thePolynomialOrder.monomialOrder.setComparison(
+    MonomialP::greaterThan_totalDegree_rightSmallerWins
+  );
   for (int i = 2; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    theGB.theBasis[i - 2] = polynomialsRational[i];
+    computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
-  if (!polynomialsRational[0].isSmallInteger(&theGB.firstIndexLatexSlide)) {
+  if (!polynomialsRational[0].isSmallInteger(&computation.firstIndexLatexSlide)) {
     return theCommands << "Failed to extract integer from first argument";
   }
-  theGB.initializeForDivision(theGB.theBasis);
-  theGB.thePolynomialOrder.monomialOrder.setComparison(
-    MonomialP::greaterThan_totalDegree_rightSmallerWins
-  );
-  theGB.remainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
-  theContext.getFormat(theGB.theFormat);
-  theGB.theFormat.flagUseLatex = true;
-  theGB.theFormat.flagUseFrac = true;
+  computation.remainderDivisionByBasis(polynomialsRational[1], computation.remainderDivision, - 1);
+  theContext.getFormat(computation.theFormat);
+  computation.theFormat.flagUseLatex = true;
+  computation.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput
   << "In latex: \r\n \\documentclass{beamer}\n"
@@ -2931,7 +2928,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   << "{\\uncover<#1->{\\alertNoH{#1}{\\!\\!\\!#2}}}}\r\n"
   << "\\begin{document} "
   << "\\begin{frame}"
-  << theGB.GetDivisionLaTeXSlide()
+  << computation.getDivisionLaTeXSlide()
   << "\\end{frame}"
   << "\\end{document}\r\n";
   return output.assignValue(

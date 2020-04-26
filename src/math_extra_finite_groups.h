@@ -567,7 +567,7 @@ class WeylGroupData {
     Vectors<Rational> fundamentalBasis;
     this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
     this->FundamentalToSimpleCoords.AssignVectorsToRows(fundamentalBasis);
-    this->FundamentalToSimpleCoords.Transpose();
+    this->FundamentalToSimpleCoords.transpose();
     this->SimpleToFundamentalCoords = this->FundamentalToSimpleCoords;
     this->SimpleToFundamentalCoords.invert();
     this->flagFundamentalToSimpleMatricesAreComputed = true;
@@ -1314,7 +1314,7 @@ void GroupRepresentation<someGroup, Coefficient>::ComputeCharacter() const {
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generatorS[ccirWord[i]];
     }
-    this->theCharacteR.data[cci] = M.GetTrace();
+    this->theCharacteR.data[cci] = M.getTrace();
   }
   this->theCharacteR.G = ownerGroup;
   this->flagCharacterIsComputed = true;
@@ -1691,7 +1691,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal() {
       csmt(i, j) = QIDMul(i, j);
     }
   }
-  global.comments << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
+  global.comments << "Coset multiplication table\n" << csmt.toStringPlainText() << '\n';
   for (int i = 0; i < cosets.size; i ++) {
     for (int j = i; j < cosets.size; j ++) {
       for (int k = j; k < cosets.size; k ++) {
@@ -1768,7 +1768,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
       out.generatorS[i](j, ci) = 1;
     }
     global.comments << "Element " << this->theGroup->generators[i] << " of coset " << this->GetCosetId(this->theGroup->generators[i]);
-    global.comments << " permutes the other cosets as\n" << out.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << " permutes the other cosets as\n" << out.generatorS[i].toStringPlainText() << '\n';
   }
 }
 
@@ -1788,7 +1788,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
   // in TODO: make random FiniteGroups capable of finding their conjugacy classes in less than at least 5 minutes
   global.comments << "inducing from subgroup representation:\n";
   for (int i = 0; i < this->theSubgroup->generators.size; i ++) {
-    global.comments << this->theSubgroup->generators[i] << '\n' << in.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << this->theSubgroup->generators[i] << '\n' << in.generatorS[i].toStringPlainText() << '\n';
   }
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     elementSomeGroup g;
@@ -1803,24 +1803,24 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     global.comments << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
     global.comments << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
     in.GetMatrixOfElement(g, sr.generatorS[i]);
-    global.comments << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << " which is assigned matrix\n" << sr.generatorS[i].toStringPlainText() << '\n';
   }
   GroupRepresentation<someGroup, Coefficient> out;
   out.MakeTensorRepresentation(qr,sr);
   global.comments << "Subgroup representation: " << sr.toString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n'
-    << sr.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << this->theGroup->generators[i] << ' ' << sr.generatorS[i].getTrace() << '\n'
+    << sr.generatorS[i].toStringPlainText() << '\n';
   }
   global.comments << "Quotient representation: " << qr.toString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n'
-    << qr.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << this->theGroup->generators[i] << ' ' << qr.generatorS[i].getTrace() << '\n'
+    << qr.generatorS[i].toStringPlainText() << '\n';
   }
   global.comments << "Induced representation: " << out.toString() << '\n';
   for (int i = 0; i <out.generatorS.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
-    << out.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].getTrace() << '\n'
+    << out.generatorS[i].toStringPlainText() << '\n';
   }
   return out;
 }
@@ -1857,8 +1857,8 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
   }
   out.ownerGroup = this->theGroup;
   for (int i = 0; i <out.generatorS.size; i ++) {
-    global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
-    << out.generatorS[i].ToStringPlainText() << '\n';
+    global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].getTrace() << '\n'
+    << out.generatorS[i].toStringPlainText() << '\n';
   }
   if (!out.VerifyRepresentation()) {
     if (!in.VerifyRepresentationExpensive()) {
@@ -2249,7 +2249,7 @@ public:
     *this = *this / right;
   }
   Coefficient operator()(const Coefficient& x) const;
-  void ClearDenominators();
+  void clearDenominators();
   void FormalDerivative();
   void SquareFree();
   List<Coefficient> GetRoots() const;
@@ -2298,13 +2298,13 @@ void UDPolynomial<Coefficient>::AssignCharPoly(const Matrix<Coefficient>& input)
   Matrix<Coefficient> acc;
   acc = input;
   for (int i = 1; i < n; i ++) {
-    this->data[i] = - acc.GetTrace() / i;
+    this->data[i] = - acc.getTrace() / i;
     for (int j = 0; j < n; j ++) {
       acc.elements[j][j] += this->data[i];
     }
     acc.multiplyOnTheLeft(input);
   }
-  this->data[n] = - acc.GetTrace() / n;
+  this->data[n] = - acc.getTrace() / n;
 }
 
 template <typename Coefficient>

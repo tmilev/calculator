@@ -171,7 +171,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::GetDual(CharacterSemisimp
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     tempM = (*this)[i];
-    tempM.weightFundamentalCoordS.Minus();
+    tempM.weightFundamentalCoordS.minus();
     output.addMonomial(tempM, this->coefficients[i]);
   }
 }

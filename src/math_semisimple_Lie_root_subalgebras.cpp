@@ -840,7 +840,7 @@ void RootSubalgebra::MatrixToRelation(
         output.Betas.addOnTop(tempRoot);
         output.BetaCoeffs.addOnTop(matX.elements[i][0]);
       } else {
-        tempRoot.Minus();
+        tempRoot.minus();
         output.Alphas.addOnTop(tempRoot);
         output.AlphaCoeffs.addOnTop(matX.elements[i][0]);
       }
@@ -1111,7 +1111,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     for (int i = 0; i <domainRec.size; i ++) {
       this->GetAmbientWeyl().RootScalarCartanRoot(domainRec[i], LastRootD, tempRatD);
       this->GetAmbientWeyl().RootScalarCartanRoot(rangeRec[i], LastRootR, tempRatR);
-      if (!tempRatR.IsEqualTo(tempRatD)) {
+      if (!tempRatR.isEqualTo(tempRatD)) {
         return false;
       }
     }
@@ -2450,7 +2450,7 @@ bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   MonomialP tempM;
-  tempM.makeOne(numberVariables);
+  tempM.makeOne();
   Matrix<Rational> coeffsF;
   coeffsF.initialize(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
@@ -2527,7 +2527,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
           outputSystemToBeSolved.setSize(outputSystemToBeSolved.size + 1);
           outputSystemToBeSolved.lastObject()->makeZero();
         }
-        tempM.makeOne(numberVariables);
+        tempM.makeOne();
         tempM.setVariable(i, 1);
         tempM.setVariable(j + halfNumberVariables, 1);
         Rational tempCoeff = this->GetOwnerSSAlgebra().GetConstant(rootsInPlay[i], - rootsInPlay[j]);
@@ -2546,14 +2546,14 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
     }
     this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
     for (int j = 0; j < this->GetOwnerSSAlgebra().GetRank(); j ++) {
-      tempM.makeOne(numberVariables);
+      tempM.makeOne();
       tempM.setVariable(i, 1);
       tempM.setVariable(i + halfNumberVariables, 1);
       outputSystemToBeSolved[j+oldSize].addMonomial(tempM, tempRoot[j]);
     }
   }
   for (int i = 0; i < this->GetOwnerSSAlgebra().GetRank(); i ++) {
-    outputSystemToBeSolved[i + oldSize].AddConstant(targetH[i] * (- 1));
+    outputSystemToBeSolved[i + oldSize].addConstant(targetH[i] * (- 1));
   }
   outputMatrixSystemToBeSolved.initialize(outputSystemToBeSolved.size, halfNumberVariables);
   outputSystemColumnVector.initialize(outputSystemToBeSolved.size, 1);

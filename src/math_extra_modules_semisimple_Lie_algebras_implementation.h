@@ -904,7 +904,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
   for (int i = 0; i < this->GetOwner().GetNumPosRoots(); i ++) {
     left = this->GetActionGeneratorIndeX(i);
     right = this->GetActionGeneratorIndeX(this->GetOwner().GetNumGenerators() - 1 - i);
-    left.Transpose();
+    left.transpose();
     left -= right;
     left = this->GetActionGeneratorIndeX(i);
     right.LieBracketOnTheLeft(left);

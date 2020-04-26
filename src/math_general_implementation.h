@@ -47,7 +47,7 @@ void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
     for (int j = i + 1; j < dim; j ++) {
       if (!this->elements[j][i].isEqualToZero()) {
         tempRat = this->elements[j][i];
-        tempRat.Minus();
+        tempRat.minus();
         this->addTwoRows (i, j, i, tempRat);
         if (doReport) {
           if (theReport2.tickAndWantReport()) {
@@ -597,7 +597,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       if (j != NumFoundPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
-          tempElement.Minus();
+          tempElement.minus();
           if (theReport.tickAndWantReport()) {
             std::stringstream reportStream;
             reportStream << "Gaussian elimination (" << this->numberOfRows << "x" << this->numberOfColumns

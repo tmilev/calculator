@@ -275,7 +275,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
       Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
       tempM2 = tempM;
-      tempM2.Transpose();
+      tempM2.transpose();
       tempM2.MultiplyOnTheRight(tempM);
       tempM2 *= 2 / tempSimpleType.GetEpsilonRealizationLongRootLengthSquared();
       if (!(tempM2 == theWeyl.cartanSymmetric)) {

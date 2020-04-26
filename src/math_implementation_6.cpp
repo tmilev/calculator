@@ -48,7 +48,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
     this->one,
     commentsOnFailure
   );
-  if (!greatestCommonDivisor.IsConstant()) {
+  if (!greatestCommonDivisor.isConstant()) {
     this->output->accountNonReducedFactor(greatestCommonDivisor);
     return true;
   }
@@ -119,7 +119,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
     output.addListOnTop(tempList);
     return result;
   }
-  if (this->IsConstant()) {
+  if (this->isConstant()) {
     return true;
   }
   highestCoefficient = this->GetLeadingCoefficient(monomialOrder);
@@ -131,8 +131,8 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   tempV.setSize(1);
   List<int> divisorsH, divisorsS;
   LargeInteger hT, lT;
-  hT = highestCoefficient.GetNumerator();
-  lT = lowestTerm.GetNumerator();
+  hT = highestCoefficient.getNumerator();
+  lT = lowestTerm.getNumerator();
   if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
     return false;
   }
@@ -188,7 +188,7 @@ void Polynomial<Coefficient>::Interpolate(
   Polynomial<Coefficient> theLagrangeInterpolator, accumulator;
   this->makeZero();
   for (int i = 0; i < thePoints.size; i ++) {
-    theLagrangeInterpolator.makeConstant(1, 1);
+    theLagrangeInterpolator.makeConstant(1);
     for (int j = 0; j < thePoints.size; j ++) {
       if (i == j) {
         continue;

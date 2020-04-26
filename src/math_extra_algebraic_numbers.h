@@ -77,7 +77,7 @@ class AlgebraicNumber {
     return false;
   }
   bool isEqualToZero() const;
-  bool IsEqualToOne() const {
+  bool isEqualToOne() const {
     return (*this) == 1;
   }
   void operator= (const AlgebraicNumber& other) {
@@ -136,7 +136,7 @@ class AlgebraicNumber {
   bool operator!= (int other) const {
     return !(*this == other);
   }
-  void Minus() {
+  void minus() {
     this->element *= - 1;
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
@@ -295,7 +295,7 @@ public:
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntegerUnsigned& other);
   void makeOne(const LargeIntegerUnsigned& newModulo);
-  void MakeMOne(const LargeIntegerUnsigned& newModulo);
+  void makeMinusOne(const LargeIntegerUnsigned& newModulo);
   void CheckEqualModuli(const ElementZmodP& other);
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
@@ -336,6 +336,7 @@ public:
   public:
     static bool all();
     static bool basicOperations();
+    static bool scale();
   };
 };
 

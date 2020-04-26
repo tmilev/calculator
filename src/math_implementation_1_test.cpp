@@ -95,6 +95,7 @@ bool Rational::Test::TestScale() {
 
 bool ElementZmodP::Test::all() {
   ElementZmodP::Test::basicOperations();
+  ElementZmodP::Test::scale();
   return true;
 }
 
@@ -109,6 +110,28 @@ bool ElementZmodP::Test::basicOperations() {
   if (!(z.theValue == 1)) {
     global.fatal << "Bad arithmetic: " << x.toString() << " * "
     << y.toString() << " equals: " << z.toString() << ". " << global.fatal;
+  }
+  return true;
+}
+
+bool ElementZmodP::Test::scale() {
+  ElementZmodP x, y, z;
+  LargeIntegerUnsigned modulus = 7;
+  x.makeOne(modulus);
+  y.makeOne(modulus);
+  z.makeOne(modulus);
+  x = 2;
+  y = 0;
+  z = 3;
+  List<ElementZmodP> theList = {x, y, z};
+  ElementZmodP scale = ElementZmodP::scaleNormalizeIndex(theList, 0);
+  std::string scaled = theList.toStringCommaDelimited();
+  std::string expected = "(1 mod (7)), (0 mod (7)), (5 mod (7))";
+  if (scaled != expected) {
+    global.fatal << "Bad scaling, got: " << scaled << ", expected: " << expected << ". " << global.fatal;
+  }
+  if (scale.theModulus != 4) {
+    global.fatal << "Bad scaling, scale expected to be 4. ";
   }
   return true;
 }

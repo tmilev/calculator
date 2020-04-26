@@ -12,7 +12,7 @@ bool MonomialP::substitution(
 ) const {
   MacroRegisterFunctionWithName("MonomialP::substitution");
   output.makeConstant(1);
-  if (this->IsConstant()) {
+  if (this->isConstant()) {
     return true;
   }
   Polynomial<Coefficient> tempPoly;
@@ -180,8 +180,8 @@ bool Polynomial<Coefficient>::substitution(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::makeOne(int ExpectedNumVars) {
-  this->makeConstant(1, ExpectedNumVars);
+void Polynomial<Coefficient>::makeOne() {
+  this->makeConstant(1);
 }
 
 template <class Coefficient>
@@ -260,8 +260,8 @@ Coefficient Polynomial<Coefficient>::Evaluate(const Vector<Coefficient>& input) 
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
-  MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
+void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int newNumVars) {
+  MacroRegisterFunctionWithName("Polynomial_CoefficientType::setNumberOfVariablesSubstituteDeletedByOne");
   if (newNumVars >= this->minimalNumberOfVariables()) {
     return;
   }
@@ -275,7 +275,7 @@ void Polynomial<Coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   Accum.setExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.makeOne(newNumVars);
+    tempM.makeOne();
     for (int j = 0; j < newNumVars; j ++) {
       tempM.setVariable(j, (*this)[i](j));
     }
@@ -311,15 +311,14 @@ void Polynomial<Coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
     return;
   }
   int oldNumVars = this->minimalNumberOfVariables();
-  int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<Coefficient> Accum;
   Accum.makeZero();
   Accum.setExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.makeOne(newNumVars);
+    tempM.makeOne();
     for (int j = 0; j < oldNumVars; j ++) {
-      tempM[j + VarIndexShift] = (*this)[i](j);
+      tempM.setVariable(j + VarIndexShift, (*this)[i](j));
     }
     Accum.addMonomial(tempM, this->coefficients[i]);
   }
@@ -327,10 +326,10 @@ void Polynomial<Coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsEqualToOne() const {
+bool Polynomial<Coefficient>::isEqualToOne() const {
   Coefficient tempC;
-  if (this->IsConstant(&tempC)) {
-    return tempC.IsEqualToOne();
+  if (this->isConstant(&tempC)) {
+    return tempC.isEqualToOne();
   }
   return false;
 }
@@ -340,7 +339,7 @@ bool Polynomial<Coefficient>::IsMonomialCoeffOne() const {
   if (this->size() != 1) {
     return false;
   }
-  return this->coefficients[0].IsEqualToOne();
+  return this->coefficients[0].isEqualToOne();
 }
 
 template <class Coefficient>
@@ -352,7 +351,7 @@ bool Polynomial<Coefficient>::IsOneLetterFirstDegree(int* whichLetter) const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsConstant(Coefficient* whichConstant) const {
+bool Polynomial<Coefficient>::isConstant(Coefficient* whichConstant) const {
   if (this->size() > 1) {
     return false;
   }
@@ -366,13 +365,13 @@ bool Polynomial<Coefficient>::IsConstant(Coefficient* whichConstant) const {
     *whichConstant = this->coefficients[0];
   }
   const MonomialP& theMon = (*this)[0];
-  return theMon.IsConstant();
+  return theMon.isConstant();
 }
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::isNegative() const {
   Coefficient tempC;
-  if (!this->IsConstant(&tempC)) {
+  if (!this->isConstant(&tempC)) {
     return false;
   }
   return tempC.isNegative();
@@ -403,7 +402,7 @@ bool Polynomial<Coefficient>::IsLinearGetRootConstantTermLastCoordinate(Vector<C
   outputRoot.makeZero(this->minimalNumberOfVariables() + 1);
   int index;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].IsConstant()) {
+    if ((*this)[i].isConstant()) {
       *outputRoot.lastObject() = this->coefficients[i];
     } else {
       if ((*this)[i].IsOneLetterFirstDegree(&index)) {
@@ -493,7 +492,7 @@ int Polynomial<Coefficient>::GetHighestIndexSuchThatHigherIndexVarsDontParticipa
 template <class Coefficient>
 void Polynomial<Coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
   int numVars = this->minimalNumberOfVariables();
-  outputScale.makeOne(numVars);
+  outputScale.makeOne();
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
       const MonomialP& currentMonomial = (*this)[j];
@@ -508,7 +507,7 @@ void Polynomial<Coefficient>::ScaleToPositiveMonomialExponents(MonomialP& output
 template <class Coefficient>
 bool Polynomial<Coefficient>::operator<=(const Coefficient& other) const {
   Coefficient constME;
-  if (!this->IsConstant(&constME)) {
+  if (!this->isConstant(&constME)) {
     global.fatal << "This may or may not be a programming error: "
     << "attempting to compare a non-constant polynomial to "
     << "a constant. I cannot judge at the moment whether "
@@ -523,7 +522,7 @@ bool Polynomial<Coefficient>::operator<=(const Coefficient& other) const {
 template <class Coefficient>
 bool Polynomial<Coefficient>::operator<(const Coefficient& other) const {
   Coefficient constME;
-  if (!this->IsConstant(&constME)) {
+  if (!this->isConstant(&constME)) {
     global.fatal << "This may or may not be a programming error: "
     << "attempting to compare a non-constant polynomial to "
     << "a constant. I cannot judge at the moment whether allowing "
@@ -602,7 +601,7 @@ bool Polynomial<Coefficient>::IsGEQcompareByTopMonomialLexicographicLastVarStron
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsEqualTo(const Polynomial<Coefficient>& p) const {
+bool Polynomial<Coefficient>::isEqualTo(const Polynomial<Coefficient>& p) const {
   return *this == p;
 }
 
@@ -837,14 +836,14 @@ void Polynomial<Coefficient>::AssignCharPoly(const Matrix<Coefficient>& input) {
   Matrix<Coefficient> acc = input;
   Coefficient currenCF;
   for (int i = 1; i < n; i ++) {
-    currenCF = - acc.GetTrace() / i;
+    currenCF = - acc.getTrace() / i;
     this->addMonomial(MonomialP(0, i), currenCF);
     for (int j = 0; j < n; j ++) {
       acc(j, j) += currenCF;
     }
     acc.multiplyOnTheLeft(input);
   }
-  this->addMonomial(MonomialP(0, n), - acc.GetTrace() / n);
+  this->addMonomial(MonomialP(0, n), - acc.getTrace() / n);
 }
 
 template <class Coefficient>
@@ -856,7 +855,7 @@ void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
     << global.fatal;
   }
   int theDim = input.numberOfColumns;
-  this->makeOne(1);
+  this->makeOne();
   Vectors<Coefficient> theBasis;
   Vector<Coefficient> theVectorPowers;
   Vector<Coefficient> firstDependentPower;
@@ -918,20 +917,18 @@ template <class Coefficient>
 void Polynomial<Coefficient>::makeMonomial(
   int letterIndex,
   const Rational& power,
-  const Coefficient& inputCoefficient,
-  int ExpectedNumVars
+  const Coefficient& inputCoefficient
 ) {
   if (letterIndex < 0) {
     global.fatal << "Negative variable index: "
     << letterIndex << " is not allowed. "
     << global.fatal;
   }
-  int numVars = MathRoutines::Maximum(letterIndex + 1, ExpectedNumVars);
   this->makeZero();
-  MonomialP tempM;
-  tempM.makeOne(numVars);
-  tempM.setVariable(letterIndex, power);
-  this->addMonomial(tempM, inputCoefficient);
+  MonomialP variable;
+  variable.makeOne();
+  variable.setVariable(letterIndex, power);
+  this->addMonomial(variable, inputCoefficient);
 }
 
 template <class Coefficient>
@@ -954,7 +951,7 @@ bool Polynomial<Coefficient>::isSquareFree(
 ) const {
   MacroRegisterFunctionWithName("Polynomial::isSquareFree");
   Vector<Polynomial<Coefficient> > differentials;
-  if (this->IsConstant()) {
+  if (this->isConstant()) {
     return false;
   }
   if (!this->differential(differentials, comments)) {
@@ -1065,13 +1062,13 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
 }
 
 template<class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetPolynomialStringSpacedMonomialsLaTeX(
+std::string GroebnerBasisComputation<Coefficient>::getPolynomialStringSpacedMonomialsLaTeX(
   const Polynomial<Coefficient>& thePoly,
   std::string* highlightColor,
   List<MonomialP>* theHighLightedMons,
   int* firstNonZeroIndex
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetPolynomialStringSpacedMonomialsLaTeX");
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::getPolynomialStringSpacedMonomialsLaTeX");
   std::stringstream out;
   bool found = false;
   int countMons = 0;
@@ -1126,8 +1123,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetPolynomialStringSpacedMono
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringLaTeX");
+std::string GroebnerBasisComputation<Coefficient>::getDivisionStringLaTeX() {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionStringLaTeX");
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
@@ -1155,7 +1152,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
   out << "&" <<  "\\multicolumn{" << this->allMonomials.size
   << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
   out << "\\multicolumn{1}{|c|}{} & ";
-  out << this->GetPolynomialStringSpacedMonomialsLaTeX(
+  out << this->getPolynomialStringSpacedMonomialsLaTeX(
     this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials
   ) << "\\\\\\hline";
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
@@ -1163,7 +1160,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
   << "\\\\";
   for (int i = 0; i < this->theBasis.size; i ++) {
     out << "$";
-    out << this->theBasis[i].toString(&this->theFormat);
+    out << this->theBasis[i].element.toString(&this->theFormat);
     out << "$";
     out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
     out << "$" << this->theQuotients[i].toString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
@@ -1173,12 +1170,12 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
       out << "$\\underline{~}$";
     }
     out << "&"
-    << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.getElement()[i])
-    << "\\\\\n";
+    << this->getPolynomialStringSpacedMonomialsLaTeX(
+      theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.getElement()[i]
+    ) << "\\\\\n";
     if (i < theSubtracands.size) {
       out << "&";
-      out << this->GetPolynomialStringSpacedMonomialsLaTeX
+      out << this->getPolynomialStringSpacedMonomialsLaTeX
       (theSubtracands[i], &HighlightedColor)
       << "\\\\\\cline{2-" << this->allMonomials.size + 1 << "}";
     }
@@ -1189,7 +1186,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringLaTeX() {
 }
 
 template<class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetPolynomialStringSpacedMonomialsHtml(
+std::string GroebnerBasisComputation<Coefficient>::getPolynomialStringSpacedMonomialsHtml(
   const Polynomial<Coefficient>& thePoly,
   const std::string& extraStyle,
   List<MonomialP>* theHighLightedMons
@@ -1244,8 +1241,8 @@ std::string GroebnerBasisComputation<Coefficient>::GetPolynomialStringSpacedMono
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringHtml");
+std::string GroebnerBasisComputation<Coefficient>::getDivisionStringHtml() {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::getDivisionStringHtml");
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders.getElement();
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
@@ -1267,7 +1264,7 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style ='white-space: nowrap; border:1px solid black;'>";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomialsHtml(
+  out << this->getPolynomialStringSpacedMonomialsHtml(
     this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials
   )
   << "</td></tr>";
@@ -1278,9 +1275,9 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasis[i].toString(&this->theFormat), - 1);
+      out << HtmlRoutines::GetMathSpanPure(this->theBasis[i].element.toString(&this->theFormat), - 1);
     } else {
-      out << this->theBasis[i].toString(&this->theFormat);
+      out << this->theBasis[i].element.toString(&this->theFormat);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"
@@ -1299,12 +1296,12 @@ std::string GroebnerBasisComputation<Coefficient>::GetDivisionStringHtml() {
   }
   for (int i = 0; i < theRemainders.size; i ++) {
     out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomialsHtml(
+    << this->getPolynomialStringSpacedMonomialsHtml(
       theRemainders[i], "", &this->intermediateHighlightedMons.getElement()[i]
     ) << "</tr>";
     if (i < theSubtracands.size) {
       out << "<tr><td>-</td></tr>";
-      out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], underlineStyle)
+      out << "<tr><td></td>" << this->getPolynomialStringSpacedMonomialsHtml(theSubtracands[i], underlineStyle)
       << "</tr>";
     }
   }

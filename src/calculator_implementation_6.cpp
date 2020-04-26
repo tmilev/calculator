@@ -1312,7 +1312,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   if (!input[2].getBoundVariables(boundVars)) {
     return theCommands << "Could not get bound variables from: " << input[2].toString();
   }
-  if (input[2].IsEqualToOne()) {
+  if (input[2].isEqualToOne()) {
     output = input[1];
     return true;
   }
@@ -1330,7 +1330,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
     if (!theCommands.EvaluateExpression(theCommands, theSubbed, subbedSimplified)) {
       return theCommands << "Failed to evaluate " << theSubbed.toString();
     }
-    if (subbedSimplified.IsEqualToOne()) {
+    if (subbedSimplified.isEqualToOne()) {
       theList.addOnTop(input[1][i]);
     }
   }
@@ -1366,17 +1366,16 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     return output.makeError("Failed to extract list of polynomials. ", theCommands);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
+  computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
   computation.flagStoreQuotients = true;
-  computation.theBasis.setSize(polynomialsRational.size - 1);
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", theCommands);
     }
-    computation.theBasis[i - 1] = polynomialsRational[i];
+    computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  computation.initializeForDivision(computation.theBasis);
-  computation.remainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
+  computation.remainderDivisionByBasis(polynomialsRational[0], outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
   for (int i = 0; i < computation.theQuotients.size; i ++) {
@@ -2341,7 +2340,7 @@ bool CalculatorFunctions::innerDistributeSqrt(Calculator& theCommands, const Exp
     } else {
       Rational exponentRat;
       if (oneOverExponentE.isRational(&exponentRat)) {
-        if (!exponentRat.GetDenominator().IsEven()) {
+        if (!exponentRat.getDenominator().IsEven()) {
           isGood = true;
         }
       }
@@ -2475,7 +2474,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   if (!input[2].isOfType<Rational>(&exponent)) {
     return false;
   }
-  if (exponent.GetDenominator() != 2) {
+  if (exponent.getDenominator() != 2) {
     return false;
   }
   Expression theRadical, reduced;
@@ -2487,7 +2486,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
     return false;
   }
   Expression theIntegerPower;
-  theIntegerPower.assignValue(Rational(exponent.GetNumerator()), theCommands);
+  theIntegerPower.assignValue(Rational(exponent.getNumerator()), theCommands);
   return output.MakeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
 }
 

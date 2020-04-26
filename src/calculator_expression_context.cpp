@@ -472,7 +472,7 @@ bool ExpressionContext::polynomialSubstitution(
     if (theNewIndex == - 1) {
       return false;
     }
-    output[i].makeMonomial(theNewIndex, 1, 1, largerContext.numberOfVariables());
+    output[i].makeMonomial(theNewIndex, 1, 1);
   }
   return true;
 }
@@ -504,7 +504,6 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   if (!this->polynomialSubstitution(largerContext, outputPolynomialPart)) {
     return false;
   }
-  int largerNumberOfVariables = largerContext.numberOfVariables();
   outputDifferentialPart.setSize(this->differentialOperatorVariables.size);
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     int newIndex = largerContext.differentialOperatorVariables.getIndex(
@@ -513,7 +512,7 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
     if (newIndex == - 1) {
       return false;
     }
-    outputDifferentialPart[i].makeMonomial(newIndex, 1, 1, largerNumberOfVariables);
+    outputDifferentialPart[i].makeMonomial(newIndex, 1, 1);
   }
   return true;
 }

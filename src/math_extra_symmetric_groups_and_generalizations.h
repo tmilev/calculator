@@ -64,7 +64,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
     }
   }
   Matrix<Coefficient> basisMatrixT = basisMatrix;
-  basisMatrixT.Transpose();
+  basisMatrixT.transpose();
   basisMatrix.multiplyOnTheLeft(basisMatrixT,this->projectionOperator);
   this->projectionOperator.invert();
   this->projectionOperator *= basisMatrixT;
@@ -88,7 +88,7 @@ template <typename somestream>
 somestream& SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::IntoStream(somestream& out) const {
   out << "Sparse subspace basis object for basis of rank " << this->rank;
   out << " involving monomials " << this->involvedMonomials.toStringCommaDelimited() << '\n';
-  out << " with projection operator\n" << this->projectionOperator.ToStringPlainText() << '\n';
+  out << " with projection operator\n" << this->projectionOperator.toStringPlainText() << '\n';
   return out;
 }
 
@@ -118,7 +118,7 @@ public:
   int& operator[](int i) const;
   void FromListInt(const List<int>& in, int lastElement = - 1);
   static void GetPartitions(List<Partition>& out, int n);
-  void Transpose();
+  void transpose();
   void FillTableau(Tableau& out, List<int>& stuffing) const;
   void FillTableauOrdered(Tableau& out) const;
   void GetAllStandardTableaux(List<Tableau>& out) const;
@@ -609,7 +609,7 @@ public:
     MonomialP x;
     x.makeEi(0);
     p.addMonomial(x, 1);
-    p.AddConstant(- m);
+    p.addConstant(- m);
   }
 };
 
@@ -1576,7 +1576,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
 template <typename elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations(bool andPrint) {
   this->ComputeGeneratorCommutationRelations();
-  std::string crs = this->generatorCommutationRelations.ToStringPlainText();
+  std::string crs = this->generatorCommutationRelations.toStringPlainText();
   List<char*> rows;
   rows.addOnTop(&crs[0]);
   int i;
@@ -1986,8 +1986,8 @@ bool GroupRepresentation<someGroup, Coefficient>::VerifyRepresentation() {
           global.comments << this->ownerGroup->generators[i] << ", " << this->ownerGroup->generators[j];
           global.comments << " are assigned matrices which fail to have commutation relations ";
           global.comments << this->ownerGroup->generatorCommutationRelations(i, j) << "\n";
-          global.comments << this->generatorS[i].ToStringPlainText() << ",\n";
-          global.comments << this->generatorS[j].ToStringPlainText() << "\n\n";
+          global.comments << this->generatorS[i].toStringPlainText() << ",\n";
+          global.comments << this->generatorS[j].toStringPlainText() << "\n\n";
           badrep = true;
         }
       }

@@ -258,7 +258,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 
   ElementUniversalEnveloping<RationalFunction> argument = output.getValue<ElementUniversalEnveloping<RationalFunction> >();
   ElementUniversalEnveloping<RationalFunction> outputUE;
-  if (!theHmm.ApplyHomomorphism(argument, outputUE)) {
+  if (!theHmm.applyHomomorphism(argument, outputUE)) {
     return output.makeError("Failed to apply homomorphism for unspecified reason", theCommands);
   }
   outputUE.simplify();
@@ -687,7 +687,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             List<Rational> tempList, tempList2;
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
-            theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
+            theG2B3Data.theShapovalovProducts[eigenIndexcounter].getNumerator(tempP);
             tempP.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.findOneVariableRationalRoots(tempList)) {
@@ -829,7 +829,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     Vector<RationalFunction> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.clear();
     for (int i = 0; i < outputChar.size(); i ++) {
-      if (!outputChar.coefficients[i].IsEqualToOne()) {
+      if (!outputChar.coefficients[i].isEqualToOne()) {
         out << outputChar.coefficients[i].toString() << " x ";
       }
       simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
@@ -1005,7 +1005,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   theHWV *= - 1;
   *theG2B3Data.theEigenVectorS.lastObject() = theHWV;
   Vector<RationalFunction> weightDifference;
-  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3);
+  theG2B3Data.theHmm.applyHomomorphism(theG2Casimir, imageCasimirInB3);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFunction charDiff;
@@ -1037,7 +1037,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
       }
     }
     RationalFunction scale = currentTensorEltEigen.scaleNormalizeLeadingMonomial(nullptr);
-    if (!scale.IsConstant(&theG2B3Data.additionalMultipliers[k])) {
+    if (!scale.isConstant(&theG2B3Data.additionalMultipliers[k])) {
       global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
     }
     currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
@@ -1441,13 +1441,13 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
     return false;
   }
   LargeIntegerUnsigned theGCD;
-  LargeIntegerUnsigned::gcd(left.GetDenominator(), base.value, theGCD);
+  LargeIntegerUnsigned::gcd(left.getDenominator(), base.value, theGCD);
   if (theGCD > 1) {
     return false;
   }
   ElementZmodP outputElt;
   outputElt.theModulus = base.value;
-  outputElt = left.GetNumerator();
+  outputElt = left.getNumerator();
   return output.assignValue(outputElt, theCommands);
 }
 
@@ -1715,7 +1715,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   }
   Vector<Polynomial<Rational> > inputPolForm;
   ExpressionContext startContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(
+  if (!theCommands.getVectorFromFunctionArguments(
     input,
     inputPolForm,
     &startContext,

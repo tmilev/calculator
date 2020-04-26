@@ -42,7 +42,7 @@ template < > bool Matrix<Rational>::flagComputingDebugInfo = true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic = true;
 
 template < > bool Complex<double>::flagEqualityIsApproximate = true;
-template < > double Complex<double>::EqualityPrecision = 0.00000001;
+template < > double Complex<double>::equalityPrecision = 0.00000001;
 
 template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
@@ -1674,7 +1674,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   basepoint.makeZero(input.size);
   basepoint[0].AssignInteger(1);
   if (input[0].isNegative()) {
-    basepoint.Minus();
+    basepoint.minus();
   }
   //////////////////////////////////////////////////
   output.ScalarEuclidean(normal, tempRat2);
@@ -2987,7 +2987,7 @@ void PartFraction::ComputeOneCheckSuM(PartFractions& owner, Rational& output, in
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.AmbientDimension);
   Rational tempRat;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    this->theObjects[this->IndicesNonZeroMults[i]].ComputeOneCheckSum(
+    this->theObjects[this->IndicesNonZeroMults[i]].computeOneCheckSum(
       tempRat, owner.startingVectors[this->IndicesNonZeroMults[i]], theDimension
     );
     output.multiplyBy(tempRat);
@@ -3055,7 +3055,7 @@ void PartFraction::PrepareFraction(
   } else {
     powerDropA = 0;
   }
-  outputCommonCoeff.makeOne(AminusNbetaPoly.minimalNumberOfVariables());
+  outputCommonCoeff.makeOne();
   for (int i = 0; i < powerDropB; i ++) {
     outputCommonCoeff *= AminusNbetaPoly;
   }
@@ -3179,17 +3179,17 @@ bool PartFraction::DecomposeFromLinRelation(
   );
 
   //if (this->MakingConsistencyCheck)
-  //{ if (!this->CheckSum2.IsEqualTo(this->CheckSum))global.fatal << global.fatal;
+  //{ if (!this->CheckSum2.isEqualTo(this->CheckSum))global.fatal << global.fatal;
   //}
   /*if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
     Rational tempRat2, tempRat;
     std::string tempS1, tempS2;
-    Accum.ComputeOneCheckSum(tempRat2);
-    this->ComputeOneCheckSum(tempRat);
+    Accum.computeOneCheckSum(tempRat2);
+    this->computeOneCheckSum(tempRat);
     tempRat.toString(tempS1);
     this->CheckSum2.toString(tempS2);
     tempRat2.Subtract(tempRat);
-    if (!oldCheckSum.IsEqualTo(tempRat2))global.fatal << global.fatal;
+    if (!oldCheckSum.isEqualTo(tempRat2))global.fatal << global.fatal;
   }*/
   //Accum.ComputeDebugString();
   return true;
@@ -3232,7 +3232,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
   int theDimension
 ) {
   MonomialP tempM;
-  tempM.makeOne(theDimension);
+  tempM.makeOne();
   for (int i = 0; i < theIndex; i ++) {
     int tempI = theSelectedIndices[i];
     for (int j = 0; j < theDimension; j ++) {
@@ -3333,7 +3333,7 @@ void PartFraction::ApplySzenesVergneFormulA(
   MonomialP tempM;
   output.makeZero();
   int theDim = startingVectors[0].size;
-  CoefficientBuffer.makeOne(theDim);
+  CoefficientBuffer.makeOne();
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     tempFrac.Assign(*this);
     tempFrac.RelevanceIsComputed = false;
@@ -3341,7 +3341,7 @@ void PartFraction::ApplySzenesVergneFormulA(
     OnePartialFractionDenominator& currentFrac = tempFrac[theSelectedIndices[i]];
     int LargestElongation = currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(- 1, LargestElongation);
-    tempM.makeOne(theDim);
+    tempM.makeOne();
     for (int j = 0; j < i; j ++) {
       int tempElongation = (*this)[theSelectedIndices[j]].GetLargestElongation();
       for (int k = 0; k < theDim; k ++) {
@@ -3415,7 +3415,7 @@ void PartFraction::ComputeIndicesNonZeroMults() {
 void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
   output.makeZero();
   MonomialP tempM;
-  tempM.makeOne(owner.AmbientDimension);
+  tempM.makeOne();
   for (int i = 0; i < n; i ++) {
     for (int j = 0; j < owner.AmbientDimension; j ++) {
       tempM.setVariable(j, owner.startingVectors[indexA][j] - owner.startingVectors[indexB][j] * (i + 1));
@@ -3434,7 +3434,7 @@ void PartFraction::GetNElongationPoly(
 ) {
   output.makeZero();
   MonomialP tempM;
-  tempM.makeOne(theDimension);
+  tempM.makeOne();
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
       for (int j = 0; j < theDimension; j ++) {
@@ -3457,8 +3457,7 @@ void PartFraction::GetNElongationPoly(
 void PartFraction::MakePolynomialFromOneNormal(
   Vector<Rational>& normal, const MonomialP& shiftRational, int theMult, Polynomial<Rational>& output
 ) {
-  int theDimension = normal.size;
-  output.makeOne(theDimension);
+  output.makeOne();
   if (theMult == 1) {
     return;
   }
@@ -3478,7 +3477,7 @@ void PartFraction::MakePolynomialFromOneNormal(
     Rational tempRat3;
     tempRat3.AssignNumeratorAndDenominator(1, j + 1);
     tempP *= (tempRat3);
-    tempP.AddConstant(tempRat2);
+    tempP.addConstant(tempRat2);
     output *= tempP;
   }
 }
@@ -3574,7 +3573,7 @@ void PartFractions::PrepareCheckSums() {
   if (!this->flagUsingCheckSum) {
     return;
   }
-  this->ComputeOneCheckSum(this->StartCheckSum);
+  this->computeOneCheckSum(this->StartCheckSum);
 }
 
 void PartFractions::initFromOtherPartFractions(PartFractions& input) {
@@ -3592,16 +3591,16 @@ void PartFractions::CompareCheckSums() {
   ProgressReport theReport1;
   ProgressReport theReport2;
   if (!this->flagDiscardingFractions) {
-    this->ComputeOneCheckSum(this->EndCheckSum);
-    if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic) {
+    this->computeOneCheckSum(this->EndCheckSum);
+    if (!this->StartCheckSum.isEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic) {
       std::stringstream out1, out2;
       out1 << "Starting checksum: " << this->StartCheckSum.toString();
       out2 << "  Ending checksum: " << this->EndCheckSum.toString();
       theReport1.report(out1.str());
       theReport2.report(out2.str());
     }
-    if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum)) {
-      global.fatal << "<b>This is a programmign error. The checksum of the partial fractions failed. " << global.fatal;
+    if (!this->StartCheckSum.isEqualTo(this->EndCheckSum)) {
+      global.fatal << "The checksum of the partial fractions failed. " << global.fatal;
     } else {
     }
   }
@@ -3635,7 +3634,7 @@ bool PartFractions::splitPartial() {
   Polynomial<LargeInteger> currentCoeff;
   reducedForGood.makeZero();
   if (this->flagUsingCheckSum) {
-    this->ComputeOneCheckSum(this->CheckSum);
+    this->computeOneCheckSum(this->CheckSum);
   }
   while (this->size() > 0) {
     this->popMonomial(0, currentFrac, currentCoeff);
@@ -3655,9 +3654,9 @@ bool PartFractions::splitPartial() {
   }
   if (this->flagUsingCheckSum) {
     Rational tempRat;
-    reducedForGood.ComputeOneCheckSum(tempRat);
+    reducedForGood.computeOneCheckSum(tempRat);
     if (tempRat != this->CheckSum) {
-      global.fatal << "This is a programming error. "
+      global.fatal
       << "The checksums of the partial fraction decomposition do not match. " << global.fatal;
     }
   }
@@ -3800,7 +3799,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   //tempFrac.Assign(*this);
   Rational StartCheckSum, theDiff;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
-    owner.ComputeOneCheckSum(StartCheckSum);
+    owner.computeOneCheckSum(StartCheckSum);
     this->ComputeOneCheckSuM(owner, theDiff, owner.AmbientDimension);
     this->ComputeDebugString(owner);
     owner.NumRunsReduceMonomialByMonomial ++;
@@ -3876,7 +3875,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           tempFrac.AssignDenominatorOnly(*this);
           tempFrac.Coefficient.makeZero(owner.AmbientDimension);
           tempFrac.Coefficient.addMonomial(this->Coefficient[k], 1);
-          tempFrac.ComputeOneCheckSum(owner, tempDiff, owner.AmbientDimension);
+          tempFrac.computeOneCheckSum(owner, tempDiff, owner.AmbientDimension);
         }
         for (int l = 0; l < numSummands; l ++) {
           tempFrac.AssignDenominatorOnly(*this);
@@ -3893,9 +3892,9 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
         }
         if (this->flagAnErrorHasOccurredTimeToPanic) {
           Rational tempFracsCheckSum;
-          tempFracs.ComputeOneCheckSum(tempFracsCheckSum);
+          tempFracs.computeOneCheckSum(tempFracsCheckSum);
           tempFracs.ComputeDebugString();
-          if (!tempFracsCheckSum.IsEqualTo(tempDiff))
+          if (!tempFracsCheckSum.isEqualTo(tempDiff))
             global.fatal << global.fatal;
         }
       }
@@ -3905,9 +3904,9 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   }
   if (this->flagAnErrorHasOccurredTimeToPanic) {
     Rational tempRat;
-    owner.ComputeOneCheckSum(tempRat);
+    owner.computeOneCheckSum(tempRat);
     tempRat.Subtract(theDiff);
-    if (!tempRat.IsEqualTo(StartCheckSum))
+    if (!tempRat.isEqualTo(StartCheckSum))
       global.fatal << global.fatal;
   }*/
 }
@@ -3962,12 +3961,13 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
   int startDenominatorPower,
   Polynomial<LargeInteger>& output
 ) {
+  (void) owner;
   if (StartMonomialPower == 0) {
-    output.makeOne(owner.AmbientDimension);
+    output.makeOne();
     return;
   }
   MonomialP tempMon;
-  tempMon.makeOne(owner.AmbientDimension);
+  tempMon.makeOne();
   output.makeZero();
   LargeInteger theCoeff = 1;
   if (StartMonomialPower > 0) {
@@ -4179,7 +4179,7 @@ void PartFractions::MakeProgressVPFcomputation() {
   theReport.report(out2.str());
 }
 
-void PartFractions::ComputeOneCheckSum(Rational& output) {
+void PartFractions::computeOneCheckSum(Rational& output) {
   output.makeZero();
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(this->AmbientDimension);
   ProgressReport theReport;
@@ -4219,7 +4219,7 @@ bool PartFractions::initFromRoots(Vectors<Rational>& input) {
   this->AmbientDimension = input[0].size;
   bool tempBool = f.initFromRoots(*this, input);
   Polynomial<LargeInteger> tempOne;
-  tempOne.makeOne(this->AmbientDimension);
+  tempOne.makeOne();
   this->addMonomial(f, tempOne);
   return tempBool;
 }
@@ -4240,7 +4240,7 @@ void PartFractions::RemoveRedundantShortRoots(Vector<Rational>* Indicator) {
   Rational startCheckSum;
   ProgressReport theReport;
   if (PartFraction::MakingConsistencyCheck) {
-    this->ComputeOneCheckSum(startCheckSum);
+    this->computeOneCheckSum(startCheckSum);
   }
   for (int i = 0; i < this->size(); i ++) {
     if (this->RemoveRedundantShortRootsIndex(i, Indicator)) {
@@ -4388,7 +4388,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
       Vector<Rational> tempRoot;
       tempRoot = theVPbasis[i];
       tempW.RootScalarCartanRoot(tempRoot, tempRoot, tempRat);
-      if (tempRat.IsEqualToOne()) {
+      if (tempRat.isEqualToOne()) {
         theVPbasis.addOnTop(tempW.RootsOfBorel[i] * 2);
       }
     }
@@ -4449,8 +4449,8 @@ void OnePartialFractionDenominator::GetPolyDenominator(
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
   MonomialP tempM;
-  output.makeOne(theExponent.size);
-  tempM.makeOne(theExponent.size);
+  output.makeOne();
+  tempM.makeOne();
   for (int i = 0; i < theExponent.size; i ++) {
     tempM.setVariable(i, theExponent[i] * this->Elongations[MultiplicityIndex]);
   }
@@ -4504,7 +4504,7 @@ void OnePartialFractionDenominator::initialize() {
   this->Multiplicities.setSize(0);
 }
 
-void OnePartialFractionDenominator::ComputeOneCheckSum(
+void OnePartialFractionDenominator::computeOneCheckSum(
   Rational& output, const Vector<Rational>& theExp, int theDimension
 ) {
   output = 1;
@@ -7284,7 +7284,7 @@ void WeylGroupData::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& 
     tempRat = 2 / this->cartanSymmetric.elements[i][i];
     tempMat.RowTimesScalar(i, tempRat);
   }
-  tempMat.Transpose();
+  tempMat.transpose();
   tempMat.invert();
   output.AssignMatrixRows(tempMat);
 }
@@ -7296,7 +7296,7 @@ void WeylGroupData::GetIntegralLatticeInSimpleCoordinates(Lattice& output) {
     tempRoot.makeEi(this->getDimension(), i);
     output.basisRationalForm.RowTimesScalar(i, 2 / this->RootScalarCartanRoot(tempRoot, tempRoot));
   }
-  output.basisRationalForm.Transpose();
+  output.basisRationalForm.transpose();
   output.basisRationalForm.invert();
   output.MakeFromMat(output.basisRationalForm);
   output.Reduce();
@@ -7421,7 +7421,7 @@ void WeylGroupData::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix
     this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
   }
   output.AssignVectorsToRows(basis);
-  output.Transpose();
+  output.transpose();
 }
 
 void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
@@ -7508,7 +7508,7 @@ void WeylGroupData::drawRootSystem(
     for (int i = 0; i < 2; i ++) {
       output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, "green", 1);
       output.drawCircleAtVectorBufferRational(tempRoot, currentColor, 2);
-      tempRoot.Minus();
+      tempRoot.minus();
     }
     return;
   }
@@ -7922,7 +7922,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
     head2 << "\\begin{array}{rcl}";
     for (int i = 0; i < this->ExternalAutomorphisms.size; i ++) {
       tempMat.AssignVectorsToRows(this->ExternalAutomorphisms[i]);
-      tempMat.Transpose();
+      tempMat.transpose();
       head2 << "a_{" << i + 1 << "}&= &" << tempMat.toString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
@@ -8125,9 +8125,9 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   }
 }
 
-void KLpolys::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex) {
+void KLpolys::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int topIndex) {
   output.clear();
-  output << "Top_index: " << TopIndex << "\n";
+  output << "Top_index: " << topIndex << "\n";
   std::string tempS;
   this->KLcoeffsToString(KLcoeff,  tempS);
   output << tempS;
@@ -8135,13 +8135,13 @@ void KLpolys::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int 
 
 int KLpolys::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output) {
   std::string tempS;
-  int TopIndex;
-  input >> tempS >> TopIndex;
+  int topIndex;
+  input >> tempS >> topIndex;
   output.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     input >> tempS >> output[i];
   }
-  return TopIndex;
+  return topIndex;
 }
 
 void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output) {
@@ -8541,7 +8541,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
       2 * this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size -
       this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
-      tempP2.makeMonomial(0, powerQ, tempI, 1);
+      tempP2.makeMonomial(0, powerQ, tempI);
       tempP1 *= tempP2;
       tempP1 *= this->theKLPolys[i][y];
       if (!this->Explored[i]) {
@@ -8593,7 +8593,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex) {
   }
   if (!boolX && boolY) {
     Polynomial<Rational> qMinus1;
-    qMinus1.makeMonomial(0, 1, 1, 1);
+    qMinus1.makeMonomial(0, 1, 1);
     this->theRPolys[x][y] = qMinus1;
     this->theRPolys[x][y] *= (this->theRPolys[sx][sy]);
     qMinus1 -= 1;
@@ -8641,15 +8641,6 @@ std::string KLpolys::RPolysToString(FormatExpressions* theFormat) {
   }
   out << "</table>";
   return out.str();
-}
-
-LargeInteger PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input) {
-  LargeInteger result;
-  result.makeZero();
-  for (int i = 0; i < input.size(); i ++) {
-    result += input.coefficients[i];
-  }
-  return result;
 }
 
 void PartFraction::EvaluateIntPoly(const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output) {
@@ -8779,7 +8770,7 @@ void WeylGroupData::TransformToSimpleBasisGenerators(
   MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGenerators");
   for (int i = 0; i < theGens.size; i ++) {
     if (!theGens[i].isPositiveOrZero()) {
-      theGens[i].Minus();
+      theGens[i].minus();
     }
   }
   bool reductionOccured = true;
@@ -8796,7 +8787,7 @@ void WeylGroupData::TransformToSimpleBasisGenerators(
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (!tempRoot.isPositiveOrZero()) {
-            tempRoot.Minus();
+            tempRoot.minus();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -8851,7 +8842,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rati
   theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
   for (int i = 0; i < theGens.size; i ++) {
     if (theGens[i].ScalarEuclidean(theH) < 0) {
-      theGens[i].Minus();
+      theGens[i].minus();
     }
   }
   bool reductionOccured = true;
@@ -8868,7 +8859,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rati
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (tempRoot.ScalarEuclidean(theH) < 0) {
-            tempRoot.Minus();
+            tempRoot.minus();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -8883,7 +8874,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rati
 void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH) {
   for (int i = 0; i < theGens.size; i ++) {
     if (!this->IsPositiveOrPerpWRTh(theGens[i], theH)) {
-      theGens[i].Minus();
+      theGens[i].minus();
     }
   }
   bool reductionOccured = true;
@@ -8900,7 +8891,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
         }
         if (this->RootSystem.getIndex(tempRoot) != - 1) {
           if (!this->IsPositiveOrPerpWRTh(tempRoot, theH)) {
-            tempRoot.Minus();
+            tempRoot.minus();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -8964,7 +8955,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
       col ++;
     }
     currentPeriod = rougherLattice.basisRationalForm.elements[i][col] / this->basisRationalForm.elements[i][col];
-    currentPeriodInt = currentPeriod.GetNumerator();
+    currentPeriodInt = currentPeriod.getNumerator();
     if (currentPeriodInt.value.theDigits.size > 1) {
       return false;
     } else {
@@ -9073,7 +9064,7 @@ void Lattice::GetDualLattice(Lattice& output) const {
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
   tempMat.invert();
-  tempMat.Transpose();
+  tempMat.transpose();
   tempMat.GetMatrixIntWithDen(output.basis, output.Den);
   output.Reduce();
 }
@@ -9087,7 +9078,7 @@ bool Lattice::FindOnePreimageInLatticeOf(
   bool result = input.GetIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
-  tempMat.Transpose();
+  tempMat.transpose();
   tempMat.actOnVectorsColumn(output);
   return result;
 }
@@ -9273,12 +9264,12 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
   } else {
     if (useLatex) {
       if (!useHtml) {
-        out << ", where $\\Lambda =\\mathbb{Z}^{" << this->getNumberOfVariables() << "}$";
+        out << ", where $\\Lambda =\\mathbb{Z}^{" << this->minimalNumberOfVariables() << "}$";
       } else {
-        out << ", \\mathrm{~where~} \\Lambda =\\mathbb{Z}^{" << this->getNumberOfVariables() << "}";
+        out << ", \\mathrm{~where~} \\Lambda =\\mathbb{Z}^{" << this->minimalNumberOfVariables() << "}";
       }
     } else {
-      out << "Z^" <<  this->getNumberOfVariables();
+      out << "Z^" <<  this->minimalNumberOfVariables();
     }
   }
   if (useLatex && !useHtml) {
@@ -9363,7 +9354,7 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
   QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
-  outputPolyPart.makeOne(theMon.minimalNumberOfVariables());
+  outputPolyPart.makeOne();
   for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
     this->MakePolynomialFromOneNormal(
       normals[i],
@@ -9532,7 +9523,7 @@ void QuasiPolynomial::substitution(
   //...
   //a_m1 ... a_mn
   if (
-    this == &output || mapFromNewSpaceToOldSpace.numberOfRows != this->getNumberOfVariables() ||
+    this == &output || mapFromNewSpaceToOldSpace.numberOfRows != this->minimalNumberOfVariables() ||
     ambientLatticeNewSpace.getDimension() != mapFromNewSpaceToOldSpace.numberOfColumns
   ) {
     global.fatal << "Bad lattice dimensions. " << global.fatal;
@@ -9546,7 +9537,7 @@ void QuasiPolynomial::substitution(
   }
   mapFromNewSpaceToOldSpace.actOnVectorsColumn(allRepresentatives, imagesAllRepresentatives);
   PolynomialSubstitution<Rational> theSub;
-  theSub.setSize(this->getNumberOfVariables());
+  theSub.setSize(this->minimalNumberOfVariables());
   Vector<Rational> tempRoot;
   for (int i = 0; i < theSub.size; i ++) {
     Polynomial<Rational>& currentPoly = theSub[i];
@@ -9578,12 +9569,12 @@ void QuasiPolynomial::substitution(
   //and the translation has coordinates (t_1, ..., t_n),
   //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
   PolynomialSubstitution<Rational> theSub;
-  theSub.MakeIdSubstitution(this->getNumberOfVariables(), Rational(1));
+  theSub.makeIdentitySubstitution(this->minimalNumberOfVariables(), Rational(1));
   for (int i = 0; i < theSub.size; i ++) {
-    theSub[i].AddConstant(- inputTranslationSubtractedFromArgument[i]);
+    theSub[i].addConstant(- inputTranslationSubtractedFromArgument[i]);
   }
   Polynomial<Rational> tempP;
-  output.MakeZeroLatTiceZn(this->getNumberOfVariables());
+  output.MakeZeroLatTiceZn(this->minimalNumberOfVariables());
   output.AmbientLatticeReduced = this->AmbientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
@@ -9769,7 +9760,7 @@ bool Lattice::SubstitutionHomogeneous(const Matrix<Rational>& theSub) {
   Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat = theSub;
   oldBasisTransformed = this->basisRationalForm;
-  oldBasisTransformed.Transpose();
+  oldBasisTransformed.transpose();
   Selection nonPivotPoints;
   theMat.gaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
   if (nonPivotPoints.CardinalitySelection != 0) {
@@ -9824,13 +9815,13 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
     global.fatal << "Plane intersection: normals don't match. " << global.fatal;
   }
   theEmbedding.AssignVectorsToRows(theBasis);
-  theEmbedding.Transpose();
+  theEmbedding.transpose();
   theBasis.addOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
   tempRoots.MakeEiBasis(theDimension);
   tempRoots.getCoordinatesInBasis(theBasis, tempRoots2);
   theProjection.AssignVectorsToRows(tempRoots2);
-  theProjection.Transpose();
+  theProjection.transpose();
   theProjection.resize(theDimension - 1, theDimension, false);
   Vectors<Rational> newNormals = this->Normals;
   theProjection.actOnVectorsColumn(newNormals);
@@ -10061,7 +10052,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
           currentCoeff *= tempIP;
           currentFrac.AddMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
           currentFrac.AddMultiplicity(- currentFrac.Multiplicities[i], ElongationValue);
-          if (!localEndCheckSum.IsEqualTo(localStartCheckSum)) {
+          if (!localEndCheckSum.isEqualTo(localStartCheckSum)) {
             global.fatal << "Local end checksum must be zero. " << global.fatal;
           }
         }
@@ -10136,7 +10127,7 @@ bool SlTwoInSlN::ComputeInvariantsOfDegree(
   basisMonsAll.makeZero();
   basisMonsAll.setExpectedSize(numCycles);
   MonomialP theMon;
-  theMon.makeOne(this->theDimension);
+  theMon.makeOne();
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
   theCartanAction.setSize(this->theDimension);
@@ -11006,11 +10997,11 @@ void RationalFunction::operator/=(const Polynomial<Rational>& other) {
   }
 }
 
-void RationalFunction::ReduceRFToPoly() {
+void RationalFunction::reduceRationalFunctionToPolynomial() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  if (this->Denominator.getElement().IsConstant()) {
+  if (this->Denominator.getElement().isConstant()) {
     this->Numerator.getElement() /= this->Denominator.getElement().coefficients[0];
     this->Denominator.FreeMemory();
     this->expressionType = this->typePoly;
@@ -11123,7 +11114,7 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(
   Cone::scaleNormalizeByPositive(tempRoot);
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
-  tempMat.Transpose();
+  tempMat.transpose();
   tempMat.actOnVectorColumn(tempRoot, output);
 }
 
@@ -11236,7 +11227,7 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   baseCone.CreateFromVertices(theRoots);
   Vector<Rational> shiftRoot;
   baseLattice.GetInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone);
-  shiftRoot.Minus();
+  shiftRoot.minus();
   theFracs.theChambers.MakeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->theProjectivizedComplex);
   outputstring = out.str();
   return true;
@@ -11516,7 +11507,7 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other) {
       this->theQPs[i] = oldQPList[theOldIndex];
     } else {
       //the below needs to be fixed!!!!!
-      this->theQPs[i].MakeZeroLatTiceZn(this->getNumberOfVariables());
+      this->theQPs[i].MakeZeroLatTiceZn(this->minimalNumberOfVariables());
     }
   }
 }
@@ -11746,7 +11737,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3() {
   for (int i = 0; i < this->theConesLargerDim.size; i ++) {
     trimmedCone.Normals = this->theConesLargerDim[i].theProjectivizedCone.Normals;
     multFreeWall = this->LPtoMaximizeLargerDim[i];
-    multFreeWall.Minus();
+    multFreeWall.minus();
     *multFreeWall.lastObject() +=1;
     trimmedCone.Normals.addOnTop(multFreeWall);
     trimmedCone.CreateFromNormals(trimmedCone.Normals);
@@ -11916,7 +11907,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
   complexBeforeProjection.initialize();
   complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
   if (direction.ScalarEuclidean(theLPToMaximizeAffine).isNegative()) {
-    direction.Minus();
+    direction.minus();
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
   complexBeforeProjection.slicingDirections.addOnTop(-direction);
@@ -12070,7 +12061,7 @@ void ConeComplex::GetNewVerticesAppend(
       if (myDyingCone.IsInCone(tempRoot)) {
         outputVertices.addOnTopNoRepetition(tempRoot);
       } else {
-        tempRoot.Minus();
+        tempRoot.minus();
         if (myDyingCone.IsInCone(tempRoot)) {
           outputVertices.addOnTopNoRepetition(tempRoot);
         }
@@ -12299,7 +12290,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices() {
       theMat.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool = this->IsInCone(tempRoot);
       if (!tempBool) {
-        tempRoot.Minus();
+        tempRoot.minus();
         tempBool = this->IsInCone(tempRoot);
       }
       if (tempBool) {
@@ -12327,7 +12318,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       matNormals.AssignVectorsToRows(NormalsToSubspace);
       // global.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.toString();
       gramMatrixInverted = matNormals;
-      gramMatrixInverted.Transpose();
+      gramMatrixInverted.transpose();
       gramMatrixInverted.multiplyOnTheLeft(matNormals);
       gramMatrixInverted.invert();
       Vector<Rational> tempRoot;
@@ -12487,7 +12478,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
       }
       Cone::scaleNormalizeByPositive(normalCandidate);
       if ((hasNegative && !hasPositive)) {
-        normalCandidate.Minus();
+        normalCandidate.minus();
       }
       if (!(hasNegative && hasPositive)) {
         this->Normals.addOnTopNoRepetition(normalCandidate);
@@ -12683,7 +12674,7 @@ int RationalFunction::minimalNumberOfVariables() const {
   }
 }
 
-bool RationalFunction::GetRelations(
+bool RationalFunction::getRelations(
   const List<Polynomial<Rational> >& inputElements,
   List<Polynomial<Rational> >& outputGeneratorLabels,
   List<Polynomial<Rational> >& outputRelations,
@@ -12705,7 +12696,7 @@ bool RationalFunction::GetRelations(
   Polynomial<Rational> currentGenerator;
   for (int i = 0; i < numStartingGenerators; i ++) {
     Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
-    currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables + numStartingGenerators);
+    currentPoly.setNumberOfVariablesSubstituteDeletedByOne(numStartingVariables + numStartingGenerators);
     currentGenerator.makeDegreeOne(numStartingVariables + numStartingGenerators, i + numStartingVariables, 1);
     outputGeneratorLabels[i] = currentGenerator;
     currentPoly -= currentGenerator;

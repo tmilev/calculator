@@ -12,7 +12,7 @@
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 
 std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
-  if (this->IsConstant()) {
+  if (this->isConstant()) {
     return "1";
   }
   std::stringstream out;
@@ -48,7 +48,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   startBasis.MakeEiBasis(this->AmbientWeyl->getDimension());
   this->actByElement(input, startBasis, imageBasis);
   outputMatrix.AssignVectorsToRows(imageBasis);
-  outputMatrix.Transpose();
+  outputMatrix.transpose();
 }
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeSubGroupFromGeneratingReflections(
@@ -425,7 +425,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     theAutoIndex =2;
 */
   mapOnRootSpaces.AssignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
-  mapOnRootSpaces.Transpose();
+  mapOnRootSpaces.transpose();
 //  mapOnRootSpaces.ComputeDebugString();
 //  Matrix<Rational>  theDet =mapOnRootSpaces;
 //  Rational tempRat;
@@ -448,7 +448,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     Domain[numRoots + i] = tempElt;
     tempElt.MakeHgenerator(rangeRoot, *this);
     Range[numRoots + i] = tempElt;
-    for (int i = 0; i < 2; i ++, domainRoot.Minus(), rangeRoot.Minus()) {
+    for (int i = 0; i < 2; i ++, domainRoot.minus(), rangeRoot.minus()) {
       int theIndex = this->theWeyl.RootSystem.getIndex(rangeRoot);
       tempElt.MakeGGenerator(rangeRoot, *this);
       Range[theIndex] = tempElt;
@@ -464,7 +464,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
       const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
       for (int j = 0; j < theDimension; j ++) {
         left.makeEi(theDimension, j);
-        for (int k = 0; k < 2; k ++, left.Minus()) {
+        for (int k = 0; k < 2; k ++, left.minus()) {
           right = current - left;
           if (this->theWeyl.IsARoot(right)) {
             int leftIndex = this->theWeyl.RootSystem.getIndex(left);
@@ -604,7 +604,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   Vector<Rational> tempRoot;
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.makeEi(theDomainDimension, i);
-    for (int j = 0; j < 2; j ++, tempRoot.Minus()) {
+    for (int j = 0; j < 2; j ++, tempRoot.minus()) {
       int index = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
       tempDomain[index].makeZero();
       ChevalleyGenerator tempGen;
@@ -692,7 +692,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& 
   invertedSmallCartan.actOnVectorColumn(output, output);
 }
 
-bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
+bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   const MonomialUniversalEnveloping<RationalFunction>& input,
   const RationalFunction& theCoeff,
   ElementUniversalEnveloping<RationalFunction>& output
@@ -723,8 +723,9 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
-  const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output
+void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
+  const ElementSemisimpleLieAlgebra<Rational>& input,
+  ElementSemisimpleLieAlgebra<Rational>& output
 ) {
   if (&output == &input) {
     global.fatal << "Output required to be different from input. " << global.fatal;
@@ -741,12 +742,12 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().GetRank(); i ++) {
     domainElt.MakeHgenerator(Vector<Rational>::GetEi(this->theDomain().GetRank(), i), this->theDomain());
-    this->ApplyHomomorphism(domainElt, imageElt);
+    this->applyHomomorphism(domainElt, imageElt);
     output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
 }
 
-bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
+bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   const ElementUniversalEnveloping<RationalFunction>& input,
   ElementUniversalEnveloping<RationalFunction>& output
 ) {
@@ -756,7 +757,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   output.makeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunction> tempElt;
   for (int i = 0; i < input.size(); i ++) {
-    if (!this->ApplyHomomorphism(input[i], input.coefficients[i], tempElt)) {
+    if (!this->applyHomomorphism(input[i], input.coefficients[i], tempElt)) {
       return false;
     }
     output += tempElt;
@@ -867,13 +868,13 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
 
 void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other) const {
   if (this->owner != other.owner) {
-    global.fatal << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. " << global.fatal;
+    global.fatal << "Attempt to compare Chevalley generators of different Lie algebras. " << global.fatal;
   }
 }
 
 bool ChevalleyGenerator::checkInitialization() const {
   if (this->owner == nullptr) {
-    global.fatal << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << global.fatal;
+    global.fatal << "Attempt to use a non-initialized Chevalley generator. " << global.fatal;
     return false;
   }
   return true;
@@ -1221,7 +1222,7 @@ std::string VectorPartition::ToStringAllPartitions(bool useHtml) {
   return out.str();
 }
 
-bool RationalFunction::ConvertToType(int theType) {
+bool RationalFunction::convertToType(int theType) {
   if (theType < this->expressionType) {
     return false;
   }
@@ -1245,21 +1246,22 @@ void RationalFunction::invert() {
   }
   if (this->expressionType == this->typeRational) {
     if (this->ratValue.isEqualToZero()) {
-      global.fatal  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
+      global.fatal << "Division by zero. "
+      << "Division by zero errors must be caught earlier in the program and "
       << "handled gracefully. Crashing ungracefully. " << global.fatal;
     }
     this->ratValue.invert();
     return;
   }
   if (this->expressionType == this->typePoly) {
-    this->ConvertToType(this->typeRationalFunction);
+    this->convertToType(this->typeRationalFunction);
   }
   if (this->Numerator.getElement().isEqualToZero()) {
     global.fatal << "Cannot invert rational function with zero numerator. " << global.fatal;
   }
   MathRoutines::swap(this->Numerator.getElement(), this->Denominator.getElement());
   this->expressionType = this->typeRationalFunction;
-  this->ReduceMemory();
+  this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (!this->checkConsistency()) {
     global.fatal << "Consistency check failed. " << global.fatal;
@@ -1269,10 +1271,12 @@ void RationalFunction::invert() {
 bool RationalFunction::checkConsistency() const {
   if (this->expressionType == this->typePoly) {
     if (this->Numerator.IsZeroPointer()) {
-      global.fatal << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << global.fatal;
+      global.fatal << "A rational function is flagged as being a "
+      << "non-constant polynomial, but the numerator pointer is zero. "
+      << global.fatal;
       return false;
     }
-    if (this->Numerator.GetElementConst().IsConstant()) {
+    if (this->Numerator.GetElementConst().isConstant()) {
       global.fatal << "This is a programming error: a rational function is flagged as "
       << "having a non-constant numerator, but the numerator is constant. " << global.fatal;
       return false;
@@ -1285,7 +1289,7 @@ bool RationalFunction::checkConsistency() const {
       << global.fatal;
       return false;
     }
-    if (this->Denominator.GetElementConst().IsConstant()) {
+    if (this->Denominator.GetElementConst().isConstant()) {
       global.fatal << "This is a programming error: a rational function is flagged as "
       << "having non-constant denominator, but the denominator is constant. " << global.fatal;
       return false;
@@ -1310,7 +1314,7 @@ void RationalFunction::operator/=(int other) {
   *this /= tempRF;
 }
 
-void RationalFunction::Minus() {
+void RationalFunction::minus() {
   this->operator*= (Rational(- 1));
   if (!this->checkConsistency()) {
     global.fatal << "Failed to take the negative sign of a rational function. " << global.fatal;
@@ -1326,7 +1330,7 @@ void RationalFunction::operator-=(const RationalFunction& other) {
   }
   RationalFunction tempRF;
   tempRF = other;
-  tempRF.Minus();
+  tempRF.minus();
   this->operator+=(tempRF);
   if (!this->checkConsistency()) {
     global.fatal << "Corrupt output in rational function operator -=." << global.fatal;
@@ -1339,7 +1343,7 @@ void RationalFunction::operator-=(const Rational& other) {
   }
   RationalFunction tempRF;
   tempRF.makeConstant(other);
-  tempRF.Minus();
+  tempRF.minus();
   this->operator+=(tempRF);
   if (!(this->checkConsistency())) {
     global.fatal << "Corrupt output in rational function operator-=(Rational)." << global.fatal;
@@ -1412,13 +1416,13 @@ RationalFunction RationalFunction::one() {
   return tempRat;
 }
 
-bool RationalFunction::FindOneVariableRationalRoots(List<Rational>& output) {
+bool RationalFunction::findOneVariableRationalRoots(List<Rational>& output) {
   if (this->expressionType == this->typeRational) {
     output.setSize(0);
     return true;
   }
   Polynomial<Rational> tempP;
-  this->GetNumerator(tempP);
+  this->getNumerator(tempP);
   return tempP.findOneVariableRationalRoots(output);
 }
 
@@ -1472,7 +1476,7 @@ std::string RationalFunction::toString(FormatExpressions* theFormat) const {
   } else {
     out << ")";
   }
-  //out << " Num vars: " << this->getNumberOfVariables();
+  //out << " Num vars: " << this->minimalNumberOfVariables();
   return out.str();
 }
 
@@ -1512,7 +1516,7 @@ void RationalFunction::gcd(
   output.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
 }
 
-void RationalFunction::MakeOneLetterMoN(
+void RationalFunction::makeOneLetterMonomial(
   int theIndex, const Rational& theCoeff, int ExpectedNumVars
 ) {
   if (theIndex < 0) {
@@ -1524,21 +1528,19 @@ void RationalFunction::MakeOneLetterMoN(
   this->Numerator.getElement().makeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
 }
 
-void RationalFunction::makeMonomial(
-  int LetterIndex, const Rational& Power, const Rational& Coeff, int ExpectedNumVars
-) {
-  if (LetterIndex < 0) {
-    global.fatal << "This is a programming error: I am asked to create Monomial which has a variable of negative index "
-    << LetterIndex << ". " << global.fatal;
+void RationalFunction::makeMonomial(int letterIndex, const Rational& power, const Rational& coefficient) {
+  if (letterIndex < 0) {
+    global.fatal << "I am asked to create Monomial which has a variable of negative index "
+    << letterIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePoly;
-  this->Numerator.getElement().makeMonomial(LetterIndex, Power, Coeff, ExpectedNumVars);
+  this->Numerator.getElement().makeMonomial(letterIndex, power, coefficient);
 }
 
-void RationalFunction::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
+void RationalFunction::setNumberOfVariablesSubstituteDeletedByOne(int newNumVars) {
   int oldNumVars = this->minimalNumberOfVariables();
-  this->Numerator.getElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
-  this->Denominator.getElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  this->Numerator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
+  this->Denominator.getElement().setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
   if (newNumVars < oldNumVars) {
     this->simplify();
   }
@@ -1597,11 +1599,11 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
     return;
   }
   if (this->expressionType == this->typeRational) {
-    this->ConvertToType(this->typePoly);
+    this->convertToType(this->typePoly);
   }
   if (this->expressionType == this->typePoly) {
     this->Numerator.getElement() *= other;
-    this->ReduceMemory();
+    this->reduceMemory();
     return;
   }
   Polynomial<Rational> theGCD, theResult, tempP;
@@ -1625,7 +1627,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
     global.fatal << "Polynomial not equal to zero. " << global.fatal;
   }
   this->Denominator.getElement() = theResult;
-  this->ReduceMemory();
+  this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (theReport.tickAndWantReport()) {
     std::stringstream out;
@@ -1669,7 +1671,6 @@ void RationalFunction::operator*=(const Rational& other) {
 }
 
 void RationalFunction::operator*=(const RationalFunction& other) {
- // int commentChecksWhenDoneDebugging= - 1;
   this->checkConsistency();
   other.checkConsistency();
   if (this == &other) {
@@ -1703,10 +1704,6 @@ void RationalFunction::operator*=(const RationalFunction& other) {
     return;
   }
   Polynomial<Rational> theGCD1, theGCD2, tempP1, tempP2;
-  //this->ComputeDebugString();
-  //  RationalFunctionOld tempde_Bugger;
-  //  tempde_Bugger = other;
-  //  tempde_Bugger.ComputeDebugString();
   ProgressReport theReport;
   if (theReport.tickAndWantReport()) {
     std::stringstream out;
@@ -1736,7 +1733,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Numerator.getElement() *= tempP1;
-  this->ReduceMemory();
+  this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (theReport.tickAndWantReport()) {
     std::stringstream out;
@@ -1760,15 +1757,15 @@ void RationalFunction::operator+=(const RationalFunction& other) {
   if (other.expressionType < this->expressionType) {
     RationalFunction tempRF;
     tempRF = other;
-    tempRF.ConvertToType(this->expressionType);
-    this->AddSameTypes(tempRF);
+    tempRF.convertToType(this->expressionType);
+    this->addSameTypes(tempRF);
     if (!this->checkConsistency()) {
       global.fatal << "Output of rational function addition is corrupt. " << global.fatal;
     }
     return;
   }
   if (this->expressionType == other.expressionType) {
-    this->AddSameTypes(other);
+    this->addSameTypes(other);
     if (!this->checkConsistency()) {
       global.fatal << "Output of rational function addition is corrupt "
       << "for same type of rational functions." << global.fatal;
@@ -1776,8 +1773,8 @@ void RationalFunction::operator+=(const RationalFunction& other) {
     return;
   }
   if (this->expressionType < other.expressionType) {
-    this->ConvertToType(other.expressionType);
-    this->AddSameTypes(other);
+    this->convertToType(other.expressionType);
+    this->addSameTypes(other);
     if (!this->checkConsistency()) {
       global.fatal << "Corrupt outputs of rational "
       << "function addition, different expression types. "
@@ -1808,7 +1805,7 @@ void RationalFunction::simplify() {
       this->Denominator.getElement() = tempP;
     }
   }
-  this->ReduceMemory();
+  this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
 }
 
@@ -1841,8 +1838,8 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
   Rational scaleNumerator = this->Numerator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational scaleDenominator = this->Denominator.getElement().scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational scale = scaleDenominator / scaleNumerator;
-  this->Denominator.getElement() *= scale.GetDenominator();
-  this->Numerator.getElement() *= scale.GetNumerator();
+  this->Denominator.getElement() *= scale.getDenominator();
+  this->Numerator.getElement() *= scale.getNumerator();
 }
 
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
@@ -1866,7 +1863,7 @@ void ElementUniversalEnveloping<Coefficient>::AssignFromCoordinateFormWRTBasis(
   }
 }
 
-bool RationalFunction::IsConstant(Rational* whichConstant) const {
+bool RationalFunction::isConstant(Rational* whichConstant) const {
   if (this->expressionType != this->typeRational) {
     return false;
   }
@@ -1897,22 +1894,22 @@ RationalFunction RationalFunction::scaleNormalizeIndex(
   Polynomial<Rational> currentNumerator, currentDenominator;
   for (int i = 0; i < input.size; i ++) {
     RationalFunction& current = input[i];
-    current.GetNumerator(currentNumerator);
-    current.GetDenominator(currentDenominator);
+    current.getNumerator(currentNumerator);
+    current.getDenominator(currentDenominator);
     scale = currentNumerator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     scale /= currentDenominator.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     scales.addOnTop(scale);
   }
-  LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].GetNumerator().value;
-  LargeIntegerUnsigned denominatorContentLeastCommonMultiple = scales[0].GetDenominator();
+  LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].getNumerator().value;
+  LargeIntegerUnsigned denominatorContentLeastCommonMultiple = scales[0].getDenominator();
   for (int i = 1; i < scales.size; i ++) {
     numeratorContentGreatestCommonDivisor = LargeIntegerUnsigned::lcm(
-      scales[i].GetNumerator().value,
+      scales[i].getNumerator().value,
       numeratorContentGreatestCommonDivisor
     );
     denominatorContentLeastCommonMultiple = LargeIntegerUnsigned::gcd(
       denominatorContentLeastCommonMultiple,
-      scales[i].GetDenominator()
+      scales[i].getDenominator()
     );
   }
   scale = numeratorContentGreatestCommonDivisor;
@@ -2084,14 +2081,14 @@ bool RationalFunction::gcdQuick(
     if (remainder.isEqualToZero()) {
       output = right;
     } else {
-      output.makeOne(left.minimalNumberOfVariables());
+      output.makeOne();
     }
   } else {
     right.DivideBy(left, quotient, remainder, monomialOrder);
     if (remainder.isEqualToZero()) {
       output = left;
     } else {
-      output.makeOne(left.minimalNumberOfVariables());
+      output.makeOne();
     }
   }
   return true;
@@ -2123,24 +2120,24 @@ void RationalFunction::raiseToPower(int thePower) {
   this->checkConsistency();
 }
 
-void RationalFunction::ClearDenominators(RationalFunction& outputWasMultipliedBy) {
+void RationalFunction::clearDenominators(RationalFunction& outputWasMultipliedBy) {
   //outputWasMultipliedBy.makeConstant(this->NumVars, (Rational) 1, this->context);
   Rational tempRat;
   switch(this->expressionType) {
     case RationalFunction::typeRational:
-      tempRat = this->ratValue.GetDenominator();
+      tempRat = this->ratValue.getDenominator();
       outputWasMultipliedBy.makeConstant(tempRat);
       this->ratValue *= tempRat;
     break;
     case RationalFunction::typePoly:
-      this->Numerator.getElement().ClearDenominators(tempRat);
+      this->Numerator.getElement().clearDenominators(tempRat);
       outputWasMultipliedBy.makeConstant(tempRat);
     break;
     case RationalFunction::typeRationalFunction:
       RationalFunction tempRF;
       outputWasMultipliedBy.operator=(this->Denominator.getElement());
       *this *= outputWasMultipliedBy;
-      this->ClearDenominators(tempRF);
+      this->clearDenominators(tempRF);
       outputWasMultipliedBy *= tempRF;
       break;
   }
@@ -2530,7 +2527,7 @@ std::string SlTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   return out.str();
 }
 
-void RationalFunction::AddSameTypes(const RationalFunction& other) {
+void RationalFunction::addSameTypes(const RationalFunction& other) {
   switch (this->expressionType) {
     case RationalFunction::typeRational:
       this->ratValue += other.ratValue;
@@ -2539,18 +2536,18 @@ void RationalFunction::AddSameTypes(const RationalFunction& other) {
       this->Numerator.getElement() += other.Numerator.GetElementConst();
       break;
     case RationalFunction::typeRationalFunction:
-      this->AddHonestRF(other);
+      this->addHonestRationalFunction(other);
       break;
   }
-  this->ReduceMemory();
+  this->reduceMemory();
   if (!this->checkConsistency()) {
     global.fatal << "Bad rational function. " << global.fatal;
   }
 }
 
-void RationalFunction::ReducePolyToRational() {
+void RationalFunction::ReducePolynomialToRational() {
   if (this->expressionType == this->typePoly) {
-    if (this->Numerator.getElement().IsConstant()) {
+    if (this->Numerator.getElement().isConstant()) {
       this->expressionType = this->typeRational;
       if (this->Numerator.getElement().isEqualToZero()) {
         this->ratValue.makeZero();
@@ -2562,8 +2559,8 @@ void RationalFunction::ReducePolyToRational() {
   }
 }
 
-void RationalFunction::AddHonestRF(const RationalFunction& other) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::AddHonestRF");
+void RationalFunction::addHonestRationalFunction(const RationalFunction& other) {
+  MacroRegisterFunctionWithName("RationalFunctionOld::addHonestRationalFunction");
   Rational tempRat;
   if (!this->Denominator.getElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, Rational(1))) {
     Polynomial<Rational> buffer;
@@ -2584,7 +2581,7 @@ void RationalFunction::AddHonestRF(const RationalFunction& other) {
     this->Numerator.getElement() *= tempRat;
     this->Denominator.getElement() *= tempRat;
     this->Numerator.getElement() += other.Numerator.GetElementConst();
-    this->ReduceMemory();
+    this->reduceMemory();
     this->simplifyLeadingCoefficientOnly();
   }
   if (!this->checkConsistency()) {
@@ -2592,16 +2589,16 @@ void RationalFunction::AddHonestRF(const RationalFunction& other) {
   }
 }
 
-bool RationalFunction::IsEqualTo(const RationalFunction& other) const {
+bool RationalFunction::isEqualTo(const RationalFunction& other) const {
   if (this->expressionType != other.expressionType) {
     return false;
   }
   switch (this->expressionType) {
     case RationalFunction::typeRationalFunction:
-      return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst()) &&
-      this->Denominator.GetElementConst().IsEqualTo(other.Denominator.GetElementConst());
+      return this->Numerator.GetElementConst().isEqualTo(other.Numerator.GetElementConst()) &&
+      this->Denominator.GetElementConst().isEqualTo(other.Denominator.GetElementConst());
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst());
+      return this->Numerator.GetElementConst().isEqualTo(other.Numerator.GetElementConst());
     case RationalFunction::typeRational:
       return this->ratValue == other.ratValue;
   }
@@ -2609,13 +2606,13 @@ bool RationalFunction::IsEqualTo(const RationalFunction& other) const {
   return false;
 }
 
-void RationalFunction::TimesConstant(const Rational& theConst) {
+void RationalFunction::multiplyByConstant(const Rational& theConst) {
   this->operator*=(theConst);
 }
 
-void RationalFunction::ReduceMemory() {
-  this->ReduceRFToPoly();
-  this->ReducePolyToRational();
+void RationalFunction::reduceMemory() {
+  this->reduceRationalFunctionToPolynomial();
+  this->ReducePolynomialToRational();
   if (!this->checkConsistency()) {
     global.fatal << "Corrupt rational function. " << global.fatal;
   }
@@ -2624,7 +2621,7 @@ void RationalFunction::ReduceMemory() {
 void RationalFunction::operator=(const Polynomial<Rational>& other) {
   this->expressionType = this->typePoly;
   this->Numerator.getElement() = other;
-  this->ReduceMemory();
+  this->reduceMemory();
 }
 
 unsigned int RationalFunction::hashFunction() const {
@@ -2654,10 +2651,10 @@ void RationalFunction::operator=(const Rational& other) {
 }
 
 void RationalFunction::setNumberOfVariables(int GoalNumVars) {
-  this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
+  this->setNumberOfVariablesSubstituteDeletedByOne(GoalNumVars);
 }
 
-void RationalFunction::GetNumerator(Polynomial<Rational>& output) const {
+void RationalFunction::getNumerator(Polynomial<Rational>& output) const {
   switch (this->expressionType) {
     case RationalFunction::typeRational:
       output.makeConstant(this->ratValue);
@@ -2675,7 +2672,7 @@ bool RationalFunction::isNegative() {
   return false;
 }
 
-void RationalFunction::GetDenominator(Polynomial<Rational>& output) const {
+void RationalFunction::getDenominator(Polynomial<Rational>& output) const {
   switch (this->expressionType) {
     case RationalFunction::typeRationalFunction:
       if (this->Denominator.IsZeroPointer()) {
@@ -2709,7 +2706,7 @@ bool RationalFunction::operator!=(int other) {
 }
 
 bool RationalFunction::operator==(const RationalFunction& other) const {
-  return this->IsEqualTo(other);
+  return this->isEqualTo(other);
 }
 
 bool RationalFunction::operator>(const RationalFunction& other) const {
@@ -2753,7 +2750,8 @@ bool RationalFunction::operator<=(const RationalFunction& other) const {
 }
 
 void MonomialP::makeEi(int LetterIndex, int Power, int ExpectedNumVars) {
-  this->makeOne(ExpectedNumVars);
+  (void) ExpectedNumVars;
+  this->makeOne();
   if (Power == 0) {
     return;
   }
@@ -3037,7 +3035,7 @@ std::string MonomialP::toString(FormatExpressions* theFormat) const {
   if (theFormat == nullptr) {
     theFormat = &tempFormat.getElement();
   }
-  if (this->IsConstant()) {
+  if (this->isConstant()) {
     return "1";
   }
   for (int i = 0; i < this->monBody.size; i ++) {

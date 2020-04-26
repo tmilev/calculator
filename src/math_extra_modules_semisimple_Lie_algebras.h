@@ -269,7 +269,7 @@ public:
     if (this->coefficients.size != 1) {
       return false;
     }
-    if (!this->coefficients[0].IsEqualToOne()) {
+    if (!this->coefficients[0].isEqualToOne()) {
       return false;
     }
     return (*this)[0].IsHWV();
@@ -300,13 +300,13 @@ public:
     MonomialGeneralizedVerma<Coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;
   }
-  int getNumberOfVariables() {
+  int minimalNumberOfVariables() {
     if (this->size == 0) {
       return - 1;
     }
-    int theAnswer = this->theObjects[0].getNumberOfVariables();
+    int theAnswer = this->theObjects[0].minimalNumberOfVariables();
     for (int i = 1; i < this->size; i ++) {
-      if (theAnswer != this->theObjects[i].getNumberOfVariables()) {
+      if (theAnswer != this->theObjects[i].minimalNumberOfVariables()) {
         return - 1;
       }
     }

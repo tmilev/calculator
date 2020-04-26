@@ -167,7 +167,7 @@ public:
   void initFromInts(int* theMaxMults, int NumberMaxMults);
   void initFromInts(const List<int>& theMaxMults);
   bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
-    return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities);
+    return this->MaxMultiplicities.isEqualTo(other.MaxMultiplicities);
   }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right) {
     this->Multiplicities = right.Multiplicities;

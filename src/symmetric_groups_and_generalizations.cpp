@@ -115,7 +115,7 @@ void Partition::GetPartitions(List<Partition>& out, int n) {
   }
 }
 
-void Partition::Transpose() {
+void Partition::transpose() {
   if (this->n == 0) {
     return;
   }
@@ -202,7 +202,7 @@ void Partition::TestAllSpechtModules(int n) {
     //std::cout << "got to here3\n";
     for (int ri = 0; ri < repgens.size; ri ++) {
       //std::cout << "got to here4\n";
-      global.comments << repgens[ri].ToStringPlainText();
+      global.comments << repgens[ri].toStringPlainText();
       //std::cout << "got to here5\n";
       Rational det = repgens[ri].GetDeterminant();
       global.comments << " determinant is " << det << "\n\n";

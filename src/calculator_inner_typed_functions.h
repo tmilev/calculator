@@ -261,7 +261,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       Polynomial<Coefficient> resultP = theConverted.getValue<Polynomial<Coefficient> >();
       if (thePower < 0) {
         Coefficient theConst;
-        if (!resultP.IsConstant(&theConst)) {
+        if (!resultP.isConstant(&theConst)) {
           theCommands << "<hr>Failed to extract polynomial from  "
           << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "

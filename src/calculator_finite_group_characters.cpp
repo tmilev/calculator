@@ -667,7 +667,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       differenceVector = outputOrbit[i] - currentWeight;
       bool isGood = !differenceVector.isEqualToZero();
       for (int k = 0; k < differenceVector.size; k++) {
-        if (!differenceVector[k].IsConstant(&currentCoordDifference)) {
+        if (!differenceVector[k].isConstant(&currentCoordDifference)) {
           isGood = false;
           break;
         } else if (!currentCoordDifference.isInteger() || currentCoordDifference < 0) {
@@ -1680,10 +1680,10 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
   KostkaNumber leftKN, rightKN;
   Partition tempP;
   tempP = leftPartition;
-  tempP.Transpose();
+  tempP.transpose();
   leftKN.partition = tempP.p;
   tempP = rightPartition;
-  tempP.Transpose();
+  tempP.transpose();
   rightKN.partition = tempP.p;
   theSelection.initFromInts(parabolicPartition.p);
   do {
@@ -1865,7 +1865,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
       partitionsTransposed.setSize(thePartitions.size);
       for (int i = 0; i < thePartitions.size; i ++) {
         partitionsTransposed[i] = thePartitions[i];
-        partitionsTransposed[i].Transpose();
+        partitionsTransposed[i].transpose();
         out << "<br>Partition: " << thePartitions[i].toString()
         << ", transposed: " << partitionsTransposed[i].toString();
       }
@@ -2337,7 +2337,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
 bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSpechtModule");
   Vector<Rational> inputRat;
-  if (!theCommands.GetVectorFromFunctionArguments(input, inputRat)) {
+  if (!theCommands.getVectorFromFunctionArguments(input, inputRat)) {
     return false;
   }
   if (inputRat.size < 1) {
@@ -2366,7 +2366,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   List<Matrix<Rational> > gens;
   p.SpechtModuleMatricesOfTranspositionsjjplusone(gens);
   for (int i = 0; i < gens.size; i ++) {
-    out << i << "\n" << gens[i].ToStringPlainText() << "\n";
+    out << i << "\n" << gens[i].toStringPlainText() << "\n";
   }
   return output.assignValue(out.str(), theCommands);
 }

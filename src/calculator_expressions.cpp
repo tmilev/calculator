@@ -1108,7 +1108,7 @@ bool Expression::ConvertInternally<double>(Expression& output) const {
   }
   return false;
 }
-//end Expression::ConvertToType specializations.
+//end Expression::convertToType specializations.
 
 bool Expression::CheckConsistencyRecursively() const {
   MacroRegisterFunctionWithName("Expression::CheckConsistencyRecursively");
@@ -1595,7 +1595,7 @@ bool Expression::IsIntervalRealLine() const {
   return false;
 }
 
-bool Expression::IsEqualToOne() const {
+bool Expression::isEqualToOne() const {
   int theInt;
   if (this->isSmallInteger(&theInt)) {
     return theInt == 1;
@@ -1633,13 +1633,13 @@ bool Expression::IsKnownToBeNonNegative() const {
   Calculator& theCommands = *(this->owner);
   testInequality.MakeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.EZero());
   if (this->owner->EvaluateExpression(theCommands, testInequality, testResult)) {
-    if (testResult.IsEqualToOne()) {
+    if (testResult.isEqualToOne()) {
       return true;
     }
   }
   testInequality.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.EZero());
   if (theCommands.EvaluateExpression(theCommands, testInequality, testResult)) {
-    if (testResult.IsEqualToOne()) {
+    if (testResult.isEqualToOne()) {
       return true;
     }
   }
@@ -3260,7 +3260,7 @@ bool Expression::toStringPower(
   if (!involvesExponentsInterpretedAsFunctions) {
     bool isSqrt = false;
     if (input[2].isOfType<Rational>()) {
-      if (input[2].getValue<Rational>().IsEqualTo(Rational(1, 2))) {
+      if (input[2].getValue<Rational>().isEqualTo(Rational(1, 2))) {
         isSqrt = true;
       }
     }

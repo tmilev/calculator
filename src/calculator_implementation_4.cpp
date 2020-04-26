@@ -149,7 +149,7 @@ void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
     varShift = this->minimalNumberOfVariables();
   }
   for (int i = 0; i < eltsNilrad.size; i ++) {
-    tempRF.MakeOneLetterMoN(i + varShift, 1);
+    tempRF.makeOneLetterMonomial(i + varShift, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.makeOne();
@@ -174,12 +174,11 @@ void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
   if (shiftPowersByNumVarsBaseField) {
     varShift = this->minimalNumberOfVariables();
   }
-  int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++) {
-    tempRF.makeMonomial(i + varShift, 1, 1, numVars);
+    tempRF.makeMonomial(i + varShift, 1, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
-  tempRF.makeOne(numVars);
+  tempRF.makeOne();
   output.addMonomial(tempMon, tempRF);
 }
 
@@ -455,7 +454,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
         if (tempMat1.coefficients[k].expressionType == RationalFunction::typeRationalFunction) {
           return false;
         }
-        tempMat1.coefficients[k].GetNumerator(tempP1);
+        tempMat1.coefficients[k].getNumerator(tempP1);
         tempMT.addMonomial(tempMat1[k], tempP1);
       }
       MathRoutines::raiseToPower(tempMT, thePower, idMT);
@@ -549,7 +548,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       ei.makeEi(theSSalgebra.GetRank(), j);
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
-      ei.Minus();
+      ei.minus();
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
     }
@@ -587,7 +586,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     if (i == 0) {
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
-      Pone.makeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
+      Pone.makeOne();
       Pzero.makeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
@@ -1407,7 +1406,7 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.size() != 3) {
     return false;
   }
-  if (!input[1].IsEqualToOne()) {
+  if (!input[1].isEqualToOne()) {
     return false;
   }
   output = input[2];
@@ -1417,7 +1416,7 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
 bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
   MacroRegisterFunctionWithName("Calculator::GetVectorLargeIntFromFunctionArguments");
   Vector<Rational> theRats;
-  if (!this->GetVectorFromFunctionArguments(input, theRats)) {
+  if (!this->getVectorFromFunctionArguments(input, theRats)) {
     return false;
   }
   output.initializeFillInObject(theRats.size, 0);
@@ -1752,7 +1751,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
   ) {
     return false;
   }
-  if (input[2].IsEqualToOne()) {
+  if (input[2].isEqualToOne()) {
     output = input[1];
     return true;
   }
@@ -1825,7 +1824,7 @@ bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Ex
   if (!input[1].isOfType<Rational>(&conditionRat)) {
     return false;
   }
-  if (conditionRat.IsEqualToOne()) {
+  if (conditionRat.isEqualToOne()) {
     output = input[2];
     return true;
   }

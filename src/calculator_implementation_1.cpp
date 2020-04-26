@@ -15,7 +15,7 @@
 #include <cfloat>
 
 template<class Element>
-bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
+bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution
 ) {
   // this function return true if Ax = b >= 0 has a solution with x >= 0 and records a solution x at outputPoint
@@ -88,7 +88,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.invert();
       for (int i = 0; i < tempMatA.numberOfRows; i ++) {
-        if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
+        if (!tempMatA.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
           << global.fatal;
         }
@@ -114,7 +114,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           tempRat.multiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
-          tempRat.Minus();
+          tempRat.minus();
           tempMatA.addTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
         if (i == LeavingVariableRow) {
@@ -129,7 +129,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       BaseVariables.selected[EnteringVariable] = true;
       //BaseVariables.ComputeDebugString();
       for (int i = 0; i < tempMatA.numberOfRows; i ++) {
-        if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
+        if (!tempMatA.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
           global.fatal << "New base variable expected to be equal to 1. " << global.fatal;
         }
       }
@@ -215,7 +215,7 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
   }
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(
+  if (!theCommands.getVectorFromFunctionArguments(
     input,
     polynomials,
     &theContext,
@@ -236,7 +236,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
 ) {
   MacroRegisterFunctionWithName("Calculator::getListPolynomialVariableLabelsLexicographic");
   ExpressionContext theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments(
+  if (!this->getVectorFromFunctionArguments(
     input,
     output,
     &theContextStart,
@@ -262,8 +262,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
     theSub[i].makeMonomial(
       currentIndex,
       1,
-      this->theObjectContainer.theAlgebraicClosure.One(),
-      numVars
+      this->theObjectContainer.theAlgebraicClosure.One()
     );
   }
   for (int i = 0; i < output.size; i ++) {
@@ -593,7 +592,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE = theErational;
   std::stringstream out, logStream;
-  bool success = ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
+  bool success = ownerSS->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
   if (success) {
     out << HtmlRoutines::GetMathSpanPure("F=" + theF.toString() + ";")
     << "<br>" << HtmlRoutines::GetMathSpanPure("H=" + theH.toString() + ";") << "<br>"
@@ -693,7 +692,7 @@ bool Calculator::innerGroebner(
       return output.makeError("Error: modulus not prime. ", theCommands);
     }
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(
+  if (!theCommands.getVectorFromFunctionArguments<Polynomial<Rational> >(
     output,
     inputVector,
     &theContext,
@@ -713,7 +712,7 @@ bool Calculator::innerGroebner(
   theContext.getFormat(global.theDefaultFormat.getElement());
   if (useModZp) {
     ElementZmodP tempElt;
-    tempElt.MakeMOne(static_cast<unsigned>(theMod));
+    tempElt.makeMinusOne(static_cast<unsigned>(theMod));
     inputVectorZmodP.setSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].makeZero();
@@ -769,8 +768,8 @@ bool Calculator::innerGroebner(
     out << "<br>Minimal Groebner basis with "
     << outputGroebner.size
     << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.numberPolynomialComputations
-    << " polynomial operations. ";
+    << theGroebnerComputation.numberPolynomialDivisions
+    << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
       out << "<br> " << HtmlRoutines::GetMathSpanPure(
         outputGroebner[i].toString(&theGroebnerComputation.theFormat)
@@ -794,7 +793,7 @@ bool Calculator::innerGroebner(
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
     for (int i = 0; i < theGroebnerComputation.theBasis.size; i ++) {
-      out << theGroebnerComputation.theBasis[i].toString(&theGroebnerComputation.theFormat);
+      out << theGroebnerComputation.theBasis[i].element.toString(&theGroebnerComputation.theFormat);
       if (i != theGroebnerComputation.theBasis.size - 1) {
         out << ", <br>";
       }
@@ -862,7 +861,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   // if (input.IsSequenceNElementS())
   //   if (theMat.numberOfRows !=1)
   //     return false;
-  theMat.Transpose();
+  theMat.transpose();
   return output.AssignMatrixExpressions(theMat, theCommands, true, true);
 }
 
@@ -1984,10 +1983,10 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   Rational theRat;
   if (input.isOfType<Rational>(&theRat)) {
     if (
-      theRat.GetDenominator().IsIntegerFittingInInt(nullptr) &&
-      theRat.GetNumerator().IsIntegerFittingInInt(nullptr)
+      theRat.getDenominator().IsIntegerFittingInInt(nullptr) &&
+      theRat.getNumerator().IsIntegerFittingInInt(nullptr)
     ) {
-      out << " " << theRat.GetNumerator().toString() << " " << theRat.GetDenominator() << " div ";
+      out << " " << theRat.getNumerator().toString() << " " << theRat.getDenominator() << " div ";
       return output.assignValue(out.str(), theCommands);
     }
     hasDoubleValue = true;
@@ -2054,7 +2053,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
     return true;
   }
   if (parSel.CardinalitySelection != 0) {
-    return output.makeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
+    return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> theElt;
   theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
@@ -2078,8 +2077,11 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   }
   std::stringstream out;
   if (coneNonStrictMatForm.numberOfColumns != coneStrictMatForm.numberOfColumns) {
-    out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.numberOfColumns
-    << " and second of dimension " << coneStrictMatForm.numberOfColumns << " which is not allowed. ";
+    out << "I got as input vectors of different dimensions, "
+    << "first groups had vectors of dimension "
+    << coneNonStrictMatForm.numberOfColumns
+    << " and second of dimension "
+    << coneStrictMatForm.numberOfColumns << " which is not allowed. ";
     return output.makeError(out.str(), theCommands);
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
@@ -2409,7 +2411,7 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesToBeIgnored.clear();
   // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
   // this->rulesDisplayNamesMap.clear();
-  // this->rulesDisplayNamesMap.SetKeyValue("Minus", "");
+  // this->rulesDisplayNamesMap.SetKeyValue("minus", "");
   // this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication", "");
   // this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals", "");
   // this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction", "");

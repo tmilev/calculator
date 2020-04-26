@@ -650,7 +650,7 @@ private:
   bool quickSortAscendingCustomRecursive(
     int bottomIndex, int topIndex, compareClass& theComparator, List<carbonCopyType>* carbonCopy
   );
-  void quickSortDescending(int BottomIndex, int TopIndex);
+  void quickSortDescending(int bottomIndex, int topIndex);
   inline void initConstructorCallOnly() {
     this->theObjects = 0;
     this->actualSize = 0;
@@ -779,7 +779,7 @@ public:
   // so the awkward name is necessary.
   void removeFirstOccurenceSwapWithLast(const Object& o);
   Object popLastObject();
-  Object PopIndexSwapWithLast(int index) {
+  Object popIndexSwapWithLast(int index) {
     Object result;
     result = (*this)[index];
     this->removeIndexSwapWithLast(index);
@@ -873,79 +873,79 @@ public:
   template <class templateList, class otherList>
   static void quickSortAscendingOrder(
     templateList& theList,
-    int BottomIndex,
-    int TopIndex,
+    int bottomIndex,
+    int topIndex,
     const List<Object>::Comparator& order,
     otherList* carbonCopy
   ) {
-    if (TopIndex <= BottomIndex) {
+    if (topIndex <= bottomIndex) {
       return;
     }
-    int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
-      if (order.greaterThan(theList[LowIndex], (theList[BottomIndex]))) {
-        theList.swapTwoIndices(LowIndex, HighIndex);
+    int highIndex = topIndex;
+    for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
+      if (order.greaterThan(theList[lowIndex], (theList[bottomIndex]))) {
+        theList.swapTwoIndices(lowIndex, highIndex);
         if (carbonCopy != 0) {
-          carbonCopy->swapTwoIndices(LowIndex, HighIndex);
+          carbonCopy->swapTwoIndices(lowIndex, highIndex);
         }
-        LowIndex --;
-        HighIndex --;
+        lowIndex --;
+        highIndex --;
       }
     }
-    if (order.greaterThan(theList[HighIndex], theList[BottomIndex])) {
-      if (HighIndex == BottomIndex) {
+    if (order.greaterThan(theList[highIndex], theList[bottomIndex])) {
+      if (highIndex == bottomIndex) {
         std::stringstream crashStream;
         crashStream << "This is a programming error. "
         << "The programmer has given me a bad strict order: the order claims that object "
-        << theList[HighIndex] << " of index "
-        << HighIndex << " is strictly greater than itself which is not allowed for strict orders. "
+        << theList[highIndex] << " of index "
+        << highIndex << " is strictly greater than itself which is not allowed for strict orders. "
         << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
         fatalCrash(crashStream.str());
       }
-      HighIndex --;
+      highIndex --;
     }
-    theList.swapTwoIndices(BottomIndex, HighIndex);
+    theList.swapTwoIndices(bottomIndex, highIndex);
     if (carbonCopy != 0) {
-      carbonCopy->swapTwoIndices(BottomIndex, HighIndex);
+      carbonCopy->swapTwoIndices(bottomIndex, highIndex);
     }
     List<Object>::quickSortAscendingOrder<templateList, otherList>(
-      theList, BottomIndex, HighIndex - 1, order, carbonCopy
+      theList, bottomIndex, highIndex - 1, order, carbonCopy
     );
     List<Object>::quickSortAscendingOrder<templateList, otherList>(
-      theList, HighIndex + 1, TopIndex, order, carbonCopy
+      theList, highIndex + 1, topIndex, order, carbonCopy
     );
   }
   template <class templateList, class otherList>
   static void quickSortAscendingNoOrder(
     templateList& theList,
-    int BottomIndex,
-    int TopIndex,
+    int bottomIndex,
+    int topIndex,
     otherList* carbonCopy
   ) {
-    if (TopIndex <= BottomIndex) {
+    if (topIndex <= bottomIndex) {
       return;
     }
-    int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
-      if (theList[LowIndex] > theList[BottomIndex]) {
-        theList.swapTwoIndices(LowIndex, HighIndex);
+    int highIndex = topIndex;
+    for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
+      if (theList[lowIndex] > theList[bottomIndex]) {
+        theList.swapTwoIndices(lowIndex, highIndex);
         if (carbonCopy != 0) {
-          carbonCopy->swapTwoIndices(LowIndex, HighIndex);
+          carbonCopy->swapTwoIndices(lowIndex, highIndex);
         }
-        LowIndex --;
-        HighIndex --;
+        lowIndex --;
+        highIndex --;
       }
     }
-    if (theList[HighIndex] > theList[BottomIndex]) {
-      HighIndex --;
+    if (theList[highIndex] > theList[bottomIndex]) {
+      highIndex --;
     }
-    theList.swapTwoIndices(BottomIndex, HighIndex);
+    theList.swapTwoIndices(bottomIndex, highIndex);
     if (carbonCopy != 0) {
-      carbonCopy->swapTwoIndices(BottomIndex, HighIndex);
+      carbonCopy->swapTwoIndices(bottomIndex, highIndex);
     }
-    List<Object>::quickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
-    List<Object>::quickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(theList, bottomIndex, highIndex - 1, carbonCopy);
+    List<Object>::quickSortAscendingNoOrder(theList, highIndex + 1, topIndex, carbonCopy);
   }
   bool hasCommonElementWith(List<Object>& right);
   void swapTwoIndices(int index1, int index2);
@@ -1158,7 +1158,7 @@ public:
   static void swap(List<Object>& l1, List<Object>& l2);
   void reverseElements();
   void reverseRange(int rangeBegin, int rangeEnd);
-  bool IsEqualTo(const List<Object>& Other) const {
+  bool isEqualTo(const List<Object>& Other) const {
     if (this->size != Other.size) {
       return false;
     }
@@ -1185,7 +1185,7 @@ public:
     return this->theObjects[i];
   }
   bool operator!=(const List<Object>& other) const {
-    return !this->IsEqualTo(other);
+    return !this->isEqualTo(other);
   }
   bool operator==(const std::string& other) {
     if ((static_cast<unsigned>(this->size)) != other.size()) {
@@ -1199,7 +1199,7 @@ public:
     return true;
   }
   bool operator==(const List<Object>& other) const {
-    return this->IsEqualTo(other);
+    return this->isEqualTo(other);
   }
   bool operator>(const List<Object>& other) const;
   bool operator<(const List<Object>& other) const;
@@ -1420,7 +1420,7 @@ public:
     this->addOnTop(o);
     return true;
   }
-  bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o) {
+  bool addOnTopNoRepetitionMustBeNew(const Object& o) {
     if (this->getIndex(o) != - 1) {
       std::stringstream crashStream;
       crashStream << "This is a programming error: the programmer requested to add the object "
@@ -1437,7 +1437,7 @@ public:
     this->removeIndexSwapWithLast(this->size - 1);
     return result;
   }
-  Object PopIndexSwapWithLast(int index) {
+  Object popIndexSwapWithLast(int index) {
     Object result = (*this)[index];
     this->removeIndexSwapWithLast(index);
     return result;
@@ -1614,16 +1614,16 @@ public:
     theList.quickSortDescending(theOrder, carbonCopy);
     this->operator=(theList);
   }
-  void initHashesToOne() {
+  void initializeHashesToOne() {
     this->theHashedArrays.setSize(1);
     this->theHashedArrays[0].size = 0;
   }
   HashTemplate(const HashTemplate& other) {
-    this->initHashesToOne();
+    this->initializeHashesToOne();
     this->operator=(other);
   }
   HashTemplate() {
-    this->initHashesToOne();
+    this->initializeHashesToOne();
   }
   std::string toString(FormatExpressions* theFormat) const {
     return this->List<Object>::toString(theFormat);
@@ -1834,15 +1834,15 @@ bool List<Object>::quickSortAscendingCustomRecursive(
     return true;
   }
   int highIndex = topIndex;
-  for (int LowIndex = bottomIndex + 1; LowIndex <= highIndex; LowIndex ++) {
+  for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
     if (theComparator.compareLeftGreaterThanRight(
-      this->theObjects[LowIndex], this->theObjects[bottomIndex]
+      this->theObjects[lowIndex], this->theObjects[bottomIndex]
     )) {
       if (carbonCopy != nullptr) {
-        carbonCopy->swapTwoIndices(LowIndex, highIndex);
+        carbonCopy->swapTwoIndices(lowIndex, highIndex);
       }
-      this->swapTwoIndices(LowIndex, highIndex);
-      LowIndex --;
+      this->swapTwoIndices(lowIndex, highIndex);
+      lowIndex --;
       highIndex --;
     }
   }

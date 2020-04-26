@@ -17,8 +17,8 @@ public:
     output << theMon.toString();
     return output;
   }
-  bool IsConstant() const {
-    return this->IsEqualToOne();
+  bool isConstant() const {
+    return this->isEqualToOne();
   }
   bool AdjointRepresentationAction(
     const ElementUniversalEnveloping<Coefficient>& input, ElementUniversalEnveloping<Coefficient>& output
@@ -241,7 +241,7 @@ public:
     if (this->size() != 1) {
       return false;
     }
-    if (!this->coefficients[0].IsEqualToOne()) {
+    if (!this->coefficients[0].isEqualToOne()) {
       return false;
     }
     return (*this)[0].generatorsIndices.size == 1;

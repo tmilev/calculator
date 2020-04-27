@@ -1437,7 +1437,7 @@ bool CalculatorFunctions::innerSqrt(
     return false;
   }
   AlgebraicNumber theNumber;
-  if (!theNumber.AssignRationalQuadraticRadical(
+  if (!theNumber.assignRationalQuadraticRadical(
     rationalValue,
     theCommands.theObjectContainer.theAlgebraicClosure,
     &theCommands.comments

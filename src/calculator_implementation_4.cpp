@@ -2200,11 +2200,11 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.addChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.addChildAtomOnTop(rightType);
-  this->RegisterCalculatorFunction(innerFunction, indexOp);
+  this->registerCalculatorFunction(innerFunction, indexOp);
 }
 
-void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
-  MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunction");
+void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
+  MacroRegisterFunctionWithName("Calculator::registerCalculatorFunction");
   if (indexOp < 0 || indexOp >= this->operations.size()) {
     global.fatal << "Invalid index operation: " << indexOp
     << ", there are: " << this->operations.size()
@@ -2274,7 +2274,7 @@ void Calculator::addOperationHandler(
   if (theFun.theFunction == nullptr || theFun.owner == nullptr) {
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
-  this->RegisterCalculatorFunction(theFun, indexOp);
+  this->registerCalculatorFunction(theFun, indexOp);
 }
 
 void Function::Options::reset() {

@@ -7054,7 +7054,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   for (int i = 0; i < this->CartanOfCentralizer.size; i ++) {
     tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owner);
     theCentralizerH = tempElt.GetCartanPart();
-    theFirstNonZeroCoeff = theCentralizerH[theCentralizerH.GetIndexFirstNonZeroCoordinate()];
+    theFirstNonZeroCoeff = theCentralizerH[theCentralizerH.getIndexFirstNonZeroCoordinate()];
     if (!theFirstNonZeroCoeff.isRational()) {
       theCentralizerH /= theFirstNonZeroCoeff;
     }

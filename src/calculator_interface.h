@@ -1380,7 +1380,7 @@ public:
   std::string ToStringRuleStatusUser();
   std::string toString();
   std::string ToStringPerformance();
-  Expression GetNewBoundVar();
+  Expression getNewBoundVariable();
   Expression getNewAtom();
   void ComputeAutoCompleteKeyWords();
   void WriteAutoCompleteKeyWordsToFile();
@@ -1392,12 +1392,12 @@ public:
     return false;
   }
 
-  void RegisterCalculatorFunction(Function& theFun, int indexOp);
+  void registerCalculatorFunction(Function& theFun, int indexOp);
   std::string ToStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
   );
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
-  bool IsBoundVarInContext(int inputOp);
+  bool isBoundVariableInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckPredefinedFunctionNameRepetitions();
@@ -1468,10 +1468,10 @@ public:
 
   bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
   bool AllowsApplyFunctionInPreceding(const std::string& lookAhead);
-  bool AllowsIfInPreceding(const std::string& lookAhead);
-  bool AllowsOrInPreceding(const std::string& lookAhead);
-  bool AllowsAndInPreceding(const std::string& lookAhead);
-  bool AllowsInInPreceding(const std::string& lookAhead);
+  bool allowsIfInPreceding(const std::string& lookAhead);
+  bool allowsOrInPreceding(const std::string& lookAhead);
+  bool allowsAndInPreceding(const std::string& lookAhead);
+  bool allowsInInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInNext(const std::string& thePreceding);
   bool AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);

@@ -12,7 +12,7 @@ class Basis {
   Matrix<Coefficient> gramMatrix;
   bool haveGramMatrix;
 
-  void AddVector(const Vector<Coefficient>& v);
+  void addVector(const Vector<Coefficient>& v);
   void ComputeGramMatrix();
   Vector<Coefficient> PutInBasis(const Vector<Coefficient>& input);
   Matrix<Coefficient> PutInBasis(const Matrix<Coefficient>& M);
@@ -32,13 +32,13 @@ public:
    }
    void MakeFullRank(int dim);
    // true if it wasn't already there
-   bool AddVector(const Vector<Coefficient>& v);
+   bool addVector(const Vector<Coefficient>& v);
    bool AddVectorDestructively(Vector<Coefficient>& v);
-   bool AddVectorToBasis(const Vector<Coefficient>& v);
-   bool GetCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
-   VectorSpace<Coefficient> Intersection(const VectorSpace<Coefficient>& other) const;
+   bool addVectorToBasis(const Vector<Coefficient>& v);
+   bool getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
+   VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other) const;
    VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
-   VectorSpace<Coefficient> OrthogonalComplement(VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0) const;
+   VectorSpace<Coefficient> orthogonalComplement(VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0) const;
    Vector<Coefficient> GetBasisVector(int i) const;
    Vector<Coefficient> GetCanonicalBasisVector(int i) const;
    //unsigned int hashFunction() const {return this->hashFunction(*this);}
@@ -49,7 +49,7 @@ public:
 };
 
 template <typename Coefficient>
-void Basis<Coefficient>::AddVector(const Vector<Coefficient>& v) {
+void Basis<Coefficient>::addVector(const Vector<Coefficient>& v) {
   if (basis.numberOfColumns == 0) {
     basis.initialize(v.size, v.size);
     basis.numberOfRows = 0;
@@ -107,7 +107,7 @@ Matrix<Coefficient> Basis<Coefficient>::PutInBasis(const Matrix<Coefficient>& in
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::AddVector(const Vector<Coefficient>& v) {
+bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
   Vector<Coefficient> tmp = v;
   return AddVectorDestructively(tmp);
 }
@@ -188,16 +188,16 @@ bool VectorSpace<Coefficient>::AddVectorDestructively(Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::AddVectorToBasis(const Vector<Coefficient>& v) {
-  if (AddVector(v)) {
-    basis.AddVector(v);
+bool VectorSpace<Coefficient>::addVectorToBasis(const Vector<Coefficient>& v) {
+  if (addVector(v)) {
+    basis.addVector(v);
     return true;
   }
   return false;
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::GetCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const {
+bool VectorSpace<Coefficient>::getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const {
   out.makeZero(this->rank);
   if (v.isEqualToZero()) {
     if (this->rank == 0) {
@@ -207,7 +207,7 @@ bool VectorSpace<Coefficient>::GetCoordinatesDestructively(Vector<Coefficient>& 
   }
   int i = 0;
   while (true) {
-    int vi = v.GetIndexFirstNonZeroCoordinate();
+    int vi = v.getIndexFirstNonZeroCoordinate();
     while (true) {
       if (i == this->rank) {
         return false;
@@ -236,7 +236,7 @@ bool VectorSpace<Coefficient>::GetCoordinatesDestructively(Vector<Coefficient>& 
 }
 
 template<typename Coefficient>
-VectorSpace<Coefficient> VectorSpace<Coefficient>::Intersection(const VectorSpace<Coefficient>& other) const {
+VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpace<Coefficient>& other) const {
   // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
   if (this->degree != other.degree && ((this->degree != - 1) && (other.degree != - 1))) {
     global.fatal << "Attempting to intersect vector spaces of different degrees, "
@@ -311,7 +311,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::Intersection(const VectorSpac
 }
 
 template <typename Coefficient>
-VectorSpace<Coefficient> VectorSpace<Coefficient>::OrthogonalComplement(
+VectorSpace<Coefficient> VectorSpace<Coefficient>::orthogonalComplement(
   VectorSpace<Coefficient>* ambient, Matrix<Coefficient>* form
 ) const {
   VectorSpace<Coefficient> V;
@@ -341,7 +341,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::OrthogonalComplement(
     V.AddVectorDestructively(VVs[i]);
   }
   if (ambient && ambient->rank < ambient->degree) {
-    VectorSpace<Coefficient> W = V.Intersection(*ambient);
+    VectorSpace<Coefficient> W = V.intersection(*ambient);
     return W;
   }
   return V;

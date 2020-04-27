@@ -291,7 +291,7 @@ VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coeffi
     for (int essi = 0; essi < ess.size; essi ++) {
       for (int esi = 0; esi < ess[essi].size; esi ++) {
         // the best laid coding practices of mice and men oft go astray
-        if (!V.AddVectorToBasis(ess[essi][esi])) {
+        if (!V.addVectorToBasis(ess[essi][esi])) {
           return V;
         }
       }
@@ -301,7 +301,7 @@ VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coeffi
   for (int i = 0; i < d; i ++) {
     Vector<Coefficient> v;
     v.makeEi(d, i);
-    if (!V.AddVectorToBasis(v)) {
+    if (!V.addVectorToBasis(v)) {
       return V;
     }
   }
@@ -523,12 +523,12 @@ bool space_contains(const List<Vector<Coefficient> >& V, Vector<Coefficient> v) 
   }
   int i = 0;
   while (true) {
-    int vi = v.GetIndexFirstNonZeroCoordinate();
+    int vi = v.getIndexFirstNonZeroCoordinate();
     while (true) {
       if (i == V.size) {
         return false;
       }
-      int vii = V[i].GetIndexFirstNonZeroCoordinate();
+      int vii = V[i].getIndexFirstNonZeroCoordinate();
       if (vii > vi) {
         return false;
       }

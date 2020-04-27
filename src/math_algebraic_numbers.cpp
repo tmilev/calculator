@@ -511,28 +511,28 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   }
   if (halfFracPart == Rational(1, 12)) {
     AlgebraicNumber sqrt6, sqrt2;
-    sqrt6.AssignRationalQuadraticRadical(6, inputOwner, nullptr);
-    sqrt2.AssignRationalQuadraticRadical(2, inputOwner, nullptr);
+    sqrt6.assignRationalQuadraticRadical(6, inputOwner, nullptr);
+    sqrt2.assignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 + sqrt2;
     *this /= 4 * sign;
     return true;
   }
   if (halfFracPart == Rational(5, 12)) {
     AlgebraicNumber sqrt6, sqrt2;
-    sqrt6.AssignRationalQuadraticRadical(6, inputOwner, nullptr);
-    sqrt2.AssignRationalQuadraticRadical(2, inputOwner, nullptr);
+    sqrt6.assignRationalQuadraticRadical(6, inputOwner, nullptr);
+    sqrt2.assignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 - sqrt2;
     *this /= 4 * sign;
     return true;
   }
   if (halfFracPart == Rational(1, 6)) {
-    this->AssignRationalQuadraticRadical(3, inputOwner, nullptr);
+    this->assignRationalQuadraticRadical(3, inputOwner, nullptr);
     *this /= 2;
     *this *= sign;
     return true;
   }
   if (halfFracPart == Rational(1, 4)) {
-    this->AssignRationalQuadraticRadical(2, inputOwner, nullptr);
+    this->assignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this /= 2;
     *this *= sign;
     return true;
@@ -618,7 +618,7 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicNumber::constructFromMinimalPolynomial");
-  return inputOwner.AdjoinRootMinimalPolynomial(
+  return inputOwner.adjoinRootMinimalPolynomial(
     thePoly, *this, commentsOnFailure
   );
 }
@@ -642,12 +642,12 @@ void AlgebraicClosureRationals::reset() {
   this->GeneratingElemenT.element.MaKeEi(0);
 }
 
-bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   const Polynomial<AlgebraicNumber>& thePoly,
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension");
   if (thePoly.totalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
@@ -670,7 +670,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.GetConstantTerm(theConstTermShifted);
   theConstTermShifted -= theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
   theConstTermShifted *= - 1;
-  if (!outputRoot.AssignRationalQuadraticRadical(
+  if (!outputRoot.assignRationalQuadraticRadical(
     theConstTermShifted, *this, commentsOnFailure
   )) {
     return false;
@@ -709,13 +709,13 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   output.substitution(theSub);
 }
 
-bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
+bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   const Polynomial<AlgebraicNumber>& thePoly,
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+  if (this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
     thePoly, outputRoot, commentsOnFailure
   )) {
     return true;
@@ -1029,7 +1029,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
 }
 
 void AlgebraicNumber::SqrtMeDefault(std::stringstream* commentsOnError) {
-  this->RadicalMeDefault(2, commentsOnError);
+  this->radicalMeDefault(2, commentsOnError);
 }
 
 bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
@@ -1138,7 +1138,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   return true;
 }
 
-bool AlgebraicNumber::AssignRationalQuadraticRadical(
+bool AlgebraicNumber::assignRationalQuadraticRadical(
   const Rational& inpuT,
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
@@ -1217,10 +1217,10 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   return true;
 }
 
-bool AlgebraicNumber::RadicalMeDefault(
+bool AlgebraicNumber::radicalMeDefault(
   int radical, std::stringstream* commentsOnError
 ) {
-  MacroRegisterFunctionWithName("AlgebraicNumber::RadicalMeDefault");
+  MacroRegisterFunctionWithName("AlgebraicNumber::radicalMeDefault");
   if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to extract radical: algebraic closure is missing. ";
@@ -1235,7 +1235,7 @@ bool AlgebraicNumber::RadicalMeDefault(
   MonomialP leadingMonomial;
   leadingMonomial.makeEi(0, radical);
   thePolynomial.addMonomial(leadingMonomial, one);
-  if (!this->owner->AdjoinRootMinimalPolynomial(
+  if (!this->owner->adjoinRootMinimalPolynomial(
     thePolynomial, result, commentsOnError
   )) {
     if (commentsOnError != nullptr) {
@@ -1247,7 +1247,7 @@ bool AlgebraicNumber::RadicalMeDefault(
   return true;
 }
 
-std::string AlgebraicClosureRationals::ToStringQuadraticRadical(
+std::string AlgebraicClosureRationals::toStringQuadraticRadical(
   FormatExpressions *theFormat
 ) const {
   (void) theFormat;
@@ -1352,7 +1352,7 @@ std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) co
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
-    return this->ToStringQuadraticRadical(&tempFormat);
+    return this->toStringQuadraticRadical(&tempFormat);
   }
   return this->toStringFull(&tempFormat);
 }

@@ -420,7 +420,7 @@ List<VectorSpace<Coefficient> > GetEigenspaces(const Matrix<Coefficient> &M) {
   for (int spi = 0; spi < es.size; spi ++) {
     VectorSpace<Coefficient> V;
     for (int j = 0; j < es[spi].size; j ++) {
-      V.AddVector(es[spi][j]);
+      V.addVector(es[spi][j]);
     }
     vs.addOnTop(V);
   }
@@ -454,11 +454,11 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     VectorSpace<Rational> allchars;
     for (int i = 0; i < G.characterTable.size; i ++) {
       VectorSpace<Rational> xspi;
-      xspi.AddVector(G.characterTable[i].data);
+      xspi.addVector(G.characterTable[i].data);
       spaces.addOnTop(xspi);
-      allchars.AddVector(G.characterTable[i].data);
+      allchars.addVector(G.characterTable[i].data);
     }
-    spaces.addOnTop(allchars.OrthogonalComplement(nullptr, &form));
+    spaces.addOnTop(allchars.orthogonalComplement(nullptr, &form));
   } else {
     Vector<Rational> X1;
     X1.setSize(G.ConjugacyClassCount());
@@ -466,9 +466,9 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
       X1[i] = 1;
     }
     VectorSpace<Rational> sp1;
-    sp1.AddVector(X1);
+    sp1.addVector(X1);
     spaces.addOnTop(sp1);
-    spaces.addOnTop(sp1.OrthogonalComplement(nullptr, &form));
+    spaces.addOnTop(sp1.orthogonalComplement(nullptr, &form));
   }
   bool foundEmAll = false;
   for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
@@ -482,9 +482,9 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
         if (spaces[spi].rank == 1) {
           continue;
         }
-        VectorSpace<Rational> V = spaces[spi].Intersection(es[esi]);
+        VectorSpace<Rational> V = spaces[spi].intersection(es[esi]);
         if ((V.rank > 0) and (V.rank < spaces[spi].rank)) {
-          VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
+          VectorSpace<Rational> W = es[esi].orthogonalComplement(&spaces[spi],&form);
           spaces[spi] = V;
           spaces.addOnTop(W);
           if (spaces.size == G.ConjugacyClassCount()) {

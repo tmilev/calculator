@@ -1151,7 +1151,7 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
   AlgebraicNumber baseCopy;
   baseCopy = base;
   baseCopy.owner = &fieldCopy;
-  if (!baseCopy.RadicalMeDefault(radical, &theCommands.comments)) {
+  if (!baseCopy.radicalMeDefault(radical, &theCommands.comments)) {
     return false;
   }
   if (fieldCopy.basisInjections.size != theCommands.theObjectContainer.theAlgebraicClosure.basisInjections.size) {
@@ -1179,7 +1179,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   if (input[2].isRational(&powerRat)) {
     if (powerRat.getDenominator() == 2) {
       if (base.isRational(&baseRat)) {
-        if (base.AssignRationalQuadraticRadical(
+        if (base.assignRationalQuadraticRadical(
           baseRat,
           theCommands.theObjectContainer.theAlgebraicClosure,
           &theCommands.comments

@@ -2271,10 +2271,10 @@ void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) 
     VectorSpace<Coefficient> vs;
     Vector<Coefficient> v, w;
     v.makeEi(n, col);
-    vs.AddVectorToBasis(v);
+    vs.addVectorToBasis(v);
     for (int i = 0; i < n; i ++) {
       w = input * v;
-      if (!vs.AddVectorToBasis(w)) {
+      if (!vs.addVectorToBasis(w)) {
         break;
       }
       v = w;

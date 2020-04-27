@@ -45,8 +45,8 @@ class AlgebraicNumber {
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
   bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
-    Rational rHalf(1, 2);
-    return this->AssignCosRationalTimesPi(rHalf - input, inputOwner);
+    Rational half(1, 2);
+    return this->AssignCosRationalTimesPi(half - input, inputOwner);
   }
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
@@ -100,7 +100,7 @@ class AlgebraicNumber {
     std::stringstream* commentsOnFailure
   );
   AlgebraicNumber one();
-  bool AssignRationalQuadraticRadical(
+  bool assignRationalQuadraticRadical(
     const Rational& inpuT,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
@@ -121,7 +121,7 @@ class AlgebraicNumber {
     }
     return theRat.isInteger(whichInteger);
   }
-  bool RadicalMeDefault(int radical, std::stringstream* commentsOnError);
+  bool radicalMeDefault(int radical, std::stringstream* commentsOnError);
   void invert();
   bool evaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
@@ -235,17 +235,17 @@ public:
   void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
-  bool AdjoinRootMinimalPolynomial(
+  bool adjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& thePoly,
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
-  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+  bool adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
     const Polynomial<AlgebraicNumber>& thePoly,
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
   );
-  std::string ToStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string toStringFull(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(

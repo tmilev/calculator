@@ -917,7 +917,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   Vector<int> indexShifts;
   indexShifts.setSize(this->simpleRootsInner.size);
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-    indexShifts[i] = this->simpleRootsInner[i].GetIndexFirstNonZeroCoordinate();
+    indexShifts[i] = this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate();
   }
   for (int i = 0; i < this->allElements.size; i ++) {
     const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& other = this->allElements[i];

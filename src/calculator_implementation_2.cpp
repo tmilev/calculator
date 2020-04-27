@@ -483,7 +483,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   this->owner = nullptr;
 }
 
-Expression Calculator::GetNewBoundVar() {
+Expression Calculator::getNewBoundVariable() {
   Expression result(*this);
   result.addChildAtomOnTop(this->opBind());
   result.addChildOnTop(this->getNewAtom());

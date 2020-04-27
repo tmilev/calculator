@@ -2143,7 +2143,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
       continue;
     }
     AlgebraicNumber theDiscriminantSqrt;
-    if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(
+    if (!theDiscriminantSqrt.assignRationalQuadraticRadical(
       theDiscriminant,
       this->owner->theObjectContainer.theAlgebraicClosure,
       &this->printoutPFsHtml

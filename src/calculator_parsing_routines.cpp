@@ -1022,7 +1022,7 @@ bool Calculator::ReplaceXXByEEmptySequence() {
   return this->DecreaseStackSetCharacterRangeS(1);
 }
 
-bool Calculator::IsBoundVarInContext(int inputOp) {
+bool Calculator::isBoundVariableInContext(int inputOp) {
   return this->BoundVariablesInContext.contains(inputOp);
 }
 
@@ -1045,7 +1045,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
     this->ReplaceXXYByY();
     return true;
   }
-  if (!this->IsBoundVarInContext(theBoundVar)) {
+  if (!this->isBoundVariableInContext(theBoundVar)) {
     this->BoundVariablesInContext.addOnTopNoRepetition(theBoundVar);
   }
   theElt.theData.reset(*this, 2);
@@ -1060,7 +1060,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
 bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1 - numXs];
   int theBoundVar = theElt.theData.theData;
-  if (this->IsBoundVarInContext(theBoundVar)) {
+  if (this->isBoundVariableInContext(theBoundVar)) {
     theElt.theData.reset(*this, 2);
     theElt.theData.addChildAtomOnTop(this->opBind());
     theElt.theData.addChildAtomOnTop(theBoundVar);
@@ -1800,7 +1800,7 @@ bool Calculator::AllowsLimitProcessInPreceding(const std::string& lookAhead) {
   lookAhead == "EndProgram";
 }
 
-bool Calculator::AllowsAndInPreceding(const std::string& lookAhead) {
+bool Calculator::allowsAndInPreceding(const std::string& lookAhead) {
   return lookAhead == "and" || lookAhead == "or" ||
   lookAhead == "(" || lookAhead == "[" ||
   lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||
@@ -1811,7 +1811,7 @@ bool Calculator::AllowsAndInPreceding(const std::string& lookAhead) {
   ;
 }
 
-bool Calculator::AllowsOrInPreceding(const std::string& lookAhead) {
+bool Calculator::allowsOrInPreceding(const std::string& lookAhead) {
   return lookAhead == "and" || lookAhead == "or" ||
   lookAhead == "(" || lookAhead == "[" ||
   lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||
@@ -1822,11 +1822,11 @@ bool Calculator::AllowsOrInPreceding(const std::string& lookAhead) {
   ;
 }
 
-bool Calculator::AllowsInInPreceding(const std::string& lookAhead) {
-  return this->AllowsIfInPreceding(lookAhead);
+bool Calculator::allowsInInPreceding(const std::string& lookAhead) {
+  return this->allowsIfInPreceding(lookAhead);
 }
 
-bool Calculator::AllowsIfInPreceding(const std::string& lookAhead) {
+bool Calculator::allowsIfInPreceding(const std::string& lookAhead) {
   return
   lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||
   lookAhead == "," || lookAhead == ";" ||
@@ -2227,7 +2227,7 @@ bool Calculator::ApplyOneRule() {
     secondToLastS == "Expression" &&
     thirdToLastS == "or" &&
     fourthToLastS == "Expression" &&
-    this->AllowsOrInPreceding(lastS)
+    this->allowsOrInPreceding(lastS)
   ) {
     return this->ReplaceEOEXByEX();
   }
@@ -2235,7 +2235,7 @@ bool Calculator::ApplyOneRule() {
     secondToLastS == "Expression" &&
     thirdToLastS == "and" &&
     fourthToLastS == "Expression" &&
-    this->AllowsAndInPreceding(lastS)
+    this->allowsAndInPreceding(lastS)
   ) {
     return this->ReplaceEOEXByEX();
   }
@@ -2288,7 +2288,7 @@ bool Calculator::ApplyOneRule() {
     secondToLastS == "Expression" &&
     thirdToLastS == "\\in" &&
     fourthToLastS == "Expression" &&
-    this->AllowsInInPreceding(lastS)
+    this->allowsInInPreceding(lastS)
   ) {
     return this->ReplaceEOEXByEX();
   }
@@ -2604,7 +2604,7 @@ bool Calculator::ApplyOneRule() {
   if (fourthToLastS == "Expression" && thirdToLastS == "\\sqcup" && secondToLastS == "Expression" && this->AllowsTimesInPreceding(lastS)) {
     return this->ReplaceEOEXByEX();
   }
-  if (thirdToLastS == "if" && secondToLastS == "Expression" && this->AllowsIfInPreceding(lastS)) {
+  if (thirdToLastS == "if" && secondToLastS == "Expression" && this->allowsIfInPreceding(lastS)) {
     return this->ReplaceOXXByEXX();
   }
   if (

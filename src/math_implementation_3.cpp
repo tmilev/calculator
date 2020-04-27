@@ -12416,7 +12416,7 @@ bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection(
 }
 
 void Cone::scaleNormalizeByPositive(Vector<Rational> &toScale) {
-  int firstIndex = toScale.GetIndexFirstNonZeroCoordinate();
+  int firstIndex = toScale.getIndexFirstNonZeroCoordinate();
   if (firstIndex < 0) {
     return;
   }

@@ -333,7 +333,7 @@ public:
     return true;
   }
   bool MakeAffineProjectionFromNormal(AffineHyperplane<Rational>& output);
-  int GetIndexFirstNonZeroCoordinate() const {
+  int getIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
       if (!this->theObjects[i].isEqualToZero()) {
         return i;
@@ -575,7 +575,7 @@ public:
 
 template <class Coefficient>
 void Vector<Coefficient>::ScaleNormalizeFirstNonZero() {
-  int index = this->GetIndexFirstNonZeroCoordinate();
+  int index = this->getIndexFirstNonZeroCoordinate();
   if (index < 0) {
     return;
   }
@@ -1240,7 +1240,7 @@ Vector<Coefficient> AffineHyperplane<Coefficient>::ProjectOnMe(Vector<Coefficien
 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::ProjectFromFacetNormal(Vector<Coefficient>& input) {
-  int tempI = input.GetIndexFirstNonZeroCoordinate();
+  int tempI = input.getIndexFirstNonZeroCoordinate();
   if (tempI == - 1) {
     global.fatal << "No non-zero coordinate found. " << global.fatal;
   }

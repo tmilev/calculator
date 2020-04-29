@@ -7473,8 +7473,23 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opRational(),
     "Raises polynomial modulo an integer to a small integer power. ",
-    "a = PolynomialModP{}(x^2 + x + 1, 7);\n"
-    "a^20",
+    "p = x^2 + 3x + 1;\n"
+    "q = x^3 +x^2 + 3 x + 5;\n"
+    "modulusComposite = p * q;\n"
+    "modulo = PolynomialModP(modulusComposite, 7);\n"
+    "a = PolynomialModP{}(x+2, 7) mod modulo;\n"
+    "a^(7  );\n"
+    "a^(49);\n"
+    "a^(7^3 );\n"
+    "a^(7^4 );\n"
+    "a^(7^5 ); \n"
+    "r = a^( (7^6 - 1) /2);\n"
+    "s = PolynomialModP(Value Value r - 1, 7);\n"
+    "t = PolynomialModP(Value Value r, 7);\n"
+    "u = PolynomialModP(Value Value r + 1, 7);\n"
+    "GCDPoly(s, modulo);\n"
+    "GCDPoly(t, modulo);\n"
+    "GCDPoly(u, modulo);",
     "CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPBySmallInteger",
     "PowerPolynomialModPModuloPolynomialModPBySmallInteger",
     innerStandard

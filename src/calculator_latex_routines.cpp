@@ -908,8 +908,8 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral == nullptr) {
     commentsGeneral = &temp;
   }
-  topicParser.LoadFileNames();
-  if (!topicParser.LoadAndParseTopicList(*commentsOnFailure)) {
+  topicParser.loadFileNames();
+  if (!topicParser.loadAndParseTopicList(*commentsOnFailure)) {
     return false;
   }
   int numSlidePairsToBuild = 0;

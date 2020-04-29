@@ -87,8 +87,8 @@ template <class Coefficient>
 Vector<Coefficient> BranchingData::ProjectWeight(Vector<Coefficient>& input) {
   Vector<Coefficient> result;
   Vector<Coefficient> fundCoordsSmaller;
-  fundCoordsSmaller.makeZero(this->theHmm.theDomain().GetRank());
-  for (int j = 0; j < this->theHmm.theDomain().GetRank(); j ++) {
+  fundCoordsSmaller.makeZero(this->theHmm.theDomain().getRank());
+  for (int j = 0; j < this->theHmm.theDomain().getRank(); j ++) {
     fundCoordsSmaller[j] = this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
     fundCoordsSmaller[j] /= this->theHmm.theDomain().theWeyl.cartanSymmetric.elements[j][j] / 2;
   }
@@ -452,7 +452,7 @@ public:
   ElementUniversalEnvelopingOrdered() {
     this->owner = nullptr;
   }
-  bool IsProportionalTo(
+  bool isProportionalTo(
     const ElementUniversalEnvelopingOrdered<Coefficient>& other,
     Coefficient& outputTimesMeEqualsOther,
     const Coefficient& theRingZero
@@ -518,12 +518,12 @@ public:
     const Coefficient& theRingUnit,
     const Coefficient& theRingZero
   ) const;
-  bool IsProportionalTo(
+  bool isProportionalTo(
     const ElementVermaModuleOrdered<Coefficient>& other,
     Coefficient& outputTimesMeEqualsOther,
     const Coefficient& theRingZero
   ) const {
-    return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
+    return this->theElT.isProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
   }
   void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
     this->theElT.makeZero(owner);

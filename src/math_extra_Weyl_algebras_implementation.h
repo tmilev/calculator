@@ -7,7 +7,7 @@
 #include "math_extra_algebraic_numbers.h"
 
 template <class Coefficient>
-bool ElementWeylAlgebra<Coefficient>::IsPolynomial(Polynomial<Coefficient>* whichPoly) const {
+bool ElementWeylAlgebra<Coefficient>::isPolynomial(Polynomial<Coefficient>* whichPoly) const {
   if (whichPoly != 0) {
     whichPoly->makeZero();
   }
@@ -23,9 +23,9 @@ bool ElementWeylAlgebra<Coefficient>::IsPolynomial(Polynomial<Coefficient>* whic
 }
 
 template <class Coefficient>
-bool ElementWeylAlgebra<Coefficient>::HasNonSmallPositiveIntegerDerivation() const {
+bool ElementWeylAlgebra<Coefficient>::hasNonSmallPositiveIntegerDerivation() const {
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].HasNonSmallPositiveIntegerDerivation()) {
+    if ((*this)[i].hasNonSmallPositiveIntegerDerivation()) {
       return true;
     }
   }
@@ -33,7 +33,7 @@ bool ElementWeylAlgebra<Coefficient>::HasNonSmallPositiveIntegerDerivation() con
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::MultiplyTwoMonomials(
+void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
 ) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
@@ -133,7 +133,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyOnTheLeft(const  ElementWeylAlgebr
   Coefficient currentCF;
   for (int j = 0; j < standsOnTheLeft.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
+      this->multiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
       currentCF = standsOnTheLeft.coefficients[j];
       currentCF *= this->coefficients[i];
       buffer *= currentCF;
@@ -151,7 +151,7 @@ void ElementWeylAlgebra<Coefficient>::operator*=(const ElementWeylAlgebra& stand
   Coefficient currentCF;
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
+      this->multiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
       currentCF = this->coefficients[i];
       currentCF *= standsOnTheRight.coefficients[j];
       buffer *= currentCF;

@@ -48,7 +48,7 @@ bool CalculatorHTML::Test::ComputeTotalFiles() {
   return true;
 }
 
-std::string CalculatorHTML::ToStringLinkFromProblem(
+std::string CalculatorHTML::toStringLinkFromProblem(
   const std::string& theFileName,
   bool practiceMode,
   int randomSeed
@@ -82,7 +82,7 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
   out << "<tr>";
   out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
   out << "<td style = 'min-width:200px'>";
-  out << CalculatorHTML::ToStringLinkFromProblem(this->fileName)
+  out << CalculatorHTML::toStringLinkFromProblem(this->fileName)
   << "</td>";
   if (this->errorLoad != "") {
     out << "<td style = 'min-width:300px'><b>Couldn't load.</b> "
@@ -136,7 +136,7 @@ std::string CalculatorHTML::Test::ToHTMLBuiltIn() {
   << "<tr>"
   << "<th>Index</th>"
   << "<th>Problem</th>"
-  << "<th>Load</th>"
+  << "<th>load</th>"
   << "<th>Interpret</th>"
   << "<th>Answer OK?</th>"
   << "</tr>";
@@ -428,7 +428,7 @@ bool TopicElementParser::Test::DefaultPdfsOK() {
   for (int i = 0; i < courses.theCourses.size; i ++) {
     CalculatorHTML owner;
     owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
-    if (!owner.LoadAndParseTopicList(this->comments)) {
+    if (!owner.loadAndParseTopicList(this->comments)) {
       this->comments << "Failed to load course "
       << owner.topicListFileName << ". ";
       return false;
@@ -452,7 +452,7 @@ bool TopicElementParser::Test::DefaultTopicListsOK() {
   for (int i = 0; i < courses.theCourses.size; i ++) {
     CalculatorHTML owner;
     owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
-    if (!owner.LoadAndParseTopicList(this->comments)) {
+    if (!owner.loadAndParseTopicList(this->comments)) {
       this->comments << "Failed to load course "
       << owner.topicListFileName << ". ";
       return false;

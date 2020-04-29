@@ -213,7 +213,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
   << HtmlRoutines::GetMathSpanPure(theWeyl.coCartanSymmetric.ToStringLatex());
-  out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.cartanSymmetric.GetDeterminant().toString();
+  out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.cartanSymmetric.getDeterminant().toString();
   /*  Rational theRatio;
     for (int j = 0; j < theWeyl.getDimension(); j ++) {
       theRatio = 0;
@@ -273,7 +273,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   )) {
     if (tempSimpleType.CartanSymmetricInverseScale == 1) {
       Matrix<Rational> tempM, tempM2;
-      theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
+      theWeyl.theDynkinType.getEpsilonMatrix(tempM);
       tempM2 = tempM;
       tempM2.transpose();
       tempM2.MultiplyOnTheRight(tempM);
@@ -281,7 +281,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
       if (!(tempM2 == theWeyl.cartanSymmetric)) {
         global.fatal << "This is a (non-critical) programming error: "
         << "the epsilon coordinates of the vectors are incorrect. "
-        << "Please fix function DynkinType::GetEpsilonMatrix. "
+        << "Please fix function DynkinType::getEpsilonMatrix. "
         << "The matrix of the epsilon coordinates is " << tempM.toString()
         << ", the Symmetric Cartan matrix is "
         << theWeyl.cartanSymmetric.toString() << ", and the "

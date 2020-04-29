@@ -31,7 +31,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   SSLRecord theRecord;
   theRecord.owner = &testServer;
   std::stringstream comments;
-  if (!Crypto::ConvertHexToListUnsignedChar(
+  if (!Crypto::convertHexToListUnsignedChar(
     inputHex, theRecord.incomingBytes, &comments
   )) {
     global.fatal << "Bad hard-coded test hex string!" << global.fatal;

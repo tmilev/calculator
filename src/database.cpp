@@ -869,7 +869,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   std::stringstream out;
   List<unsigned char> authenticationToken;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(authenticationToken, 20);
-  this->actualAuthenticationToken = Crypto::ConvertListUnsignedCharsToBase64(authenticationToken, true);
+  this->actualAuthenticationToken = Crypto::convertListUnsignedCharsToBase64(authenticationToken, true);
   QueryExact findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
@@ -1148,7 +1148,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   now.AssignLocalTime();
   List<unsigned char> activationToken;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
-  this->actualActivationToken = Crypto::ConvertListUnsignedCharsToBase64(activationToken, true);
+  this->actualActivationToken = Crypto::convertListUnsignedCharsToBase64(activationToken, true);
   QueryExact findUserQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   QuerySet updateUser;
   updateUser.value[DatabaseStrings::labelActivationToken] = this->actualActivationToken;

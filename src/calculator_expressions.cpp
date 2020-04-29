@@ -4463,7 +4463,7 @@ std::string Expression::toString(
   return out.str();
 }
 
-std::string Expression::Lispify() const {
+std::string Expression::lispify() const {
   if (this->owner == nullptr) {
     return "Error: not initialized";
   }
@@ -4481,7 +4481,7 @@ std::string Expression::Lispify() const {
   std::stringstream out;
   out << "(";
   for (int i = 0; i < this->children.size; i ++) {
-    out << " " << (*this)[i].Lispify();
+    out << " " << (*this)[i].lispify();
   }
   out << ")";
   return out.str();
@@ -4936,7 +4936,7 @@ bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgume
   return this->addChildOnTop(opArgument);
 }
 
-bool Expression::Sequencefy() {
+bool Expression::sequencefy() {
   this->checkInitialization();
   if (this->isSequenceNElements()) {
     return true;

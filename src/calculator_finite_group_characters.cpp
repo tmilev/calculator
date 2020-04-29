@@ -309,7 +309,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   List<char> letters;
   List<int> ranks;
   WeylGroupData& WD = *(G.generators[0].owner);
-  WD.theDynkinType.GetLettersTypesMults(&letters, &ranks, nullptr);
+  WD.theDynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   // When WeylGroupRepresentation is merged with GroupRepresentation,
   // and WeylGroupData split from FiniteGroup<ElementWeylGroup<WeylGroup> >
   // theRepresentations will be this->theGroup->irreps
@@ -435,7 +435,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
     if (!theCommands.getVector<Rational>(
-      input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank()
+      input[i], theHWs[i - 2], nullptr, theSSalgebra->getRank()
     )) {
       isGood = false;
       break;
@@ -444,7 +444,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   if (!isGood && input.children.size == 3) {
     Matrix<Rational> theHWsMatForm;
     if (theCommands.functionGetMatrix(
-      input[2], theHWsMatForm, nullptr, theSSalgebra->GetRank()
+      input[2], theHWsMatForm, nullptr, theSSalgebra->getRank()
     )) {
       theHWsMatForm.GetVectorsFromRows(theHWs);
       isGood = true;
@@ -498,7 +498,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     vectorNode,
     theHWfundCoords,
     &theContext,
-    theType.GetRank(),
+    theType.getRank(),
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.makeError("Failed to extract highest weight", theCommands);
@@ -528,7 +528,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   out << "</tr>";
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
-  theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
+  theWeyl.theDynkinType.getEpsilonMatrix(epsCoordMat);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
@@ -640,7 +640,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
-  theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
+  theWeyl.theDynkinType.getEpsilonMatrix(epsCoordMat);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
@@ -1956,8 +1956,8 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
   if (!theCommands.functionGetMatrix(input[2], theMat)) {
     return theCommands << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
-  if (theMat.numberOfColumns != theMat.numberOfRows || theMat.numberOfColumns != theType.GetRank()) {
-    theCommands << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.GetRank()
+  if (theMat.numberOfColumns != theMat.numberOfRows || theMat.numberOfColumns != theType.getRank()) {
+    theCommands << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.getRank()
     << " but extracted linear operator has " << theMat.numberOfColumns << " columns and " << theMat.numberOfRows << " rows.";
     return false;
   }
@@ -2051,7 +2051,7 @@ void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
   MonomialMacdonald currentMon;
   Rational tempRat;
   for (int i = 0; i < output.size; i ++) {
-    for (int j = 0; j < this->owner->GetRank(); j ++) {
+    for (int j = 0; j < this->owner->getRank(); j ++) {
       currentMon = output[i];
       currentMon.ActOnMeSimpleReflection(j, tempRat);
       output.addOnTopNoRepetition(currentMon);
@@ -2160,7 +2160,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
     return false;
   }
   if (theCoordsString != "epsilon") {
-    if (theWeightIndex < 1 || theWeightIndex> theSSowner->GetRank()) {
+    if (theWeightIndex < 1 || theWeightIndex> theSSowner->getRank()) {
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function "
       << "needs to be index of a weight between 1 and the Lie algebra rank. "
@@ -2168,7 +2168,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
       return output.makeError(errorStream.str(), theCommands);
     }
     Vector<Polynomial<Rational> > EiVector;
-    EiVector.makeEi(theSSowner->GetRank(), theWeightIndex - 1);
+    EiVector.makeEi(theSSowner->getRank(), theWeightIndex - 1);
     if (theCoordsString == "fundamental") {
       resultWeight.weightFundamentalCoordS = EiVector;
     } else if (theCoordsString == "simple") {
@@ -2176,7 +2176,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
     }
   } else {
     Vector<Rational> EiVector;
-    EiVector.makeZero(theSSowner->GetRank());
+    EiVector.makeZero(theSSowner->getRank());
     Vector<Rational> tempV = theSSowner->theWeyl.getEpsilonCoordinates(EiVector);
     if (theWeightIndex>tempV.size || theWeightIndex < 1) {
       std::stringstream errorStream;
@@ -2429,7 +2429,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
   theElt.owner = &thePointer.content->theWeyl;
   for (int i = 0; i < theElt.generatorsLastAppliedFirst.size; i ++) {
     if (
-      theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->GetRank() ||
+      theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||
       theElt.generatorsLastAppliedFirst[i].index < 0
     ) {
       return output.makeError("Bad reflection index", theCommands);

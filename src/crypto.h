@@ -112,7 +112,7 @@ public:
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  bool Load(const ASNElement& input, std::stringstream* commentsOnFailure);
+  bool load(const ASNElement& input, std::stringstream* commentsOnFailure);
   bool LoadExtensions(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
@@ -179,7 +179,7 @@ public:
   static List<uint64_t> kArraySha512;
   class Test {
   public:
-    static bool Sha256();
+    static bool sha256();
     static bool all();
   };
   static bool LoadKnownCertificates(
@@ -237,7 +237,7 @@ public:
   static bool ConvertHexToString(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );
-  static bool ConvertHexToListUnsignedChar(
+  static bool convertHexToListUnsignedChar(
     const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure
   );
   static bool convertHexToInteger(
@@ -245,29 +245,29 @@ public:
     LargeIntegerUnsigned& output,
     int& outputNumLeadingZeroPairs
   );
-  static std::string ConvertListUnsignedCharsToBase64(
+  static std::string convertListUnsignedCharsToBase64(
     const List<unsigned char>& input, bool useBase64URL
   );
   static std::string convertListUnsignedCharsToHex(
     const List<unsigned char>& input
   );
-  static std::string ConvertListUnsignedCharsToHexFormat(
+  static std::string convertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
-  static bool ConvertListUnsignedCharsToHexFormat(
+  static bool convertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
     std::string& output,
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
-  static std::string ConvertListCharsToHex(
+  static std::string convertListCharsToHex(
     const List<char>& input,
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
-  static bool ConvertListCharsToHex(
+  static bool convertListCharsToHex(
     const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
   );
   static bool convertStringToHex(

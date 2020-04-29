@@ -75,8 +75,8 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimirWRTLeviParabolic(
   killingRestrictedToCartan.initialize(theLeviRoots.CardinalitySelection, theLeviRoots.CardinalitySelection);
   for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++) {
     for (int j = i; j < theLeviRoots.CardinalitySelection; j ++) {
-      theWeightLeft.makeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
-      theWeightRight.makeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
+      theWeightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
+      theWeightRight.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
       leftE.MakeHgenerator(theWeightLeft, theOwner);
       rightE.MakeHgenerator(theWeightRight, theOwner);
       killingRestrictedToCartan(i, j) = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
@@ -87,10 +87,10 @@ void ElementUniversalEnveloping<Coefficient>::MakeCasimirWRTLeviParabolic(
   ElementUniversalEnveloping<Coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;
   for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++) {
-    theWeightLeft.makeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
-    theWeightRight.makeZero(theOwner.GetRank());
+    theWeightLeft.makeEi(theOwner.getRank(), theLeviRoots.elements[i]);
+    theWeightRight.makeZero(theOwner.getRank());
     for (int j = 0; j < theLeviRoots.CardinalitySelection; j ++) {
-      currentEj.makeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
+      currentEj.makeEi(theOwner.getRank(), theLeviRoots.elements[j]);
       theWeightRight += currentEj * killingRestrictedToCartan(i, j);
     }
     leftUE.MakeHgenerator(theWeightLeft, theOwner);
@@ -404,7 +404,7 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyTransposeAntiAutoOnMe() {
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
   int numPosRoots = this->GetOwner().GetNumPosRoots();
-  int theRank = this->GetOwner().GetRank();
+  int theRank = this->GetOwner().getRank();
   Coefficient theCoeff;
   this->CheckNumCoeffsConsistency();
   for (int i = 0; i < this->size(); i ++) {
@@ -531,7 +531,7 @@ void MonomialUniversalEnveloping<Coefficient>::ModOutVermaRelations(
   const Coefficient& theRingZero
 ) {
   int numPosRoots = this->GetOwner().GetNumPosRoots();
-  int theDimension = this->GetOwner().GetRank();
+  int theDimension = this->GetOwner().getRank();
   outputCoeff = theRingUnit;
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int IndexCurrentGenerator = this->generatorsIndices[i];
@@ -1327,7 +1327,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::MultiplyByNoSimplify(const
 }
 
 template <class Coefficient>
-bool ElementUniversalEnvelopingOrdered<Coefficient>::IsProportionalTo(
+bool ElementUniversalEnvelopingOrdered<Coefficient>::isProportionalTo(
   const ElementUniversalEnvelopingOrdered<Coefficient>& other,
   Coefficient& outputTimesMeEqualsOther,
   const Coefficient& theRingZero
@@ -1998,7 +1998,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutVermaRelations(
   const Coefficient& theRingZero
 ) {
   int numPosRoots = this->owner->theOwner->GetNumPosRoots();
-  int theDimension = this->owner->theOwner->GetRank();
+  int theDimension = this->owner->theOwner->getRank();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int IndexCurrentGenerator = this->generatorsIndices[i];
     if (IndexCurrentGenerator >= numPosRoots + theDimension) {

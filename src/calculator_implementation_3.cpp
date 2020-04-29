@@ -201,7 +201,7 @@ bool Calculator::innerAnimateLittelmannPaths(
     input[2],
     theWeight,
     &tempContext,
-    theSSowner->GetRank(),
+    theSSowner->getRank(),
     nullptr
   )) {
     return output.makeError(
@@ -1082,7 +1082,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
   ExpressionContext theContext(theCommands);
   Vector<Rational> theHW;
-  if (!theCommands.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
+  if (!theCommands.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.getRank())) {
     return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
@@ -1107,7 +1107,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.RootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
-  theWeight.makeZero(theSSalgebra.GetRank());
+  theWeight.makeZero(theSSalgebra.getRank());
   int i = rootsBorel.size;
   while (i > 0 && counter < 10000) {
     totalCycles ++;
@@ -1369,7 +1369,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   waypoints.setSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
     if (!theCommands.getVector<Rational>(
-      input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
+      input[i], waypoints[i - 2], nullptr, ownerSSalgebra.getRank(), nullptr
     )) {
       return output.makeError("Failed to extract waypoints", theCommands);
     }

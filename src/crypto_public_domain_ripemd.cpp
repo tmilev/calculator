@@ -215,7 +215,7 @@ static void ripemd160_compress(Ripemd160State* self) {
   if (Crypto::flagRIPEMDBigEndian) {
     byteswap_digest(self->buf.w);
   }
-  /* Load the left and right lines with the initial state */
+  /* load the left and right lines with the initial state */
   AL = AR = self->h[0];
   BL = BR = self->h[1];
   CL = CR = self->h[2];

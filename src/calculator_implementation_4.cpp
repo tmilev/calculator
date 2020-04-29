@@ -543,9 +543,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   hwContext.getFormat(theWeylFormat);
   List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
   if (!AllGenerators) {
-    for (int j = 0; j < theSSalgebra.GetRank(); j ++) {
+    for (int j = 0; j < theSSalgebra.getRank(); j ++) {
       Vector<Rational> ei;
-      ei.makeEi(theSSalgebra.GetRank(), j);
+      ei.makeEi(theSSalgebra.getRank(), j);
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
       ei.minus();
@@ -915,7 +915,7 @@ bool Calculator::innerGetChevGen(
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex > 0) {
-    theIndex += theSSalg.content->GetRank() - 1;
+    theIndex += theSSalg.content->getRank() - 1;
   }
   theIndex += theSSalg.content->GetNumPosRoots();
   theElt.MakeGenerator(theIndex, *theSSalg.content);
@@ -1781,7 +1781,13 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   return true;
 }
 
-bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss) {
+bool Expression::makeAtom(int input, Calculator& newBoss) {
+  this->reset(newBoss);
+  this->theData = input;
+  return true;
+}
+
+bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss) {
   Matrix<Expression> theMat;
   theMat.MakeIdMatrix(theDim, inputBoss.EOne(), inputBoss.EZero());
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);

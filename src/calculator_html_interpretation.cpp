@@ -15,7 +15,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
   JSData result;
-  theProblem.LoadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
+  theProblem.loadCurrentProblemItem(false, global.getWebInput(WebAPI::problem::randomSeed), &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -65,7 +65,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   theInterpreteR.initialize();
   theInterpreteR.flagPlotNoControls = true;
   theInterpreteR.flagWriteLatexPlots = false;
-  if (!theProblem.PrepareCommands(&comments)) {
+  if (!theProblem.prepareCommands(&comments)) {
     out << "<b>Failed to prepare calculator commands.</b>"
     << "<br>Comments:<br>" << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
@@ -103,7 +103,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
-  if (!theProblem.InterpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
+  if (!theProblem.interpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -137,7 +137,7 @@ std::string WebAPIResponse::SetProblemWeight() {
   CalculatorHTML theProblem;
   std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
-  if (theProblem.MergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
+  if (theProblem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<b style = 'color:green'>Modified.</b>";
   } else {
     out << "<b style = 'color:red'>" << commentsOnFailure.str() << "</b>";
@@ -156,7 +156,7 @@ std::string WebAPIResponse::SetProblemDeadline() {
   CalculatorHTML theProblem;
   std::string inputProblemInfo = HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
-  if (theProblem.MergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
+  if (theProblem.mergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<b style =\"color:green\">Modified. </b>";
   } else {
     out << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
@@ -251,7 +251,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   std::stringstream errorStream, comments;
-  theProblem.LoadCurrentProblemItem(
+  theProblem.loadCurrentProblemItem(
     global.UserRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorStream
@@ -273,7 +273,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
     return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
-  if (!theProblem.PrepareCommands(&comments)) {
+  if (!theProblem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << comments.str();
@@ -719,7 +719,7 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   thePage.fileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::courseHome), false);
   thePage.topicListFileName = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::topicList), false);
   JSData result;
-  if (!thePage.LoadAndParseTopicList(out)) {
+  if (!thePage.loadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
@@ -730,8 +730,8 @@ JSData WebAPIResponse::GetTopicTableJSON() {
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
-  thePage.ComputeTopicListAndPointsEarned(comments);
-  return thePage.ToStringTopicListJSON();
+  thePage.computeTopicListAndPointsEarned(comments);
+  return thePage.toStringTopicListJSON();
 }
 
 void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
@@ -837,7 +837,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
   output[WebAPI::problem::fileName] = theFile.fileName;
   output[WebAPI::problem::idProblem] = theFile.fileName;
   if (theFile.flagLoadedSuccessfully) {
-    output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
+    output["answers"] = theFile.getJavascriptMathQuillBoxesForJSON();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
     theScripts.theList.setSize(theFile.theScripts.size());
@@ -867,7 +867,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
     return output;
   }
   CalculatorHTML theFile;
-  theFile.LoadFileNames();
+  theFile.loadFileNames();
   std::stringstream failureStream;
   if (!theFile.loadMe(false, global.getWebInput(WebAPI::problem::randomSeed), &failureStream)) {
     std::stringstream errorStream;
@@ -896,7 +896,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
     theFile.initAutocompleteExtras();
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
   } else {
-    theFile.LoadAndParseTopicList(comments);
+    theFile.loadAndParseTopicList(comments);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
@@ -928,7 +928,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   JSData result;
   double startTime = global.getElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem(
+  theProblem.loadCurrentProblemItem(
     global.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
@@ -1026,8 +1026,8 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     << ");";
     completedProblemStreamNoEnclosures << currentA.commandsCommentsBeforeSubmission;
   }
-  completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
-  completedProblemStreamNoEnclosures << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
+  completedProblemStream << theProblem.cleanUpCommandString(currentA.commandVerificationOnly);
+  completedProblemStreamNoEnclosures << theProblem.cleanUpCommandString(currentA.commandVerificationOnly);
 
   std::stringstream debugInputStream;
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
@@ -1125,14 +1125,14 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     bool hasDeadline = true;
     double secondsTillDeadline = - 1;
     if (theProblem.flagIsForReal) {
-      if (!theProblem.LoadAndParseTopicList(output)) {
+      if (!theProblem.loadAndParseTopicList(output)) {
         hasDeadline = false;
       }
       std::string theSQLstring;
       theSQLstring = theUser.sectionComputed;
       if (hasDeadline) {
         bool unused = false;
-        std::string theDeadlineString = theProblem.GetDeadline(
+        std::string theDeadlineString = theProblem.getDeadline(
           theProblem.fileName,
           HtmlRoutines::convertStringToURLString(theSQLstring, false),
           unused
@@ -1402,7 +1402,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   int64_t startTimeInMilliseconds = global.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
-  theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
+  theProblem.loadCurrentProblemItem(false, inputRandomSeed, &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -1704,7 +1704,7 @@ std::string WebAPIResponse::GetScoresPage() {
   MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
   std::stringstream out;
   CalculatorHTML thePage;
-  thePage.LoadDatabaseInfo(out);
+  thePage.loadDatabaseInfo(out);
   std::string theScoresHtml = WebAPIResponse::ToStringUserScores();
   out << theScoresHtml;
   return out.str();
@@ -2097,14 +2097,14 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     return false;
   }
   theProblem.currentUseR.::UserCalculatorData::operator=(global.userDefault);
-  this->theProblem.LoadFileNames();
-  if (!this->theProblem.LoadAndParseTopicList(comments)) {
+  this->theProblem.loadFileNames();
+  if (!this->theProblem.loadAndParseTopicList(comments)) {
     return false;
   }
-  if (!this->theProblem.PrepareSectionList(comments)) {
+  if (!this->theProblem.prepareSectionList(comments)) {
     return false;
   }
-  if (!this->theProblem.LoadDatabaseInfo(comments)) {
+  if (!this->theProblem.loadDatabaseInfo(comments)) {
     comments << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
   }
   theProblem.currentUseR.ComputePointsEarned(
@@ -2173,7 +2173,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     )) {
       continue;
     }
-    currentUserRecord.MergeProblemWeight(
+    currentUserRecord.mergeProblemWeight(
       theProblem.currentUseR.problemWeights,
       currentUserRecord.currentUseR.theProblemData,
       false,

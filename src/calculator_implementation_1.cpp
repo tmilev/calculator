@@ -479,7 +479,7 @@ bool Calculator::innerPrintSSSubalgebras(
       return output.makeError("Error extracting Lie algebra.", theCommands);
     }
     ownerSSPointer = ownerAlgebra.content;
-    if (ownerSSPointer->GetRank() > 8) {
+    if (ownerSSPointer->getRank() > 8) {
       out << "<b>This code is completely experimental and has been set to run up to rank 6. "
       << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.assignValue(out.str(), theCommands);
@@ -2277,7 +2277,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* theSSlieAlg = algebra.content;
-  int theRank = theSSlieAlg->GetRank();
+  int theRank = theSSlieAlg->getRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
   WeylGroupData& theWeyl = theSSlieAlg->theWeyl;

@@ -73,7 +73,7 @@ public:
     output.makeZero();
     ChevalleyGenerator theGen;
     Polynomial<Coefficient> theCf;
-    for (int i = 0; i < this->GetRank(); i ++) {
+    for (int i = 0; i < this->getRank(); i ++) {
       theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
       theCf.makeMonomial(indexFirstVar + i, 1, 1);
       output.addMonomial(theGen, theCf);
@@ -97,9 +97,9 @@ public:
   }
   bool IsASimpleGenerator(int generatorIndex) {
     bool isNegativeGenerator = (generatorIndex < this->GetNumPosRoots()) &&
-    (generatorIndex >= this->GetNumPosRoots() - this->GetRank());
-    bool isPositiveGenerator = (generatorIndex >= this->GetNumPosRoots() + this->GetRank()) &&
-    (generatorIndex < this->GetNumPosRoots() + this->GetRank() * 2);
+    (generatorIndex >= this->GetNumPosRoots() - this->getRank());
+    bool isPositiveGenerator = (generatorIndex >= this->GetNumPosRoots() + this->getRank()) &&
+    (generatorIndex < this->GetNumPosRoots() + this->getRank() * 2);
     return isNegativeGenerator || isPositiveGenerator;
   }
   SemisimpleLieAlgebra() {
@@ -156,7 +156,7 @@ public:
   inline int GetNumPosRoots() const {
     return this->theWeyl.RootsOfBorel.size;
   }
-  inline int GetRank() const {
+  inline int getRank() const {
     return this->theWeyl.cartanSymmetric.numberOfRows;
   }
   void OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
@@ -179,7 +179,7 @@ public:
     if (theIndex < 0) {
       return theIndex + this->GetNumPosRoots();
     }
-    return theIndex + this->GetNumPosRoots() + this->GetRank() - 1;
+    return theIndex + this->GetNumPosRoots() + this->getRank() - 1;
   }
   int GetGeneratorFromRootIndex(int theIndex) const;
   int GetDisplayIndexFromRootIndex(int theIndex) const;
@@ -192,14 +192,14 @@ public:
     if (theIndex < this->GetNumPosRoots()) {
       return theIndex - this->GetNumPosRoots();
     }
-    if (theIndex >= this->GetNumPosRoots() + this->GetRank()) {
-      return theIndex + 1 - this->GetNumPosRoots() - this->GetRank();
+    if (theIndex >= this->GetNumPosRoots() + this->getRank()) {
+      return theIndex + 1 - this->GetNumPosRoots() - this->getRank();
     }
     return theIndex - this->GetNumPosRoots();
   }
   bool AreOrderedProperly(int leftIndex, int rightIndex);
   bool IsGeneratorFromCartan(int theIndex) const {
-    return theIndex >= this->GetNumPosRoots() && theIndex < this->GetNumPosRoots() + this->GetRank();
+    return theIndex >= this->GetNumPosRoots() && theIndex < this->GetNumPosRoots() + this->getRank();
   }
   bool AreOppositeRootSpaces(int leftIndex, int rightIndex) {
     if (this->IsGeneratorFromCartan(leftIndex) || this->IsGeneratorFromCartan(rightIndex)) {
@@ -242,11 +242,11 @@ public:
     if (index < this->GetNumPosRoots()) {
       return this->theWeyl.RootSystem[index];
     }
-    if (index >= this->GetRank() + this->GetNumPosRoots()) {
-      return this->theWeyl.RootSystem[index - this->GetRank()];
+    if (index >= this->getRank() + this->GetNumPosRoots()) {
+      return this->theWeyl.RootSystem[index - this->getRank()];
     }
     Vector<Rational> result;
-    result.makeZero(this->GetRank());
+    result.makeZero(this->getRank());
     return result;
   }
   //returns true if returning constant, false if returning element of h

@@ -1052,7 +1052,7 @@ public:
     }
     return true;
   }
-  bool IsProportionalTo(const Matrix<Coefficient>& input, Coefficient& outputTimesMeEqualsInput) {
+  bool isProportionalTo(const Matrix<Coefficient>& input, Coefficient& outputTimesMeEqualsInput) {
     if (input.numberOfColumns != this->numberOfColumns || input.numberOfRows != this->numberOfRows) {
       return false;
     }
@@ -1173,7 +1173,7 @@ public:
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
   );
-  Coefficient GetDeterminant();
+  Coefficient getDeterminant();
   Coefficient getTrace() const;
   void AssignMatrixIntWithDen(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -1929,7 +1929,7 @@ class MonomialWeylAlgebra {
     }
     return false;
   }
-  bool HasNonSmallPositiveIntegerDerivation() const {
+  bool hasNonSmallPositiveIntegerDerivation() const {
     for (
       int i = 0;
       i < this->differentialPart.minimalNumberOfVariables();
@@ -2755,7 +2755,7 @@ public:
   bool GetRootFromLinPolyConstTermLastVariable(Vector<Coefficient>& outputRoot);
   Matrix<Coefficient> EvaluateUnivariatePoly(const Matrix<Coefficient>& input);//<-for univariate polynomials only
   Coefficient Evaluate(const Vector<Coefficient>& input);
-  bool IsProportionalTo(
+  bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& TimesMeEqualsOther, const Coefficient& theRingUnit
   ) const;
   void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
@@ -4093,17 +4093,17 @@ public:
     const RationalFunction& theRingZero
   );
   bool IsACoeffOneChevalleyGenerator();
-  bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
+  bool isProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
     Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
-    return tempRoot1.IsProportionalTo(tempRoot2);
+    return tempRoot1.isProportionalTo(tempRoot2);
   }
-  bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput) const {
+  bool isProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput) const {
     Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
-    return tempRoot1.IsProportionalTo(tempRoot2, outputTimesMeEqualsInput);
+    return tempRoot1.isProportionalTo(tempRoot2, outputTimesMeEqualsInput);
   }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   unsigned int hashFunction() const {
@@ -4185,7 +4185,7 @@ void Matrix<Coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange() {
 }
 
 template <class Coefficient>
-Coefficient Matrix<Coefficient> ::GetDeterminant() {
+Coefficient Matrix<Coefficient> ::getDeterminant() {
   Matrix<Coefficient> tempMat = *this;
   Coefficient result;
   tempMat.ComputeDeterminantOverwriteMatrix(result);
@@ -5020,7 +5020,7 @@ public:
   int getDimension() const {
     return this->basis.numberOfColumns;
   }
-  int GetRank() const {
+  int getRank() const {
     return this->basis.numberOfRows;
   }
   void intersectWith(const Lattice& other);
@@ -5804,7 +5804,7 @@ class DynkinSimpleType {
     this->CartanSymmetricInverseScale = 1;
   }
   int GetRootSystemSize() const;
-  int GetLieAlgebraDimension() const {
+  int getLieAlgebraDimension() const {
     return this->GetRootSystemSize() + this->theRank;
   }
   int GetSSAlgDim() const {
@@ -5816,8 +5816,8 @@ class DynkinSimpleType {
     const Rational& inputLengthFirstCorRootSquared
   );
   Rational GetPrincipalSlTwoCSInverseScale() const;
-  void GetCoCartanSymmetric(Matrix<Rational>& output) const;
-  void GetCartanSymmetric(Matrix<Rational>& output) const;
+  void getCoCartanSymmetric(Matrix<Rational>& output) const;
+  void getCartanSymmetric(Matrix<Rational>& output) const;
   void GetAn(int n, Matrix<Rational>& output) const;
   void GetBn(int n, Matrix<Rational>& output) const;
   void GetCn(int n, Matrix<Rational>& output) const;
@@ -5825,7 +5825,7 @@ class DynkinSimpleType {
   void GetEn(int n, Matrix<Rational>& output) const;
   void GetF4(Matrix<Rational>& output) const;
   void GetG2(Matrix<Rational>& output) const;
-  void Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const;
+  void grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const;
   void operator=(const DynkinSimpleType& other) {
     this->theLetter = other.theLetter;
     this->theRank = other.theRank;
@@ -5856,12 +5856,12 @@ class DynkinSimpleType {
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex) const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
   static Rational GetDynkinIndexParabolicallyInducingSubalgebra(char inputType);
-  bool CanBeExtendedParabolicallyTo(const DynkinSimpleType& otherType) const;
+  bool canBeExtendedParabolicallyTo(const DynkinSimpleType& otherType) const;
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinSimpleType& otherType) const {
     if (*this == otherType) {
       return true;
     }
-    return this->CanBeExtendedParabolicallyTo(otherType);
+    return this->canBeExtendedParabolicallyTo(otherType);
   }
   bool HasPrecomputedSubalgebras() const;
   Rational GetRatioLongRootToFirst() const {
@@ -5871,7 +5871,7 @@ class DynkinSimpleType {
   std::string ToStringNonTechnicalName(FormatExpressions* theFormat = nullptr) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
-  static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
+  static void getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
   bool operator<(const DynkinSimpleType& other) const {
     return other > *this;
   }
@@ -5884,7 +5884,7 @@ class DynkinSimpleType {
 //which may impose this reorganization.
 class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
 public:
-  void GetLettersTypesMults(
+  void getLettersTypesMultiplicities(
     List<char>* outputLetters = nullptr,
     List<int>* outputRanks = nullptr,
     List<int>* outputMults = nullptr,
@@ -5913,7 +5913,7 @@ public:
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output) const;
   Rational GetPrincipalSlTwoCSInverseScale() const;
   void SortTheDynkinTypes();
-  bool Grow(
+  bool grow(
     const List<Rational>& allowedInverseScales,
     int AmbientWeylDim,
     List<DynkinType>& output,
@@ -5921,8 +5921,8 @@ public:
   ) const;
   bool HasPrecomputedSubalgebras() const;
   std::string ToStringVirtualNameFolder() const;
-  bool ContainsType(char theTypeLetter) const;
-  void GetDynkinTypeWithDefaultScales(DynkinType& output) const;
+  bool containsType(char theTypeLetter) const;
+  void getDynkinTypeWithDefaultScales(DynkinType& output) const;
   static void GetPrecomputedDynkinTypes(List<DynkinType>& output);
   DynkinSimpleType GetGreatestSimpleType() const;
   DynkinSimpleType GetSmallestSimpleType() const;
@@ -5941,7 +5941,7 @@ public:
   int GetNumSimpleComponentsOfGivenRank(int desiredRank) const;
   int GetNumSimpleComponents() const;
   Rational GetRankRational() const;
-  int GetRank() const;
+  int getRank() const;
   int GetRootSystemSize() const {
     Rational result = 0;
     for (int i = 0; i < this->size(); i ++) {
@@ -5953,10 +5953,10 @@ public:
     }
     return intResult;
   }
-  int GetLieAlgebraDimension() const {
+  int getLieAlgebraDimension() const {
     Rational result = 0;
     for (int i = 0; i < this->size(); i ++) {
-      result += this->coefficients[i] * (*this)[i].GetLieAlgebraDimension();
+      result += this->coefficients[i] * (*this)[i].getLieAlgebraDimension();
     }
     int intResult = 0;
     if (!result.isSmallInteger(&intResult)) {
@@ -5964,14 +5964,14 @@ public:
     }
     return intResult;
   }
-  bool IsTypeA_1() const;
+  bool isTypeAOne() const;
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
-  bool CanBeExtendedParabolicallyTo(const DynkinType& other) const;
+  bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength = nullptr);
-  void GetEpsilonMatrix(Matrix<Rational>& output) const;
-  void GetCoCartanSymmetric(Matrix<Rational>& output) const;
-  void GetCartanSymmetric(Matrix<Rational>& output) const;
+  void getEpsilonMatrix(Matrix<Rational>& output) const;
+  void getCoCartanSymmetric(Matrix<Rational>& output) const;
+  void getCartanSymmetric(Matrix<Rational>& output) const;
   void GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output) const;
   int GetCoxeterEdgeWeight(int v, int w);
   std::string GetWeylGroupName(FormatExpressions* theFormat = nullptr) const;
@@ -6123,10 +6123,10 @@ public:
     this->makeZero();
     this->addMonomial(tempMon, 1);
   }
-  bool IsPolynomial(Polynomial<Coefficient>* whichPoly = 0) const;
-  bool HasNonSmallPositiveIntegerDerivation() const;
+  bool isPolynomial(Polynomial<Coefficient>* whichPoly = 0) const;
+  bool hasNonSmallPositiveIntegerDerivation() const;
   void raiseToPower(int thePower);
-  void MultiplyTwoMonomials(
+  void multiplyTwoMonomials(
     const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
   ) const;
   void AssignPolynomial(const Polynomial<Rational>& input) {
@@ -6416,10 +6416,10 @@ public:
     }
     return result + 1;
   }
-  Coefficient GetDeterminant() const {
+  Coefficient getDeterminant() const {
     Matrix<Coefficient> theMat;
     this->GetMatrix(theMat, this->GetMinNumColsNumRows());
-    return theMat.GetDeterminant();
+    return theMat.getDeterminant();
   }
   void DirectSumWith(const MatrixTensor<Coefficient>& other);
   void raiseToPower(int power);
@@ -6945,7 +6945,7 @@ class SlTwoInSlN {
   int GetModuleIndexFromHighestWeightVector(const Matrix<Rational>& input) {
     Rational tempRat;
     for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
-      if (this->theHighestWeightVectors.theObjects[i].IsProportionalTo(input, tempRat)) {
+      if (this->theHighestWeightVectors.theObjects[i].isProportionalTo(input, tempRat)) {
         return i;
       }
     }
@@ -7394,7 +7394,7 @@ bool Matrix<Coefficient>::isPositiveDefinite() {
         tempMat.elements[j][k] = this->elements[j][k];
       }
     }
-    det = tempMat.GetDeterminant();
+    det = tempMat.getDeterminant();
     if (det <= 0) {
       return false;
     }

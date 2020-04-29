@@ -1035,7 +1035,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
     }
     this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed = true;
   } else {
-    if (this->theDynkinType.GetRank() <= 6) {
+    if (this->theDynkinType.getRank() <= 6) {
       this->theSubgroupData.theSubgroup->computeConjugacyClassesFromAllElements();
     } else {
       this->theSubgroupData.theSubgroup->computeConjugacyClassSizesAndRepresentatives();
@@ -1047,7 +1047,7 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
 
 void SubgroupDataRootReflections::initializeGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::initializeGenerators");
-  if (this->theDynkinType.GetRank() == 0) {
+  if (this->theDynkinType.getRank() == 0) {
     this->theSubgroupData.theSubgroup->generators.setSize(1);
     this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
     return;

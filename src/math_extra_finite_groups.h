@@ -597,7 +597,7 @@ public:
 
   typedef FiniteGroup<ElementWeylGroup> WeylGroupBase;
   void reset();
-  static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
+  static void getCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void ComputeSquares();
   void ComputeInitialIrreps();
   void GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups);

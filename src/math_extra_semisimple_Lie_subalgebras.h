@@ -202,7 +202,7 @@ public:
   bool CheckMaximalDominance() const;
   bool ComputeAndVerifyFromGeneratorsAndHs();
   int GetPrimalRank() const;
-  int GetRank() const;
+  int getRank() const;
   int GetSSpartCentralizerOfSSPartCentralizer() const;
   void GetHsScaledToActByTwoByType(
     List<List<Vectors<Rational> > >& outputHsByType,

@@ -177,7 +177,7 @@ bool SemisimpleLieAlgebra::attemptExtendingEtoHEFwithHinCartan(
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > unknownH, unknownF, knownE;
   knownE = theE;
   this->GetGenericElementCartan(unknownH, 0);
-  this->GetGenericElementNegativeBorelNilradical(unknownF, this->GetRank());
+  this->GetGenericElementNegativeBorelNilradical(unknownF, this->getRank());
   bool success = this->AttempTFindingHEF(unknownH, knownE, unknownF, logStream);
   if (!success) {
     return false;
@@ -534,12 +534,12 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
     out << "& $ ";
     if (!typeCentralizer.isEqualToZero()) {
       out << typeCentralizer.toString();
-      if (currentSA.centralizerRank != typeCentralizer.GetRank()) {
+      if (currentSA.centralizerRank != typeCentralizer.getRank()) {
         out << "\\oplus";
       }
     }
-    if (currentSA.centralizerRank != typeCentralizer.GetRank()) {
-      out << "\\mathfrak h_{" << (currentSA.centralizerRank - typeCentralizer.GetRank()).toString() << "}";
+    if (currentSA.centralizerRank != typeCentralizer.getRank()) {
+      out << "\\mathfrak h_{" << (currentSA.centralizerRank - typeCentralizer.getRank()).toString() << "}";
     }
     out << "$";
     if (!currentSA.charFormaT.IsZeroPointer()) {
@@ -750,7 +750,7 @@ std::string SemisimpleSubalgebras::ToStringPart2(FormatExpressions *theFormat) {
     if (this->theSubalgebras.theValues[i].AmRegularSA()) {
       numRegularSAs ++;
     }
-    if (this->theSubalgebras.theValues[i].theWeylNonEmbedded->theDynkinType.IsTypeA_1()) {
+    if (this->theSubalgebras.theValues[i].theWeylNonEmbedded->theDynkinType.isTypeAOne()) {
       numSl2s ++;
     }
   }
@@ -870,7 +870,7 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand() {
   WeylGroupAutomorphisms& theWeylAutomorphisms = this->theSl2s.theRootSAs.theWeylGroupAutomorphisms;
   theWeylAutomorphisms.ComputeOuterAutoGenerators();
   ElementWeylGroupAutomorphisms theElt;
-  for (int i = 0; i < this->owner->GetRank(); i ++) {
+  for (int i = 0; i < this->owner->getRank(); i ++) {
     theElt.MakeSimpleReflection(i, theWeylAutomorphisms);
     theGens.addOnTop(theElt);
   }
@@ -1007,7 +1007,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
     LogFile.close();
   }
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
-  this->currentSubalgebraChain.setExpectedSize(this->owner->GetRank() + 2);
+  this->currentSubalgebraChain.setExpectedSize(this->owner->getRank() + 2);
   this->currentSubalgebraChain.setSize(0);
 }
 
@@ -1062,7 +1062,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
 }
 
 bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input) const {
-  if (input.GetRank() > this->owner->GetRank()) {
+  if (input.getRank() > this->owner->getRank()) {
     return false;
   }
   for (int i = 0; i < input.size(); i ++) {
@@ -1086,7 +1086,7 @@ bool SemisimpleSubalgebras::GrowDynkinType(
   if (outputImagesSimpleRoots != nullptr) {
     outputImagesSimpleRoots->setSize(0);
   }
-  return input.Grow(theLengths, this->owner->GetRank(), output, outputImagesSimpleRoots);
+  return input.grow(theLengths, this->owner->getRank(), output, outputImagesSimpleRoots);
 }
 
 Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
@@ -1147,7 +1147,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs(
   }
   DynkinSimpleType newComponent = this->theWeylNonEmbedded->theDynkinType.GetSmallestSimpleType();
   this->CartanSAsByComponentScaledToActByTwo = baseSubalgebra.CartanSAsByComponentScaledToActByTwo;
-  int indexOffset = this->theWeylNonEmbedded->theDynkinType.GetRank() - newComponent.theRank;
+  int indexOffset = this->theWeylNonEmbedded->theDynkinType.getRank() - newComponent.theRank;
   int newIndexInNewComponent = 0;
 //  if (!newComponent.isEqualToZero())
   newIndexInNewComponent = *theRootInjection.lastObject() - indexOffset;
@@ -1461,7 +1461,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   ProgressReport theReport1;
   ProgressReport theReport2;
   ProgressReport theReport3;
-  int baseRank = currentType.GetRank() - 1;
+  int baseRank = currentType.getRank() - 1;
   DynkinSimpleType theSmallType = currentType.GetSmallestSimpleType();
   if (theReport1.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -1469,7 +1469,7 @@ void SemisimpleSubalgebras::GetHCandidates(
     theReport1.report(reportStream.str());
   }
   int indexNewRooT = *currentRootInjection.lastObject();
-  int indexNewRootInSmallType = indexNewRooT - currentType.GetRank() + theSmallType.theRank;
+  int indexNewRootInSmallType = indexNewRooT - currentType.getRank() + theSmallType.theRank;
   Rational desiredHScaledToActByTwoLengthSquared = theSmallType.CartanSymmetricInverseScale * 4 /
   theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.setSize(0);
@@ -1721,7 +1721,7 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
 bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed() {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed");
   this->CheckFullInitializatioN();
-  if (this->GetRank() != 1) {
+  if (this->getRank() != 1) {
     return false;
   }
   Vector<Rational> theH = this->theHsScaledToActByTwo[0];
@@ -1850,7 +1850,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
   }
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner = this;
-  if (this->baseSubalgebra().GetRank() != 0) {
+  if (this->baseSubalgebra().getRank() != 0) {
     Vector<Rational> weightHElementWeAreLookingFor =
     this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
       this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
@@ -2023,7 +2023,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
     << ", and this order is needed to construct extensions. " << global.fatal;
   }
   ProgressReport theReport1;
-  if (this->baseSubalgebra().GetRank() >= this->owner->GetRank()) {
+  if (this->baseSubalgebra().getRank() >= this->owner->getRank()) {
     return this->RemoveLastSubalgebra();
   }
   int stackIndex = this->currentSubalgebraChain.size - 1;
@@ -2080,7 +2080,7 @@ void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& inp
   this->checkInitialization();
 }*/
 
-bool DynkinType::IsTypeA_1() const {
+bool DynkinType::isTypeAOne() const {
   if (this->size() != 1) {
     return false;
   }
@@ -2093,10 +2093,10 @@ bool DynkinType::IsTypeA_1() const {
   return (*this)[0].theLetter == 'A';
 }
 
-void DynkinType::GetDynkinTypeWithDefaultScales(DynkinType& output) const {
+void DynkinType::getDynkinTypeWithDefaultScales(DynkinType& output) const {
   if (&output == this) {
     DynkinType thisCopy =*this;
-    thisCopy.GetDynkinTypeWithDefaultScales(output);
+    thisCopy.getDynkinTypeWithDefaultScales(output);
     return;
   }
   output.makeZero();
@@ -2182,7 +2182,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
      output.addMonomial(MonomialMatrix(2, 4), 1);
      output.addMonomial(MonomialMatrix(4, 2), 1);
   }
-  Rational tempRat = output.GetDeterminant();
+  Rational tempRat = output.getDeterminant();
   if (tempRat != 1 && tempRat != - 1) {
     FormatExpressions theFormat;
     theFormat.flagUseHTML = false;
@@ -2590,11 +2590,11 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     this->theBasis.addListOnTop(this->thePosGens);
     if (this->theBasis.size > 0) {
       this->owner->owner->GenerateLieSubalgebra(this->theBasis);
-      if (this->theBasis.size != this->theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()) {
+      if (this->theBasis.size != this->theWeylNonEmbedded->theDynkinType.getLieAlgebraDimension()) {
         if (!allowNonPolynomialSystemFailure) {
           global.fatal << "This is a programming error. "
           << "Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
-          << this->theBasis.size << ", must be " << this->theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()
+          << this->theBasis.size << ", must be " << this->theWeylNonEmbedded->theDynkinType.getLieAlgebraDimension()
           << ". The subalgebra is " << this->toString() << "<br>Involved generators: "
           << this->theInvolvedNegGenerators.toString()
           << "<br>and<br>" << this->theInvolvedPosGenerators.toString() << global.fatal;
@@ -3053,7 +3053,7 @@ bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem(
   Polynomial<AlgebraicNumber> tempP;
   for (int i = 0; i < FisLinearCombiOf.size; i ++) {
     tempElt = FisLinearCombiOf[i];
-    tempP.makeMonomial(i + this->GetAmbientSS().GetRank(), 1, 1);
+    tempP.makeMonomial(i + this->GetAmbientSS().getRank(), 1, 1);
     tempElt *= tempP;
     theF += tempElt;
   }
@@ -3091,8 +3091,8 @@ void CandidateSSSubalgebra::ComputeKsl2triples() {
   }
 }
 
-int CandidateSSSubalgebra::GetRank() const {
-  return this->theWeylNonEmbedded->theDynkinType.GetRank();
+int CandidateSSSubalgebra::getRank() const {
+  return this->theWeylNonEmbedded->theDynkinType.getRank();
 }
 
 int CandidateSSSubalgebra::GetPrimalRank() const {
@@ -3850,9 +3850,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     }
     tempModules[theIndex].addOnTop(this->HighestVectorsNonSorted[i]);
   }
-  this->HighestVectors.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->GetRank());
-  this->HighestWeightsPrimal.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->GetRank());
-  this->Modules.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->GetRank());
+  this->HighestVectors.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->getRank());
+  this->HighestWeightsPrimal.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->getRank());
+  this->Modules.setExpectedSize(this->thePrimalChaR.size() +this->owner->owner->getRank());
   this->HighestVectors.setSize(0);
   this->HighestWeightsPrimal.clear();
   this->Modules.setSize(0);
@@ -4181,7 +4181,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   tempMon.weightFundamentalCoordS.makeZero(this->theWeylNonEmbedded->getDimension());
   tempMon.owner = nullptr;
   this->theCharFundamentalCoordsRelativeToCartan.makeZero();
-  this->theCharFundamentalCoordsRelativeToCartan.addMonomial(tempMon, this->GetAmbientSS().GetRank());
+  this->theCharFundamentalCoordsRelativeToCartan.addMonomial(tempMon, this->GetAmbientSS().getRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theTypes);
 /*  global.Comments << "<br>Cartan symmetric, type  "
@@ -4727,9 +4727,9 @@ bool SlTwoSubalgebra::AttemptToComputeCentralizer() {
     currentMinimalContainer.theCentralizerDynkinType.GetRankRational() +
     currentMinimalContainer.theCentralizerDynkinType.GetRootSystemSize();
     this->dimCentralizerToralPart =
-    this->owner->GetRank() -
-    currentMinimalContainer.theDynkinType.GetRank() -
-    currentMinimalContainer.theCentralizerDynkinType.GetRank();
+    this->owner->getRank() -
+    currentMinimalContainer.theDynkinType.getRank() -
+    currentMinimalContainer.theCentralizerDynkinType.getRank();
 
     Rational totalCentalizerCandidateDim = dimOfSSpartOfCentralizerOfRootSA + this->dimCentralizerToralPart;
 
@@ -4773,7 +4773,7 @@ void SlTwoSubalgebra::MakeReportPrecomputations(
   int indexMinimalContainingRegularSA, RootSubalgebra& MinimalContainingRegularSubalgebra
 ) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::MakeReportPrecomputations");
-  int theDimension = this->GetOwnerSSAlgebra().GetRank();
+  int theDimension = this->GetOwnerSSAlgebra().getRank();
   this->IndicesContainingRootSAs.size = 0;
   Vectors<Rational> tempRoots;
   tempRoots = MinimalContainingRegularSubalgebra.SimpleBasisK;
@@ -5162,12 +5162,12 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > >& currentMod = this->Modules[indexModule];
   FormatExpressions charFormat;
   charFormat.vectorSpaceEiBasisNames.setSize(this->GetPrimalRank());
-  for (int i = 0; i < this->GetRank(); i ++) {
+  for (int i = 0; i < this->getRank(); i ++) {
     std::stringstream tempStream;
     tempStream << "\\\\omega_{" << i + 1 << "}";
     charFormat.vectorSpaceEiBasisNames[i] = tempStream.str();
   }
-  for (int i = this->GetRank(); i < this->GetPrimalRank(); i ++) {
+  for (int i = this->getRank(); i < this->GetPrimalRank(); i ++) {
     std::stringstream tempStream;
     tempStream << "\\\\psi_{" << i + 1 << "}";
     charFormat.vectorSpaceEiBasisNames[i] = tempStream.str();
@@ -6201,7 +6201,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     if (this->indexSSPartCentralizer != - 1) {
       CandidateSSSubalgebra& centralizerSSpart = this->owner->theSubalgebras.theValues[this->indexSSPartCentralizer];
       out << this->owner->ToStringAlgebraLink(this->indexSSPartCentralizer, theFormat);
-      dimToralPartCentralizer -= centralizerSSpart.GetRank();
+      dimToralPartCentralizer -= centralizerSSpart.getRank();
       if (dimToralPartCentralizer != 0) {
         out << " + ";
       }
@@ -6212,7 +6212,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
         out << HtmlRoutines::GetMathSpanPure(this->theCentralizerType.toString());
       }
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
-      dimToralPartCentralizer -= this->theCentralizerType.GetRank();
+      dimToralPartCentralizer -= this->theCentralizerType.getRank();
     }
     if (dimToralPartCentralizer != 0) {
       std::stringstream toralPartStream;
@@ -6258,7 +6258,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizerDebugData(FormatExpression
   << ". this->centralizerDimension: " << this->centralizerDimension.toString()
   << ". The max semisimple subalgebra container computed: "
   << this->owner->theSubalgebras.theValues[this->indexMaxSSContainer].theWeylNonEmbedded->theDynkinType.toString()
-  << ". The rank of the ambient Lie algebra is " << this->owner->owner->GetRank()
+  << ". The rank of the ambient Lie algebra is " << this->owner->owner->getRank()
   << ". The indices of the direct containers of the subalgebra are: ";
   for (int k = 0; k < this->indicesDirectSummandSuperAlgebra.size; k ++) {
     out << this->owner->theSubalgebras.theValues[this->indicesDirectSummandSuperAlgebra[k]].theWeylNonEmbedded->theDynkinType.toString()
@@ -6307,11 +6307,11 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
         << centralizerTypeAlternative.toString() << global.fatal;
       }
     }
-    if (this->centralizerRank>this->owner->owner->GetRank()) {
+    if (this->centralizerRank>this->owner->owner->getRank()) {
       global.fatal << "Something is wrong." << this->ToStringCentralizerDebugData() << global.fatal;
     }
   } else {
-    if (this->centralizerDimension + this->GetRank() > this->owner->owner->GetRank()) {
+    if (this->centralizerDimension + this->getRank() > this->owner->owner->getRank()) {
       global.fatal << "Something is wrong. " << this->ToStringCentralizerDebugData() << global.fatal;
     }
   }
@@ -6960,19 +6960,19 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
           currentSA.indexMaxSSContainer = j;
         }
         if (
-          this->theSubalgebras.theValues[currentSA.indexMaxSSContainer].theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension() <
-          otherSA.theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()
+          this->theSubalgebras.theValues[currentSA.indexMaxSSContainer].theWeylNonEmbedded->theDynkinType.getLieAlgebraDimension() <
+          otherSA.theWeylNonEmbedded->theDynkinType.getLieAlgebraDimension()
         ) {
           currentSA.indexMaxSSContainer = j;
         }
       }
     }
     currentSA.ComputeCentralizerIsWellChosen();
-    if (currentSA.centralizerRank > this->owner->GetRank()) {
+    if (currentSA.centralizerRank > this->owner->getRank()) {
       global.fatal << "Subalgebra " << currentSA.ToStringType() << " has rank "
       << currentSA.centralizerRank.toString()
       << " but the ambient Lie algebra isonly of rank "
-      << this->owner->GetRank() << ". " << global.fatal;
+      << this->owner->getRank() << ". " << global.fatal;
     }
   }
   theReport1.report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
@@ -7003,10 +7003,10 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
 }
 
 bool DynkinType::operator>(const DynkinType& other) const {
-  if (this->GetRank() > other.GetRank()) {
+  if (this->getRank() > other.getRank()) {
     return true;
   }
-  if (other.GetRank() > this->GetRank()) {
+  if (other.getRank() > this->getRank()) {
     return false;
   }
   DynkinType difference;
@@ -7040,9 +7040,9 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
   Vector<Rational> tempV;
-  theCartan.setSize(this->GetAmbientSS().GetRank());
-  for (int i = 0; i < this->GetAmbientSS().GetRank(); i ++) {
-    tempV.makeEi(this->GetAmbientSS().GetRank(), i);
+  theCartan.setSize(this->GetAmbientSS().getRank());
+  for (int i = 0; i < this->GetAmbientSS().getRank(); i ++) {
+    tempV.makeEi(this->GetAmbientSS().getRank(), i);
     tempElt.MakeHgenerator(tempV, this->GetAmbientSS());
     tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
@@ -7092,11 +7092,11 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   this->BilinearFormFundPrimal *= this->BilinearFormSimplePrimal;
   this->BilinearFormFundPrimal *= matFundCoordsSimple;
 /*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->GetAmbientWeyl().getDimension(), this->GetPrimalRank());
-  for (int i = 0; i < this->GetRank(); i ++)
+  for (int i = 0; i < this->getRank(); i ++)
     this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->theHs[i]);
-  for (int i = this->GetRank(); i < this->GetPrimalRank(); i ++)
+  for (int i = this->getRank(); i < this->GetPrimalRank(); i ++)
     this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
-    (i, this->CartanOfCentralizer[i-this->GetRank()]);
+    (i, this->CartanOfCentralizer[i-this->getRank()]);
 */
 }

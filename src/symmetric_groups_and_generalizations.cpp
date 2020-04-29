@@ -204,7 +204,7 @@ void Partition::TestAllSpechtModules(int n) {
       //std::cout << "got to here4\n";
       global.comments << repgens[ri].toStringPlainText();
       //std::cout << "got to here5\n";
-      Rational det = repgens[ri].GetDeterminant();
+      Rational det = repgens[ri].getDeterminant();
       global.comments << " determinant is " << det << "\n\n";
       if ((det != 1) && (det != - 1)) {
         global.fatal << "invalid determinant" << global.fatal;

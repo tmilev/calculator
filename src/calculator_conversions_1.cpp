@@ -18,7 +18,7 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Expression generatorLetterE, generatorIndexE;
   if (
     input.theGeneratorIndex >= input.owner->GetNumPosRoots() &&
-    input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->GetRank()
+    input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->getRank()
   ) {
     generatorLetterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   } else {
@@ -223,7 +223,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   )) {
     return theCommands << "Failed to extract Dynkin type from: " << input.toString();
   }
-  if (theDynkinType.GetRank() > 20) {
+  if (theDynkinType.getRank() > 20) {
     return theCommands
     << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
     << "If you would like to relax this limitation edit file " << __FILE__
@@ -532,7 +532,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
-  int theRank = owner.owner->GetRank();
+  int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   theReport.report(reportStream.str());
   Matrix<Rational> theHs;
@@ -545,7 +545,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     << outputSubalgebra.theWeylNonEmbedded->getDimension() << " elements, but failed to get them.";
   }
   List<int> theRanks, theMults;
-  outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetLettersTypesMults(nullptr, &theRanks, &theMults, nullptr);
+  outputSubalgebra.theWeylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
   outputSubalgebra.CartanSAsByComponentScaledToActByTwo.setSize(
     outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetNumSimpleComponents()
   );
@@ -567,7 +567,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   outputSubalgebra.thePosGens.setSize(0);
   outputSubalgebra.theNegGens.setSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE)) {
-    generatorsE.Sequencefy();
+    generatorsE.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i = 1; i < generatorsE.children.size; i ++) {
       if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
@@ -657,7 +657,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theReport.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.report(reportStream.str());
-  theSAsE.Sequencefy();
+  theSAsE.sequencefy();
   theSAs.theSubalgebras.setExpectedSize(theSAsE.children.size - 1);
   theSAs.theSubalgebras.clear();
   theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
@@ -987,7 +987,7 @@ bool CalculatorConversions::innerElementUE(
           isGood = false;
         }
       } else if (theLetter == "h") {
-        if (theChevGen.theGeneratorIndex < 1 || theChevGen.theGeneratorIndex>owner.GetRank()) {
+        if (theChevGen.theGeneratorIndex < 1 || theChevGen.theGeneratorIndex>owner.getRank()) {
           isGood = false;
         } else {
           theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.GetNumPosRoots() - 1;

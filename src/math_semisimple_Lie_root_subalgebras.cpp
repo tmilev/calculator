@@ -143,7 +143,7 @@ void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.isEqualToZero()) {
-    if (this->theCentralizerDynkinType.GetRank() + this->theDynkinType.GetRank() != this->ownEr->owner->GetRank()) {
+    if (this->theCentralizerDynkinType.getRank() + this->theDynkinType.getRank() != this->ownEr->owner->getRank()) {
       global.fatal << "Centralizer of " << this->theDynkinType.toString() << " computed to be "
       << this->theCentralizerDynkinType.toString()
       << " which is impossible. " << global.fatal;
@@ -483,7 +483,7 @@ void RootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
 }
 
 bool RootSubalgebra::IsARoot(const Vector<Rational>& input) {
-  if (input.size != this->getOwnerLieAlgebra().GetRank()) {
+  if (input.size != this->getOwnerLieAlgebra().getRank()) {
     return false;
   }
   return this->GetAmbientWeyl().RootSystem.contains(input);
@@ -612,7 +612,7 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
         }
       }
     }
-    currentWeight.makeZero(this->getOwnerLieAlgebra().GetRank());
+    currentWeight.makeZero(this->getOwnerLieAlgebra().getRank());
     for (int i = 0; i <zeroSpace.size; i ++) {
       currentWeights.addOnTop(currentWeight);
     }
@@ -758,7 +758,7 @@ bool RootSubalgebra::ConeConditionHolds(RootSubalgebras& owner, int indexInOwner
 }
 
 bool RootSubalgebra::CheckRankInequality() const {
-  if ((this->theDynkinType.GetRank() + this->theCentralizerDynkinType.GetRank()) * 2 < this->ownEr->owner->GetRank()) {
+  if ((this->theDynkinType.getRank() + this->theCentralizerDynkinType.getRank()) * 2 < this->ownEr->owner->getRank()) {
     global.fatal << "2*(Centralizer rank + rank) < ambient rank, "
     << "which is mathematically impossible. There was a programming error. "
     << global.fatal;
@@ -856,7 +856,7 @@ void RootSubalgebra::ExtractRelations(
   int indexInOwner,
   Vectors<Rational>& Ksingular
 ) {
-  int theDimension = this->getOwnerLieAlgebra().GetRank();
+  int theDimension = this->getOwnerLieAlgebra().getRank();
   Vector<Rational> tempRoot;
   tempRoot.makeZero(theDimension);
   ConeRelation theRel; theRel.IndexOwnerRootSubalgebra = indexInOwner;
@@ -923,7 +923,7 @@ bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
   Vector<Rational> tempRoot, Accum;
   SelectionWithMaxMultiplicity tempSel;
   Vectors<Rational> chosenAlphas;
-  int theRank = this->getOwnerLieAlgebra().GetRank();
+  int theRank = this->getOwnerLieAlgebra().getRank();
   DynkinDiagramRootSubalgebra theDiagram;
   for (int i = 2; i <= MathRoutines::Maximum(highestWeightsAllowed.size, theRank); i ++) {
     tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
@@ -2107,7 +2107,7 @@ void RootSubalgebra::ComputePotentialExtensions() {
   );
   this->potentialExtensionCartanSymmetrics.setSize(this->potentialExtensionDynkinTypes.size);
   for (int i = 0; i < this->potentialExtensionDynkinTypes.size; i ++) {
-    this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
+    this->potentialExtensionDynkinTypes[i].getCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
   }
 }
 
@@ -2115,7 +2115,7 @@ bool RootSubalgebras::GrowDynkinType(
   const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots
 ) const {
   MacroRegisterFunctionWithName("RootSubalgebras::GrowDynkinType");
-  input.Grow(this->validScales, this->GetOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
+  input.grow(this->validScales, this->GetOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
   char theLetter;
   if (!this->owner->theWeyl.theDynkinType.IsSimple(&theLetter)) {
     return true;
@@ -2124,51 +2124,51 @@ bool RootSubalgebras::GrowDynkinType(
     bool isGood = true;
     if (theLetter == 'A') {
       if (
-        output[i].ContainsType('B') || output[i].ContainsType('C') || output[i].ContainsType('D') ||
-        output[i].ContainsType('E') || output[i].ContainsType('F') || output[i].ContainsType('G')
+        output[i].containsType('B') || output[i].containsType('C') || output[i].containsType('D') ||
+        output[i].containsType('E') || output[i].containsType('F') || output[i].containsType('G')
       ) {
         isGood = false;
       }
     }
     if (theLetter == 'B') {
       if (
-        output[i].ContainsType('C') || output[i].ContainsType('E') ||
-        output[i].ContainsType('F') || output[i].ContainsType('G')
+        output[i].containsType('C') || output[i].containsType('E') ||
+        output[i].containsType('F') || output[i].containsType('G')
       ) {
         isGood = false;
       }
     }
     if (theLetter == 'C') {
       if (
-        output[i].ContainsType('D') || output[i].ContainsType('E') ||
-        output[i].ContainsType('F') || output[i].ContainsType('G')
+        output[i].containsType('D') || output[i].containsType('E') ||
+        output[i].containsType('F') || output[i].containsType('G')
       ) {
         isGood = false;
       }
     }
     if (theLetter == 'D') {
       if (
-        output[i].ContainsType('B') || output[i].ContainsType('C') ||
-        output[i].ContainsType('E') || output[i].ContainsType('F') || output[i].ContainsType('G')
+        output[i].containsType('B') || output[i].containsType('C') ||
+        output[i].containsType('E') || output[i].containsType('F') || output[i].containsType('G')
       ) {
         isGood = false;
       }
     }
     if (theLetter == 'E') {
       if (
-        output[i].ContainsType('B') || output[i].ContainsType('C') ||
-        output[i].ContainsType('F') || output[i].ContainsType('G')
+        output[i].containsType('B') || output[i].containsType('C') ||
+        output[i].containsType('F') || output[i].containsType('G')
       ) {
         isGood = false;
       }
     }
     if (theLetter == 'F') {
-      if (output[i].ContainsType('G')) {
+      if (output[i].containsType('G')) {
         isGood = false;
       }
     }
     if (theLetter == 'G') {
-      if (output[i].ContainsType('B')) {
+      if (output[i].containsType('B')) {
         isGood = false;
       }
     }
@@ -2383,7 +2383,7 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool 
   this->GetOwnerWeyl().ComputeRho(true);
   //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
   RootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.theSubalgebras.setSize(this->GetOwnerSSalgebra().GetRank()*2+ 1);
+  rootSAsGenerateAll.theSubalgebras.setSize(this->GetOwnerSSalgebra().getRank()*2+ 1);
   rootSAsGenerateAll.theSubalgebras[0].genK.size = 0;
   rootSAsGenerateAll.theSubalgebras[0].ownEr = this;
   rootSAsGenerateAll.theSubalgebras[0].ComputeEssentialS();
@@ -2545,14 +2545,14 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
       global.fatal << "Roots in play must be half the number of variables. " << global.fatal;
     }
     this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
-    for (int j = 0; j < this->GetOwnerSSAlgebra().GetRank(); j ++) {
+    for (int j = 0; j < this->GetOwnerSSAlgebra().getRank(); j ++) {
       tempM.makeOne();
       tempM.setVariable(i, 1);
       tempM.setVariable(i + halfNumberVariables, 1);
       outputSystemToBeSolved[j+oldSize].addMonomial(tempM, tempRoot[j]);
     }
   }
-  for (int i = 0; i < this->GetOwnerSSAlgebra().GetRank(); i ++) {
+  for (int i = 0; i < this->GetOwnerSSAlgebra().getRank(); i ++) {
     outputSystemToBeSolved[i + oldSize].addConstant(targetH[i] * (- 1));
   }
   outputMatrixSystemToBeSolved.initialize(outputSystemToBeSolved.size, halfNumberVariables);
@@ -2655,7 +2655,7 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     InvertedRelativeKillingForm.actOnVectorColumn(relativeCharacteristic, relativeSimpleCoords);
     Vector<Rational> characteristicH;
-    characteristicH.makeZero(theLieAlgebra.GetRank());
+    characteristicH.makeZero(theLieAlgebra.getRank());
     for (int j = 0; j < theRelativeDimension; j ++) {
       characteristicH += this->SimpleBasisK[j] * relativeSimpleCoords[j];
     }
@@ -2743,8 +2743,8 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
 void RootSubalgebras::ComputeAllReductiveRootSAsInit() {
   this->GetOwnerWeyl().ComputeRho(true);
   this->validScales.clear();
-  this->validScales.setExpectedSize(this->owner->GetRank() * 2);
-  for (int i = 0; i < this->owner->GetRank(); i ++) {
+  this->validScales.setExpectedSize(this->owner->getRank() * 2);
+  for (int i = 0; i < this->owner->getRank(); i ++) {
     this->validScales.addOnTopNoRepetition(2 / this->owner->theWeyl.cartanSymmetric(i, i));
   }
   this->theWeylGroupAutomorphisms.theWeyl = &this->GetOwnerWeyl();
@@ -2753,7 +2753,7 @@ void RootSubalgebras::ComputeAllReductiveRootSAsInit() {
 void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
   MacroRegisterFunctionWithName("RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder");
   Selection parSel;
-  parSel.initialize(this->owner->GetRank());
+  parSel.initialize(this->owner->getRank());
   Vectors<Rational> basis, currentBasis;
   List<bool> Explored;
   Explored.initializeFillInObject(this->theSubalgebras.size, false);
@@ -2763,7 +2763,7 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
   this->NumPseudoParabolicNonParabolic = 0;
   RootSubalgebra currentSA;
   currentSA.ownEr = this;
-  basis.MakeEiBasis(this->owner->GetRank());
+  basis.MakeEiBasis(this->owner->getRank());
   List<RootSubalgebra> currentList;
   ProgressReport theReport;
   for (int i = 0; i < 2; i ++) {
@@ -2811,7 +2811,7 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
     currentList.quickSortAscending();
     this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
     basis.addOnTop(this->owner->theWeyl.RootSystem[0]);
-    parSel.initialize(this->owner->GetRank() + 1);
+    parSel.initialize(this->owner->getRank() + 1);
   }
   this->NumNonPseudoParabolic = this->theSubalgebras.size - this->NumParabolic - this->NumPseudoParabolicNonParabolic;
   currentList.setSize(0);
@@ -3148,7 +3148,7 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::GetRootIMustBeWeight(
       << this->toString() << global.fatal;
     }
     Vector<Rational> result;
-    result.makeZero(this->GetOwner()->GetRank());
+    result.makeZero(this->GetOwner()->getRank());
     return result;
   }
   return this->GetOwner()->GetWeightOfGenerator((*this)[0].theGeneratorIndex);
@@ -3298,8 +3298,8 @@ std::string RootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
     out << "$" << (currentSA.theDynkinType.GetRootSystemSize() / 2) << "$&" ;
     out << "$" << (currentSA.theCentralizerDynkinType.GetRootSystemSize() / 2)<< "$&" ;
     out << "$" << currentSA.theDynkinType.GetNumSimpleComponentsOfGivenRank(1) << "$&" ;
-    out << "$" << currentSA.theDynkinType.GetRank() << "$&" ;
-    out << "$" << currentSA.theCentralizerDynkinType.GetRank() << "$&" ;
+    out << "$" << currentSA.theDynkinType.getRank() << "$&" ;
+    out << "$" << currentSA.theCentralizerDynkinType.getRank() << "$&" ;
     out << "\\\\" << endline;
   }
   out << "\\end{longtable}" << endline;

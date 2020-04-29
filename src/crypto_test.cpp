@@ -1,11 +1,11 @@
 #include "crypto.h"
 
 bool Crypto::Test::all() {
-  Crypto::Test::Sha256();
+  Crypto::Test::sha256();
   return true;
 }
 
-bool Crypto::Test::Sha256() {
+bool Crypto::Test::sha256() {
   List<std::string> inputs;
   List<std::string> outputs;
   inputs.addOnTop("abc");

@@ -75,13 +75,13 @@ public:
   // Please do not use outside of critical functions.
   // At the time of writing, there are only
   // a few use cases that qualify.
-  // 1. Load the server's private key and server certificate.
+  // 1. load the server's private key and server certificate.
   //    The certificate is not a secret but we keep it next to
   //    the private key for ease of management.
-  // 2. Load other server secrets:
+  // 2. load other server secrets:
   //    - recaptcha credentials
   //    - email credentials.
-  // 3. Load private user computation reports from the results/ folder.
+  // 3. load private user computation reports from the results/ folder.
   //    These are not expected to contain secret information
   //    or pose security risks. However since they contain personal user
   //    data we treat them as ultra sensitive.

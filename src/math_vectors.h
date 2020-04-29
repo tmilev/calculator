@@ -301,10 +301,10 @@ public:
     }
     return result;
   }
-  bool IsProportionalTo(const Vector<Coefficient>& other, Coefficient& TimesMeEqualsOther) const;
-  bool IsProportionalTo(const Vector<Coefficient>& other) const {
+  bool isProportionalTo(const Vector<Coefficient>& other, Coefficient& TimesMeEqualsOther) const;
+  bool isProportionalTo(const Vector<Coefficient>& other) const {
     Coefficient TimesMeEqualsOther;
-    return this->IsProportionalTo(other, TimesMeEqualsOther);
+    return this->isProportionalTo(other, TimesMeEqualsOther);
   }
   int FindLCMDenominatorsTruncateToInt();
   void FindLCMDenominators(LargeIntegerUnsigned& output);
@@ -596,7 +596,7 @@ void Vector<Coefficient>::ScaleToFirstNonZeroCoordinatePositive() {
 }
 
 template <class Coefficient>
-bool Vector<Coefficient>::IsProportionalTo(
+bool Vector<Coefficient>::isProportionalTo(
   const Vector<Coefficient>& input,
   Coefficient& outputTimesMeEqualsInput
 ) const {

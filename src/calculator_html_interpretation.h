@@ -286,125 +286,117 @@ public:
   bool flagLoadedClassDataSuccessfully;
   /////////////////
   int getAnswerIndex(const std::string& desiredAnswerId);
-  bool CheckContent(std::stringstream* comments);
-  bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
+  bool checkContent(std::stringstream* comments);
+  bool canBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool loadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
-  bool LoadAndParseTopicList(std::stringstream& comments);
-  bool LoadDatabaseInfo(std::stringstream& comments);
-  std::string CleanUpFileName(const std::string& inputLink);
+  bool loadAndParseTopicList(std::stringstream& comments);
+  bool loadDatabaseInfo(std::stringstream& comments);
+  std::string cleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
   bool parseHTML(std::stringstream* comments);
   bool parseHTMLPrepareCommands(std::stringstream* comments);
-  bool IsSplittingChar(const std::string& input);
-  void LoadFileNames();
-  bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
+  bool isSplittingChar(const std::string& input);
+  void loadFileNames();
+  bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   bool extractAnswerIds(std::stringstream* comments);
   bool interpretHtml(std::stringstream* comments);
   bool interpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
-  void ComputeProblemLabel();
-  void ComputeBodyDebugString();
-  std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
-  void LogProblemGenerationObsolete(Calculator& theInterpreter);
-  bool InterpretProcessExecutedCommands(
+  void computeProblemLabel();
+  void computeBodyDebugString();
+  std::string toStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
+  void logProblemGenerationObsolete(Calculator& theInterpreter);
+  bool interpretProcessExecutedCommands(
     Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments
   );
   bool prepareAnswerElements(std::stringstream& comments);
   bool interpretAnswerHighlights(std::stringstream& comments);
-  bool InterpretAnswerElements(std::stringstream& comments);
+  bool interpretAnswerElements(std::stringstream& comments);
   bool interpretOneAnswerElement(SyntacticElementHTML& inputOutput);
-  bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments);
-  std::string PrepareUserInputBoxes();
-  bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments);
-  bool PrepareCommentsBeforeSubmission(Answer& theAnswer, std::stringstream* comments);
-  bool PrepareCommentsBeforeInterpretation(Answer& theAnswer, std::stringstream* comments);
-  bool PrepareCommandsSolution(Answer& theAnswer, std::stringstream* comments);
-  bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments);
-  bool PrepareCommandsGenerateProblem(std::stringstream* comments);
-  std::string GetProblemHeaderEnclosure();
-  std::string GetProblemHeaderWithoutEnclosure();
-  bool SetTagClassFromOpenTag(SyntacticElementHTML& output);
-  bool SetTagClassFromCloseTag(SyntacticElementHTML& output);
-  bool StoreRandomSeedCurrent(std::stringstream* commentsOnFailure);
-  bool PrepareCommands(std::stringstream* comments);
-  std::string CleanUpCommandString(const std::string& inputCommand);
-  void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
-  void InterpretIfAnswer(SyntacticElementHTML& inputOutput);
-  std::string GetDeadlineNoInheritance(const std::string& id);
-  std::string GetDeadline(
+  bool prepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream* comments);
+  std::string prepareUserInputBoxes();
+  bool prepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream* comments);
+  bool prepareCommentsBeforeSubmission(Answer& theAnswer, std::stringstream* comments);
+  bool prepareCommentsBeforeInterpretation(Answer& theAnswer, std::stringstream* comments);
+  bool prepareCommandsSolution(Answer& theAnswer, std::stringstream* comments);
+  bool prepareCommandsAnswer(Answer& theAnswer, std::stringstream* comments);
+  bool prepareCommandsGenerateProblem(std::stringstream* comments);
+  std::string getProblemHeaderEnclosure();
+  std::string getProblemHeaderWithoutEnclosure();
+  bool setTagClassFromOpenTag(SyntacticElementHTML& output);
+  bool setTagClassFromCloseTag(SyntacticElementHTML& output);
+  bool storeRandomSeedCurrent(std::stringstream* commentsOnFailure);
+  bool prepareCommands(std::stringstream* comments);
+  std::string cleanUpCommandString(const std::string& inputCommand);
+  void interpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
+  void interpretIfAnswer(SyntacticElementHTML& inputOutput);
+  std::string getDeadlineNoInheritance(const std::string& id);
+  std::string getDeadline(
     const std::string& problemName,
     const std::string& sectionNumber,
     bool& outputIsInherited
   );
-  bool MergeOneProblemAdminData(
+  bool mergeOneProblemAdminData(
     const std::string& inputProblemName,
     ProblemData& inputProblemInfo,
     std::stringstream& commentsOnFailure
   );
-  //bool MergeProblemInfoInDatabaseURLed(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
-  bool MergeProblemWeightAndStore(
+  bool mergeProblemWeightAndStore(
     std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
   );
-  bool MergeProblemDeadlineAndStore(
+  bool mergeProblemDeadlineAndStore(
     std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
   );
-  bool MergeProblemWeight(
+  bool mergeProblemWeight(
     const JSData& inputJSON,
     MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
-  bool MergeProblemDeadline(
+  bool mergeProblemDeadline(
     const JSData& inputJSON,
     MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
-  bool StoreProblemWeights(
+  bool storeProblemWeights(
     MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
     std::stringstream* commentsOnFailure
   );
-  bool StoreProblemDeadlines(
+  bool storeProblemDeadlines(
     MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
     std::stringstream* commentsOnFailure
   );
-  // bool LoadDeadlineInfoFromJSONStringAppend
-  // (const std::string& inputJSONString,
-  //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
-  //   std::stringstream& commentsOnFailure);
-  //void StoreDeadlineInfoIntoJSON
-  //(JSData& outputData,
-  // MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
-  QuerySet ToQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
-  JSData ToJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
-  std::string ToStringDeadline(
+  QuerySet toQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  JSData toJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  std::string toStringDeadline(
     const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection
   );
-  void ComputeDeadlinesAllSections(TopicElement& inputOutput);
-  void ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
-  JSData ToStringTopicListJSON();
-  std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
-  static std::string ToStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
-  std::string ToStringLinkFromFileName(const std::string& theFileName);
-  std::string ToStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
-  std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
-  void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string ToStringProblemScoreFull(const std::string& theFileName);
-  std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
-  bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
-  void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
-  bool PrepareSectionList(std::stringstream& commentsOnFailure);
-  void InterpretManageClass(SyntacticElementHTML& inputOutput);
-  void InterpretTopicList(SyntacticElementHTML& inputOutput);
-  bool ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
-  void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
-  void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
-  void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
-  void InterpretJavascripts(SyntacticElementHTML& inputOutput);
-  JSData GetJavascriptMathQuillBoxesForJSON();
-  void LoadCurrentProblemItem(
+  void computeDeadlinesAllSections(TopicElement& inputOutput);
+  void computeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
+  JSData toStringTopicListJSON();
+  std::string toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
+  static std::string toStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
+  std::string toStringLinkFromFileName(const std::string& theFileName);
+  std::string toStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
+  std::string toStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
+  void interpretGenerateLink(SyntacticElementHTML& inputOutput);
+  std::string toStringProblemScoreFull(const std::string& theFileName);
+  std::string toStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
+  bool computeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
+  void interpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
+  bool prepareSectionList(std::stringstream& commentsOnFailure);
+  void interpretManageClass(SyntacticElementHTML& inputOutput);
+  void interpretTopicList(SyntacticElementHTML& inputOutput);
+  bool computeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
+  void interpretTableOfContents(SyntacticElementHTML& inputOutput);
+  void interpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
+  void interpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
+  void interpretJavascripts(SyntacticElementHTML& inputOutput);
+  JSData getJavascriptMathQuillBoxesForJSON();
+  void loadCurrentProblemItem(
     bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
   );
-  void FigureOutCurrentProblemList(std::stringstream& comments);
+  void figureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItemJSON(
     bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
   );
@@ -417,24 +409,24 @@ public:
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;
   }
-  std::string ToStringAllSectionDeadlines(const std::string& topicID, bool isSection);
-  std::string ToStringOnEDeadlineFormatted(
+  std::string toStringAllSectionDeadlines(const std::string& topicID, bool isSection);
+  std::string toStringOneDeadlineFormatted(
     const std::string& topicID,
     const std::string& sectionNumber,
     bool problemAlreadySolved,
     bool returnEmptyStringIfNoDeadline,
     bool isSection
   );
-  std::string ToStringCalculatorArgumentsForProblem(
+  std::string toStringCalculatorArgumentsForProblem(
     const std::string& requestType,
     const std::string& studentView,
     const std::string& studentSection = "",
     bool includeRandomSeedIfAppropriate = false
   ) const;
-  std::string ToStringProblemNavigation() const;
+  std::string toStringProblemNavigation() const;
   std::string ToStringExtractedCommands();
-  std::string ToStringContent();
-  std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
+  std::string toStringContent();
+  std::string toStringParsingStack(List<SyntacticElementHTML>& theStack);
   CalculatorHTML();
   class Test {
   public:

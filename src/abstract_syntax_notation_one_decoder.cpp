@@ -1016,7 +1016,7 @@ void ASNObject::initializeAddSample(
   std::stringstream commentsOnFailure;
   incoming.objectId.startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06;
   incoming.objectId.ComputeTag();
-  if (!Crypto::ConvertHexToListUnsignedChar(
+  if (!Crypto::convertHexToListUnsignedChar(
     inputObjectIdHex, incoming.objectId.ASNAtom, &commentsOnFailure
   )) {
     global.fatal << "Failure in certificate field initialization is not allowed. " << global.fatal;
@@ -1195,7 +1195,7 @@ std::string ASNObject::ToStringAllRecognizedObjectIds() {
     const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
     out << "<tr>"
     << "<td><small>" << i + 1 << "</small></td>"
-    << "<td>" << Crypto::ConvertListUnsignedCharsToHexFormat(currentId, 50, false) << "</td>"
+    << "<td>" << Crypto::convertListUnsignedCharsToHexFormat(currentId, 50, false) << "</td>"
     << "<td>" << current.name << "</td>"
     << "</tr>";
   }
@@ -2016,8 +2016,8 @@ bool TBSCertificateInfo::LoadASNAlgorithmIdentifier(
   return true;
 }
 
-bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::Load");
+bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TBSCertificateInfo::load");
   if (input.theElements.size < 7) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Certificate ASN element needs at least 7 fields. ";
@@ -2115,7 +2115,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  if (!this->information.Load(this->sourceASN[0], commentsOnFailure)) {
+  if (!this->information.load(this->sourceASN[0], commentsOnFailure)) {
     return false;
   }
   if (this->sourceASN[2].tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03) {

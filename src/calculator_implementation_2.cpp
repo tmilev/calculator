@@ -951,7 +951,7 @@ bool Calculator::EvaluateExpression(
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "Evaluating " << input.Lispify()
+    theCommands << "Evaluating " << input.lispify()
     << " with rule stack cache index "
     << theCommands.RuleStackCacheIndex; // << this->RuleStack.toString();
   }
@@ -989,7 +989,7 @@ bool Calculator::EvaluateExpression(
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "to get: " << state.outpuT->Lispify();
+    theCommands << "to get: " << state.outpuT->lispify();
   }
   return true;
 }

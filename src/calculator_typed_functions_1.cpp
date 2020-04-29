@@ -596,8 +596,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
     return false;
   }
   if (
-    inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
-    inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation()
+    inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation() ||
+    inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >().hasNonSmallPositiveIntegerDerivation()
   ) {
     return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].toString()
     << " by " << inputContextsMerged[2].toString() << ": "
@@ -977,7 +977,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       << "Your matrix, " << baseRat.toString() << " is not square. ";
       return output.makeError(errorStream.str(), theCommands);
     }
-    Rational theDet = baseRat.GetDeterminant();
+    Rational theDet = baseRat.getDeterminant();
     if (largePower <= 0) {
       if (theDet == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
@@ -1003,7 +1003,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       << "Your matrix, " << baseAlg.toString() << " is not square. ";
       return output.makeError(errorStream.str(), theCommands);
     }
-    AlgebraicNumber theDet = baseAlg.GetDeterminant();
+    AlgebraicNumber theDet = baseAlg.getDeterminant();
     if (largePower <= 0) {
       if (theDet == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
@@ -1050,7 +1050,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       return output.makeError(errorStream.str(), theCommands);
     }
     if (thePower <= 0) {
-      if (baseRat.GetDeterminant() == 0) {
+      if (baseRat.getDeterminant() == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
       }
     }
@@ -1069,7 +1069,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       return output.makeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
     }
     if (thePower <= 0) {
-      if (baseAlg.GetDeterminant() == 0) {
+      if (baseAlg.getDeterminant() == 0) {
         return output.makeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
       }
     }
@@ -1093,7 +1093,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       );
     }
     if (thePower <= 0) {
-      if (baseRF.GetDeterminant() == 0) {
+      if (baseRF.getDeterminant() == 0) {
         return output.makeError(
           "Division by zero: trying to raise 0 to negative power. ",
           theCommands

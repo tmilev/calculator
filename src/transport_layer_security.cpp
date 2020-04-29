@@ -432,7 +432,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
     this->incomingBytes.setSize(numBytesInBuffer);
   }
   global << "Read bytes:\n"
-  << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << Logger::endL;
+  << Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << Logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -485,7 +485,7 @@ std::string SSLContent::ToStringVersion() const {
   twoBytes[0] = static_cast<char> (this->version / 256);
   twoBytes[1] = static_cast<char> (this->version % 256);
   std::stringstream out;
-  out << Crypto::ConvertListCharsToHex(twoBytes, 0, false);
+  out << Crypto::convertListCharsToHex(twoBytes, 0, false);
   return out.str();
 }
 
@@ -1366,7 +1366,7 @@ void Serialization::WriteTwoByteLengthFollowedByBytes(
 }
 
 std::string Serialization::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
-  return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
+  return Crypto::convertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
 std::string Serialization::ConvertListUnsignedCharsToString(const List<unsigned char>& input) {
@@ -1615,7 +1615,7 @@ std::string SSLRecord::ToStringType() const {
 std::string SSLRecord::toString() const {
   JSData result;
   result["length"] = this->length;
-  result["incomingBytes"] = Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
+  result["incomingBytes"] = Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
   result["type"] = this->ToStringType();
   if (this->theType == SSLRecord::tokens::handshake) {
     result["hello"] = this->content.toJSON();

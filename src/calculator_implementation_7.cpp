@@ -227,7 +227,7 @@ bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
   }
   TransportLayerSecurityServer testServer;
   std::stringstream commentsOnFailure;
-  if (!Crypto::ConvertHexToListUnsignedChar(
+  if (!Crypto::convertHexToListUnsignedChar(
     inputString, testServer.lastReaD.incomingBytes, &commentsOnFailure
   )) {
     return theCommands << commentsOnFailure.str();
@@ -424,8 +424,8 @@ bool CalculatorFunctions::functionHashString(
   std::stringstream out;
   if (verbose) {
     out << "<br>Input: " << inputString;
-    out << "<br>Base64 conversion: " << Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false);
-    out << "<br>Base64url conversion: " << Crypto::ConvertListUnsignedCharsToBase64(theBitStream, true);
+    out << "<br>Base64 conversion: " << Crypto::convertListUnsignedCharsToBase64(theBitStream, false);
+    out << "<br>Base64url conversion: " << Crypto::convertListUnsignedCharsToBase64(theBitStream, true);
   }
   List<unsigned char> hashUChar;
   List<uint32_t> theSha1Uint;
@@ -456,8 +456,8 @@ bool CalculatorFunctions::functionHashString(
   }
   if (verbose) {
     std::string theSha1base64string, theSha1base64URLstring;
-    theSha1base64string = Crypto::ConvertListUnsignedCharsToBase64(hashUChar, true);
-    theSha1base64URLstring = Crypto::ConvertListUnsignedCharsToBase64(hashUChar, false);
+    theSha1base64string = Crypto::convertListUnsignedCharsToBase64(hashUChar, true);
+    theSha1base64URLstring = Crypto::convertListUnsignedCharsToBase64(hashUChar, false);
     out << "<br>" << hashId << " in base64: " << theSha1base64string;
     out << "<br>" << hashId << " in base64url: " << theSha1base64URLstring;
     out << "<br>" << hashId << " hex: ";
@@ -754,7 +754,7 @@ bool CalculatorFunctions::innerCharToBase64(
   }
   List<unsigned char> theBitStream;
   theBitStream = inputString;
-  return output.assignValue(Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false), theCommands);
+  return output.assignValue(Crypto::convertListUnsignedCharsToBase64(theBitStream, false), theCommands);
 }
 
 bool CalculatorFunctions::innerBase64ToCharToBase64Test(
@@ -773,7 +773,7 @@ bool CalculatorFunctions::innerBase64ToCharToBase64Test(
     return false;
   }
   std::stringstream out;
-  std::string theConvertedBack = Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false);
+  std::string theConvertedBack = Crypto::convertListUnsignedCharsToBase64(theBitStream, false);
   out << "Original string: " << inputString
   << "<br>Converted to bitstream and back: " << theConvertedBack;
   if (theConvertedBack != inputString) {
@@ -917,7 +917,7 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   }
   SemisimpleLieAlgebra* theSSalg = algebra.content;
   Vector<Rational> leviSelection;
-  if (!theCommands.getVector(input[2], leviSelection, nullptr, theSSalg->GetRank())) {
+  if (!theCommands.getVector(input[2], leviSelection, nullptr, theSSalg->getRank())) {
     return theCommands << "<hr>Failed to extract parabolic selection. ";
   }
   Selection theParSel;
@@ -2364,14 +2364,14 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   if (theArgument.convertInternally<Polynomial<Rational> >(theArgumentConverted)) {
     theArgumentPoly = theArgumentConverted.getValue<Polynomial<Rational> >();
   } else if (theArgument.convertInternally<ElementWeylAlgebra<Rational> >(theArgumentConverted)) {
-    if (!theArgumentConverted.getValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly)) {
+    if (!theArgumentConverted.getValue<ElementWeylAlgebra<Rational> >().isPolynomial(&theArgumentPoly)) {
       return false;
     }
   } else {
     return false;
   }
   const ElementWeylAlgebra<Rational>& theEWA = theEWAE.getValue<ElementWeylAlgebra<Rational> >();
-  if (theEWA.HasNonSmallPositiveIntegerDerivation()) {
+  if (theEWA.hasNonSmallPositiveIntegerDerivation()) {
     return theCommands << "<hr> I cannot apply " << theEWA.toString()
     << " onto " << theArgumentPoly.toString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
@@ -5531,7 +5531,7 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
   }
   SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   std::stringstream out;
-  if (ownerSS.GetRank() > 6) {
+  if (ownerSS.getRank() > 6) {
     out << "<b>This code is completely experimental and has been set to run up to rank 6. "
     << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.assignValue(out.str(), theCommands);
@@ -5865,7 +5865,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
     if (theMat.numberOfRows != theMat.numberOfColumns || theMat.numberOfColumns < 1) {
       return output.makeError("The matrix is not square", theCommands);
     }
-    if (theMat.GetDeterminant() == 0) {
+    if (theMat.getDeterminant() == 0) {
       return output.makeError("Matrix determinant is zero.", theCommands);
     }
     theMat.invert();
@@ -5879,7 +5879,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
   if (theMatAlg.numberOfRows != theMatAlg.numberOfColumns || theMatAlg.numberOfColumns < 1) {
     return output.makeError("The matrix is not square", theCommands);
   }
-  if (theMatAlg.GetDeterminant() == 0) {
+  if (theMatAlg.getDeterminant() == 0) {
     return output.makeError("Matrix determinant is zero.", theCommands);
   }
   theMatAlg.invert();
@@ -6954,7 +6954,7 @@ bool CalculatorFunctions::innerCanBeExtendedParabolicallyTo(
   ) {
     return theCommands << "Failed to convert arguments of " << input.toString() << " to two DynkinType's.";
   }
-  return output.assignValue(static_cast<int>(smallType.CanBeExtendedParabolicallyTo(targetType)), theCommands);
+  return output.assignValue(static_cast<int>(smallType.canBeExtendedParabolicallyTo(targetType)), theCommands);
 }
 
 bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -6965,8 +6965,8 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const
   }
   std::stringstream out;
   Matrix<Rational> outputMat, outputCoMat;
-  theType.GetCartanSymmetric(outputMat);
-  theType.GetCoCartanSymmetric(outputCoMat);
+  theType.getCartanSymmetric(outputMat);
+  theType.getCoCartanSymmetric(outputCoMat);
   out << "Symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputMat.ToStringLatex(), 10000)
   << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
   return output.assignValue(out.str(), theCommands);
@@ -6991,7 +6991,7 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
     return theCommands << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
-  if (theType.GetRank() > 20) {
+  if (theType.getRank() > 20) {
     return theCommands
     << "Getting absolute Dynkin indices of sl(2)-subalgebras "
     << "is restricted up to rank 20 "
@@ -7032,7 +7032,7 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
   }
   SemisimpleLieAlgebra& ownerSS = *largeSubalgebraPointer.content;
   std::stringstream out;
-  if (ownerSS.GetRank() > 8) {
+  if (ownerSS.getRank() > 8) {
     out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
     return output.assignValue(out.str(), theCommands);
   } else {
@@ -7073,7 +7073,7 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
     input[2],
     theWeight,
     &theSSowner.context,
-    theSSowner.content->GetRank(),
+    theSSowner.content->getRank(),
     CalculatorConversions::functionRationalFunction
   )) {
     return output.makeError(
@@ -7121,7 +7121,7 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   WeylGroupData& theWeyl = ownerSS.theWeyl;
-  int theDim = ownerSS.GetRank();
+  int theDim = ownerSS.getRank();
   ExpressionContext finalContext(theCommands);
   if (!theCommands.getVector<RationalFunction>(
     weightNode,
@@ -7411,7 +7411,7 @@ bool CalculatorFunctions::innerDeterminant(
         << "To lift the restriction "
         << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
       }
-      return output.assignValue(matRat.GetDeterminant(), theCommands);
+      return output.assignValue(matRat.getDeterminant(), theCommands);
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.numberOfRows << " by "
@@ -7433,7 +7433,7 @@ bool CalculatorFunctions::innerDeterminant(
         << "edit function located in file "
         << __FILE__ << ", line " << __LINE__ << ". ";
       }
-      return output.assignValue(matAlg.GetDeterminant(), theCommands);
+      return output.assignValue(matAlg.getDeterminant(), theCommands);
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.numberOfRows << " by "
@@ -7478,7 +7478,7 @@ bool CalculatorFunctions::innerDeterminant(
     << " rows. To lift the restriction edit function located in file "
     << __FILE__ << ", line " << __LINE__ << ". ";
   }
-  RationalFunction theDet = matRF.GetDeterminant();
+  RationalFunction theDet = matRF.getDeterminant();
   return output.assignValueWithContext(theDet, context, theCommands);
 }
 
@@ -7663,7 +7663,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
-  int theRank = theSSalgebra.content->GetRank();
+  int theRank = theSSalgebra.content->getRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   ExpressionContext hwContext(theCommands);
   if (!theCommands.getVector(
@@ -7782,7 +7782,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
-  int theRank = theSSalgebra.content->GetRank();
+  int theRank = theSSalgebra.content->getRank();
   Vector<RationalFunction> highestWeightFundCoords;
   ExpressionContext hwContext(theCommands);
   if (!theCommands.getVector<RationalFunction>(
@@ -7869,8 +7869,8 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   ModuleSSalgebra<RationalFunction>& theFDMod = theHWfd[0].theMons[0].GetOwner();
   if (
     theGenMod.owner != theFDMod.owner ||
-    theGenMod.GetOwner().GetRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
-    theFDMod.GetOwner().GetRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
+    theGenMod.GetOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
+    theFDMod.GetOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
   ) {
     global.fatal << "This is a programming error: the two modules have owners, "
     << theFDMod.GetOwner().theWeyl.theDynkinType.toString()
@@ -7883,10 +7883,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
   Vectors<RationalFunction> theEigenVectorWeightsFund;
-  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.GetOwner().GetRank()) {
+  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.GetOwner().getRank()) {
     global.fatal << "This is a programming error: module has parabolic selection with max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
-    << theGenMod.GetOwner().GetRank() << ". " << global.fatal;
+    << theGenMod.GetOwner().getRank() << ". " << global.fatal;
   }
   std::string report;
   theFDMod.SplitOverLevi(
@@ -8050,7 +8050,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     weightExpression,
     weight,
     &finalContext,
-    constSSalg.GetRank(),
+    constSSalg.getRank(),
     CalculatorConversions::functionRationalFunction
   )) {
     return theCommands
@@ -9178,7 +9178,7 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   Vector<Rational> highestWeightFundCoords;
   ExpressionContext theContext(theCommands);
   if (!theCommands.getVector<Rational>(
-    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer.content->GetRank(), nullptr
+    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer.content->getRank(), nullptr
   )) {
     return output.makeError("Failed to extract highest weight vector", theCommands);
   }
@@ -9282,10 +9282,10 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
     Vector<Coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.toString() << "</td>";
-    outputSimpleStringCoords.makeZero(this->GetOwner()->GetRank());
-    outputSimpleHalfStringCoords.makeZero(this->GetOwner()->GetRank());
-    for (int j = 0; j < this->GetOwner()->GetRank(); j ++) {
-      theSimpleRoot.makeEi(this->GetOwner()->GetRank(), j);
+    outputSimpleStringCoords.makeZero(this->GetOwner()->getRank());
+    outputSimpleHalfStringCoords.makeZero(this->GetOwner()->getRank());
+    for (int j = 0; j < this->GetOwner()->getRank(); j ++) {
+      theSimpleRoot.makeEi(this->GetOwner()->getRank(), j);
       theSimpleRootFundCoords =
       this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
       outputSimpleStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
@@ -9602,7 +9602,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
     hwNode,
     highestWeightFundCoords,
     nullptr,
-    theAlg.GetRank(),
+    theAlg.getRank(),
     nullptr
   )) {
     return false;

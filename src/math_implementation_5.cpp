@@ -738,10 +738,10 @@ void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
 }
 
 void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output) {
-  output.initialize(this->theRange().GetRank(), this->theDomain().GetRank());
+  output.initialize(this->theRange().getRank(), this->theDomain().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
-  for (int i = 0; i < this->theDomain().GetRank(); i ++) {
-    domainElt.MakeHgenerator(Vector<Rational>::GetEi(this->theDomain().GetRank(), i), this->theDomain());
+  for (int i = 0; i < this->theDomain().getRank(); i ++) {
+    domainElt.MakeHgenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
     this->applyHomomorphism(domainElt, imageElt);
     output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
@@ -902,7 +902,7 @@ std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator(
   } else {
     out << thePolynomialFormat->chevalleyGgeneratorLetter << "_{";
     if (theIndex >= this->GetNumPosRoots()) {
-      out << theIndex - this->GetNumPosRoots() - this->GetRank() + 1;
+      out << theIndex - this->GetNumPosRoots() - this->getRank() + 1;
     } else {
       out << theIndex - this->GetNumPosRoots();
     }
@@ -1944,7 +1944,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
   }
   int numPosRoots = this->theOwner->GetNumPosRoots();
   Vector<Rational> tempH = input.GetCartanPart();
-  for (int i = 0; i < this->theOwner->GetRank(); i ++) {
+  for (int i = 0; i < this->theOwner->getRank(); i ++) {
     theCoeffs[numPosRoots + i] = tempH[i];
   }
   this->ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(theCoeffs);
@@ -1952,7 +1952,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
 
 int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
   int numPosRoots = this->theOwner->GetNumPosRoots();
-  int posRootsPlusRank = numPosRoots + this->theOwner->GetRank();
+  int posRootsPlusRank = numPosRoots + this->theOwner->getRank();
   if (GeneratorIndex >= posRootsPlusRank) {
     return GeneratorIndex - posRootsPlusRank + 1;
   }
@@ -2020,15 +2020,15 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
   for (int i = 0; i < inputElts.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
-    currentWeight.makeZero(this->theDomain().GetRank());
+    currentWeight.makeZero(this->theDomain().getRank());
     ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElts[i];
-    for (int j = 0; j < this->theDomain().GetRank(); j ++) {
+    for (int j = 0; j < this->theDomain().getRank(); j ++) {
       this->theRange().LieBracket(
         this->imagesAllChevalleyGenerators[j + this->theDomain().GetNumPosRoots()],
         currentLieElt,
         tempLieElement
       );
-      if (!currentLieElt.IsProportionalTo(tempLieElement, tempRat)) {
+      if (!currentLieElt.isProportionalTo(tempLieElement, tempRat)) {
         global.fatal << "Lie algebra elements not proportional as expected. " << global.fatal;
       }
       currentWeight[j] = tempRat;
@@ -2157,7 +2157,7 @@ void SlTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
   }
   Rational currentWeight;
   Matrix<Rational>::LieBracket(this->theH, input, output);
-  bool tempBool = input.IsProportionalTo(output, currentWeight);
+  bool tempBool = input.isProportionalTo(output, currentWeight);
   if (!tempBool) {
     global.comments << "<br>Climbing down does not work as expected!";
   }
@@ -2562,7 +2562,7 @@ void RationalFunction::ReducePolynomialToRational() {
 void RationalFunction::addHonestRationalFunction(const RationalFunction& other) {
   MacroRegisterFunctionWithName("RationalFunctionOld::addHonestRationalFunction");
   Rational tempRat;
-  if (!this->Denominator.getElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, Rational(1))) {
+  if (!this->Denominator.getElement().isProportionalTo(other.Denominator.GetElementConst(), tempRat, Rational(1))) {
     Polynomial<Rational> buffer;
 //    RationalFunctionOld debugger;
 //    debugger = other;

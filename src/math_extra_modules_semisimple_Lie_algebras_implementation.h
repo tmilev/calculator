@@ -31,8 +31,8 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
     newLeft.generatorsIndices.size --;
     newLeft.Powers.size --;
   }
-  int theIndexMinus = 2 * this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank() - theIndex - 1;
-  int theSimpleIndex = theIndex - this->GetOwner().GetNumPosRoots() - this->GetOwner().GetRank();
+  int theIndexMinus = 2 * this->GetOwner().GetNumPosRoots() + this->GetOwner().getRank() - theIndex - 1;
+  int theSimpleIndex = theIndex - this->GetOwner().GetNumPosRoots() - this->GetOwner().getRank();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
   Accum.Powers.reserve(oldRight.Powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
@@ -84,7 +84,7 @@ template<class Coefficient>
 void ModuleSSalgebra<Coefficient>::ApplyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon) {
   for (int i = 0; i < theMon.generatorsIndices.size; i ++) {
     theMon.generatorsIndices[i] =
-    this->GetOwner().GetNumPosRoots() * 2 + this->GetOwner().GetRank() - theMon.generatorsIndices[i] - 1;
+    this->GetOwner().GetNumPosRoots() * 2 + this->GetOwner().getRank() - theMon.generatorsIndices[i] - 1;
   }
   theMon.Powers.reverseElements();
   theMon.generatorsIndices.reverseElements();
@@ -180,7 +180,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::GetActionGeneratorIndeX
     MonomialMatrix theMon;
     Vector<Coefficient> weightH;
     Coefficient tempCF, hwCFshift;
-    weightH.makeEi(this->GetOwner().GetRank(), generatorIndex - this->GetOwner().GetNumPosRoots());
+    weightH.makeEi(this->GetOwner().getRank(), generatorIndex - this->GetOwner().GetNumPosRoots());
     hwCFshift = this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
     hwCFshift -= this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
     for (int i = 0; i < this->theGeneratingWordsNonReduced.size; i ++) {
@@ -257,9 +257,9 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitOverLeviMonsEncodeHI
   this->CheckNonZeroOwner();
   std::stringstream out;
   std::string tempS;
-  if (this->GetOwner()->GetRank() != splittingParSel.MaxSize) {
+  if (this->GetOwner()->getRank() != splittingParSel.MaxSize) {
     global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
-    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << global.fatal;
+    << " elements while the weyl group is of rank " << this->GetOwner()->getRank() << ". " << global.fatal;
   }
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
   outputWeylSub.ComputeRootSubsystem();
@@ -402,9 +402,9 @@ void ModuleSSalgebra<Coefficient>::SplitOverLevi(
     }
     return;
   }
-  if (this->GetOwner().GetRank() != splittingParSel.MaxSize) {
+  if (this->GetOwner().getRank() != splittingParSel.MaxSize) {
     global.fatal << "This is a programming error: semisimple rank is "
-    << this->GetOwner().GetRank() << " but splitting parabolic selects "
+    << this->GetOwner().getRank() << " but splitting parabolic selects "
     << " out of " << splittingParSel.MaxSize << " simple roots. " << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
@@ -442,7 +442,7 @@ void ModuleSSalgebra<Coefficient>::SplitOverLevi(
   theFinalEigenSpace.MakeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.CardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
-    this->GetOwner().GetRank() + this->GetOwner().GetNumPosRoots();
+    this->GetOwner().getRank() + this->GetOwner().GetNumPosRoots();
     MatrixTensor<Coefficient>& currentOp = this->GetActionGeneratorIndeX(theGenIndex);
     Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
@@ -569,7 +569,7 @@ bool ModuleSSalgebra<Coefficient>::MakeFromHW(
   this->owner = &inputAlgebra;
   SemisimpleLieAlgebra& theAlgebrA = inputAlgebra;
 
-  int theRank = theAlgebrA.GetRank();
+  int theRank = theAlgebrA.getRank();
   if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.MaxSize != theRank) {
     global.fatal << "This is a programming error. I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
@@ -718,11 +718,11 @@ bool ModuleSSalgebra<Coefficient>::MakeFromHW(
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
   if (computeSimpleGens) {
     for (int k = 0; k < 2; k ++) {
-      for (int j = 0; j < this->GetOwner().GetRank(); j ++) {
+      for (int j = 0; j < this->GetOwner().getRank(); j ++) {
         if (this->parabolicSelectionSelectedAreElementsLevi.selected[j]) {
           int theIndex = this->GetOwner().GetNumPosRoots() - j - 1;
           if (k == 1) {
-            theIndex = this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank() + j;
+            theIndex = this->GetOwner().GetNumPosRoots() + this->GetOwner().getRank() + j;
           }
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport != nullptr) {
@@ -830,7 +830,7 @@ void ModuleSSalgebra<Coefficient>::GetElementsNilradical(
   output.setSize(0);
   output.reserve(ownerSS.GetNumPosRoots());
 
-  int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.GetRank();
+  int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.getRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators == nullptr) {
     outputListOfGenerators = &tempList.getElement();

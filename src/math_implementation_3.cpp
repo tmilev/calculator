@@ -5034,7 +5034,7 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
       << "DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << global.fatal;
     }
     this->GetOuterAutosGeneratorsOneTypeActOnVectorColumn(intermediateGenerators,(*this)[i], currentMult);
-    matrixToGo.MakeId(this->GetRank() - numRowsSoFar - currentMult * (*this)[i].theRank);
+    matrixToGo.MakeId(this->getRank() - numRowsSoFar - currentMult * (*this)[i].theRank);
     for (int j = 0; j < intermediateGenerators.size; j ++) {
       matrixFinal.MakeId(numRowsSoFar);
       matrixFinal.DirectSumWith(intermediateGenerators[j]);
@@ -5045,11 +5045,11 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
   }
   if (output.size == 0) {
     output.setSize(1);
-    output[0].MakeId(this->GetRank());
+    output[0].MakeId(this->getRank());
   }
 }
 
-void DynkinType::GetLettersTypesMults(
+void DynkinType::getLettersTypesMultiplicities(
   List<char>* outputLetters,
   List<int>* outputRanks,
   List<int>* outputMults,
@@ -5116,25 +5116,25 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) 
   return false;
 }
 
-bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other) const {
-  MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
+bool DynkinType::canBeExtendedParabolicallyTo(const DynkinType& other) const {
+  MacroRegisterFunctionWithName("DynkinType::canBeExtendedParabolicallyTo");
   if (*this == other) {
     return false;
   }
   return this->CanBeExtendedParabolicallyOrIsEqualTo(other);
 }
 
-bool DynkinType::Grow(
+bool DynkinType::grow(
   const List<Rational>& allowedInverseScales,
   int AmbientWeylDim,
   List<DynkinType>& output, List<List<int> >* outputPermutationRoots
 ) const {
-  MacroRegisterFunctionWithName("DynkinType::Grow");
+  MacroRegisterFunctionWithName("DynkinType::grow");
   output.setSize(0);
   if (outputPermutationRoots != nullptr) {
     outputPermutationRoots->setSize(0);
   }
-  if (this->GetRank() >= AmbientWeylDim) {
+  if (this->getRank() >= AmbientWeylDim) {
     return true;
   }
   if (this->isEqualToZero()) {
@@ -5162,8 +5162,8 @@ bool DynkinType::Grow(
     typeMinusMin.SubtractMonomial(minComponent, 1);
     List<DynkinSimpleType> theSimpleTypes;
     List<List<int> > lastComponentRootInjections;
-    minComponent.Grow(theSimpleTypes, &lastComponentRootInjections);
-    currentRootInjection.setSize(this->GetRank() + 1);
+    minComponent.grow(theSimpleTypes, &lastComponentRootInjections);
+    currentRootInjection.setSize(this->getRank() + 1);
     for (int i = 0; i < theSimpleTypes.size; i ++) {
       bool isGood = true;
       for (int j = 0; j < typeMinusMin.size(); j ++) {
@@ -5178,7 +5178,7 @@ bool DynkinType::Grow(
       output.addOnTop(typeMinusMin);
       output.lastObject()->addMonomial(theSimpleTypes[i], 1);
       if (outputPermutationRoots != nullptr) {
-        int baseTypeRank = typeMinusMin.GetRank();
+        int baseTypeRank = typeMinusMin.getRank();
         for (int j = 0; j < baseTypeRank; j ++) {
           currentRootInjection[j] = j;
         }
@@ -5197,7 +5197,7 @@ bool DynkinType::Grow(
     }
     output.addOnTop(*this);
     output.lastObject()->addMonomial(currentA1, Rational::one());
-    currentRootInjection.setSize(output.lastObject()->GetRank());
+    currentRootInjection.setSize(output.lastObject()->getRank());
     if (outputPermutationRoots != nullptr) {
       for (int j = 0; j < currentRootInjection.size; j ++) {
         currentRootInjection[j] = j;
@@ -5239,7 +5239,7 @@ bool DynkinType::HasExceptionalComponent() const {
   return false;
 }
 
-bool DynkinType::ContainsType(char theTypeLetter) const {
+bool DynkinType::containsType(char theTypeLetter) const {
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].theLetter == theTypeLetter) {
       return true;
@@ -5304,7 +5304,7 @@ Rational DynkinType::GetRankRational() const {
   return result;
 }
 
-int DynkinType::GetRank() const {
+int DynkinType::getRank() const {
   Rational tempRat = this->GetRankRational();
   int result = 0;
   if (!tempRat.isSmallInteger(&result)) {
@@ -5315,7 +5315,7 @@ int DynkinType::GetRank() const {
   return result;
 }
 
-void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output) const {
+void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
   output.initialize(0,0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
@@ -5324,7 +5324,7 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output) const {
     int theIndex = this->theMonomials.getIndex(sortedMons[j]);
     int theMult = this->GetMult(theIndex);
     for (int k = 0; k < theMult; k ++) {
-      DynkinSimpleType::GetEpsilonMatrix((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
+      DynkinSimpleType::getEpsilonMatrix((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
       output.DirectSumWith(curCartan);
     }
   }
@@ -5346,8 +5346,8 @@ void DynkinType::GetSortedDynkinTypes(List<DynkinSimpleType>& output) const {
   output.quickSortDescending();
 }
 
-void DynkinType::GetCartanSymmetric(Matrix<Rational>& output) const {
-  MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
+void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
+  MacroRegisterFunctionWithName("DynkinType::getCartanSymmetric");
   output.initialize(0, 0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
@@ -5356,17 +5356,17 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output) const {
     int theIndex = this->theMonomials.getIndex(sortedMons[j]);
     int mult = this->GetMult(theIndex);
     for (int k = 0; k < mult; k ++) {
-      (*this)[theIndex].GetCartanSymmetric(curCartan);
+      (*this)[theIndex].getCartanSymmetric(curCartan);
       output.DirectSumWith(curCartan);
     }
   }
 }
 
-void DynkinType::GetCoCartanSymmetric(Matrix<Rational>& output) const {
-  MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
+void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
+  MacroRegisterFunctionWithName("DynkinType::getCartanSymmetric");
   Matrix<Rational> curCartan;
-  this->GetCartanSymmetric(curCartan);
-  WeylGroupData::GetCoCartanSymmetric(curCartan, output);
+  this->getCartanSymmetric(curCartan);
+  WeylGroupData::getCoCartanSymmetric(curCartan, output);
 }
 
 void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output) const {
@@ -5382,7 +5382,7 @@ void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
     currentType.MakeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank, 1);
     currentType.CartanSymmetricInverseScale = 1;//= currentType.GetDefaultCoRootLengthSquared(0);
     for (int k = 0; k < mult; k ++) {
-      currentType.GetCartanSymmetric(curCartan);
+      currentType.getCartanSymmetric(curCartan);
       output.DirectSumWith(curCartan);
     }
   }
@@ -5393,7 +5393,7 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w) {
     return 0;
   }
   Matrix<Rational> M;
-  this->GetCartanSymmetric(M);
+  this->getCartanSymmetric(M);
   if (M(v, w) == 0) {
     return 2;
   }
@@ -5681,7 +5681,7 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex) const {
   }
 }
 
-void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output) {
+void DynkinSimpleType::getEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output) {
   if (WeylLetter == 'A') {
     output.initialize(WeylRank + 1, WeylRank);
     output.makeZero();
@@ -5839,8 +5839,8 @@ Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char in
   }
 }
 
-bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other) const {
-  MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
+bool DynkinSimpleType::canBeExtendedParabolicallyTo(const DynkinSimpleType& other) const {
+  MacroRegisterFunctionWithName("DynkinSimpleType::canBeExtendedParabolicallyTo");
   if (other.theRank <= this->theRank) {
     return false;
   }
@@ -5871,8 +5871,8 @@ bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& othe
   return this->theLetter == 'A';
 }
 
-void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const {
-  MacroRegisterFunctionWithName("DynkinSimpleType::Grow");
+void DynkinSimpleType::grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots) const {
+  MacroRegisterFunctionWithName("DynkinSimpleType::grow");
   //almost all simple types are grown from type A. Exceptions only for types F4 (grown from B_3),
   //E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.setSize(0);
@@ -6036,10 +6036,10 @@ void DynkinSimpleType::GetG2(Matrix<Rational>& output) const {
   output /= 3;
 }
 
-void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output) const {
+void DynkinSimpleType::getCoCartanSymmetric(Matrix<Rational>& output) const {
   Matrix<Rational> currentCartan;
-  this->GetCartanSymmetric(currentCartan);
-  WeylGroupData::GetCoCartanSymmetric(currentCartan, output);
+  this->getCartanSymmetric(currentCartan);
+  WeylGroupData::getCoCartanSymmetric(currentCartan, output);
 }
 
 Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale() const {
@@ -6077,14 +6077,14 @@ Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale() const {
       nonScaled = 28;
       break;
     default:
-      global.fatal << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric "
+      global.fatal << "This is a programming error: requesting DynkinSimpleType::getCartanSymmetric "
       << "from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
   return nonScaled * this->CartanSymmetricInverseScale;
 }
 
-void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output) const {
+void DynkinSimpleType::getCartanSymmetric(Matrix<Rational>& output) const {
   switch(this->theLetter) {
     case 'A': this->GetAn(this->theRank, output); break;
     case 'B': this->GetBn(this->theRank, output); break;
@@ -6095,7 +6095,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output) const {
     case 'G': this->GetG2(output);                break;
     default:
       global.fatal << "This is a programming error: requesting "
-      << "DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
+      << "DynkinSimpleType::getCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
   output /= this->CartanSymmetricInverseScale;
@@ -6836,11 +6836,11 @@ void WeylGroupData::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot
   }
 }
 
-void WeylGroupData::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output) {
-  MacroRegisterFunctionWithName("DynkinType::GetCoCartanSymmetric");
+void WeylGroupData::getCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output) {
+  MacroRegisterFunctionWithName("DynkinType::getCoCartanSymmetric");
   if (&input == &output) {
     Matrix<Rational> inputCopy = input;
-    WeylGroupData::GetCoCartanSymmetric(inputCopy, output);
+    WeylGroupData::getCoCartanSymmetric(inputCopy, output);
     return;
   }
   output.initialize(input.numberOfRows, input.numberOfColumns);
@@ -7073,7 +7073,7 @@ bool WeylGroupData::IsAddmisibleDynkinType(char candidateLetter, int n) {
 
 void WeylGroupData::ComputeEpsilonMatrix() {
   if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer()) {
-    this->theDynkinType.GetEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.getElement());
+    this->theDynkinType.getEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.getElement());
   }
 }
 
@@ -7105,7 +7105,7 @@ void WeylGroupData::TransformToAdmissibleDynkinType(char inputLetter, int& outpu
 }
 
 void WeylGroupData::ComputeCoCartanSymmetricFromCartanSymmetric() {
-  this->GetCoCartanSymmetric(this->cartanSymmetric, this->coCartanSymmetric);
+  this->getCoCartanSymmetric(this->cartanSymmetric, this->coCartanSymmetric);
 }
 
 void WeylGroupData::MakeMeFromMyCartanSymmetric() {
@@ -7137,14 +7137,14 @@ void WeylGroupData::initializeGenerators() {
 void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
   this->reset();
   this->theDynkinType = inputType;
-  this->theDynkinType.GetCartanSymmetric(this->cartanSymmetric);
-  this->theDynkinType.GetCoCartanSymmetric(this->coCartanSymmetric);
+  this->theDynkinType.getCartanSymmetric(this->cartanSymmetric);
+  this->theDynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
   this->MakeFinalSteps();
 
   // eventually, there will be formulas for all classical types
   List<char> letters;
   List<int> ranks;
-  this->theDynkinType.GetLettersTypesMults(&letters, &ranks, nullptr);
+  this->theDynkinType.getLettersTypesMultiplicities(&letters, &ranks, nullptr);
   if (letters.size == 1) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
@@ -7236,7 +7236,7 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   }
   basisChange.resize(0, 0, true);
   for (int i = 0; i < tempDyn.SimpleComponentTypes.size; i ++) {
-    DynkinSimpleType::GetEpsilonMatrix(
+    DynkinSimpleType::getEpsilonMatrix(
       tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat
     );
     basisChange.DirectSumWith(tempMat, Rational(0));
@@ -9058,7 +9058,7 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy) {
 }
 
 void Lattice::GetDualLattice(Lattice& output) const {
-  if (this->GetRank() != this->getDimension()) {
+  if (this->getRank() != this->getDimension()) {
     return;
   }
   Matrix<Rational> tempMat;

@@ -359,17 +359,8 @@ private:
   bool IsEqualToMOne() const;
   bool IsKnownToBeNonNegative() const;
   bool IsNegativeConstant() const;
-  bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
-  void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunction>& inputMon, Calculator& newBoss);
-  void MakeElementTensorsGeneralizedVermas(
-    const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon,
-    Calculator& newBoss
-  );
-  bool makeAtom(int input, Calculator& newBoss) {
-    this->reset(newBoss);
-    this->theData = input;
-    return true;
-  }
+  bool makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss);
+  bool makeAtom(int input, Calculator& newBoss);
   // TODO(tmilev): rename to MakeOperation
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound() const;
@@ -397,7 +388,7 @@ private:
   bool MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
   bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
   bool MakeOX(Calculator& owner, int theOp, const Expression& opArgument);
-  bool Sequencefy();
+  bool sequencefy();
   bool IsSuitableForSubstitution() const;
   bool IsSuitableForRecursion() const;
 
@@ -414,7 +405,7 @@ private:
     tempE.MakeXOX(owner, theOp, left, right);
     this->setChild(childIndex, tempE);
   }
-  std::string Lispify() const;
+  std::string lispify() const;
   bool toStringData(std::stringstream& out, FormatExpressions* theFormat = nullptr) const;
 
   std::string toStringSemiFull() const;
@@ -532,14 +523,6 @@ private:
       result += (*this)[i].HashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
     }
     return result;
-  }
-  int GetIndexChild(const Expression& input) const {
-    for (int i = 0; i < this->children.size; i ++) {
-      if (input == (*this)[i]) {
-        return i;
-      }
-    }
-    return - 1;
   }
   Expression(): flagDeallocated(false) {
     this->reset();
@@ -3144,11 +3127,11 @@ bool Calculator::getTypeWeight(
     middleE,
     outputWeightSimpleCoords,
     &outputAmbientSemisimpleLieAlgebra.context,
-    ambientSSalgebra->GetRank(),
+    ambientSSalgebra->getRank(),
     ConversionFun
   )) {
     theCommands << "Failed to convert the second "
-    << "argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    << "argument of HWV to a list of " << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
     return false;
@@ -3209,13 +3192,13 @@ bool Calculator::getTypeHighestWeightParabolic(
     middleE,
     outputWeightHWFundcoords,
     &outputAmbientSSalgebra.context,
-    ambientSSalgebra->GetRank(),
+    ambientSSalgebra->getRank(),
     ConversionFun
   )) {
     std::stringstream tempStream;
     tempStream
     << "Failed to convert the second argument of HWV to a list of "
-    << ambientSSalgebra->GetRank()
+    << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
     return output.makeError(tempStream.str(), theCommands);
@@ -3227,20 +3210,20 @@ bool Calculator::getTypeHighestWeightParabolic(
       rightE,
       parabolicSel,
       &outputAmbientSSalgebra.context,
-      ambientSSalgebra->GetRank(),
+      ambientSSalgebra->getRank(),
       nullptr
     )) {
       std::stringstream tempStream;
       tempStream
       << "Failed to convert the third argument of HWV to a list of "
-      << ambientSSalgebra->GetRank()
+      << ambientSSalgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString() << ".";
       return output.makeError(tempStream.str(), theCommands);
     }
     outputInducingSel = parabolicSel;
   } else {
-    outputInducingSel.initialize(ambientSSalgebra->GetRank());
+    outputInducingSel.initialize(ambientSSalgebra->getRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
       if (!outputWeightHWFundcoords[i].isSmallInteger()) {
         outputInducingSel.AddSelectionAppendNewIndex(i);

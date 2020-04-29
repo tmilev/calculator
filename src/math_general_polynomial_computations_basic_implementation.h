@@ -701,7 +701,7 @@ bool Polynomial<Coefficient>::operator<=(const Polynomial<Coefficient>& other) c
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsProportionalTo(
+bool Polynomial<Coefficient>::isProportionalTo(
   const Polynomial<Coefficient>& other,
   Coefficient& TimesMeEqualsOther,
   const Coefficient& theRingUnit

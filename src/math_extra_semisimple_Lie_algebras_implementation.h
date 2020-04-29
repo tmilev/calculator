@@ -181,11 +181,11 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::MakeFromWeight(
   const Vector<Coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner
 ) {
   this->makeZero();
-  if (inputWeightSimpleCoords.size != inputOwner->GetRank()) {
+  if (inputWeightSimpleCoords.size != inputOwner->getRank()) {
     global.fatal << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.toString() << "("
     << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << (inputOwner->GetRank()) << global.fatal;
+    << " Lie algebra is of rank " << (inputOwner->getRank()) << global.fatal;
   }
   Weight<Coefficient> theMon;
   theMon.owner = inputOwner;
@@ -331,7 +331,7 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::GetCartanPart() co
   }
   ChevalleyGenerator tempGen;
   SemisimpleLieAlgebra* owner = this->GetOwner();
-  int theRank = owner->GetRank();
+  int theRank = owner->getRank();
   int numPosRoots = owner->GetNumPosRoots();
   result.makeZero(theRank);
   if (theRank <= 0 || owner == nullptr) {
@@ -474,7 +474,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::MakeTrivial(SemisimpleLie
   this->makeZero();
   Weight<Rational> tempMon;
   tempMon.owner = &inputOwner;
-  tempMon.weightFundamentalCoordS.makeZero(inputOwner.GetRank());
+  tempMon.weightFundamentalCoordS.makeZero(inputOwner.getRank());
   this->addMonomial(tempMon, 1);
 }
 

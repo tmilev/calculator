@@ -54,7 +54,7 @@ public:
   List<Vector<Rational> > characterTable;
 
   AnotherWeylGroup():sizePrivate(- 1){}
-  int GetRank() const; // idk lol
+  int getRank() const; // idk lol
   void SimpleReflection(int i, const templateVector& v, templateVector& out) const;
   void SimpleReflection(int i, templateVector& v) const;
   void GetSimpleReflections(const templateVector& v, List<int>& out) const;
@@ -99,7 +99,7 @@ template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::MakeArbitrarySimple(char letter, int number) {
   DynkinType D;
   D.MakeSimpleType(letter, number);
-  D.GetCartanSymmetric(this->cartanSymmetric);
+  D.getCartanSymmetric(this->cartanSymmetric);
 }
 
 template <typename scalar, typename templateVector>
@@ -307,7 +307,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   this->conjugacyClasses.reserve(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.setExpectedSize(this->size());
-  int theRank = this->GetRank();
+  int theRank = this->getRank();
   templateVector theRhoImage;
   global.comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
@@ -370,7 +370,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices() {
 }
 
 template <typename scalar, typename templateVector>
-int AnotherWeylGroup<scalar, templateVector>::GetRank() const {
+int AnotherWeylGroup<scalar, templateVector>::getRank() const {
   return this->cartanSymmetric.numberOfRows;
 }
 

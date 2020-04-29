@@ -14,7 +14,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
   if (this->IsGeneratorFromCartan(generatorIndex)) {
     int simpleIndex = generatorIndex - this->GetNumPosRoots();
-    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->GetRank());
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->GetNumPosRoots() - 1 - generatorIndex);
     outputMultiplyLieBracketsToGetGenerator = this->theWeyl.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
@@ -23,8 +23,8 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   outputMultiplyLieBracketsToGetGenerator = 1;
   Vector<Rational> genWeight, newWeight;
   while (!theWeight.isEqualToZero()) {
-    for (int i = 0; i < this->GetRank(); i ++) {
-      genWeight.makeEi(this->GetRank(), i);
+    for (int i = 0; i < this->getRank(); i ++) {
+      genWeight.makeEi(this->getRank(), i);
       if (theWeight.isPositive()) {
         genWeight.minus();
       }
@@ -581,7 +581,7 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyMinusTransposeAutoOnMe() {
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
   int numPosRoots = this->GetOwner().GetNumPosRoots();
-  int theRank = this->GetOwner().GetRank();
+  int theRank = this->GetOwner().getRank();
   Coefficient theCoeff;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->theObjects[i];
@@ -696,7 +696,7 @@ std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
   List<ElementUniversalEnveloping<Coefficient> > theOrbit;
   theOrbit.reserve(1000);
   ElementUniversalEnveloping<Coefficient> theElt;
-  int theDim = this->GetOwner().GetRank();
+  int theDim = this->GetOwner().getRank();
   int numPosRoots = this->GetOwner().GetNumPosRoots();
   theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {

@@ -303,7 +303,7 @@ void Sha3::getResultVector(List<unsigned char>& output) {
 std::string Crypto::computeSha3_256OutputBase64URL(const std::string& input) {
   List<unsigned char> outputList;
   Crypto::computeSha3_256(input, outputList);
-  return Crypto::ConvertListUnsignedCharsToBase64(outputList, true);
+  return Crypto::convertListUnsignedCharsToBase64(outputList, true);
 }
 
 void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& output) {

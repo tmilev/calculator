@@ -433,17 +433,17 @@ void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>
 std::string Crypto::ConvertStringToBase64Standard(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
-  return Crypto::ConvertListUnsignedCharsToBase64(inputChar, false);
+  return Crypto::convertListUnsignedCharsToBase64(inputChar, false);
 }
 
 std::string Crypto::ConvertStringToBase64URL(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
-  return Crypto::ConvertListUnsignedCharsToBase64(inputChar, true);
+  return Crypto::convertListUnsignedCharsToBase64(inputChar, true);
 }
 
-std::string Crypto::ConvertListUnsignedCharsToBase64(const List<unsigned char>& input, bool useBase64URL) {
-  MacroRegisterFunctionWithName("Crypto::ConvertListUnsignedCharsToBase64");
+std::string Crypto::convertListUnsignedCharsToBase64(const List<unsigned char>& input, bool useBase64URL) {
+  MacroRegisterFunctionWithName("Crypto::convertListUnsignedCharsToBase64");
   uint32_t theStack = 0;
   int numBitsInTheStack = 0;
   std::string result;
@@ -585,7 +585,7 @@ std::string Crypto::ConvertUint64ToHex(uint64_t input) {
   return out.str();
 }
 
-bool Crypto::ConvertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
+bool Crypto::convertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
   std::string outputString;
   if (!Crypto::ConvertHexToString(input, outputString, commentsOnFailure)) {
     return false;
@@ -692,14 +692,14 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
   }
 }
 
-std::string Crypto::ConvertListCharsToHex(
+std::string Crypto::convertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-bool Crypto::ConvertListCharsToHex(
+bool Crypto::convertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
@@ -707,17 +707,17 @@ bool Crypto::ConvertListCharsToHex(
 }
 
 std::string Crypto::convertListUnsignedCharsToHex(const List<unsigned char>& input) {
-  return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
+  return Crypto::convertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
-std::string Crypto::ConvertListUnsignedCharsToHexFormat(
+std::string Crypto::convertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-bool Crypto::ConvertListUnsignedCharsToHexFormat(
+bool Crypto::convertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<const char*>(input.theObjects), static_cast<unsigned>(input.size));
@@ -1043,7 +1043,7 @@ bool Crypto::convertLargeUnsignedToBase64SignificantDigitsFirst(
 ) {
   std::string theString;
   Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(input, 0, theString);
-  outputBase64 = Crypto::ConvertListUnsignedCharsToBase64(theString, false);
+  outputBase64 = Crypto::convertListUnsignedCharsToBase64(theString, false);
   return true;
 }
 
@@ -1628,7 +1628,7 @@ bool JSONWebToken::verifyRSA256(
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned theSha;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
-    *commentsGeneral << "<br>Sha256 of payload: " << theSha.toString();
+    *commentsGeneral << "<br>sha256 of payload: " << theSha.toString();
   }
   LargeIntegerUnsigned theSignatureInt;
   if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, theSignatureInt, commentsOnFailure)) {

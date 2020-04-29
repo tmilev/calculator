@@ -4418,7 +4418,7 @@ int WebServer::main(int argc, char **argv) {
     << Logger::blue << FileOperations::GetCurrentFolder()
     << Logger::endL;
     // Compute configuration file location.
-    // Load the configuration file.
+    // load the configuration file.
     global.ConfigurationLoad();
     // Compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.

@@ -290,7 +290,7 @@ private:
   int GetExpressionTreeSize() const;
 
   template <class theType>
-  bool ConvertInternally(Expression& output) const;
+  bool convertInternally(Expression& output) const;
   template <class theType>
   bool ConvertsInternally(WithContext<theType>* whichElement = nullptr) const;
 
@@ -391,7 +391,7 @@ private:
   static bool MergeContexts(Expression& leftE, Expression& rightE);
   bool mergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
   template <class theType>
-  bool MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
+  bool mergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
 
   bool ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
   bool ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
@@ -3002,7 +3002,7 @@ bool Calculator::functionGetMatrix(
       if (!this->ConvertToTypeUsingFunction<theType>(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
-        if (!nonConvertedEs(i, j).ConvertInternally<theType>(convertedEs.elements[i][j])) {
+        if (!nonConvertedEs(i, j).convertInternally<theType>(convertedEs.elements[i][j])) {
           if (commentsOnError != nullptr) {
             *commentsOnError << "Failed to convert matrix element: "
             << "row: " << i << ", column: "
@@ -3138,10 +3138,10 @@ bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
 }
 
 template <class theType>
-bool Expression::MergeContextsMyArumentsAndConvertThem(
+bool Expression::mergeContextsMyArumentsAndConvertThem(
   Expression& output, std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
+  MacroRegisterFunctionWithName("Expression::mergeContextsMyArumentsAndConvertThem");
   this->checkInitialization();
   Expression mergedContexts;
   if (!this->mergeContextsMyAruments(mergedContexts, commentsOnFailure)) {
@@ -3150,8 +3150,8 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
   output.reset(*this->owner, this->children.size);
   output.addChildOnTop((*this)[0]);
   Expression convertedE;
-  for (int i = 1; i < mergedContexts.children.size; i ++) {
-    if (!mergedContexts[i].ConvertInternally<theType>(convertedE)) {
+  for (int i = 1; i < mergedContexts.size(); i ++) {
+    if (!mergedContexts[i].convertInternally<theType>(convertedE)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].toString() << " to the desired type. ";

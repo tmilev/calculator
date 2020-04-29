@@ -1699,12 +1699,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerEulerFlaAsALaw,
+    CalculatorFunctions::innerEulerFormulaAsLaw,
     "",
     "Trigonometrizes an exponential expression using Euler's formula.  ",
     "TurnOnRules(\"EulerFormula\");\n"
     "e^{i x}",
-    "CalculatorFunctions::innerEulerFlaAsALaw",
+    "CalculatorFunctions::innerEulerFormulaAsLaw",
     "EulerFormula",
     innerStandardOffByDefault
   );
@@ -5637,35 +5637,48 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
     this->opRational(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
     "AddRationalToElementZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
     this->opEltZmodP(),
     this->opRational(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
     "AddElementZmodPToRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational,
     this->opEltZmodP(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational",
     "AddElementZmodPToElementZmodP",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP,
+    this->opPolynomialModuloInteger(),
+    this->opPolynomialModuloInteger(),
+    "Adds polynomials modulo integers. ",
+    "a = PolynomialModP(x^2 + x + 7, 5);\n"
+    "b = PolynomialModP(x^2 + 1, 5);\n"
+    "a + b",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP",
+    "AddPolynomialZmodPToPolynomialZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -7302,7 +7315,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger,
+    CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger,
     "",
     "If the base is a matrix and the exponent is a rational number: "
     "1. If the base is not square, returns error. "

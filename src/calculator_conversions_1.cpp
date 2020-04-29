@@ -7,7 +7,7 @@
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 
 template <>
-bool Expression::ConvertInternally<RationalFunction>(Expression& output) const;
+bool Expression::convertInternally<RationalFunction>(Expression& output) const;
 
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
@@ -1184,7 +1184,7 @@ bool CalculatorConversions::functionRationalFunction(
     return true;
   }
   if (input.isOfType<Polynomial<Rational> >() || input.isOfType<Rational>()) {
-    return input.ConvertInternally<RationalFunction>(output);
+    return input.convertInternally<RationalFunction>(output);
   }
   if (input.isOfType<AlgebraicNumber>()) {
     AlgebraicNumber theNumber = input.getValue<AlgebraicNumber>();
@@ -1192,7 +1192,7 @@ bool CalculatorConversions::functionRationalFunction(
     if (theNumber.isRational(&theRat)) {
       Expression tempE;
       tempE.assignValue(theRat, theCommands);
-      return tempE.ConvertInternally<RationalFunction> (output);
+      return tempE.convertInternally<RationalFunction> (output);
     }
   }
   ExpressionContext theContext(theCommands);

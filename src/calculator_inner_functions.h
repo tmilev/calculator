@@ -358,7 +358,7 @@ public:
   static bool innerConvertSinToExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertCosToExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEulerFlaAsALaw(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEulerFormulaAsLaw(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateTanPowerNSecPowerM(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInterpretAsDifferential(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output);

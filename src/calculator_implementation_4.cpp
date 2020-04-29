@@ -3087,7 +3087,7 @@ bool Expression::mergeContextsMyAruments(
         *commentsOnFailure
         << "<hr>Failed to merge the arguments of the expression "
         << this->toString() << ": the argument "
-        << (*this)[i].toString() << "is not of built-in type";
+        << (*this)[i].toString() << " is not of built-in type";
       }
       return false;
     }

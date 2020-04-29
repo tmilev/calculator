@@ -26,11 +26,11 @@ bool Expression::ConvertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber>
 ) const;
 
 template <>
-bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
+bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
 template <>
-bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) const;
+bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const;
 template <>
-bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
 
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
@@ -2361,9 +2361,9 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   }
   Polynomial<Rational> theArgumentPoly;
   Expression theArgumentConverted;
-  if (theArgument.ConvertInternally<Polynomial<Rational> >(theArgumentConverted)) {
+  if (theArgument.convertInternally<Polynomial<Rational> >(theArgumentConverted)) {
     theArgumentPoly = theArgumentConverted.getValue<Polynomial<Rational> >();
-  } else if (theArgument.ConvertInternally<ElementWeylAlgebra<Rational> >(theArgumentConverted)) {
+  } else if (theArgument.convertInternally<ElementWeylAlgebra<Rational> >(theArgumentConverted)) {
     if (!theArgumentConverted.getValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly)) {
       return false;
     }
@@ -5011,10 +5011,10 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& theCommands, const
   return false; //<-this shouldn't happen
 }
 
-bool CalculatorFunctions::innerEulerFlaAsALaw(
+bool CalculatorFunctions::innerEulerFormulaAsLaw(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEulerFlaAsALaw");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerEulerFormulaAsLaw");
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -8064,10 +8064,10 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     );
   }
   Expression leftConverted, rightConverted;
-  if (!leftMerged.ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(leftConverted)) {
+  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFunction> >(leftConverted)) {
     return false;
   }
-  if (!rightMerged.ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(rightConverted)) {
+  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFunction> >(rightConverted)) {
     return false;
   }
   const ElementUniversalEnveloping<RationalFunction>& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction> >();

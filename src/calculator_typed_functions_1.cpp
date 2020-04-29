@@ -11,10 +11,10 @@
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 
 template <>
-bool Expression::ConvertInternally<RationalFunction>(Expression& output) const;
+bool Expression::convertInternally<RationalFunction>(Expression& output) const;
 
 template <>
-bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
+bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
 
 bool Calculator::innerOperationBinary(
   Calculator& theCommands,
@@ -83,11 +83,11 @@ bool Calculator::outerExtractBaseMultiplication(
   return result;
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(
+bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
-  if (!input.isListNElements(3)) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPOrRational");
+  if (input.size() != 3) {
     return false;
   }
   const Expression* leftE;
@@ -420,7 +420,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunction> >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunction> >(
     inputConverted, &theCommands.comments
   )) {
     return false;
@@ -539,7 +539,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
 }
 
 template <>
-bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -562,7 +562,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   inputConverted[1].checkConsistency();
   input[1].checkConsistency();
   input[2].checkConsistency();
-  if (!inputConverted[1].ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
+  if (!inputConverted[1].convertInternally<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFunction>& rightEltETGVM =
@@ -590,7 +590,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(
     inputContextsMerged, &theCommands.comments
   )) {
     return false;
@@ -601,7 +601,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
   ) {
     return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].toString()
     << " by " << inputContextsMerged[2].toString() << ": "
-    << "one of the two differential operators has differential operator exponent that is not a small integer. ";
+    << "one of the two differential operators has "
+    << "differential operator exponent that is not a small integer. ";
   }
   ElementWeylAlgebra<Rational> result = inputContextsMerged[1].getValue<ElementWeylAlgebra<Rational> >();
   result *= inputContextsMerged[2].getValue<ElementWeylAlgebra<Rational> >();
@@ -686,7 +687,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunction> >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunction> >(
     inputContextsMerged, &theCommands.comments
   )) {
     return false;
@@ -796,6 +797,30 @@ bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(
     return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
   }
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP");
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression inputContextsMerged;
+  if (!input.mergeContextsMyArumentsAndConvertThem<Polynomial<ElementZmodP> >(
+    inputContextsMerged, &theCommands.comments
+  )) {
+    return false;
+  }
+  Polynomial<ElementZmodP> left = inputContextsMerged[1].getValue<Polynomial<ElementZmodP> >();
+  Polynomial<ElementZmodP> right = inputContextsMerged[2].getValue<Polynomial<ElementZmodP> >();
+  if (!left.isEqualToZero() && !right.isEqualToZero()) {
+    if (left.coefficients[0].theModulus != right.coefficients[0].theModulus) {
+      return theCommands << "Attempt to add polynomials with different moduli.";
+    }
+  }
+  left += right;
+  return output.assignValueWithContext(left, inputContextsMerged[1].getContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -929,10 +954,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
+bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
@@ -1079,11 +1104,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPB
     return false;
   }
   PolynomialModuloPolynomial<ElementZmodP> base;
-  int thePower = 0;
-  if (!input[1].isOfType(&base)|| !input[2].isSmallInteger(&thePower)) {
-    return false;
-  }
-  if (thePower < 0) {
+  LargeIntegerUnsigned thePower = 0;
+  if (!input[1].isOfType(&base) || !input[2].isIntegerNonNegative(&thePower)) {
     return false;
   }
   if (base.isEqualToZero()) {
@@ -1246,7 +1268,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     if (!isMon) {
       return theCommands << "<hr>Failed to raise " << base.toString() << " to power "
       << powerRat.toString() << ": the exponent is not a "
-      << " small integer and the base is not a coefficient one monomial. ";
+      << "small integer and the base is not a coefficient one monomial. ";
     }
     ElementWeylAlgebra<Rational> finalOutput;
     MonomialWeylAlgebra theMon = base[0];
@@ -1336,7 +1358,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
     return output.assignValueWithContext(theUE, copyBase.getContext(), theCommands);
   }
   Expression exponentConverted;
-  if (!copyExponent.ConvertInternally<RationalFunction>(exponentConverted)) {
+  if (!copyExponent.convertInternally<RationalFunction>(exponentConverted)) {
     return false;
   }
   MonomialUniversalEnveloping<RationalFunction> theMon;
@@ -1442,7 +1464,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.getNumerator().value;
   List<LargeInteger> numeratorFactors, denominatorFactors;
   List<int> numeratorPowersInt, denominatorPowersInt;
-  if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowersInt, denominatorFactors, denominatorPowersInt)) {
+  if (!base.GetPrimeFactorsAbsoluteValue(
+    numeratorFactors,
+    numeratorPowersInt,
+    denominatorFactors,
+    denominatorPowersInt
+  )) {
     return false;
   }
   List<LargeIntegerUnsigned> numeratorPowerS, denominatorPowerS;
@@ -1594,7 +1621,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
       return output.assignValue(FloatingPoint::Power(- baseDouble, thePower), theCommands);
     }
     baseDouble *= - 1;
-    return output.assignValue(-FloatingPoint::Power(baseDouble, expDouble), theCommands);
+    return output.assignValue(- FloatingPoint::Power(baseDouble, expDouble), theCommands);
   }
   if (baseDouble == 0.0) {
     if (expDouble > 0) {
@@ -1671,7 +1698,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   }
   std::string successString = (leftC *= rightC);
   if (successString != "") {
-    return theCommands << "I tried to multiply character " << leftC.toString() << " by " << rightC.toString()
+    return theCommands << "I tried to multiply character "
+    << leftC.toString() << " by " << rightC.toString()
     << " but I failed with the following message: " << successString;
   }
   return output.assignValue(leftC, theCommands);
@@ -1768,7 +1796,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
   }
   bool invokeRFMultiplication =
   (left.isMatrixOfType<RationalFunction>() && right.isMatrixOfType<Rational>()) ||
-  (left.isMatrixOfType<Rational>()            && right.isMatrixOfType<RationalFunction>()) ||
+  (left.isMatrixOfType<Rational>()         && right.isMatrixOfType<RationalFunction>()) ||
   (left.isMatrixOfType<RationalFunction>() && right.isMatrixOfType<RationalFunction>() );
   if (invokeRFMultiplication) {
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
@@ -2029,7 +2057,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   }
   if (!leftE.isMatrixOfType<RationalFunction>()) {
     Expression leftErfForm;
-    if (!leftE.ConvertInternally<RationalFunction>(leftErfForm)) {
+    if (!leftE.convertInternally<RationalFunction>(leftErfForm)) {
       return theCommands << "Failed to convert " << leftE.toString() << " to rational function. ";
     }
     RationalFunction theScalar = leftErfForm.getValue<RationalFunction>();
@@ -2084,7 +2112,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant(
   }
   Rational theCF = 1;
   Rational tempRat;
-  Expression leftE = input[1], rightE = input[2];
+  Expression leftE = input[1];
+  Expression rightE = input[2];
   bool found = false;
   if (input[1].startsWith(theCommands.opTimes(), 3)) {
     if (input[1][1].isOfType(&tempRat)) {
@@ -2221,13 +2250,16 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
   if (!leftEisGood || !rightEisGood) {
     return false;
   }
-  if (!leftE.isOfType<ElementWeylAlgebra<Rational> >() && !rightE.isOfType<ElementWeylAlgebra<Rational> >()) {
+  if (
+    !leftE.isOfType<ElementWeylAlgebra<Rational> >() &&
+    !rightE.isOfType<ElementWeylAlgebra<Rational> >()
+  ) {
     return output.assignValue(0, theCommands);
   }
   Expression leftConverted, rightConverted;
   if (
-    !leftE.ConvertInternally<ElementWeylAlgebra<Rational> >(leftConverted) ||
-    !rightE.ConvertInternally<ElementWeylAlgebra<Rational> >(rightConverted)
+    !leftE.convertInternally<ElementWeylAlgebra<Rational> >(leftConverted) ||
+    !rightE.convertInternally<ElementWeylAlgebra<Rational> >(rightConverted)
   ) {
     theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
@@ -2289,7 +2321,8 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
     return false;
   }
   if (leftMat.numberOfRows != rightMat.numberOfRows) {
-    return theCommands << "Cannot augment the left matrix with: " << leftMat.numberOfRows
+    return theCommands << "Cannot augment the left matrix with: "
+    << leftMat.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
     << rightMat.numberOfRows << ". ";
   }
@@ -2312,7 +2345,8 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
     return false;
   }
   if (leftMat.numberOfRows != rightMat.numberOfRows) {
-    return theCommands << "Cannot augment the left matrix with: " << leftMat.numberOfRows
+    return theCommands
+    << "Cannot augment the left matrix with: " << leftMat.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
     << rightMat.numberOfRows << ". ";
   }
@@ -2542,7 +2576,9 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerNChooseK(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerNChooseK");
   if (input.size() != 3) {
     return false;
@@ -2666,7 +2702,7 @@ bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyArumentsAndConvertThem<Polynomial<ElementZmodP> >(
+  if (!input.mergeContextsMyArumentsAndConvertThem<Polynomial<ElementZmodP> >(
     inputConverted, &theCommands.comments
   )) {
     return false;
@@ -2685,14 +2721,17 @@ bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
   if (!left.content.isEqualToZero()) {
     if (left.content.coefficients[0].theModulus != modulus) {
       return theCommands
-      << "Attempt to perform operations with modular polynomials with different moduli: "
-      << modulus << " and " << left.content.coefficients[0].theModulus;
+      << "Attempt to perform operations with "
+      << "modular polynomials with different moduli: "
+      << modulus << " and "
+      << left.content.coefficients[0].theModulus;
     }
   }
   ElementZmodP rightLeadingCoefficient = right.content.GetLeadingCoefficient(&MonomialP::orderDefault());
   if (!rightLeadingCoefficient.invert()) {
     return theCommands
-    << "Leading coefficient of quotient polynomial is not invertible mod " << modulus << ".";
+    << "Leading coefficient of quotient "
+    << "polynomial is not invertible mod " << modulus << ".";
   }
   PolynomialModuloPolynomial<ElementZmodP> result;
   result.modulus = right.content;

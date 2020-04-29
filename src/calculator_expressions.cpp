@@ -909,9 +909,9 @@ bool Expression::isMatrix(int* outputNumRows, int* outputNumCols) const {
 }
 
 //end Expression::getValueNonConst specializations.
-//start Expression::ConvertInternally specializations.
+//start Expression::convertInternally specializations.
 template< >
-bool Expression::ConvertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
+bool Expression::convertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
@@ -937,7 +937,7 @@ bool Expression::ConvertInternally<Polynomial<AlgebraicNumber> >(Expression& out
 }
 
 template< >
-bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) const {
+bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
@@ -953,7 +953,7 @@ bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) co
 }
 
 template< >
-bool Expression::ConvertInternally<Polynomial<ElementZmodP> >(Expression& output) const {
+bool Expression::convertInternally<Polynomial<ElementZmodP> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->checkInitialization();
   if (this->isOfType<Polynomial<ElementZmodP> >()) {
@@ -964,7 +964,7 @@ bool Expression::ConvertInternally<Polynomial<ElementZmodP> >(Expression& output
 }
 
 template< >
-bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
+bool Expression::convertInternally<RationalFunction>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
@@ -992,7 +992,7 @@ bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const {
+bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
@@ -1013,7 +1013,7 @@ bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
 }
 
 template< >
-bool Expression::ConvertInternally<Weight<Polynomial<Rational> > >(Expression& output) const {
+bool Expression::convertInternally<Weight<Polynomial<Rational> > >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Weight_Polynomial");
   this->checkInitialization();
   if (this->isOfType<Weight<Polynomial<Rational> > >()) {
@@ -1024,7 +1024,7 @@ bool Expression::ConvertInternally<Weight<Polynomial<Rational> > >(Expression& o
 }
 
 template< >
-bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->checkInitialization();
   if (!this->isBuiltInType())
@@ -1057,7 +1057,7 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
 }
 
 template< >
-bool Expression::ConvertInternally<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
+bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->checkInitialization();
   if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
@@ -1068,7 +1068,7 @@ bool Expression::ConvertInternally<ElementTensorsGeneralizedVermas<RationalFunct
 }
 
 template< >
-bool Expression::ConvertInternally<Rational>(Expression& output) const {
+bool Expression::convertInternally<Rational>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Rational");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
@@ -1079,7 +1079,7 @@ bool Expression::ConvertInternally<Rational>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertInternally<AlgebraicNumber>(Expression& output) const {
+bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
   this->checkInitialization();
   if (this->isOfType<AlgebraicNumber>()) {
@@ -1095,7 +1095,7 @@ bool Expression::ConvertInternally<AlgebraicNumber>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertInternally<double>(Expression& output) const {
+bool Expression::convertInternally<double>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_double");
   this->checkInitialization();
   if (this->isOfType<double>()) {

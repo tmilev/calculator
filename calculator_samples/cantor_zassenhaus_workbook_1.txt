@@ -1,0 +1,13 @@
+p = x^2+ 3x + 3;
+q = x^3 + 2 x + 5;
+r = x^2+2;
+s= x+1;
+modulusComposite = r;
+modulo = PolynomialModP(modulusComposite, 7);
+a = PolynomialModP{}( x,7) mod modulo;
+ a^(7  );
+ a^(49);
+ a^(7^3 );
+ a^(7^4 );
+ a^(7^5 ); 
+ a^(7^6 );

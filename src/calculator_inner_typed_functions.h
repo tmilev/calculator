@@ -34,7 +34,8 @@ public:
   static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddPolynomialModPToPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -87,7 +88,7 @@ public:
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPowerMatNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatrixNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -129,7 +130,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   theType result = inputContextsMerged[1].getValue<theType>();
@@ -144,7 +145,7 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   theType result;
@@ -155,12 +156,12 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
 
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideTypeByType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
     return false;
   }
   if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
@@ -202,7 +203,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     return output.assignValueWithContext(converted, input.getContext(), theCommands);
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
-    if (!input.ConvertInternally<Polynomial<Coefficient> >(output)) {
+    if (!input.convertInternally<Polynomial<Coefficient> >(output)) {
       global.fatal << "This is a programming error: "
       << "failed to convert coefficient to polynomial. " << global.fatal;
     }

@@ -108,7 +108,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return theCommands << "<hr>Couldn't extract first co-root length: " << theScale.toString() << " is non-positive.";
   }
   std::string theTypeName;
-  if (!typeLetterE.IsOperation(&theTypeName)) {
+  if (!typeLetterE.isOperation(&theTypeName)) {
     return theCommands << "I couldn't extract a type letter from " << typeLetterE.toString();
   }
   if (theTypeName.size() != 1) {
@@ -474,7 +474,7 @@ bool CalculatorConversions::innerStoreCandidateSA(
   values.addOnTop(currentE);
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHsScaledToActByTwo);
-  currentE.AssignMatrix(conversionMat, theCommands, nullptr, false);
+  currentE.assignMatrix(conversionMat, theCommands, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
   if (input.flagSystemSolved) {
@@ -888,7 +888,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     }
     std::string theLetter;
     if (
-      !singleChevGenE[1].IsOperation(&theLetter) ||
+      !singleChevGenE[1].isOperation(&theLetter) ||
       !singleChevGenE[2].isSmallInteger(&theChevGen.theGeneratorIndex)
     ) {
       return theCommands << "<hr>Failed to convert summand "
@@ -944,7 +944,7 @@ bool CalculatorConversions::innerElementUE(
     return theCommands << "<hr>Failed to convert " << input[1].toString() << " to polynomial.<hr>";
   }
   Polynomial<Rational> theP;
-  if (polyE.IsError() || !polyE.isOfType<Polynomial<Rational> >(&theP)) {
+  if (polyE.isError() || !polyE.isOfType<Polynomial<Rational> >(&theP)) {
     return theCommands << "<hr>Failed to convert " << input[1].toString()
     << " to polynomial. Instead I got " << polyE.toString() << ". <hr>";
   }
@@ -972,7 +972,7 @@ bool CalculatorConversions::innerElementUE(
       }
       std::string theLetter;
       if (
-        !singleChevGenE[0].IsOperation(&theLetter) ||
+        !singleChevGenE[0].isOperation(&theLetter) ||
         !singleChevGenE[1].isSmallInteger(&theChevGen.theGeneratorIndex)
       ) {
         return theCommands << "<hr>Failed to convert summand "
@@ -1133,7 +1133,7 @@ bool CalculatorConversions::functionRationalFunction(
       return theCommands << "<hr> Failed to convert " << input[1].toString()
       << " and " << input[2].toString() << " to rational function. ";
     }
-    if (leftE.IsError() || rightE.IsError()) {
+    if (leftE.isError() || rightE.isError()) {
       return theCommands << "<hr> Conversion of " << input[1].toString()
       << " and " << input[2].toString() << " returned error(s): "
       << leftE.toString() << " and " << rightE.toString();
@@ -1166,7 +1166,7 @@ bool CalculatorConversions::functionRationalFunction(
         return theCommands << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
         << input[1].toString() << " to rational function. ";
       }
-      if (leftE.IsError()) {
+      if (leftE.isError()) {
         return theCommands << "<hr> Conversion of " << input[1].toString() << " returned error: " << leftE.toString();
       }
       RationalFunction theRF = leftE.getValue<RationalFunction>();
@@ -1210,7 +1210,7 @@ bool CalculatorConversions::functionMatrixRational(
   if (!theCommands.functionGetMatrix(input, outputMat, nullptr, - 1, nullptr)) {
     return theCommands << "<br>Failed to get matrix of rationals. ";
   }
-  return output.AssignMatrix(outputMat, theCommands);
+  return output.assignMatrix(outputMat, theCommands);
 }
 
 bool CalculatorConversions::innerMatrixRationalTensorForM(
@@ -1263,7 +1263,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
     return false;
   }
   Expression conversionAttempt;
-  conversionAttempt.AssignMatrixExpressions(theMatrix, theCommands, true, false);
+  conversionAttempt.assignMatrixExpressions(theMatrix, theCommands, true, false);
   if (!conversionAttempt.isMatrix()) {
     output = conversionAttempt;
     return true;
@@ -1285,7 +1285,7 @@ bool CalculatorConversions::innerMakeMatrix(
   MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
   Matrix<Expression> outMat;
   if (theCommands.GetMatrixExpressionsFromArguments(input, outMat)) {
-    return output.AssignMatrixExpressions(outMat, theCommands, true, true);
+    return output.assignMatrixExpressions(outMat, theCommands, true, true);
   }
   return false;
 }
@@ -1298,7 +1298,7 @@ bool CalculatorConversions::functionMatrixAlgebraic(
   if (!theCommands.functionGetMatrix(input, outputMat)) {
     return false;
   }
-  return output.AssignMatrix(outputMat, theCommands);
+  return output.assignMatrix(outputMat, theCommands);
 }
 
 bool CalculatorConversions::innerMatrixRationalFunction(
@@ -1324,7 +1324,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   )) {
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
   }
-  output.AssignMatrix(outputMat, theCommands, &context);
+  output.assignMatrix(outputMat, theCommands, &context);
   output.checkConsistency();
   return true;
 }

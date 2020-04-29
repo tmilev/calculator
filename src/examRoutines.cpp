@@ -3297,7 +3297,7 @@ bool TopicElementParser::CheckNoErrors(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TopicElementParser::CheckNoErrors");
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
-    if (current.IsError()) {
+    if (current.isError()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Element index "
         << i << " has an error. " << current.toString();
@@ -3308,7 +3308,7 @@ bool TopicElementParser::CheckNoErrors(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-bool TopicElement::IsError() {
+bool TopicElement::isError() {
   return this->type == TopicElement::types::error;
 }
 

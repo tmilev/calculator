@@ -2147,7 +2147,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
     return theCommands << "<hr>Failed to load semisimple Lie algebra";
   }
   std::string theCoordsString;
-  bool isGood = input[3].IsOperation(&theCoordsString);
+  bool isGood = input[3].isOperation(&theCoordsString);
   if (isGood) {
     isGood = (theCoordsString == "epsilon") || (theCoordsString == "fundamental") || (theCoordsString == "simple");
   }
@@ -2260,7 +2260,7 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(
     return theCommands << "Failed to get matrix of element " << theElt.toString()
     << " from representation: " << theRep.toString();
   }
-  return output.AssignMatrix(result, theCommands, nullptr, false);
+  return output.assignMatrix(result, theCommands, nullptr, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(

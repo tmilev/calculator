@@ -1311,7 +1311,7 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringHtml() {
 
 template<class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::operator*=(
-  PolynomialModuloPolynomial& other
+  const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
     global.fatal << "Not allowed to multiply quotient-ring "
@@ -1319,6 +1319,19 @@ void PolynomialModuloPolynomial<Coefficient>::operator*=(
     << this->modulus << ", " << other.modulus << global.fatal;
   }
   this->value *= other.value;
+  this->reduce();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::operator+=(
+  const PolynomialModuloPolynomial& other
+) {
+  if (other.modulus != this->modulus) {
+    global.fatal << "Not allowed to multiply quotient-ring "
+    << "elements of different rings. [This modulus, other modulus]: "
+    << this->modulus << ", " << other.modulus << global.fatal;
+  }
+  this->value += other.value;
   this->reduce();
 }
 

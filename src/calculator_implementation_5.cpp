@@ -372,7 +372,7 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);
-  return output.AssignMatrix(theMatrix, theCommands);
+  return output.assignMatrix(theMatrix, theCommands);
 }
 
 bool CalculatorFunctions::innerPlotImplicitFunction(
@@ -484,7 +484,7 @@ bool CalculatorConversions::functionMatrixDouble(
   )) {
     return theCommands << "<br>Failed to get matrix of doubles. ";
   }
-  return output.AssignMatrix(theMat, theCommands);
+  return output.assignMatrix(theMat, theCommands);
 }
 
 bool CalculatorFunctions::innerIntegratePullConstant(
@@ -492,11 +492,11 @@ bool CalculatorFunctions::innerIntegratePullConstant(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegratePullConstant");
   Expression theFunctionE, theVariableE, theSetE;
-  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE)) {
+  if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
   }
   Expression theFunCoeff, theFunNoCoeff;
-  theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
+  theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (theFunCoeff.isEqualToOne()) {
     return false;
   }
@@ -511,11 +511,11 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared");
   Expression theFunctionE, theVariableE, theSetE;
-  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE)) {
+  if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
   }
   Expression theFunCoeff, theFunNoCoeff;
-  theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
+  theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (!theFunNoCoeff.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -556,7 +556,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateXpowerNePowerAx");
   Expression theFunctionE, theVariableE, theSetE;
-  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE)) {
+  if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
   }
   if (!theFunctionE.startsWith(theCommands.opTimes(), 3)) {
@@ -573,7 +573,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
     if (!exponentPartE.startsWith(theCommands.opThePower(), 3)) {
       continue;
     }
-    if (!exponentPartE[1].IsOperationGiven(theCommands.opE())) {
+    if (!exponentPartE[1].isOperationGiven(theCommands.opE())) {
       continue;
     }
     powerOfEE = exponentPartE[2];
@@ -620,11 +620,11 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne");
   Expression theFunctionE, theVariableE, theSetE;
-  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE)) {
+  if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
   }
   Expression theFunCoeff, theFunNoCoeff;
-  theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
+  theFunctionE.getCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (!theFunNoCoeff.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -663,7 +663,7 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateDefiniteIntegral");
   Expression theFunctionE, theVariableE, theSetE;
-  if (!input.IsDefiniteIntegralOverIntervalfdx(&theVariableE, &theFunctionE, &theSetE)) {
+  if (!input.isDefiniteIntegralOverIntervalFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
   }
   if (!theSetE.startsWith(theCommands.opLimitBoundary(), 3)) {
@@ -732,7 +732,7 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
   if (input.size() != 3) {
     return false;
   }
-  if (!input.StartsWithGivenOperation("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
+  if (!input.startsWithGivenOperation("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
     return false;
   }
   const Expression& theArg = input[2];
@@ -901,7 +901,7 @@ bool CalculatorFunctions::innerSumSequence(
     return false;
   }
   const Expression* sequenceToSum = &input;
-  if (input[1].IsSequenceNElementS()) {
+  if (input[1].isSequenceNElements()) {
     sequenceToSum = &input[1];
   }
   List<Expression> theTerms;
@@ -972,8 +972,8 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveDuplicates");
   int operationRemoveDuplicated = theCommands.operations.getIndexNoFail("RemoveDuplicates");
   if (
-    !input.IsListStartingWithAtom(operationRemoveDuplicated) &&
-    !input.IsSequenceNElementS()
+    !input.isListStartingWithAtom(operationRemoveDuplicated) &&
+    !input.isSequenceNElements()
   ) {
     return false;
   }
@@ -986,7 +986,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
 
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
-  if (!input.IsListStartingWithAtom(
+  if (!input.isListStartingWithAtom(
     theCommands.operations.getIndexNoFail("Sort")
   )) {
     return false;
@@ -994,7 +994,7 @@ bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& i
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
   if (input.size() == 2) {
-    if (input[1].IsSequenceNElementS()) {
+    if (input[1].isSequenceNElements()) {
       toBeSorted = &(input[1]);
     }
   }
@@ -1011,15 +1011,15 @@ bool CalculatorFunctions::innerSortDescending(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSortDescending");
   if (
-    !input.IsListStartingWithAtom(theCommands.operations.getIndexNoFail("SortDescending")) &&
-    !input.IsSequenceNElementS()
+    !input.isListStartingWithAtom(theCommands.operations.getIndexNoFail("SortDescending")) &&
+    !input.isSequenceNElements()
   ) {
     return false;
   }
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
   if (input.size() == 2) {
-    if (input[1].IsSequenceNElementS()) {
+    if (input[1].isSequenceNElements()) {
       toBeSorted = &(input[1]);
     }
   }
@@ -1033,13 +1033,13 @@ bool CalculatorFunctions::innerSortDescending(
 
 bool CalculatorFunctions::innerLength(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLength");
-  if (!input.IsListStartingWithAtom(
+  if (!input.isListStartingWithAtom(
     theCommands.operations.getIndexNoFail("Length")
   )) {
     return false;
   }
   if (input.size() == 2) {
-    if (input[1].IsSequenceNElementS()) {
+    if (input[1].isSequenceNElements()) {
       return output.assignValue(input[1].size() - 1, theCommands);
     }
   }
@@ -1055,7 +1055,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   }
   const Expression& theExpression = input[1];
   HashedList<Expression> mandatoryFreeVars, allowedFreeVars, presentFreeVars;
-  if (input[2].IsSequenceNElementS()) {
+  if (input[2].isSequenceNElements()) {
     mandatoryFreeVars.setExpectedSize(input[2].size() - 1);
     for (int i = 1; i < input[2].size(); i ++) {
       mandatoryFreeVars.addOnTop(input[2][i]);
@@ -1065,7 +1065,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   }
   allowedFreeVars.addOnTop(mandatoryFreeVars);
   if (input.size() > 3) {
-    if (input[3].IsSequenceNElementS()) {
+    if (input[3].isSequenceNElements()) {
       for (int i = 1; i < input[3].size(); i ++) {
         allowedFreeVars.addOnTop(input[3][i]);
       }
@@ -1236,7 +1236,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
       << input[2].toString();
     }
   }
-  if (!thePowers.IsSequenceNElementS()) {
+  if (!thePowers.isSequenceNElements()) {
     return theCommands << "This is not supposed to happen: expression "
     << thePowers.toString() << " should be a list. This may be a programming bug. ";
   }
@@ -1311,7 +1311,7 @@ bool CalculatorFunctions::innerOperatorBounds(
       theLimitsE.addChildAtomOnTop(theCommands.opIndefiniteIndicator());
     }
   }
-  if (input[1].IsOperationGiven(theCommands.opUnderscore())) {
+  if (input[1].isOperationGiven(theCommands.opUnderscore())) {
     theLimitsE.setChild(1, input[2]);
   } else {
     theLimitsE.setChild(2, input[2]);
@@ -1329,7 +1329,7 @@ bool CalculatorFunctions::innerPowerExponentToLog(
   }
   const Expression& baseE = input[1];
   const Expression& powerE = input[2];
-  if (baseE.IsOperationGiven(theCommands.opE())) {
+  if (baseE.isOperationGiven(theCommands.opE())) {
     if (powerE.startsWith(theCommands.opLog(), 2)) {
       output = powerE[1];
       return true;
@@ -1347,7 +1347,7 @@ bool CalculatorFunctions::innerDistributeExponent(
   }
   const Expression& base = input[1];
   const Expression& exponentE = input[2];
-  if (exponentE.IsOperationGiven(theCommands.opCirc())) {
+  if (exponentE.isOperationGiven(theCommands.opCirc())) {
     return false;
   }
   if (!input[1].startsWith(theCommands.opTimes(), 3)) {
@@ -1747,7 +1747,7 @@ bool CalculatorFunctions::innerLogBaseNaturalToLn(Calculator& theCommands, const
   if (!input.startsWith(theCommands.opLogBase(), 3)) {
     return false;
   }
-  if (!input[1].IsOperationGiven(theCommands.opE())) {
+  if (!input[1].isOperationGiven(theCommands.opE())) {
     return false;
   }
   return output.MakeOX(theCommands, theCommands.opLog(), input[2]);
@@ -1895,11 +1895,11 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   if (input == theCommands.EInfinity()) {
     return output.assignValue<std::string>("\"infinity\"", theCommands);
   }
-  if (input.IsOperation(&atomString)) {
-    if (input.IsOperationGiven(theCommands.opE())) {
+  if (input.isOperation(&atomString)) {
+    if (input.isOperationGiven(theCommands.opE())) {
       return output.assignValue<std::string>(" 2.718281828 ", theCommands);
     }
-    if (input.IsOperationGiven(theCommands.opPi())) {
+    if (input.isOperationGiven(theCommands.opPi())) {
       return output.assignValue<std::string>(" 3.141592654 ", theCommands);
     }
     if (input.theData >= theCommands.NumPredefinedAtoms) {
@@ -2104,7 +2104,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   PlotObject thePlot;
   bool found = false;
   for (int i = 0; i < input.size(); i ++) {
-    if (input[i].IsSequenceNElementS(3)) {
+    if (input[i].isSequenceNElements(3)) {
       thePlot.manifoldImmersion = input[i];
       found = true;
       break;

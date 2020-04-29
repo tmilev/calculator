@@ -271,7 +271,7 @@ bool Calculator::outerStandardHandler(
 ) {
   const Expression& functionNameNode = input[0];
   int operationIndex = - 1;
-  if (!functionNameNode.IsOperation(operationIndex)) {
+  if (!functionNameNode.isOperation(operationIndex)) {
     return false;
   }
   if (theCommands.operations.theValues[operationIndex].IsZeroPointer()) {
@@ -347,7 +347,7 @@ bool Calculator::ExpressionMatchesPattern(
 //  if (this->opDefine() == input.theOperation)
 //    return false;
   int opVarB = this->opBind();
-  if (thePattern.IsListStartingWithAtom(opVarB)) {
+  if (thePattern.isListStartingWithAtom(opVarB)) {
     if (!matchedExpressions.contains(thePattern)) {
       matchedExpressions.SetKeyValue(thePattern, input);
     }
@@ -518,10 +518,10 @@ bool Calculator::accountRule(
   if (this->RecursionDeptH > this->MaxRecursionDeptH) {
     return false;
   }
-  if (ruleE.IsCalculatorStatusChanger()) {
+  if (ruleE.isCalculatorStatusChanger()) {
     theRuleStackMaintainer.AddRule(ruleE);
   }
-  if (!ruleE.IsListStartingWithAtom(this->opCommandEnclosure())) {
+  if (!ruleE.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
   }
   if (ruleE.size() <= 1) {
@@ -656,7 +656,7 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::InitializeOneRun");
   this->numberOfTransformations ++;
   std::string atomValue;
-  if (this->outpuT->IsOperation(&atomValue)) {
+  if (this->outpuT->isOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.contains(atomValue)) {
       this->flagIsNonCacheable = true;
     }
@@ -732,12 +732,12 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::EvaluateChildren");
-  if (this->outpuT->IsFrozen()) {
+  if (this->outpuT->isFrozen()) {
     return true;
   }
   int indexOp = - 1;
   if (this->outpuT->size() > 0) {
-    if ((*this->outpuT)[0].IsAtom()) {
+    if ((*this->outpuT)[0].isAtom()) {
       indexOp = (*this->outpuT)[0].theData;
     }
   }
@@ -771,7 +771,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
     if (childIsNonCacheable) {
       this->flagIsNonCacheable = true;
     }
-    if ((*this->outpuT)[i].IsError()) {
+    if ((*this->outpuT)[i].isError()) {
       this->owner->flagAbortComputationASAP = true;
       return false;
     }
@@ -885,7 +885,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
   theExpressionWithContext.addChildAtomOnTop(this->owner->opSequence());
-  theExpressionWithContext.AddChildValueOnTop(this->owner->RuleStackCacheIndex);
+  theExpressionWithContext.addChildValueOnTop(this->owner->RuleStackCacheIndex);
   theExpressionWithContext.addChildOnTop(*(this->outpuT));
   this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
   if (this->indexInCache != - 1) {
@@ -908,7 +908,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   if (
     this->owner->cachedExpressions.size > this->owner->MaxCachedExpressionPerRuleStack ||
     this->outpuT->isBuiltInType() ||
-    this->outpuT->IsBuiltInAtom()
+    this->outpuT->isBuiltInAtom()
   ) {
     return;
   }
@@ -959,7 +959,7 @@ bool Calculator::EvaluateExpression(
     return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
   }
   state.SetOutput(input, nullptr, "");
-  if (state.outpuT->IsError()) {
+  if (state.outpuT->isError()) {
     theCommands.flagAbortComputationASAP = true;
     return true;
   }
@@ -1050,7 +1050,7 @@ Expression* Calculator::patternMatch(
 void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
   MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind())) {
+  if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
       toBeSubbedIn = matchedPairs.GetValueCreate(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);

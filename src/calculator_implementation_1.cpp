@@ -843,14 +843,14 @@ bool Calculator::innerDeterminantPolynomial(
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerTranspose");
   if (
-    !input.IsSequenceNElementS() &&
+    !input.isSequenceNElements() &&
     !input.isMatrix() &&
-    !input.StartsWithGivenOperation("Transpose")
+    !input.startsWithGivenOperation("Transpose")
   ) {
     return false;
   }
   Matrix<Expression> theMat;
-  if (input.StartsWithGivenOperation("Transpose")) {
+  if (input.startsWithGivenOperation("Transpose")) {
     theCommands.GetMatrixExpressionsFromArguments(input, theMat);
   } else {
     theCommands.getMatrixExpressions(input, theMat);
@@ -858,11 +858,11 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   // The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
   // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
   // If the commented code needs to be restored, please document why.
-  // if (input.IsSequenceNElementS())
+  // if (input.isSequenceNElements())
   //   if (theMat.numberOfRows !=1)
   //     return false;
   theMat.transpose();
-  return output.AssignMatrixExpressions(theMat, theCommands, true, true);
+  return output.assignMatrixExpressions(theMat, theCommands, true, true);
 }
 
 void Plot::operator+=(const Plot& other) {
@@ -1857,7 +1857,7 @@ bool Expression::IsSuitableForRecursion() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsAtom() || this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
+  if (this->isAtom() || this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
@@ -1922,7 +1922,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     return output.assignValue(std::string("..."), theCommands);
   }
   std::string currentString;
-  if (input.IsOperation(&currentString)) {
+  if (input.isOperation(&currentString)) {
     if (input.toString() == "e") {
       return output.assignValue<std::string>(" 2.718281828 ", theCommands);
     }
@@ -2005,8 +2005,8 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   }
   Expression currentE;
   bool useUsualOrder =
-    !input[0].IsOperationGiven(theCommands.opDivide()) &&
-    !input[0].IsOperationGiven(theCommands.opThePower());
+    !input[0].isOperationGiven(theCommands.opDivide()) &&
+    !input[0].isOperationGiven(theCommands.opThePower());
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
@@ -2049,7 +2049,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   )) {
     return false;
   }
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   if (parSel.CardinalitySelection != 0) {

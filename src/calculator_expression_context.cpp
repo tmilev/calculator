@@ -209,7 +209,7 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
 }
 
 bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
-  if (!this->IsContext()) {
+  if (!this->isContext()) {
     global.fatal << "This is a programming error: calling "
     << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << global.fatal;
   }
@@ -259,7 +259,7 @@ bool ExpressionContext::fromExpression(const Expression& input) {
   input.checkInitialization();
   Calculator& commands = *input.owner;
   this->initialize(commands);
-  if (!input.IsContext()) {
+  if (!input.isContext()) {
     return commands
     << "Not allowed: call getContext from non-context expression: "
     << input << ". ";
@@ -622,7 +622,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
         }
       }
     }
-    return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
+    return this->assignMatrix(newMat, *this->owner, &inputOutputMinContext);
   }
   this->owner->comments << "Expression " << this->toString()
   << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";

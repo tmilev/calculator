@@ -249,7 +249,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   if (!output.isOfType < ElementUniversalEnveloping<RationalFunction> >()) {
     return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   }
-  SemisimpleLieAlgebra& ownerSS = *output.GetAmbientSSAlgebraNonConstUseWithCaution();
+  SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
   if (!ownerSS.IsOfSimpleType('G', 2)) {
     return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   }
@@ -744,7 +744,7 @@ bool Calculator::innerPrintB3G2branchingTable(
   )) {
     return false;
   }
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   return theCommands.innerPrintB3G2branchingIntermediate(
@@ -760,7 +760,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   theCommands.innerPrintB3G2branchingTableCommon(
     theCommands, input, output, theHWs, theg2b3data, theContext
   );
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   CharacterSemisimpleLieAlgebraModule<RationalFunction> theCharacter, outputChar;
@@ -1511,13 +1511,13 @@ bool Calculator::innerPrintZnEnumeration(
   return output.assignValue(out.str(), theCommands);
 }
 
-bool Expression::AssignMatrixExpressions(
+bool Expression::assignMatrixExpressions(
   const Matrix<Expression>& input,
   Calculator& owner,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
   bool dontReduceTypes
 ) {
-  MacroRegisterFunctionWithName("Expression::AssignMatrixExpressions");
+  MacroRegisterFunctionWithName("Expression::assignMatrixExpressions");
   if (reduceOneRowToSequenceAndOneByOneToNonMatrix && input.numberOfRows == 1) {
     if (input.numberOfColumns == 1) {
       (*this) = input(0, 0);
@@ -1653,7 +1653,7 @@ bool Calculator::getMatrixExpressions(
   const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
 ) {
   MacroRegisterFunctionWithName("Calculator::getMatrixExpressions");
-  if (!input.IsSequenceNElementS() && !input.isMatrix() && !input.IsIntervalRealLine()) {
+  if (!input.isSequenceNElements() && !input.isMatrix() && !input.isIntervalRealLine()) {
     output.initialize(1, 1);
     output(0, 0) = input;
     return true;
@@ -1665,7 +1665,7 @@ bool Calculator::getMatrixExpressions(
     }
     return false;
   }
-  if (!input[1].IsSequenceNElementS() && !input[1].startsWith(this->opIntervalOpen())) {
+  if (!input[1].isSequenceNElements() && !input[1].startsWith(this->opIntervalOpen())) {
     if (desiredNumRows > 0) {
       if (desiredNumRows != 1) {
         return false;
@@ -1695,7 +1695,7 @@ bool Calculator::getMatrixExpressions(
   output.initialize(input.size() - 1, input[1].size() - 1);
   for (int i = 1; i < input.size(); i ++) {
     if (
-      input[i].IsSequenceNElementS(output.numberOfColumns) ||
+      input[i].isSequenceNElements(output.numberOfColumns) ||
       input[i].startsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
     ) {
       for (int j = 1; j < input[i].size(); j ++) {

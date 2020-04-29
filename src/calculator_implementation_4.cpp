@@ -83,7 +83,7 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
   MacroRegisterFunctionWithName("Calculator::getVectorExpressions");
   output.reserve(input.size());
   output.setSize(0);
-  if (!input.IsSequenceNElementS() && !input.startsWith(this->opIntervalOpen())) {
+  if (!input.isSequenceNElements() && !input.startsWith(this->opIntervalOpen())) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
         return *this << "<hr>getVector failure: target dim is "
@@ -890,7 +890,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
       resultMat.elements[i][j].addChildOnTop(rightIE);
     }
   }
-  return output.AssignMatrixExpressions(resultMat, theCommands, true, true);
+  return output.assignMatrixExpressions(resultMat, theCommands, true, true);
 }
 
 bool Calculator::innerGetChevGen(
@@ -1125,7 +1125,7 @@ bool Expression::hasBoundVariables() const {
   if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH) {
     global.fatal << "This is a programming error: function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
-  if (this->IsListOfTwoAtomsStartingWith(this->owner->opBind())) {
+  if (this->isListOfTwoAtomsStartingWith(this->owner->opBind())) {
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
@@ -1191,14 +1191,14 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
     return false;
   }
   bool result = false;
-  if (!input.IsListStartingWithAtom(theOp)) {
+  if (!input.isListStartingWithAtom(theOp)) {
     output.addOnTop(input);
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (this->AppendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp)) {
         result = true;
       }
-      if (i < input.size() - 1 && input[i].IsListStartingWithAtom(theOp) && input[i].size() > 2) {
+      if (i < input.size() - 1 && input[i].isListStartingWithAtom(theOp) && input[i].size() > 2) {
         result = true;
       }
     }
@@ -1403,7 +1403,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
 
 bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyByOne");
-  if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.size() != 3) {
+  if (!input.isListStartingWithAtom(theCommands.opTimes()) || input.size() != 3) {
     return false;
   }
   if (!input[1].isEqualToOne()) {
@@ -1454,19 +1454,19 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
     return false;
   }
   const Expression& firstElt = input[1];
-  if (!firstElt.IsBuiltInAtom()) {
+  if (!firstElt.isBuiltInAtom()) {
     if (!firstElt.startsWith(theCommands.opThePower(), 3)) {
       return false;
     }
-    if (!firstElt[1].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
+    if (!firstElt[1].isAtomWhoseExponentsAreInterpretedAsFunction()) {
       return false;
     }
   }
-  if (firstElt.IsAtomNotInterpretedAsFunction()) {
+  if (firstElt.isAtomNotInterpretedAsFunction()) {
     return false;
   }
   const Expression& secondElt = input[2];
-  if (secondElt.IsSequenceNElementS() || secondElt.startsWith(theCommands.opIntervalOpen())) {
+  if (secondElt.isSequenceNElements() || secondElt.startsWith(theCommands.opIntervalOpen())) {
     output = secondElt;
     return output.setChild(0, firstElt);
   }
@@ -1747,7 +1747,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
   }
   if (
     input[1].startsWith(theCommands.opIntegral(), 2) ||
-    input[1].IsOperationGiven(theCommands.opIntegral())
+    input[1].isOperationGiven(theCommands.opIntegral())
   ) {
     return false;
   }
@@ -1784,7 +1784,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
 bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss) {
   Matrix<Expression> theMat;
   theMat.MakeIdMatrix(theDim, inputBoss.EOne(), inputBoss.EZero());
-  return this->AssignMatrixExpressions(theMat, inputBoss, false, true);
+  return this->assignMatrixExpressions(theMat, inputBoss, false, true);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2063,7 +2063,7 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
   if (differenceEsimplified.isEqualToZero()) {
     return true;
   }
-  if (differenceEsimplified.IsSequenceNElementS()) {
+  if (differenceEsimplified.isSequenceNElements()) {
     for (int i = 1; i < differenceEsimplified.size(); i ++) {
       if (!differenceEsimplified[i].isEqualToZero()) {
         return false;
@@ -2085,7 +2085,7 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
   return true;
 }
 
-SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() const {
+SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const {
   this->checkInitialization();
   ExpressionContext myContext = this->getContext();
   int indexSSalg = myContext.indexAmbientSemisimpleLieAlgebra;
@@ -2303,8 +2303,8 @@ bool Function::inputFitsMyInnerType(const Expression& input) {
   if (input.children.size != 3) {
     return false;
   }
-  bool argument1good = this->theArgumentTypes[0].theData == - 1 ? true : input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
-  bool argument2good = this->theArgumentTypes[1].theData == - 1 ? true : input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  bool argument1good = this->theArgumentTypes[0].theData == - 1 ? true : input[1].isListStartingWithAtom(this->theArgumentTypes[0].theData);
+  bool argument2good = this->theArgumentTypes[1].theData == - 1 ? true : input[2].isListStartingWithAtom(this->theArgumentTypes[1].theData);
   return argument1good && argument2good;
 }
 
@@ -2974,7 +2974,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   ) {
     return output.makeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   }
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   std::string letterString = "x";
@@ -3015,7 +3015,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   )) {
     return output.makeError("Failed to extract highest weight and algebra", theCommands);
   }
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   if (tempSel.CardinalitySelection > 0) {
@@ -3042,7 +3042,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   )) {
     return output.makeError("Failed to extract highest weight and algebra", theCommands);
   }
-  if (output.IsError()) {
+  if (output.isError()) {
     return true;
   }
   if (tempSel.CardinalitySelection > 0) {

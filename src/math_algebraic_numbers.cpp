@@ -588,11 +588,11 @@ bool AlgebraicNumber::needsParenthesisForMultiplication(
   return (additiveForm.size() > 1);
 }
 
-bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
+bool AlgebraicNumber::needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
   if (this->owner == nullptr) {
     Rational tempRat;
     if (this->isRational(&tempRat)) {
-      return tempRat.NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+      return tempRat.needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     }
     return false;
   }
@@ -601,7 +601,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost
   if (additiveForm.size() != 1) {
     return true;
   }
-  return additiveForm.coefficients[0].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  return additiveForm.coefficients[0].needsParenthesisForMultiplicationWhenSittingOnTheRightMost();
 }
 
 bool AlgebraicNumber::CheckNonZeroOwner() const {

@@ -36,6 +36,10 @@ public:
   static bool innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddPolynomialModPToPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -43,7 +47,10 @@ public:
 
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
@@ -61,8 +68,8 @@ public:
   static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyDoubleOrRatByDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRationalByRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyCharacterByCharacter(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output);
@@ -211,8 +218,8 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   }
   Expression theConverted, theComputed;
   if (
-    input.IsListStartingWithAtom(theCommands.opTimes()) ||
-    input.IsListStartingWithAtom(theCommands.opPlus())
+    input.isListStartingWithAtom(theCommands.opTimes()) ||
+    input.isListStartingWithAtom(theCommands.opPlus())
   ) {
     theComputed.reset(theCommands, input.size());
     theComputed.addChildOnTop(input[0]);
@@ -225,12 +232,12 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       }
       theComputed.addChildOnTop(theConverted);
     }
-    if (input.IsListStartingWithAtom(theCommands.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(
+    if (input.isListStartingWithAtom(theCommands.opTimes())) {
+      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
         theCommands, theComputed, output
       );
     }
-    if (input.IsListStartingWithAtom(theCommands.opPlus())) {
+    if (input.isListStartingWithAtom(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     }
     global.fatal << "Error, this line of code should never be reached. " << global.fatal;

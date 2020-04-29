@@ -158,141 +158,108 @@ private:
   }
   Expression zero();
   static Expression zeroStatic();
-  bool AddChildRationalOnTop(const Rational& inputRat);
+  bool addChildRationalOnTop(const Rational& inputRat);
   bool addChildOnTop(const Expression& inputChild);
   bool addChildAtomOnTop(const std::string& theOperationString);
   bool addChildAtomOnTop(int theOp);
-  void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const;
-  bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand) const;
-  void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent) const;
-  void GetMultiplicandsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
-  void GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
-  void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
-  void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
+  void getBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const;
+  bool splitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand) const;
+  void getBaseExponentForm(Expression& outputBase, Expression& outputExponent) const;
+  void getMultiplicandsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
+  void getMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth = 0) const;
+  void getCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff) const;
+  void getCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff) const;
   bool setChildAtomValue(int childIndex, const std::string& theAtom);
   bool setChildAtomValue(int childIndex, int TheAtomValue);
   int size() const {
     return this->children.size;
   }
   bool setChild(int childIndexInMe, const Expression& inputChild);
-  bool AssignMatrixExpressions(
+  bool assignMatrixExpressions(
     const Matrix<Expression>& input,
     Calculator& owner,
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix,
     bool dontReduceTypes
   );
   template<class Coefficient>
-  bool AssignMatrix(
+  bool assignMatrix(
     const Matrix<Coefficient>& input,
     Calculator& owner,
     ExpressionContext const* inputContext = nullptr,
     bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
   );
-  bool DivisionByMeShouldBeWrittenInExponentForm() const;
-  bool IsCalculatorStatusChanger() const;
-  bool AssignMeMyChild(int childIndex) {
-    Expression tempExp = (*this)[childIndex];
-    this->operator=(tempExp);
-    return true;
-  }
+  bool divisionByMeShouldBeWrittenInExponentForm() const;
+  bool isCalculatorStatusChanger() const;
   bool isList() const;
-  bool isListNElements(int N = - 1) const {
-    if (!this->isList()) {
-      return false;
-    }
-    if (N == - 1) {
-      return true;
-    }
-    return this->children.size == N;
-  }
-  bool StartsWithBuiltInAtom() const;
-  bool StartsWithFunctionWithComplexRange() const;
-  bool StartsWithArithmeticOperation() const;
+  bool isListNElements(int N = - 1) const;
+  bool startsWithBuiltInAtom() const;
+  bool startsWithFunctionWithComplexRange() const;
+  bool startsWithArithmeticOperation() const;
   bool startsWith(int theOp = - 1, int N = - 1) const;
 
-  bool StartsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
-  bool IsListStartingWithAtom(int theOp = - 1) const {
-    if (!this->isList()) {
-      return false;
-    }
-    if (!(*this)[0].IsAtom()) {
-      return false;
-    }
-    if (theOp == - 1) {
-      return true;
-    }
-    return (*this)[0].theData == theOp;
-  }
-  bool IsListOfTwoAtomsStartingWith(int theOp) const {
-    if (!this->IsListStartingWithAtom(theOp)) {
-      return false;
-    }
-    if (this->children.size != 2) {
-      return false;
-    }
-    return (*this)[1].IsAtom();
-  }
-  bool HasSameContextArgumentsNoLog() const;
-  bool IsFrozen() const;
-  bool IsAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const;
-  bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
-  bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
-  bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
+  bool startsWithGivenOperation(const std::string& theOperation, int desiredChildren = - 1) const;
+  bool isListStartingWithAtom(int theOp = - 1) const;
+  bool isListOfTwoAtomsStartingWith(int theOp) const;
+  bool isFrozen() const;
+  bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr) const;
+  bool isAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
+  bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
+  bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool isMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
   template<class theType>
   bool isMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
 
-  bool IsAtom() const;
-  bool IsOperationGiven(const std::string& desiredAtom) const;
-  bool IsOperationGiven(int desiredDataUseMinusOneForAny = - 1) const;
-  bool IsOperation(int& outputWhichOperationIndex) const;
-  bool IsOperation(std::string* outputWhichOperation = nullptr) const;
+  bool isAtom() const;
+  bool isOperationGiven(const std::string& desiredAtom) const;
+  bool isOperationGiven(int desiredDataUseMinusOneForAny = - 1) const;
+  bool isOperation(int& outputWhichOperationIndex) const;
+  bool isOperation(std::string* outputWhichOperation = nullptr) const;
 
-  bool IsBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
-  bool IsGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr) const;
-  bool IsIntegraLfdx(
+  bool isBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
+  bool isGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr) const;
+  bool isIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
     Expression* integrationSet = nullptr
   ) const;
-  bool IsIndefiniteIntegralfdx(
+  bool isIndefiniteIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
     Expression* integrationSet = nullptr
   ) const;
-  bool IsDefiniteIntegralOverIntervalfdx(
+  bool isDefiniteIntegralOverIntervalFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
     Expression* integrationSet = nullptr
   ) const;
-  bool IsDifferentialOneFormOneVariablE(
+  bool isDifferentialOneFormOneVariable(
     Expression* outputDifferentialOfWhat = nullptr,
     Expression* outputCoeffInFrontOfDifferential = nullptr
   ) const;
-  bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation = nullptr) const;
-  bool IsArithmeticOperation(std::string* outputWhichOperation = nullptr) const;
-  bool IsCacheableExpression() const;
-  bool IsBuiltInScalar() const;
-  bool IsElementaryObject() const;
+  bool isKnownFunctionWithComplexRange(std::string* outputWhichOperation = nullptr) const;
+  bool isArithmeticOperation(std::string* outputWhichOperation = nullptr) const;
+  bool isCacheableExpression() const;
+  bool isBuiltInScalar() const;
+  bool isElementaryObject() const;
   bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInType(int* outputWhichType) const;
   const Expression& operator[](int n) const;
-  bool IsIntervalRealLine() const;
-  bool IsSequenceDoubleButNotTripleNested() const;
-  bool IsSequenceNElementS(int N = - 2) const;
-  bool IsError(std::string* outputErrorMessage = nullptr) const;
-  bool IsContext() const;
-  bool NeedsParenthesisForBaseOfExponent() const;
+  bool isIntervalRealLine() const;
+  bool isSequenceDoubleButNotTripleNested() const;
+  bool isSequenceNElements(int N = - 2) const;
+  bool isError(std::string* outputErrorMessage = nullptr) const;
+  bool isContext() const;
+  bool needsParenthesisForBaseOfExponent() const;
   bool needsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
-  bool NeedsParenthesisForAddition() const;
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
+  bool needsParenthesisForAddition() const;
+  bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
-  int GetExpressionTreeSize() const;
+  int getExpressionTreeSize() const;
 
   template <class theType>
   bool convertInternally(Expression& output) const;
   template <class theType>
-  bool ConvertsInternally(WithContext<theType>* whichElement = nullptr) const;
+  bool convertsInternally(WithContext<theType>* whichElement = nullptr) const;
 
   template <class theType>
   bool isOfType() const {
@@ -303,7 +270,7 @@ private:
     if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
-    if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
+    if (this->children.size < 2 || !this->GetLastChild().isAtom()) {
       return false;
     }
     return true;
@@ -313,7 +280,7 @@ private:
     if (this->isOfType<theType>()) {
       return true;
     }
-    if (this->IsElementaryObject()) {
+    if (this->isElementaryObject()) {
       return false;
     }
     for (int i = 0; i < this->size(); i ++) {
@@ -332,7 +299,7 @@ private:
     if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
-    if (this->children.size < 2 || !this->GetLastChild().IsAtom()) {
+    if (this->children.size < 2 || !this->GetLastChild().isAtom()) {
       return false;
     }
     if (whichElement == 0) {
@@ -364,26 +331,14 @@ private:
     Calculator& owner
   );
   template <class theType>
-  bool AddChildValueOnTop(const theType& inputValue) {
+  bool addChildValueOnTop(const theType& inputValue) {
     this->checkInitialization();
     Expression tempE;
     tempE.assignValue(inputValue, *this->owner);
     tempE.checkConsistency();
     return this->addChildOnTop(tempE);
   }
-  template <class theType>
-  bool AssignValueWithContextToChild(
-    int childIndex,
-    const theType& inputValue,
-    const Expression& theContext,
-    Calculator& owner
-  ) {
-    Expression tempE;
-    tempE.assignValueWithContext(inputValue, theContext, owner);
-    return this->setChild(childIndex, tempE);
-  }
   bool setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
-  bool RemoveContext();
   bool hasContext() const;
   bool hasNonEmptyContext() const;
   ExpressionContext getContext() const;
@@ -396,10 +351,7 @@ private:
   bool ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
   bool ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
   bool ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar);
-  SemisimpleLieAlgebra* GetAmbientSSAlgebraNonConstUseWithCaution() const;
-  const SemisimpleLieAlgebra* GetAmbientSSAlgebra() const {
-    return this->GetAmbientSSAlgebraNonConstUseWithCaution();
-  }
+  SemisimpleLieAlgebra* getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const;
   bool isEqualToZero() const;
   bool isEqualToOne() const;
   bool IsEqualToTwo() const;
@@ -2150,7 +2102,7 @@ public:
     if (!theFun(*this, input, output)) {
       return false;
     }
-    return !output.IsError();
+    return !output.isError();
   }
   bool ExpressionMatchesPattern(
     const Expression& thePattern,
@@ -2926,18 +2878,18 @@ bool Expression::isMatrixOfType(int* outputNumRows, int* outputNumCols) const {
   if (!(*this)[0].startsWith(this->owner->opMatriX(), 2)) {
     return false;
   }
-  if (!(*this)[0][1].IsOperationGiven(this->getTypeOperation<theType>())) {
+  if (!(*this)[0][1].isOperationGiven(this->getTypeOperation<theType>())) {
     return false;
   }
   const Expression& rows = (*this)[1];
-  if (!rows.IsSequenceNElementS()) {
+  if (!rows.isSequenceNElements()) {
     return false;
   }
   if (rows.size() < 2) {
     return false;
   }
   const Expression& firstRow = rows[1];
-  if (!firstRow.IsSequenceNElementS()) {
+  if (!firstRow.isSequenceNElements()) {
     return false;
   }
   if (firstRow.size() < 2) {
@@ -2961,7 +2913,7 @@ bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
   if (!this->startsWith(this->getTypeOperation<theType>())) {
     return false;
   }
-  if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
+  if (this->size() < 2 || !this->GetLastChild().isAtom()) {
     return false;
   }
   if (whichElement == 0) {
@@ -3062,7 +3014,7 @@ bool Expression::makeSum(
     } else if (!(theSum.coefficients[i] == 1)) {
       current.reset(theCommands, 3);
       current.addChildAtomOnTop(theCommands.opTimes());
-      current.AddChildValueOnTop(theSum.coefficients[i]);
+      current.addChildValueOnTop(theSum.coefficients[i]);
       current.addChildOnTop(theSum[i]);
     } else {
       current = theSum[i];
@@ -3311,13 +3263,13 @@ bool Calculator::getTypeHighestWeightParabolic(
 }
 
 template <class Coefficient>
-bool Expression::AssignMatrix(
+bool Expression::assignMatrix(
   const Matrix<Coefficient>& input,
   Calculator& owner,
   const ExpressionContext *inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
-  MacroRegisterFunctionWithName("Expression::AssignMatrix");
+  MacroRegisterFunctionWithName("Expression::assignMatrix");
   Matrix<Expression> theMatEs;
   theMatEs.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;
@@ -3331,7 +3283,7 @@ bool Expression::AssignMatrix(
       theMatEs(i, j) = currentElt;
     }
   }
-  return this->AssignMatrixExpressions(
+  return this->assignMatrixExpressions(
     theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
   );
 }
@@ -3367,7 +3319,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
         } else {
           currentBase.reset(theCommands);
           currentBase.addChildAtomOnTop("x");
-          currentBase.AddChildValueOnTop(Rational(j));
+          currentBase.addChildValueOnTop(Rational(j));
         }
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;

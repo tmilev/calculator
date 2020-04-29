@@ -983,7 +983,7 @@ bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
   newExpr.reset(*this);
   newExpr.children.reserve(theSequenceElt.theData.children.size);
   newExpr.addChildOnTop(theFunctionElt.theData);
-  if (theSequenceElt.theData.IsAtom()) {
+  if (theSequenceElt.theData.isAtom()) {
     newExpr.addChildOnTop(theSequenceElt.theData);
   } else {
     for (int i = 1; i < theSequenceElt.theData.children.size; i ++) {
@@ -1137,7 +1137,7 @@ bool Calculator::ReplaceMatrixXByE() {
         theMat.elements[i][j] = theMatElt.dataList[i][j + 1];
       }
     }
-    theMatElt.theData.AssignMatrixExpressions(theMat, *this, true, true);
+    theMatElt.theData.assignMatrixExpressions(theMat, *this, true, true);
   } else {
     theMatElt.theData.makeMatrix(*this);
   }
@@ -1744,7 +1744,7 @@ bool Calculator::AllowsTimesInNext(const std::string& thePreceding) {
 
 bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead) {
   if (thePreceding.controlIndex == this->conExpression()) {
-    if (thePreceding.theData.IsBuiltInAtom()) {
+    if (thePreceding.theData.isBuiltInAtom()) {
       return lookAhead == "+" || lookAhead == "-" || lookAhead == "*" || lookAhead == "/" ||
       lookAhead == "\\cup" ||
       lookAhead == ")" || lookAhead == "]" || lookAhead == "}" ||
@@ -2148,12 +2148,12 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceXXByEEmptySequence();
   }
   if (secondToLastS == "\\text" && lastS == "d") {
-    if (lastE.theData.IsOperationGiven("d")) {
+    if (lastE.theData.isOperationGiven("d")) {
       return this->ReplaceXXbyO(this->opDifferential());
     }
   }
   if (thirdToLastS == "\\text" && secondToLastS == "Expression") {
-    if (secondToLastE.theData.IsOperationGiven("d")) {
+    if (secondToLastE.theData.isOperationGiven("d")) {
       return this->ReplaceXXYbyOY(this->opDifferential());
     }
   }
@@ -2428,7 +2428,7 @@ bool Calculator::ApplyOneRule() {
       return this->ReplaceXEXByEcontainingOE(this->opIntervalClosed());
     }
     if (this->flagUseBracketsForIntervals) {
-      if (secondToLastE.theData.IsSequenceNElementS(2)) {
+      if (secondToLastE.theData.isSequenceNElements(2)) {
         if (
           this->isSeparatorFromTheLeftForInterval(fourthToLastS) &&
           thirdToLastS == "(" &&

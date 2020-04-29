@@ -2873,7 +2873,8 @@ public:
   Polynomial<Coefficient> modulus;
   Polynomial<Coefficient> value;
   void reduce();
-  void operator*=(PolynomialModuloPolynomial<Coefficient>& other);
+  void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
+  void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* theFormat = nullptr);
   PolynomialModuloPolynomial<Coefficient> one();
   static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);

@@ -543,7 +543,7 @@ bool CalculatorFunctions::innerIntervalClosedFromSequence(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[1].IsSequenceNElementS(2)) {
+  if (!input[1].isSequenceNElements(2)) {
     return false;
   }
   output = input[1];
@@ -557,7 +557,7 @@ bool CalculatorFunctions::innerIntervalOpenFromSequence(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[1].IsSequenceNElementS(2)) {
+  if (!input[1].isSequenceNElements(2)) {
     return false;
   }
   output = input[1];
@@ -571,7 +571,7 @@ bool CalculatorFunctions::innerIntervalRightClosedFromSequence(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[1].IsSequenceNElementS()) {
+  if (!input[1].isSequenceNElements()) {
     return false;
   }
   output = input[1];
@@ -585,7 +585,7 @@ bool CalculatorFunctions::innerIntervalLeftClosedFromSequence(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[1].IsSequenceNElementS()) {
+  if (!input[1].isSequenceNElements()) {
     return false;
   }
   output = input[1];
@@ -596,7 +596,7 @@ bool CalculatorFunctions::innerGetFirstSummandContaining(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFirstSummandContaining");
-  if (!input.StartsWithGivenOperation("GetFirstSummandContaining", 3)) {
+  if (!input.startsWithGivenOperation("GetFirstSummandContaining", 3)) {
     return false;
   }
   List<Expression> theSummands;
@@ -614,7 +614,7 @@ bool CalculatorFunctions::innerGetSummand(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetSummand");
-  if (!input.StartsWithGivenOperation("GetSummand", 3)) {
+  if (!input.startsWithGivenOperation("GetSummand", 3)) {
     return false;
   }
   const Expression& theExpression = input[1];
@@ -654,7 +654,7 @@ bool CalculatorFunctions::innerGetSummand(
     return output.addChildOnTop(input[2] - shiftE);
   }
   List<Expression> theMultiplicands;
-  theExpression.GetMultiplicandsRecursive(theMultiplicands);
+  theExpression.getMultiplicandsRecursive(theMultiplicands);
   Expression theSum = *theMultiplicands.lastObject();
   theMultiplicands.removeLastObject();
   Expression theCoeff;
@@ -786,7 +786,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   }
   thePlotObj.thePlotType = "plotDirectionField";
   if (
-    !input[4].IsSequenceNElementS(2) &&
+    !input[4].isSequenceNElements(2) &&
     !input[4].startsWith(theCommands.opIntervalOpen(), 3)
   ) {
     return theCommands
@@ -1305,7 +1305,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   if (input.size() != 3) {
     return false;
   }
-  if (!input[1].IsSequenceNElementS()) {
+  if (!input[1].isSequenceNElements()) {
     return false;
   }
   HashedList<Expression> boundVars;
@@ -1343,7 +1343,7 @@ bool CalculatorFunctions::innerApplyToList(Calculator& theCommands, const Expres
     return false;
   }
   const Expression& theFun = input[1];
-  if (!input[2].IsSequenceNElementS()) {
+  if (!input[2].isSequenceNElements()) {
     return false;
   }
   List<Expression> result;
@@ -1577,7 +1577,7 @@ bool CalculatorFunctions::innerDegreesToRadians(
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!input[2].IsOperationGiven("\\circ")) {
+  if (!input[2].isOperationGiven("\\circ")) {
     return false;
   }
   Expression piE;
@@ -1671,7 +1671,7 @@ bool CalculatorFunctions::innerCollectOpands(
   if (input.size() != 3) {
     return false;
   }
-  if (!input[1].IsAtom()) {
+  if (!input[1].isAtom()) {
     return false;
   }
   List<Expression> theList;
@@ -1710,10 +1710,10 @@ bool CalculatorFunctions::LeftIntervalGreaterThanRight(const Expression& left, c
   if (left.size() != 3 || right.size() != 3) {
     return left > right;
   }
-  if (!left.IsIntervalRealLine()) {
+  if (!left.isIntervalRealLine()) {
     return left > right;
   }
-  if (!right.IsIntervalRealLine()) {
+  if (!right.isIntervalRealLine()) {
     return left > right;
   }
   double left1, right1, left2, right2;
@@ -1779,10 +1779,10 @@ bool CalculatorFunctions::innerIntersectIntervals(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  if (!leftE.IsIntervalRealLine()) {
+  if (!leftE.isIntervalRealLine()) {
     return false;
   }
-  if (!rightE.IsIntervalRealLine()) {
+  if (!rightE.isIntervalRealLine()) {
     return false;
   }
   double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
@@ -1912,10 +1912,10 @@ bool CalculatorFunctions::innerUnionIntervals(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  if (!leftE.IsIntervalRealLine()) {
+  if (!leftE.isIntervalRealLine()) {
     return false;
   }
-  if (!rightE.IsIntervalRealLine()) {
+  if (!rightE.isIntervalRealLine()) {
     return false;
   }
   double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
@@ -2040,11 +2040,11 @@ bool CalculatorFunctions::innerUnionEmptySet(Calculator& theCommands, const Expr
   if (!input.startsWith(theCommands.opUnion(), 3)) {
     return false;
   }
-  if (input[1].IsOperationGiven("\\emptyset")) {
+  if (input[1].isOperationGiven("\\emptyset")) {
     output = input[2];
     return true;
   }
-  if (input[2].IsOperationGiven("\\emptyset")) {
+  if (input[2].isOperationGiven("\\emptyset")) {
     output = input[1];
     return true;
   }
@@ -2084,7 +2084,7 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
     if (leftList[i] == rightList[i]) {
       continue;
     }
-    if ((!leftList[i].IsIntervalRealLine() ) || (!rightList[i].IsIntervalRealLine())) {
+    if ((!leftList[i].isIntervalRealLine() ) || (!rightList[i].isIntervalRealLine())) {
       return output.assignValue(0, theCommands);
     }
     if (leftList[i][0] != rightList[i][0]) {
@@ -2125,11 +2125,11 @@ bool CalculatorFunctions::innerIntersectEmptySet(
   if (!input.startsWith(theCommands.opIntersection(), 3)) {
     return false;
   }
-  if (input[1].IsOperationGiven("\\emptyset")) {
+  if (input[1].isOperationGiven("\\emptyset")) {
     output = input[1];
     return true;
   }
-  if (input[2].IsOperationGiven("\\emptyset")) {
+  if (input[2].isOperationGiven("\\emptyset")) {
     output = input[2];
     return true;
   }
@@ -2202,7 +2202,7 @@ bool CalculatorFunctions::innerIsProductLinearOrConstTermsIn(
 bool CalculatorFunctions::innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerOrIdentical");
   (void) theCommands;
-  if (!input.StartsWithGivenOperation("or", 3)) {
+  if (!input.startsWithGivenOperation("or", 3)) {
     return false;
   }
   if (input[1] == input[2]) {

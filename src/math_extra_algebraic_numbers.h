@@ -48,7 +48,7 @@ class AlgebraicNumber {
     Rational half(1, 2);
     return this->AssignCosRationalTimesPi(half - input, inputOwner);
   }
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
+  bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
   bool checkConsistency() const;
   bool CheckNonZeroOwner() const;

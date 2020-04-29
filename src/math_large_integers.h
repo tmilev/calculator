@@ -467,7 +467,7 @@ public:
   static unsigned long long int TotalLargeMultiplications;
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
+  bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->isNegative();
   }
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const {

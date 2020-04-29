@@ -162,7 +162,7 @@ public:
     output << theElt.toString();
     return output;
   }
-  bool IsError();
+  bool isError();
   bool ProblemOpensIfAvailable(std::stringstream* commentsOnFailure);
   bool PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);

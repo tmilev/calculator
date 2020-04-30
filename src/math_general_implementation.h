@@ -380,7 +380,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::ChooseABasis() {
+void Vectors<Coefficient>::chooseABasis() {
   Vectors<Rational> output;
   Matrix<Coefficient> tempMat;
   Selection tempSel;
@@ -394,7 +394,7 @@ void Vectors<Coefficient>::ChooseABasis() {
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
+void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
   Selection BufferSel;
   Matrix<Coefficient> Buffer;
   if (this->size != 0 && theDim != this->getDimension()) {
@@ -421,10 +421,10 @@ void Vectors<Coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::LinSpanContainsVector(const Vector<Coefficient>& input) const {
+bool Vectors<Coefficient>::linearSpanContainsVector(const Vector<Coefficient>& input) const {
     Matrix<Coefficient> buffer;
     Selection bufferSelection;
-    return this->LinSpanContainsVector(input, buffer, bufferSelection);
+    return this->linearSpanContainsVector(input, buffer, bufferSelection);
   }
 
 template <class Coefficient>

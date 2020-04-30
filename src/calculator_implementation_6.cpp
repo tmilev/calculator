@@ -1083,7 +1083,7 @@ bool CalculatorFunctions::innerSendEmailWithMailGun(
       return theCommands << "Arguments of " << input.toString()
       << "expected to be strings (enclose in \"\" please). ";
     }
-    theEmail.SendEmailWithMailGun(&out, &out, &out);
+    theEmail.sendEmailWithMailGun(&out, &out, &out);
   } else {
     (void) input;
     out << "Error: database not running. ";
@@ -2525,14 +2525,14 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
     return output.makeError(errorStream.str(), theCommands);
   }
   MapList<std::string, Expression, MathRoutines::HashString> theSub;
-  theSub.SetKeyValue("x", theVars[0]);
-  theSub.SetKeyValue("f", theFun);
-  theSub.SetKeyValue("a", theCommands.getNewAtom());
-  theSub.SetKeyValue("iteratedMap", theCommands.getNewAtom());
-  theSub.SetKeyValue("NewtonMap", theCommands.getNewAtom());
-  theSub.SetKeyValue("y", theCommands.getNewAtom());
-  theSub.SetKeyValue("startingPoint", input[2]);
-  theSub.SetKeyValue("numIterations", input[3]);
+  theSub.setKeyValue("x", theVars[0]);
+  theSub.setKeyValue("f", theFun);
+  theSub.setKeyValue("a", theCommands.getNewAtom());
+  theSub.setKeyValue("iteratedMap", theCommands.getNewAtom());
+  theSub.setKeyValue("NewtonMap", theCommands.getNewAtom());
+  theSub.setKeyValue("y", theCommands.getNewAtom());
+  theSub.setKeyValue("startingPoint", input[2]);
+  theSub.setKeyValue("numIterations", input[3]);
   return output.AssignStringParsed(
     "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
     "y_{0} = startingPoint;"

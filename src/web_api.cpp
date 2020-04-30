@@ -300,7 +300,7 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
-  if (!Database::get().theUser.SetPassword(
+  if (!Database::get().theUser.setPassword(
     theUser.username,
     newPassword,
     newAuthenticationToken,

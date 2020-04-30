@@ -242,7 +242,7 @@ void Database::FallBack::CreateHashIndex(const std::string& collectionName, cons
   newIndex.collection = collectionName;
   newIndex.label = theKey;
   newIndex.collectionAndLabelCache = newIndex.collectionAndLabel();
-  this->indices.SetKeyValue(newIndex.collectionAndLabelCache, newIndex);
+  this->indices.setKeyValue(newIndex.collectionAndLabelCache, newIndex);
 }
 
 std::string Database::FallBack::Index::collectionAndLabelStatic(

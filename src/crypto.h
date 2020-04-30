@@ -17,7 +17,7 @@ public:
   std::string theExponentString;
   LargeIntegerUnsigned theModulus;
   LargeIntegerUnsigned theExponent;
-  bool LoadFromJSON(
+  bool loadFromJSON(
     JSData& input,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
@@ -153,7 +153,7 @@ public:
     const List<unsigned char>& input,
     std::stringstream* commentsOnFailure
   );
-  bool LoadFromJSON(
+  bool loadFromJSON(
     JSData& input,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral

@@ -1159,7 +1159,7 @@ bool Database::User::LoadUserInfo(
   )) {
     return false;
   }
-  return output.LoadFromJSON(userEntry);
+  return output.loadFromJSON(userEntry);
 }
 
 bool Database::FetchCollectionNames(

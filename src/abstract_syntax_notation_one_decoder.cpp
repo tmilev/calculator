@@ -1021,7 +1021,7 @@ void ASNObject::initializeAddSample(
   )) {
     global.fatal << "Failure in certificate field initialization is not allowed. " << global.fatal;
   }
-  container.SetKeyValue(incoming.name, incoming);
+  container.setKeyValue(incoming.name, incoming);
 }
 
 MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ASNObject::ObjectIdsToNames() {
@@ -1155,7 +1155,7 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
   ASNObject::ObjectIdsToNames();
   for (int i = 0; i < container.theValues.size; i ++) {
     ASNObject& current = container.theValues[i];
-    reverseMap.SetKeyValue(current.objectId.ASNAtom, current);
+    reverseMap.setKeyValue(current.objectId.ASNAtom, current);
   }
   return container;
 }
@@ -1228,7 +1228,7 @@ bool ASNObject::LoadFieldsFromASNSequence(
       }
       return false;
     }
-    output.SetKeyValue(current.name, current);
+    output.setKeyValue(current.name, current);
   }
   return true;
 

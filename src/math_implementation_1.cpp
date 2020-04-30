@@ -110,7 +110,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   Rational theMin = 0;
   int minIndex = - 1;
   if (this->owner == nullptr) {
-    global.fatal << "Zero owner not allowed here. " << global.fatal;
+    global.fatal << "zero owner not allowed here. " << global.fatal;
   }
   WeylGroupData& theWeyl = *this->owner;
   theWeyl.ComputeRho(true);
@@ -324,7 +324,7 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannP
     out << "eAlpha(" << displayIndex << ", ";
   }
   out << "littelmann"
-  << inputStartingPath.owner->GetFundamentalCoordinatesFromSimple(*inputStartingPath.Waypoints.lastObject()).toString();
+  << inputStartingPath.owner->getFundamentalCoordinatesFromSimple(*inputStartingPath.Waypoints.lastObject()).toString();
   for (int i = 0; i < input.size; i ++) {
     out << " ) ";
   }
@@ -424,7 +424,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimen
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
   Vector<Rational> theHWdualCoords = theWeyl.GetDualCoordinatesFromFundamental(
-    theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
+    theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
   );
   List<Coefficient> theSub;
   theSub.setSize(theHWdualCoords.size);
@@ -938,7 +938,7 @@ std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool 
     if (useSimpleCoords) {
       out << this->Waypoints[i].toString();
     } else {
-      out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).toString();
+      out << this->owner->getFundamentalCoordinatesFromSimple(this->Waypoints[i]).toString();
     }
     if (i != this->Waypoints.size - 1) {
       if (useArrows) {

@@ -32,7 +32,7 @@ void WebServer::ComputeActiveWorkerId() {
     this->workerIds.RemoveKey(worker.workerId);
   }
   worker.workerId = Crypto::convertListUnsignedCharsToHex(incomingId);
-  this->workerIds.SetKeyValue(worker.workerId, this->activeWorker);
+  this->workerIds.setKeyValue(worker.workerId, this->activeWorker);
   if (this->workerIds.size() > 2 * this->theWorkers.size) {
     global << Logger::red
     << "Warning: worker ids exceeds twice the number of workers. "

@@ -1163,13 +1163,13 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> Sn;
   auto Sngens = this->generators;
   Sngens.setSize(this->N- 1);
-  Sn.MakeTranslatableWordsSubgroup(*this,Sngens);
+  Sn.makeTranslatableWordsSubgroup(*this,Sngens);
 
   Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup> PxM;
   auto PxMgens = Sn.generators;
   if ((positive.n > 0) && (negative.n > 0))
     PxMgens.removeIndexShiftDown(positive.n);
-  PxM.MakeTranslatableWordsSubgroup(Sn,PxMgens);
+  PxM.makeTranslatableWordsSubgroup(Sn,PxMgens);
 
   GroupRepresentation<Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
@@ -1203,7 +1203,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
     subgens[i] = this->generators[i];
   if ((positive.n > 0) && (negative.n > 0))
     subgens.removeIndexShiftDown(positive.n- 1);
-  PxM.MakeTranslatableWordsSubgroup(*this, subgens);
+  PxM.makeTranslatableWordsSubgroup(*this, subgens);
   global.Comments << "Generating subgroup:\n";
   for (int i = 0; i < this->generators.size; i ++)
     global.Comments << i << " " << this->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
@@ -1307,7 +1307,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
     subgens.setSize(this->N- 1);
     for (int i = 0; i < this->N- 1; i ++)
       subgens[i] = this->generators[i];
-    subsn->MakeTranslatableWordsSubgroup(*this, subgens);
+    subsn->makeTranslatableWordsSubgroup(*this, subgens);
   }
   Subgroup<PermutationGroup, PermutationR2> PxM;
   List<int> subgens;
@@ -1316,7 +1316,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
     subgens[i] = i;
   if (pozm.size + negm.size != subsn->generators.size)
     subgens.removeIndexShiftDown(pozm.size);
-  PxM.MakeTranslatableWordsSubgroup(*subsn, subgens);
+  PxM.makeTranslatableWordsSubgroup(*subsn, subgens);
   global.Comments << "Generating subgroup:\n";
   for (int i = 0; i <subsn->generators.size; i ++)
     global.Comments << i << " " << subsn->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "

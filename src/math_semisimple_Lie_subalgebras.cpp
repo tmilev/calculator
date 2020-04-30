@@ -1321,9 +1321,9 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLa
   }
   this->currentIndexInBuffer ++;
   if (this->flagOrbitEnumeratedOnce) {
-    return this->theIterator.IncrementReturnFalseIfPastLastFALSE();
+    return this->theIterator.incrementReturnFalseIfPastLastFALSE();
   }
-  if (!this->theIterator.IncrementReturnFalseIfPastLastFALSE()) {
+  if (!this->theIterator.incrementReturnFalseIfPastLastFALSE()) {
     this->orbitSize = this->currentIndexInBuffer;
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
@@ -1905,7 +1905,7 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
     }
   } else {
     input.indexInOwner = this->theSubalgebras.theValues.size;
-    this->theSubalgebras.SetKeyValue(input.theHs, input);
+    this->theSubalgebras.setKeyValue(input.theHs, input);
   }
   input.ComputeAndVerifyFromGeneratorsAndHs();
   this->AddSubalgebraToStack(input, 0, 0);
@@ -2054,7 +2054,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
       std::stringstream out;
       out << "<hr>Failed to realize type " << newCandidate.theWeylNonEmbedded->theDynkinType.toString()
       << " because I couldn't handle the polynomial system. "
-      << "One poly system that governs the embedding follows.<br>" << newCandidate.ToStringSystemPart2() << "<hr>";
+      << "one poly system that governs the embedding follows.<br>" << newCandidate.ToStringSystemPart2() << "<hr>";
       this->comments = out.str();
       return true;
     }
@@ -2341,7 +2341,7 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::GetIndexExtremeWeightRelat
   HashedList<Vector<Coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.setExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
-    weightsSimpleCoords.addOnTop(theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
+    weightsSimpleCoords.addOnTop(theWeyl.getSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
   }
   for (int i = 0; i <weightsSimpleCoords.size; i ++) {
     bool isGood = true;
@@ -2509,7 +2509,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
       theCentralizerCartanElts[i] = this->theUnknownCartanCentralizerBasis[i].GetCartanPart();
     }
-    theCentralizerCartanElts.GetGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().cartanSymmetric);
+    theCentralizerCartanElts.getGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().cartanSymmetric);
     Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
     theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
     theDetMultiplier.makeMonomial(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
@@ -3274,7 +3274,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
     for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
-        if (this->theNilradicalSubsetWeights.ConesIntersect(
+        if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
           betterIntersection.ScaleNormalizeFirstNonZero();
@@ -3314,7 +3314,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
       theReport.report(out.str());
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->ComputeTheTwoConesRelativeToNilradicalSubset();
-        if (this->theNilradicalSubsetWeights.ConesIntersect(
+        if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights,
           this->theNonFKhwVectorsStrongRelativeToSubsetWeights,
           &this->ConeRelativelyStrongIntersection,
@@ -3574,7 +3574,7 @@ void NilradicalCandidate::ProcessMe() {
   this->flagRestrictedCentralizerConditionHoldS = false;
   this->flagParabolicACextendsToParabolicAC = true;
   this->ComputeTheTwoCones();
-  this->flagNilradicalConesIntersect = this->theNilradicalWeights.ConesIntersect(
+  this->flagNilradicalConesIntersect = this->theNilradicalWeights.conesIntersect(
     this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal
   );
   this->flagLinfiniteRelFound = false;
@@ -3587,7 +3587,7 @@ void NilradicalCandidate::ProcessMe() {
     this->ComputeParabolicACextendsToParabolicAC();
     return;
   }
-  this->flagNilradicalConesStronglyIntersect = this->theNilradicalWeights.ConesIntersect(
+  this->flagNilradicalConesStronglyIntersect = this->theNilradicalWeights.conesIntersect(
     this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, nullptr
   );
   if (this->flagNilradicalConesStronglyIntersect) {
@@ -4193,7 +4193,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   << "<br> hs scaled to act by two: " << this->theHsScaledToActByTwo.toString()
   << "<br> hs non-scaled: " << this->theHs.toString();*/
   Matrix<Rational> coCartanCandidate;
-  this->theHsScaledToActByTwo.GetGramMatrix(coCartanCandidate, &this->GetAmbientWeyl().cartanSymmetric);
+  this->theHsScaledToActByTwo.getGramMatrix(coCartanCandidate, &this->GetAmbientWeyl().cartanSymmetric);
   if (coCartanCandidate != this->theWeylNonEmbedded->coCartanSymmetric) {
     if (!allowBadCharacter) {
       global.fatal << "This is a mathematical error. The co-Cartan symmetric matrix is: "
@@ -4598,7 +4598,7 @@ bool CandidateSSSubalgebra::ComputeAndVerifyFromGeneratorsAndHs() {
     return true;
   }
   Matrix<Rational> actualCoCartan;
-  this->theHsScaledToActByTwo.GetGramMatrix(actualCoCartan, &this->owner->GetSSowner().theWeyl.cartanSymmetric);
+  this->theHsScaledToActByTwo.getGramMatrix(actualCoCartan, &this->owner->GetSSowner().theWeyl.cartanSymmetric);
   std::stringstream out;
   this->flagSubalgebraPreloadedButNotVerified = false;
   if (!(this->theWeylNonEmbedded->coCartanSymmetric == actualCoCartan)) {
@@ -4783,7 +4783,7 @@ void SlTwoSubalgebra::MakeReportPrecomputations(
   theDiagram.AmbientRootSystem = this->GetOwnerWeyl().RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(tempRoots);
   this->IndicesContainingRootSAs.addOnTop(indexMinimalContainingRegularSA);
-  tempRoots.MakeEiBasis(theDimension);
+  tempRoots.makeEiBasis(theDimension);
   this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.AmbientBilinearForm = this->GetOwnerWeyl().cartanSymmetric;
@@ -5025,7 +5025,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
       out << "<td style =\"white-space: nowrap\">";
     }
     out << theSl2.theH.GetCartanPart().toString();
-    if (!this->GetOwnerWeyl().IsDominantWeight(theSl2.theH.GetCartanPart())) {
+    if (!this->GetOwnerWeyl().isDominantWeight(theSl2.theH.GetCartanPart())) {
       out << "<b>Something has gone very wrong! The h is not dual to a dominant weight. This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }
@@ -5261,7 +5261,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   }
   Vector<Rational> zeroVector;
   zeroVector.makeZero(thePrimalRank);
-  BasisToDrawCirclesAt.MakeEiBasis(thePrimalRank);
+  BasisToDrawCirclesAt.makeEiBasis(thePrimalRank);
   Vectors<Rational> cornerWeights;
   int maxModDim = 0;
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -5347,7 +5347,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     }
     theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], "red", 4);
   }
-  theDV.theBuffer.BasisProjectionPlane.MakeEiBasis(thePrimalRank);
+  theDV.theBuffer.BasisProjectionPlane.makeEiBasis(thePrimalRank);
   out << theDV.GetHtmlDiv(thePrimalRank);
   return out.str();
 }
@@ -7066,7 +7066,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
-  this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owner->theWeyl.cartanSymmetric);
+  this->CartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->theWeyl.cartanSymmetric);
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted = this->BilinearFormSimplePrimal;
   bilinearFormInverted.invert();

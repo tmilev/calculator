@@ -41,18 +41,18 @@ class AlgebraicNumber {
   }
   static AlgebraicNumber zero();
   static AlgebraicNumber zeroStatic();
-  bool IsExpressedViaLatestBasis() const;
-  void ExpressViaLatestBasis();
-  bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
+  bool isExpressedViaLatestBasis() const;
+  void expressViaLatestBasis();
+  bool assignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  bool assignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
     Rational half(1, 2);
-    return this->AssignCosRationalTimesPi(half - input, inputOwner);
+    return this->assignCosRationalTimesPi(half - input, inputOwner);
   }
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const;
   bool checkConsistency() const;
-  bool CheckNonZeroOwner() const;
-  bool CheckCommonOwner(const AlgebraicNumber& other) const;
+  bool checkNonZeroOwner() const;
+  bool checkCommonOwner(const AlgebraicNumber& other) const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const AlgebraicNumber& input) {
     return input.hashFunction();
@@ -106,7 +106,7 @@ class AlgebraicNumber {
     std::stringstream* commentsOnFailure
   );
   void assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  void SqrtMeDefault(std::stringstream* commentsOnError);
+  void squareRootDefault(std::stringstream* commentsOnError);
   bool isSmallInteger(int* whichInteger) const {
     Rational theRat;
     if (!this->isRational(&theRat)) {
@@ -167,11 +167,11 @@ class AlgebraicNumber {
     result /= other;
     return result;
   }
-  void operator+= (const AlgebraicNumber& other);
-  void operator-= (const AlgebraicNumber& other);
-  void operator*= (const AlgebraicNumber& other);
-  void operator*= (const Rational& other);
-  void operator*= (LargeInteger other) {
+  void operator+=(const AlgebraicNumber& other);
+  void operator-=(const AlgebraicNumber& other);
+  void operator*=(const AlgebraicNumber& other);
+  void operator*=(const Rational& other);
+  void operator*=(LargeInteger other) {
     this->operator*=(Rational(other));
   }
   void operator*= (int other) {
@@ -207,32 +207,32 @@ public:
 
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> theQuadraticRadicals;
-  List<std::string> DisplayNamesBasisElements;
-  void InjectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
-  void AppendAdditiveEiBasis();
-  void AssignDefaultBasisDisplayNames();
+  List<std::string> displayNamesBasisElements;
+  void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
+  void appendAdditiveEiBasis();
+  void assignDefaultBasisDisplayNames();
   void reset();
   bool checkConsistency() const;
   AlgebraicClosureRationals() {
     this->reset();
   }
-  bool MergeRadicals(const List<LargeInteger>& theRadicals);
-  bool ChooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
-  bool ReduceMe(std::stringstream* commentsOnFailure);
-  void ContractBasesIfRedundant(
+  bool mergeRadicals(const List<LargeInteger>& theRadicals);
+  bool chooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
+  bool reduceMe(std::stringstream* commentsOnFailure);
+  void contractBasesIfRedundant(
     AlgebraicClosureRationals& previousCopy,
     AlgebraicNumber* outputImageGenerator
   );
-  void ComputeDisplayStringsFromRadicals();
-  bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
+  void computeDisplayStringsFromRadicals();
+  bool getRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
   int getDimensionOverTheRationals() const;
-  static int GetIndexFromRadicalSelection(const Selection& theSel);
-  void GetMultiplicativeOperatorFromRadicalSelection(
+  static int getIndexFromRadicalSelection(const Selection& theSel);
+  void getMultiplicativeOperatorFromRadicalSelection(
     const Selection& theSel, MatrixTensor<Rational>& outputOp
   );
-  void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
-  void GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
-  void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
+  void getMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
+  void getAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
+  void convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
@@ -254,8 +254,8 @@ public:
     List<Polynomial<AlgebraicNumber> >& outputDenominators,
     std::stringstream* reportStream = nullptr
   );
-  AlgebraicNumber One();
-  AlgebraicNumber Zero();
+  AlgebraicNumber one();
+  AlgebraicNumber zero();
   AlgebraicNumber fromRational(const Rational& input);
 };
 
@@ -283,7 +283,7 @@ public:
   ~ElementZmodP() {
     this->flagDeallocated = true;
   }
-  void CheckIamInitialized() const;
+  void checkIamInitialized() const;
   bool invert();
   bool isEqualToZero() const {
     return this->theValue.isEqualToZero();

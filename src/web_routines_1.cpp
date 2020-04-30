@@ -941,14 +941,14 @@ bool WebAPIResponse::processForgotLogin() {
     result[WebAPI::result::comments] = out.str();
     return global.theResponse.writeResponse(result, false);
   }
-  if (!theUser.Iexist(&out)) {
+  if (!theUser.exists(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
     return global.theResponse.writeResponse(result, false);
   }
-  if (!theUser.LoadFromDB(&out, &out)) {
+  if (!theUser.loadFromDatabase(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
@@ -997,13 +997,13 @@ JSData WebWorker::GetSignUpRequestResult() {
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (!EmailRoutines::IsOKEmail(theUser.email, &generalCommentsStream)) {
+  if (!EmailRoutines::isOKEmail(theUser.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (theUser.Iexist(&generalCommentsStream)) {
+  if (theUser.exists(&generalCommentsStream)) {
     errorStream
     << "Either the username ("
     << theUser.username
@@ -1021,7 +1021,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     << theUser.email
     << ") is available. </b>";
   }
-  if (!theUser.StoreToDB(false, &errorStream)) {
+  if (!theUser.storeToDatabase(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();

@@ -262,7 +262,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
     theSub[i].makeMonomial(
       currentIndex,
       1,
-      this->theObjectContainer.theAlgebraicClosure.One()
+      this->theObjectContainer.theAlgebraicClosure.one()
     );
   }
   for (int i = 0; i < output.size; i ++) {
@@ -491,7 +491,7 @@ bool Calculator::innerPrintSSSubalgebras(
     ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
   }
   if (ownerSSPointer == nullptr) {
-    global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
+    global.fatal << "zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.toString();
@@ -1258,7 +1258,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   outScript << canvasFunctionName << "();\n";
   outContent << outScript.str();
   outContent << "</script>";
-  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->GetCanvasName(), outScript.str());
+  owner.theObjectContainer.graphicsScripts.setKeyValue(this->GetCanvasName(), outScript.str());
   return outContent.str();
 }
 
@@ -1772,7 +1772,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "}\n";
-  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->GetCanvasName(), outScript.str());
+  owner.theObjectContainer.graphicsScripts.setKeyValue(this->GetCanvasName(), outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();
 }
@@ -1835,7 +1835,7 @@ bool Expression::AssignStringParsed(
     for (int i = 0; i < substitutions->size(); i ++) {
       Expression theSubbed;
       theSubbed.makeAtom(substitutions->theKeys[i], owner);
-      theSubs.SetKeyValue(theSubbed, substitutions->theValues[i]);
+      theSubs.setKeyValue(theSubbed, substitutions->theValues[i]);
     }
     result.substituteRecursively(theSubs);
   }
@@ -2056,7 +2056,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
     return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> theElt;
-  theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
+  theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.getSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
   return output.assignValue(theElt, theCommands);
 }
 
@@ -2095,7 +2095,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].toString() << ";";
   }
   Vector<Rational> outputIntersection, outputSeparatingNormal;
-  bool conesDoIntersect = coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
+  bool conesDoIntersect = coneNonStrictGens.conesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
     checkVector.makeZero(coneStrictMatForm.numberOfColumns);
@@ -2330,13 +2330,13 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   )) {
     return output.makeError("Failed to extract matrix from second argument. ", theCommands);
   }
-  NonStrictCone.AssignMatrixRows(theMat);
+  NonStrictCone.assignMatrixRows(theMat);
   if (!theCommands.functionGetMatrix(
     input[3], theMat, nullptr, splittingNormal.size, nullptr
   )) {
     return output.makeError("Failed to extract matrix from third argument. ", theCommands);
   }
-  VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
+  VectorsToPerturbRelativeTo.assignMatrixRows(theMat);
   for (int i = 0; i < NonStrictCone.size; i ++) {
     if (splittingNormal.ScalarEuclidean(NonStrictCone[i]) < 0) {
       std::stringstream out;
@@ -2411,13 +2411,13 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesToBeIgnored.clear();
   // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
   // this->rulesDisplayNamesMap.clear();
-  // this->rulesDisplayNamesMap.SetKeyValue("minus", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("AddTerms", "");
-  // this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule", "");
+  // this->rulesDisplayNamesMap.setKeyValue("minus", "");
+  // this->rulesDisplayNamesMap.setKeyValue("DistributeMultiplication", "");
+  // this->rulesDisplayNamesMap.setKeyValue("MultiplyRationals", "");
+  // this->rulesDisplayNamesMap.setKeyValue("ConstantExtraction", "");
+  // this->rulesDisplayNamesMap.setKeyValue("MultiplyByOne", "");
+  // this->rulesDisplayNamesMap.setKeyValue("AddTerms", "");
+  // this->rulesDisplayNamesMap.setKeyValue("AssociativeRule", "");
 }
 
 Expression ExpressionHistoryEnumerator::GetExpression(

@@ -211,7 +211,7 @@ int JSData::GetKeyIndex(const std::string& key) const {
   return this->objects.getIndex(key);
 }
 
-void JSData::SetKeyValue(const std::string& key, const JSData& value) {
+void JSData::setKeyValue(const std::string& key, const JSData& value) {
   (*this)[key] = value;
 }
 
@@ -598,7 +598,7 @@ bool JSData::readstring(
       fourthToLast.theType == JSData::token::tokenOpenBrace && thirdToLast.theType == JSData::token::tokenString &&
       secondToLast.theType == JSData::token::tokenColon && last.IsValidElement()
     ) {
-      fourthToLast.objects.SetKeyValue(thirdToLast.theString, last);
+      fourthToLast.objects.setKeyValue(thirdToLast.theString, last);
       readingStack.setSize(readingStack.size - 3);
       continue;
     }

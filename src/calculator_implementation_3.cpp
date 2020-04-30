@@ -112,9 +112,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
   int theDim= this->AmbientWeyl->getDimension();
-  basisEi.MakeEiBasis(theDim);
+  basisEi.makeEiBasis(theDim);
   this->RaiseToDominantWeightInner(highestWeightTrue);
-  Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
     return false;
   }
@@ -150,7 +150,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->AmbientWeyl->RootsOfBorel[i];
-        if (this->IsDominantWeight(currentWeight)) {
+        if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
           this->AmbientWeyl->RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
@@ -210,7 +210,7 @@ bool Calculator::innerAnimateLittelmannPaths(
     );
   }
   Vector<Rational> theWeightInSimpleCoords;
-  theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+  theWeightInSimpleCoords = theSSowner->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
@@ -417,7 +417,7 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
   theFinalEigenSpace.setSize(0);
   if (InvertedLeviInSmall.CardinalitySelection == 0) {
-    theFinalEigenSpace.MakeEiBasis(this->getDimension());
+    theFinalEigenSpace.makeEiBasis(this->getDimension());
   }
   for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
@@ -480,7 +480,7 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
         lastNonZeroIndex = i;
       }
     }
-    currentWeight = theHmm.theRange().theWeyl.GetFundamentalCoordinatesFromSimple(
+    currentWeight = theHmm.theRange().theWeyl.getFundamentalCoordinatesFromSimple(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicit type conversion here
     currentWeight += hwFundCoordsNilPart;
@@ -636,7 +636,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
           Vector<RationalFunction> theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
+          theSimpleCoordinates = theG2B3Data.WeylFD.AmbientWeyl->getSimpleCoordinatesFromFundamental(
             theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
           );
           RationalFunction theWeylSize;
@@ -659,7 +659,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             latexTable << multiplicity << "\\times";
           }
           Vector<RationalFunction> theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
+          theSimpleCoordinates = theG2B3Data.WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
             tempChar[0].weightFundamentalCoordS
           );
           RationalFunction dimension;
@@ -808,14 +808,14 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   WeylGroupData& smallWeyl = theg2b3data.theHmm.theDomain().theWeyl;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.MakeFromWeight(
-      theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
+      theg2b3data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theHWs[k]),
       &theg2b3data.theHmm.theRange()
     );
     theCharacter.SplitCharOverRedSubalg(nullptr, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
     out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction> simpleCoordinates;
-    simpleCoordinates = theg2b3data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
+    simpleCoordinates = theg2b3data.WeylFD.AmbientWeyl->getSimpleCoordinatesFromFundamental(
       theCharacter[0].weightFundamentalCoordS
     );
     RationalFunction dimension;
@@ -832,7 +832,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       if (!outputChar.coefficients[i].isEqualToOne()) {
         out << outputChar.coefficients[i].toString() << " x ";
       }
-      simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
+      simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
       );
       dimension = theg2b3data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
@@ -840,10 +840,10 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       if (i != outputChar.size() - 1) {
         out << "+";
       }
-      leftWeightSimple = smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
+      leftWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       leftWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       for (int j = 0; j < outputChar.size(); j ++) {
-        rightWeightSimple = smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
+        rightWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         rightWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
@@ -956,9 +956,9 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   invertedG2cartanMat = theG2B3Data.theHmm.theDomain().theWeyl.cartanSymmetric;
   invertedG2cartanMat.invert();
   WeylGroupData& rangeWeyl = theG2B3Data.theHmm.theRange().theWeyl;
-  theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.outputWeightsFundCoordS);
+  theG2B3Data.outputWeightsSimpleCoords = rangeWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.outputWeightsFundCoordS);
   Vector<RationalFunction> weightSimpleCoordinates;
-  weightSimpleCoordinates = rangeWeyl.GetSimpleCoordinatesFromFundamental(
+  weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
     theG2B3Data.theWeightFundCoords
   );
   theG2B3Data.theAmbientChar.MakeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
@@ -1152,7 +1152,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
     current = output[i];
     for (int k = 0; k < this->getDimension(); k ++) {
       current[k] += 1;
-      theDim = this->WeylDimFormulaFundamentalCoords(current);
+      theDim = this->weylDimFormulaFundamentalCoords(current);
       if (theDim < dimBound) {
         output.addOnTopNoRepetition(current);
       }
@@ -1240,21 +1240,21 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       std::stringstream reportStream;
       Vector<Rational>& currentHW = theHws[j];
       out << "<tr><td> " << currentHW.toString() << "</td><td>"
-      << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
+      << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "</td>";
       reportStream << "Processing " << currentAlg.ToStringLieAlgebraName() << ", index  "
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
-      << currentHW.toString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
+      << currentHW.toString() << ", dim: " << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
       theReport.report(reportStream.str());
       latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
-      << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
+      << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "&";
       hwPath.MakeFromWeightInSimpleCoords(
-        currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl
+        currentAlg.theWeyl.getSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl
       );
       hwPath.generateOrbit(
         tempList,
         theStrings,
-        MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).numeratorShort),
+        MathRoutines::Minimum(1000, currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW).numeratorShort),
         nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size
@@ -1374,7 +1374,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
       return output.makeError("Failed to extract waypoints", theCommands);
     }
   }
-  waypoints = ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
+  waypoints = ownerSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
   theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
   return output.assignValue(theLSpath, theCommands);

@@ -92,7 +92,7 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
   << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
   << "\" charset =\"utf-8\"></script>";
   out << HtmlRoutines::GetJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
-  HtmlRoutines::preLoadedFiles().SetKeyValue("AceEditor", out.str());
+  HtmlRoutines::preLoadedFiles().setKeyValue("AceEditor", out.str());
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
 }
 
@@ -118,7 +118,7 @@ const std::string& HtmlRoutines::GetFile(
     out << "<b style =\"color:red\">Failed to load file: [" << fileNameVirtual
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
-  HtmlRoutines::preLoadedFiles().SetKeyValue(theID, out.str());
+  HtmlRoutines::preLoadedFiles().setKeyValue(theID, out.str());
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit(theID);
 }
 
@@ -331,7 +331,7 @@ std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
   out << "<script type =\"text/javascript\" src = '" << baseFolder << "MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full'>"
   << "</script>\n";
   out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
-  HtmlRoutines::preLoadedFiles().SetKeyValue("MathJax", out.str());
+  HtmlRoutines::preLoadedFiles().setKeyValue("MathJax", out.str());
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("MathJax");
 }
 
@@ -353,7 +353,7 @@ bool HtmlRoutines::AccountOneInputCGIString(
 //      << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
 //      return false;
 //    }
-  outputMap.SetKeyValue(fieldName, fieldValue);
+  outputMap.setKeyValue(fieldName, fieldValue);
   return true;
 }
 

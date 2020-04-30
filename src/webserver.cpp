@@ -518,7 +518,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
       }
     }
     if (isGood) {
-      global.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
+      global.webArguments.setKeyValue(newlyFoundArgs.theKeys[i], trimmed);
     }
   }
   return result;
@@ -664,7 +664,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
       theUser, &argumentProcessingFailureComments
     );
   }
-  global.CookiesToSetUsingHeaders.SetKeyValue(
+  global.CookiesToSetUsingHeaders.setKeyValue(
     "username",
     HtmlRoutines::convertStringToURLString(theUser.username, false)
     // <-User name must be stored in URL-encoded fashion, NO PLUSES.
@@ -672,7 +672,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
     // In case the user logged in with password, we need
     // to give the user the correct authentication token.
-    global.CookiesToSetUsingHeaders.SetKeyValue(
+    global.CookiesToSetUsingHeaders.setKeyValue(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
       // <-URL-encoded fashion, NO PLUSES.
@@ -682,7 +682,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
     );
   } else {
-    global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
+    global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "0");
   }
   bool shouldDisplayMessage = false;
   if (!global.flagLoggedIn && theUser.username != "") {
@@ -699,7 +699,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   if (shouldDisplayMessage) {
     argumentProcessingFailureComments << "Invalid user and/or authentication. ";
   }
-  theArgs.SetKeyValue("password", "********************************************");
+  theArgs.setKeyValue("password", "********************************************");
   return true;
 }
 
@@ -1298,7 +1298,7 @@ int WebWorker::ProcessFileDoesntExist() {
   std::stringstream out;
   out << "<html>"
   << "<body>";
-  out << "One page <a href = \"" << global.displayApplication << "\">app</a>. ";
+  out << "one page <a href = \"" << global.displayApplication << "\">app</a>. ";
   out << " Same app without browser cache: <a href = \""
   << global.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
   out << "<b>File does not exist.</b>";
@@ -1507,17 +1507,17 @@ std::string WebWorker::HeaderFromFileExtension(const std::string& fileExtension)
 }
 
 void WebServer::initializeMainMIMETypes() {
-  this->MIMETypes.SetKeyValue(".html", "text/html"                    );
-  this->MIMETypes.SetKeyValue(".php" , "text/html"                    );
-  this->MIMETypes.SetKeyValue(".txt" , "text/plain"                   );
-  this->MIMETypes.SetKeyValue(".png" , "image/png"                    );
-  this->MIMETypes.SetKeyValue(".js"  , "text/javascript"              );
-  this->MIMETypes.SetKeyValue(".ico" , "image/x-icon"                 );
-  this->MIMETypes.SetKeyValue(".css" , "text/css"                     );
-  this->MIMETypes.SetKeyValue(".eot" , "application/vnd.ms-fontobject");
-  this->MIMETypes.SetKeyValue(".ttf" , "application/octet-stream"     );
-  this->MIMETypes.SetKeyValue(".svg" , "image/svg+xml"                );
-  this->MIMETypes.SetKeyValue(".woff", "application/font-woff"        );
+  this->MIMETypes.setKeyValue(".html", "text/html"                    );
+  this->MIMETypes.setKeyValue(".php" , "text/html"                    );
+  this->MIMETypes.setKeyValue(".txt" , "text/plain"                   );
+  this->MIMETypes.setKeyValue(".png" , "image/png"                    );
+  this->MIMETypes.setKeyValue(".js"  , "text/javascript"              );
+  this->MIMETypes.setKeyValue(".ico" , "image/x-icon"                 );
+  this->MIMETypes.setKeyValue(".css" , "text/css"                     );
+  this->MIMETypes.setKeyValue(".eot" , "application/vnd.ms-fontobject");
+  this->MIMETypes.setKeyValue(".ttf" , "application/octet-stream"     );
+  this->MIMETypes.setKeyValue(".svg" , "image/svg+xml"                );
+  this->MIMETypes.setKeyValue(".woff", "application/font-woff"        );
 }
 
 std::string WebWorker::MIMETypeFromFileExtension(const std::string& fileExtension) {
@@ -1656,13 +1656,13 @@ bool WebWorker::DoSetEmail(
   }
   EmailRoutines theEmail;
   theEmail.toEmail = inputOutputUser.email;
-  if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure)) {
+  if (!theEmail.isOKEmail(theEmail.toEmail, commentsOnFailure)) {
     return false;
   }
   UserCalculator userCopy;
   userCopy.UserCalculatorData::operator=(inputOutputUser);
   userCopy.email = inputOutputUser.email;
-  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive)) {
+  if (!userCopy.computeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive)) {
     return false;
   }
   theEmail.emailContent = userCopy.activationEmail;
@@ -1670,7 +1670,7 @@ bool WebWorker::DoSetEmail(
   if (commentsGeneralNonSensitive != nullptr) {
     *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
   }
-  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
+  theEmail.sendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != nullptr) {
     if (global.UserDefaultHasAdminRights()) {
       *commentsGeneralSensitive << "<hr>Content of sent email (administrator view only):<br>"
@@ -2078,7 +2078,7 @@ int WebWorker::ServeClient() {
       << " requires login. ";
     }
     argumentProcessingFailureComments << comments.str();
-    global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
+    global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
       global.SetWebInpuT("authenticationToken", "");
     }
@@ -2097,7 +2097,7 @@ int WebWorker::ServeClient() {
       global.hostNoPort = HtmlRoutines::convertURLStringToNormal(
         global.getWebInput("spoofHostName"), false
       );
-      global.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", global.hostNoPort);
+      global.CookiesToSetUsingHeaders.setKeyValue("spoofHostName", global.hostNoPort);
     }
   }
   if (this->response.ServeResponseFalseIfUnrecognized(
@@ -4251,7 +4251,7 @@ bool GlobalVariables::ConfigurationStore() {
 void GlobalVariables::ConfigurationProcess() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
   for (int i = 0; i < global.configurationCommandLine.objects.size(); i ++) {
-    global.configuration.SetKeyValue(
+    global.configuration.setKeyValue(
       global.configurationCommandLine.objects.theKeys[i],
       global.configurationCommandLine.objects.theValues[i]
     );

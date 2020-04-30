@@ -65,7 +65,7 @@ public:
   bool HasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
   bool HasCompositeKeyValueNull(const std::string& key, std::stringstream* commentsOnFailure) const;
 
-  void SetKeyValue(const std::string& key, const JSData& value);
+  void setKeyValue(const std::string& key, const JSData& value);
   int GetKeyIndex(const std::string& key) const;
   JSData();
   ~JSData();

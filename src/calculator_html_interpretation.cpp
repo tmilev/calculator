@@ -54,7 +54,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
-      out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+      out << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
@@ -109,8 +109,8 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     return result;
   }
   for (int i = 0; i < currentA.solutionElements.size; i ++) {
-    if (!currentA.solutionElements[i].IsHidden()) {
-      out << currentA.solutionElements[i].ToStringInterpretedBody();
+    if (!currentA.solutionElements[i].isHidden()) {
+      out << currentA.solutionElements[i].toStringInterpretedBody();
     }
   }
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
@@ -1181,8 +1181,8 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     }
     if (theProblem.flagIsForReal) {
       std::stringstream comments;
-      theUser.SetProblemData(theProblem.fileName, currentProblemData);
-      if (!theUser.StoreProblemData(theProblem.fileName, &comments)) {
+      theUser.setProblemData(theProblem.fileName, currentProblemData);
+      if (!theUser.storeProblemData(theProblem.fileName, &comments)) {
         output << "<tr><td><b>This shouldn't happen and may be a bug: "
         << "failed to store your answer in the database. "
         << CalculatorHTML::BugsGenericMessage
@@ -1293,7 +1293,7 @@ std::string WebAPIResponse::AddTeachersSections() {
   for (int i = 0; i < theTeachers.size; i ++) {
     currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
-    if (!currentTeacher.LoadFromDB(&out, &out)) {
+    if (!currentTeacher.loadFromDatabase(&out, &out)) {
       out << "<span style =\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
@@ -1444,7 +1444,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
-      errorStream << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+      errorStream << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
@@ -1739,7 +1739,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
   for (int i = 0; i < theUsers.size; i ++) {
-    currentUser.LoadFromJSON(theUsers[i]);
+    currentUser.loadFromJSON(theUsers[i]);
     if (flagFilterCourse && (
       currentUser.courseInDB != currentCourse ||
       currentUser.instructorInDB != global.userDefault.username
@@ -1761,7 +1761,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   preFilledLinkBucketsBySection.setSize(theSections.size);
   int numActivatedUsers = 0;
   for (int i = 0; i < theUsers.size; i ++) {
-    currentUser.LoadFromJSON(theUsers[i]);
+    currentUser.loadFromJSON(theUsers[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
       out << "<b style = \"color:red\">Non-expected behavior: user: "
       << currentUser.username
@@ -1782,7 +1782,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
       if (currentUser.actualActivationToken != "") {
         oneTableLineStream << "<td>"
         << "<a href=\""
-        << UserCalculator::GetActivationAddressFromActivationToken
+        << UserCalculator::getActivationAddressFromActivationToken
         (currentUser.actualActivationToken, hostWebAddressWithPort,
          currentUser.username, currentUser.email)
         << "\"> (Re)activate account and change password</a>"
@@ -1799,7 +1799,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
       << "To activate your account and set your password please use the link: "
       << HtmlRoutines::convertStringToURLString("\n\n", false)
       << HtmlRoutines::convertStringToURLString(
-        UserCalculator::GetActivationAddressFromActivationToken(
+        UserCalculator::getActivationAddressFromActivationToken(
           currentUser.actualActivationToken,
           hostWebAddressWithPort,
           currentUser.username,
@@ -1965,7 +1965,7 @@ int ProblemData::getExpectedNumberOfAnswers(
         if (numAnswers == - 1) {
           continue;
         }
-        global.problemExpectedNumberOfAnswers.SetKeyValue(
+        global.problemExpectedNumberOfAnswers.setKeyValue(
           currentProblemName, numAnswers
         );
       }
@@ -2009,12 +2009,12 @@ int ProblemData::getExpectedNumberOfAnswers(
   return this->knownNumberOfAnswersFromHD;
 }
 
-void UserCalculator::ComputePointsEarned(
+void UserCalculator::computePointsEarned(
   const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
   MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
+  MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
   if (theTopics != nullptr) {
@@ -2038,7 +2038,7 @@ void UserCalculator::ComputePointsEarned(
     currentP.numCorrectlyAnswered = 0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK =
-    currentP.adminData.GetWeightFromCoursE(this->courseComputed, currentWeight);
+    currentP.adminData.getWeightFromCourse(this->courseComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK) {
       currentWeight = 0;
     }
@@ -2107,7 +2107,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   if (!this->theProblem.loadDatabaseInfo(comments)) {
     comments << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
   }
-  theProblem.currentUseR.ComputePointsEarned(
+  theProblem.currentUseR.computePointsEarned(
     theProblem.currentUseR.theProblemData.theKeys,
     &theProblem.topics.theTopics,
     comments
@@ -2167,7 +2167,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     currentUserRecord.currentUseR.username = this->userProblemData[i][
       DatabaseStrings::labelUsername
     ].theString;
-    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemDataJSON(
+    if (!currentUserRecord.currentUseR.interpretDatabaseProblemDataJSON(
       this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
       comments
     )) {
@@ -2179,7 +2179,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       false,
       &comments
     );
-    currentUserRecord.currentUseR.ComputePointsEarned(
+    currentUserRecord.currentUseR.computePointsEarned(
       theProblem.problemNamesNoTopics,
       &theProblem.topics.theTopics,
       comments
@@ -2189,7 +2189,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       TopicElement& currentTopic = theProblem.topics.theTopics.theValues[j];
       Rational currentPts = currentTopic.totalPointsEarned;
       Rational maxPts = currentTopic.maxPointsInAllChildren;
-      this->scoresBreakdown.lastObject()->SetKeyValue(
+      this->scoresBreakdown.lastObject()->setKeyValue(
         theProblem.topics.theTopics.theKeys[j], currentPts
       );
       if (maxPts == currentPts) {

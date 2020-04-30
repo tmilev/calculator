@@ -258,7 +258,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   << "of the epsilon coordinate realizations in types G and C "
   << "does not equal the  corresponding symmetric Cartan matrix. "
   << "<table>";
-  simpleBasis.MakeEiBasis(theWeyl.getDimension());
+  simpleBasis.makeEiBasis(theWeyl.getDimension());
   theWeyl.getEpsilonCoordinates(simpleBasis, simplebasisEpsCoords);
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()

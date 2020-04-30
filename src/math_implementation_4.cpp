@@ -353,7 +353,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
 
 void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::string& inputValue) {
   MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
-  this->webArguments.SetKeyValue(inputName, inputValue);
+  this->webArguments.setKeyValue(inputName, inputValue);
 }
 
 bool GlobalVariables::UserSecureNonAdminOperationsAllowed() {
@@ -869,7 +869,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   for (int i = 0; i < simpleBasisInput.size; i ++) {
     int indexFirstComponentConnectedToRoot = - 1;
     for (int j = 0; j < this->SimpleBasesConnectedComponents.size; j ++) {
-      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(
+      if (this->SimpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
         simpleBasisInput[i], this->AmbientBilinearForm)
       ) {
         if (indexFirstComponentConnectedToRoot == - 1) {
@@ -1149,7 +1149,7 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     }
     if (counter > 3) {
       Matrix<Rational> theGram;
-      currentComponent.GetGramMatrix(theGram, &this->AmbientBilinearForm);
+      currentComponent.getGramMatrix(theGram, &this->AmbientBilinearForm);
       global.fatal << "This is a programming error: corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with"
       << " valency at most 3, but this diagram has node with valency "
@@ -1451,14 +1451,14 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   this->TransformToWeylProjectiveStep1();
   this->TransformToWeylProjectiveStep2();
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
-  highestWeightLargerAlgSimpleCoords = LargerWeyl.GetSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
+  highestWeightLargerAlgSimpleCoords = LargerWeyl.getSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
   Matrix<Rational> tempMat;
   Vector<Rational> tempRoot;
   DrawingVariables drawOps;
   int theSmallDim = SmallerWeyl.cartanSymmetric.numberOfRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
-  theDraggableBasis.MakeEiBasis(theSmallDim);
+  theDraggableBasis.makeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
   tmpWeyl.MakeArbitrarySimple('A', 2);
   drawOps.theBuffer.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);

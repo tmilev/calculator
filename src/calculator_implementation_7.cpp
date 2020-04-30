@@ -1101,7 +1101,7 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.AssignSinRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignSinRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, theCommands);
           }
@@ -1138,7 +1138,7 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
       if (argument[1].isOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
-        if (algOutput.AssignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
+        if (algOutput.assignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
           if (algOutput.isRational(&ratOutput)) {
             return output.assignValue(ratOutput, theCommands);
           }
@@ -1442,7 +1442,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   }
   int dimension = theNumber.owner->getDimensionOverTheRationals();
   MatrixTensor<Rational> numberMatrixTensor;
-  theNumber.owner->GetMultiplicationBy(theNumber, numberMatrixTensor);
+  theNumber.owner->getMultiplicationBy(theNumber, numberMatrixTensor);
   Matrix<Rational> result;
   numberMatrixTensor.GetMatrix(result, dimension);
   return output.assignMatrix(result, theCommands);
@@ -5766,7 +5766,7 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
 }
 
 bool ElementZmodP::operator==(int other) const {
-  this->CheckIamInitialized();
+  this->checkIamInitialized();
   ElementZmodP tempElt;
   tempElt.theModulus = this->theModulus;
   tempElt = LargeInteger(other);
@@ -5774,8 +5774,8 @@ bool ElementZmodP::operator==(int other) const {
 }
 
 bool ElementZmodP::operator==(const ElementZmodP& other) const {
-  this->CheckIamInitialized();
-  other.CheckIamInitialized();
+  this->checkIamInitialized();
+  other.checkIamInitialized();
   return this->theModulus == other.theModulus && this->theValue == other.theValue;
 }
 
@@ -6912,7 +6912,7 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
 bool CalculatorFunctions::innerEvaluateToDoublE(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Expression::innerEvaluateToDoublE");
   if (input.size() != 2) {
-    // One argument expected.
+    // one argument expected.
     return false;
   }
   double theValue = 0;
@@ -7086,11 +7086,11 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   Vector<RationalFunction> theWeightInSimpleCoords;
   FormatExpressions theFormat;
   theSSowner.context.getFormat(theFormat);
-  theWeightInSimpleCoords = theSSowner.content->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+  theWeightInSimpleCoords = theSSowner.content->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Weyl dim formula input: simple coords: "
   << theWeightInSimpleCoords.toString(&theFormat)
   << ", fundamental coords: " << theWeight.toString(&theFormat);
-  RationalFunction tempRF = theSSowner.content->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  RationalFunction tempRF = theSSowner.content->theWeyl.weylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   return output.assignValueWithContext(tempRF, theSSowner.context, theCommands);
 }
 
@@ -7140,7 +7140,7 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   }
   theCommands << "Your input weight in fundamental coordinates: " << theWeightFundCoords.toString();
   theCommands << "<br>Your input weight in simple coordinates: "
-  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
+  << theWeyl.getSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
   << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
   << "<br>The parabolic subalgebra I should split over: " << splittingParSel.toString() << ".";
   ModuleSSalgebra<RationalFunction> theMod;
@@ -7300,13 +7300,13 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
       out << "<tr><td>"
       << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.toString()) : current.toString())
       << "</td>";
-      theHWsimplecoords = theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
+      theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
       theSSalgebra.theWeyl.ActOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
       << (useJavascript ? HtmlRoutines::GetMathSpanPure(theHWsimplecoords.toString(&theFormat))
       : theHWsimplecoords.toString(&theFormat))
       << "</td>";
-      tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
+      tempRoot = theSSalgebra.theWeyl.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString = tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
       out << "<td>" << (useJavascript ? HtmlRoutines::GetMathSpanPure(theFundString): theFundString)
       << "</td>";
@@ -7366,7 +7366,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
     << thePartitioningVectorsE.toString();
   }
   Vectors<Rational> theInputVectors;
-  theInputVectors.AssignMatrixRows(vectorsMatForm);
+  theInputVectors.assignMatrixRows(vectorsMatForm);
   for (int i = 0; i < theInputVectors.size; i ++) {
     if (!theInputVectors[i].isPositive()) {
       return theCommands << "<hr>Input vector "
@@ -7519,7 +7519,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   if (!theKLpolys.ComputeKLPolys(&theWeyl)) {
     return output.makeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
   }
-  theHWSimpCoordsFDPart = theWeyl.GetSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
+  theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart += theWeyl.rho;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSub;
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
@@ -7528,7 +7528,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
       theCommands
     );
   }
-  theHWsimpCoords = theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
+  theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunction> currentHW;
@@ -7540,7 +7540,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     theWeyl.actOn(i, currentHW);
     currentHW -= theSub.GetRho();
     out << "<tr><td>" << currentHW.toString() << "</td><td>"
-    << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
+    << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
   }
   out << "</table>";
   out << "<br>The rho of the Levi part is: "
@@ -7576,7 +7576,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
         theWeyl.ActOnRhoModified(j, currentHW);
-        theMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
+        theMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
         int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
       }
@@ -7585,7 +7585,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     currentHW += theSub.GetRho();
     theWeyl.actOn(indexInWeyl, currentHW);
     currentHW -= theSub.GetRho();
-    out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
+    out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
@@ -7960,7 +7960,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
     Vector<RationalFunction> currentWeightSimpleCoords =
-    theSSalgebra.content->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
+    theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
     tempElt.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
     tempElt.MakeHWV(theGenMod, RFOne);
@@ -7972,7 +7972,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     bool found = false;
     for (int j = 0; j < theCentralCharacters.size; j ++) {
       Vector<RationalFunction> otherWeightSimpleCoords =
-      theSSalgebra.content->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
+      theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
         theCasimirMinusChar = theCasimir;
         theCasimirMinusChar -= theCentralCharacters[j];
@@ -7998,10 +7998,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWsimplecoords = theGenMod.theHWSimpleCoordSBaseField;
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
-    << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
     latexReport2
-    << "$" << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "$" << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.toString();
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
@@ -8105,7 +8105,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
   CharacterSemisimpleLieAlgebraModule<RationalFunction> tempChar;
   CharacterSemisimpleLieAlgebraModule<RationalFunction> startingChar;
   Vector<RationalFunction> simpleWeight;
-  simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
+  simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
   startingChar.MakeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
   startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data);
   out << report;
@@ -8230,7 +8230,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
     out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
     << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
     << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).toString()
+    << theG2B3Data.theHmm.theDomain().theWeyl.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
     out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].toString()) << "</td>";
     out << "</tr>";
@@ -8841,7 +8841,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theSize == 0) {
-    return theCommands << "<hr>Zero modulus not allowed.";
+    return theCommands << "<hr>zero modulus not allowed.";
   }
   if (theSize < 0) {
     theSize *= - 1;
@@ -8949,7 +8949,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theMod == 0) {
-    return theCommands << "<hr>Zero modulus not allowed.";
+    return theCommands << "<hr>zero modulus not allowed.";
   }
   if (theMod < 0) {
     theMod *= - 1;
@@ -9057,7 +9057,7 @@ void Calculator::Test::CalculatorTestPrepare() {
         oneTest.command = currentFunction.theExample;
         oneTest.atom = this->owner->operations.theKeys[i];
         oneTest.functionAdditionalIdentifier = currentFunction.additionalIdentifier;
-        this->commands.SetKeyValue(oneTest.command, oneTest);
+        this->commands.setKeyValue(oneTest.command, oneTest);
       }
       currentHandler = &current.compositeHandlers;
     }
@@ -9184,7 +9184,7 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   }
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroupData& theWeyl = theSSalgpointer.content->theWeyl;
-  highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
@@ -9279,7 +9279,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
   for (int k = 0; k < outputChar.size(); k ++) {
     out << "<tr>";
     out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
-    Vector<Coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
+    Vector<Coefficient> weightSimple = this->GetOwner()->theWeyl.getSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoords.makeZero(this->GetOwner()->getRank());
@@ -9287,7 +9287,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
     for (int j = 0; j < this->GetOwner()->getRank(); j ++) {
       theSimpleRoot.makeEi(this->GetOwner()->getRank(), j);
       theSimpleRootFundCoords =
-      this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
+      this->GetOwner()->theWeyl.getFundamentalCoordinatesFromSimple(theSimpleRoot);
       outputSimpleStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
         outputChar[k], theSimpleRootFundCoords
       ) - outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
@@ -9609,7 +9609,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   }
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroupData& theWeyl = theAlg.theWeyl;
-  highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   // Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;

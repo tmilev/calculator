@@ -329,7 +329,7 @@ InputBox
 & inputValue) const {
   this->checkInitialization();
   this->owner->theObjectContainer.theUserInputTextBoxesWithValues
-  .SetKeyValue(inputValue.name, inputValue);
+  .setKeyValue(inputValue.name, inputValue);
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues
   .getIndex(inputValue.name);
 }
@@ -4831,7 +4831,7 @@ bool Expression::makeSum(Calculator& owner, const List<Expression>& theSummands)
 bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
   MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
   if (theOpands.size == 0) {
-    global.fatal << "Zero opands not allowed at this point. " << global.fatal;
+    global.fatal << "zero opands not allowed at this point. " << global.fatal;
   }
   if (theOpands.size == 1) {
     *this = theOpands[0];

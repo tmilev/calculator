@@ -266,7 +266,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Reduced() const {
     matrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
   }
   out.ownerGroup = ownerGroup;
-  out.basis.MakeEiBasis(d);
+  out.basis.makeEiBasis(d);
 
 /*
    if (classFunctionMatrices.size > 0) {
@@ -1072,7 +1072,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   this->flagIsParabolic = true;
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
-  EiBasis.MakeEiBasis(G.getDimension());
+  EiBasis.makeEiBasis(G.getDimension());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.CardinalitySelection;
   this->SubCartanSymmetric.initialize(d, d);
@@ -1190,7 +1190,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   Selection parSelrootsAreInLevi;
   parSelrootsAreInLevi.initialize(this->getDimension() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
-  extendedBasis.MakeEiBasis(this->getDimension());
+  extendedBasis.makeEiBasis(this->getDimension());
   extendedBasis.addOnTop(this->RootSystem[0]);
   outputSubgroups.setExpectedSize(MathRoutines::TwoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);

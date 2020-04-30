@@ -684,18 +684,18 @@ public:
     return &this->SimpleToFundamentalCoords;
   }
   template<class Coefficient>
-  Vector<Coefficient> GetSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords);
+  Vector<Coefficient> getSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords);
   template<class Coefficient>
-  Vectors<Coefficient> GetSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords);
+  Vectors<Coefficient> getSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords);
   template<class Coefficient>
-  Vector<Coefficient> GetFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInSimpleCoords);
+  Vector<Coefficient> getFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInSimpleCoords);
   template<class Coefficient>
-  Vector<Coefficient> GetFundamentalCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords);
+  Vector<Coefficient> getFundamentalCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords);
   template<class Coefficient>
-  Vector<Coefficient> GetSimpleCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords);
+  Vector<Coefficient> getSimpleCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords);
   template<class Coefficient>
   Vector<Coefficient> GetDualCoordinatesFromSimple(const Vector<Coefficient>& inputInSimpleCoords) {
-    return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
+    return this->GetDualCoordinatesFromFundamental(this->getFundamentalCoordinatesFromSimple(inputInSimpleCoords));
   }
   template <class Coefficient>
   Vector<Coefficient> GetDualCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords) {
@@ -730,12 +730,12 @@ public:
     return result;
   }
   template <class Coefficient>
-  Coefficient WeylDimFormulaSimpleCoords(
+  Coefficient weylDimFormulaSimpleCoords(
     Vector<Coefficient>& theWeightInSimpleCoords,
     const Coefficient& theRingUnit = 1
   );
   template <class Coefficient>
-  Coefficient WeylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords);
+  Coefficient weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords);
   template <class Coefficient>
   void RaiseToDominantWeight(
     Vector<Coefficient>& theWeight,
@@ -1014,7 +1014,7 @@ public:
   template <class Coefficient>
   bool IsDominantWRTgenerator(const Vector<Coefficient>& theWeight, int generatorIndex);
   template <class Coefficient>
-  bool IsDominantWeight(const Vector<Coefficient>& theWeight);
+  bool isDominantWeight(const Vector<Coefficient>& theWeight);
   static void TransformToSimpleBasisGenerators(
     Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
   );
@@ -1540,7 +1540,7 @@ public:
     this->indexCurrentElement = - 1;
   }
   const elementRepresentation& GetCurrentElement();
-  bool IncrementReturnFalseIfPastLastFALSE();
+  bool incrementReturnFalseIfPastLastFALSE();
   bool IncrementReturnFalseIfPastLast();
   void initialize(
     const List<elementGroup>& inputGenerators,
@@ -1625,7 +1625,7 @@ public:
     return - 1;
   }
   void initFromGroupAndGenerators(someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
-  void MakeTranslatableWordsSubgroup(someGroup& inputGroup, const List<elementSomeGroup>& subGenerators);
+  void makeTranslatableWordsSubgroup(someGroup& inputGroup, const List<elementSomeGroup>& subGenerators);
   void ComputeCCRepresentativesPreimages();
   void ComputeCCSizesRepresentativesPreimages() {
     this->computeConjugacyClassSizesAndRepresentatives();
@@ -2001,7 +2001,7 @@ public:
   // The body of this function must
   // appear after the definitions of IsDominantWRTgenerator.
   template <class Coefficient>
-  bool IsDominantWeight(const Vector<Coefficient>& theWeight);
+  bool isDominantWeight(const Vector<Coefficient>& theWeight);
   template <class Coefficient>
   bool IsDominantWRTgenerator(const Vector<Coefficient>& theWeight, int generatorIndex);
   template <class Coefficient>

@@ -393,7 +393,7 @@ public:
       (*this)[i] = 0;
     }
   }
-  bool GetIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordsInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vector<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
@@ -407,7 +407,7 @@ public:
   ) {
     int Pivot = - 1;
     if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
-      output.MakeEiBasis(this->size);
+      output.makeEiBasis(this->size);
       return;
     }
     output.setSize(this->size - 1);
@@ -747,7 +747,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return out.str();
   }
-  int ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel);
+  int arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel);
   static unsigned int hashFunction(const Vectors<Coefficient>& input) {
     return input.hashFunction();
   }
@@ -778,27 +778,27 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output);
-  void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
-  void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
-  void GetGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
-  void GetMatrixRootsToRows(Matrix<Rational>& output) const;
-  void GetOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm = nullptr);
-  bool LinSpanContainsVector(
+  void selectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output);
+  void selectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
+  void selectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
+  void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
+  void getMatrixRootsToRows(Matrix<Rational>& output) const;
+  void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm = nullptr);
+  bool linearSpanContainsVector(
     const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
   ) const;
-  void MakeEiBasis(int theDimension) {
+  void makeEiBasis(int theDimension) {
     this->setSize(theDimension);
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i].makeEi(theDimension, i);
     }
   }
-  bool LinSpanContainsVector(const Vector<Coefficient>& input) const;
+  bool linearSpanContainsVector(const Vector<Coefficient>& input) const;
   static void SelectABasisInSubspace(
     const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivots
   );
   int GetRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
-  static bool ConesIntersect(
+  static bool conesIntersect(
     List<Vector<Rational> >& StrictCone,
     List<Vector<Rational> >& NonStrictCone,
     Vector<Rational>* outputLinearCombo = nullptr,
@@ -825,7 +825,7 @@ class Vectors: public List<Vector<Coefficient> > {
   bool getCoordinatesInBasis(
     const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>& outputCoords
   ) const;
-  bool GetIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordsInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
     const Coefficient& theRingUnit,
@@ -836,7 +836,7 @@ class Vectors: public List<Vector<Coefficient> > {
     bool result = true;
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].GetIntegralCoordsInBasisIfTheyExist(
+      if (!this->theObjects[i].getIntegralCoordsInBasisIfTheyExist(
         inputBasis,
         output.theObjects[i],
         bufferMatGaussianEliminationCC,
@@ -850,7 +850,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return result;
   }
-  bool GetIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordsInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
@@ -862,7 +862,7 @@ class Vectors: public List<Vector<Coefficient> > {
     bool result = true;
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].GetIntegralCoordsInBasisIfTheyExist(
+      if (!this->theObjects[i].getIntegralCoordsInBasisIfTheyExist(
         inputBasis,
         output.theObjects[i],
         bufferMatGaussianEliminationCC,
@@ -886,21 +886,23 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return out.str();
   }
-  bool ComputeNormalExcludingIndex(Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix);
-  bool ComputeNormalFromSelection(
+  bool computeNormalExcludingIndex(
+    Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix
+  );
+  bool computeNormalFromSelection(
     Vector<Coefficient>& output,
     Selection& theSelection,
     Matrix<Coefficient>& bufferMatrix,
     int theDimension
   ) const;
-  bool ComputeNormalFromSelectionAndExtraRoot(
+  bool computeNormalFromSelectionAndExtraRoot(
     Vector<Coefficient>& output,
     Vector<Coefficient>& ExtraRoot,
     Selection& theSelection,
     Matrix<Coefficient>& bufferMatrix,
     Selection& bufferSel
   );
-  bool ComputeNormalFromSelectionAndTwoExtraRoots(
+  bool computeNormalFromSelectionAndTwoExtraRoots(
     Vector<Coefficient>& output,
     Vector<Coefficient>& ExtraRoot1,
     Vector<Coefficient>& ExtraRoot2,
@@ -908,15 +910,15 @@ class Vectors: public List<Vector<Coefficient> > {
     Matrix<Coefficient>& bufferMat,
     Selection& bufferSel
   );
-  bool ComputeNormal(Vector<Coefficient>& output, int inputDim);
-  void GaussianEliminationForNormalComputation(
+  bool computeNormal(Vector<Coefficient>& output, int inputDim);
+  void gaussianEliminationForNormalComputation(
     Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension
   ) const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
-  bool GetLinearDependence(Matrix<Coefficient>& outputTheLinearCombination);
-  void GetLinearDependenceRunTheLinearAlgebra(Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
-  bool ContainsARootNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm);
-  bool ContainsOppositeRoots() {
+  bool getLinearDependence(Matrix<Coefficient>& outputTheLinearCombination);
+  void getLinearDependenceRunTheLinearAlgebra(Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
+  bool containsVectorNonPerpendicularTo(const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm);
+  bool containsOppositeRoots() {
     if (this->size < 10) {
       Vector<Rational> tempRoot;
       for (int i = 0; i < this->size; i ++) {
@@ -940,7 +942,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  void AssignMatrixColumns(Matrix<Coefficient>& mat) {
+  void assignMatrixColumns(Matrix<Coefficient>& mat) {
     Vector<Coefficient> tempRoot;
     this->setSize(mat.numberOfColumns);
     tempRoot.setSize(mat.numberOfRows);
@@ -951,7 +953,7 @@ class Vectors: public List<Vector<Coefficient> > {
       this->theObjects[i] = tempRoot;
     }
   }
-  void AssignMatrixRows(const Matrix<Coefficient>& mat) {
+  void assignMatrixRows(const Matrix<Coefficient>& mat) {
     this->size = 0;
     this->setSize(mat.numberOfRows);
     for (int i = 0; i < mat.numberOfRows; i ++) {
@@ -967,8 +969,8 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return - 1;
   }
-  void BeefUpWithEiToLinearlyIndependentBasis(int theDim);
-  void ChooseABasis();
+  void beefUpWithEiToLinearlyIndependentBasis(int theDim);
+  void chooseABasis();
   static void IntersectTwoLinSpaces(
     const List<Vector<Coefficient> >& firstSpace,
     const List<Vector<Coefficient> >& secondSpace,
@@ -1028,7 +1030,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   bufferVectors.reserve(inputBasis.size + 1);
   bufferVectors.addListOnTop(inputBasis);
   bufferVectors.addOnTop(*this);
-  if (!bufferVectors.GetLinearDependence(bufferMat)) {
+  if (!bufferVectors.getLinearDependence(bufferMat)) {
     return false;
   }
   Coefficient tempCF = bufferMat(bufferMat.numberOfRows - 1, 0);
@@ -1042,10 +1044,10 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
 }
 
 template <class Coefficient>
-void Vectors<Coefficient>::GetLinearDependenceRunTheLinearAlgebra(
+void Vectors<Coefficient>::getLinearDependenceRunTheLinearAlgebra(
   Matrix<Coefficient>& outputTheSystem, Selection& outputNonPivotPoints
 ) {
-  MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
+  MacroRegisterFunctionWithName("Vectors::getLinearDependenceRunTheLinearAlgebra");
   if (this->size == 0) {
     return;
   }
@@ -1060,7 +1062,7 @@ void Vectors<Coefficient>::GetLinearDependenceRunTheLinearAlgebra(
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::LinSpanContainsVector(
+bool Vectors<Coefficient>::linearSpanContainsVector(
   const Vector<Coefficient>& input, Matrix<Coefficient>& bufferMatrix, Selection& bufferSelection
 ) const {
   Vectors<Coefficient> tempVectors;
@@ -1088,7 +1090,7 @@ bool Vectors<Coefficient>::getCoordinatesInBasis(
 }
 
 template <class Coefficient>
-bool Vector<Coefficient>::GetIntegralCoordsInBasisIfTheyExist(
+bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   const Vectors<Coefficient>& inputBasis,
   Vector<Coefficient>& output,
   Matrix<Coefficient>& bufferMatGaussianEliminationCC,
@@ -1138,7 +1140,7 @@ bool Vector<Coefficient>::GetIntegralCoordsInBasisIfTheyExist(
 }
 
 template<class Coefficient>
-void Vectors<Coefficient>::GetGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm) const {
+void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm) const {
   output.resize(this->size, this->size, false);
   for (int i = 0; i < this->size; i ++) {
     for (int j = i; j < this->size; j ++) {
@@ -1155,7 +1157,7 @@ void Vectors<Coefficient>::GetGramMatrix(Matrix<Coefficient>& output, const Matr
 }
 
 template<class Coefficient>
-bool Vectors<Coefficient>::ContainsARootNonPerpendicularTo(
+bool Vectors<Coefficient>::containsVectorNonPerpendicularTo(
   const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm
 ) {
   for (int i = 0; i < this->size; i ++) {
@@ -1167,7 +1169,7 @@ bool Vectors<Coefficient>::ContainsARootNonPerpendicularTo(
 }
 
 template<class Coefficient>
-int Vectors<Coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel) {
+int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coefficient>& bufferMat, Selection& bufferSel) {
   if (this->size == 0) {
     return 0;
   }
@@ -1204,11 +1206,11 @@ public:
   static inline unsigned int hashFunction(const AffineHyperplane& input) {
     return input.hashFunction();
   }
-  bool ProjectFromFacetNormal(Vector<Coefficient>& input);
-  Vector<Coefficient> ProjectOnMe(Vector<Coefficient>& input) const;
-  bool ContainsPoint(Vector<Coefficient> & thePoint);
+  bool projectFromFacetNormal(Vector<Coefficient>& input);
+  Vector<Coefficient> projectOnMe(Vector<Coefficient>& input) const;
+  bool containsPoint(Vector<Coefficient> & thePoint);
   void MakeFromNormalAndPoint(Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal);
-  bool HasACommonPointWithPositiveTwoToTheNth_ant();
+  bool hasACommonPointWithPositiveTwoToTheNthQudrant();
   bool operator==(const AffineHyperplane& right);
 };
 
@@ -1229,7 +1231,7 @@ bool AffineHyperplane<Coefficient>::operator==(const AffineHyperplane& right) {
 }
 
 template <class Coefficient>
-Vector<Coefficient> AffineHyperplane<Coefficient>::ProjectOnMe(Vector<Coefficient>& input) const {
+Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(Vector<Coefficient>& input) const {
   // output = input + x * normal  and <input + x * normal, normal> = 0 =>
   // x = -<input, normal> / <normal, normal>
   Coefficient theNormalCoeff = - input.ScalarEuclidean(this->normal) / this->normal.ScalarEuclidean(this->normal);
@@ -1239,7 +1241,7 @@ Vector<Coefficient> AffineHyperplane<Coefficient>::ProjectOnMe(Vector<Coefficien
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::ProjectFromFacetNormal(Vector<Coefficient>& input) {
+bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& input) {
   int tempI = input.getIndexFirstNonZeroCoordinate();
   if (tempI == - 1) {
     global.fatal << "No non-zero coordinate found. " << global.fatal;
@@ -1258,7 +1260,7 @@ bool AffineHyperplane<Coefficient>::ProjectFromFacetNormal(Vector<Coefficient>& 
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::ContainsPoint(Vector<Coefficient>& thePoint) {
+bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& thePoint) {
   Rational tempRat1, tempRat2;
   tempRat1 = this->normal.ScalarEuclidean(thePoint);
   tempRat2 = this->normal.ScalarEuclidean(this->affinePoint);
@@ -1266,7 +1268,7 @@ bool AffineHyperplane<Coefficient>::ContainsPoint(Vector<Coefficient>& thePoint)
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::HasACommonPointWithPositiveTwoToTheNth_ant() {
+bool AffineHyperplane<Coefficient>::hasACommonPointWithPositiveTwoToTheNthQudrant() {
   Rational tempRat;
   tempRat = this->normal.ScalarEuclidean(this->affinePoint);
   if (tempRat.isEqualToZero()) {

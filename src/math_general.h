@@ -1272,7 +1272,7 @@ public:
 };
 
 template <class Coefficient>
-bool Vectors<Coefficient>::ConesIntersect(
+bool Vectors<Coefficient>::conesIntersect(
   List<Vector<Rational> >& StrictCone,
   List<Vector<Rational> >& NonStrictCone,
   Vector<Rational>* outputLinearCombo,
@@ -1396,7 +1396,7 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
 }
 
 template <typename Coefficient>
-void Vectors<Coefficient>::GetMatrixRootsToRows(Matrix<Rational>& output) const {
+void Vectors<Coefficient>::getMatrixRootsToRows(Matrix<Rational>& output) const {
   int tempNumCols = 0;
   if (this->size != 0) {
     tempNumCols = static_cast<int>(this->theObjects[0].size);
@@ -1410,10 +1410,10 @@ void Vectors<Coefficient>::GetMatrixRootsToRows(Matrix<Rational>& output) const 
 }
 
 template <typename Coefficient>
-void Vectors<Coefficient>::GetOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm) {
+void Vectors<Coefficient>::getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm) {
   if (this->size == 0) {
     if (theBilinearForm != nullptr) {
-      output.MakeEiBasis(theBilinearForm->numberOfRows);
+      output.makeEiBasis(theBilinearForm->numberOfRows);
       return;
     }
     global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
@@ -1428,7 +1428,7 @@ void Vectors<Coefficient>::GetOrthogonalComplement(Vectors<Coefficient>& output,
 }
 
 template <typename Coefficient>
-bool Vectors<Coefficient>::ComputeNormal(Vector<Coefficient>& output, int inputDim) {
+bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputDim) {
   if (this->size == 0) {
     if (inputDim == 1) {
       output.makeEi(1, 0);
@@ -1441,7 +1441,7 @@ bool Vectors<Coefficient>::ComputeNormal(Vector<Coefficient>& output, int inputD
   Selection NonPivotPoints;
   NonPivotPoints.initialize(theDimension);
   output.setSize(theDimension);
-  this->GaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
+  this->gaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
   if (NonPivotPoints.CardinalitySelection != 1) {
     return false;
   }
@@ -2917,7 +2917,7 @@ class PolynomialFactorizationKronecker {
 template <class Coefficient>
 class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   public:
-  // One of the main purposes of this class is to be used for carrying out substitutions.
+  // one of the main purposes of this class is to be used for carrying out substitutions.
   // the general format of the substitution is:
   // the i^th element denotes the image of x_i,
   // For example, if polynomials is the array
@@ -6807,7 +6807,7 @@ class MonomialGeneralizedVerma {
     }
     return this->theMonCoeffOne > other.theMonCoeffOne;
   }
-  void ReduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
+  void reduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
   bool IsHWV() const {
     if (!this->theMonCoeffOne.isEqualToOne()) {
       return false;
@@ -7220,7 +7220,7 @@ void MonomialGeneralizedVerma<Coefficient>::MultiplyMeByUEEltOnTheLefT(
     reportStream << "reducing mon: " << currentMon.toString()
     << ", index" << j + 1 << " out of " << theUE.size() << "...";
     theReport.report(reportStream.str());
-    currentMon.ReduceMe(buffer);
+    currentMon.reduceMe(buffer);
     reportStream << " done.";
     theReport.report(reportStream.str());
     buffer *= theUE.coefficients[j];
@@ -7244,10 +7244,10 @@ void ElementSumGeneralizedVermas<Coefficient>::MultiplyMeByUEEltOnTheLeft(
 }
 
 template <class Coefficient>
-void MonomialGeneralizedVerma<Coefficient>::ReduceMe(
+void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
-  MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
+  MacroRegisterFunctionWithName("MonomialGeneralizedVerma::reduceMe");
   ModuleSSalgebra<Coefficient>& theMod = *this->owner;
   output.makeZero();
   MonomialUniversalEnveloping<Coefficient> tempMon;

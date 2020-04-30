@@ -2239,7 +2239,7 @@ void Calculator::registerCalculatorFunction(Function& theFun, int indexOp) {
   namedRule.containerOperation = this->operations.theKeys[indexOp];
   namedRule.index = theFun.indexInOperationHandlers;
   namedRule.isComposite = theFun.options.flagIsCompositeHandler;
-  this->namedRules.SetKeyValue(
+  this->namedRules.setKeyValue(
     theFun.calculatorIdentifier,
     namedRule
   );
@@ -3028,7 +3028,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
     return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString)) {
@@ -3055,7 +3055,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
     return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {

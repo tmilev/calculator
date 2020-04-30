@@ -61,7 +61,7 @@ public:
     }
     return this->theValues[theIndex];
   }
-  void SetKeyValue(const key& inputKey, const value& inputValue) {
+  void setKeyValue(const key& inputKey, const value& inputValue) {
     if (this->contains(inputKey)) {
       this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
       return;

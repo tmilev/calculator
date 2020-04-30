@@ -8450,13 +8450,13 @@ void Calculator::addTrigonometricSplit(const std::string& trigFun, const List<st
     theSplit.setSize(0);
     theSplit.addOnTop("\\" + trigFun);
     theSplit.addOnTop(theVar);
-    this->predefinedWordSplits.SetKeyValue(trigFun + theVar, theSplit);
-    this->predefinedWordSplits.SetKeyValue("\\" + trigFun + theVar, theSplit);
+    this->predefinedWordSplits.setKeyValue(trigFun + theVar, theSplit);
+    this->predefinedWordSplits.setKeyValue("\\" + trigFun + theVar, theSplit);
     theSplit.setSize(0);
     theSplit.addOnTop(theVar);
     theSplit.addOnTop("\\" + trigFun);
-    this->predefinedWordSplits.SetKeyValue(theVar + trigFun, theSplit);
-    this->predefinedWordSplits.SetKeyValue(theVar + "\\" + trigFun, theSplit);
+    this->predefinedWordSplits.setKeyValue(theVar + trigFun, theSplit);
+    this->predefinedWordSplits.setKeyValue(theVar + "\\" + trigFun, theSplit);
   }
   for (int i = 0; i < theVars.size; i ++) {
     for (int j = 0; j < theVars.size; j ++) {
@@ -8464,7 +8464,7 @@ void Calculator::addTrigonometricSplit(const std::string& trigFun, const List<st
       theSplit.addOnTop(theVars[i]);
       theSplit.addOnTop("\\" + trigFun);
       theSplit.addOnTop(theVars[j]);
-      this->predefinedWordSplits.SetKeyValue(theVars[i] + trigFun + theVars[j], theSplit);
+      this->predefinedWordSplits.setKeyValue(theVars[i] + trigFun + theVars[j], theSplit);
     }
   }
 }
@@ -8496,7 +8496,7 @@ void Calculator::addOneStringHandler(
       << this->operations.theKeys[atom] << "." << global.fatal;
     }
   } else {
-    handlerCollection.SetKeyValue(atom, handler);
+    handlerCollection.setKeyValue(atom, handler);
   }
 }
 
@@ -8577,7 +8577,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<ElementWeylGroup                                                         >();
   this->addOneBuiltInHandler<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>             >();
   this->addOneBuiltInHandler<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>           >();
-  this->addOneBuiltInHandler<CharacterSemisimpleLieAlgebraModule<Rational>                                                   >();
+  this->addOneBuiltInHandler<CharacterSemisimpleLieAlgebraModule<Rational>                            >();
   this->addOneBuiltInHandler<SemisimpleSubalgebras                                                    >();
   this->addOneBuiltInHandler<double                                                                   >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
@@ -8592,11 +8592,13 @@ void Calculator::initializePredefinedWordSplits() {
   theVars.addOnTop("x");
   theVars.addOnTop("y");
   theSplit.setSize(0);
-  theSplit.addOnTop("x"); theSplit.addOnTop("y");
-  this->predefinedWordSplits.SetKeyValue("xy", theSplit);
+  theSplit.addOnTop("x");
+  theSplit.addOnTop("y");
+  this->predefinedWordSplits.setKeyValue("xy", theSplit);
   theSplit.setSize(0);
-  theSplit.addOnTop("y"); theSplit.addOnTop("x");
-  this->predefinedWordSplits.SetKeyValue("yx", theSplit);
+  theSplit.addOnTop("y");
+  theSplit.addOnTop("x");
+  this->predefinedWordSplits.setKeyValue("yx", theSplit);
   this->addTrigonometricSplit("sin", theVars);
   this->addTrigonometricSplit("cos", theVars);
   this->addTrigonometricSplit("tan", theVars);

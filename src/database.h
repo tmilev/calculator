@@ -76,7 +76,7 @@ public:
       std::stringstream* commentsGeneral,
       bool& tokenIsGood
     );
-    bool SetPassword(
+    bool setPassword(
       const std::string& inputUsername,
       const std::string& inputNewPassword,
       std::string& outputAuthenticationToken,

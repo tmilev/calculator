@@ -45,7 +45,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input, Matrix<Rational>& outputMatrix
 ) const {
   Vectors<Rational> startBasis, imageBasis;
-  startBasis.MakeEiBasis(this->AmbientWeyl->getDimension());
+  startBasis.makeEiBasis(this->AmbientWeyl->getDimension());
   this->actByElement(input, startBasis, imageBasis);
   outputMatrix.AssignVectorsToRows(imageBasis);
   outputMatrix.transpose();
@@ -416,7 +416,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   RootSubalgebra theRootSA;
 //  theRootSA.initialize(*this);
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
-  theRootSA.genK.MakeEiBasis(theDimension);
+  theRootSA.genK.makeEiBasis(theDimension);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
@@ -540,7 +540,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
     }
   }
   Vectors<Rational> simpleBasis;
-  simpleBasis.MakeEiBasis(theDimension);
+  simpleBasis.makeEiBasis(theDimension);
   while (numExplored< this->theWeyl.RootSystem.size) {
     for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
       if (Explored.theObjects[i])
@@ -858,7 +858,7 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
       this->theRange().LieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], tempElt);
       tempElt.ElementToVectorNegativeRootSpacesFirst(tempRoot);
-      if (!tempRoots.LinSpanContainsVector(tempRoot)) {
+      if (!tempRoots.linearSpanContainsVector(tempRoot)) {
         return false;
       }
     }
@@ -1554,13 +1554,13 @@ void RationalFunction::operator=(const RationalFunction& other) {
       break;
     case RationalFunction::typePoly:
       if (other.Numerator.IsZeroPointer()) {
-        global.fatal << "Zero pointer in numerator of other. " << global.fatal;
+        global.fatal << "zero pointer in numerator of other. " << global.fatal;
       }
       this->Numerator.getElement() = other.Numerator.GetElementConst();
       break;
     case RationalFunction::typeRationalFunction:
       if (other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer()) {
-        global.fatal << "Zero pointer in numerator or denominator of other. " << global.fatal;
+        global.fatal << "zero pointer in numerator or denominator of other. " << global.fatal;
       }
       this->Numerator.getElement() = other.Numerator.GetElementConst();
       this->Denominator.getElement() = other.Denominator.GetElementConst();
@@ -2055,7 +2055,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::GetBasisFromSpanOfElements(
 //  { theRank = theElements.theObjects[0].Hcomponent.size;
 //    numRoots = theElements.theObjects[0].coeffsRootSpaces.size;
 //  }
-  theRootForm.ChooseABasis();
+  theRootForm.chooseABasis();
   outputTheBasis.setSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputTheBasis[i];

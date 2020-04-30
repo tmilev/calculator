@@ -444,8 +444,8 @@ CodeFormatter::CodeFormatter() {
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
     this->separatorCharactersMap[static_cast<signed>(this->separatorCharacters[i])] = true;
   }
-  this->builtInTypes.SetKeyValue(" ", "whiteSpace");
-  this->builtInTypes.SetKeyValue("\t", "whiteSpace");
+  this->builtInTypes.setKeyValue(" ", "whiteSpace");
+  this->builtInTypes.setKeyValue("\t", "whiteSpace");
 }
 
 bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {

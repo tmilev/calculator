@@ -1009,10 +1009,10 @@ void FileOperations::InitializeFoldersULTRASensitive() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersULTRASensitive");
   MapList<std::string, std::string, MathRoutines::HashString>&
   folderSubstitutionsULTRASensitive = FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
-  folderSubstitutionsULTRASensitive.SetKeyValue("certificates/", "certificates/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("/results/", "results/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("results/", "results/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("crashes/", "results/crashes/");
+  folderSubstitutionsULTRASensitive.setKeyValue("certificates/", "certificates/");
+  folderSubstitutionsULTRASensitive.setKeyValue("/results/", "results/");
+  folderSubstitutionsULTRASensitive.setKeyValue("results/", "results/");
+  folderSubstitutionsULTRASensitive.setKeyValue("crashes/", "results/crashes/");
 }
 
 void FileOperations::InitializeFoldersSensitive() {
@@ -1021,14 +1021,14 @@ void FileOperations::InitializeFoldersSensitive() {
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   folderSubstitutionsSensitive.clear();
 
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
-  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
-  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.SetKeyValue("database_fallback/database.json", "database_fallback/database.json");
-  folderSubstitutionsSensitive.SetKeyValue("/database_fallback/database.json", "database_fallback/database.json");
+  folderSubstitutionsSensitive.setKeyValue("LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.setKeyValue("/LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.setKeyValue("configuration/", "configuration/");
+  folderSubstitutionsSensitive.setKeyValue("/configuration/", "configuration/");
+  folderSubstitutionsSensitive.setKeyValue("freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue("/freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.setKeyValue("database_fallback/database.json", "database_fallback/database.json");
+  folderSubstitutionsSensitive.setKeyValue("/database_fallback/database.json", "database_fallback/database.json");
 }
 
 List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults() {
@@ -1091,8 +1091,8 @@ void FileOperations::InitializeFoldersNonSensitive() {
       global.fatal << Logger::red << "Unexpected empty folder mapping: key: "
       << key << ", value: " << value << global.fatal;
     }
-    folderSubstitutionsNonSensitive.SetKeyValue(key, value);
-    folderSubstitutionsNonSensitive.SetKeyValue("/" + key, value);
+    folderSubstitutionsNonSensitive.setKeyValue(key, value);
+    folderSubstitutionsNonSensitive.setKeyValue("/" + key, value);
   }
 }
 
@@ -1610,7 +1610,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     TDV.drawTextAtVectorBufferRational(tempRoot, tempS, "#94c894");
     TDV.drawCircleAtVectorBufferRational(tempRoot, colorText, 2);
   }
-  TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension);
+  TDV.theBuffer.BasisToDrawCirclesAt.makeEiBasis(theDimension);
 }
 
 void DrawingVariables::drawLineBufferOld(
@@ -2863,7 +2863,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
     tempRoot = owner.startingVectors[currentIndex] * this->theObjects[currentIndex].GetLargestElongation();
     tempRoots.addOnTop(tempRoot);
     bool ShouldDecompose;
-    ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
+    ShouldDecompose = tempRoots.getLinearDependence(tempMat);
     if (ShouldDecompose && this->LastDistinguishedIndex != - 1) {
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
@@ -2904,7 +2904,7 @@ bool PartFraction::ReduceOnceGeneralMethod(
     tempRoot *= (this->theObjects[currentIndex].GetLargestElongation());
     bufferVectors.addOnTop(tempRoot);
     bool ShouldDecompose;
-    ShouldDecompose = bufferVectors.GetLinearDependence(tempMat);
+    ShouldDecompose = bufferVectors.getLinearDependence(tempMat);
     if (ShouldDecompose && (
       this->LastDistinguishedIndex != - 1 ||
       this->LastDistinguishedIndex == owner.startingVectors.size
@@ -3494,7 +3494,7 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
   }
   Rational tempRat;
   for (int i = 0; i < theDimension; i ++) {
-    dens.ComputeNormalExcludingIndex(tempRoot, i, buffer);
+    dens.computeNormalExcludingIndex(tempRoot, i, buffer);
     tempRat = tempRoot.ScalarEuclidean(dens[i]);
     if (tempRat.isEqualToZero()) {
       global.fatal << "Scalar product is equal to zero. " << global.fatal;
@@ -6664,7 +6664,7 @@ void WeylGroupData::GetTrivialRepresentation(
   MacroRegisterFunctionWithName("WeylGroup::GetTrivialRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
   output.initialize(this->theGroup);
-  output.basis.MakeEiBasis(1);
+  output.basis.makeEiBasis(1);
   for (int i = 0; i < this->getDimension(); i ++) {
     output.generatorS[i].MakeIdMatrix(1);
   }
@@ -6677,7 +6677,7 @@ void WeylGroupData::GetSignRepresentation(
   MacroRegisterFunctionWithName("WeylGroup::GetSignRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
   output.initialize(this->theGroup);
-  output.basis.MakeEiBasis(1);
+  output.basis.makeEiBasis(1);
   ElementWeylGroup currentElt;
   for (int i = 0; i < this->getDimension(); i ++) {
     currentElt.MakeSimpleReflection(i, *this);
@@ -6693,7 +6693,7 @@ void WeylGroupData::GetStandardRepresentation(
   MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
   this->theGroup.CheckInitializationConjugacyClasses();
   output.initialize(this->theGroup);
-  output.basis.MakeEiBasis(this->getDimension());
+  output.basis.makeEiBasis(this->getDimension());
   for (int i = 0; i < this->getDimension(); i ++) {
     this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
   }
@@ -6854,7 +6854,7 @@ void WeylGroupData::getCoCartanSymmetric(const Matrix<Rational>& input, Matrix<R
 void WeylGroupData::GenerateRootSystem() {
   Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > theRootsFinder;
-  startRoots.MakeEiBasis(this->getDimension());
+  startRoots.makeEiBasis(this->getDimension());
   int estimatedNumRoots = this->theDynkinType.GetRootSystemSize();
   this->generateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
   this->RootSystem.clear();
@@ -7113,7 +7113,7 @@ void WeylGroupData::MakeMeFromMyCartanSymmetric() {
   this->GenerateRootSystem();
   DynkinDiagramRootSubalgebra theDynkinTypeComputer;
   Vectors<Rational> simpleBasis;
-  simpleBasis.MakeEiBasis(this->cartanSymmetric.numberOfRows);
+  simpleBasis.makeEiBasis(this->cartanSymmetric.numberOfRows);
   theDynkinTypeComputer.ComputeDiagramTypeModifyInputRelative(simpleBasis, this->RootSystem, this->cartanSymmetric);
   theDynkinTypeComputer.GetDynkinType(this->theDynkinType);
   this->MakeFinalSteps();
@@ -7272,7 +7272,7 @@ void WeylGroupData::GetWeylChamber(Cone& output) {
   tempMat = this->cartanSymmetric;
   tempMat.invert();
   Vectors<Rational> tempRoots;
-  tempRoots.AssignMatrixRows(tempMat);
+  tempRoots.assignMatrixRows(tempMat);
   output.CreateFromVertices(tempRoots);
 }
 
@@ -7286,7 +7286,7 @@ void WeylGroupData::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& 
   }
   tempMat.transpose();
   tempMat.invert();
-  output.AssignMatrixRows(tempMat);
+  output.assignMatrixRows(tempMat);
 }
 
 void WeylGroupData::GetIntegralLatticeInSimpleCoordinates(Lattice& output) {
@@ -7317,7 +7317,7 @@ void WeylGroupData::GetLongestWeylElt(ElementWeylGroup& outputWeylElt) {
   this->ComputeRho(false);
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> tempRoots;
-  tempRoots.MakeEiBasis(this->getDimension());
+  tempRoots.makeEiBasis(this->getDimension());
   this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
 }
 
@@ -7416,7 +7416,7 @@ bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Ra
 void WeylGroupData::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output) {
   Vectors<Rational> basis;
   int theDim = this->getDimension();
-  basis.MakeEiBasis(theDim);
+  basis.makeEiBasis(theDim);
   for (int i = 0; i < theDim; i ++) {
     this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
   }
@@ -7590,7 +7590,7 @@ void WeylGroupData::drawRootSystem(
   }
   Vector<Rational> tempRootRat;
   Vectors<Rational> epsNotationSimpleBasis;
-  epsNotationSimpleBasis.MakeEiBasis(theDimension);
+  epsNotationSimpleBasis.makeEiBasis(theDimension);
   this->getEpsilonCoordinates(epsNotationSimpleBasis, epsNotationSimpleBasis);
   for (int i = 0; i < theDimension; i ++) {
     tempRootRat.makeEi(theDimension, i);
@@ -9073,9 +9073,9 @@ bool Lattice::FindOnePreimageInLatticeOf(
   const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
 ) {
   Vectors<Rational> thisBasis;
-  thisBasis.AssignMatrixRows(this->basisRationalForm);
+  thisBasis.assignMatrixRows(this->basisRationalForm);
   theLinearMap.actOnVectorsColumn(thisBasis, Rational(0));
-  bool result = input.GetIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
+  bool result = input.getIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
   tempMat.transpose();
@@ -9086,16 +9086,16 @@ bool Lattice::FindOnePreimageInLatticeOf(
 void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearMap, const Lattice& other) {
   Vectors<Rational> startingBasis, imageStartingBasis, basisImageIntersection, ImageBasisInImageStartingBasisCoords;
   Vectors<Rational> resultNonKernelPart, result, tempRoots;
-  startingBasis.AssignMatrixRows(this->basisRationalForm);
+  startingBasis.assignMatrixRows(this->basisRationalForm);
   theLinearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
   Lattice ImageLattice;
   ImageLattice.MakeFromRoots(imageStartingBasis);
   ImageLattice.intersectWith(other);
-  basisImageIntersection.AssignMatrixRows(ImageLattice.basisRationalForm);
+  basisImageIntersection.assignMatrixRows(ImageLattice.basisRationalForm);
   Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
   basisImageIntersection = tempBasisImageIntersection;
   imageStartingBasis = tempImageStartingBasis;
-  bool tempBool = tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(
+  bool tempBool = tempBasisImageIntersection.getIntegralCoordsInBasisIfTheyExist(
     tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, Rational(1), Rational(- 1), Rational(0)
   );
   ImageBasisInImageStartingBasisCoords =(tempImageBasisInImageStartingBasisCoords);
@@ -9112,17 +9112,17 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   }
   Lattice KernelPart;
   KernelPart = *this;
-  tempRoots.AssignMatrixRows(theLinearMap);
+  tempRoots.assignMatrixRows(theLinearMap);
   KernelPart.IntersectWithLinearSubspaceGivenByNormals(tempRoots);
-  result.AssignMatrixRows(KernelPart.basisRationalForm);
+  result.assignMatrixRows(KernelPart.basisRationalForm);
   result.addListOnTop(resultNonKernelPart);
   this->MakeFromRoots(result);
 }
 
 void Lattice::intersectWith(const Lattice& other) {
   Vectors<Rational> commonBasis, otherBasis, startBasis;
-  startBasis.AssignMatrixRows(this->basisRationalForm);
-  otherBasis.AssignMatrixRows(other.basisRationalForm);
+  startBasis.assignMatrixRows(this->basisRationalForm);
+  otherBasis.assignMatrixRows(other.basisRationalForm);
   startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis);
   Lattice thisLatticeIntersected, otherLatticeIntersected;
   thisLatticeIntersected = *this;
@@ -9130,8 +9130,8 @@ void Lattice::intersectWith(const Lattice& other) {
   thisLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
   otherLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
   Vectors<Rational> thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
-  thisCommonBasis.AssignMatrixRows(thisLatticeIntersected.basisRationalForm);
-  otherCommonBasis.AssignMatrixRows(otherLatticeIntersected.basisRationalForm);
+  thisCommonBasis.assignMatrixRows(thisLatticeIntersected.basisRationalForm);
+  otherCommonBasis.assignMatrixRows(otherLatticeIntersected.basisRationalForm);
   thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoords);
   otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoords);
   Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
@@ -9242,7 +9242,7 @@ std::string QuasiPolynomial::toString(bool useHtml, bool useLatex, FormatExpress
       out << " where $\\Lambda =\\left\\langle\\begin{array}{c}";
     }
     Vectors<Rational> tempRoots;
-    tempRoots.AssignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
+    tempRoots.assignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
     for (int i = 0; i < tempRoots.size; i ++) {
       out << tempRoots[i].toString();
       if (i != tempRoots.size - 1) {
@@ -9302,7 +9302,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
     global.fatal << "Vector dimension not as expected. " << global.fatal;
   }
   Vectors<Rational> basisRoots;
-  basisRoots.AssignMatrixRows(this->basisRationalForm);
+  basisRoots.assignMatrixRows(this->basisRationalForm);
   if (!theVector.getCoordinatesInBasis(basisRoots, output)) {
     global.fatal << "Failed to get coordinates in basis. " << global.fatal;
     return false;
@@ -9382,7 +9382,7 @@ void PartFraction::GetVectorPartitionFunction(
   Matrix<Rational>  theNormalsMatForm;
   theNormalsMatForm.AssignVectorsToRows(theLatticeGenerators);
   theNormalsMatForm.invert();
-  theNormals.AssignMatrixColumns(theNormalsMatForm);
+  theNormals.assignMatrixColumns(theNormalsMatForm);
   output.MakeZeroLatTiceZn(owner.AmbientDimension);
   for (int i = 0; i < theCoeff.size(); i ++) {
     this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, theCoeff[i], theNormals, theLattice);
@@ -9671,7 +9671,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
 
 void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal) {
   Vectors<Rational> startingBasis, resultBasis;
-  startingBasis.AssignMatrixRows(this->basisRationalForm);
+  startingBasis.assignMatrixRows(this->basisRationalForm);
   Vector<Rational> theScalarProducts;
   theScalarProducts.setSize(startingBasis.size);
   for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
@@ -9722,7 +9722,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
 void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis) {
   Vectors<Rational> theNormals;
   Matrix<Rational> theMat;
-  theSubspaceBasis.GetMatrixRootsToRows(theMat);
+  theSubspaceBasis.getMatrixRootsToRows(theMat);
   theMat.GetZeroEigenSpace(theNormals);
   this->IntersectWithLinearSubspaceGivenByNormals(theNormals);
 }
@@ -9738,7 +9738,7 @@ bool Lattice::SubstitutionHomogeneous(const Matrix<Rational> & theSub, Lattice& 
   (void) resultIsSubsetOf;
   global.fatal << "Not implemented yet. " << global.fatal;
  /*Vectors<Rational> preimageBasis;
-  preimageBasis.AssignMatrixRows(this->basisRationalForm);
+  preimageBasis.assignMatrixRows(this->basisRationalForm);
   Matrix<Rational>  theSubModifiable, currentBasisVector, oneSolution;
   for (int i = 0; i <preimageBasis.size; i ++) {
     theSubModifiable = theSub;
@@ -9804,7 +9804,7 @@ void QuasiPolynomial::operator*=(const Rational& theConst) {
 
 void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim) {
   if (theNormal.isEqualToZero()) {
-    global.fatal << "Zero normal not allowed. " << global.fatal;
+    global.fatal << "zero normal not allowed. " << global.fatal;
   }
   int theDimension = theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
@@ -9818,7 +9818,7 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   theEmbedding.transpose();
   theBasis.addOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
-  tempRoots.MakeEiBasis(theDimension);
+  tempRoots.makeEiBasis(theDimension);
   tempRoots.getCoordinatesInBasis(theBasis, tempRoots2);
   theProjection.AssignVectorsToRows(tempRoots2);
   theProjection.transpose();
@@ -10079,7 +10079,7 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   }
   Rational theConstOnTheOtherSide = - *theAffineHyperplane.lastObject();
   Vectors<Rational> theBasis;
-  theBasis.AssignMatrixRows(this->basisRationalForm);
+  theBasis.assignMatrixRows(this->basisRationalForm);
   Lattice theHyperplaneLatticeNoShift, theDirectionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
   Vectors<Rational> tempRoots; //Vector<Rational> tempRoot;
   tempRoots.addOnTop(theDirection);
@@ -10088,7 +10088,7 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   theDirectionLattice.basisRationalForm.GetVectorFromRow(0, outputDirectionMultipleOnLattice);
   theHyperplaneLatticeNoShift = *this;
   theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
-  tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
+  tempRoots.assignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
   tempRoots.addOnTop(outputDirectionMultipleOnLattice);
   outputRougherLattice.MakeFromRoots(tempRoots);
   this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
@@ -10273,7 +10273,7 @@ void DrawOperations::MakeMeAStandardBasis(int theDim) {
   }
   if (this->BasisProjectionPlane.size < 1)
     this->BasisProjectionPlane.setSize(1);
-  this->BasisProjectionPlane.MakeEiBasis(theDim);
+  this->BasisProjectionPlane.makeEiBasis(theDim);
   this->BasisProjectionPlane.setSize(2);
   if (theDim != 3) {
     for (int i = 0; i < this->BasisProjectionPlane[1].size; i ++) {
@@ -10386,7 +10386,7 @@ bool Cone::IsRegularToBasis(
   Rational theScalarProduct;
   for (int i = 0; i < x; i ++) {
     WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
-    if (basis.ComputeNormalFromSelection(candidate, WallSelection, bufferMat, theDimension)) {
+    if (basis.computeNormalFromSelection(candidate, WallSelection, bufferMat, theDimension)) {
       candidate.ScalarEuclidean(input, theScalarProduct);
       if (theScalarProduct.isEqualToZero()) {
         outputFailingNormal = candidate;
@@ -10509,7 +10509,7 @@ bool Cone::DrawMeProjective(
       sumAbsValuesCoords += (VerticesScaled[i][j].isPositive()) ? VerticesScaled[i][j] : - VerticesScaled[i][j];
     }
     if (sumAbsValuesCoords.isEqualToZero()) {
-      global.fatal << "Zero vector not allowed. " << global.fatal;
+      global.fatal << "zero vector not allowed. " << global.fatal;
     }
     VerticesScaled[i] /= sumAbsValuesCoords;
   }
@@ -10601,14 +10601,14 @@ void DrawOperations::initDimensions(int theDim) {
   }
   this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
-  this->BasisProjectionPlane.MakeEiBasis(theDim);
+  this->BasisProjectionPlane.makeEiBasis(theDim);
   this->BasisProjectionPlane.size = 2;
 /*  for (int i = 0; i < tempBasis[1].size; i ++)
     tempBasis[1][i] =2*i + 1;
   for (int i = 0; i < tempBasis[0].size; i ++)
     tempBasis[0][i] =3*i +2;*/
   this->ModifyToOrthonormalNoShiftSecond(this->BasisProjectionPlane[1], this->BasisProjectionPlane[0]);
-  this->BasisToDrawCirclesAt.MakeEiBasis(theDim);
+  this->BasisToDrawCirclesAt.makeEiBasis(theDim);
   this->SelectedCircleMinus2noneMinus1Center = - 2;
   this->centerX = 300;
   this->centerY = 300;
@@ -11109,7 +11109,7 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(
   }
   Vectors<Rational> theBasis;
   Vector<Rational> tempRoot;
-  theBasis.AssignMatrixRows(this->basisRationalForm);
+  theBasis.assignMatrixRows(this->basisRationalForm);
   input.getCoordinatesInBasis(theBasis, tempRoot);
   Cone::scaleNormalizeByPositive(tempRoot);
   Matrix<Rational> tempMat;
@@ -11151,7 +11151,7 @@ bool Cone::GetLatticePointsInCone(
   outputPoints.size = 0;
   Vector<Rational> candidatePoint;
   Vectors<Rational> LatticeBasis;
-  LatticeBasis.AssignMatrixRows(theLattice.basisRationalForm);
+  LatticeBasis.assignMatrixRows(theLattice.basisRationalForm);
   for (int i = 0; i < numCycles; i ++, boundingBox.IncrementSubset()) {
     candidatePoint = theActualShift;
     if (shiftAllPointsBy != nullptr) {
@@ -11237,7 +11237,7 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
   Vector<Rational> coordsInBasis;
   coneContainingOutputPoint.GetInternalPoint(output);
   Vectors<Rational> basisRoots;
-  basisRoots.AssignMatrixRows(this->basisRationalForm);
+  basisRoots.assignMatrixRows(this->basisRationalForm);
   if (!output.getCoordinatesInBasis(basisRoots, coordsInBasis)) {
     return false;
   }
@@ -11647,7 +11647,7 @@ void Cone::SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output)
 
 void Lattice::ApplyLinearMap(Matrix<Rational> & theMap, Lattice& output) {
   Vectors<Rational> tempRoots;
-  tempRoots.AssignMatrixRows(this->basisRationalForm);
+  tempRoots.assignMatrixRows(this->basisRationalForm);
   theMap.actOnVectorsColumn(tempRoots);
   output.MakeFromRoots(tempRoots);
 }
@@ -11891,7 +11891,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
     theProjectionLatticeLevel.elements[i][i + 1] = 1;
   }
   direction.makeEi(theDimProjectivized, 0);
-  if (!this->theProjectivizedCone.Vertices.LinSpanContainsVector(direction)) {
+  if (!this->theProjectivizedCone.Vertices.linearSpanContainsVector(direction)) {
     this->FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
       theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel
     );
@@ -12461,7 +12461,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
     for (int j = 0; j < theSelection.CardinalitySelection; j ++) {
       extraVertices.addOnTop(inputVertices[theSelection.elements[j]]);
     }
-    if (extraVertices.ComputeNormal(normalCandidate, theDim)) {
+    if (extraVertices.computeNormal(normalCandidate, theDim)) {
       bool hasPositive = false;
       bool hasNegative = false;
       for (int j = 0; j < inputVertices.size; j ++) {
@@ -12513,7 +12513,7 @@ bool Cone::CreateFromNormalS(
     for (int i = 0; i < theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++) {
       Vector<Rational> tempRoot;
       tempRoot.makeEi(theDim, i);
-      if (!this->Normals.LinSpanContainsVector(tempRoot, tempMat, tempSel)) {
+      if (!this->Normals.linearSpanContainsVector(tempRoot, tempMat, tempSel)) {
         numAddedFakeWalls ++;
         this->Normals.addOnTop(tempRoot);
       }
@@ -12871,7 +12871,7 @@ std::string Lattice::toString() const {
   std::stringstream out;
   out << "L=<";
   Vectors<Rational> tempRoots;
-  tempRoots.AssignMatrixRows(this->basisRationalForm);
+  tempRoots.assignMatrixRows(this->basisRationalForm);
   for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
     out << tempRoots[i].toString();
     if (i != this->basisRationalForm.numberOfRows - 1) {

@@ -227,7 +227,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Restrict(
   }
   output.initialize(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
-  output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
+  output.basis.getGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
   output.theCharacteR = remainingCharacter;
   ProgressReport theReport;
@@ -506,7 +506,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   WeylGroupData theWeyl;
   theWeyl.MakeFromDynkinType(theType);
   theHWsimpleCoords = theHWfundCoords;
-  theHWfundCoords = theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
+  theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat = theContext.getFormat();
@@ -537,7 +537,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     epsCoordMat.actOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString =
-    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::GetMathSpanPure(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
@@ -607,10 +607,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
   if (!useFundCoords) {
     theHWsimpleCoords = theWeight;
-    theHWfundCoords = theWeyl.GetFundamentalCoordinatesFromSimple(theWeight);
+    theHWfundCoords = theWeyl.getFundamentalCoordinatesFromSimple(theWeight);
   } else {
     theHWfundCoords = theWeight;
-    theHWsimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+    theHWsimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
   }
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
@@ -648,7 +648,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
     "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
-    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi") + "$";
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
   Vector<Polynomial<Rational> > differenceVector;
@@ -692,7 +692,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     epsCoordMat.actOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
-    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
@@ -2172,7 +2172,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
     if (theCoordsString == "fundamental") {
       resultWeight.weightFundamentalCoordS = EiVector;
     } else if (theCoordsString == "simple") {
-      resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(EiVector);
+      resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(EiVector);
     }
   } else {
     Vector<Rational> EiVector;
@@ -2185,7 +2185,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
       return output.makeError(errorStream.str(), theCommands);
     }
     EiVector.makeEi(tempV.size, theWeightIndex - 1);
-    resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromEpsilon(EiVector);
+    resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
   ExpressionContext theContext(theCommands);
@@ -2211,7 +2211,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(
   theSSowner->checkConsistency();
   ExpressionContext theContext(theCommands);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
+  resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
   resultWeight.owner = theSSowner;
   return output.assignValueWithContext(resultWeight, theContext, theCommands);
 }

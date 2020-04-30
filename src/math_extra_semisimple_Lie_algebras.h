@@ -301,7 +301,7 @@ public:
   }
   Weight(): owner(nullptr) {
   }
-  void CheckNonZeroOwner() const {
+  void checkNonZeroOwner() const {
     if (this->owner != nullptr) {
       return;
     }
@@ -354,7 +354,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
       }
     }
   }
-  void CheckNonZeroOwner() const {
+  void checkNonZeroOwner() const {
     this->checkConsistency();
     if (this->GetOwner() == 0) {
       global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "

@@ -1448,8 +1448,8 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   output[7] = h7;
 }
 
-bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
-  MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
+bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+  MacroRegisterFunctionWithName("Certificate::loadFromJSON");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>Loading certificate from: "
     << input.toString(nullptr);
@@ -1511,7 +1511,7 @@ bool Crypto::LoadOneKnownCertificate(
       if (theKeys.theType == JSData::token::tokenArray) {
         isGood = true;
         for (int i = 0; i < theKeys.theList.size; i ++) {
-          if (!currentCert.LoadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {
+          if (!currentCert.loadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {
             return false;
           }
           Crypto::knownCertificates.addOnTop(currentCert);
@@ -1628,7 +1628,7 @@ bool JSONWebToken::verifyRSA256(
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned theSha;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
-    *commentsGeneral << "<br>sha256 of payload: " << theSha.toString();
+    *commentsGeneral << "<br>Sha256 of payload: " << theSha.toString();
   }
   LargeIntegerUnsigned theSignatureInt;
   if (!Crypto::convertBase64ToLargeUnsigned(this->signatureBase64, theSignatureInt, commentsOnFailure)) {

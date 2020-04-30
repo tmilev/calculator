@@ -409,7 +409,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
     if (!outputExpressionFormat.theKeys[i].isOfType<std::string>(&keyName)) {
       keyName = outputExpressionFormat.theKeys[i].toString();
     }
-    output.SetKeyValue(keyName, outputExpressionFormat.theValues[i]);
+    output.setKeyValue(keyName, outputExpressionFormat.theValues[i]);
   }
   return true;
 }
@@ -425,7 +425,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   output.clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(theCommands.opDefine(), 3)) {
-      output.SetKeyValue(input[i][1], input[i][2]);
+      output.setKeyValue(input[i][1], input[i][2]);
     } else if (!allowFailure) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Could not extract key-value pair from: "
@@ -694,7 +694,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
       << "the same Cartan subalgebra. ";
       continue;
     }
-    theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
+    theSAs.theSubalgebras.setKeyValue(currentCandidate.theHs, currentCandidate);
     theSAs.theSubalgebras.theValues.lastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
   }
   reportStream << "Subalgebra loading done, total "

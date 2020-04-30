@@ -867,7 +867,7 @@ void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
     theBasis.addOnTop(theVectorPowers);
     for (int i = 0; i < theDim; i ++) {
       input.actOnVectorColumn(*theBasis.lastObject(), theVectorPowers);
-      if (theBasis.LinSpanContainsVector(theVectorPowers)) {
+      if (theBasis.linearSpanContainsVector(theVectorPowers)) {
         break;
       }
       theBasis.addOnTop(theVectorPowers);

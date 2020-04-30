@@ -113,7 +113,7 @@ class Logger {
 // Stack traces are stored inside the global object
 // GlobalVariables global.
 // That runs just fine.
-// One year later, the programmer decides to
+// one year later, the programmer decides to
 // make X a global object,
 // and again everything runs just fine as object global
 // happens to be initialized before X.

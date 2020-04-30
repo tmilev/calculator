@@ -490,11 +490,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
     return theCommands << "<hr>Possible user input error: attempting to apply Weyl group "
     << "element to weight corresponding to different Weyl group.";
   }
-  Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->GetSimpleCoordinatesFromFundamental(
+  Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->getSimpleCoordinatesFromFundamental(
     theWeight.weightFundamentalCoordS
   );
   theElt.actOn(theWeightSimpleCoords);
-  theWeight.weightFundamentalCoordS = theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
+  theWeight.weightFundamentalCoordS = theElt.owner->getFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
   return output.assignValueWithContext(theWeight, inputConverted[2].getContext(), theCommands);
 }
 
@@ -1251,7 +1251,7 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
     return false;
   }
   baseCopy.owner = &theCommands.theObjectContainer.theAlgebraicClosure;
-  MathRoutines::raiseToPower(baseCopy, powerIntegral, baseCopy.owner->One());
+  MathRoutines::raiseToPower(baseCopy, powerIntegral, baseCopy.owner->one());
   return output.assignValue(baseCopy, theCommands);
 }
 

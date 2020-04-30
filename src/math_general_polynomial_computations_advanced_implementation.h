@@ -1392,7 +1392,7 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorization::accountReducedFactor");
   if (incoming.isEqualToZero()) {
-    global.fatal << "Zero is not a valid factor. " << global.fatal;
+    global.fatal << "zero is not a valid factor. " << global.fatal;
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;

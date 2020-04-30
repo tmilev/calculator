@@ -92,7 +92,7 @@ Vector<Coefficient> BranchingData::ProjectWeight(Vector<Coefficient>& input) {
     fundCoordsSmaller[j] = this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
     fundCoordsSmaller[j] /= this->theHmm.theDomain().theWeyl.cartanSymmetric.elements[j][j] / 2;
   }
-  result = this->theHmm.theDomain().theWeyl.GetSimpleCoordinatesFromFundamental(fundCoordsSmaller);
+  result = this->theHmm.theDomain().theWeyl.getSimpleCoordinatesFromFundamental(fundCoordsSmaller);
   return result;
 }
 

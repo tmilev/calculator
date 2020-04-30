@@ -405,7 +405,7 @@ void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSuba
           tempOthers.addOnTop(-this->PositiveRootsK.theObjects[i]);
           tempK.addOnTop(this->PositiveRootsK.theObjects[i]);
         }
-        if (Vectors<Rational>::ConesIntersect(empNilradical, tempOthers, owner.AmbientWeyl.cartanSymmetric.numberOfRows)) {
+        if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.AmbientWeyl.cartanSymmetric.numberOfRows)) {
           Vectors<Rational> tempRoots; std::stringstream out; std::string tempS;
           this->AmbientWeyl.getEpsilonCoordinates(tempNilradical, tempRoots);
           tempRoots.ElementToStringEpsilonForm(tempS, true, false, false);
@@ -565,7 +565,7 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
     }
   }
   Vectors<Rational> cartanCentralizer;
-  this->SimpleBasisK.GetOrthogonalComplement(cartanCentralizer, &this->GetAmbientWeyl().cartanSymmetric);
+  this->SimpleBasisK.getOrthogonalComplement(cartanCentralizer, &this->GetAmbientWeyl().cartanSymmetric);
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->SimpleBasisK.size);
   for (int i = 0; i <cartanCentralizer.size; i ++) {
@@ -605,7 +605,7 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
           currentWeights.addOnTopNoRepetition(currentWeight);
         }
         if (currentWeight.isEqualToZero()) {
-          if (!zeroSpace.LinSpanContainsVector(currentWeights[j])) {
+          if (!zeroSpace.linearSpanContainsVector(currentWeights[j])) {
             zeroSpace.addOnTop(currentWeights[j]);
             currentWeights.addOnTop(- this->SimpleBasisK[k]);
           }
@@ -720,7 +720,7 @@ bool RootSubalgebra::ConeConditionHolds(
   bool doExtractRelations
 ) {
   Matrix<Rational> tempA, tempB;
-  if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, nullptr, nullptr)) {
+  if (Vectors<Rational>::conesIntersect(NilradicalRoots, Ksingular, nullptr, nullptr)) {
     if (doExtractRelations) {
       this->ExtractRelations(tempA, tempB, NilradicalRoots, owner, indexInOwner, Ksingular);
     }
@@ -1420,7 +1420,7 @@ void RootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   std::stringstream out;
   out2 << this->toString() << "\n";
   Matrix<Rational> tempMat;
-  this->SimpleBasisK.GetMatrixRootsToRows(tempMat);
+  this->SimpleBasisK.getMatrixRootsToRows(tempMat);
   tempMat.invert();
   int counter = 0;
   HashedList<Vector<Rational> >& AllRoots = this->GetAmbientWeyl().RootSystem;
@@ -1475,7 +1475,7 @@ void RootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       tempRoots =(this->SimpleBasisK);
       tempRoots[l] =(tempRoot);
       Matrix<Rational> tempMat;
-      tempRoots.GetMatrixRootsToRows(tempMat);
+      tempRoots.getMatrixRootsToRows(tempMat);
       tempMat.invert();
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
@@ -2037,7 +2037,7 @@ void RootSubalgebra::KEnumerationsToLinComb() {
   tempMat.initialize(theDimension, theDimension);
   int counter = 0;
   for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
-    this->PosRootsKConnectedComponents[i].SelectionToMatrixAppend(
+    this->PosRootsKConnectedComponents[i].selectionToMatrixAppend(
       this->theKEnumerations[i], theDimension, tempMat, counter
     );
     counter += this->theKComponentRanks[i];
@@ -2093,7 +2093,7 @@ bool RootSubalgebra::checkInitialization() const {
 
 bool RootSubalgebra::CheckScalarProdMatrixOrdered() const {
   Matrix<Rational> theMat;
-  this->SimpleBasisK.GetGramMatrix(theMat, &this->GetAmbientWeyl().cartanSymmetric);
+  this->SimpleBasisK.getGramMatrix(theMat, &this->GetAmbientWeyl().cartanSymmetric);
   if (theMat != this->scalarProdMatrixOrdered) {
     global.fatal << "Bilinear product matrix does not match the stored value. " << global.fatal;
   }
@@ -2244,7 +2244,7 @@ bool RootSubalgebra::CheckForMaximalDominanceCartanSA() {
 void RootSubalgebra::ComputeEssentialS() {
   MacroRegisterFunctionWithName("RootSubalgebra::ComputeEssentialS");
   this->SimpleBasisK = this->genK;
-  this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().cartanSymmetric);
+  this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().cartanSymmetric);
   this->theDynkinDiagram.AmbientRootSystem= this->GetAmbientWeyl().RootSystem;
   this->theDynkinDiagram.AmbientBilinearForm= this->GetAmbientWeyl().cartanSymmetric;
   this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
@@ -2279,7 +2279,7 @@ bool RootSubalgebra::ComputeEssentialsIfNew() {
     theReport.report(reportStream.str());
   }
   if (this->indexInducingSubalgebra != - 1) {
-    this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().cartanSymmetric);
+    this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().cartanSymmetric);
     int goodPermutation = - 1;
     List<List<int> >& extensionRootPermutations =
     this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
@@ -2308,7 +2308,7 @@ bool RootSubalgebra::ComputeEssentialsIfNew() {
       this->SimpleBasisK[extensionRootPermutations[goodPermutation][i]] = copySimpleBasisK[i];
     }
   } else {
-    this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().cartanSymmetric);
+    this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().cartanSymmetric);
   }
   if (theReport.tickAndWantReport()) {
     reportStream << "...found a candidate type... ";
@@ -2763,7 +2763,7 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
   this->NumPseudoParabolicNonParabolic = 0;
   RootSubalgebra currentSA;
   currentSA.ownEr = this;
-  basis.MakeEiBasis(this->owner->getRank());
+  basis.makeEiBasis(this->owner->getRank());
   List<RootSubalgebra> currentList;
   ProgressReport theReport;
   for (int i = 0; i < 2; i ++) {
@@ -3905,7 +3905,7 @@ void ConeRelation::RelationOneSideToStringCoordForm(
       tempS = "-";
     }
     if ((tempS == "0")) {
-      global.fatal << "Zero not allowed at this point of code. " << global.fatal;
+      global.fatal << "zero not allowed at this point of code. " << global.fatal;
     }
     out << tempS;
     if (!EpsilonForm) {
@@ -3951,7 +3951,7 @@ void ConeRelation::RelationOneSideToString(
       tempS = "-";
     }
     if ((tempS == "0")) {
-      global.fatal << "Zero not allowed here. " << global.fatal;
+      global.fatal << "zero not allowed here. " << global.fatal;
     }
     out << tempS;
     if (!useLatex) {
@@ -4113,7 +4113,7 @@ void ConeRelation::ComputeConnectedComponents(Vectors<Rational>& input, RootSuba
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
     for (int j = 0; j < owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j ++) {
-      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(
+      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
           input[i], owner.GetAmbientWeyl().cartanSymmetric
       )) {
         output[i].addOnTop(j);
@@ -4285,7 +4285,7 @@ void ConeRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
     for (int j = 0; j < owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j ++) {
-      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(
+      if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
         input[i], owner.GetAmbientWeyl().cartanSymmetric
       )) {
         output[i].addOnTop(j);

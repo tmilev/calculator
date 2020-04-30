@@ -349,7 +349,7 @@ bool Calculator::ExpressionMatchesPattern(
   int opVarB = this->opBind();
   if (thePattern.isListStartingWithAtom(opVarB)) {
     if (!matchedExpressions.contains(thePattern)) {
-      matchedExpressions.SetKeyValue(thePattern, input);
+      matchedExpressions.setKeyValue(thePattern, input);
     }
     if (matchedExpressions.GetValueCreate(thePattern) != input) {
       return false;

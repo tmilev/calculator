@@ -166,8 +166,8 @@ bool OrbitIterator<elementGroup, elementRepresentation>::checkInitialization() c
 }
 
 template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLastFALSE() {
-  MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLastFALSE");
+bool OrbitIterator<elementGroup, elementRepresentation>::incrementReturnFalseIfPastLastFALSE() {
+  MacroRegisterFunctionWithName("OrbitIterator::incrementReturnFalseIfPastLastFALSE");
   if (this->theGroupGeneratingElements.size == 0) {
     return false;
   }
@@ -207,7 +207,6 @@ void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
 ) {
   MacroRegisterFunctionWithName("Subgroup::initFromGroupAndGenerators");
   if (&inputGenerators == &this->theSubgroup->generators) {
-    //<-handle naughty programmers
     List<elementSomeGroup> inputGeneratorsCopy = inputGenerators;
     this->initFromGroupAndGenerators(inputGroup, inputGeneratorsCopy);
     return;
@@ -224,10 +223,10 @@ void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
 // This is the case for, in particular, the parabolic subgroups of the complete hyperoctahedral
 // groups in the generating set that tacks on to the symmetric groups a complete set of ℤ₂ generators
 template <class someGroup, class elementSomeGroup>
-void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(
+void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
   someGroup &inputGroup, const List<elementSomeGroup>& subGenerators
 ) {
-  MacroRegisterFunctionWithName("Subgroup::MakeTranslatableWordsSubgroup");
+  MacroRegisterFunctionWithName("Subgroup::makeTranslatableWordsSubgroup");
   this->theGroup = &inputGroup;
   this->theSubgroup = &this->theSubgroupMayBeHere;
   this->theSubgroup->generators = subGenerators;
@@ -308,7 +307,7 @@ SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> FiniteGroup<elemen
   for (int i = 0; i < subgenids.size; i ++) {
     subgens[i] = this->generators[subgenids[i]];
   }
-  out.MakeTranslatableWordsSubgroup(*this, subgens);
+  out.makeTranslatableWordsSubgroup(*this, subgens);
   return out;
 }
 
@@ -458,8 +457,10 @@ template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::checkInitialization() const {
   this->checkConsistency();
   if (this->generators.size == 0) {
-    global.fatal << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
-    << "group, you are still supposed to put the identity element in the group generators. " << global.fatal;
+    global.fatal << "Error: group has 0 generators, "
+    << "which is not allowed. If you want to use the trivial "
+    << "group, you are still supposed to put the "
+    << "identity element in the group generators. " << global.fatal;
   }
   return true;
 }
@@ -476,7 +477,7 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
         if (theScalarProd != 0) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.toString() << " is not orthogonal to char number "
-          << j+ 1 << " = " << rightChar.toString() << ". <br>The entire char table is: "
+          << j + 1 << " = " << rightChar.toString() << ". <br>The entire char table is: "
           << this->PrettyPrintCharacterTable() << global.fatal;
         }
       }
@@ -545,8 +546,10 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes() {
     this->ComputeCCSizeOrCCFromRepresentative(this->conjugacyClasses[i], true);
     if (oldCCsize != this->conjugacyClasses[i].size) {
       global.fatal << "The precomputed size " << oldCCsize.toString()
-      << " of the class represented by " << this->conjugacyClasses[i].representative.toString()
-      << " doesn't match actual class size which is: " << this->conjugacyClasses[i].size.toString()
+      << " of the class represented by "
+      << this->conjugacyClasses[i].representative.toString()
+      << " doesn't match actual class size which is: "
+      << this->conjugacyClasses[i].size.toString()
       << global.fatal;
     }
     computedSize += oldCCsize;
@@ -590,9 +593,9 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
   LargeInteger groupSizeByFla = this->SizeByFormulaOrNeg1();
   this->flagCharPolysAreComputed = true;
   for (int phase = 0; phase < 2; phase ++) {
-    //In phase 0 we try to add a new conjugacy class only if
-    //the class has a new character polynomial. In phase 1 we try every single conjugacy class,
-    //in case there are two non-conjugate elements with the same char poly.
+    // In phase 0 we try to add a new conjugacy class only if
+    // the class has a new character polynomial. In phase 1 we try every single conjugacy class,
+    // in case there are two non-conjugate elements with the same char poly.
     for (int i = 0; i < this->conjugacyClasses.size; i ++) {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
         if (theReport.tickAndWantReport()) {
@@ -658,12 +661,9 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
   if (recursionCount > 100) {
     global.fatal << "Recursion too deep: something is very wrong. " << global.fatal;
   }
-  std::cout << "got to here!\n";
   this->registerConjugacyClass(currentElt, false);
-  std::cout << "got to here2!\n";
   this->ComputeCCRepresentatives();
   recursionCount --;
-  std::cout << "got to here3!\n";
   this->flagCCRepresentativesComputed = true;
 }
 
@@ -760,8 +760,12 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<Coefficient>& theWeight) {
       HashedList<Vector<Coefficient> > comparisonOrbit;
       this->generateOrbit(theWeight, false, comparisonOrbit, false, - 1, 0, - 1);
       if (result != comparisonOrbit.size) {
-        global.fatal << "Actual orbit of " << theWeight.toString() << " has size " << comparisonOrbit.size << " but I computed "
-        << " the orbit size to be " << result.toString() << ". This may be a mathematical error. " << global.fatal;
+        global.fatal << "Actual orbit of "
+        << theWeight.toString()
+        << " has size "
+        << comparisonOrbit.size << " but I computed "
+        << " the orbit size to be " << result.toString()
+        << ". This may be a mathematical error. " << global.fatal;
       }
     }
   }
@@ -832,7 +836,10 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
 
 template <class Coefficient>
 void WeylGroupData::RaiseToDominantWeight(
-  Vector<Coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt
+  Vector<Coefficient>& theWeight,
+  int* sign,
+  bool* stabilizerFound,
+  ElementWeylGroup* raisingElt
 ) {
   MacroRegisterFunctionWithName("WeylGroup::RaiseToDominantWeight");
   if (sign != nullptr) {
@@ -1004,7 +1011,7 @@ void WeylGroupData::reflectSimple(int index, Vector<Coefficient>& theVector) con
 }
 
 template <class Coefficient>
-bool WeylGroupData::IsDominantWeight(const Vector<Coefficient>& theWeight) {
+bool WeylGroupData::isDominantWeight(const Vector<Coefficient>& theWeight) {
   int theDimension = this->getDimension();
   for (int i = 0; i < theDimension; i ++) {
     if (!this->IsDominantWRTgenerator(theWeight, i)) {
@@ -1015,7 +1022,7 @@ bool WeylGroupData::IsDominantWeight(const Vector<Coefficient>& theWeight) {
 }
 
 template<class Coefficient>
-Coefficient WeylGroupData::WeylDimFormulaSimpleCoords(
+Coefficient WeylGroupData::weylDimFormulaSimpleCoords(
   Vector<Coefficient>& theWeightInSimpleCoords, const Coefficient& theRingUnit
 ) {
   Coefficient Result, buffer;
@@ -1033,7 +1040,7 @@ Coefficient WeylGroupData::WeylDimFormulaSimpleCoords(
 }
 
 template<class Coefficient>
-Vector<Coefficient> WeylGroupData::GetFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInFundamentalCoords) {
+Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromSimple(const Vector<Coefficient>& inputInFundamentalCoords) {
   Matrix<Rational>& tempMat = *this->GetMatrixSimpleToFundamentalCoords();
   Vector<Coefficient> result = inputInFundamentalCoords;
   tempMat.actOnVectorColumn(result);
@@ -1041,9 +1048,9 @@ Vector<Coefficient> WeylGroupData::GetFundamentalCoordinatesFromSimple(const Vec
 }
 
 template<class Coefficient>
-Vector<Coefficient> WeylGroupData::GetSimpleCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords) {
+Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords) {
   Vectors<Rational> simpleBasis, simpleBasisEpsCoords;
-  simpleBasis.MakeEiBasis(this->getDimension());
+  simpleBasis.makeEiBasis(this->getDimension());
   this->getEpsilonCoordinates(simpleBasis, simpleBasisEpsCoords);
   Vector<Coefficient> result;
   result.setSize(this->getDimension());
@@ -1057,12 +1064,12 @@ Vector<Coefficient> WeylGroupData::GetSimpleCoordinatesFromEpsilon(const Vector<
 }
 
 template<class Coefficient>
-Vector<Coefficient> WeylGroupData::GetFundamentalCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords) {
-  return this->GetFundamentalCoordinatesFromSimple(this->GetSimpleCoordinatesFromEpsilon(inputInEpsCoords));
+Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(const Vector<Coefficient>& inputInEpsCoords) {
+  return this->getFundamentalCoordinatesFromSimple(this->getSimpleCoordinatesFromEpsilon(inputInEpsCoords));
 }
 
 template<class Coefficient>
-Vector<Coefficient> WeylGroupData::GetSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords) {
+Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords) {
   Matrix<Rational>& tempMat = *this->GetMatrixFundamentalToSimpleCoords();
   Vector<Coefficient> result;
   result = inputInFundamentalCoords;
@@ -1071,7 +1078,7 @@ Vector<Coefficient> WeylGroupData::GetSimpleCoordinatesFromFundamental(const Vec
 }
 
 template<class Coefficient>
-Vectors<Coefficient> WeylGroupData::GetSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords) {
+Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(const Vectors<Coefficient>& inputInFundamentalCoords) {
   Matrix<Rational>& tempMat = *this->GetMatrixFundamentalToSimpleCoords();
   Vectors<Coefficient> result;
   result = inputInFundamentalCoords;
@@ -1080,10 +1087,10 @@ Vectors<Coefficient> WeylGroupData::GetSimpleCoordinatesFromFundamental(const Ve
 }
 
 template<class Coefficient>
-Coefficient WeylGroupData::WeylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords) {
+Coefficient WeylGroupData::weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords) {
   Vector<Coefficient> theWeightInSimpleCoords;
-  theWeightInSimpleCoords = this->GetSimpleCoordinatesFromFundamental(weightFundCoords);
-  return this->WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  theWeightInSimpleCoords = this->getSimpleCoordinatesFromFundamental(weightFundCoords);
+  return this->weylDimFormulaSimpleCoords(theWeightInSimpleCoords);
 }
 
 template <class Coefficient>
@@ -1105,9 +1112,9 @@ bool WeylGroupData::FreudenthalEval(
   }
   this->ComputeRho(true);
   Vectors<Rational> EiBasis;
-  EiBasis.MakeEiBasis(this->getDimension());
+  EiBasis.makeEiBasis(this->getDimension());
   List<bool> Explored;
-  Vector<Coefficient> hwSimpleCoords = this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
+  Vector<Coefficient> hwSimpleCoords = this->getSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
   if (!this->GetAlLDominantWeightsHWFDIM(
     hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails
   )) {
@@ -1185,7 +1192,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
   Vector<Coefficient> highestWeightTrue;
   highestWeightTrue = highestWeightSimpleCoords;
   this->RaiseToDominantWeight(highestWeightTrue);
-  Vector<Coefficient> highestWeightFundCoords = this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Coefficient> highestWeightFundCoords = this->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
     if (outputDetails != nullptr) {
       out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.toString()
@@ -1227,7 +1234,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
-        if (this->IsDominantWeight(currentWeight)) {
+        if (this->isDominantWeight(currentWeight)) {
           int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
@@ -1573,7 +1580,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
 }
 
 template <class Coefficient>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWeight(const Vector<Coefficient>& theWeight) {
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWeight(const Vector<Coefficient>& theWeight) {
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
     if (!this->IsDominantWRTgenerator(theWeight, i)) {
       return false;
@@ -1586,7 +1593,7 @@ template<class Coefficient>
 Coefficient SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::WeylDimFormulaInnerSimpleCoords(
   const Vector<Coefficient>& theWeightInnerSimpleCoords, const Coefficient& theRingUnit
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::weylDimFormulaSimpleCoords");
   this->checkInitialization();
   Coefficient Result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
@@ -1619,9 +1626,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   Vector<Coefficient> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
   int theDim = this->AmbientWeyl->getDimension();
-  basisEi.MakeEiBasis(theDim);
+  basisEi.makeEiBasis(theDim);
   this->RaiseToDominantWeightInner(highestWeightTrue);
-  Vector<Coefficient> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Coefficient> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
@@ -1652,7 +1659,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
       for (int i = 0; i < this->RootsOfBorel.size; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
-        if (this->IsDominantWeight(currentWeight)) {
+        if (this->isDominantWeight(currentWeight)) {
           int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
@@ -1771,8 +1778,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
       hwSimpleCoordsNilPart[i] = theRingZero;
     }
   }
-  hwSimpleCoordsLeviPart = this->AmbientWeyl->GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
-  hwSimpleCoordsNilPart = this->AmbientWeyl->GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
+  hwSimpleCoordsLeviPart = this->AmbientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
+  hwSimpleCoordsNilPart = this->AmbientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
   ///////////////////////////
   HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordsLeviPart;
 
@@ -2131,7 +2138,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::SpreadVector
     for (int j = 0; j < theRank; j ++) {
       tempV = outputBasisGeneratedSpace[i];
       this->theElementImageS[j + 1].actOnVectorColumn(tempV);
-      if (!outputBasisGeneratedSpace.LinSpanContainsVector(tempV)) {
+      if (!outputBasisGeneratedSpace.linearSpanContainsVector(tempV)) {
         outputBasisGeneratedSpace.addOnTop(tempV);
       }
     }
@@ -2191,7 +2198,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
   Matrix<Coefficient> splittingOperatorMatrix;
   Vectors<Coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
   ClassFunction<somegroup, Coefficient> remainingCharacter = this->theCharacteR;
-  remainingVectorSpace.MakeEiBasis(this->getDimension());
+  remainingVectorSpace.makeEiBasis(this->getDimension());
   ProgressReport Report1, Report2, Report3, Report4;
   {
     std::stringstream reportStream;

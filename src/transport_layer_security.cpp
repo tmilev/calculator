@@ -195,7 +195,7 @@ void TransportLayerSecurityOpenSSL::RemoveLastSocket() {
 
 CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(int inputId) {
   if (inputId == 0) {
-    global.fatal << "Zero cipher suite specification not allowed here. " << global.fatal;
+    global.fatal << "zero cipher suite specification not allowed here. " << global.fatal;
   }
   if (!this->cipherSuiteNames.contains(inputId)) {
     global.fatal << "Unknown cipher suite specification not allowed here. " << global.fatal;
@@ -208,29 +208,29 @@ CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(i
 }
 
 void TransportLayerSecurityServer::AddSupportedCipher(int inputId) {
-  this->supportedCiphers.SetKeyValue(inputId, this->GetCipherCrashIfUnknown(inputId));
+  this->supportedCiphers.setKeyValue(inputId, this->GetCipherCrashIfUnknown(inputId));
 }
 
 void TransportLayerSecurityServer::initializeExtensions() {
   // Extension specification should be available here:
   // https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::signatureAlgorithms,
     "signature algorithms"
   );
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::renegotiateConnection, "renegotiate"
   );
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::ellipticCurvePointFormat, "elliptic curve point format"
   );
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::requestOnlineCertificateStatus, "request online certificate status"
   );
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::serverName, "server name"
   );
-  this->extensionNames.SetKeyValue(
+  this->extensionNames.setKeyValue(
     SSLContent::tokensExtension::extendedMasterSecret, "extended master secret"
   );
 }
@@ -239,24 +239,24 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
   if (this->cipherSuiteNames.size() != 0) {
     return;
   }
-  this->cipherSuiteNames.SetKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc02f, "ECDHE/RSA/AES 128/GCM/SHA2"          ); // (RFC 5289)
   this->AddSupportedCipher(0xc02f);
-  this->cipherSuiteNames.SetKeyValue(0x1301, "TLS_AES_128_GCM_SHA256"              ); //
-  this->cipherSuiteNames.SetKeyValue(0x1302, "TLS_AES_256_GCM_SHA384"              ); //
-  this->cipherSuiteNames.SetKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256"        ); //
-  this->cipherSuiteNames.SetKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
-  this->cipherSuiteNames.SetKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
-  this->cipherSuiteNames.SetKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
-  this->cipherSuiteNames.SetKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
-  this->cipherSuiteNames.SetKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
-  this->cipherSuiteNames.SetKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuiteNames.SetKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
-  this->cipherSuiteNames.SetKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuiteNames.SetKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
-  this->cipherSuiteNames.SetKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuiteNames.SetKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
-  this->cipherSuiteNames.SetKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
-  this->cipherSuiteNames.SetKeyValue(0,      "unknown"                             );
+  this->cipherSuiteNames.setKeyValue(0x1301, "TLS_AES_128_GCM_SHA256"              ); //
+  this->cipherSuiteNames.setKeyValue(0x1302, "TLS_AES_256_GCM_SHA384"              ); //
+  this->cipherSuiteNames.setKeyValue(0x1303, "TLS_CHACHA20_POLY1305_SHA256"        ); //
+  this->cipherSuiteNames.setKeyValue(0xc02b, "ECDHE/ECDSA/AES 128/GCM/SHA2"        ); // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc02c, "ECDHE/ECDSA/AES 128/GCM/SHA3"        ); // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xc030, "ECDHE/RSA/AES 256/GCM/SHA3"          ); // (RFC 5289)
+  this->cipherSuiteNames.setKeyValue(0xcca9, "ECDHE/ECDSA/CHACHA 20/POLY 1305/SHA2"); // (RFC 7905)
+  this->cipherSuiteNames.setKeyValue(0xcca8, "ECDHE/RSA/CHACHA 20/POLY 1305/SHA2"  ); // (RFC 7905)
+  this->cipherSuiteNames.setKeyValue(0xc013, "ECDHE/RSA/AES 128/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuiteNames.setKeyValue(0xc014, "ECDHE/RSA/AES 256/CBC/SHA"           ); // (RFC 4492)
+  this->cipherSuiteNames.setKeyValue(0x009c, "RSA/RSA/AES 128/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuiteNames.setKeyValue(0x009d, "RSA/RSA/AES 256/GCM/SHA2"            ); // (RFC 5288)
+  this->cipherSuiteNames.setKeyValue(0x002f, "RSA/RSA/AES 128/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0x0035, "RSA/RSA/AES 256/CBC/SHA"             ); // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0x000a, "RSA/RSA/3DES/CBC/SHA"                ); // (RFC 5246)
+  this->cipherSuiteNames.setKeyValue(0,      "unknown"                             );
 }
 
 bool TransportLayerSecurityServer::initializeAll(

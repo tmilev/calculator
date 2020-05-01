@@ -82,7 +82,7 @@ void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeftMakeReport(const Elemen
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight) {
-  this->LieBracketOnTheRight(standsOnTheRight);
+  this->lieBracketOnTheRight(standsOnTheRight);
 }
 
 template <class Coefficient>
@@ -115,7 +115,7 @@ void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeft(const ElementWeylAlgeb
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight) {
+void ElementWeylAlgebra<Coefficient>::lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight) {
   ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1 = standsOnTheRight;
   tempEl1.multiplyOnTheLeft(*this);

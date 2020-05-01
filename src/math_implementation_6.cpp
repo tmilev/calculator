@@ -139,7 +139,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
       tempV[0].AssignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
-      val = myCopy.Evaluate(tempV);
+      val = myCopy.evaluate(tempV);
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
         divisor.makeDegreeOne(1, 0, 1, - tempV[0]);
@@ -235,7 +235,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   LargeInteger tempLI;
   for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
     theArgument[0] = AllPointsOfEvaluation[i];
-    theValuesAtPoints[i] = this->current.Evaluate(theArgument);
+    theValuesAtPoints[i] = this->current.evaluate(theArgument);
     if (theValuesAtPoints[i].isEqualToZero()) {
       Polynomial<Rational> incomingFactor;
       incomingFactor.makeDegreeOne(1, 0, 1, - theArgument[0]);

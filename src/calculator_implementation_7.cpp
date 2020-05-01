@@ -140,7 +140,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
     std::stringstream out;
     out << "Starting elements: <br>";
     for (int i = 0; i < theLieAlgElts.size; i ++) {
-      out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].toString(&theFormat)) << "<br>";
+      out << HtmlRoutines::getMathSpanPure(theLieAlgElts[i].toString(&theFormat)) << "<br>";
     }
     bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success) {
@@ -154,7 +154,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
         if (theLieAlgElts.size > 50) {
           out << theLieAlgElts[i].toString(&theFormat);
         } else {
-          out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].toString(&theFormat));
+          out << HtmlRoutines::getMathSpanPure(theLieAlgElts[i].toString(&theFormat));
         }
       }
     }
@@ -165,7 +165,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   std::stringstream out;
   out << "Starting elements: <br>";
   for (int i = 0; i < theOps.size; i ++) {
-    out << HtmlRoutines::GetMathSpanPure(theOps[i].toString(&theFormat)) << "<br>";
+    out << HtmlRoutines::getMathSpanPure(theOps[i].toString(&theFormat)) << "<br>";
   }
   bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success) {
@@ -182,7 +182,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
       if (theOps.size > 50) {
         out << theOps[i].toString(&theFormat);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(theOps[i].toString(&theFormat));
+        out << HtmlRoutines::getMathSpanPure(theOps[i].toString(&theFormat));
       }
     }
   }
@@ -871,7 +871,7 @@ bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expr
     << "quote operation is applied to an expression "
     << "with wrong number of arguments. "
     << "This may be a bug with the function "
-    << "Calculator::ParseFillDictionary.</b>";
+    << "Calculator::parseFillDictionary.</b>";
     return output.assignValue(input.toString(), theCommands);
   }
   if (input[1].isOperation(&operation)) {
@@ -881,7 +881,7 @@ bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expr
   << "<b>Warning: this shouldn't happen: quote operation "
   << "is applied to the non-atomic expression: "
   << input.toString() << ". "
-  << "This may be a bug with the function Calculator::ParseFillDictionary. </b>";
+  << "This may be a bug with the function Calculator::parseFillDictionary. </b>";
   return output.assignValue(input.toString(), theCommands);
 }
 
@@ -2000,7 +2000,7 @@ void IntegralRFComputation::PrepareFinalAnswer() {
 
 void IntegralRFComputation::PrepareDenominatorFactors() {
   MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
-  this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::GetMathSpanPure(
+  this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::getMathSpanPure(
     "\\frac{" + this->theNum.toString(&this->currentFormaT) + "}{" + this->theDen.toString(&this->currentFormaT) + "}"
   )
   << ".";
@@ -2011,7 +2011,7 @@ void IntegralRFComputation::PrepareDenominatorFactors() {
   << "\\frac{" << this->theNum.toString(&this->currentFormaT)  << "}{ ";
   this->allFactorsAreOfDegree2orless = true;
   for (int i = 0; i < this->theFactors.size; i ++) {
-    this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->theFactors[i].toString(&this->currentFormaT));
+    this->printoutPFsHtml << HtmlRoutines::getMathSpanPure(this->theFactors[i].toString(&this->currentFormaT));
     bool needsParenthesis = this->theFactors[i].needsParenthesisForMultiplication();
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\left(";
@@ -2095,13 +2095,13 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   needPolyDivision = !this->quotientRat.isEqualToZero();
   if (needPolyDivision) {
     this->printoutPFsHtml << "<br>The numerator "
-    << HtmlRoutines::GetMathSpanPure(this->theNum.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathSpanPure(this->theNum.toString(&this->currentFormaT))
     << " divided by the denominator "
-    << HtmlRoutines::GetMathSpanPure(theDen.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathSpanPure(theDen.toString(&this->currentFormaT))
     << " yields "
-    << HtmlRoutines::GetMathSpanPure(this->quotientRat.toString(&this->currentFormaT))
+    << HtmlRoutines::getMathSpanPure(this->quotientRat.toString(&this->currentFormaT))
     << " with remainder "
-    << HtmlRoutines::GetMathSpanPure(this->remainderRat.toString(&this->currentFormaT)) << ". ";
+    << HtmlRoutines::getMathSpanPure(this->remainderRat.toString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> computation;
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
@@ -2169,21 +2169,21 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   }
   this->theDenominatorFactorsWithMults.quickSortAscending();
   this->printoutPFsHtml << "<br><br>I need to find "
-  << HtmlRoutines::GetMathSpanPure("A_i")
+  << HtmlRoutines::getMathSpanPure("A_i")
   << "'s so that I have the equality of rational functions: ";
   this->printoutPFsLatex
   << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->PrepareNumerators();
   this->PrepareFormatExpressions();
-  this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->stringRationalFunctionLatex, - 1);
+  this->printoutPFsHtml << HtmlRoutines::getMathSpanPure(this->stringRationalFunctionLatex, - 1);
   this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
   this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
-  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, - 1);
+  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::getMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, - 1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
-  << HtmlRoutines::GetMathSpanPure(univariateThatMustDie.toString(&this->currentFormaT));
+  << HtmlRoutines::getMathSpanPure(univariateThatMustDie.toString(&this->currentFormaT));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
   << "we mean that the coefficients of the powers of $x$ must be equal to zero."
   << "\\[" << univariateThatMustDie.toString(&this->currentFormaT) << "\\]";
@@ -2194,7 +2194,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   theConstTermsForLaTeX = theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
-  << HtmlRoutines::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
+  << HtmlRoutines::getMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML = true;
@@ -2213,7 +2213,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   }
   this->PrepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
-  << HtmlRoutines::GetMathSpanPure(this->stringFinalAnswer);
+  << HtmlRoutines::getMathSpanPure(this->stringFinalAnswer);
   this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
   << "\\[" << this->stringFinalAnswer << "\\]";
   this->printoutPFsLatex << "\\end{document}";
@@ -3715,10 +3715,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   theFormat.flagUseFrac = true;
   theFormat.MatrixColumnVerticalLineIndex = theMatrix.numberOfColumns - 1;
   out << "Computing "
-  << HtmlRoutines::GetMathSpanPure(theMatrix.toString(&theFormat) + "^{- 1}");
+  << HtmlRoutines::getMathSpanPure(theMatrix.toString(&theFormat) + "^{- 1}");
   extendedMatrix = theMatrix;
   extendedMatrix.appendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat)) ;
+  out << "<br>" << HtmlRoutines::getMathSpanPure(extendedMatrix.toString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
 
@@ -3732,7 +3732,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
         extendedMatrix = theMatrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
+        out << "<br>" << HtmlRoutines::getMathSpanPure(outputMat.toString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
       }
       tempElement = theMatrix(NumFoundPivots, i);
@@ -3748,7 +3748,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
       if (tempElement != 1) {
         extendedMatrix = theMatrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
+        out << HtmlRoutines::getMathSpanPure(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
       bool found = false;
@@ -3781,7 +3781,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\\\";
         extendedMatrix = theMatrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
+        out << HtmlRoutines::getMathSpanPure(extendedMatrix.toString(&theFormat));
         outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
       NumFoundPivots ++;
@@ -3799,7 +3799,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   } else {
     out << "<br>The inverse of the starting matrix "
     << "can be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
+    << HtmlRoutines::getMathSpanPure(outputMat.toString(&theFormat));
     outLaTeX << " The inverse matrix can now be read off as the matrix "
     << "to the left of the identity matrix: $"
     << outputMat.toString(&theFormat) << "$";
@@ -3835,10 +3835,10 @@ bool Calculator::innerInvertMatrixVerbose(
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   theFormat.MatrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
-  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.toString(&theFormat) + "^{- 1}");
+  out << "Computing " << HtmlRoutines::getMathSpanPure(mat.toString(&theFormat) + "^{- 1}");
   tempMat = mat;
   tempMat.appendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
+  out << "<br>" << HtmlRoutines::getMathSpanPure(tempMat.toString(&theFormat));
   for (int i = 0; i < mat.numberOfColumns; i ++) {
     tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI != - 1) {
@@ -3850,7 +3850,7 @@ bool Calculator::innerInvertMatrixVerbose(
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
         out << "<br>"
-        << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
+        << HtmlRoutines::getMathSpanPure(outputMat.toString(&theFormat));
       }
       tempElement = mat.elements[NumFoundPivots][i];
       tempElement.invert();
@@ -3863,7 +3863,7 @@ bool Calculator::innerInvertMatrixVerbose(
       if (tempElement != 1) {
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
+        out << HtmlRoutines::getMathSpanPure(tempMat.toString(&theFormat));
       }
       bool found = false;
       for (int j = 0; j < mat.numberOfRows; j ++) {
@@ -3888,7 +3888,7 @@ bool Calculator::innerInvertMatrixVerbose(
         out << ": <br> ";
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
+        out << HtmlRoutines::getMathSpanPure(tempMat.toString(&theFormat));
       }
       NumFoundPivots ++;
     }
@@ -3900,7 +3900,7 @@ bool Calculator::innerInvertMatrixVerbose(
   } else {
     out << "<br>The inverse of the starting matrix can "
     << "be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
+    << HtmlRoutines::getMathSpanPure(outputMat.toString(&theFormat));
   }
   return output.assignValue(out.str(), theCommands);
 }
@@ -5419,7 +5419,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
       Vector<Rational> currentHighestWeight = tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
         largerTypes[i], imagesSimpleRoots[i], tempCandidate
       );
-      out << HtmlRoutines::GetMathSpanPure(
+      out << HtmlRoutines::getMathSpanPure(
         currentHighestWeight.ToStringLetterFormat("\\omega")
       );
       out << "</td></tr>";
@@ -6695,7 +6695,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     thePlot.variablesInPlay.addOnTop(tempE);
   }
   thePlot.variablesInPlayJS.addOnTop(
-    HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].toString())
+    HtmlRoutines::getJavascriptVariable(thePlot.variablesInPlay[0].toString())
   );
   thePlot.colorJS = "red";
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
@@ -6936,7 +6936,7 @@ bool CalculatorFunctions::functionEvaluateToDouble(
 bool CalculatorFunctions::innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestMathMouseHover");
   std::stringstream out;
-  out << "Hover mouse to render: " << HtmlRoutines::GetMathMouseHover(input.toString());
+  out << "Hover mouse to render: " << HtmlRoutines::getMathMouseHover(input.toString());
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -6967,8 +6967,8 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const
   Matrix<Rational> outputMat, outputCoMat;
   theType.getCartanSymmetric(outputMat);
   theType.getCoCartanSymmetric(outputCoMat);
-  out << "Symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputMat.ToStringLatex(), 10000)
-  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
+  out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputMat.ToStringLatex(), 10000)
+  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputCoMat.ToStringLatex(), 10000);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -7212,7 +7212,7 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
   std::stringstream out;
   for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
     theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
-    out << "<hr>" << HtmlRoutines::GetMathSpanPure(theSubgroup.toString());
+    out << "<hr>" << HtmlRoutines::getMathSpanPure(theSubgroup.toString());
   }
   return output.assignValue(out.str(), theCommands);
 }
@@ -7298,17 +7298,17 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
     for (int i = 0; i < theSubgroup.RepresentativesQuotientAmbientOrder.size; i ++) {
       ElementWeylGroup& current = theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
-      << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.toString()) : current.toString())
+      << (useJavascript ? HtmlRoutines::getMathSpanPure(current.toString()) : current.toString())
       << "</td>";
       theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
       theSSalgebra.theWeyl.ActOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
-      << (useJavascript ? HtmlRoutines::GetMathSpanPure(theHWsimplecoords.toString(&theFormat))
+      << (useJavascript ? HtmlRoutines::getMathSpanPure(theHWsimplecoords.toString(&theFormat))
       : theHWsimplecoords.toString(&theFormat))
       << "</td>";
       tempRoot = theSSalgebra.theWeyl.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString = tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
-      out << "<td>" << (useJavascript ? HtmlRoutines::GetMathSpanPure(theFundString): theFundString)
+      out << "<td>" << (useJavascript ? HtmlRoutines::getMathSpanPure(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
     }
@@ -7586,7 +7586,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     theWeyl.actOn(indexInWeyl, currentHW);
     currentHW -= theSub.GetRho();
     out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
-    out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
+    out << "<td>" << HtmlRoutines::getMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
     }
@@ -7594,7 +7594,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     out << "</tr>";
   }
   out << "</table>";
-  out << "Final char: " << HtmlRoutines::GetMathMouseHover(theChar.toString(&formatChars));
+  out << "Final char: " << HtmlRoutines::getMathMouseHover(theChar.toString(&formatChars));
   return output.assignValue<std::string>(out.str(), theCommands);
 }
 
@@ -7899,7 +7899,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   );
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
-  theCasimir.MakeCasimir(*theSSalgebra.content);
+  theCasimir.makeCasimir(*theSSalgebra.content);
   Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength = 60;
@@ -7907,9 +7907,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   tempFormat.fundamentalWeightLetter = "\\psi";
   tempFormat.CustomPlusSign = "\\oplus ";
   hwContext.getFormat(tempFormat);
-  out << "<br>Character of finite dimensional module:" << HtmlRoutines::GetMathMouseHover(theFDChaR.toString());
+  out << "<br>Character of finite dimensional module:" << HtmlRoutines::getMathMouseHover(theFDChaR.toString());
   if (theGenMod.parabolicSelectionSelectedAreElementsLevi.CardinalitySelection > 0) {
-    out << "<br>theFDChar split over levi:" << HtmlRoutines::GetMathMouseHover(theFDLeviSplit.toString(&tempFormat));
+    out << "<br>theFDChar split over levi:" << HtmlRoutines::getMathMouseHover(theFDLeviSplit.toString(&tempFormat));
   }
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
@@ -7930,7 +7930,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     theFDLeviSplitShifteD.addMonomial(tempMon, RFOne);
     currentHWdualcoords = theSSalgebra.content->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar = theCasimir;
-    currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
+    currentChar.modOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.addOnTop(currentChar);
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.toString(&tempFormat) << "</td></tr>";
@@ -7999,7 +7999,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
     << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
+    << "</td><td>" << HtmlRoutines::getMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
     latexReport2
     << "$" << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.toString();
@@ -8009,14 +8009,14 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
       scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
       scale.getNumerator(tmpGCD);
       tmpGCD.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-      out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
+      out << "<td>" << HtmlRoutines::getMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
-    out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.toString(&tempFormat)) << "</td>";
+    out << "<td>" << HtmlRoutines::getMathMouseHover(theElt.toString(&tempFormat)) << "</td>";
     latexReport2 << "&$\\begin{array}{l}" << theElt.toString(&tempFormat) << "\\end{array}$\\\\<br>";
     if (theNumVars == 1) {
       tmpRF = tmpGCD;
       theElt /= tmpRF;
-      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{l}" + theElt.toString(&tempFormat) + "\\end{array}") << "</td>";
+      out << "<td>" << HtmlRoutines::getMathMouseHover("\\begin{array}{l}" + theElt.toString(&tempFormat) + "\\end{array}") << "</td>";
     }
     out << "</tr>";
   }
@@ -8232,7 +8232,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
     << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
     << theG2B3Data.theHmm.theDomain().theWeyl.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
-    out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].toString()) << "</td>";
+    out << "<td>" << HtmlRoutines::getMathSpanPure(theG2B3Data.theChars[i].toString()) << "</td>";
     out << "</tr>";
   }
   readyForLatexConsumptionTable1 << "\\hline \n";
@@ -8251,8 +8251,8 @@ bool Calculator::innerSplitFDpartB3overG2old(
       }
     }
     formulaStream1 << "v_\\lambda";
-    out << HtmlRoutines::GetMathSpanPure(formulaStream1.str())
-    << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].toString()) << "</td></tr>";
+    out << HtmlRoutines::getMathSpanPure(formulaStream1.str())
+    << "</td><td>" << HtmlRoutines::getMathSpanPure(theG2B3Data.theEigenVectorS[k].toString()) << "</td></tr>";
   }
   out << "</table>";
   out << "<br>Time final: " << global.getElapsedSeconds();
@@ -9096,7 +9096,7 @@ bool Calculator::Test::CalculatorTestRun() {
     theReport.report(reportStream.str());
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();
-    theTester.Evaluate(currentTest.command);
+    theTester.evaluate(currentTest.command);
     currentTest.actualResult = theTester.theProgramExpression.toString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.toString();
     reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";

@@ -327,11 +327,11 @@ public:
   void ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW);
   void ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
   void ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW);
-  void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration);
-//  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
+  void getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration);
+//  void commonCodeForgetLinearCombinationFromMaxRankRootsAndExtraRoot();
   void initForNilradicalGeneration();
   void initNoOwnerReset();
-  void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
+  void getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
   bool LinCombToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
   bool LinCombToStringDistinguishedIndex(
     int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output

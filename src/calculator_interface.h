@@ -1097,7 +1097,7 @@ public:
     List<Function> mergeHandlers();
     bool checkConsistency();
     JSData toJSON();
-    std::string ToStringRuleStatusUser();
+    std::string toStringRuleStatusUser();
   };
   class Atoms {
   public:
@@ -1312,7 +1312,7 @@ public:
   std::stringstream comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
-  std::string ToStringRuleStatusUser();
+  std::string toStringRuleStatusUser();
   std::string toString();
   JSData toJSONPerformance();
   Expression getNewBoundVariable();
@@ -2623,40 +2623,40 @@ public:
     Expression* history;
     Expression currentChild;
     bool reduceOnce();
-    bool BuiltInEvaluation();
-    bool UserDefinedEvaluation();
-    void InitializeOneRun();
-    bool OutputHasErrors();
+    bool builtInEvaluation();
+    bool userDefinedEvaluation();
+    void initializeOneRun();
+    bool outputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
-    bool EvaluateChildren(StateMaintainerCalculator& maintainRuleStack);
-    void ReportChildEvaluation(Expression& output, int childIndex);
-    void LookUpCache();
-    bool SetOutput(
+    bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
+    void reportChildEvaluation(Expression& output, int childIndex);
+    void lookUpCache();
+    bool setOutput(
       const Expression& input, Function* handler, const std::string& info
     );
-    void AccountHistory(Function *handler, const std::string &info);
+    void accountHistory(Function *handler, const std::string &info);
     bool checkInitialization();
-    void AccountHistoryChildTransformation(
+    void accountHistoryChildTransformation(
       const Expression& transformedChild, const Expression& childHistory, int childIndex
     );
   };
-  void Evaluate(const std::string& theInput);
-  bool ParseAndExtractExpressions(
+  void evaluate(const std::string& theInput);
+  bool parseAndExtractExpressions(
     const std::string& input,
     Expression& output,
     List<SyntacticElement>& outputSynSoup,
     List<SyntacticElement>& outputSynStack,
     std::string* outputSynErrors
   );
-  bool Parse(
+  bool parse(
     const std::string& input,
     Expression& output
   );
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
-  bool ShouldSplitOutsideQuotes(const std::string& left, char right);
-  void ParseFillDictionary(const std::string& input, List<SyntacticElement>& output);
-  void ParseFillDictionary(const std::string& input);
+  bool shouldSplitOutsideQuotes(const std::string& left, char right);
+  void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
+  void parseFillDictionary(const std::string& input);
 };
 
 class CalculatorConversions {

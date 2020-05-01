@@ -314,7 +314,7 @@ void SemisimpleLieAlgebra::LieBracket(
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::ActOnMe(
+void ElementSemisimpleLieAlgebra<Coefficient>::actOnMe(
   const ElementSemisimpleLieAlgebra<Coefficient>& theElt,
   ElementSemisimpleLieAlgebra<Coefficient>& output,
   SemisimpleLieAlgebra& owner
@@ -397,7 +397,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::IsElementCartan() const {
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::MakeHgenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwner) {
+void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwner) {
   ChevalleyGenerator tempGen;
   this->makeZero();
   for (int i = 0; i < theH.size; i ++) {
@@ -588,7 +588,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitCharOverRedSubalg(
   theFormat.CustomPlusSign = "\\oplus ";
   theFormat.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
-  << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
+  << HtmlRoutines::getMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.makeZero();
   Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.setSize(WeylFDSmall.AmbientWeyl->getDimension());
@@ -641,7 +641,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitCharOverRedSubalg(
   }
   theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
-  << HtmlRoutines::GetMathSpanPure(output.toString(&theFormat));
+  << HtmlRoutines::getMathSpanPure(output.toString(&theFormat));
   if (report != nullptr) {
     DrawingVariables theDV1;
     std::string tempS;

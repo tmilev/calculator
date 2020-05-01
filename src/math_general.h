@@ -2245,8 +2245,8 @@ public:
     }
   }
   template<class baseType>
-  void SubstitutionCoefficients(const List<Polynomial<baseType> >& theSub) {
-    MacroRegisterFunctionWithName("Polynomial::SubstitutionCoefficients");
+  void substitutionCoefficients(const List<Polynomial<baseType> >& theSub) {
+    MacroRegisterFunctionWithName("Polynomial::substitutionCoefficients");
     Coefficient newCoeff;
     for (int i = 0; i < this->size(); i ++) {
       newCoeff = this->coefficients[i];
@@ -2754,7 +2754,7 @@ public:
   void raiseToPower(int d, const Coefficient& one);
   bool GetRootFromLinPolyConstTermLastVariable(Vector<Coefficient>& outputRoot);
   Matrix<Coefficient> EvaluateUnivariatePoly(const Matrix<Coefficient>& input);//<-for univariate polynomials only
-  Coefficient Evaluate(const Vector<Coefficient>& input);
+  Coefficient evaluate(const Vector<Coefficient>& input);
   bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& TimesMeEqualsOther, const Coefficient& theRingUnit
   ) const;
@@ -4048,7 +4048,7 @@ public:
   Vector<Coefficient> GetCartanPart() const;
   void MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
   bool IsElementCartan() const;
-  void MakeHgenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
+  void makeCartanGenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void ElementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces(
@@ -4076,16 +4076,16 @@ public:
     return true;
   }
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
-  static void GetBasisFromSpanOfElements(
+  static void getBasisFromSpanOfElements(
     List<ElementSemisimpleLieAlgebra>& theElements,
     List<ElementSemisimpleLieAlgebra>& outputTheBasis
   );
-  void ActOnMe(
+  void actOnMe(
     const ElementSemisimpleLieAlgebra& theElt,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner
   );
-  void ActOnMe(
+  void actOnMe(
     const ElementSemisimpleLieAlgebra& theElt,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner,
@@ -5136,7 +5136,7 @@ public:
   void ComputeDebugString() {
     this->DebugString = this->toString(false, false);
   }
-  Rational Evaluate(const Vector<Rational>& input);
+  Rational evaluate(const Vector<Rational>& input);
   void AddLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
@@ -6111,7 +6111,7 @@ public:
   void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight);
-  void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
+  void lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
   bool substitution(
     const PolynomialSubstitution<Rational>& SubPolyPart,
     const PolynomialSubstitution<Rational>& SubDiffPArt
@@ -6259,7 +6259,7 @@ class PiecewiseQuasipolynomial {
   void MakeCommonRefinement(const ConeComplex& other);
   void TranslateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring);
-  Rational Evaluate(const Vector<Rational>& thePoint);
+  Rational evaluate(const Vector<Rational>& thePoint);
   Rational EvaluateInputProjectivized(const Vector<Rational>& thePoint);
   void makeZero(int numVars) {
     this->NumVariables = numVars;

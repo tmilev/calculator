@@ -13,9 +13,9 @@ class Basis {
   bool haveGramMatrix;
 
   void addVector(const Vector<Coefficient>& v);
-  void ComputeGramMatrix();
-  Vector<Coefficient> PutInBasis(const Vector<Coefficient>& input);
-  Matrix<Coefficient> PutInBasis(const Matrix<Coefficient>& M);
+  void computeGramMatrix();
+  Vector<Coefficient> putInBasis(const Vector<Coefficient>& input);
+  Matrix<Coefficient> putInBasis(const Matrix<Coefficient>& M);
 };
 
 template <typename Coefficient>
@@ -67,7 +67,7 @@ void Basis<Coefficient>::addVector(const Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-void Basis<Coefficient>::ComputeGramMatrix() {
+void Basis<Coefficient>::computeGramMatrix() {
   int r = basis.numberOfRows;
   int d = basis.numberOfColumns;
   gramMatrix.MakeZeroMatrix(r);
@@ -83,7 +83,7 @@ void Basis<Coefficient>::ComputeGramMatrix() {
 }
 
 template <typename Coefficient>
-Vector<Coefficient> Basis<Coefficient>::PutInBasis(const Vector<Coefficient>& input) {
+Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& input) {
   if (false) {
     Vectors<Coefficient> theBasisVectorForm;
     this->basis.GetVectorsFromRows(theBasisVectorForm);
@@ -92,16 +92,16 @@ Vector<Coefficient> Basis<Coefficient>::PutInBasis(const Vector<Coefficient>& in
     return output;
   } else {
     if (!haveGramMatrix) {
-      ComputeGramMatrix();
+      computeGramMatrix();
     }
     return gramMatrix * (basis * input);
   }
 }
 
 template <typename Coefficient>
-Matrix<Coefficient> Basis<Coefficient>::PutInBasis(const Matrix<Coefficient>& in) {
+Matrix<Coefficient> Basis<Coefficient>::putInBasis(const Matrix<Coefficient>& in) {
   if (!haveGramMatrix) {
-    ComputeGramMatrix();
+    computeGramMatrix();
   }
   return gramMatrix * (basis * in);
 }

@@ -140,7 +140,7 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
   Calculator parser;
   std::string inputModified = "Polynomial(" + input + ")";
   parser.initialize();
-  parser.Evaluate(inputModified);
+  parser.evaluate(inputModified);
   if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
     global.fatal
     << "Polynomial::fromString parsed: "
@@ -204,7 +204,7 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   }
   inputStream << ")";
   parser.initialize();
-  parser.Evaluate(inputStream.str());
+  parser.evaluate(inputStream.str());
   if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
     global.fatal
     << "Polynomial::fromString parsed: "

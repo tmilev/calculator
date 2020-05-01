@@ -82,7 +82,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   answerCommandsNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << currentA.commandsSolutionOnly;
-  theInterpreteR.Evaluate(answerCommands.str());
+  theInterpreteR.evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "") {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
@@ -295,7 +295,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << ");"
   << studentAnswerSream.str();
 
-  theInterpreteR.Evaluate(studentAnswerWithComments.str());
+  theInterpreteR.evaluate(studentAnswerWithComments.str());
   if (theInterpreteR.syntaxErrors != "") {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
@@ -350,7 +350,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << "?request=calculator&mainInput="
   << HtmlRoutines::convertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
-  theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
+  theInterpreterWithAdvice.evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors != "") {
     out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when parsing your answer "
@@ -448,8 +448,8 @@ JSData WebAPIResponse::clonePageResult() {
   return result;
 }
 
-void BuilderApplication::BuildHtmlJSpage(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIReponse::BuildHtmlJSpage");
+void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("WebAPIReponse::buildHtmlJavascriptPage");
   std::stringstream outFirstPart, outSecondPart;
   std::stringstream theReader(this->htmlRaw);
   theReader.seekg(0);
@@ -458,7 +458,7 @@ void BuilderApplication::BuildHtmlJSpage(bool appendBuildHash) {
   FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
   WebAPI::request::calculatorHTML;
 
-  const std::string& browserifierScript = HtmlRoutines::GetJavascriptBrowserifier();
+  const std::string& browserifierScript = HtmlRoutines::getJavascriptBrowserifier();
   const std::string& browserifierTag =
   "<script note = \"This tag has special treatment, do not change please.\" "
   "type = \"text/javascript\" src = \"/calculator-html/browserifier.js\"></script>";
@@ -513,7 +513,7 @@ void BuilderApplication::BuildHtmlJSpage(bool appendBuildHash) {
   this->htmlJSbuild = outFirstPart.str();
 }
 
-bool BuilderApplication::FileNameAllowedToBeMissing(const std::string& input) {
+bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
   if (input == "/calculator-html/external/build/output-min.js") {
     return true;
   }
@@ -532,7 +532,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
-  theInterpretation.BuildHtmlJSpage(appendBuildHash);
+  theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
   theInterpretation.jsFileContents.setSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
     if (!FileOperations::LoadFileToStringVirtual(
@@ -541,7 +541,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
       false,
       &errorStream
     )) {
-      if (!theInterpretation.FileNameAllowedToBeMissing(theInterpretation.jsFileNames[i])) {
+      if (!theInterpretation.fileNameAllowedToBeMissing(theInterpretation.jsFileNames[i])) {
         errorStream << "Failed to load javascript file: " << theInterpretation.jsFileNames[i];
         return errorStream.str();
       }
@@ -553,11 +553,11 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
       theInterpretation.jsFileContents[i] = moduleNotFound.str();
     }
   }
-  return theInterpretation.GetOnePageJSBrowserify();
+  return theInterpretation.getOnePageJavascriptBrowserify();
 }
 
-std::string BuilderApplication::GetOnePageJSBrowserify() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetOnePageJSBrowserify");
+std::string BuilderApplication::getOnePageJavascriptBrowserify() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJavascriptBrowserify");
   std::stringstream out;
   out << "var theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
@@ -588,7 +588,7 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
-  theInterpretation.BuildHtmlJSpage(appendBuildHash);
+  theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
   return theInterpretation.htmlJSbuild;
 }
 
@@ -1044,7 +1044,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
 
-  theInterpreter.Evaluate(completedProblemStream.str());
+  theInterpreter.evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "") {
     if (theInterpreter.errorsPublic.str() != "") {
       output << "While checking your answer, got the error: "
@@ -1065,7 +1065,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     if (timeSafetyBrake) {
       global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; //+20 sec
     }
-    isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
+    isolatedInterpreter.evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
       output << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
     } else {
@@ -1470,7 +1470,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   answerCommands << Calculator::Atoms::commandEnclosure
   << "{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
-  theInterpreteR.Evaluate(answerCommands.str());
+  theInterpreteR.evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "") {
     out << "<b style ='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";

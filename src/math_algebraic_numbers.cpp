@@ -1260,7 +1260,7 @@ std::string AlgebraicClosureRationals::toStringQuadraticRadical(
     }
   }
   out << "]";
-  return HtmlRoutines::GetMathSpanPure(out.str());
+  return HtmlRoutines::getMathSpanPure(out.str());
 }
 
 std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat) const {
@@ -1280,7 +1280,7 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat
       theFlaStream << " e_{" << i + 1 << "}";
     }
     theFlaStream << "=" << this->latestBasis[i].toStringMatrixForm(theFormat);
-    out << HtmlRoutines::GetMathSpanPure(theFlaStream.str());
+    out << HtmlRoutines::getMathSpanPure(theFlaStream.str());
     if (i != this->latestBasis.size - 1) {
       out << ",  ";
     }
@@ -1289,13 +1289,13 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat
     out << "<br>Generating element not selected. ";
   } else {
     out << "<br>Generating element: "
-    << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.toString(theFormat));
+    << HtmlRoutines::getMathSpanPure(this->GeneratingElementMatForm.toString(theFormat));
   }
   out << "<br>There are " << this->basisInjections.size << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {
     out << "<hr>Basis " << i + 1 << " has " << this->basisInjections[i].size << " elements: ";
     for (int j = 0; j < this->basisInjections[i].size; j ++) {
-      out << HtmlRoutines::GetMathSpanPure(this->basisInjections[i][j].toString(theFormat));
+      out << HtmlRoutines::getMathSpanPure(this->basisInjections[i][j].toString(theFormat));
       if (j != this->basisInjections[i].size - 1) {
         out << ", ";
       }
@@ -1348,7 +1348,7 @@ std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) co
   tempFormat.flagUseHTML = false;
   tempFormat.flagUseLatex = true;
   if (this->latestBasis.size == 1) {
-    out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
+    out << HtmlRoutines::getMathSpanPure("\\mathbb Q");
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {

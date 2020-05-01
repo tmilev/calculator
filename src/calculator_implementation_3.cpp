@@ -231,7 +231,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   }
   SemisimpleLieAlgebra& algebraReference = *algebra.content;
   ElementUniversalEnveloping<RationalFunction> theCasimir;
-  theCasimir.MakeCasimir(algebraReference);
+  theCasimir.makeCasimir(algebraReference);
   theCommands << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
   << ". The coefficient: " << algebraReference.theWeyl.GetKillingDivTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
@@ -561,18 +561,18 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
     << "\\endhead \n<br>";
   } else {
-    out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
+    out << "Let " << HtmlRoutines::getMathSpanPure("p\\subset so(7)") << " be the "
     << theG2B3Data.selInducing.toString() << "-parabolic subalgebra"
-    << " and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
-    << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
+    << " and let " << HtmlRoutines::getMathSpanPure("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::getMathSpanPure("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
-    << HtmlRoutines::GetMathSpanPure("p'")
-    << "</td><td>" << HtmlRoutines::GetMathSpanPure("p'\\cap b")
+    << HtmlRoutines::getMathSpanPure("p'")
+    << "</td><td>" << HtmlRoutines::getMathSpanPure("p'\\cap b")
     << "-eigenvectors</td><td>Casimir projector</td><td>Extra multiplier</td><td>corresponding "
-    << HtmlRoutines::GetMathSpanPure("G_2\\cap b")
+    << HtmlRoutines::getMathSpanPure("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << theG2B3Data.selInducing.toString() << "} "
@@ -670,15 +670,15 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
         }
         latexTable << "&";
         theG2B3Data.theFormat.CustomPlusSign = "";
-        out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
+        out << "<td>" << HtmlRoutines::getMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
         theG2B3Data.theFormat.MaxLineLength = 20;
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD) {
           std::string tempS1 = theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
           std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].toString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
-          out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS1) << "</td>";
+          out << "<td>" << HtmlRoutines::getMathSpanPure(tempS1) << "</td>";
           out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].toString() << "</td>";
-          out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS2) << "</td>";
+          out << "<td>" << HtmlRoutines::getMathSpanPure(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex = - 1;
@@ -776,16 +776,16 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
-    out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
+    out << "Let " << HtmlRoutines::getMathSpanPure("p\\subset so(7)") << " be the "
     << theg2b3data.selInducing.toString() << "-parabolic subalgebra "
-    << "and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
-    << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
+    << "and let " << HtmlRoutines::getMathSpanPure("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::getMathSpanPure("{p}'") << " is the "
     << theg2b3data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
-    << HtmlRoutines::GetMathSpanPure(" p")
+    << HtmlRoutines::getMathSpanPure(" p")
     << "-module</td><td>Decomposition of inducing module over "
-    << HtmlRoutines::GetMathSpanPure("p'")
+    << HtmlRoutines::getMathSpanPure("p'")
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
@@ -804,7 +804,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   theg2b3data.theFormat.flagUseLatex = true;
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCentralCharacter, resultChar;
   HashedList<ElementUniversalEnveloping<RationalFunction> > theCentralChars;
-  theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain());
+  theCasimir.makeCasimir(theg2b3data.theHmm.theDomain());
   WeylGroupData& smallWeyl = theg2b3data.theHmm.theDomain().theWeyl;
   for (int k = 0; k < theHWs.size; k ++) {
     theCharacter.MakeFromWeight(
@@ -848,8 +848,8 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
         if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
           theCentralCharacter = theCasimir;
-          resultChar.ModOutVermaRelations(&rightWeightDual);
-          theCentralCharacter.ModOutVermaRelations(&leftWeightDual);
+          resultChar.modOutVermaRelations(&rightWeightDual);
+          theCentralCharacter.modOutVermaRelations(&leftWeightDual);
           resultChar -= theCentralCharacter;
           resultChar.scaleNormalizeLeadingMonomial(nullptr);
           resultChar *= - 1;
@@ -982,13 +982,13 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
   ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, tempElt;
-  theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain());
+  theG2Casimir.makeCasimir(theG2B3Data.theHmm.theDomain());
 
   theG2B3Data.theChars.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
-    theG2CasimirCopy.ModOutVermaRelations(&currentG2DualWeight, 1, 0);
+    theG2CasimirCopy.modOutVermaRelations(&currentG2DualWeight, 1, 0);
     if (theG2CasimirCopy.isEqualToZero()) {
       theG2B3Data.theChars[i] = 0;
     } else {

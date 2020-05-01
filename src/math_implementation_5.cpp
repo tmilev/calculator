@@ -444,9 +444,9 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   for (int i = 0; i < theDimension; i ++) {
     domainRoot.makeEi(theDimension, i);
     mapOnRootSpaces.actOnVectorColumn(domainRoot, rangeRoot);
-    tempElt.MakeHgenerator(domainRoot, *this);
+    tempElt.makeCartanGenerator(domainRoot, *this);
     Domain[numRoots + i] = tempElt;
-    tempElt.MakeHgenerator(rangeRoot, *this);
+    tempElt.makeCartanGenerator(rangeRoot, *this);
     Range[numRoots + i] = tempElt;
     for (int i = 0; i < 2; i ++, domainRoot.minus(), rangeRoot.minus()) {
       int theIndex = this->theWeyl.RootSystem.getIndex(rangeRoot);
@@ -706,7 +706,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
       return false;
     }
-    tempElt.AssignElementLieAlgebra(
+    tempElt.assignElementLieAlgebra(
       this->imagesAllChevalleyGenerators[input.generatorsIndices[i]],
       this->theRange(),
       polyOne
@@ -741,7 +741,7 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   output.initialize(this->theRange().getRank(), this->theDomain().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().getRank(); i ++) {
-    domainElt.MakeHgenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
+    domainElt.makeCartanGenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
     this->applyHomomorphism(domainElt, imageElt);
     output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
@@ -1796,7 +1796,7 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::AssignFromCoordinateFormWRTBasis(
+void ElementUniversalEnveloping<Coefficient>::assignFromCoordinateFormWithRespectToBasis(
   List<ElementUniversalEnveloping<Coefficient> >& theBasis, Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   this->makeZero(owner);
@@ -1880,7 +1880,7 @@ bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
   return true;
 }
 
-void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
+void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs
 ) {
   this->checkInitialization();
@@ -1897,7 +1897,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
   this->ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(theCoeffs);
 }
 
-int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
+int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
   int numPosRoots = this->theOwner->GetNumPosRoots();
   int posRootsPlusRank = numPosRoots + this->theOwner->getRank();
   if (GeneratorIndex >= posRootsPlusRank) {
@@ -1987,7 +1987,7 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::GetBasisFromSpanOfElements(
+void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   List<ElementSemisimpleLieAlgebra>& theElements,
   List<ElementSemisimpleLieAlgebra>& outputTheBasis
 ) {

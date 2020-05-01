@@ -12,7 +12,7 @@ public:
 
 class CalculatorFunctions {
 public:
-  static bool LeftIntervalGreaterThanRight(const Expression& left, const Expression& right);
+  static bool leftIntervalGreaterThanRight(const Expression& left, const Expression& right);
   static bool innerPrintRuleStack(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByListOutOfBounds(Calculator& theCommands, const Expression& input, Expression& output);

@@ -4499,7 +4499,7 @@ int WebServer::mainCommandLine() {
     std::cin >> theCalculator.inputString;
   }
   theCalculator.flagUseHtml = false;
-  theCalculator.Evaluate(theCalculator.inputString);
+  theCalculator.evaluate(theCalculator.inputString);
   std::fstream outputFile;
   std::string outputFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual(

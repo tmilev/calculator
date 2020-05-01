@@ -2279,7 +2279,7 @@ void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) 
       }
       v = w;
     }
-    Vector<Coefficient> p = vs.basis.PutInBasis(w);
+    Vector<Coefficient> p = vs.basis.putInBasis(w);
     UDPolynomial<Coefficient> out;
     out.data.setSize(p.size + 1);
     for (int i = 0; i <p.size; i ++) {

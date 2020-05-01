@@ -423,7 +423,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
-  result.AssignElementLieAlgebra(inputElt, *this->owner, 1);
+  result.assignElementLieAlgebra(inputElt, *this->owner, 1);
   theGenElt.simplify();
   result *= theGenElt;
   result.simplify();
@@ -619,7 +619,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
-      << HtmlRoutines::GetMathMouseHover(genericElt.toString(&theUEformat)) << "</td> </tr>";
+      << HtmlRoutines::getMathMouseHover(genericElt.toString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan =\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
@@ -630,22 +630,22 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(genericElt.toString(&theUEformat)) << "</td>";
+      out << "<tr><td>" << HtmlRoutines::getMathMouseHover(genericElt.toString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.toString(&theUEformat) << "$";
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
+        actionOnGenericElt.assignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::getMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.toString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString()) << "</td>";
+    out << "<tr><td>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.ToStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
@@ -663,7 +663,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       totalTime += global.getElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
-      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
+      out << "<td>" << HtmlRoutines::getMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
       theWeylFormat.MaxLineLength = 300;
@@ -680,11 +680,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "</tr>";
     if (theMod.getDimension() == 1) {
       ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString())
+      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportFourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
-      reportCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString())
+      reportCalculatorCommands << "<hr>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
@@ -920,7 +920,7 @@ bool Calculator::innerGetChevGen(
   theIndex += theSSalg.content->GetNumPosRoots();
   theElt.MakeGenerator(theIndex, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
+  theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext context(theCommands);
   int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
     theSSalg.content->theWeyl.theDynkinType
@@ -958,9 +958,9 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->GetRootIndexFromDisplayIndex(theIndex)];
-  theElt.MakeHgenerator(theH, *theSSalg.content);
+  theElt.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
+  theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext theContext(theCommands);
   int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
   theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
@@ -2646,7 +2646,7 @@ std::string Calculator::toString() {
     << "} else {\n"
     << "  window.calculator.miscellaneousFrontend.switchMenu('calculatorExamples');\n"
     << "}\n";
-    out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
+    out2 << HtmlRoutines::getHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id =\"calculatorExamples\"></span>";
   }
   if (!global.UserDebugFlagOn()) {

@@ -1703,7 +1703,7 @@ bool CalculatorFunctions::innerCollectSummands(
   return output.makeSequence(theCommands, &theList);
 }
 
-bool CalculatorFunctions::LeftIntervalGreaterThanRight(const Expression& left, const Expression& right) {
+bool CalculatorFunctions::leftIntervalGreaterThanRight(const Expression& left, const Expression& right) {
   if (left.owner == nullptr || right.owner == nullptr) {
     return left > right;
   }
@@ -2030,7 +2030,7 @@ bool CalculatorFunctions::innerNormalizeIntervals(
   if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), outputList)) {
     return false;
   }
-  List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  List<Expression>::Comparator order(CalculatorFunctions::leftIntervalGreaterThanRight);
   outputList.quickSortAscending(&order);
   return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
 }
@@ -2077,7 +2077,7 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
   if (leftList.size != rightList.size) {
     return output.assignValue(0, theCommands);
   }
-  List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  List<Expression>::Comparator order(CalculatorFunctions::leftIntervalGreaterThanRight);
   leftList.quickSortAscending(&order);
   rightList.quickSortAscending(&order);
   for (int i = 0; i < leftList.size; i ++) {

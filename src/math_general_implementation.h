@@ -559,9 +559,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       if (useHtmlInReport) {
         *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
         if (formatAsLinearSystem) {
-          *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1);
         } else {
-          *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->ToStringLatex(theFormat), - 1);
         }
         *humanReadableReport << "</td><td style =\"border-bottom:1pt solid black;\">Selected pivot column "
         << i + 1 << ". ";
@@ -624,10 +624,10 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat))
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->ToStringLatex(theFormat))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {

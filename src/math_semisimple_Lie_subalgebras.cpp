@@ -144,9 +144,9 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   }
   PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
   theComputation.getSubstitutionFromPartialSolutionSerreLikeSystem(theSolutionSub);
-  inputOutputF.SubstitutionCoefficients(theSolutionSub);
-  inputOutputH.SubstitutionCoefficients(theSolutionSub);
-  inputOutputE.SubstitutionCoefficients(theSolutionSub);
+  inputOutputF.substitutionCoefficients(theSolutionSub);
+  inputOutputH.substitutionCoefficients(theSolutionSub);
+  inputOutputE.substitutionCoefficients(theSolutionSub);
   if (logStream != nullptr) {
     *logStream << "<br>H = " << inputOutputH.toString() << "<br>E = "
     << inputOutputE.toString() << "<br>F = " << inputOutputF.toString();
@@ -404,9 +404,9 @@ void SemisimpleSubalgebras::WriteReportToFiles() {
   commonHead << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.toString()
   << "</title>";
-  commonHead << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../");
-  commonHead << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
-  commonHead << HtmlRoutines::GetJavascriptMathjax("../../../");
+  commonHead << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../");
+  commonHead << HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
+  commonHead << HtmlRoutines::getJavascriptMathjax("../../../");
   commonHead << "<body>";
 
   fileSlowLoad << commonHead.str() << this->toString(&this->currentFormat);
@@ -644,9 +644,9 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     << "2. The calculator has no write permission to the folder in which the file is located. "
     << "3. The folder does not exist for some reason lying outside of the calculator. " << global.fatal;
   }
-  outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../")
-  << "\n" << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../")
-  << "\n" << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../")
+  outputFileSubalgebra << "<html>\n" << HtmlRoutines::getJavascriptMathjax("../../../")
+  << "\n" << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../")
+  << "\n" << HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels("../../../")
   << "\n<body>";
   outputFileSubalgebra << this->toStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
@@ -671,8 +671,8 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
       << "3. The folder does not exist for some reason lying outside of the calculator. " << global.fatal;
     }
     outputFileFKFTnilradicals << "<html>"
-    << HtmlRoutines::GetJavascriptMathjax("../../../")
-    << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../")
+    << HtmlRoutines::getJavascriptMathjax("../../../")
+    << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../")
     << "<body>"
     << this->ToStringAlgebraLink(subalgebraIndex, theFormat)
     << currentSubalgebra.ToStringNilradicals(theFormat) << "\n</body></html>";
@@ -739,7 +739,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions *theFormat) {
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField == nullptr) {
-    out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
+    out << HtmlRoutines::getMathSpanPure("\\mathbb Q");
   } else {
     out << this->ownerField->toString();
   }
@@ -823,12 +823,12 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
     out << "<hr><a href = '" << loadSubalgebrasFile  << "'>Calculator input for subalgebras load</a>.";
     std::stringstream fileSl2Content, fileLoadContent;
     fileSl2Content << "<html>"
-    << HtmlRoutines::GetJavascriptMathjax("../../../")
+    << HtmlRoutines::getJavascriptMathjax("../../../")
     << "<body>"
     << this->toStringSl2s()
     << "</body></html>";
     fileLoadContent << "<html>"
-    << HtmlRoutines::GetJavascriptMathjax("../../../")
+    << HtmlRoutines::getJavascriptMathjax("../../../")
     << "<body>"
     << this->ToStringProgressReport(theFormat)
     << "</body></html>";
@@ -2190,7 +2190,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     global.fatal << "This is a programming error: the determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
-    << HtmlRoutines::GetMathMouseHover(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
+    << HtmlRoutines::getMathMouseHover(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
   }
 }
@@ -2412,7 +2412,7 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs() {
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> goalH, lieBracket;
   for (int i = 0; i < this->theNegGens.size; i ++) {
-    goalH.MakeHgenerator(this->theHsScaledToActByTwo[i], *this->owner->owner);
+    goalH.makeCartanGenerator(this->theHsScaledToActByTwo[i], *this->owner->owner);
     this->GetAmbientSS().LieBracket(this->thePosGens[i], this->theNegGens[i], lieBracket);
     lieBracket -= goalH;
     if (!lieBracket.isEqualToZero()) {
@@ -2522,7 +2522,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   }
   for (int i = 0; i < this->theUnknownNegGens.size; i ++) {
     desiredHpart = this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
-    goalValue.MakeHgenerator(desiredHpart, *this->owner->owner);
+    goalValue.makeCartanGenerator(desiredHpart, *this->owner->owner);
     this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
     lieBracketMinusGoalValue -= goalValue;
     this->addToSystem(lieBracketMinusGoalValue);
@@ -2703,7 +2703,7 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent() {
   this->RatioKillingsByComponent.setSize(this->cartanSubalgebrasByComponentScaledToActByTwo.size);
   Matrix<AlgebraicNumber> theAdMat;
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
-    currentElt.MakeHgenerator(this->cartanSubalgebrasByComponentScaledToActByTwo[i][0], this->GetAmbientSS());
+    currentElt.makeCartanGenerator(this->cartanSubalgebrasByComponentScaledToActByTwo[i][0], this->GetAmbientSS());
     AlgebraicNumber result = 0;
     for (int k = 0; k < this->theBasis.size; k ++) {
       this->GetAmbientSS().LieBracket(currentElt, this->theBasis[k], adActionElt);
@@ -3963,7 +3963,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
   allHs.addListOnTop(this->CartanOfCentralizer);
   theAdsOfHs.setSize(allHs.size);
   for (int j = 0; j < allHs.size; j ++) {
-    tempElt.MakeHgenerator(allHs[j], this->GetAmbientSS());
+    tempElt.makeCartanGenerator(allHs[j], this->GetAmbientSS());
     this->GetAmbientSS().GetAd(theAdsOfHs[j], tempElt);
   }
   Vectors<AlgebraicNumber> outputV;
@@ -4085,8 +4085,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
     for (int i = 0; i < this->theUnknownNegGens.size; i ++) {
       currentNegElt = this->theUnknownNegGens[i];
       currentPosElt = this->theUnknownPosGens[i];
-      currentNegElt.SubstitutionCoefficients(theSub);
-      currentPosElt.SubstitutionCoefficients(theSub);
+      currentNegElt.substitutionCoefficients(theSub);
+      currentPosElt.substitutionCoefficients(theSub);
       this->theNegGens[i] = currentNegElt;//<-implicit type conversion here, will crash if currentNegElt has non-const coefficients
       this->thePosGens[i] = currentPosElt;//<-implicit type conversion here, will crash if currentNegElt has non-const coefficients
     }
@@ -4387,7 +4387,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-  out << HtmlRoutines::GetMathMouseHover((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml) {
     out << "\n<br>\n";
@@ -4395,20 +4395,20 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS = this->theH.toString(theFormat);
   tempStreamH << "\nh = " << tempS << "";
-  out << HtmlRoutines::GetMathMouseHover(tempStreamH.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne = " << this->theE.toString(theFormat) << "\n<br>\n";
-  out << HtmlRoutines::GetMathMouseHover(tempStreamE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.toString(theFormat) << "\n<br>\n";
-/*  out << HtmlRoutines::GetMathMouseHover(tempStreamF.str()) << "\n<br>\n";
+/*  out << HtmlRoutines::getMathMouseHover(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n[e, f] =" <<  this->bufferEbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::GetMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
   tempStreamHE << "\n[h, e] =" << this->bufferHbracketE.toString(theFormat) << "";
-  out << HtmlRoutines::GetMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
   tempStreamHF << "\n[h, f] = " << this->bufferHbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::GetMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
+  out << HtmlRoutines::getMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
   //this->theSystemMatrixForm.toString(tempS);
   //out << "\nSystem matrix form we try to solve:\n" << tempS;
   //this->theSystemColumnVector.toString(tempS);
@@ -4423,7 +4423,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   if (useHtml) {
     out << "\n<br>\n";
   }
-  out << HtmlRoutines::GetMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -4681,7 +4681,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
   }
   ElementSemisimpleLieAlgebra<Rational> tempH;
   this->CheckForCorrectInitializationCrashIfNot();
-  tempH.MakeHgenerator(theH, *this->owner);
+  tempH.makeCartanGenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
     if (this->theObjects[i].theH == tempH) {
       if (outputIndex != nullptr) {
@@ -5034,14 +5034,14 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
     }
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-    out << HtmlRoutines::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
+    out << HtmlRoutines::getMathMouseHover((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml) {
       out << "</td>";
     }
     out << "<td>" << theSl2.dimensionCentralizer << "</td>";
     if (theSl2.flagCentralizerTypeComputed) {
-      out << "<td> " << HtmlRoutines::GetMathSpanPure(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
+      out << "<td> " << HtmlRoutines::getMathSpanPure(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
     } else {
       out << "<td> not computed</td>";
     }
@@ -5114,8 +5114,8 @@ void SltwoSubalgebras::toHTML(FormatExpressions* theFormat) {
   std::stringstream out;
   out << "<html><title>sl(2)-subalgebras of "
   << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.toString() << "</title>";
-  out << HtmlRoutines::GetJavascriptMathjax("../../../../");
-  out << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../../");
+  out << HtmlRoutines::getJavascriptMathjax("../../../../");
+  out << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../../");
   out << "<meta name =\"keywords\" content =\""
   <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.toString()
   << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
@@ -5467,9 +5467,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathMouseHover(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       } else {
-        out << HtmlRoutines::GetMathSpanPure(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathSpanPure(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       }
       out << "</td>";
     }
@@ -5568,9 +5568,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
     for (int i = 0; i < this->CharsPrimalModules.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathMouseHover(this->CharsPrimalModules[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpanPure(this->CharsPrimalModules[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -5586,9 +5586,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
     for (int i = 0; i < this->CharsPrimalModulesMerged.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathMouseHover(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpanPure(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -6131,9 +6131,9 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int actualIndexSubalgebra
     << "\" id = \"semisimple_subalgebra_" << this->getDisplayIndexFromActual(actualIndexSubalgebra)
     << "\" style = \"text-decoration: none\">";
     if (useMouseHover) {
-      out << HtmlRoutines::GetMathMouseHover(theTypeString);
+      out << HtmlRoutines::getMathMouseHover(theTypeString);
     } else {
-      out << HtmlRoutines::GetMathSpanPure(theTypeString);
+      out << HtmlRoutines::getMathSpanPure(theTypeString);
     }
     out << "</a> ";
   } else {
@@ -6157,9 +6157,9 @@ std::string CandidateSSSubalgebra::ToStringcartanSubalgebra(FormatExpressions* t
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathMouseHover(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       } else {
-        out << HtmlRoutines::GetMathSpanPure(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathSpanPure(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       }
     } else {
       out << theSimpleTypes[i].toString(&tempFormat) << ":";
@@ -6207,9 +6207,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
       }
     } else if (!this->theCentralizerType.isEqualToZero()) {
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathMouseHover(this->theCentralizerType.toString());
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathSpanPure(this->theCentralizerType.toString());
       }
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer -= this->theCentralizerType.getRank();
@@ -6218,9 +6218,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
       std::stringstream toralPartStream;
       toralPartStream << "T_{" << dimToralPartCentralizer.toString() << "}";
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(toralPartStream.str());
+        out << HtmlRoutines::getMathMouseHover(toralPartStream.str());
       } else {
-        out << HtmlRoutines::GetMathSpanPure(toralPartStream.str());
+        out << HtmlRoutines::getMathSpanPure(toralPartStream.str());
       }
       out << " (toral part, subscript = dimension)";
     }
@@ -6466,9 +6466,9 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   for (int i = 0; i < this->theNegGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathMouseHover(this->theNegGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpanPure(this->theNegGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->theNegGens[i].toString(theFormat);
@@ -6481,9 +6481,9 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   for (int i = 0; i < this->thePosGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathMouseHover(this->thePosGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpanPure(this->thePosGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->thePosGens[i].toString(theFormat);
@@ -6568,9 +6568,9 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
   out << "<br>Cartan symmetric matrix: ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::GetMathMouseHover(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathMouseHover(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::GetMathSpanPure(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpanPure(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->cartanSymmetric.toString(theFormat);
@@ -6578,9 +6578,9 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
   out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::GetMathMouseHover(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathMouseHover(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::GetMathSpanPure(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpanPure(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->coCartanSymmetric.toString(theFormat);
@@ -6592,9 +6592,9 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX) {
     if (useMouseHover) {
-      out << HtmlRoutines::GetMathMouseHover(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathMouseHover(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     } else {
-      out << HtmlRoutines::GetMathSpanPure(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathSpanPure(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     }
   } else {
     out << this->theCharNonPrimalFundCoords.toString(&charFormatNonConst);
@@ -6604,9 +6604,9 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
     << "This decomposition refines the above decomposition (please note the order is not the same as above). ";
     if (useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::GetMathMouseHover(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathMouseHover(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathSpanPure(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       }
     } else
       out << this->thePrimalChaR.toString(&charFormatNonConst);
@@ -6830,7 +6830,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
         reportStream << "... and so on, only the first 100 elements printed out of total "
         << theOuterAutos.theElements.size << ". ";
       } else {
-        reportStream << "<br>" << HtmlRoutines::GetMathMouseHover(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
+        reportStream << "<br>" << HtmlRoutines::getMathMouseHover(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
       }
     }
     theReport.report(reportStream.str());
@@ -7043,7 +7043,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   theCartan.setSize(this->GetAmbientSS().getRank());
   for (int i = 0; i < this->GetAmbientSS().getRank(); i ++) {
     tempV.makeEi(this->GetAmbientSS().getRank(), i);
-    tempElt.MakeHgenerator(tempV, this->GetAmbientSS());
+    tempElt.makeCartanGenerator(tempV, this->GetAmbientSS());
     tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
   Vectors<AlgebraicNumber> outputCartanCentralizer;

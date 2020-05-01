@@ -223,8 +223,8 @@ void Polynomial<Coefficient>::makeDegreeOne(
 }
 
 template <class Coefficient>
-Coefficient Polynomial<Coefficient>::Evaluate(const Vector<Coefficient>& input) {
-  MacroRegisterFunctionWithName("Polynomial::Evaluate");
+Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::evaluate");
   Coefficient output = 0;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMon = (*this)[i];
@@ -1219,7 +1219,7 @@ std::string GroebnerBasisComputation<Coefficient>::getPolynomialStringSpacedMono
         &this->theFormat
       );
 
-      out << HtmlRoutines::GetMathSpanPure(monomialWithCoefficient);
+      out << HtmlRoutines::getMathSpanPure(monomialWithCoefficient);
     } else {
       out << Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
         thePoly[theIndex],
@@ -1275,14 +1275,14 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringHtml() {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasis[i].element.toString(&this->theFormat), - 1);
+      out << HtmlRoutines::getMathSpanPure(this->theBasis[i].element.toString(&this->theFormat), - 1);
     } else {
       out << this->theBasis[i].element.toString(&this->theFormat);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"
     << this->allMonomials.size + 1 << "'>";
-    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].toString(&this->theFormat));
+    out << HtmlRoutines::getMathSpanPure(this->theQuotients[i].toString(&this->theFormat));
     out << "</td></tr>";
   }
   out << "</tr>";

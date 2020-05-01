@@ -357,7 +357,7 @@ bool WebAPIResponse::processCompute() {
   // theParser.initialize();
   ////////////////////////////////////////////////
   global.theResponse.AllowReport();
-  theCalculator.Evaluate(theCalculator.inputString);
+  theCalculator.evaluate(theCalculator.inputString);
   global.theResponse.DisallowReport();
   JSData result;
   result = theCalculator.toJSONOutputAndSpecials();

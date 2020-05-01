@@ -776,7 +776,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 }
 
 template <typename Coefficient>
-Vector<Coefficient> PutInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
+Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<Coefficient> >& B) {
   Vector<Coefficient> w;
   w.makeZero(B.size);
   Matrix<Coefficient> M;
@@ -838,7 +838,7 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V
     Coefficient tr = 0;
     for (int j = 0; j < V.size; j ++) {
       Vector<Coefficient> v = ActOnGroupRing(g, V[j]);
-      v = PutInBasis(v, V);
+      v = putInBasis(v, V);
       tr += v[j];
     }
     X.data[i] = tr;
@@ -886,7 +886,7 @@ Matrix<Rational> matrixInBasis(
   Matrix<Rational> M;
   M.initialize(rows.size, rows.size);
   for (int i = 0; i < rows.size; i ++) {
-    Vector<Rational> v = PutInBasis(rows[i], B);
+    Vector<Rational> v = putInBasis(rows[i], B);
     for (int j = 0; j < rows.size; j ++) {
       M.elements[i][j] = v[j];
     }

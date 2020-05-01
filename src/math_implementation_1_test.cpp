@@ -183,7 +183,7 @@ RationalFunction RationalFunction::Test::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize();
-  parser.Evaluate(inputModified);
+  parser.evaluate(inputModified);
   if (!parser.theProgramExpression.startsWith(parser.opEndStatement())) {
     global.fatal
     << "RationalFunction::fromString parsed: "

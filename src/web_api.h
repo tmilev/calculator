@@ -17,9 +17,9 @@ public:
   List<std::string> jsFileNames;
   List<std::string> jsFileContents;
 
-  bool FileNameAllowedToBeMissing(const std::string& input);
-  void BuildHtmlJSpage(bool appendBuildHash);
-  std::string GetOnePageJSBrowserify();
+  bool fileNameAllowedToBeMissing(const std::string& input);
+  void buildHtmlJavascriptPage(bool appendBuildHash);
+  std::string getOnePageJavascriptBrowserify();
 };
 
 class WebWorker;
@@ -218,64 +218,44 @@ public:
   static std::string getCSSLink(const std::string& fileNameVirtual);
   static std::string getJavascriptLink(const std::string& fileNameVirtual);
 
-  static const std::string& GetCSSAddStyleTags(
+  static const std::string& getCSSAddStyleTags(
     const std::string& fileNameVirtual
   );
-  static const std::string& GetJavascriptAddScriptTags(
+  static const std::string& getJavascriptAddScriptTags(
     const std::string& fileNameVirtual
   );
-  static const std::string& GetFile(
+  static const std::string& getFile(
     const std::string& fileNameVirtual,
     const std::string& additionalBeginTag = "",
     const std::string& additionalEndTag = ""
   );
 
-  static const std::string& GetMathQuillStyleSheeTWithTags();
-  static const std::string GetMathQuillStyleSheetLink();
+  static const std::string& getMathQuillStyleSheeTWithTags();
 
-  static const std::string& GetJavascriptAceEditorScriptWithTags();
+  static const std::string& getJavascriptAceEditorScriptWithTags();
 
-  static const std::string GetCSSLinkCalculator(const std::string& relativeTo);
-  static const std::string GetCSSLinkLieAlgebras(
-    const std::string& relativeTo
-  );
-  static const std::string GetCSSLinkLieAlgebrasAndCalculator(
+  static const std::string getCSSLinkLieAlgebrasAndCalculator(
     const std::string& relativeTo
   );
 
-  static const std::string GetJavascriptLinkGraphicsNDimensionsWithPanels(
+  static const std::string getJavascriptLinkGraphicsNDimensionsWithPanels(
     const std::string& relativeTo
   );
-  static const std::string GetJavascriptLinkGraphicsNDimensions(
-    const std::string& relativeTo
-  );
-  static const std::string GetJavascriptLinkPanels(
-    const std::string& relativeTo
-  );
-  static std::string GetJavascriptMathjax(const std::string& baseFolder);
-  static const std::string& GetJavascriptBrowserifier();
+  static std::string getJavascriptMathjax(const std::string& baseFolder);
+  static const std::string& getJavascriptBrowserifier();
 
-  static const std::string& GetJavascriptMathQuillDefaulTWithTags();
-  static const std::string GetJavascriptMathQuillDefaultLink();
-  static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();
-  static const std::string GetJavascriptMathQuillMatrixSupportLink();
+  static const std::string& getJavascriptMathQuillDefaultWithTags();
+  static const std::string& getJavascriptMathQuillMatrixSupporTWithTags();
+  static std::string getJavascriptVariable(const std::string& theVar);
 
-  static std::string GetJavascriptVariable(const std::string& theVar);
-
-  static std::string GetMathSpanPure(
+  static std::string getMathSpanPure(
     const std::string& input, int upperNumChars = 10000
   );
-  static std::string GetMathSpanBeginArrayL(
+  static std::string getMathMouseHover(
     const std::string& input, int upperNumChars = 10000
   );
-  static std::string GetMathMouseHover(
-    const std::string& input, int upperNumChars = 10000
-  );
-  static std::string GetMathMouseHoverBeginArrayL(
-    const std::string& input, int upperNumChars = 10000
-  );
-  static std::string GetStyleButtonLikeHtml();
-  static std::string GetHtmlButton(
+  static std::string getStyleButtonLikeHtml();
+  static std::string getHtmlButton(
     const std::string& buttonID,
     const std::string& theScript,
     const std::string& buttonText

@@ -14,7 +14,7 @@ MapList<std::string, std::string, MathRoutines::HashString>& HtmlRoutines::preLo
 
 std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
-std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
+std::string HtmlRoutines::getJavascriptVariable(const std::string& theVar) {
   std::stringstream sanitizer;
   for (unsigned i = 0; i < theVar.size(); i ++) {
     if (MathRoutines::isALatinLetter(theVar[i])) {
@@ -52,38 +52,18 @@ std::string HtmlRoutines::getHtmlLinkFromProjectFileName(
   return out.str();
 }
 
-std::string HtmlRoutines::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars) {
-  std::stringstream out;
-  out << "\\begin{array}{l}" << input << "\\end{array}";
-  if (out.str().size() < static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
-    return HtmlRoutines::GetMathMouseHover(out.str(), upperNumChars);
-  } else {
-    return HtmlRoutines::GetMathMouseHover(input, upperNumChars);
-  }
-}
-
-std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars) {
-  std::stringstream out;
-  out << "\\begin{array}{l} " << input << " \\end{array}";
-  if (out.str().size() < static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
-    return HtmlRoutines::GetMathSpanPure(out.str(), upperNumChars);
-  } else {
-    return HtmlRoutines::GetMathSpanPure(input, upperNumChars);
-  }
-}
-
 void HtmlRoutines::loadStrings() {
   if (HtmlRoutines::preLoadedFiles().size() > 0) {
     return;
   }
-  HtmlRoutines::GetMathQuillStyleSheeTWithTags();
-  HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
-  HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
-  HtmlRoutines::GetJavascriptBrowserifier();
+  HtmlRoutines::getMathQuillStyleSheeTWithTags();
+  HtmlRoutines::getJavascriptAceEditorScriptWithTags();
+  HtmlRoutines::getJavascriptMathQuillDefaultWithTags();
+  HtmlRoutines::getJavascriptMathQuillMatrixSupporTWithTags();
+  HtmlRoutines::getJavascriptBrowserifier();
 }
 
-const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
+const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
     return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
   }
@@ -91,17 +71,17 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
   out << "<script type =\"text/javascript\" src =\""
   << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
   << "\" charset =\"utf-8\"></script>";
-  out << HtmlRoutines::GetJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
+  out << HtmlRoutines::getJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles().setKeyValue("AceEditor", out.str());
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
 }
 
-const std::string& HtmlRoutines::GetFile(
+const std::string& HtmlRoutines::getFile(
   const std::string& fileNameVirtual,
   const std::string& additionalBeginTag,
   const std::string& additionalEndTag
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
+  MacroRegisterFunctionWithName("HtmlRoutines::getFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
     if (HtmlRoutines::preLoadedFiles().GetValueCreate(theID) != "") {
@@ -122,9 +102,9 @@ const std::string& HtmlRoutines::GetFile(
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit(theID);
 }
 
-const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& fileNameVirtual) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptAddScriptTags");
-  return HtmlRoutines::GetFile(fileNameVirtual, "<script>", "</script>");
+const std::string& HtmlRoutines::getJavascriptAddScriptTags(const std::string& fileNameVirtual) {
+  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptAddScriptTags");
+  return HtmlRoutines::getFile(fileNameVirtual, "<script>", "</script>");
 }
 
 std::string HtmlRoutines::getJavascriptLink(const std::string& fileNameVirtual) {
@@ -143,66 +123,38 @@ std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
   return out.str();
 }
 
-const std::string& HtmlRoutines::GetCSSAddStyleTags(const std::string& fileNameVirtual) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetCSSAddStyleTags");
-  return HtmlRoutines::GetFile(fileNameVirtual, "<style>", "</style>");
+const std::string& HtmlRoutines::getCSSAddStyleTags(const std::string& fileNameVirtual) {
+  MacroRegisterFunctionWithName("HtmlRoutines::getCSSAddStyleTags");
+  return HtmlRoutines::getFile(fileNameVirtual, "<style>", "</style>");
 }
 
-const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags() {
-  return HtmlRoutines::GetCSSAddStyleTags("/html-common/mathquill/mathquill.css");
+const std::string& HtmlRoutines::getMathQuillStyleSheeTWithTags() {
+  return HtmlRoutines::getCSSAddStyleTags("/html-common/mathquill/mathquill.css");
 }
 
-const std::string HtmlRoutines::GetMathQuillStyleSheetLink() {
-  return HtmlRoutines::getCSSLink("/html-common/mathquill/mathquill.css");
-}
-
-const std::string HtmlRoutines::GetCSSLinkCalculator(const std::string& relativeTo) {
-  return HtmlRoutines::getCSSLink(relativeTo + "calculator-html/styleCalculator.css");
-}
-
-const std::string HtmlRoutines::GetCSSLinkLieAlgebras(const std::string& relativeTo) {
-  return HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css");
-}
-
-const std::string HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
+const std::string HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
   return
   HtmlRoutines::getCSSLink(relativeTo + "calculator-html/styleCalculator.css") +
   HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
 }
 
-const std::string HtmlRoutines::GetJavascriptLinkPanels(const std::string& relativeTo) {
-  return HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
+const std::string HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
   return
   HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js") +
   HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js")
   ;
 }
 
-const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensions(const std::string& relativeTo) {
-  return HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
+const std::string& HtmlRoutines::getJavascriptMathQuillDefaultWithTags() {
+  return  HtmlRoutines::getJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags() {
-  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
+const std::string& HtmlRoutines::getJavascriptMathQuillMatrixSupporTWithTags() {
+  return  HtmlRoutines::getJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
 }
 
-const std::string HtmlRoutines::GetJavascriptMathQuillDefaultLink() {
-  return HtmlRoutines::getJavascriptLink("/html-common/mathquill/mathquill.min.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags() {
-  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
-}
-
-const std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() {
-  return  HtmlRoutines::getJavascriptLink("/html-common/mathquill/mathquill.min.js");
-}
-
-const std::string& HtmlRoutines::GetJavascriptBrowserifier() {
-  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/browserifier.js");
+const std::string& HtmlRoutines::getJavascriptBrowserifier() {
+  return HtmlRoutines::getJavascriptAddScriptTags("/calculator-html/browserifier.js");
 }
 
 std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {
@@ -222,7 +174,7 @@ std::string HtmlRoutines::getCalculatorComputationAnchor(const std::string& inpu
   return out.str();
 }
 
-std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNumChars) {
+std::string HtmlRoutines::getMathSpanPure(const std::string& input, int upperNumChars) {
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
@@ -233,7 +185,7 @@ std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNum
   return out.str();
 }
 
-std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperNumChars) {
+std::string HtmlRoutines::getMathMouseHover(const std::string& input, int upperNumChars) {
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars)) {
     out << "<b>LaTeX output is longer than " << upperNumChars
@@ -319,8 +271,8 @@ void HtmlRoutines::convertURLStringToNormal(const std::string& input, std::strin
   output = out.str();
 }
 
-std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptMathjax");
+std::string HtmlRoutines::getJavascriptMathjax(const std::string& baseFolder) {
+  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptMathjax");
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash(
     "calculator-html/mathjax-calculator-setup.js"

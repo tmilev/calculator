@@ -1419,7 +1419,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   if (!copyBase.isOfType<ElementUniversalEnveloping<RationalFunction> >(&theUE)) {
     return false;
   }
-  if (!theUE.IsAPowerOfASingleGenerator()) {
+  if (!theUE.isPowerOfSingleGenerator()) {
     int tempPower;
     if (!copyExponent.isSmallInteger(&tempPower)) {
       return false;
@@ -2239,7 +2239,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
     rightE.isOfType<ElementUniversalEnveloping<RationalFunction> >()
   ) {
     ElementUniversalEnveloping<RationalFunction> result;
-    leftE.getValue<ElementUniversalEnveloping<RationalFunction> >().LieBracketOnTheRight(
+    leftE.getValue<ElementUniversalEnveloping<RationalFunction> >().lieBracketOnTheRight(
       rightE.getValue<ElementUniversalEnveloping<RationalFunction> >(), result
     );
     result.simplify();

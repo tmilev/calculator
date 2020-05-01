@@ -1438,7 +1438,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
   this->theMultiplicitiesMaxOutputReport2 << out.str();
 }
 
-std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight(
+std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebraHighestWeight(
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel
 ) {
   std::stringstream out;
@@ -1539,8 +1539,8 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities() {
   }
 }
 
-std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits() {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits");
+std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
+  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits");
   this->checkInitialization();
   std::stringstream out;
   int totalDimAffine = this->WeylLarger->getDimension() + this->WeylSmaller->getDimension();
@@ -1564,7 +1564,7 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits() {
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& parabolicSel) {
+void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& parabolicSel) {
   std::stringstream out;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
@@ -1585,10 +1585,10 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
       break;
     case 2:
       this->ComputeQPsFromChamberComplex();
-      out << this->ElementToStringMultiplicitiesReport();
+      out << this->elementToStringMultiplicitiesReport();
       break;
     case 3:
-//      out << this->CheckMultiplicitiesVsOrbits();
+//      out << this->checkMultiplicitiesVsOrbits();
       break;
     case 4:
       this->InitTheMaxComputation();
@@ -1900,7 +1900,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   //global.makeReport();
 }
 
-std::string GeneralizedVermaModuleCharacters::PrepareReport() {
+std::string GeneralizedVermaModuleCharacters::prepareReport() {
   std::stringstream out;
   FormatExpressions theFormat;
   int tempI = 0;
@@ -1975,7 +1975,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport() {
           tempRat =*tempRoot.lastObject();
           if (tempRat != 0)
             tempRoot/= tempRat;
-          theMult.valueOnEachLatticeShift.theObjects[0].Evaluate(tempRoot, tempRat);
+          theMult.valueOnEachLatticeShift.theObjects[0].evaluate(tempRoot, tempRat);
           if (tempRat<1) {
             indexMultFreeChamber = j;
             break;
@@ -2052,7 +2052,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone(FormatExpress
   return out1.str();
 }
 
-std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport() {
+std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesReport() {
   if (this->theMultiplicities.size != this->projectivizedChambeR.size) {
     global.fatal << "Bad number of multiplicities. " << global.fatal;
   }
@@ -2071,7 +2071,7 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   }
   out << "\nNumber of inequalities: " << numInequalities;
   if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection != 0) {
-    out << this->PrepareReport();
+    out << this->prepareReport();
   }
   return out.str();
 }

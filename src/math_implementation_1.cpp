@@ -415,7 +415,7 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<in
 }
 
 template <class Coefficient>
-bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimental(
+bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
   const Vector<Rational>& theHWsimpleCoords,
   const Coefficient& theRingUnit,
   const Coefficient& theRingZero
@@ -431,7 +431,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimen
   for (int i = 0; i < theHWdualCoords.size; i ++) {
     theSub[i] = theHWdualCoords[i];
   }
-  this->ModOutVermaRelations(&theSub, theRingUnit, theRingZero);
+  this->modOutVermaRelations(&theSub, theRingUnit, theRingZero);
   int numPosRoots = this->owner->theOwner->GetNumPosRoots();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
@@ -464,7 +464,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimen
 }
 
 template <class Coefficient>
-bool ElementUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimental(
+bool ElementUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimental(
   const Vector<Rational>& theHWsimpleCoords,
   const Coefficient& theRingUnit,
   const Coefficient& theRingZero
@@ -475,7 +475,7 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperiment
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
     tempMon = this->theObjects[i];
-    if (!tempMon.ModOutFDRelationsExperimental(theHWsimpleCoords, theRingUnit, theRingZero)) {
+    if (!tempMon.modOutFDRelationsExperimental(theHWsimpleCoords, theRingUnit, theRingZero)) {
       result = false;
     }
     output.addMonomial(tempMon);
@@ -495,7 +495,7 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   tempBasis = theBasis;
   tempBasis.addOnTop(*this);
   Vectors<Coefficient> tempCoords;
-  if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero)) {
+  if (!this->getBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero)) {
     return false;
   }
   Vector<Coefficient> tempRoot;
@@ -506,7 +506,7 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
 
 template<class Coefficient>
 template<class CoefficientTypeQuotientField>
-bool ElementUniversalEnveloping<Coefficient>::GetBasisFromSpanOfElements(
+bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   List<ElementUniversalEnveloping<Coefficient> >& theElements,
   Vectors<CoefficientTypeQuotientField>& outputCoords,
   List<ElementUniversalEnveloping<Coefficient> >& outputTheBasis,
@@ -567,7 +567,7 @@ void ElementUniversalEnveloping<Coefficient>::ModToMinDegreeFormFDRels(
       this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
       this->simplify(theRingUnit);
       this->owner->UEGeneratorOrderIncludingCartanElts.swapTwoIndices(j, numPosRoots - 1);
-      if (this->ModOutFDRelationsExperimental(theHWinSimpleCoords, theRingUnit, theRingZero)) {
+      if (this->modOutFDRelationsExperimental(theHWinSimpleCoords, theRingUnit, theRingZero)) {
         Found = true;
       }
     }
@@ -641,7 +641,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
       *logStream << "intermediate after simplification: "
       << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
     }
-    intermediateAccum.ModOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
+    intermediateAccum.modOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int thePower;
@@ -665,7 +665,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
             *logStream << "intermediate after simplification: "
             << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
-          intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
+          intermediateAccum.modOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
             << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
@@ -704,7 +704,7 @@ std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
       theElt.MakeOneGenerator(j + numPosRoots + theDim, *this->owner, theRingUnit);
       theElt *= theOrbit[i];
       theElt.simplify(theRingUnit);
-      theElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
+      theElt.modOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
       if (!theElt.isEqualToZero()) {
         theOrbit.addOnTop(theElt);
       }
@@ -816,7 +816,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     bool isGood = false;
     for (int j = 0; j < this->weightsNilModPreNil.size; j ++) {
-      proj = this->ProjectWeight(this->weightsNilModPreNil[j]);
+      proj = this->projectWeight(this->weightsNilModPreNil[j]);
       if (proj == this->weightsNilradicalSmall[i]) {
         isGood = true;
         this->NilModPreNil.removeIndexSwapWithLast(j);

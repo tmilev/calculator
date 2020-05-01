@@ -594,9 +594,9 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   std::stringstream out, logStream;
   bool success = ownerSS->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
   if (success) {
-    out << HtmlRoutines::GetMathSpanPure("F=" + theF.toString() + ";")
-    << "<br>" << HtmlRoutines::GetMathSpanPure("H=" + theH.toString() + ";") << "<br>"
-    << HtmlRoutines::GetMathSpanPure("E=" + theE.toString() + ";")
+    out << HtmlRoutines::getMathSpanPure("F=" + theF.toString() + ";")
+    << "<br>" << HtmlRoutines::getMathSpanPure("H=" + theH.toString() + ";") << "<br>"
+    << HtmlRoutines::getMathSpanPure("E=" + theE.toString() + ";")
     << "<br><br>The log stream of the computation follows. " << logStream.str();
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
@@ -760,7 +760,7 @@ bool Calculator::innerGroebner(
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
     out << "<br>"
-    << HtmlRoutines::GetMathSpanPure(
+    << HtmlRoutines::getMathSpanPure(
       inputVector[i].toString(&theGroebnerComputation.theFormat)
     );
   }
@@ -771,7 +771,7 @@ bool Calculator::innerGroebner(
     << theGroebnerComputation.numberPolynomialDivisions
     << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << "<br> " << HtmlRoutines::GetMathSpanPure(
+      out << "<br> " << HtmlRoutines::getMathSpanPure(
         outputGroebner[i].toString(&theGroebnerComputation.theFormat)
       );
     }
@@ -1530,7 +1530,7 @@ std::string PlotObject::GetJavascript2dPlot(
   std::string fnName = fnNameStream.str();
   if (this->variablesInPlayJS.size > 0) {
     out << "function " << fnName
-    << " (" << HtmlRoutines::GetJavascriptVariable(this->variablesInPlayJS[0]) << "){\n";
+    << " (" << HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[0]) << "){\n";
     out << "return " << this->coordinateFunctionsJS[0] << ";\n";
     out << "}\n";
   } else {
@@ -1821,7 +1821,7 @@ bool Expression::AssignStringParsed(
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;
-  if (!owner.ParseAndExtractExpressions(theString, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors)) {
+  if (!owner.parseAndExtractExpressions(theString, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors)) {
     this->assignValue(outputSyntacticErrors, owner);
     return false;
   }
@@ -2259,7 +2259,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> leftEltSS, rightEltSS;
-  if (left.GetLieAlgebraElementIfPossible(leftEltSS) && right.GetLieAlgebraElementIfPossible(rightEltSS)) {
+  if (left.getLieAlgebraElementIfPossible(leftEltSS) && right.getLieAlgebraElementIfPossible(rightEltSS)) {
     return output.assignValue(leftEltSS.GetOwner()->getKillingForm(leftEltSS, rightEltSS), theCommands);
   }
   return output.assignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);

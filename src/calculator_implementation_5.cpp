@@ -1903,7 +1903,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       return output.assignValue<std::string>(" 3.141592654 ", theCommands);
     }
     if (input.theData >= theCommands.NumPredefinedAtoms) {
-      return output.assignValue(HtmlRoutines::GetJavascriptVariable(atomString), theCommands);
+      return output.assignValue(HtmlRoutines::getJavascriptVariable(atomString), theCommands);
     }
     if (atomString == "+" || atomString == "*" || atomString == "/" || atomString == "-") {
       return output.assignValue(atomString, theCommands);

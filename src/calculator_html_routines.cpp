@@ -52,7 +52,7 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
     return false;
   }
   List<SyntacticElement> theElts;
-  theCommands.ParseFillDictionary(theString, theElts);
+  theCommands.parseFillDictionary(theString, theElts);
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;

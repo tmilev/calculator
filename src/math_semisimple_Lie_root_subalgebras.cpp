@@ -569,7 +569,7 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->SimpleBasisK.size);
   for (int i = 0; i <cartanCentralizer.size; i ++) {
-    currentElt.MakeHgenerator(cartanCentralizer[i], this->getOwnerLieAlgebra());
+    currentElt.makeCartanGenerator(cartanCentralizer[i], this->getOwnerLieAlgebra());
     this->HighestVectors.addOnTop(currentElt);
     this->HighestWeightsPrimalSimple.addOnTop(currentElt.GetRootIMustBeWeight());
     this->HighestWeightsNONPrimalFundamental.addOnTop(zeroRoot);
@@ -646,7 +646,7 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
       currentElt.MakeGGenerator(wPrimalSimple[i], this->getOwnerLieAlgebra());
       continue;
     }
-    currentElt.MakeHgenerator(zeroSpace[indexInZeroSpace], this->getOwnerLieAlgebra());
+    currentElt.makeCartanGenerator(zeroSpace[indexInZeroSpace], this->getOwnerLieAlgebra());
     indexInZeroSpace ++;
   }
 }
@@ -1261,7 +1261,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << HtmlRoutines::GetJavascriptMathjax("../../../");
+  output << HtmlRoutines::getJavascriptMathjax("../../../");
   output << "<body>" << this->toString(theFormat) << "</body></html>";
   output.close();
 }
@@ -1281,8 +1281,8 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   ) {
     includeKEpsCoords = false;
   }
-  out << "Type: " << HtmlRoutines::GetMathSpanPure(this->theDynkinDiagram.toString());
-  out << " (Dynkin type computed to be: " << HtmlRoutines::GetMathSpanPure(this->theDynkinType.toString()) << ")";
+  out << "Type: " << HtmlRoutines::getMathSpanPure(this->theDynkinDiagram.toString());
+  out << " (Dynkin type computed to be: " << HtmlRoutines::getMathSpanPure(this->theDynkinType.toString()) << ")";
   out << "\n<br>\nSimple basis: " << this->SimpleBasisK.toString();
   out << "\n<br>\nSimple basis epsilon form: "
   << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
@@ -1296,7 +1296,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.toString();
   out << "<hr>\n Number of k-submodules of g: " << this->Modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
-  out << HtmlRoutines::GetMathSpanPure(this->ModuleDecompoHighestWeights.toString());
+  out << HtmlRoutines::getMathSpanPure(this->ModuleDecompoHighestWeights.toString());
   out << "<br>\n";
   out << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";
@@ -1414,7 +1414,7 @@ void RootSubalgebra::MakeGeneratingSingularVectors(ConeRelation& theRelation, Ve
   }
 }
 
-void RootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration) {
+void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration) {
   int theDimension = this->GetAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out2;
   std::stringstream out;
@@ -1455,10 +1455,10 @@ void RootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
     this->TestedRootsAlpha = this->LowestWeightsPrimalSimple;
     this->DoKRootsEnumeration();
   }
-//  this->GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
+//  this->getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
 }
 
-void RootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
+void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   int theDimension = this->GetAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out;
   out << this->toString() << "\n\n";
@@ -2696,7 +2696,7 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
         << global.fatal;
       }
     }
-    theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
+    theSl2.theH.makeCartanGenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared = theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.makeZero();
     theSl2.theF.makeZero();
@@ -3035,9 +3035,9 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
-  output << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../");
-  output << HtmlRoutines::GetJavascriptMathjax("../../../");
-  output << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
+  output << HtmlRoutines::getCSSLinkLieAlgebrasAndCalculator("../../../");
+  output << HtmlRoutines::getJavascriptMathjax("../../../");
+  output << HtmlRoutines::getJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
   output << "<body>"
   << this->owner->ToStringHTMLMenuStructureSummary("", true, false, true, true)
   << this->toString(theFormat)

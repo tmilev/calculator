@@ -113,7 +113,7 @@ List<Function> Calculator::OperationHandlers::mergeHandlers() {
   return result;
 }
 
-std::string Calculator::OperationHandlers::ToStringRuleStatusUser() {
+std::string Calculator::OperationHandlers::toStringRuleStatusUser() {
   std::stringstream out;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
@@ -132,14 +132,14 @@ std::string Calculator::OperationHandlers::ToStringRuleStatusUser() {
   return out.str();
 }
 
-std::string Calculator::ToStringRuleStatusUser() {
-  MacroRegisterFunctionWithName("Calculator::ToStringRuleStatusUser");
+std::string Calculator::toStringRuleStatusUser() {
+  MacroRegisterFunctionWithName("Calculator::toStringRuleStatusUser");
   std::stringstream out;
   for (int i = 0; i < this->operations.size(); i ++) {
     if (this->operations.theValues[i].IsZeroPointer()) {
       continue;
     }
-    out << this->operations.theValues[i].getElement().ToStringRuleStatusUser();
+    out << this->operations.theValues[i].getElement().toStringRuleStatusUser();
   }
   return out.str();
 }
@@ -576,7 +576,7 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->outpuT = nullptr;
 }
 
-void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
+void Calculator::EvaluateLoop::accountHistoryChildTransformation(
   const Expression& transformedChild,
   const Expression& childHistory,
   int childIndex
@@ -600,8 +600,8 @@ void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
   this->history->addChildOnTop(incomingHistory);
 }
 
-void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::string& info) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::AccountHistory");
+void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::string& info) {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::accountHistory");
   this->checkInitialization();
   if (this->history == nullptr) {
     return;
@@ -640,20 +640,20 @@ void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::stri
   this->history->addChildOnTop(incomingHistory);
 }
 
-bool Calculator::EvaluateLoop::SetOutput(
+bool Calculator::EvaluateLoop::setOutput(
   const Expression& input, Function* handler, const std::string& info
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::SetOutput");
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::setOutput");
   if (this->outpuT == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
   *(this->outpuT) = input;
-  this->AccountHistory(handler, info);
+  this->accountHistory(handler, info);
   return true;
 }
 
-void Calculator::EvaluateLoop::InitializeOneRun() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::InitializeOneRun");
+void Calculator::EvaluateLoop::initializeOneRun() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::initializeOneRun");
   this->numberOfTransformations ++;
   std::string atomValue;
   if (this->outpuT->isOperation(&atomValue)) {
@@ -682,8 +682,8 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
   }
 }
 
-bool Calculator::EvaluateLoop::OutputHasErrors() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::OutputHasErrors");
+bool Calculator::EvaluateLoop::outputHasErrors() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::outputHasErrors");
   if (this->owner->TimedOut()) {
     return true;
   }
@@ -707,7 +707,7 @@ bool Calculator::EvaluateLoop::OutputHasErrors() {
   return true;
 }
 
-void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int childIndex) {
+void Calculator::EvaluateLoop::reportChildEvaluation(Expression& output, int childIndex) {
   if (!this->theReport.tickAndWantReport()) {
     return;
   }
@@ -728,10 +728,10 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
   theReport.report(reportStream.str());
 }
 
-bool Calculator::EvaluateLoop::EvaluateChildren(
+bool Calculator::EvaluateLoop::evaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::EvaluateChildren");
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::evaluateChildren");
   if (this->outpuT->isFrozen()) {
     return true;
   }
@@ -748,7 +748,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   }
   for (int i = 0; i < this->outpuT->size(); i ++) {
     if (i > 0) {
-      this->ReportChildEvaluation(*this->outpuT, i);
+      this->reportChildEvaluation(*this->outpuT, i);
     }
     bool childIsNonCacheable = false;
     if (this->history != nullptr) {
@@ -764,7 +764,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
     )) {
       this->outpuT->setChild(i, childEvaluation);
     }
-    this->AccountHistoryChildTransformation(childEvaluation, historyContainer, i);
+    this->accountHistoryChildTransformation(childEvaluation, historyContainer, i);
     // If the child is non-cache-able, so is the current one.
     // Once evaluation has passed through a non-cacheable expression,
     // our expression is no longer cache-able.
@@ -792,8 +792,8 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   return true;
 }
 
-bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::UserDefinedEvaluation");
+bool Calculator::EvaluateLoop::userDefinedEvaluation() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::userDefinedEvaluation");
   Expression beforepatternMatch, afterpatternMatch;
   for (
     int i = 0;
@@ -815,14 +815,14 @@ bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
       if (this->history == nullptr) {
         substitutionComment << "User-defined substition: " << currentPattern.toString();
       }
-      this->SetOutput(afterpatternMatch, nullptr, substitutionComment.str());
+      this->setOutput(afterpatternMatch, nullptr, substitutionComment.str());
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluatioN) {
         *this->owner
         << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
         << "<br>Rule: " << currentPattern.toString() << "<br>"
-        << HtmlRoutines::GetMathSpanPure(beforepatternMatch.toString())
-        << " -> " << HtmlRoutines::GetMathSpanPure(this->outpuT->toString());
+        << HtmlRoutines::getMathSpanPure(beforepatternMatch.toString())
+        << " -> " << HtmlRoutines::getMathSpanPure(this->outpuT->toString());
       }
       return true;
     }
@@ -837,8 +837,8 @@ bool Calculator::EvaluateLoop::checkInitialization() {
   return true;
 }
 
-bool Calculator::EvaluateLoop::BuiltInEvaluation() {
-  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::BuiltInEvaluation");
+bool Calculator::EvaluateLoop::builtInEvaluation() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::builtInEvaluation");
   this->checkInitialization();
   Expression result;
   Function* handlerContainer = nullptr;
@@ -851,36 +851,36 @@ bool Calculator::EvaluateLoop::BuiltInEvaluation() {
   if (this->owner->flagLogEvaluatioN) {
     *(this->owner) << "<br>Rule context identifier: "
     << this->owner->RuleStackCacheIndex
-    << "<br>" << HtmlRoutines::GetMathMouseHover(this->outpuT->toString())
-    << " -> " << HtmlRoutines::GetMathMouseHover(result.toString());
+    << "<br>" << HtmlRoutines::getMathMouseHover(this->outpuT->toString())
+    << " -> " << HtmlRoutines::getMathMouseHover(result.toString());
   }
-  return this->SetOutput(result, handlerContainer, "");
+  return this->setOutput(result, handlerContainer, "");
 }
 
 bool Calculator::EvaluateLoop::reduceOnce() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::reduceOnce");
   StateMaintainerCalculator maintainRuleStack(*(this->owner));
   this->checkInitialization();
-  this->InitializeOneRun();
-  if (this->OutputHasErrors()) {
+  this->initializeOneRun();
+  if (this->outputHasErrors()) {
     return false;
   }
-  if (!this->EvaluateChildren(maintainRuleStack)) {
+  if (!this->evaluateChildren(maintainRuleStack)) {
     return false;
   }
   if (this->owner->flagAbortComputationASAP) {
     return false;
   }
-  if (this->BuiltInEvaluation()) {
+  if (this->builtInEvaluation()) {
     return true;
   }
-  if (this->UserDefinedEvaluation()) {
+  if (this->userDefinedEvaluation()) {
     return true;
   }
   return false;
 }
 
-void Calculator::EvaluateLoop::LookUpCache() {
+void Calculator::EvaluateLoop::lookUpCache() {
   this->owner->EvaluatedExpressionsStack.addOnTop(*(this->outpuT));
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
@@ -902,7 +902,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
       << this->owner->imagesCachedExpressions[this->indexInCache].toString()
       << "\\)";
     }
-    this->SetOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, comment.str());
+    this->setOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, comment.str());
     return;
   }
   if (
@@ -958,7 +958,7 @@ bool Calculator::EvaluateExpression(
   if (theCommands.RecursionDepthExceededHandleRoughly()) {
     return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
   }
-  state.SetOutput(input, nullptr, "");
+  state.setOutput(input, nullptr, "");
   if (state.outpuT->isError()) {
     theCommands.flagAbortComputationASAP = true;
     return true;
@@ -971,14 +971,14 @@ bool Calculator::EvaluateExpression(
     theCommands.flagAbortComputationASAP = true;
     Expression errorE;
     errorE.makeError(errorStream.str(), theCommands);
-    return state.SetOutput(errorE, nullptr, "Error");
+    return state.setOutput(errorE, nullptr, "Error");
   }
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
-  state.LookUpCache();
+  state.lookUpCache();
   // reduction phase:
   //////////////////////////////////
   // EvaluateExpression is called recursively
-  // inside state.EvaluateChildren
+  // inside state.evaluateChildren
   // inside state.reduceOnce.
   while (state.reduceOnce()) {
   }
@@ -1109,22 +1109,22 @@ bool Calculator::processOneExpressionOnePatternOneSub(
   return true;
 }
 
-bool Calculator::Parse(const std::string& input, Expression& output) {
+bool Calculator::parse(const std::string& input, Expression& output) {
   List<SyntacticElement> syntacticSoup, syntacticStack;
-  return this->ParseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, nullptr);
+  return this->parseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, nullptr);
 }
 
-bool Calculator::ParseAndExtractExpressions(
+bool Calculator::parseAndExtractExpressions(
   const std::string& input,
   Expression& output,
   List<SyntacticElement>& outputSynSoup,
   List<SyntacticElement>& outputSynStack,
   std::string* outputSynErrors
 ) {
-  MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
+  MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
   this->CurrentSyntacticStacK = &outputSynStack;
   this->CurrrentSyntacticSouP = &outputSynSoup;
-  this->ParseFillDictionary(input);
+  this->parseFillDictionary(input);
   bool result = this->extractExpressions(output, outputSynErrors);
   this->CurrentSyntacticStacK = &this->syntacticStacK;
   this->CurrrentSyntacticSouP = &this->syntacticSouP;
@@ -1144,11 +1144,11 @@ void Calculator::initComputationStats() {
   this->NumLargeGCDcallsStart           = static_cast<signed>( Rational::TotalLargeGCDcalls          );
 }
 
-void Calculator::Evaluate(const std::string& theInput) {
-  MacroRegisterFunctionWithName("Calculator::Evaluate");
+void Calculator::evaluate(const std::string& theInput) {
+  MacroRegisterFunctionWithName("Calculator::evaluate");
   this->initComputationStats();
   this->inputString = theInput;
-  this->ParseAndExtractExpressions(
+  this->parseAndExtractExpressions(
     theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, &this->syntaxErrors
   );
   this->evaluateCommands();

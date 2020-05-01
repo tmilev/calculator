@@ -1232,7 +1232,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
     << "<br>\n"
     << this->theProblemData.commandsGenerateProblem << "<br>";
   }
-  theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
+  theInterpreter.evaluate(this->theProblemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator evaluation time");
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
@@ -2772,7 +2772,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
-  outHeadPt2 << HtmlRoutines::GetJavascriptMathjax("");
+  outHeadPt2 << HtmlRoutines::getJavascriptMathjax("");
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before execution");
   if (!this->prepareAndExecuteCommands(theInterpreter, &comments)) {
@@ -3979,7 +3979,7 @@ void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
   std::string javascriptName = StringRoutines::stringTrimWhiteSpace(inputOutput.content);
   if (javascriptName == "MathJax") {
-    inputOutput.interpretedCommand = HtmlRoutines::GetJavascriptMathjax("");
+    inputOutput.interpretedCommand = HtmlRoutines::getJavascriptMathjax("");
   }
 }
 

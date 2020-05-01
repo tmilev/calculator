@@ -13,7 +13,7 @@ bool Expression::Test::ToStringTestRecodeOnce(
   const std::string& inputHardCodedMustParse, Calculator& ownerInitialized
 ) {
   Expression parsed;
-  if (!ownerInitialized.Parse(inputHardCodedMustParse, parsed)) {
+  if (!ownerInitialized.parse(inputHardCodedMustParse, parsed)) {
     global.fatal << "Failed to parse hard-coded input string. " << global.fatal;
   }
   std::string recoded = parsed.toString();

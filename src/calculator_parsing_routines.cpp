@@ -805,16 +805,16 @@ bool Calculator::isInterpretedAsEmptySpace(unsigned char input) {
   // return false;
 }
 
-void Calculator::ParseFillDictionary(const std::string& input) {
-  MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
-  this->ParseFillDictionary(input, *this->CurrrentSyntacticSouP);
+void Calculator::parseFillDictionary(const std::string& input) {
+  MacroRegisterFunctionWithName("Calculator::parseFillDictionary");
+  this->parseFillDictionary(input, *this->CurrrentSyntacticSouP);
   SyntacticElement currentElement;
   currentElement.theData.reset(*this);
   currentElement.controlIndex = this->conEndProgram();
   (*this->CurrrentSyntacticSouP).addOnTop(currentElement);
 }
 
-bool Calculator::ShouldSplitOutsideQuotes(const std::string& left, char right) {
+bool Calculator::shouldSplitOutsideQuotes(const std::string& left, char right) {
   if (left.size() == 0) {
     return false;
   }
@@ -839,8 +839,8 @@ bool Calculator::ShouldSplitOutsideQuotes(const std::string& left, char right) {
   return false;
 }
 
-void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticElement>& output) {
-  MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
+void Calculator::parseFillDictionary(const std::string& input, List<SyntacticElement>& output) {
+  MacroRegisterFunctionWithName("Calculator::parseFillDictionary");
   std::string current;
   output.reserve(static_cast<signed>(input.size()));
   output.setSize(0);
@@ -873,7 +873,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     }
     bool shouldSplit = false;
     if (!inQuotes) {
-      shouldSplit = this->ShouldSplitOutsideQuotes(current, LookAheadChar);
+      shouldSplit = this->shouldSplitOutsideQuotes(current, LookAheadChar);
     } else {
       if (escapingAllowed) {
         if (current.size() >= 1) {

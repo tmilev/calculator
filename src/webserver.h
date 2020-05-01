@@ -262,11 +262,11 @@ public:
   static void AnalyzeMainArguments(int argC, char** argv);
   static bool AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeBuildFlags();
-  void InitializeMainAll();
+  void initializeMainAll();
   void InitializeMainHashes();
-  void InitializeMainRequests();
-  void InitializeMainAddresses();
-  void InitializeMainFoldersInstructorSpecific();
+  void initializeMainRequests();
+  void initializeMainAddresses();
+  void initializeMainFoldersInstructorSpecific();
   void initializeMainMIMETypes();
 
   void MarkChildNotInUse(int childIndex);
@@ -322,8 +322,8 @@ public:
   std::string ToStringStatusAll();
   std::string ToStringStatusForLogFile();
   std::string ToStringConnectionSummary();
-  static void TurnProcessMonitoringOn();
-  static void TurnProcessMonitoringOff();
+  static void turnProcessMonitoringOn();
+  static void turnProcessMonitoringOff();
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
   static int mainConsoleHelp();

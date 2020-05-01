@@ -537,7 +537,7 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.imagesSimpleChevalleyGenerators[3] = g_m2;
   output.imagesSimpleChevalleyGenerators[2] = g_m1plusg_m3;
   output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
-  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem);
+  output.GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.RestrictedRootSystem);
 }
 
 bool Calculator::innerPrintB3G2branchingIntermediate(

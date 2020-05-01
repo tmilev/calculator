@@ -546,7 +546,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   }
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
-  outputSubalgebra.CartanSAsByComponentScaledToActByTwo.setSize(
+  outputSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo.setSize(
     outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetNumSimpleComponents()
   );
   int componentCounter = - 1;
@@ -554,7 +554,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   for (int i = 0; i < theMults.size; i ++) {
     for (int j = 0; j < theMults[i]; j ++) {
       componentCounter ++;
-      Vectors<Rational>& currentComponent = outputSubalgebra.CartanSAsByComponentScaledToActByTwo[componentCounter];
+      Vectors<Rational>& currentComponent = outputSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo[componentCounter];
       currentComponent.setSize(theRanks[i]);
       for (int k = 0; k < theRanks[i]; k ++) {
         counter ++;
@@ -701,11 +701,11 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.report(reportStream.str());
   theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
-  if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.comments)) {
+  if (!theSAs.loadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.comments)) {
     return false;
   }
   theSAs.flagAttemptToAdjustCentralizers = false;
-  if (!theSAs.FindTheSSSubalgebrasContinue()) {
+  if (!theSAs.findTheSemisimpleSubalgebrasContinue()) {
     std::stringstream out;
     out << "<br>Failed to realize all subalgebras, "
     << "computation aborted. The failure report follows. "

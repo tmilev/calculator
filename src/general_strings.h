@@ -35,7 +35,7 @@ public:
     const List<char>& delimiters,
     List<std::string>& output
   );
-  static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
+  static void stringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
   static std::string StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast = 50);
   static std::string ConvertStringToCalculatorDisplay(
@@ -49,7 +49,7 @@ public:
   static std::string ConvertStringToJSONString(const std::string& input);
   static std::string ConvertStringToJavascriptString(const std::string& input);
   static std::string ConvertStringToJavascriptVariable(const std::string& input);
-  static std::string StringTrimWhiteSpace(const std::string& inputString);
+  static std::string stringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(
     const std::string& inputString,
     int firstStringSize,

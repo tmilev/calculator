@@ -316,7 +316,7 @@ public:
   bool CheckRankInequality() const;
   bool ComputeEssentialsIfNew();
   void ComputeEssentialS();
-  bool CheckForMaximalDominanceCartanSA();
+  bool CheckForMaximalDominancecartanSubalgebra();
   void ComputeRootsOfK();
   void ComputeKModules();
   void ComputeModuleDecompo();

@@ -105,7 +105,7 @@ public:
   static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerChoosecartanSubalgebra(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialDivisionSlidesGrLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
@@ -286,7 +286,7 @@ public:
   static bool innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetDynkinIndicesSlTwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConstructCartanSubalgebra(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetCentralizerChainsSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);

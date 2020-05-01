@@ -1252,7 +1252,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
   std::stringstream myPath;
   myPath << this->ownEr->owner->ToStringVirtualFolderName();
   myPath << "rootSubalgebra_" << index + 1 << ".html";
-  FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
+  FileOperations::openFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.toString() << " root subalgebra of type "
   << this->theDynkinDiagram.toString() << "</title>";
   output << "<meta name = \"keywords\" content = \"" << this->GetAmbientWeyl().theDynkinType.toString()
@@ -2216,8 +2216,8 @@ void RootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators() {
   }
 }
 
-bool RootSubalgebra::CheckForMaximalDominanceCartanSA() {
-  MacroRegisterFunctionWithName("RootSubalgebra::CheckForMaximalDominanceCartanSA");
+bool RootSubalgebra::CheckForMaximalDominancecartanSubalgebra() {
+  MacroRegisterFunctionWithName("RootSubalgebra::CheckForMaximalDominancecartanSubalgebra");
   Vectors<Rational> simpleBasisOriginalOrderCopy;
   for (int i = 0; i < this->outerSAautos.theElements.size; i ++) {
     if (!this->outerSAautos.theElements[i].isIdentity()) {

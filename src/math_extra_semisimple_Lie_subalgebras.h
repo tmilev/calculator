@@ -81,9 +81,9 @@ public:
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > CartanSA;
-  void ComputeBasis();
-  void ComputeCartanSA();
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > cartanSubalgebra;
+  void computeBasis();
+  void computeCartanSubalgebra();
   SubalgebraSemisimpleLieAlgebra();
   bool checkInitialization();
 
@@ -101,7 +101,7 @@ public:
   DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
   DynkinType theCentralizerType;
 
-  List<Vectors<Rational> > CartanSAsByComponentScaledToActByTwo;
+  List<Vectors<Rational> > cartanSubalgebrasByComponentScaledToActByTwo;
   List<AlgebraicNumber> RatioKillingsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
@@ -341,7 +341,7 @@ public:
   std::string ToStringLoadUnknown(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringCentralizer(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringCentralizerDebugData(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringCartanSA(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringcartanSubalgebra(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringPairingTable(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringNilradicals(FormatExpressions* theFormat = nullptr) const;
@@ -408,34 +408,34 @@ public:
   // 1. nulltpr.
   // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
-  bool LoadState(
+  bool loadState(
     List<int>& currentChainInt,
     List<int>& numExploredTypes,
     List<int>& numExploredHs,
     std::stringstream& reportStream
   );
-  int GetDisplayIndexFromActual(int ActualIndexSubalgebra) const;
-  std::string ToStringSubalgebraNumberWithAmbientLink(
+  int getDisplayIndexFromActual(int actualIndexSubalgebra) const;
+  std::string toStringSubalgebraNumberWithAmbientLink(
     int actualIndexSubalgebra, FormatExpressions* theFormat
   ) const;
-  void ComputeFolderNames(FormatExpressions& outputFormat);
+  void computeFolderNames(FormatExpressions& outputFormat);
   void CheckFileWritePermissions();
   void WriteReportToFiles();
   std::string ToStringAlgebraLink(
-    int ActualIndexSubalgebra, FormatExpressions* theFormat
+    int actualIndexSubalgebra, FormatExpressions* theFormat
   ) const;
-  std::string GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra) const;
-  std::string GetDisplayFileNameSubalgebraRelative(
-    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  std::string getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra) const;
+  std::string getDisplayFileNameSubalgebraRelative(
+    int actualIndexSubalgebra, FormatExpressions* theFormat
   ) const;
-  std::string GetDisplayFileNameSubalgebraAbsolute(
-    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  std::string getDisplayFileNameSubalgebraAbsolute(
+    int actualIndexSubalgebra, FormatExpressions* theFormat
   ) const;
-  std::string GetRelativePhysicalFileNameFKFTNilradicals(
-    int ActualIndexSubalgebra
+  std::string getRelativePhysicalFileNameFKFTNilradicals(
+    int actualIndexSubalgebra
   ) const;
-  std::string GetDisplayFileNameFKFTNilradicals(
-    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  std::string getDisplayFileNameFKFTNilradicals(
+    int actualIndexSubalgebra, FormatExpressions* theFormat
   ) const;
   const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {
@@ -492,18 +492,18 @@ public:
   std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
   std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
   std::string toString(FormatExpressions* theFormat = nullptr);
-  std::string ToStringPart2(FormatExpressions* theFormat = nullptr);
-  std::string ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
-  std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = nullptr);
-  std::string ToStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = nullptr);
+  std::string toStringPart2(FormatExpressions* theFormat = nullptr);
+  std::string toStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
+  std::string toStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = nullptr);
+  std::string toStringSubalgebrasWithHDWrite(FormatExpressions* theFormat = nullptr);
   void WriteSubalgebraToFile(FormatExpressions* theFormat, int subalgebraIndex);
-  std::string ToStringPart3(FormatExpressions* theFormat = nullptr);
-  std::string ToStringSl2s(FormatExpressions* theFormat = nullptr);
-  std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringSSsumaryHTML(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringPart3(FormatExpressions* theFormat = nullptr);
+  std::string toStringSl2s(FormatExpressions* theFormat = nullptr);
+  std::string toStringSemisimpleSubalgebrasSummaryLaTeX(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringSemisimpleSubalgebraSummaryHTML(FormatExpressions* theFormat = nullptr) const;
   void ComputePairingTablesAndFKFTtypes();
-  void GetCentralizerChains(List<List<int> >& outputChains);
-  int GetIndexFullSubalgebra() const;
+  void getCentralizerChains(List<List<int> >& outputChains);
+  int getIndexFullSubalgebra() const;
   bool RanksAndIndicesFit(const DynkinType& input) const;
   bool GrowDynkinType(
     const DynkinType& input,
@@ -518,7 +518,7 @@ public:
   );
   //void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
-  void ComputeSl2sInitOrbitsForComputationOnDemand();
+  void computeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   bool FindTheSSSubalgebrasFromScratch(
     SemisimpleLieAlgebra& newOwner,
@@ -541,8 +541,8 @@ public:
     bool computePairingTable,
     bool adjustCentralizers
   );
-  void FindTheSSSubalgebrasInit();
-  bool FindTheSSSubalgebrasContinue();
+  void findTheSemisimpleSubalgebrasInitialize();
+  bool findTheSemisimpleSubalgebrasContinue();
 
   void GetHCandidates(
     Vectors<Rational>& outputHCandidatesScaledToActByTwo,

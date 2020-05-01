@@ -157,7 +157,7 @@ public:
     bool truncate,
     bool openAsBinary
   );
-  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile,
+  static bool openFileCreateIfNotPresentVirtual(std::fstream& theFile,
     const std::string& theFileName,
     bool OpenInAppendMode,
     bool truncate,

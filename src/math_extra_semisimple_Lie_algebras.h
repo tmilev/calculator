@@ -488,7 +488,7 @@ public:
     this->toString(tempS);
     return tempS;
   }
-  void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output);
+  void GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
   bool CheckClosednessLieBracket();
   void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);

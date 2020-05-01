@@ -422,7 +422,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
   modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false
   );
 
@@ -491,7 +491,7 @@ std::string ProblemDataAdministrative::toString() const {
 bool ProblemData::checkConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
       global.fatal << "This is not supposed to happen: empty answer id." << global.fatal;
     }
   }
@@ -501,7 +501,7 @@ bool ProblemData::checkConsistency() const {
 bool ProblemData::checkConsistencyMathQuillIds() const {
   MacroRegisterFunctionWithName("ProblemData::checkConsistencyMathQuillIds");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
-    if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers.theValues[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
@@ -1102,7 +1102,7 @@ bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, st
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
+    probNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
     if (probNameNoWhiteSpace == "") {
       continue;
     }
@@ -1123,7 +1123,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(const JSData& theData, std
       result = false;
       continue;
     }
-    problemNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(
+    problemNameNoWhiteSpace = StringRoutines::stringTrimWhiteSpace(
       theData.objects.theKeys[i]
     );
     if (problemNameNoWhiteSpace == "") {
@@ -1463,7 +1463,7 @@ bool EmailRoutines::sendEmailWithMailGun(
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
   } else {
-    hostnameToSendEmailFrom = StringRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
+    hostnameToSendEmailFrom = StringRoutines::stringTrimWhiteSpace(hostnameToSendEmailFrom);
     if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::convertStringToURLString(hostnameToSendEmailFrom, false);

@@ -2451,13 +2451,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CartanSA",
-    CalculatorFunctions::innerConstructCartanSA,
+    CalculatorFunctions::innerConstructCartanSubalgebra,
     "",
     "Generates a Cartan subalgebra, code is still experimental.",
     "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
     "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
     "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
-    "CalculatorFunctions::innerConstructCartanSA",
+    "CalculatorFunctions::innerConstructCartanSubalgebra",
     "CartanSA",
     innerAdminNoTestExperimental
   );

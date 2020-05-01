@@ -217,7 +217,7 @@ std::string WebAPIResponse::GetCommentsInterpretation(
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
     currentS = WebAPIResponse::getSanitizedComment(currentE[i], theFormat,resultIsPlot);
-    if (StringRoutines::StringTrimWhiteSpace(currentS) == "") {
+    if (StringRoutines::stringTrimWhiteSpace(currentS) == "") {
       continue;
     }
     out << currentS;
@@ -336,7 +336,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << ");";
   calculatorInputStreamNoEnclosures
   << currentA.answerId << " = " << lastAnswer << "";
-  bool hasCommentsBeforeSubmission = (StringRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
+  bool hasCommentsBeforeSubmission = (StringRoutines::stringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
   if (hasCommentsBeforeSubmission) {
     calculatorInputStream << Calculator::Atoms::commandEnclosure << "{}("
     <<  currentA.commandsCommentsBeforeSubmission
@@ -640,28 +640,28 @@ bool CourseList::LoadFromString(const std::string& input) {
         this->theCourses.addOnTop(current);
         current.reset();
       }
-      current.courseTemplate = StringRoutines::StringTrimWhiteSpace(currentArgument);
+      current.courseTemplate = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
       if (current.courseTopicsNoFolder != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
-      current.courseTopicsNoFolder = StringRoutines::StringTrimWhiteSpace(currentArgument);
+      current.courseTopicsNoFolder = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
-      current.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
+      current.title = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
       if (current.flagRoughDraft != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
-      current.flagRoughDraft = StringRoutines::StringTrimWhiteSpace(currentArgument);
+      current.flagRoughDraft = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
   }
   if (!current.IsEmpty()) {
@@ -1017,7 +1017,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
   bool hasCommentsBeforeSubmission = (
-    StringRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
+    StringRoutines::stringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != ""
   );
   if (hasCommentsBeforeSubmission) {
     completedProblemStream
@@ -1333,7 +1333,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
     global.getWebInput(WebAPI::request::passwordList), false
   );
   std::string userGroup =
-  StringRoutines::StringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(
+  StringRoutines::stringTrimWhiteSpace(HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(DatabaseStrings::labelSection), false
   ));
   std::string userRole = HtmlRoutines::convertURLStringToNormal(global.getWebInput("userRole"), false);
@@ -2139,7 +2139,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->currentSection = global.userDefault.sectionComputed;
   this->currentCourse = global.getWebInput(WebAPI::problem::courseHome);
   if (global.getWebInput("request") == "scoresInCoursePage") {
-    this->currentSection = StringRoutines::StringTrimWhiteSpace(
+    this->currentSection = StringRoutines::stringTrimWhiteSpace(
       HtmlRoutines::convertURLStringToNormal(global.getWebInput("mainInput"), false)
     );
   }

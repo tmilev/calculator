@@ -38,7 +38,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::HashString(fileContent);
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+  if (!FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, global.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
   )) {
     return "failed to create file: " + fileName.str() + ".tex";
@@ -2517,7 +2517,7 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
   out << "];\n";
   out << "module.exports = {theAutocompleteDictionary};";
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     theFileStream, "/calculator-html/autocomplete_keywords.js",
     false, true, false, false
   );

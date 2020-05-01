@@ -862,7 +862,7 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
   List<std::string> inputStrings;
   StringRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
-    std::string current = StringRoutines::StringTrimWhiteSpace(inputStrings[i]);
+    std::string current = StringRoutines::stringTrimWhiteSpace(inputStrings[i]);
     Logger::StringHighligher::Section incoming;
     if (current == "|") {
       incoming.theType = "|";

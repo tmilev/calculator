@@ -129,8 +129,8 @@ void LaTeXCrawler::BuildFreecalC() {
       isHW = true;
     }
     if (this->flagBuildSingleSlides && isLecturE) {
-      if (StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\input", nullptr)) {
-        this->slideTexInputCommands.addOnTop(StringRoutines::StringTrimWhiteSpace(buffer));
+      if (StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\input", nullptr)) {
+        this->slideTexInputCommands.addOnTop(StringRoutines::stringTrimWhiteSpace(buffer));
       }
     }
     if (!isInput) {
@@ -205,25 +205,25 @@ void LaTeXCrawler::BuildFreecalC() {
     while (!inputFile.eof()) {
       std::getline(inputFile, buffer);
       if (
-        !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\documentclass") &&
-        !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "[handout]") &&
-        !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "{beamer}") &&
-        !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\newcommand{\\currentLecture}")
+        !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\documentclass") &&
+        !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "[handout]") &&
+        !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "{beamer}") &&
+        !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\newcommand{\\currentLecture}")
       ) {
         LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
       }
       if (this->flagBuildSingleSlides) {
         if (
-          StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\lect") &&
-          !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\lecture")
+          StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\lect") &&
+          !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\lecture")
         ) {
           foundFirstLecture = true;
         }
         if (!foundFirstLecture) {
           if (
-            !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\documentclass") &&
-            !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "[handout]") &&
-            !StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "{beamer}")
+            !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\documentclass") &&
+            !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "[handout]") &&
+            !StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "{beamer}")
           ) {
             LectureHeaderNoDocumentClass << buffer << "\n";
           }
@@ -450,7 +450,7 @@ void LaTeXCrawler::Crawl() {
   global.changeDirectory(startingDirectory);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+  if (!FileOperations::openFileCreateIfNotPresentVirtual(
     outputFile, "output/" + outputFileName, false, true, false, true)
   ) {
     this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
@@ -501,7 +501,7 @@ void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   if (this->baseFoldersCrawlableFilesPhysical.size == 0) {
     global.fatal << "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. " << global.fatal;
   }
-  std::string trimmedFileName = StringRoutines::StringTrimWhiteSpace(currentFileNamE);
+  std::string trimmedFileName = StringRoutines::stringTrimWhiteSpace(currentFileNamE);
   std::string trimmedFolder = FileOperations::GetPathFromFileNameWithPath(trimmedFileName);
   std::string resultingFolder = FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(trimmedFolder);
   if (!this->IsInCrawlableFolder(resultingFolder, &this->errorStream)) {
@@ -545,7 +545,7 @@ void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
         for (i = 7; buffer[i] != '}' && i < buffer.size(); i ++) {
           newFileName += buffer[i];
         }
-        newFileName = StringRoutines::StringTrimWhiteSpace(newFileName);
+        newFileName = StringRoutines::stringTrimWhiteSpace(newFileName);
         std::string newFileNameEnd;
         if (StringRoutines::StringBeginsWith(newFileName, "\\freecalcBaseFolder", &newFileNameEnd)) {
           newFileName = "../../freecalc" + newFileNameEnd;
@@ -717,7 +717,7 @@ std::string LaTeXCrawler::AdjustDisplayTitle(const std::string& input, bool isHo
     unsigned pos = static_cast<unsigned>(result.find("\\(\\LaTeX\\)"));
     result = result.substr(0, pos) + "\\LaTeX" + result.substr(pos + (std::string("\\(\\LaTeX\\)")).size());
   }
-  result = StringRoutines::StringTrimWhiteSpace(result);
+  result = StringRoutines::stringTrimWhiteSpace(result);
   if (isHomework && result.size() > 4 && !StringRoutines::StringBeginsWith(result, "\\\\")) {
     result = "\\\\" + result;
   }
@@ -777,11 +777,11 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
     std::string buffer;
     do {
       std::getline(theFile, buffer);
-      if (!StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "[handout]")) {
+      if (!StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "[handout]")) {
         crawlingResult << buffer << "\n";
       }
       if (!this->flagProjectorMode && !this->flagHomeworkRatherThanSlides) {
-        if (StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\documentclass")) {
+        if (StringRoutines::StringBeginsWith(StringRoutines::stringTrimWhiteSpace(buffer), "\\documentclass")) {
           crawlingResult << "[handout]" << "\n";
         }
       }

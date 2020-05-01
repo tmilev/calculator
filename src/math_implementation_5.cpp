@@ -823,7 +823,7 @@ void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtm
 
 class SlTwoInSlN;
 
-void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
   List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.RootSystem;
   int rankSA = this->theDomain().theWeyl.getDimension();
   Matrix<Rational> tempMat;

@@ -117,7 +117,7 @@ void WebServerMonitor::Monitor(int pidServer) {
     << "Set the ping interval to less than 30 seconds to remove this message. " << Logger::endL;
   }
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, "/LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
   );
   theFile << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">"
@@ -164,7 +164,7 @@ void WebServerMonitor::Restart() {
   global << Logger::red << "Server stopped responding (probably locked pipe?)"
   << ", restarting. " << Logger::endL;
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
   );
   theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
@@ -700,7 +700,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
   std::fstream googleKeysFile, googleKeysDebugFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+  if (!FileOperations::openFileCreateIfNotPresentVirtual(
     googleKeysFile, googleKeysFileName, false, true, false
   )) {
     if (commentsOnFailure != nullptr) {
@@ -709,7 +709,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     global << Logger::red << "Failed to create google keys file name. " << Logger::endL;
     return;
   }
-  FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
+  FileOperations::openFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }

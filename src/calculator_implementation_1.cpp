@@ -533,7 +533,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeStructureWriteFiles");
   this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   this->owner = &newOwner;
-  this->ComputeFolderNames(this->currentFormat);
+  this->computeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
       this->millisecondsComputationStart = global.getElapsedMilliseconds();

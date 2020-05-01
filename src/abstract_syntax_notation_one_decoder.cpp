@@ -1596,7 +1596,7 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
 
 bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
-  std::string certificateContentStripped = StringRoutines::StringTrimWhiteSpace(input);
+  std::string certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
   if (!StringRoutines::StringBeginsWith(
     certificateContentStripped,
     "-----BEGIN PRIVATE KEY-----",
@@ -1617,7 +1617,7 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
     }
     return false;
   }
-  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  certificateContentStripped = StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
   if (!Crypto::ConvertBase64ToBitStream(
     certificateContentStripped,
     this->sourceBinary,
@@ -1820,7 +1820,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(
 bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *commentsOnFailure) {
   std::string certificateContentStripped;
   //see ASN1_item_d2i_bio for decoding.
-  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(input);
+  certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
   std::string beginCertificate = "-----BEGIN CERTIFICATE-----";
   std::string endCertificate = "-----END CERTIFICATE-----";
   if (!StringRoutines::StringBeginsWith(
@@ -1839,7 +1839,7 @@ bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *c
     }
     return false;
   }
-  certificateContentStripped = StringRoutines::StringTrimWhiteSpace(certificateContentStripped);
+  certificateContentStripped = StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
   if (!Crypto::ConvertBase64ToBitStream(
     certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr
   )) {

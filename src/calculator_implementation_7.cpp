@@ -71,10 +71,10 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   return true;
 }
 
-bool CalculatorFunctions::innerConstructCartanSA(
+bool CalculatorFunctions::innerConstructCartanSubalgebra(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConstructCartanSA");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerConstructCartanSubalgebra");
   SubalgebraSemisimpleLieAlgebra theSA;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   if (input.convertsInternally(&element)) {
@@ -105,8 +105,8 @@ bool CalculatorFunctions::innerConstructCartanSA(
     return theCommands << "Failed to extract input semisimple Lie algebra "
     << "elements from the inputs of " << input.toString();
   }
-  theSA.ComputeBasis();
-  theSA.ComputeCartanSA();
+  theSA.computeBasis();
+  theSA.computeCartanSubalgebra();
   return output.assignValue(theSA.toString(), theCommands);
 }
 
@@ -5379,7 +5379,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
     &theCommands.theObjectContainer.semisimpleLieAlgebras,
     &theCommands.theObjectContainer.theSltwoSAs
   );
-  tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
+  tempSas.computeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType)) {
     return output.makeError(
       "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.toString(),
@@ -6872,7 +6872,7 @@ bool CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras(
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = true;
   tempFormat.flagCandidateSubalgebraShortReportOnly = false;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
+  FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
   theFile << theSAs.toString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << global.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
@@ -6884,12 +6884,12 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras");
   if (!input.isOfType<SemisimpleSubalgebras>()) {
-    return theCommands << "<hr>Input of GetCentralizerChains must be of type semisimple subalgebras. ";
+    return theCommands << "<hr>Input of getCentralizerChains must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
   List<List<int> > theChains;
   std::stringstream out;
-  theSAs.GetCentralizerChains(theChains);
+  theSAs.getCentralizerChains(theChains);
   Expression currentChainE;
   out << theChains.size << " chains total. <br>";
   for (int i = 0; i < theChains.size; i ++) {

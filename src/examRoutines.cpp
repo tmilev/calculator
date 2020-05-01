@@ -172,13 +172,13 @@ JSData CalculatorHTML::toJSONDeadlines(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++) {
-      std::string currentDeadline = StringRoutines::StringTrimWhiteSpace(
+      std::string currentDeadline = StringRoutines::stringTrimWhiteSpace(
         currentProblem.deadlinesPerSection.theValues[j]
       );
       if (currentDeadline == "") {
         continue;
       }
-      std::string currentSection = StringRoutines::StringTrimWhiteSpace(
+      std::string currentSection = StringRoutines::stringTrimWhiteSpace(
         currentProblem.deadlinesPerSection.theKeys[j]
       );
       currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] = currentDeadline;
@@ -202,13 +202,13 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++) {
-      std::string currentWeight = StringRoutines::StringTrimWhiteSpace(
+      std::string currentWeight = StringRoutines::stringTrimWhiteSpace(
         currentProblem.problemWeightsPerCoursE.theValues[j]
       );
       if (currentWeight == "") {
         continue;
       }
-      std::string currentCourse = StringRoutines::StringTrimWhiteSpace(
+      std::string currentCourse = StringRoutines::stringTrimWhiteSpace(
         currentProblem.problemWeightsPerCoursE.theKeys[j]
       );
       currentProblemJSON[currentCourse] = currentWeight;
@@ -1494,7 +1494,7 @@ std::string CalculatorHTML::getDeadline(
       ProblemDataAdministrative& currentProb =
       this->currentUseR.theProblemData.GetValueCreateNoInit(containerName).adminData;
       result = currentProb.deadlinesPerSection.GetValueCreate(sectionNumber);
-      if (StringRoutines::StringTrimWhiteSpace(result) != "") {
+      if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
         return result;
       }
@@ -2489,7 +2489,7 @@ bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
   for (int i = 0; i < this->theContent.size; i ++) {
     SyntacticElementHTML& currentE = this->theContent[i];
     if (currentE.isAnswer()) {
-      std::string currentId = StringRoutines::StringTrimWhiteSpace(currentE.getKeyValue("id"));
+      std::string currentId = StringRoutines::stringTrimWhiteSpace(currentE.getKeyValue("id"));
       if (currentId == "") {
         if (comments != nullptr) {
           *comments << "The answer element: " << currentE.toStringDebug() << " has empty id. This is not allowed. ";
@@ -3439,7 +3439,7 @@ bool TopicElementParser::checkInitialization() {
 }
 
 void TopicElementParser::TopicLine::makeError(const std::string& message) {
-  this->contentTrimmedWhiteSpace = StringRoutines::StringTrimWhiteSpace(message);
+  this->contentTrimmedWhiteSpace = StringRoutines::stringTrimWhiteSpace(message);
   this->tag = "Error";
   this->theType = TopicElement::types::error;
 }
@@ -3515,7 +3515,7 @@ void TopicElementParser::LoadTopicBundleFile(
 
 TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string& inputNonTrimmed) {
   TopicElementParser::TopicLine result;
-  std::string input = StringRoutines::StringTrimWhiteSpace(inputNonTrimmed);
+  std::string input = StringRoutines::stringTrimWhiteSpace(inputNonTrimmed);
   if (input.size() == 0) {
     result.MakeEmpty();
     return result;
@@ -3528,12 +3528,12 @@ TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string&
   for (unsigned i = 0; i < input.size(); i ++) {
     char current = input[i];
     if (current == ':') {
-      result.contentTrimmedWhiteSpace = StringRoutines::StringTrimWhiteSpace(input.substr(i + 1));
+      result.contentTrimmedWhiteSpace = StringRoutines::stringTrimWhiteSpace(input.substr(i + 1));
       break;
     }
     result.tag.push_back(current);
   }
-  result.tag = StringRoutines::StringTrimWhiteSpace(result.tag);
+  result.tag = StringRoutines::stringTrimWhiteSpace(result.tag);
   if (result.contentTrimmedWhiteSpace.size() == 0) {
     result.contentTrimmedWhiteSpace = result.tag;
     result.tag = "";
@@ -3977,7 +3977,7 @@ void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput)
 
 void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretJavascripts");
-  std::string javascriptName = StringRoutines::StringTrimWhiteSpace(inputOutput.content);
+  std::string javascriptName = StringRoutines::stringTrimWhiteSpace(inputOutput.content);
   if (javascriptName == "MathJax") {
     inputOutput.interpretedCommand = HtmlRoutines::GetJavascriptMathjax("");
   }

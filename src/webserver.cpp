@@ -3178,7 +3178,7 @@ void WebServer::WriteVersionJSFile() {
   out << "};\n";
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     theFileStream, "/calculator-html/server_information.js", false, true, false, false
   );
   theFileStream << out.str();
@@ -3975,7 +3975,7 @@ bool ArgumentAnalyzer::processOneArgument() {
   if (this->currentIndex >= global.programArguments.size) {
     return false;
   }
-  std::string current = StringRoutines::StringTrimWhiteSpace(global.programArguments[this->currentIndex]);
+  std::string current = StringRoutines::stringTrimWhiteSpace(global.programArguments[this->currentIndex]);
   if (current == MainFlags::server) {
     return this->setServer();
   }
@@ -4031,16 +4031,16 @@ void WebServer::InitializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (global.buildVersionSimple == "") {
     global.buildVersionSimple =
-    StringRoutines::StringTrimWhiteSpace(global.externalCommandReturnOutput("git rev-list --count HEAD"));
+    StringRoutines::stringTrimWhiteSpace(global.externalCommandReturnOutput("git rev-list --count HEAD"));
   }
-  global.buildVersionSimple = StringRoutines::StringTrimWhiteSpace(global.buildVersionSimple);
+  global.buildVersionSimple = StringRoutines::stringTrimWhiteSpace(global.buildVersionSimple);
   for (unsigned i = 0; i < global.buildVersionSimple.size(); i ++) {
     if (MathRoutines::isALatinLetter(global.buildVersionSimple[i])) {
       global.buildVersionSimple = "?";
       break;
     }
   }
-  global.buildHeadHashWithServerTime = StringRoutines::StringTrimWhiteSpace(
+  global.buildHeadHashWithServerTime = StringRoutines::stringTrimWhiteSpace(
     global.externalCommandReturnOutput("git rev-parse HEAD")
   );
   for (unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++) {
@@ -4060,8 +4060,8 @@ void WebServer::InitializeMainHashes() {
   WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
 }
 
-void WebServer::InitializeMainRequests() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainRequests");
+void WebServer::initializeMainRequests() {
+  MacroRegisterFunctionWithName("WebServer::initializeMainRequests");
   this->requestsNotNeedingLogin.addOnTop("about");
   this->requestsNotNeedingLogin.addOnTop("signUp");
   this->requestsNotNeedingLogin.addOnTop("signUpPage");
@@ -4091,8 +4091,8 @@ void WebServer::InitializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
 }
 
-void WebServer::InitializeMainAddresses() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainAddresses");
+void WebServer::initializeMainAddresses() {
+  MacroRegisterFunctionWithName("WebServer::initializeMainAddresses");
   this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.addOnTop("/html-common/");
@@ -4136,8 +4136,8 @@ void WebServer::InitializeMainAddresses() {
 
 }
 
-void WebServer::InitializeMainFoldersInstructorSpecific() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersInstructorSpecific");
+void WebServer::initializeMainFoldersInstructorSpecific() {
+  MacroRegisterFunctionWithName("WebServer::initializeMainFoldersInstructorSpecific");
   List<std::string> incoming = List<std::string>({
     Configuration::topicLists      ,
     Configuration::courseTemplates ,
@@ -4150,23 +4150,23 @@ void WebServer::InitializeMainFoldersInstructorSpecific() {
   }
 }
 
-void WebServer::InitializeMainAll() {
+void WebServer::initializeMainAll() {
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeMainHashes();
   FileOperations::InitializeFoldersULTRASensitive();
   FileOperations::InitializeFoldersSensitive();
   FileOperations::InitializeFoldersNonSensitive();
   FileOperations::CheckFolderLinks();
-  this->InitializeMainFoldersInstructorSpecific();
-  this->InitializeMainRequests();
-  this->InitializeMainAddresses();
+  this->initializeMainFoldersInstructorSpecific();
+  this->initializeMainRequests();
+  this->initializeMainAddresses();
   this->initializeMainMIMETypes();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
 
-void WebServer::TurnProcessMonitoringOn() {
-  MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
+void WebServer::turnProcessMonitoringOn() {
+  MacroRegisterFunctionWithName("WebServer::turnProcessMonitoringOn");
   global.theResponse.flagBanProcessMonitorinG = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
@@ -4174,8 +4174,8 @@ void WebServer::TurnProcessMonitoringOn() {
   << global.millisecondsReplyAfterComputation << " ms." << Logger::endL;
 }
 
-void WebServer::TurnProcessMonitoringOff() {
-  MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOff");
+void WebServer::turnProcessMonitoringOff() {
+  MacroRegisterFunctionWithName("WebServer::turnProcessMonitoringOff");
   global
   << Logger::green << "************************" << Logger::endL
   << Logger::red << "Process monitoring is now off. " << Logger::endL
@@ -4226,7 +4226,7 @@ bool GlobalVariables::ConfigurationStore() {
     return true;
   }
   std::fstream configurationFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
+  if (!FileOperations::openFileCreateIfNotPresentVirtual(
     configurationFile, this->configurationFileName, false, true, false, true
   )) {
     global << Logger::red << "Could not open file: " << this->configurationFileName << Logger::endL;
@@ -4339,9 +4339,9 @@ void GlobalVariables::ConfigurationProcess() {
     ].isTrueRepresentationInJSON()
   ) {
     global << Logger::blue << "Process monitoring banned from configuration.json. " << Logger::endL;
-    WebServer::TurnProcessMonitoringOff();
+    WebServer::turnProcessMonitoringOff();
   } else {
-    WebServer::TurnProcessMonitoringOn();
+    WebServer::turnProcessMonitoringOn();
   }
   if (global.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
     &global.server().WebServerPingIntervalInSeconds
@@ -4439,7 +4439,7 @@ int WebServer::main(int argc, char **argv) {
     }
     // Uses the configuration file.
     // Calls again global.server().InitializeMainFoldersSensitive();
-    global.server().InitializeMainAll();
+    global.server().initializeMainAll();
     global.server().CheckMathJaxSetup();
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
@@ -4507,7 +4507,7 @@ int WebServer::mainCommandLine() {
   )) {
     outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";
   }
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     outputFile, "output/outputFileCommandLine.html", false, true, false
   );
   global << theCalculator.outputString;

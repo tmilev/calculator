@@ -92,7 +92,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
       }
     }
     std::fstream theFile;
-    bool openSuccess = FileOperations::OpenFileCreateIfNotPresentVirtual(
+    bool openSuccess = FileOperations::openFileCreateIfNotPresentVirtual(
       theFile,
       "crashes/" + global.RelativePhysicalNameCrashReport,
       false,
@@ -1360,7 +1360,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
   std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
+  FileOperations::openFileCreateIfNotPresentVirtual(
     this->theMultiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);

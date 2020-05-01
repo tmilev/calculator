@@ -1520,7 +1520,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   );
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentVirtual(std::fstream& theFile,
+bool FileOperations::openFileCreateIfNotPresentVirtual(std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
   bool truncate,
@@ -2102,9 +2102,9 @@ void StringRoutines::StringSplitExcludeDelimiter(
   StringRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
 
-std::string StringRoutines::StringTrimWhiteSpace(const std::string& inputString) {
+std::string StringRoutines::stringTrimWhiteSpace(const std::string& inputString) {
   std::string result;
-  StringRoutines::StringTrimWhiteSpace(inputString, result);
+  StringRoutines::stringTrimWhiteSpace(inputString, result);
   return result;
 }
 
@@ -2144,7 +2144,7 @@ std::string StringRoutines::StringTrimToLengthForDisplay(const std::string& inpu
   return out.str();
 }
 
-void StringRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output) {
+void StringRoutines::stringTrimWhiteSpace(const std::string& inputString, std::string& output) {
   //this function needs to be rewritten to do one substr call (no time now).
   output = "";
   output.reserve(inputString.size());

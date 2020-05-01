@@ -23,7 +23,7 @@ public:
   HashedList<std::string, MathRoutines::HashString> inputs;
   bool flagTestAll;
   void initialize(List<std::string>& inputArguments);
-  void Run();
+  void run();
   bool ShouldTest(const std::string& testSuite);
 };
 
@@ -31,7 +31,7 @@ int mainTest(List<std::string>& inputArguments) {
   Test tester;
   inputArguments.sliceInPlace(2, inputArguments.size - 2);
   tester.initialize(inputArguments);
-  tester.Run();
+  tester.run();
   return 0;
 }
 
@@ -45,8 +45,8 @@ const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
 
-void Test::Run() {
-  MacroRegisterFunctionWithName("Test::Run");
+void Test::run() {
+  MacroRegisterFunctionWithName("Test::run");
   global << "Testing ..." << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->ShouldTest(Test::Suites::database)) {

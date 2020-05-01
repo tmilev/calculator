@@ -191,7 +191,7 @@ CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
   this->flagBuiltInGenerated = false;
 }
 
-bool CalculatorHTML::Test::OneProblemTest::Run() {
+bool CalculatorHTML::Test::OneProblemTest::run() {
   CalculatorHTML theProblem;
   std::stringstream commentsOnFailure;
   std::stringstream randomSeedStringStarting;
@@ -372,7 +372,7 @@ bool CalculatorHTML::Test::BuiltIn(
       global << reportStream.str() << Logger::endL;
     }
     theReport.report(reportStream.str());
-    if (!currentTest.Run()) {
+    if (!currentTest.run()) {
       result = false;
     }
     if (!currentTest.flagSuccess) {

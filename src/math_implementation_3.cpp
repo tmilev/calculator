@@ -1078,7 +1078,7 @@ void FileOperations::InitializeFoldersNonSensitive() {
   folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
 
   // InitializeFolderVirtualLinksDefaults() is called in
-  // GlobalVariables::ConfigurationProcess and its contents
+  // GlobalVariables::configurationProcess and its contents
   // are used together with file configuration.json,
   // to compute the folder locations below.
 
@@ -4229,7 +4229,7 @@ void PartFractions::initAndSplit(Vectors<Rational>& input) {
   this->split(nullptr);
 }
 
-void PartFractions::Run(Vectors<Rational>& input) {
+void PartFractions::run(Vectors<Rational>& input) {
   if (!this->flagInitialized) {
     this->initFromRoots(input);
   }

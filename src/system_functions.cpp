@@ -38,7 +38,7 @@ public:
 //  ThreadWrapper theThread;
   TimeoutThread();
   void reset();
-  void Run();
+  void run();
   bool HandleComputationTimer();
   bool HandleMaxComputationTime();
   bool HandleEverythingIsDone();
@@ -142,8 +142,8 @@ void TimeoutThread::reset() {
   this->intervalBetweenChecksInMilliseconds = 100000;
 }
 
-void TimeoutThread::Run() {
-  MacroRegisterFunctionWithName("TimerThreadData::Run");
+void TimeoutThread::run() {
+  MacroRegisterFunctionWithName("TimerThreadData::run");
   this->reset();
   for (;;) {
     this->counter ++;
@@ -167,7 +167,7 @@ void RunTimerThread(int threadIndex) {
   global.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
   TimeoutThread theThread;
-  theThread.Run();
+  theThread.run();
 }
 
 void CreateTimerThread() {

@@ -240,7 +240,7 @@ public:
   // Initialized once, securely, in the
   // parent process.
   // When running as a web server, this happens inside
-  // WebServer::Run.
+  // WebServer::run.
   // When not initialized, contains 0 bytes.
   List<unsigned char> randomBytesCurrent;
   // Random bytes to keep as internal state.
@@ -413,9 +413,9 @@ public:
   };
   CommentsCurrentConnection comments;
   void JoinAllThreads();
-  bool ConfigurationStore();
-  bool ConfigurationLoad();
-  void ConfigurationProcess();
+  bool configurationStore();
+  bool configurationLoad();
+  void configurationProcess();
   int GetGlobalTimeInSeconds();
   int64_t getElapsedMilliseconds();
   double getElapsedSeconds() {

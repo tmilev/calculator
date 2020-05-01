@@ -5726,7 +5726,7 @@ public:
   void ComputeDebugStringBasisChange();
   bool initFromRoots(Vectors<Rational>& input);
   void initAndSplit(Vectors<Rational>& input);
-  void Run(Vectors<Rational>& input);
+  void run(Vectors<Rational>& input);
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
   void RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
   void RemoveRedundantShortRoots(Vector<Rational>* Indicator);

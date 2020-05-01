@@ -67,7 +67,7 @@ public:
   WebServerMonitor();
 };
 
-void MonitorWebServer(int pidServer) {
+void monitorWebServer(int pidServer) {
   WebServerMonitor theMonitor;
   theMonitor.Monitor(pidServer);
 }
@@ -287,7 +287,7 @@ void WebCrawler::PingCalculatorStatus() {
       } while (numSelected < 0);
       if (numSelected <= 0) {
         global << Logger::red << failStream.str() << Logger::endL;
-        reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
+        reportStream << failStream.str() << "Could not connect through port. select returned: " << numSelected;
         connectionResult = - 1;
       } else {
         connectionResult = connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
@@ -414,7 +414,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         global << Logger::red << failStream.str() << Logger::endL;
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << failStream.str()
-          << "Could not connect through port. Select returned: " << numSelected;
+          << "Could not connect through port. select returned: " << numSelected;
         }
         connectionResult = - 1;
       } else {
@@ -1054,7 +1054,7 @@ bool WebWorker::writeToBodyJSON(const JSData& result) {
       toWrite = StringRoutines::ReplaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
     }
   }  
-  return this->WriteToBody(toWrite);
+  return this->writeToBody(toWrite);
 }
 
 bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCrash) {

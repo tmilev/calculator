@@ -17,7 +17,7 @@ public:
   bool flagDeallocated;
   std::string name;
   int numberOfBytesLastWrite;
-  void Release();
+  void release();
   bool CreateMe(
     const std::string& inputPipeName,
     bool readEndBlocks,
@@ -77,7 +77,7 @@ public:
   //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
   std::string toString() const;
-  void Release();
+  void release();
   // inputName is the display name of the mutex - something you want
   // to see in error messages and logs.
   bool CreateMe(
@@ -112,7 +112,7 @@ public:
   // False result should normally be a fatal error but
   // may be handled gracefully for stability reasons.
   bool Unlock();
-  static void Release(int& theDescriptor);
+  static void release(int& theDescriptor);
   MutexProcess();
   ~MutexProcess();
 };
@@ -180,7 +180,7 @@ public:
   );
 
   std::string toString() const;
-  void Release();
+  void release();
   bool checkConsistency();
   bool CreateMe(const std::string& inputPipeName);
   bool ResetNoAllocation();

@@ -59,7 +59,7 @@ public:
   int indentationLevelHTML;
   int numberOfConsecutiveNoReportsBeforeDisconnect;
   const int maxNumberOfConsecutiveNoReports = 2;
-  List<char> remainingBytesToSenD;
+  List<char> remainingBytesToSend;
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
   List<char> bufferFileIO;
@@ -72,7 +72,7 @@ public:
 
   WebAPIResponse response;
   std::string error;
-  void PrepareFullMessageHeaderAndFooter();
+  void prepareFullMessageHeaderAndFooter();
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
   JSData processComputationIndicatorJSData();
@@ -95,10 +95,10 @@ public:
   int ProcessLoginNeededOverUnsecureConnection();
   bool ProcessRedirectAwayFromWWW();
   int ProcessUnknown();
-  bool RunInitialize();
-  int Run();
-  bool RunOnce();
-  bool FailReceiveReturnFalse();
+  bool runInitialize();
+  int run();
+  bool runOnce();
+  bool failReceiveReturnFalse();
   bool checkConsistency();
 
   bool IsFileServedRaw();
@@ -124,7 +124,7 @@ public:
   void PauseIfRequested();
   // writes json to body, sanitizes.
   bool writeToBodyJSON(const JSData& result);
-  bool WriteToBody(const std::string& bytesToAppend);
+  bool writeToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutString(
     const std::string& input,
     const std::string& status,
@@ -145,17 +145,17 @@ public:
     const std::string& fileNameCarbonCopy
   );
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);
-  void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
-  void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
+  void queueStringForSendingNoHeader(const std::string& stringToSend, bool mustSendAll = false);
+  void queueBytesForSendingNoHeader(const List<char>& bytesToSend, bool mustSendAll = false);
   bool ShouldDisplayLoginPage();
   void WrapUpConnection();
   void ResetMutexProcesses();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void resetConnection();
-  void Release();
+  void release();
   void ReleaseKeepInUseFlag();
-  bool EnsureAllBytesSent();
+  bool ensureAllBytesSent();
   void sendPending();
   void SendAllBytesNoHeaderS();
   std::string MIMETypeFromFileExtension(const std::string& fileExtension);
@@ -250,20 +250,20 @@ public:
   bool flagDeallocated;
   WebServer();
   ~WebServer();
-  static void FigureOutOperatingSystem();
-  void ComputeSSLFlags();
-  static void CheckInstallation();
-  static void CheckSystemInstallationMongoDB();
-  static void CheckSystemInstallationOpenSSL();
-  static void CheckMongoDBSetup();
-  static void CheckMathJaxSetup();
-  static void CheckUnzipInstall();
-  static void CheckFreecalcSetup();
-  static void AnalyzeMainArguments(int argC, char** argv);
-  static bool AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
+  static void figureOutOperatingSystem();
+  void computeSSLFlags();
+  static void checkInstallation();
+  static void checkSystemInstallationMongoDatabase();
+  static void checkSystemInstallationOpenSSL();
+  static void checkMongoDatabaseSetup();
+  static void checkMathJaxSetup();
+  static void checkUnzipInstall();
+  static void checkFreecalcSetup();
+  static void analyzeMainArguments(int argC, char** argv);
+  static bool analyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeBuildFlags();
   void initializeMainAll();
-  void InitializeMainHashes();
+  void initializeMainHashes();
   void initializeMainRequests();
   void initializeMainAddresses();
   void initializeMainFoldersInstructorSpecific();
@@ -271,7 +271,7 @@ public:
 
   void MarkChildNotInUse(int childIndex);
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
-  void ReleaseWorkerSideResources();
+  void releaseWorkerSideResources();
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();
   void ReleaseNonActiveWorkers();
@@ -279,8 +279,8 @@ public:
   bool CreateNewActiveWorker();
   bool EmergencyRemoval_LastCreatedWorker();
   bool checkConsistency();
-  int Daemon();
-  int Run();
+  int daemon();
+  int run();
   // Wraps the system level fork() call.
   // Addionally computes a
   // unique [with probability ~1] process id and
@@ -290,10 +290,10 @@ public:
   void ComputeActiveWorkerId();
   int Fork();
   void initializeRandomBytes();
-  void WriteVersionJSFile();
+  void writeVersionJSFile();
   WebWorker& getActiveWorker();
   static void WorkerTimerPing(int64_t pingTime);
-  static void Release(int& theDescriptor);
+  static void release(int& theDescriptor);
   static void wrapUp();
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();
@@ -309,10 +309,10 @@ public:
   static void TerminateProcessId(int processId);
   void TerminateChildSystemCall(int i);
   void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
-  void RecycleChildrenIfPossible();
+  void recycleChildrenIfPossible();
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
-  void HandleTooManyWorkers(int& numInUse);
+  void handleTooManyWorkers(int& numInUse);
   void StopKillAll();
   bool RestartIsNeeded();
   void initDates();
@@ -324,7 +324,6 @@ public:
   std::string ToStringConnectionSummary();
   static void turnProcessMonitoringOn();
   static void turnProcessMonitoringOff();
-  static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
   static int mainConsoleHelp();
   static int mainCommandLine();

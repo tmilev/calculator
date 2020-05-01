@@ -403,7 +403,7 @@ bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
   } else {
     this->owner->setHeaderOKNoContentLength("", "text/javascript");
   }
-  this->owner->WriteToBody(WebAPIResponse::getOnePageJS(appendBuildHash));
+  this->owner->writeToBody(WebAPIResponse::getOnePageJS(appendBuildHash));
   this->owner->sendPending();
   return true;
 }
@@ -414,7 +414,7 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
   if (global.server().RestartIsNeeded()) {
     return true;
   }
-  this->owner->WriteToBody(WebAPIResponse::getApp(appendBuildHash));
+  this->owner->writeToBody(WebAPIResponse::getApp(appendBuildHash));
   this->owner->sendPending();
   return true;
 }
@@ -566,7 +566,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
-  this->owner->WriteToBody(theCrawler.targetPDFbinaryContent);
+  this->owner->writeToBody(theCrawler.targetPDFbinaryContent);
   this->owner->sendPending();
   return true;
 }
@@ -619,7 +619,7 @@ bool WebAPIResponse::processSlidesSource() {
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
-  return this->owner->WriteToBody(theCrawler.targetLaTeX);
+  return this->owner->writeToBody(theCrawler.targetLaTeX);
 }
 
 bool WebAPIResponse::processClonePage() {

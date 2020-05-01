@@ -8,7 +8,7 @@
 
 std::string MutexProcess::currentProcessName = "S: ";
 
-void MutexProcess::Release(int& theDescriptor) {
+void MutexProcess::release(int& theDescriptor) {
   if (theDescriptor == - 1) {
     return;
   }
@@ -37,21 +37,21 @@ std::string PipePrimitive::toString() const {
 }
 
 PipePrimitive::~PipePrimitive() {
-  this->Release();
+  this->release();
   this->flagDeallocated = true;
 }
 
-void PipePrimitive::Release() {
-  MutexProcess::Release(this->pipeEnds[0]);
-  MutexProcess::Release(this->pipeEnds[1]);
+void PipePrimitive::release() {
+  MutexProcess::release(this->pipeEnds[0]);
+  MutexProcess::release(this->pipeEnds[1]);
   this->numberOfBytesLastWrite = 0;
   this->lastRead.setSize(0);
 }
 
 std::string MutexProcess::lockContent = "!";
 
-void MutexProcess::Release() {
-  this->lockPipe.Release();
+void MutexProcess::release() {
+  this->lockPipe.release();
   this->name = "";
 }
 
@@ -93,19 +93,19 @@ bool PipePrimitive::CreateMe(
   this->name = inputPipeName;
   if (pipe(this->pipeEnds.theObjects) < 0) {
     global << Logger::red << "FAILED to create pipe: " << this->name << ". " << Logger::endL;
-    this->Release();
+    this->release();
     global.server().StopKillAll();
     // return false;
   }
   if (!readEndBlocks) {
     if (!this->SetReadNonBlocking(dontCrashOnFail)) {
-      this->Release();
+      this->release();
       return false;
     }
   }
   if (!writeEndBlocks) {
     if (!this->SetPipeWriteNonBlockingIfFailThenCrash(dontCrashOnFail)) {
-      this->Release();
+      this->release();
       return false;
     }
   }
@@ -116,7 +116,7 @@ bool MutexProcess::CreateMe(
   const std::string& inputName,
   bool dontCrashOnFail
 ) {
-  this->Release();
+  this->release();
   this->name = inputName;
   if (!this->lockPipe.CreateMe(inputName + "lockPipe", true, false, dontCrashOnFail)) {
     return false;
@@ -512,18 +512,18 @@ bool Pipe::ResetNoAllocation() {
 
 bool Pipe::CreateMe(const std::string& inputPipeName) {
   this->checkConsistency();
-  this->Release();
+  this->release();
   this->name = inputPipeName;
   if (!this->thePipe.CreateMe("pipe[" + inputPipeName + "]", false, false, true)) {
-    this->Release();
+    this->release();
     return false;
   }
   if (!this->theMutexPipe.CreateMe("mutex[" + inputPipeName + "]", true)) {
-    this->Release();
+    this->release();
     return false;
   }
   if (!this->metaData.CreateMe("metaData[" + inputPipeName + "]", false, false, true)) {
-    this->Release();
+    this->release();
     return false;
   }
   return true;
@@ -547,11 +547,11 @@ Pipe::Pipe() {
   this->flagDeallocated = false;
 }
 
-void Pipe::Release() {
+void Pipe::release() {
   this->checkConsistency();
-  this->theMutexPipe.Release();
-  this->thePipe.Release();
-  this->metaData.Release();
+  this->theMutexPipe.release();
+  this->thePipe.release();
+  this->metaData.release();
 }
 
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {

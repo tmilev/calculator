@@ -219,9 +219,9 @@ bool WebWorker::ReceiveAll() {
     this->displayUserInput = this->error;
     return false;
   }
-  this->remainingBytesToSenD = std::string("HTTP/1.0 100 Continue\r\n\r\n");
+  this->remainingBytesToSend = std::string("HTTP/1.0 100 Continue\r\n\r\n");
   this->SendAllBytesNoHeaderS();
-  this->remainingBytesToSenD.setSize(0);
+  this->remainingBytesToSend.setSize(0);
   std::string bufferString;
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
     if (global.getElapsedSeconds() - numSecondsAtStart > 5) {
@@ -279,7 +279,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaderS");
   this->checkConsistency();
   global << "Worker " << this->indexInParent + 1
-  << " sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
+  << " sending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   double startTime = global.getElapsedSeconds();
   struct timeval tv;
   tv.tv_sec = 5;  // 5 Secs Timeout
@@ -289,7 +289,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   std::string errorString;
   std::stringstream commentsOnError;
-  while (this->remainingBytesToSenD.size > 0) {
+  while (this->remainingBytesToSend.size > 0) {
     if (global.getElapsedSeconds() - startTime > timeOutInSeconds) {
       global << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << Logger::endL;
@@ -297,7 +297,7 @@ void WebWorker::SendAllBytesNoHeaderS() {
     }
     int numBytesSent = this->parent->theTLS.writeOnce(
       this->connectedSocketID,
-      this->remainingBytesToSenD,
+      this->remainingBytesToSend,
       &errorString,
       nullptr,
       &commentsOnError,
@@ -313,8 +313,8 @@ void WebWorker::SendAllBytesNoHeaderS() {
       numTimesRunWithoutSending = 0;
     }
     global << numBytesSent;
-    this->remainingBytesToSenD.sliceInPlace(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
-    if (this->remainingBytesToSenD.size > 0) {
+    this->remainingBytesToSend.sliceInPlace(numBytesSent, this->remainingBytesToSend.size - numBytesSent);
+    if (this->remainingBytesToSend.size > 0) {
       global << ", ";
     }
     if (numTimesRunWithoutSending > 3) {
@@ -1285,7 +1285,7 @@ int WebWorker::ProcessFolder() {
   }
   outPage << "\n</body></html>";
   this->setHeaderOKNoContentLength("", "text/html");
-  this->WriteToBody(outPage.str());
+  this->writeToBody(outPage.str());
   this->sendPending();
   return 0;
 }
@@ -1322,7 +1322,7 @@ int WebWorker::ProcessFileDoesntExist() {
   << HtmlRoutines::convertStringToHtmlString(global.requestType, true);
   out << "</body></html>";
   // End of WARNING: cross-site scripting danger.
-  this->WriteToBody(out.str());
+  this->writeToBody(out.str());
   this->sendPending();
   return - 1;
 }
@@ -1392,7 +1392,7 @@ int WebWorker::ProcessFile() {
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
   }
   theHeader << "\r\n";
-  this->QueueStringForSendingNoHeadeR(theHeader.str());
+  this->queueStringForSendingNoHeader(theHeader.str());
   if (this->requestTypE == this->requestHead) {
     this->SendAllBytesNoHeaderS();
     return 0;
@@ -1404,7 +1404,7 @@ int WebWorker::ProcessFile() {
   long numBytesRead = theFile.gcount();
   while (numBytesRead != 0) {
     this->bufferFileIO.setSize(static_cast<int>(numBytesRead));
-    this->QueueBytesForSendingNoHeadeR(this->bufferFileIO);
+    this->queueBytesForSendingNoHeader(this->bufferFileIO);
     this->bufferFileIO.setSize(bufferSize);
     theFile.read(this->bufferFileIO.theObjects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
@@ -1438,7 +1438,7 @@ void WebWorker::reset() {
   this->RelativePhysicalFileNamE = "";
   this->numberOfReceivesCurrentConnection = 0;
   this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
-  this->Release();
+  this->release();
 }
 
 WebWorker::WebWorker() {
@@ -1485,7 +1485,7 @@ void WebWorker::WrapUpConnection() {
   if (global.flagServerDetailedLog) {
     global << "Detail: done with pipes, releasing resources. " << Logger::endL;
   }
-  this->Release();
+  this->release();
   if (global.flagServerDetailedLog) {
     global << "Detail: released. " << Logger::endL;
   }
@@ -1713,7 +1713,7 @@ JSData WebWorker::SetEmail(const std::string& input) {
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
   this->setHeaderOKNoContentLength("");
-  return this->WriteToBody(this->GetAuthenticationToken(reasonForNoAuthentication));
+  return this->writeToBody(this->GetAuthenticationToken(reasonForNoAuthentication));
 }
 
 JSData WebWorker::GetClonePageResult() {
@@ -1860,7 +1860,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   out << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
   << " here " << "</a> if your browser does not redirect the page automatically. ";
   out << "</body></html>";
-  this->WriteToBody(out.str());
+  this->writeToBody(out.str());
   return true;
 }
 
@@ -1925,7 +1925,7 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
   << "Click <a href=\"" << newAddressStream.str()
   << "\">here</a> if not redirected automatically. ";
   out << "</body></html>";
-  this->WriteToBody(out.str());
+  this->writeToBody(out.str());
   return true;
 }
 
@@ -1964,7 +1964,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
 
   }
   outBody << "</body></html>";
-  return this->WriteToBody(outBody.str());
+  return this->writeToBody(outBody.str());
 }
 
 bool WebWorker::RequireSSL() {
@@ -2152,17 +2152,17 @@ void WebWorker::ResetMutexProcesses() {
 
 void WebWorker::ReleaseKeepInUseFlag() {
   MacroRegisterFunctionWithName("WebWorker::ReleaseKeepInUseFlag");
-  this->pipeWorkerToServerTimerPing.Release();
-  this->pipeWorkerToServerControls.Release();
-  this->workerToWorkerRequestIndicator.Release();
-  this->pipeWorkerToWorkerStatus.Release();
-  this->PauseWorker.Release();
-  this->writingReportFile.Release();
+  this->pipeWorkerToServerTimerPing.release();
+  this->pipeWorkerToServerControls.release();
+  this->workerToWorkerRequestIndicator.release();
+  this->pipeWorkerToWorkerStatus.release();
+  this->PauseWorker.release();
+  this->writingReportFile.release();
   this->millisecondsLastPingServerSideOnly = - 1;
-  WebServer::Release(this->connectedSocketID);
+  WebServer::release(this->connectedSocketID);
 }
 
-void WebWorker::Release() {
+void WebWorker::release() {
   this->ReleaseKeepInUseFlag();
   this->flagInUsE = false;
 }
@@ -2212,10 +2212,10 @@ void WebWorker::writeAfterTimeoutShowIndicator(const std::string& message) {
   this->sendPending();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
     if (i != this->indexInParent) {
-      this->parent->theWorkers[i].Release();
+      this->parent->theWorkers[i].release();
     }
   }
-  this->parent->Release(this->connectedSocketID);
+  this->parent->release(this->connectedSocketID);
 }
 
 std::string WebWorker::ToStringAddressRequest() const {
@@ -2301,7 +2301,7 @@ bool WebServer::checkConsistency() {
 void WebServer::ReleaseEverything() {
   this->theTLS.Free();
   for (int i = 0; i < this->theWorkers.size; i ++) {
-    this->theWorkers[i].Release();
+    this->theWorkers[i].release();
   }
   this->activeWorker = - 1;
   if (global.flagServerDetailedLog) {
@@ -2406,7 +2406,7 @@ void WebServer::ReleaseActiveWorker() {
   if (this->activeWorker == - 1) {
     return;
   }
-  this->getActiveWorker().Release();
+  this->getActiveWorker().release();
   this->activeWorker = - 1;
 }
 
@@ -2435,13 +2435,13 @@ void WebServer::ReleaseSocketsNonActiveWorkers() {
   MacroRegisterFunctionWithName("WebServer::ReleaseSocketsNonActiveWorkers");
   for (int i = 0; i < this->theWorkers.size; i ++) {
     if (i != this->activeWorker) {
-      this->Release(this->theWorkers[i].connectedSocketID);
+      this->release(this->theWorkers[i].connectedSocketID);
     }
   }
 }
 
 bool WebServer::EmergencyRemoval_LastCreatedWorker() {
-  this->getActiveWorker().Release();
+  this->getActiveWorker().release();
   this->activeWorker = - 1;
   this->theWorkers.setSize(this->theWorkers.size - 1);
   return false;
@@ -2479,7 +2479,7 @@ bool WebServer::CreateNewActiveWorker() {
     this->theWorkers[this->activeWorker].flagExited = false;
     return true;
   }
-  this->getActiveWorker().Release();
+  this->getActiveWorker().release();
   this->theWorkers[this->activeWorker].flagInUsE = false; //<-until everything is initialized, we cannot be in use.
   std::stringstream stowstream, wtosStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
@@ -2661,7 +2661,7 @@ bool WebServer::RestartIsNeeded() {
   << "; latest executable has different time stamp: " << theFileStat.st_ctime
   << ". " << Logger::red << "RESTARTING." << Logger::endL;
   global.flagRestartNeeded = true;
-  this->getActiveWorker().WriteToBody(out.str());
+  this->getActiveWorker().writeToBody(out.str());
   return true;
 }
 
@@ -2752,12 +2752,12 @@ void WebServer::initDates() {
   this->timeLastExecutableModification = theFileStat.st_ctime;
 }
 
-void WebServer::ReleaseWorkerSideResources() {
-  MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
+void WebServer::releaseWorkerSideResources() {
+  MacroRegisterFunctionWithName("WebServer::releaseWorkerSideResources");
   if (global.flagServerDetailedLog) {
     global << Logger::red << "Detail: server about to RELEASE active workder. " << Logger::endL;
   }
-  this->Release(this->getActiveWorker().connectedSocketID);
+  this->release(this->getActiveWorker().connectedSocketID);
   if (global.flagServerDetailedLog) {
     global << Logger::green << "Detail: server RELEASED active worker. " << Logger::endL;
   }
@@ -2967,11 +2967,11 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   this->NumprocessAssassinated ++;
 }
 
-void WebServer::HandleTooManyWorkers(int& numInUse) {
+void WebServer::handleTooManyWorkers(int& numInUse) {
   if (numInUse <= this->MaxTotalUsedWorkers) {
     if (global.flagServerDetailedLog) {
       global << Logger::green
-      << "Detail: RecycleChildrenIfPossible exit point 1. " << Logger::endL;
+      << "Detail: recycleChildrenIfPossible exit point 1. " << Logger::endL;
     }
     return;
   }
@@ -2992,20 +2992,20 @@ void WebServer::HandleTooManyWorkers(int& numInUse) {
   }
   if (global.flagServerDetailedLog) {
     global << Logger::green
-    << "Detail: RecycleChildrenIfPossible exit point 2. " << Logger::endL;
+    << "Detail: recycleChildrenIfPossible exit point 2. " << Logger::endL;
   }
 }
 
-void WebServer::RecycleChildrenIfPossible() {
+void WebServer::recycleChildrenIfPossible() {
   // Listen for children who have exited properly.
   // This might need to be rewritten: I wasn't able to make this work with any
   // mechanism other than pipes.
-  MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
+  MacroRegisterFunctionWithName("WebServer::recycleChildrenIfPossible");
   if (global.flagIsChildProcess) {
     return;
   }
   if (global.flagServerDetailedLog) {
-    global << Logger::red << "Detail: RecycleChildrenIfPossible start. " << Logger::endL;
+    global << Logger::red << "Detail: recycleChildrenIfPossible start. " << Logger::endL;
   }
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++) {
@@ -3016,7 +3016,7 @@ void WebServer::RecycleChildrenIfPossible() {
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->RecycleOneChild(i, numInUse);
   }
-  this->HandleTooManyWorkers(numInUse);
+  this->handleTooManyWorkers(numInUse);
 }
 
 bool WebServer::initPrepareWebServerALL() {
@@ -3167,10 +3167,10 @@ void SignalsInfrastructure::initializeSignals() {
   this->flagInitialized = true;
 }
 
-extern void MonitorWebServer(int pidServer);
+extern void monitorWebServer(int pidServer);
 
-void WebServer::WriteVersionJSFile() {
-  MacroRegisterFunctionWithName("WebServer::WriteVersionJSFile");
+void WebServer::writeVersionJSFile() {
+  MacroRegisterFunctionWithName("WebServer::writeVersionJSFile");
   std::stringstream out;
   out << "\"use strict\"; //This file is automatically generated, please do not modify.\n";
   out << "var serverInformation = {\n  ";
@@ -3198,9 +3198,9 @@ public:
   Listener(WebServer* inputOwner) {
     this->owner = inputOwner;
   }
-  int Accept();
-  void Select();
-  void ComputeUserAddress();
+  int acceptWrapper();
+  void selectWrapper();
+  void computeUserAddress();
 };
 
 void Listener::zeroSocketSet() {
@@ -3214,7 +3214,7 @@ void Listener::zeroSocketSet() {
 
 }
 
-void Listener::Select() {
+void Listener::selectWrapper() {
   while (select(this->owner->highestSocketNumber + 1, &this->FDSetListenSockets, nullptr, nullptr, nullptr) == - 1) {
     if (this->owner->flagReapingChildren) {
       if (global.flagServerDetailedLog) {
@@ -3223,15 +3223,15 @@ void Listener::Select() {
       }
       this->owner->flagReapingChildren = false;
     } else {
-      global << Logger::red << "Select failed: this is not expected. Error message: "
+      global << Logger::red << "select failed: this is not expected. Error message: "
       << strerror(errno) << Logger::endL;
     }
     this->owner->NumFailedSelectsSoFar ++;
   }
 }
 
-int Listener::Accept() {
-  MacroRegisterFunctionWithName("Listener::Accept");
+int Listener::acceptWrapper() {
+  MacroRegisterFunctionWithName("Listener::acceptWrapper");
   socklen_t sin_size = sizeof (this->theirAddress);
   for (int i = this->owner->theListeningSockets.size - 1; i >= 0; i --) {
     int currentListeningSocket = this->owner->theListeningSockets[i];
@@ -3255,7 +3255,7 @@ int Listener::Accept() {
   return - 1;
 }
 
-void Listener::ComputeUserAddress() {
+void Listener::computeUserAddress() {
   inet_ntop(
     this->theirAddress.ss_family,
     get_in_addr(reinterpret_cast<struct sockaddr *>(&this->theirAddress)),
@@ -3269,8 +3269,8 @@ TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
   return global.server().theTLS;
 }
 
-int WebServer::Daemon() {
-  MacroRegisterFunctionWithName("WebServer::Daemon");
+int WebServer::daemon() {
+  MacroRegisterFunctionWithName("WebServer::daemon");
   global.logs.logType = GlobalVariables::LogData::type::daemon;
   std::stringstream restartCommand;
   restartCommand << global.PhysicalNameExecutableWithPath << " ";
@@ -3297,8 +3297,8 @@ int WebServer::Daemon() {
   }
 }
 
-int WebServer::Run() {
-  MacroRegisterFunctionWithName("WebServer::Run");
+int WebServer::run() {
+  MacroRegisterFunctionWithName("WebServer::run");
   global.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
   if (global.millisecondsMaxComputation <= 0) {
@@ -3337,7 +3337,7 @@ int WebServer::Run() {
     if (this->processIdServer > 0) {
       global.logs.logType = GlobalVariables::LogData::type::serverMonitor;
       global.flagIsChildProcess = true;
-      MonitorWebServer(this->processIdServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
+      monitorWebServer(this->processIdServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
@@ -3346,7 +3346,7 @@ int WebServer::Run() {
   // Cannot call initializeMutex here: not before we execute Fork();
   global.calculator().getElement().ComputeAutoCompleteKeyWords();
   global.calculator().getElement().WriteAutoCompleteKeyWordsToFile();
-  this->WriteVersionJSFile();
+  this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
@@ -3364,7 +3364,7 @@ int WebServer::Run() {
     // Main accept() loop.
     theListener.zeroSocketSet();
     SignalsInfrastructure::theSignals().unblockSignals();
-    theListener.Select();
+    theListener.selectWrapper();
     SignalsInfrastructure::theSignals().blockSignals();
     if (global.flagServerDetailedLog) {
       global << Logger::green << "Detail: select success. " << Logger::endL;
@@ -3391,7 +3391,7 @@ int WebServer::Run() {
       this->previousServerStatDetailedReport = reportCount;
       global << this->ToStringStatusForLogFile() << Logger::endL;
     }
-    int newConnectedSocket = theListener.Accept();
+    int newConnectedSocket = theListener.acceptWrapper();
     if (newConnectedSocket < 0) {
       global << Logger::red
       << "This is not supposed to to happen: select succeeded "
@@ -3404,9 +3404,9 @@ int WebServer::Run() {
       }
       continue;
     }
-    theListener.ComputeUserAddress();
+    theListener.computeUserAddress();
     this->HandleTooManyConnections(theListener.userAddress);
-    this->RecycleChildrenIfPossible();
+    this->recycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker()) {
       global << Logger::purple
       << " failed to create an active worker. System error string: "
@@ -3417,7 +3417,7 @@ int WebServer::Run() {
     }
     /////////////
     this->getActiveWorker().connectedSocketID = newConnectedSocket;
-    this->ComputeSSLFlags();
+    this->computeSSLFlags();
     this->getActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
     this->getActiveWorker().millisecondsServerAtWorkerStart = global.getElapsedMilliseconds();
     this->getActiveWorker().millisecondsLastPingServerSideOnly = this->getActiveWorker().millisecondsServerAtWorkerStart;
@@ -3467,7 +3467,7 @@ int WebServer::Run() {
       if (global.flagServerDetailedLog) {
         global << Logger::green << "Detail: sigprocmask success, running... " << Logger::endL;
       }
-      int result = this->getActiveWorker().Run();
+      int result = this->getActiveWorker().run();
       if (global.flagServerDetailedLog) {
         global << "Detail: run finished, releasing resources. " << Logger::endL;
       }
@@ -3482,7 +3482,7 @@ int WebServer::Run() {
       << global.getElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << Logger::endL;
     }
-    this->ReleaseWorkerSideResources();
+    this->releaseWorkerSideResources();
   }
   // Cleanup, if ever needed:
   // this->ReleaseEverything();
@@ -3490,7 +3490,7 @@ int WebServer::Run() {
   // return 0;
 }
 
-void WebServer::ComputeSSLFlags() {
+void WebServer::computeSSLFlags() {
   global.flagUsingSSLinCurrentConnection = false;
 
   if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
@@ -3503,11 +3503,11 @@ void WebServer::ComputeSSLFlags() {
   this->getActiveWorker().flagUsingSSLInWorkerProcess = global.flagUsingSSLinCurrentConnection;
 }
 
-bool WebWorker::RunInitialize() {
+bool WebWorker::runInitialize() {
   global.millisecondOffset = this->millisecondsAfterSelect;
   this->checkConsistency();
   if (this->connectedSocketID == - 1) {
-    global.fatal << "Worker::Run() started on a connecting with ID equal to - 1. " << global.fatal;
+    global.fatal << "Worker::run() started on a connecting with ID equal to - 1. " << global.fatal;
   }
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
@@ -3535,7 +3535,7 @@ bool WebWorker::RunInitialize() {
   return  true;
 }
 
-bool WebWorker::FailReceiveReturnFalse() {
+bool WebWorker::failReceiveReturnFalse() {
   bool sslWasOK = true;
   if (global.flagSSLIsAvailable) {
     sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
@@ -3551,11 +3551,11 @@ bool WebWorker::FailReceiveReturnFalse() {
   return false;
 }
 
-bool WebWorker::RunOnce() {
+bool WebWorker::runOnce() {
   this->lastResult = 0;
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (!this->ReceiveAll()) {
-    return this->FailReceiveReturnFalse();
+    return this->failReceiveReturnFalse();
   }
   if (this->numberOfReceivesCurrentConnection > 0) {
     global.calculator().FreeMemory();
@@ -3575,7 +3575,7 @@ bool WebWorker::RunOnce() {
   if (this->lastResult == - 1) {
     return false;
   }
-  this->EnsureAllBytesSent();
+  this->ensureAllBytesSent();
   this->numberOfReceivesCurrentConnection ++;
   if (
     (!this->flagKeepAlive) ||
@@ -3594,27 +3594,27 @@ bool WebWorker::RunOnce() {
   return true;
 }
 
-int WebWorker::Run() {
-  MacroRegisterFunctionWithName("WebWorker::Run");
-  if (!this->RunInitialize()) {
+int WebWorker::run() {
+  MacroRegisterFunctionWithName("WebWorker::run");
+  if (!this->runInitialize()) {
     this->lastResult = - 1;
     return this->lastResult;
   }
-  while (this->RunOnce()) {
+  while (this->runOnce()) {
   }
   this->parent->wrapUp();
   this->parent->ReleaseEverything();
   return this->lastResult;
 }
 
-void WebServer::Release(int& theDescriptor) {
-  MutexProcess::Release(theDescriptor);
+void WebServer::release(int& theDescriptor) {
+  MutexProcess::release(theDescriptor);
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
 
-void WebServer::FigureOutOperatingSystem() {
-  MacroRegisterFunctionWithName("WebServer::FigureOutOperatingSystem");
+void WebServer::figureOutOperatingSystem() {
+  MacroRegisterFunctionWithName("WebServer::figureOutOperatingSystem");
   if (global.OperatingSystem != "") {
     return;
   }
@@ -3644,8 +3644,8 @@ void WebServer::FigureOutOperatingSystem() {
   << Logger::endL << "and we will add your Linux flavor to the list of supported distros. " << Logger::endL;
 }
 
-void WebServer::CheckSystemInstallationOpenSSL() {
-  MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationOpenSSL");
+void WebServer::checkSystemInstallationOpenSSL() {
+  MacroRegisterFunctionWithName("WebServer::checkSystemInstallationOpenSSL");
   if (!global.flagDatabaseCompiled) {
     return;
   }
@@ -3653,8 +3653,8 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     return;
   }
   global.configuration["openSSL"] = "Attempted installation";
-  global.ConfigurationStore();
-  WebServer::FigureOutOperatingSystem();
+  global.configurationStore();
+  WebServer::figureOutOperatingSystem();
   StateMaintainerCurrentFolder preserveFolder;
   std::string sslInstallCommand = "CentOS";
   if (global.OperatingSystem == "Ubuntu") {
@@ -3673,15 +3673,15 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     global.externalCommandNoOutput(sslInstallCommand, true);
     global.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
-  global.ConfigurationStore();
+  global.configurationStore();
 }
 
-void WebServer::CheckSystemInstallationMongoDB() {
-  MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationMongoDB");
+void WebServer::checkSystemInstallationMongoDatabase() {
+  MacroRegisterFunctionWithName("WebServer::checkSystemInstallationMongoDatabase");
   if (global.flagDatabaseCompiled) {
     return;
   }
-  WebServer::FigureOutOperatingSystem();
+  WebServer::figureOutOperatingSystem();
   if (global.OperatingSystem == "") {
     return;
   }
@@ -3689,7 +3689,7 @@ void WebServer::CheckSystemInstallationMongoDB() {
     return;
   }
   global.configuration["mongoDB"] = "Attempted installation";
-  global.ConfigurationStore();
+  global.configurationStore();
 
   StateMaintainerCurrentFolder preserveFolder;
   global << "You appear to be missing an mongoDB installation. "
@@ -3707,11 +3707,11 @@ void WebServer::CheckSystemInstallationMongoDB() {
   global << "Proceeding to rebuild the calculator. " << Logger::red
   << "This is expected to take 10+ minutes. " << Logger::endL;
   global.externalCommandNoOutput("make -j8", true);
-  global.ConfigurationStore();
+  global.configurationStore();
 }
 
-void WebServer::CheckMongoDBSetup() {
-  MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
+void WebServer::checkMongoDatabaseSetup() {
+  MacroRegisterFunctionWithName("WebServer::checkMongoDatabaseSetup");
   if (global.flagDatabaseCompiled) {
     global << Logger::green << "Compiled with mongo DB support. " << Logger::endL;
   } else {
@@ -3721,8 +3721,8 @@ void WebServer::CheckMongoDBSetup() {
     return;
   }
   global.configuration["mongoDBSetup"] = "Attempting";
-  global.ConfigurationStore();
-  WebServer::FigureOutOperatingSystem();
+  global.configurationStore();
+  WebServer::figureOutOperatingSystem();
   global << Logger::yellow << "Mongo setup file missing, proceeding with setup. " << Logger::endL;
   global << Logger::green << "Enter the sudo password as prompted please. " << Logger::endL;
   StateMaintainerCurrentFolder maintainFolder;
@@ -3755,17 +3755,17 @@ void WebServer::CheckMongoDBSetup() {
   global << "Need sudo access for command: " << Logger::red << "sudo ldconfig" << Logger::endL;
   global.externalCommandNoOutput("sudo ldconfig", true);
   global.configuration["mongoDBSetup"] = "Setup complete";
-  global.ConfigurationStore();
+  global.configurationStore();
 }
 
-void WebServer::CheckFreecalcSetup() {
-  MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
+void WebServer::checkFreecalcSetup() {
+  MacroRegisterFunctionWithName("WebServer::checkFreecalcSetup");
   if (global.configuration["freecalcSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
   global.configuration["freecalcSetup"] = "Setup started";
-  global.ConfigurationStore();
-  WebServer::FigureOutOperatingSystem();
+  global.configurationStore();
+  WebServer::figureOutOperatingSystem();
   global << Logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << Logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
   std::string startingDir = FileOperations::GetCurrentFolder();
@@ -3774,11 +3774,11 @@ void WebServer::CheckFreecalcSetup() {
   global << Logger::green << "git clone https://github.com/tmilev/freecalc.git" << Logger::endL;
   global.externalCommandNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
   global.configuration["freecalcSetup"] = "Setup complete";
-  global.ConfigurationStore();
+  global.configurationStore();
 }
 
-void WebServer::CheckUnzipInstall() {
-  WebServer::FigureOutOperatingSystem();
+void WebServer::checkUnzipInstall() {
+  WebServer::figureOutOperatingSystem();
   if (global.OperatingSystem == "Ubuntu") {
     global.externalCommandNoOutput("sudo apt-get install unzip", true);
   } else if (global.OperatingSystem == "CentOS") {
@@ -3787,8 +3787,8 @@ void WebServer::CheckUnzipInstall() {
 
 }
 
-void WebServer::CheckMathJaxSetup() {
-  MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
+void WebServer::checkMathJaxSetup() {
+  MacroRegisterFunctionWithName("WebServer::checkMathJaxSetup");
   std::string checkForMathJaxAndAutoInstall = "Check for mathjax on every boot.";
   if (
     global.configuration[Configuration::mathJaxSetup].theString !=
@@ -3796,9 +3796,9 @@ void WebServer::CheckMathJaxSetup() {
   ) {
     return;
   }
-  global.ConfigurationStore();
+  global.configurationStore();
   if ((false)) {
-    WebServer::CheckUnzipInstall();
+    WebServer::checkUnzipInstall();
   }
   std::string mathjaxBase;
   std::string mathjaxZipSource;
@@ -3860,7 +3860,7 @@ void WebServer::CheckMathJaxSetup() {
   global.externalCommandNoOutput(moveCommand.str(), true);
 }
 
-bool WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
+bool WebServer::analyzeMainArgumentsTimeString(const std::string& timeLimitString) {
   if (timeLimitString == "") {
     return false;
   }
@@ -3920,7 +3920,7 @@ bool ArgumentAnalyzer::setServer() {
   global.flagRunningConsoleTest = false;
   if (this->currentIndex + 1 < global.programArguments.size) {
     timeLimitString = global.programArguments[this->currentIndex + 1];
-    if (WebServer::AnalyzeMainArgumentsTimeString(timeLimitString)) {
+    if (WebServer::analyzeMainArgumentsTimeString(timeLimitString)) {
       this->currentIndex ++;
     }
   }
@@ -3999,8 +3999,8 @@ bool ArgumentAnalyzer::processOneArgument() {
   return this->processCommandLineConfigurations(current);
 }
 
-void WebServer::AnalyzeMainArguments(int argC, char **argv) {
-  MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
+void WebServer::analyzeMainArguments(int argC, char **argv) {
+  MacroRegisterFunctionWithName("WebServer::analyzeMainArguments");
   global.configurationCommandLine.reset(JSData::token::tokenObject);
   if (argC < 0) {
     argC = 0;
@@ -4027,7 +4027,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   }
 }
 
-void WebServer::InitializeMainHashes() {
+void WebServer::initializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (global.buildVersionSimple == "") {
     global.buildVersionSimple =
@@ -4152,7 +4152,7 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
 
 void WebServer::initializeMainAll() {
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
-  this->InitializeMainHashes();
+  this->initializeMainHashes();
   FileOperations::InitializeFoldersULTRASensitive();
   FileOperations::InitializeFoldersSensitive();
   FileOperations::InitializeFoldersNonSensitive();
@@ -4185,8 +4185,8 @@ void WebServer::turnProcessMonitoringOff() {
   global.configuration[Configuration::processMonitoringBanned] = true;
 }
 
-bool GlobalVariables::ConfigurationLoad() {
-  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationLoad");
+bool GlobalVariables::configurationLoad() {
+  MacroRegisterFunctionWithName("GlobalVariables::configurationLoad");
   std::stringstream out;
   if (this->configurationFileName == "") {
     this->configurationFileName = "/configuration/configuration.json";
@@ -4213,8 +4213,8 @@ bool GlobalVariables::ConfigurationLoad() {
   return true;
 }
 
-bool GlobalVariables::ConfigurationStore() {
-  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
+bool GlobalVariables::configurationStore() {
+  MacroRegisterFunctionWithName("GlobalVariables::configurationStore");
   if (global.configurationCommandLine.objects.size() > 0) {
     global << Logger::yellow
     << "Command-line overrides in the present configuration: "
@@ -4248,8 +4248,8 @@ bool GlobalVariables::ConfigurationStore() {
   return true;
 }
 
-void GlobalVariables::ConfigurationProcess() {
-  MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
+void GlobalVariables::configurationProcess() {
+  MacroRegisterFunctionWithName("GlobalVariables::configurationProcess");
   for (int i = 0; i < global.configurationCommandLine.objects.size(); i ++) {
     global.configuration.setKeyValue(
       global.configurationCommandLine.objects.theKeys[i],
@@ -4378,12 +4378,12 @@ void GlobalVariables::ConfigurationProcess() {
   }
 }
 
-void WebServer::CheckInstallation() {
-  global.server().CheckSystemInstallationOpenSSL();
-  global.server().CheckSystemInstallationMongoDB();
-  global.server().CheckMongoDBSetup();
-  global.server().CheckMathJaxSetup();
-  global.server().CheckFreecalcSetup();
+void WebServer::checkInstallation() {
+  global.server().checkSystemInstallationOpenSSL();
+  global.server().checkSystemInstallationMongoDatabase();
+  global.server().checkMongoDatabaseSetup();
+  global.server().checkMathJaxSetup();
+  global.server().checkFreecalcSetup();
 }
 
 int WebServer::main(int argc, char **argv) {
@@ -4398,7 +4398,7 @@ int WebServer::main(int argc, char **argv) {
     // Process executable arguments.
     // May set the value of
     // global.PathProjectBaseUserInputOrDeduced.
-    global.server().AnalyzeMainArguments(argc, argv);
+    global.server().analyzeMainArguments(argc, argv);
     if (global.flagRunningConsoleHelp) {
       return WebServer::mainConsoleHelp();
     }
@@ -4419,12 +4419,12 @@ int WebServer::main(int argc, char **argv) {
     << Logger::endL;
     // Compute configuration file location.
     // load the configuration file.
-    global.ConfigurationLoad();
+    global.configurationLoad();
     // Compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.
-    global.ConfigurationProcess();
+    global.configurationProcess();
     // Store back the config file if it changed.
-    global.ConfigurationStore();
+    global.configurationStore();
     global << "Computation timeout: " << Logger::red
     << global.millisecondsMaxComputation << " ms." << Logger::endL;
 
@@ -4440,15 +4440,15 @@ int WebServer::main(int argc, char **argv) {
     // Uses the configuration file.
     // Calls again global.server().InitializeMainFoldersSensitive();
     global.server().initializeMainAll();
-    global.server().CheckMathJaxSetup();
+    global.server().checkMathJaxSetup();
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
       global << Logger::red << "MathJax not available. " << Logger::endL;
     }
     if (global.flagDaemonMonitor) {
-      return global.server().Daemon();
+      return global.server().daemon();
     } else if (global.flagRunningBuiltInWebServer) {
-      return global.server().Run();
+      return global.server().run();
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);
     } else {
@@ -4463,22 +4463,22 @@ int WebServer::main(int argc, char **argv) {
 
 int WebServer::mainConsoleHelp() {
   std::cout << "All flags are optional.\n";
-  std::cout << "Run the server with:\n";
+  std::cout << "run the server with:\n";
   std::cout << "calculator " << MainFlags::server
   << " [[max_seconds_per_computation]] "
   << MainFlags::configurationFile << " [[configuration_file_name]]"
   << MainFlags::pathExecutable << " [[custom_path_to_run_from]]" << "\n";
   std::cout << "Examples:\n";
-  std::cout << "Run as server with defaults:\n";
+  std::cout << "run as server with defaults:\n";
   std::cout << "./calculator\n";
-  std::cout << "Run as server with custom computation timeout:\n";
+  std::cout << "run as server with custom computation timeout:\n";
   std::cout << "./calculator server 200\n";
-  std::cout << "Run as server with custom timeout, custom base path and custom configuration file:\n";
+  std::cout << "run as server with custom timeout, custom base path and custom configuration file:\n";
   std::cout << "./calculator " << MainFlags::server
   << " 50 "
   << MainFlags::configurationFile << " \"./configuration/configuration.json\" "
   << MainFlags::pathExecutable  << " \"./\"" << "\n";
-  std::cout << "Run unit tests with:\n";
+  std::cout << "run unit tests with:\n";
   std::cout << "calculator " << MainFlags::test << "\n";
   return 0;
 }
@@ -4518,26 +4518,18 @@ int WebServer::mainCommandLine() {
   return 0;
 }
 
-std::string WebServer::GetEnvironment(const std::string& envVarName) {
-  char* queryStringPtr = getenv(envVarName.c_str());
-  if (queryStringPtr == nullptr) {
-    return "";
-  }
-  return queryStringPtr;
-}
-
-void WebWorker::PrepareFullMessageHeaderAndFooter() {
-  MacroRegisterFunctionWithName("WebWorker::PrepareFullMessageHeaderAndFooter");
-  this->remainingBytesToSenD.setSize(0);
-  this->remainingBytesToSenD.setExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
+void WebWorker::prepareFullMessageHeaderAndFooter() {
+  MacroRegisterFunctionWithName("WebWorker::prepareFullMessageHeaderAndFooter");
+  this->remainingBytesToSend.setSize(0);
+  this->remainingBytesToSend.setExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
   if (this->remainingHeaderToSend.size == 0) {
     if (this->requestTypE != this->requestHead) {
-      this->remainingBytesToSenD = this->remainingBodyToSend;
+      this->remainingBytesToSend = this->remainingBodyToSend;
     }
     this->remainingBodyToSend.setSize(0);
     return;
   }
-  this->remainingBytesToSenD = this->remainingHeaderToSend;
+  this->remainingBytesToSend = this->remainingHeaderToSend;
   this->remainingHeaderToSend.setSize(0);
   std::stringstream contentLengthStream;
   if (this->flagDoAddContentLength) {
@@ -4546,17 +4538,17 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   contentLengthStream << "\r\n";
   std::string contentLengthString = contentLengthStream.str();
   for (unsigned i = 0; i < contentLengthString.size(); i ++) {
-    this->remainingBytesToSenD.addOnTop(contentLengthString[i]);
+    this->remainingBytesToSend.addOnTop(contentLengthString[i]);
   }
   if (this->requestTypE != this->requestHead) {
-    this->remainingBytesToSenD.addListOnTop(this->remainingBodyToSend);
+    this->remainingBytesToSend.addListOnTop(this->remainingBodyToSend);
   }
   this->remainingBodyToSend.setSize(0);
 }
 
-bool WebWorker::EnsureAllBytesSent() {
+bool WebWorker::ensureAllBytesSent() {
   if (
-    this->remainingBytesToSenD.size == 0 &&
+    this->remainingBytesToSend.size == 0 &&
     this->remainingBodyToSend.size == 0 &&
     this->remainingHeaderToSend.size == 0
   ) {
@@ -4570,27 +4562,27 @@ bool WebWorker::EnsureAllBytesSent() {
   global << Logger::red << "Remaining body size: " << Logger::blue
   << this->remainingBodyToSend.size << Logger::endL;
   global << Logger::red << "Remaining bytes: " << Logger::blue
-  << this->remainingBytesToSenD.size << Logger::endL;
+  << this->remainingBytesToSend.size << Logger::endL;
   this->sendPending();
   return false;
 }
 
 void WebWorker::sendPending() {
   MacroRegisterFunctionWithName("WebWorker::sendPending");
-  this->PrepareFullMessageHeaderAndFooter();
+  this->prepareFullMessageHeaderAndFooter();
   this->SendAllBytesNoHeaderS();
 }
 
-void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll) {
-  MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
-  (void) MustSendAll;
-  this->remainingBytesToSenD.addListOnTop(bytesToSend);
-  //  if (this->remainingBytesToSend.size >= 1024 * 512 || MustSendAll)
+void WebWorker::queueBytesForSendingNoHeader(const List<char>& bytesToSend, bool mustSendAll) {
+  MacroRegisterFunctionWithName("WebWorker::queueBytesForSendingNoHeader");
+  (void) mustSendAll;
+  this->remainingBytesToSend.addListOnTop(bytesToSend);
+  //  if (this->remainingBytesToSend.size >= 1024 * 512 || mustSendAll)
   //    this->SendAllBytes();
 }
 
-bool WebWorker::WriteToBody(const std::string& stringToSend) {
-  MacroRegisterFunctionWithName("WebWorker::WriteToBody");
+bool WebWorker::writeToBody(const std::string& stringToSend) {
+  MacroRegisterFunctionWithName("WebWorker::writeToBody");
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.setSize(
     this->remainingBodyToSend.size + static_cast<signed>(stringToSend.size())
@@ -4601,14 +4593,14 @@ bool WebWorker::WriteToBody(const std::string& stringToSend) {
   return true;
 }
 
-void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll) {
-  MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingNoHeadeR");
-  (void) MustSendAll;
-  int oldSize = this->remainingBytesToSenD.size;
-  this->remainingBytesToSenD.setSize(
-    this->remainingBytesToSenD.size + static_cast<signed>(stringToSend.size())
+void WebWorker::queueStringForSendingNoHeader(const std::string& stringToSend, bool mustSendAll) {
+  MacroRegisterFunctionWithName("WebWorker::queueStringForSendingNoHeader");
+  (void) mustSendAll;
+  int oldSize = this->remainingBytesToSend.size;
+  this->remainingBytesToSend.setSize(
+    this->remainingBytesToSend.size + static_cast<signed>(stringToSend.size())
   );
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
-    this->remainingBytesToSenD[static_cast<signed>(i) + oldSize] = stringToSend[i];
+    this->remainingBytesToSend[static_cast<signed>(i) + oldSize] = stringToSend[i];
   }
 }

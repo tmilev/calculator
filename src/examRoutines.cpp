@@ -3857,7 +3857,7 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
       this->topicListFileName, this->topicListContent, &comments
     )) {
       comments << "Failed to load the topic list associated with this course. "
-      << "Go to ``Select course'' from the menu to see a list of available courses. ";
+      << "Go to ``select course'' from the menu to see a list of available courses. ";
       return false;
     }
   }

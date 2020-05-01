@@ -454,7 +454,7 @@ public:
       int randomSeed;
       List<OneAnswer> answers;
       OneProblemTest();
-      bool Run();
+      bool run();
       std::string ToStringHTMLTableRow(int rowIndex);
     };
     int filesToInterpret;

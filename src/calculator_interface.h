@@ -1314,7 +1314,7 @@ public:
   FormatExpressions formatVisibleStrings;
   std::string ToStringRuleStatusUser();
   std::string toString();
-  std::string toStringPerformance();
+  JSData toJSONPerformance();
   Expression getNewBoundVariable();
   Expression getNewAtom();
   void ComputeAutoCompleteKeyWords();

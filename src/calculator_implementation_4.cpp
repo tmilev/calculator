@@ -2491,7 +2491,7 @@ JSData Calculator::toJSONOutputAndSpecials() {
   if (this->inputString == "") {
     return result;
   }
-  result[WebAPI::result::performance] = this->toStringPerformance();
+  result[WebAPI::result::performance] = this->toJSONPerformance();
   result[WebAPI::result::parsingLog] = this->parsingLog;
   return result;
 }
@@ -2542,18 +2542,13 @@ void Calculator::ComputeAutoCompleteKeyWords() {
   }
 }
 
-std::string Calculator::toStringPerformance() {
+JSData Calculator::toJSONPerformance() {
   MacroRegisterFunctionWithName("Calculator::toStringPerformance");
-  std::stringstream out;
   int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
   int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
   int64_t requestMilliseconds = elapsedMilliseconds - global.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
-  out << "<br>Computation time: "
-  << computationMilliseconds
-  << " ms (~"
-  << ((static_cast<double>(computationMilliseconds)) / 1000)
-  << " s). ";
+  JSData result;
   std::stringstream moreDetails;
   moreDetails << "<br>Max computation time soft: "
   << (static_cast<double>(global.millisecondsMaxComputation) / 2000)
@@ -2575,7 +2570,6 @@ std::string Calculator::toStringPerformance() {
   if (this->DepthRecursionReached > 0) {
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
-  #ifdef MacroIncrementCounter
   moreDetails << "<br>Lists created: " << "computation: "
   << (ParallelComputing::NumListsCreated - static_cast<unsigned>(this->NumListsStart))
   << ", total: " << ParallelComputing::NumListsCreated;
@@ -2615,11 +2609,11 @@ std::string Calculator::toStringPerformance() {
     << Rational::TotalLargeGCDcalls - static_cast<unsigned long long>(this->NumLargeGCDcallsStart)
     << ", total: " << Rational::TotalLargeGCDcalls;
   }
-  out << "<br>" << //HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
-  moreDetails.str();
-//  , "More details");
-  #endif
-  return out.str();
+  std::stringstream millisecondsStream;
+  millisecondsStream << computationMilliseconds << " ms";
+  result[WebAPI::result::computationTime] = millisecondsStream.str();
+  result[WebAPI::result::comments] = moreDetails.str();
+  return result;
 }
 
 std::string Calculator::toString() {

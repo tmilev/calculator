@@ -40,11 +40,13 @@ var urlFields = {
     resultHtml: "resultHtml",
     crashReport: "crashReport",
     error: "error",
-    // comments on performance:
+    // Comments on performance.
     performance: "performance",
-    // comments for the specific task:
+    // Computation time. Excludes https traffic.
+    computationTime: "computationTime",
+    // Comments for the specific task.
     comments: "comments",
-    // global comments, usually used for debugging:
+    // Global comments, usually used for debugging.
     commentsGlobal: "commentsGlobal",
   },
   problem: {

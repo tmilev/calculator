@@ -119,11 +119,23 @@ function PanelExpandableData(
   /** @type {string} */
   id,
   /** @type {number} */
-  minimalCharacterLengthForPanel
+  minimalCharacterLengthForPanel,
+  /** @type {boolean} */
+  startHidden,
+  /** @type {string} */
+  label,
 ) {
   this.content = content;
   this.id = id;
   this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
+  this.startHidden = startHidden;
+  this.label = label;
+  if (this.startHidden === undefined) {
+    this.startHidden = false;
+  }
+  if (this.label === undefined) {
+    this.label = "";
+  }
 }
 
 function PanelExpandable(
@@ -160,7 +172,10 @@ function makePanelFromData(
     var inputPanel = new PanelExpandable(data.id);
     inputPanel.initialize(true);
     inputPanel.setPanelContent(data.content);
-    inputPanel.doToggleContent();
+    inputPanel.setPanelLabel(data.label);
+    if (!data.startHidden) {
+      inputPanel.doToggleContent();
+    }
     inputPanel.matchPanelStatus();
   } else {
     var element = document.getElementById(data.id);

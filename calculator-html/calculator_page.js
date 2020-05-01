@@ -292,14 +292,18 @@ Calculator.prototype.writeResult = function(
   }
   buffer.write(`</table>`);
   buffer.write(`</td><td><div class = "containerComments">`);
-  buffer.write("<b>Double-click formulas to get their LaTeX.</b>");
-  buffer.write("<br>Double-click back to hide the LaTeX.");
-  if (inputParsed[pathnames.urlFields.result.performance] !== undefined) {
+  buffer.write("<small>Double-click formulas: get LaTeX. Double-click back: hide. </small>");
+  var performance = inputParsed[pathnames.urlFields.result.performance]; 
+  if (performance !== undefined) {
+    var content = performance[pathnames.urlFields.result.comments];
+    var label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
     buffer.write(`<div id = '${ids.domElements.divPerformance}'></div>`);
     panelData.push(new panels.PanelExpandableData(
-      inputParsed.performance,
+      content,
       ids.domElements.divPerformance,
       0,
+      true,
+      label
     ));
     buffer.write("<br>");
   }

@@ -26,7 +26,7 @@ void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
 }
 
 void Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
-  Crypto::Random::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
+  Crypto::Random::acquireAdditionalRandomness(global.getElapsedMilliseconds());
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
     global.fatal << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << global.fatal;
   }

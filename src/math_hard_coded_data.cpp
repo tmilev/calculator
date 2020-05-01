@@ -1151,7 +1151,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     readerSubgroup.generatingSimpleRoots.setSize(0);
     for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
       int theInt = 0;
-      currentSGdata.theList[0].theList[2].theList[j].theInteger.getElement().IsIntegerFittingInInt(&theInt);
+      currentSGdata.theList[0].theList[2].theList[j].theInteger.getElement().isIntegerFittingInInt(&theInt);
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;

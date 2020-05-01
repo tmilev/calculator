@@ -533,8 +533,8 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
         int newIndex = this->GetGeneratorFromRoot(leftWeight + rightWeight);
         if (newIndex != - 1) {
           this->theLiebrackets.elements[i][j].MakeGenerator(newIndex, *this);
-          int leftIndex = this->GetRootIndexFromGenerator(i);
-          int rightIndex = this->GetRootIndexFromGenerator(j);
+          int leftIndex = this->getRootIndexFromGenerator(i);
+          int rightIndex = this->getRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else {
           if (!(leftWeight +rightWeight).isEqualToZero()) {

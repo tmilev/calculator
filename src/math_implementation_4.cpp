@@ -162,7 +162,7 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
     ListReferences<StackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
-      out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
+      out << "<tr><td>" << HtmlRoutines::getHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
       << "</td><td>" << currentInfo[i].line << "</td>";
       if (currentInfo[i].functionName != "") {
         out << "<td>" << currentInfo[i].functionName << "</td>";
@@ -287,7 +287,7 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
     } else {
       reportStream << global.fatal.GetStackTraceEtcErrorMessageConsole();
     }
-    reportStream << global.GetElapsedMilliseconds()
+    reportStream << global.getElapsedMilliseconds()
     << " ms elapsed. ";
     if (global.millisecondsMaxComputation > 0) {
       if (useHTML) {
@@ -368,7 +368,7 @@ bool GlobalVariables::UserStudentVieWOn() {
   return global.getWebInput("studentView") == "true";
 }
 
-std::string GlobalVariables::LogData::ToStringProcessType() const {
+std::string GlobalVariables::LogData::ToStringprocessType() const {
   switch (this->logType) {
   case GlobalVariables::LogData::type::server:
     return "server";
@@ -449,7 +449,7 @@ std::string GlobalVariables::ToStringCalculatorComputation(
   request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
   out << "<a href = \"" << global.displayApplication << "#"
   << HtmlRoutines::convertStringToURLString(request.toString(), false) << "\">";
-  out << HtmlRoutines::ConvertStringToHtmlString(display, true) << "</a>";
+  out << HtmlRoutines::convertStringToHtmlString(display, true) << "</a>";
   return out.str();
 }
 

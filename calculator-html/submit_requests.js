@@ -13,7 +13,8 @@ function recordProgressDone(progress, timeFinished) {
   }
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
   var panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
-  var panel = new panels.PanelExpandable(progress, false);
+  var panel = new panels.PanelExpandable(progress);
+  panel.initialize(false);
   panel.setPanelLabel(panelLabel);
 }
 
@@ -73,7 +74,9 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  var panelWithButton = new panels.PanelExpandable(progress, true);
+  var panelWithButton = new panels.PanelExpandable(progress);
+  panelWithButton.initialize(true);
+  panelWithButton.initialize
   progress.setAttribute("timeStarted", timeStarted);
   panelWithButton.setPanelLabel(`<b style = "color:orange">Sent</b>`)
 

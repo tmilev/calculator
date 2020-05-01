@@ -83,7 +83,7 @@ int LargeIntegerUnsigned::operator%(unsigned int x) {
   divisor.AssignShiftedUInt(x, 0);
   this->DivPositive(divisor, quotient, remainder);
   int result = 0;
-  remainder.IsIntegerFittingInInt(&result);
+  remainder.isIntegerFittingInInt(&result);
   return result;
 }
 
@@ -96,7 +96,7 @@ void LargeIntegerUnsigned::GetHexBigEndian(
     digit = static_cast<unsigned char>(inputCopy % 256);
     inputCopy /= 256;
     int digitInt = 0;
-    digit.IsIntegerFittingInInt(&digitInt);
+    digit.isIntegerFittingInInt(&digitInt);
     char digitChar = static_cast<char>(digitInt);
     result.addOnTop(digitChar);
   }
@@ -210,7 +210,7 @@ void LargeIntegerUnsigned::operator++(int) {
   this->AddUInt(1);
 }
 
-bool LargeIntegerUnsigned::IsIntegerFittingInInt(int* whichInt) {
+bool LargeIntegerUnsigned::isIntegerFittingInInt(int* whichInt) const {
   LargeIntegerUnsigned twoToThe31 = 2;
   MathRoutines::raiseToPower(twoToThe31, 31, LargeIntegerUnsigned(1));
   if (*this >= twoToThe31) {
@@ -734,7 +734,7 @@ void LargeIntegerUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int 
   }
 }
 
-unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) const {
+unsigned int LargeIntegerUnsigned::logarithmBaseNCeiling(unsigned int theBase) const {
   if (this->isEqualToZero()) {
     return 0;
   }
@@ -1070,6 +1070,15 @@ bool LargeIntegerUnsigned::factor(
   if (maximumDivisorToTry <= 0) {
     maximumDivisorToTry = 100000;
   }
+  if (*this < maximumDivisorToTry) {
+    if (*this < 100) {
+      maximumDivisorToTry = 10;
+    } else if (*this < 1000) {
+      maximumDivisorToTry = 32;
+    } else {
+      this->isIntegerFittingInInt(&maximumDivisorToTry);
+    }
+  }
   List<bool> theSieve;
   theSieve.initializeFillInObject(maximumDivisorToTry + 1, true);
   for (int i = 2; i <= maximumDivisorToTry; i ++) {
@@ -1235,8 +1244,8 @@ void LargeInteger::raiseToPower(int thePower) {
   MathRoutines::raiseToPower(*this, thePower, LargeInteger(1));
 }
 
-bool LargeInteger::IsIntegerFittingInInt(int* whichInt) {
-  if (!this->value.IsIntegerFittingInInt(whichInt)) {
+bool LargeInteger::isIntegerFittingInInt(int* whichInt) {
+  if (!this->value.isIntegerFittingInInt(whichInt)) {
     return false;
   }
   if (whichInt != nullptr) {

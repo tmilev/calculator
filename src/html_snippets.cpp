@@ -29,13 +29,13 @@ std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar) {
   return sanitizer.str();
 }
 
-std::string HtmlRoutines::GetHtmlLinkToGithubRepo(const std::string& displayString) {
+std::string HtmlRoutines::getHtmlLinkToGithubRepository(const std::string& displayString) {
   std::stringstream out;
   out << "<a href=\"" << HtmlRoutines::gitRepository << "\">" << displayString << "</a>";
   return out.str();
 }
 
-std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(
+std::string HtmlRoutines::getHtmlLinkFromProjectFileName(
   const std::string& fileName, const std::string& fileDesc, int line
 ) {
   std::stringstream out;
@@ -127,16 +127,16 @@ const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& f
   return HtmlRoutines::GetFile(fileNameVirtual, "<script>", "</script>");
 }
 
-std::string HtmlRoutines::GetJavascriptLink(const std::string& fileNameVirtual) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptLink");
+std::string HtmlRoutines::getJavascriptLink(const std::string& fileNameVirtual) {
+  MacroRegisterFunctionWithName("HtmlRoutines::getJavascriptLink");
   std::stringstream out;
   std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
   out << "<script src =\"" << theFileName << "\"></script>\n";
   return out.str();
 }
 
-std::string HtmlRoutines::GetCSSLink(const std::string& fileNameVirtual) {
-  MacroRegisterFunctionWithName("HtmlRoutines::GetCSSLink");
+std::string HtmlRoutines::getCSSLink(const std::string& fileNameVirtual) {
+  MacroRegisterFunctionWithName("HtmlRoutines::getCSSLink");
   std::stringstream out;
   std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
   out << "<link rel = \"stylesheet\" href= \"" << theFileName << "\">\n";
@@ -153,36 +153,36 @@ const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags() {
 }
 
 const std::string HtmlRoutines::GetMathQuillStyleSheetLink() {
-  return HtmlRoutines::GetCSSLink("/html-common/mathquill/mathquill.css");
+  return HtmlRoutines::getCSSLink("/html-common/mathquill/mathquill.css");
 }
 
 const std::string HtmlRoutines::GetCSSLinkCalculator(const std::string& relativeTo) {
-  return HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/styleCalculator.css");
+  return HtmlRoutines::getCSSLink(relativeTo + "calculator-html/styleCalculator.css");
 }
 
 const std::string HtmlRoutines::GetCSSLinkLieAlgebras(const std::string& relativeTo) {
-  return HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/style_lie_algebras.css");
+  return HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css");
 }
 
 const std::string HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator(const std::string& relativeTo) {
   return
-  HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/styleCalculator.css") +
-  HtmlRoutines::GetCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
+  HtmlRoutines::getCSSLink(relativeTo + "calculator-html/styleCalculator.css") +
+  HtmlRoutines::getCSSLink(relativeTo + "calculator-html/style_lie_algebras.css") ;
 }
 
 const std::string HtmlRoutines::GetJavascriptLinkPanels(const std::string& relativeTo) {
-  return HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/panels.js");
+  return HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels(const std::string& relativeTo) {
   return
-  HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/panels.js") +
-  HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js")
+  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/panels.js") +
+  HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js")
   ;
 }
 
 const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensions(const std::string& relativeTo) {
-  return HtmlRoutines::GetJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
+  return HtmlRoutines::getJavascriptLink(relativeTo + "calculator-html/graphics_n_dimensions.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags() {
@@ -190,7 +190,7 @@ const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags() {
 }
 
 const std::string HtmlRoutines::GetJavascriptMathQuillDefaultLink() {
-  return HtmlRoutines::GetJavascriptLink("/html-common/mathquill/mathquill.min.js");
+  return HtmlRoutines::getJavascriptLink("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags() {
@@ -198,14 +198,14 @@ const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags() {
 }
 
 const std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() {
-  return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill/mathquill.min.js");
+  return  HtmlRoutines::getJavascriptLink("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptBrowserifier() {
   return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/browserifier.js");
 }
 
-std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNoEncoding) {
+std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNoEncoding) {
   std::stringstream out;
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
@@ -216,9 +216,9 @@ std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNo
 
 std::string HtmlRoutines::getCalculatorComputationAnchor(const std::string& inputNoEncoding) {
   std::stringstream out;
-  out << "<a href = \"" << HtmlRoutines::GetCalculatorComputationURL(inputNoEncoding)
+  out << "<a href = \"" << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
-  << HtmlRoutines::ConvertStringToHtmlString(inputNoEncoding, false) << "</a>";
+  << HtmlRoutines::convertStringToHtmlString(inputNoEncoding, false) << "</a>";
   return out.str();
 }
 
@@ -262,7 +262,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   }
   MapList<std::string, std::string, MathRoutines::HashString> currentMap;
   std::stringstream notUsed;
-  if (!HtmlRoutines::ChopCGIString(input, currentMap, notUsed)) {
+  if (!HtmlRoutines::chopPercentEncodedString(input, currentMap, notUsed)) {
     return input;
   }
   if (currentMap.size() == 0) {
@@ -335,13 +335,13 @@ std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("MathJax");
 }
 
-bool HtmlRoutines::AccountOneInputCGIString(
+bool HtmlRoutines::accountOneInputPercentEncodedString(
   const std::string& fieldName,
   const std::string& fieldValue,
   MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::AccountOneInputCGIString");
+  MacroRegisterFunctionWithName("HtmlRoutines::accountOneInputPercentEncodedString");
   if (fieldName == "") {
     return true;
   }
@@ -357,23 +357,23 @@ bool HtmlRoutines::AccountOneInputCGIString(
   return true;
 }
 
-bool HtmlRoutines::ChopCGIString(
+bool HtmlRoutines::chopPercentEncodedString(
   const std::string& input,
   MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
+  MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedString");
   outputMap.clear();
   outputMap.setExpectedSize(15);
-  return HtmlRoutines::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
+  return HtmlRoutines::chopPercentEncodedStringAppend(input, outputMap, commentsOnFailure);
 }
 
-bool HtmlRoutines::ChopCGIStringAppend(
+bool HtmlRoutines::chopPercentEncodedStringAppend(
   const std::string& input,
   MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIStringAppend");
+  MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedStringAppend");
   unsigned inputLength = static_cast<unsigned>(input.size());
   bool readingData = false;
   std::string currentFieldName = "";
@@ -393,14 +393,14 @@ bool HtmlRoutines::ChopCGIStringAppend(
       }
       continue;
     }
-    if (!HtmlRoutines::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure)) {
+    if (!HtmlRoutines::accountOneInputPercentEncodedString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure)) {
       return false;
     }
     currentFieldName = "";
     currentFieldValue = "";
     readingData = false;
   }
-  return HtmlRoutines::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure);
+  return HtmlRoutines::accountOneInputPercentEncodedString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure);
 }
 
 bool HtmlRoutines::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace) {

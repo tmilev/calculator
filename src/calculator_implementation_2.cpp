@@ -550,7 +550,7 @@ bool Calculator::TimedOut() {
   if (global.millisecondsMaxComputation <= 0) {
     return false;
   }
-  int64_t elapsedMilliseconds = global.GetElapsedMilliseconds();
+  int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
   int64_t halfTimeLimit = global.millisecondsMaxComputation / 2;
   if (elapsedMilliseconds <= halfTimeLimit) {
     return false;
@@ -1132,7 +1132,7 @@ bool Calculator::ParseAndExtractExpressions(
 }
 
 void Calculator::initComputationStats() {
-  this->startTimeEvaluationMilliseconds = global.GetElapsedMilliseconds();
+  this->startTimeEvaluationMilliseconds = global.getElapsedMilliseconds();
   this->NumListsStart                   = static_cast<signed>( ParallelComputing::NumListsCreated    );
   this->NumListResizesStart             = static_cast<signed>( ParallelComputing::NumListResizesTotal);
   this->NumHashResizesStart             = static_cast<signed>( ParallelComputing::NumHashResizes     );

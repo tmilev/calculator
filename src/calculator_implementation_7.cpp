@@ -278,7 +278,7 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
 
   std::stringstream out;
   std::stringstream spanId;
-  spanId << "spanServerSpoofer_" << "_" << global.GetElapsedMilliseconds();
+  spanId << "spanServerSpoofer_" << "_" << global.getElapsedMilliseconds();
   out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displayTransportLayerSecurity('"
@@ -983,7 +983,7 @@ bool CalculatorFunctions::innerFactorial(Calculator& theCommands, const Expressi
     return false;
   }
   int inputInt = - 1;
-  if (!input[1].IsIntegerFittingInInt(&inputInt)) {
+  if (!input[1].isIntegerFittingInInt(&inputInt)) {
     return false;
   }
   if (inputInt < 0) {
@@ -1392,7 +1392,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
       return theCommands << "Failed to extract a constant from the first argument "
       << thePolysRational[0].toString(&theComputation.theFormat) << ". ";
     }
-    if (!upperLimitRat.IsIntegerFittingInInt(&upperLimit)) {
+    if (!upperLimitRat.isIntegerFittingInInt(&upperLimit)) {
       return theCommands << "Failed to extract a small integer from the first argument "
       << upperLimitRat.toString(&theComputation.theFormat) << ". ";
     }
@@ -8648,7 +8648,7 @@ bool CalculatorFunctions::innerTestIndicator(
     << "number of iterations and size of dummy comment. ";
   }
   int numRuns = - 1;
-  if (!input[1].IsIntegerFittingInInt(&numRuns)) {
+  if (!input[1].isIntegerFittingInInt(&numRuns)) {
     return theCommands << "Argument of CalculatorFunctions::innerTestIndicator "
     << "is not a small integer, instead it equals: " << input[1] << ".";
   }
@@ -8661,7 +8661,7 @@ bool CalculatorFunctions::innerTestIndicator(
     numRuns = 0;
   }
   int dummyCommentSize = 0;
-  if (!input[2].IsIntegerFittingInInt(&dummyCommentSize)) {
+  if (!input[2].isIntegerFittingInInt(&dummyCommentSize)) {
     return theCommands << "Second argument needs to be an integer. ";
   }
   if (dummyCommentSize > 200000) {
@@ -8837,7 +8837,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   const Expression& theModuloE = input[1];
   const Expression& theIntegersE = input[2];
   int theSize;
-  if (!theModuloE.IsIntegerFittingInInt(&theSize)) {
+  if (!theModuloE.isIntegerFittingInInt(&theSize)) {
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theSize == 0) {
@@ -8887,7 +8887,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
       currentIndexLarge = static_cast<unsigned>(theIndexStack[i]);
       currentIndexLarge *= static_cast<unsigned>(theIntsReduced[j]);
       currentIndexLarge %= theMod;
-      if (!currentIndexLarge.IsIntegerFittingInInt(&currentIndex)) {
+      if (!currentIndexLarge.isIntegerFittingInInt(&currentIndex)) {
         return theCommands << "An internal check has failed. "
         << "This shouldn't happen, this is possibly a programming bug.";
       }
@@ -8945,7 +8945,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
     return theCommands << "<hr>Value theMod not found.";
   }
   int theMod;
-  if (!theModuloE.IsIntegerFittingInInt(&theMod)) {
+  if (!theModuloE.isIntegerFittingInInt(&theMod)) {
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theMod == 0) {
@@ -9550,7 +9550,7 @@ public:
         this->DisplayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString =
         HtmlRoutines::clearNewLines
-        (HtmlRoutines::backslashQuotes(HtmlRoutines::DoubleBackslashes(this->DisplayedEstrings[i]) ));
+        (HtmlRoutines::backslashQuotes(HtmlRoutines::doubleBackslashes(this->DisplayedEstrings[i]) ));
         thePlot += theText;
       } else {
         PlotObject thePoint;
@@ -9632,7 +9632,7 @@ bool CalculatorFunctions::innerSetRandomSeed(
   }
   const Expression& argument = input[1];
   int theInt = - 1;
-  if (!argument.IsIntegerFittingInInt(& theInt)) {
+  if (!argument.isIntegerFittingInInt(& theInt)) {
     return theCommands << "Failed to extract small integer";
   }
   std::stringstream out;
@@ -9857,7 +9857,7 @@ bool CalculatorFunctions::innerRandomInteger(
   for (int i = 0; i < theMat.numberOfRows; i ++) {
     theIntervals[i].setSize(theMat.numberOfColumns);
     for (int j = 0; j < theMat.numberOfColumns; j ++) {
-      if (!theMat(i, j).IsIntegerFittingInInt(&theIntervals[i][j])) {
+      if (!theMat(i, j).isIntegerFittingInInt(&theIntervals[i][j])) {
         return theCommands << "<hr>Failed to convert "
         << theMat(i, j).toString() << " to an integer. ";
       }

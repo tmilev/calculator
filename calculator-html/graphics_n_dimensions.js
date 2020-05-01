@@ -163,7 +163,7 @@ GraphicsNDimensions.prototype.initInfo = function () {
     document.getElementById(this.idInfo).innerHTML = infoHTML;
   } else {
     this.panelInfo = new PanelExpandable(this.idInfo);
-    this.panelInfo.initialize(this.idInfo, true);
+    this.panelInfo.initialize(true);
     this.panelInfo.setPanelContent(infoHTML);
     this.panelInfo.doToggleContent();
     this.panelInfo.matchPanelStatus();

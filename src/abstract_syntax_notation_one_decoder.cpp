@@ -101,7 +101,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointerNoC
     length += static_cast<signed>(static_cast<unsigned int>(nextByte));
     this->dataPointer ++;
   }
-  if (!length.IsIntegerFittingInInt(&output.lengthPromised)) {
+  if (!length.isIntegerFittingInInt(&output.lengthPromised)) {
     std::stringstream errorStream;
     errorStream << "Variable length: " << length << " whose decoding started at position: "
     << startDataPointer << " with first excluded position: " << this->dataPointer << " is too large. ";
@@ -426,7 +426,7 @@ bool ASNElement::HasSubElementOfType<int>(
   if (!this->HasSubElementOfType(desiredIndices, desiredTypes, outputLarge, commentsOnFailure)) {
     return false;
   }
-  if (!outputLarge.IsIntegerFittingInInt(&output)) {
+  if (!outputLarge.isIntegerFittingInInt(&output)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASN is not a small integer because it is too large. ";
     }
@@ -1661,7 +1661,7 @@ PrivateKeyRSA::PrivateKeyRSA() {
 }
 
 void PrivateKeyRSA::ComputeBitSize() {
-  this->bitSize = static_cast<signed>(this->thePublicKey.theModulus.LogarithmBaseNCeiling(2));
+  this->bitSize = static_cast<signed>(this->thePublicKey.theModulus.logarithmBaseNCeiling(2));
   this->byteSize = this->bitSize / 8;
   if (this->byteSize * 8 < this->bitSize) {
     this->byteSize ++;

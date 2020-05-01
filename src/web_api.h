@@ -30,79 +30,79 @@ class WebAPIResponse {
   static std::string youHaveReachedTheBackend;
   WebAPIResponse();
 
-  bool ProcessDatabaseJSON();
-  bool ProcessDatabaseDeleteEntry();
-  bool ProcessDatabaseModifyEntry();
-  bool ProcessProblemGiveUp();
-  bool ProcessProblemSolution();
-  bool ProcessPauseWorker();
-  bool ProcessUnpauseWorker();
-  bool ProcessAccountsJSON();
-  bool ProcessCompute();
-  bool ProcessCalculatorExamplesJSON();
-  bool ProcessSubmitAnswers();
-  bool ProcessSubmitAnswersPreview();
-  bool ProcessServerStatusJSON();
-  bool ProcessSetProblemWeight();
-  bool ProcessSetProblemDeadline();
-  bool ProcessSlidesOrHomeworkFromSource();
-  bool ProcessSlidesSource();
-  bool ProcessClonePage();
-  bool ProcessModifyPage();
-  bool ProcessAddUserEmails();
-  bool ProcessComputationIndicator();
+  bool processDatabaseJSON();
+  bool processDatabaseDeleteEntry();
+  bool processDatabaseModifyEntry();
+  bool processProblemGiveUp();
+  bool processProblemSolution();
+  bool processPauseWorker();
+  bool processUnpauseWorker();
+  bool processAccountsJSON();
+  bool processCompute();
+  bool processCalculatorExamplesJSON();
+  bool processSubmitAnswers();
+  bool processSubmitAnswersPreview();
+  bool processServerStatusJSON();
+  bool processSetProblemWeight();
+  bool processSetProblemDeadline();
+  bool processSlidesOrHomeworkFromSource();
+  bool processSlidesSource();
+  bool processClonePage();
+  bool processModifyPage();
+  bool processAddUserEmails();
+  bool processComputationIndicator();
 
-  bool ProcessChangePassword(const std::string& reasonForNoAuthentication);
-  bool ProcessActivateAccount();
-  bool ProcessScores();
-  bool ProcessApp(bool appendBuildHash);
-  bool ProcessCalculatorOnePageJS(bool appendBuildHash);
-  bool ProcessTopicListJSON();
-  bool ProcessScoresInCoursePage();
-  bool ProcessAssignTeacherToSection();
-  bool ProcessExamPageJSON();
-  bool ProcessTemplateJSON();
-  bool ProcessLoginUserInfo(const std::string &comments);
-  bool ProcessSelectCourseJSON();
-  bool ProcessExamPageInterpreter();
-  bool ProcessLogout();
-  bool ProcessSignUP();
+  bool processChangePassword(const std::string& reasonForNoAuthentication);
+  bool processActivateAccount();
+  bool processScores();
+  bool processApp(bool appendBuildHash);
+  bool processCalculatorOnePageJS(bool appendBuildHash);
+  bool processTopicListJSON();
+  bool processScoresInCoursePage();
+  bool processAssignTeacherToSection();
+  bool processExamPageJSON();
+  bool processTemplateJSON();
+  bool processLoginUserInfo(const std::string &comments);
+  bool processSelectCourseJSON();
+  bool processExamPageInterpreter();
+  bool processLogout();
+  bool processSignUp();
   bool processForgotLogin();
-  bool ProcessEditPageJSON();
+  bool processEditPageJSON();
 
   void reset(WebWorker& inputOwner);
-  bool ServeResponseFalseIfUnrecognized(
+  bool serveResponseFalseIfUnrecognized(
     std::stringstream& argumentProcessingFailureComments,
     std::stringstream& comments
   );
-  static std::string GetHtmlTagWithManifest();
-  static std::string ModifyProblemReport();
-  static JSData ClonePageResult();
-  static std::string AddTeachersSections();
-  static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static JSData SubmitAnswersJSON(
+  static std::string getHtmlTagWithManifest();
+  static std::string modifyProblemReport();
+  static JSData clonePageResult();
+  static std::string addTeachersSections();
+  static std::string addUserEmails(const std::string& hostWebAddressWithPort);
+  static JSData submitAnswersJSON(
     const std::string& inputRandomSeed,
     bool* outputIsCorrect,
     bool timeSafetyBrake
   );
 
-  static JSData SubmitAnswersPreviewJSON();
-  static JSData SubmitAnswersJSON();
-  static JSData GetProblemSolutionJSON();
-  static JSData GetAnswerOnGiveUp();
+  static JSData submitAnswersPreviewJSON();
+  static JSData submitAnswersJSON();
+  static JSData getProblemSolutionJSON();
+  static JSData getAnswerOnGiveUp();
 
-  static JSData GetEditPageJSON();
-  static std::string GetJavascriptCaptcha();
-  static std::string GetCaptchaDiv();
-  static JSData GetExamPageJSON();
-  static std::string GetJSONFromTemplate();
-  static JSData GetJSONUserInfo(const std::string& comments);
-  static void GetJSDataUserInfo(
+  static JSData getEditPageJSON();
+  static std::string getJavascriptCaptcha();
+  static std::string getCaptchaDiv();
+  static JSData getExamPageJSON();
+  static std::string getJSONFromTemplate();
+  static JSData getJSONUserInfo(const std::string& comments);
+  static void getJSDataUserInfo(
     JSData& outputAppend, const std::string& comments
   );
-  static JSData GetTopicTableJSON();
+  static JSData getTopicTableJSON();
 
-  static JSData GetAnswerOnGiveUp(
+  static JSData getAnswerOnGiveUp(
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
     bool* answerGenerationSuccess = nullptr,
@@ -115,29 +115,29 @@ class WebAPIResponse {
   );
 
   static JSData getSelectCourseJSON();
-  static std::string GetScoresPage();
-  static std::string GetApp(bool appendBuildHash);
-  static std::string GetOnePageJS(bool appendBuildHash);
-  static std::string GetScoresInCoursePage();
-  static std::string SetProblemDeadline();
-  static std::string SetProblemWeight();
-  static JSData GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
-  static std::string GetAccountsPageBody(
+  static std::string getScoresPage();
+  static std::string getApp(bool appendBuildHash);
+  static std::string getOnePageJS(bool appendBuildHash);
+  static std::string getScoresInCoursePage();
+  static std::string setProblemDeadline();
+  static std::string setProblemWeight();
+  static JSData getAccountsPageJSON(const std::string& hostWebAddressWithPort);
+  static std::string getAccountsPageBody(
     const std::string& hostWebAddressWithPort
   );
-  static std::string ToStringAssignSection();
-  static std::string ToStringUserDetails(
+  static std::string toStringAssignSection();
+  static std::string toStringUserDetails(
     bool adminsOnly,
     List<JSData>& theUsers,
     const std::string& hostWebAddressWithPort
   );
-  static std::string ToStringUserScores();
-  static std::string ToStringUserDetailsTable(
+  static std::string toStringUserScores();
+  static std::string toStringUserDetailsTable(
     bool adminsOnly,
     List<JSData>& theUsers,
     const std::string& hostWebAddressWithPort
   );
-  static std::string GetSanitizedComment(
+  static std::string getSanitizedComment(
     const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
   );
 };
@@ -170,54 +170,53 @@ public:
   static std::string convertURLStringToNormal(
     const std::string& input, bool replacePlusBySpace
   );
-  static bool ConvertStringToHtmlStringReturnTrueIfModified(
+  static bool convertStringToHtmlStringReturnTrueIfModified(
     const std::string& input, std::string& output, bool doReplaceNewLineByBr
   );
-  static std::string ConvertStringToURLStringExceptDashesAndSlashes(
+  static std::string convertStringToURLStringExceptDashesAndSlashes(
     const std::string& input
   );
   static std::string convertStringToURLString(
     const std::string& input, bool usePlusesForSpacebars
   );
-  static std::string ConvertStringToHtmlString(
+  static std::string convertStringToHtmlString(
     const std::string& theString, bool doReplaceNewLineByBr
   );
-  static std::string ConvertStringToHtmlStringRestrictSize(
+  static std::string convertStringToHtmlStringRestrictSize(
     const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize
   );
-  static std::string ConvertStringEscapeQuotesAndBackslashes(
+  static std::string convertStringEscapeQuotesAndBackslashes(
     const std::string& input
   );
-  static std::string ConvertStringEscapeNewLinesQuotesBackslashes(
+  static std::string convertStringEscapeNewLinesQuotesBackslashes(
     const std::string& input
   );
 
   static bool URLStringToNormalOneStep(
     std::string& readAhead, std::stringstream& out, bool replacePlusBySpace
   );
-  static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
-  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static std::string GetCalculatorComputationURL(
+  static void replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
+  static std::string getCalculatorComputationURL(
     const std::string& inputNoEncoding
   );
   static std::string getCalculatorComputationAnchor(
     const std::string& inputNoEncoding
   );
-  static std::string GetSliderSpanStartsHidden(
+  static std::string getSliderSpanStartsHidden(
     const std::string& content,
     const std::string& label = "Expand/collapse",
     const std::string& desiredID = ""
   );
-  static std::string GetHtmlLinkToGithubRepo(const std::string& displayString);
-  static std::string GetHtmlLinkFromProjectFileName(
+  static std::string getHtmlLinkToGithubRepository(const std::string& displayString);
+  static std::string getHtmlLinkFromProjectFileName(
     const std::string& fileName,
     const std::string& fileDesc = "",
     int line = - 1
   );
-  static std::string DoubleBackslashes(const std::string& input);
+  static std::string doubleBackslashes(const std::string& input);
 
-  static std::string GetCSSLink(const std::string& fileNameVirtual);
-  static std::string GetJavascriptLink(const std::string& fileNameVirtual);
+  static std::string getCSSLink(const std::string& fileNameVirtual);
+  static std::string getJavascriptLink(const std::string& fileNameVirtual);
 
   static const std::string& GetCSSAddStyleTags(
     const std::string& fileNameVirtual
@@ -281,53 +280,48 @@ public:
     const std::string& theScript,
     const std::string& buttonText
   );
-  static std::string GetHtmlSpanHidableStartsHiddeN(
-    const std::string& input,
-    const std::string& labelExpandButton = "info expand/collapse",
-    const std::string& desiredId = ""
-  );
   static std::string clearNewLines(const std::string& theString);
   static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);
-  static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);
-  static bool IsRepresentedByItselfInURLs(char input);
+  static std::string cleanUpForLaTeXLabelUse(const std::string& inputString);
+  static bool isRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(
     std::string& theString, std::string& output
   );
-  static bool AccountOneInputCGIString(
+  static bool accountOneInputPercentEncodedString(
     const std::string& fieldName,
     const std::string& fieldValue,
     MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
-  static bool ChopCGIString(
+  static bool chopPercentEncodedString(
     const std::string& input,
     MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
-  static bool ChopCGIStringAppend(
+  static bool chopPercentEncodedStringAppend(
     const std::string& input,
     MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
-  static void ElementToStringTooltip(
+  static void elementToStringTooltip(
     const std::string& input,
     const std::string& inputTooltip,
     std::string& output,
     bool useHtml
   );
-  static std::string ElementToStringTooltip(
+  static std::string elementToStringTooltip(
     const std::string& input, const std::string& inputTooltip, bool useHtml
   ) {
     std::string result;
-    HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml);
+    HtmlRoutines::elementToStringTooltip(input, inputTooltip, result, useHtml);
     return result;
   }
-  static std::string ElementToStringTooltip(
+  static std::string elementToStringTooltip(
     const std::string& input, const std::string& inputTooltip
   ) {
-    return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true);
+    return HtmlRoutines::elementToStringTooltip(input, inputTooltip, true);
   }
   static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);
@@ -337,9 +331,9 @@ public:
     List<List<std::string> >& content,
     bool nestTables
   );
-  static std::string ToHtmlTableRowsFromStringContainingJSON(
+  static std::string toHtmlTableRowsFromStringContainingJSON(
     const std::string& theJSON
   );
-  static std::string ToHtmlTableRowsFromJSON(const JSData& input);
+  static std::string toHtmlTableRowsFromJSON(const JSData& input);
 };
 #endif

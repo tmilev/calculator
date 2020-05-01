@@ -155,7 +155,7 @@ public:
     LogData() {
       this->logType = LogData::type::server;
     }
-    std::string ToStringProcessType() const;
+    std::string ToStringprocessType() const;
   };
   LogData logs;
   template <typename theType>
@@ -198,7 +198,7 @@ public:
   int64_t millisecondsReplyAfterComputation;
   int64_t millisecondsComputationStart;
 
-  //  bool flagLogInterProcessCommunication;
+  //  bool flagLogInterprocessCommunication;
   // flags: what mode are we running in?
   bool flagRunningConsoleHelp;
   bool flagRunningConsoleRegular;
@@ -417,9 +417,9 @@ public:
   bool ConfigurationLoad();
   void ConfigurationProcess();
   int GetGlobalTimeInSeconds();
-  int64_t GetElapsedMilliseconds();
+  int64_t getElapsedMilliseconds();
   double getElapsedSeconds() {
-    return static_cast<double>(this->GetElapsedMilliseconds()) / 1000;
+    return static_cast<double>(this->getElapsedMilliseconds()) / 1000;
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultIsDebuggingAdmin();

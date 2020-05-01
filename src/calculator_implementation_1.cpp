@@ -536,7 +536,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
-      this->millisecondsComputationStart = global.GetElapsedMilliseconds();
+      this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }
     this->flagComputeNilradicals = computeNilradicals;
     this->flagComputeModuleDecomposition = computeModuleDecomposition;
@@ -1983,8 +1983,8 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   Rational theRat;
   if (input.isOfType<Rational>(&theRat)) {
     if (
-      theRat.getDenominator().IsIntegerFittingInInt(nullptr) &&
-      theRat.getNumerator().IsIntegerFittingInInt(nullptr)
+      theRat.getDenominator().isIntegerFittingInInt(nullptr) &&
+      theRat.getNumerator().isIntegerFittingInInt(nullptr)
     ) {
       out << " " << theRat.getNumerator().toString() << " " << theRat.getDenominator() << " div ";
       return output.assignValue(out.str(), theCommands);
@@ -2383,8 +2383,8 @@ public:
   HashedList<std::string, MathRoutines::HashString> rulesToBeIgnored;
   MapList<std::string, std::string, MathRoutines::HashString> rulesDisplayNamesMap;
   bool ComputeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
-  bool ProcessTransformation(const Expression& current, std::stringstream* commentsOnFailure);
-  bool ProcessChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
+  bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
+  bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
   void initializeComputation();
   const Expression* getCurrentE(const List<Expression>& input);
   ExpressionHistoryEnumerator();
@@ -2494,24 +2494,24 @@ bool ExpressionHistoryEnumerator::ComputeRecursively(
       childrenToAccount ++;
       continue;
     }
-    if (!this->ProcessChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
+    if (!this->processChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
       return false;
     }
     childrenToAccount = 0;
-    if (!this->ProcessTransformation(current, commentsOnFailure)) {
+    if (!this->processTransformation(current, commentsOnFailure)) {
       return false;
     }
   }
-  if (!this->ProcessChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
+  if (!this->processChildrenTransformations(firstNonAccountedChildIndex, childrenToAccount, commentsOnFailure)) {
     return false;
   }
   return true;
 }
 
-bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
+bool ExpressionHistoryEnumerator::processChildrenTransformations(
   int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ProcessChildrenTransformations");
+  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::processChildrenTransformations");
   if (numberOfChildren <= 0) {
     return true;
   }
@@ -2577,7 +2577,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
   return true;
 }
 
-bool ExpressionHistoryEnumerator::ProcessTransformation(
+bool ExpressionHistoryEnumerator::processTransformation(
   const Expression& current, std::stringstream* commentsOnFailure
 ) {
   if (!current.startsWith(this->owner->opExpressionHistorySet())) {

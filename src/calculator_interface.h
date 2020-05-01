@@ -549,7 +549,7 @@ private:
   bool CheckInitializationRecursively() const;
   bool checkConsistency() const;
   bool CheckConsistencyRecursively() const;
-  bool IsIntegerFittingInInt(int* whichInteger = nullptr) const;
+  bool isIntegerFittingInInt(int* whichInteger = nullptr) const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
   bool isIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const;
@@ -1252,7 +1252,7 @@ public:
 
   // bool flagReplaceInputBoxesByValues;
 
-  bool flagForkingProcessAllowed;
+  bool flagForkingprocessAllowed;
 
   double LastLogEvaluationTime;
   ///////////////////////////////////////////////////////////////////////////
@@ -1314,12 +1314,12 @@ public:
   FormatExpressions formatVisibleStrings;
   std::string ToStringRuleStatusUser();
   std::string toString();
-  std::string ToStringPerformance();
+  std::string toStringPerformance();
   Expression getNewBoundVariable();
   Expression getNewAtom();
   void ComputeAutoCompleteKeyWords();
   void WriteAutoCompleteKeyWordsToFile();
-  JSData ToJSONOutputAndSpecials();
+  JSData toJSONOutputAndSpecials();
   std::string ToStringOutputAndSpecials();
   JSData ToJSONFunctionHandlers();
   // the purpose of the operator below is to save on typing when returning false with a comment.

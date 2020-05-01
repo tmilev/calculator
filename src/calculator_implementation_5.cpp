@@ -1485,7 +1485,7 @@ bool CalculatorFunctions::innerLogarithmBaseNCeiling(
     return theCommands << "Failed to extract positive intger from second argument. ";
   }
   int result = static_cast<int>(
-    argument.LogarithmBaseNCeiling(static_cast<unsigned>(smallInt))
+    argument.logarithmBaseNCeiling(static_cast<unsigned>(smallInt))
   );
   return output.assignValue(result, theCommands);
 }
@@ -2932,7 +2932,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   << "\\end{frame}"
   << "\\end{document}\r\n";
   return output.assignValue(
-    HtmlRoutines::ConvertStringToHtmlString(latexOutput.str(), true), theCommands
+    HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true), theCommands
   );
 }
 

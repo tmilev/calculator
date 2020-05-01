@@ -284,7 +284,8 @@ function getLabelsRows(input) {
 JSONToHTML.prototype.bindButtons = function() {
   for (var i = this.panelInformation.length - 1; i >= 0; i--) {
     var currentInfo = this.panelInformation[i];
-    var currentPanel = new panels.PanelExpandable(currentInfo.panelId, true);
+    var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
+    currentPanel.initialize(true);
     currentPanel.setPanelContent(currentInfo.content);
     currentPanel.setPanelLabel(currentInfo.label);
   }
@@ -298,7 +299,8 @@ JSONToHTML.prototype.bindButtons = function() {
   }
   for (var i = 0; i < this.panelInformation.length; i ++) {
     var currentInfo = this.panelInformation[i];
-    var currentPanel = new panels.PanelExpandable(currentInfo.panelId, false);
+    var currentPanel = new panels.PanelExpandable(currentInfo.panelId);
+    currentPanel.initialize(false);
     currentPanel.matchPanelStatus();
   }
 }

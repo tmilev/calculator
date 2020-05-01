@@ -222,7 +222,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
     current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.SetWebInpuT(current.answerIdWebAPI, "1");
-    current.builtInAnswerAPICall = WebAPIResponse::GetAnswerOnGiveUp(
+    current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(
       randomSeedStream.str(),
       &current.builtInAnswer,
       &current.flagBuiltInGenerated,
@@ -240,7 +240,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
       current.builtInAnswer, false
     );
     global.SetWebInpuT(current.answerIdWebAPI, current.builtInAnswerEncoded);
-    current.builtInAnswerReply = WebAPIResponse::SubmitAnswersJSON(
+    current.builtInAnswerReply = WebAPIResponse::submitAnswersJSON(
       randomSeedStream.str(), &current.flagBuiltInWorks, false
     );
     global.webArguments.RemoveKey(current.answerIdWebAPI);
@@ -379,13 +379,13 @@ bool CalculatorHTML::Test::BuiltIn(
       badSoFar ++;
       if (global.flagRunningConsoleTest) {
         global << Logger::red << "Failure @ index: " << i << ". "
-        << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
+        << "Elapsed ms: " << global.getElapsedMilliseconds() << ". "
         << Logger::endL;        
       }
     } else {
       if (global.flagRunningConsoleTest) {
         global << Logger::green << "Success @ index: " << i << ". "
-        << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
+        << "Elapsed ms: " << global.getElapsedMilliseconds() << ". "
         << Logger::endL;
       }
     }
@@ -1221,7 +1221,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
     if (!input[1].isInteger(&integer)) {
       return false;
     }
-    if (!input[2].IsIntegerFittingInInt(&upperBound)) {
+    if (!input[2].isIntegerFittingInInt(&upperBound)) {
       return theCommands << "Failed to extract integer from " << upperBound << ".";
     }
   } else if (!input.isInteger(&integer)) {

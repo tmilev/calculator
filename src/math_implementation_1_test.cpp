@@ -5,8 +5,8 @@
 #include "math_extra_algebraic_numbers.h"
 #include "calculator.h"
 
-bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
+bool LargeIntegerUnsigned::Test::serializationToHex(const LargeIntegerUnsigned& input) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::Test::serializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
   if (!Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
     global.fatal << "Function Crypto::convertLargeUnsignedToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
@@ -25,12 +25,13 @@ bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& 
 
 bool LargeIntegerUnsigned::Test::all() {
   MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::all");
-  LargeIntegerUnsigned::Test::SerializationToHex(LargeIntegerUnsigned(100));
-  LargeIntegerUnsigned::Test::Comparisons();
+  LargeIntegerUnsigned::Test::serializationToHex(LargeIntegerUnsigned(100));
+  LargeIntegerUnsigned::Test::comparisons();
+  LargeIntegerUnsigned::Test::factor();
   return true;
 }
 
-bool LargeIntegerUnsigned::Test::Comparisons() {
+bool LargeIntegerUnsigned::Test::comparisons() {
   LargeIntegerUnsigned x = 1;
   LargeIntegerUnsigned y = 0;
   List<LargeIntegerUnsigned> toTest = {x, y};
@@ -43,6 +44,48 @@ bool LargeIntegerUnsigned::Test::Comparisons() {
   }
   return true;
 }
+
+bool LargeIntegerUnsigned::Test::factor() {
+  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 100, 100, 3);
+  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 0, 100, 3);
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::factorSmall(
+  const LargeIntegerUnsigned& input,
+  const std::string& expectedFactors,
+  const std::string& expectedMultiplicities,
+  int maximumDivisorToTry,
+  int numberMillerRabinRuns,
+  int64_t maximumRunningTime
+) {
+  List<LargeInteger> factors;
+  List<int> multiplicitiesInt;
+  int64_t millisecondsStart = global.getElapsedMilliseconds();
+  input.factor(factors, multiplicitiesInt, maximumDivisorToTry, numberMillerRabinRuns, nullptr);
+  int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;
+  if (elapsed > maximumRunningTime) {
+    global.fatal << "Factoring " << input << " with maximumDivisorToTry: " << maximumDivisorToTry
+    << " and " << numberMillerRabinRuns << " Miller-rabin runs took "
+    << elapsed << " ms, maximum allowed: "
+    << maximumRunningTime << " ms. " << global.fatal;
+  }
+  List<LargeInteger> multiplicities;
+  multiplicities = multiplicitiesInt;
+  std::stringstream out;
+  out << "Factoring: " << input << ". Got factors: "
+  << expectedFactors << " with multiplicities: "
+  << multiplicities.toStringCommaDelimited() << ". Expected: "
+  << expectedFactors << " with multiplicities: " << expectedMultiplicities << ". ";
+  if (
+    factors.toStringCommaDelimited() != expectedFactors ||
+    multiplicities.toStringCommaDelimited() != expectedMultiplicities
+  ) {
+    global.fatal << "Bad factorization. " << out.str() << global.fatal;
+  }
+  return true;
+}
+
 
 bool Rational::Test::all() {
   Rational::Test::TestScale();

@@ -46,7 +46,7 @@ int WebServer::Fork() {
   }
   this->ComputeActiveWorkerId();
   // timer taken at server level:
-  int64_t millisecondsAtFork = global.GetElapsedMilliseconds();
+  int64_t millisecondsAtFork = global.getElapsedMilliseconds();
   int result = fork();
   // We need to make sure that the child retains no information
   // about the server's random bytes, and similarly the server

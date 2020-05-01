@@ -35,7 +35,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
           int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
-          theIndex = this->GetRootIndexFromGenerator(theIndex);
+          theIndex = this->getRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal << "This is a programming error. "
             << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
@@ -448,7 +448,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::ModOutFDRelationsExperimen
     if (!this->Powers[k].isSmallInteger(thePower)) {
       return false;
     }
-    int rootIndex = this->owner->theOwner->GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
+    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
     const Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
     for (int j = 0; j < thePower; j ++) {
       currentWeight += currentRoot;

@@ -6,14 +6,16 @@ const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;
-const PanelExpandable = require('./panels').PanelExpandable;
+const panels = require('./panels');
 const mathjax = require('./mathjax-calculator-setup');
 const processMonitoring = require('./process_monitoring');
 const initializeButtons = require('./initialize_buttons');
 
+
 function Calculator() {
   this.parsedComputation = {};
-  this.panelIdPairs = [];
+  /** @type {panels.PanelExpandableData[]}*/
+  this.panels = [];
   this.inputBoxNames = [];
   this.inputBoxToSliderUpdaters = {};
   this.canvases = null;
@@ -234,7 +236,8 @@ Calculator.prototype.writeResult = function(
   /**@type {BufferCalculator} */
   buffer,
   inputParsed,
-  panelIdPairs,
+  /** @type {panels.PanelExpandableData[]} */
+  panelData,
 ) {
   if (inputParsed.commentsGlobal !== "" && inputParsed.commentsGlobal !== undefined) {
     buffer.write(inputParsed.commentsGlobal);
@@ -272,7 +275,16 @@ Calculator.prototype.writeResult = function(
     this.numberOfCalculatorPanels ++;
     var inputPanelId = `calculatorInputPanel${this.numberOfCalculatorPanels}`;
     var outputPanelId = `calculatorOutputPanel${this.numberOfCalculatorPanels}`;
-    panelIdPairs.push([inputPanelId, outputPanelId]);
+    if (i < inputParsed.result.input.length) {
+      panelData.push(new panels.PanelExpandableData(
+        inputParsed.result.input[i], inputPanelId, 150,
+      ));
+    }
+    if (i < inputParsed.result.output.length) {
+      panelData.push(new panels.PanelExpandableData(
+        inputParsed.result.output[i], outputPanelId, 150,
+      ));
+    }
     buffer.write(`<tr>`);
     buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
     buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
@@ -280,8 +292,15 @@ Calculator.prototype.writeResult = function(
   }
   buffer.write(`</table>`);
   buffer.write(`</td><td><div class = "containerComments">`);
-  if (inputParsed.performance !== undefined) {
-    buffer.write(inputParsed.performance);
+  buffer.write("<b>Double-click formulas to get their LaTeX.</b>");
+  buffer.write("<br>Double-click back to hide the LaTeX.");
+  if (inputParsed[pathnames.urlFields.result.performance] !== undefined) {
+    buffer.write(`<div id = '${ids.domElements.divPerformance}'></div>`);
+    panelData.push(new panels.PanelExpandableData(
+      inputParsed.performance,
+      ids.domElements.divPerformance,
+      0,
+    ));
     buffer.write("<br>");
   }
   if (inputParsed.comments !== undefined ) {
@@ -301,27 +320,8 @@ Calculator.prototype.writeResult = function(
 }
 
 Calculator.prototype.afterWriteOutput = function() {
-  for (var i = 0; i < this.panelIdPairs.length; i ++) {
-    var currentInput = this.parsedComputation.result.input[i];
-    var currentOutput = this.parsedComputation.result.output[i];
-    var inputPanelId = this.panelIdPairs[i][0];
-    var outputPanelId = this.panelIdPairs[i][1];
-    if (currentInput.length > 200) {
-      var inputPanel = new PanelExpandable(inputPanelId, true);
-      inputPanel.setPanelContent(currentInput);
-      inputPanel.doToggleContent();
-      inputPanel.matchPanelStatus();
-    } else {
-      document.getElementById(inputPanelId).innerHTML = currentInput;
-    }
-    if (currentOutput.length > 150) {
-      var outputPanel = new PanelExpandable(outputPanelId, true);
-      outputPanel.setPanelContent(currentOutput);
-      outputPanel.doToggleContent();
-      outputPanel.matchPanelStatus();
-    } else {
-      document.getElementById(outputPanelId).innerHTML = currentOutput;
-    }
+  for (var i = 0; i < this.panels.length; i ++) {
+    panels.makePanelFromData(this.panels[i]);
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
   var incomingScripts = spanVerification.getElementsByTagName('script');
@@ -342,15 +342,14 @@ Calculator.prototype.afterWriteOutput = function() {
 }
 
 Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) {
-  this.parsedComputation = null;
   var inputHtml = null;
-  this.panelIdPairs = [];
+  this.panels.length = 0;
   try {
     this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
     var buffer = new BufferCalculator();
     var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
     progReportTimer.innerHTML = "";
-    this.writeResult(buffer, this.parsedComputation, this.panelIdPairs);
+    this.writeResult(buffer, this.parsedComputation, this.panels);
     inputHtml = buffer.toString();
   } catch (e) {
     inputHtml = input + "<br>" + e;

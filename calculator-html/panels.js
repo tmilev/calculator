@@ -113,10 +113,21 @@ function toggleMenu() {
   }
 }
 
+function PanelExpandableData(
+  /** @type {string} */
+  content,
+  /** @type {string} */
+  id,
+  /** @type {number} */
+  minimalCharacterLengthForPanel
+) {
+  this.content = content;
+  this.id = id;
+  this.minimalCharacterLengthForPanel = minimalCharacterLengthForPanel;
+}
+
 function PanelExpandable(
   container,
-  /** @type {Boolean} */
-  resetPanel,
 ) {
   this.attributes = {
     buttonId: null,
@@ -128,8 +139,35 @@ function PanelExpandable(
     originalWidth: "0px",
   }
   this.containerId = "";
-  this.container = null;
-  this.initialize(container, resetPanel);
+  this.container = container;
+  if (typeof container === "string") {
+    this.containerId = container;
+    this.container = document.getElementById(this.containerId);
+  } else {
+    this.containerId = this.container.id;
+  }
+}
+
+function makePanelFromData(
+/** @type {PanelExpandableData} */
+  data 
+) {
+  var doCreatePanel = false;
+  if (data.content.length > data.minimalCharacterLengthForPanel) {
+    doCreatePanel = true;
+  } 
+  if (doCreatePanel) {
+    var inputPanel = new PanelExpandable(data.id);
+    inputPanel.initialize(true);
+    inputPanel.setPanelContent(data.content);
+    inputPanel.doToggleContent();
+    inputPanel.matchPanelStatus();
+  } else {
+    var element = document.getElementById(data.id);
+    if (element != null) {
+      element.innerHTML = data.content;
+    }
+  }
 }
 
 PanelExpandable.prototype.matchPanelStatus = function() {
@@ -161,11 +199,13 @@ PanelExpandable.prototype.setPanelLabel = function(input) {
   panelLabel.innerHTML = input;
 }
 
-PanelExpandable.prototype.initialize = function(container, resetPanel) {
-  if (container === null || container === undefined || container === "") {
+PanelExpandable.prototype.initialize = function(  
+  /** @type {boolean} */
+  resetPanel,
+) {
+  if (this.container === null || this.container === undefined || this.container === "") {
     return this;
   }
-  this.container = container;
   if (typeof this.container === "string") {
     this.container = document.getElementById(this.container);
   }
@@ -203,6 +243,7 @@ PanelExpandable.prototype.setStatusToBeCalledThroughTimeout = function() {
 
 function doToggleContent(progressId) {
   var thePanel = new PanelExpandable(progressId);
+  thePanel.initialize(false);
   thePanel.doToggleContent();
 }
 
@@ -261,5 +302,7 @@ module.exports = {
   toggleMenu,
   doToggleContent,
   PanelExpandable,
+  PanelExpandableData,
+  makePanelFromData,
   toggleHeight
 };

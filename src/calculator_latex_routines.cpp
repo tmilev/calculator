@@ -759,7 +759,7 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
         << "Pdf of slides not created. "
         << "Only logged-in admins can compile pdfs. "
         << "Computed file name: "
-        << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false);
+        << HtmlRoutines::convertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false);
       }
       return false;
     }

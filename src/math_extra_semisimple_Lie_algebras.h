@@ -184,7 +184,7 @@ public:
   int GetGeneratorFromRootIndex(int theIndex) const;
   int GetDisplayIndexFromRootIndex(int theIndex) const;
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
-  int GetRootIndexFromGenerator(int theIndex) const;
+  int getRootIndexFromGenerator(int theIndex) const;
   int GetCartanIndexFromGenerator(int theIndex) {
     return theIndex + this->theWeyl.RootsOfBorel.size;
   }
@@ -205,8 +205,8 @@ public:
     if (this->IsGeneratorFromCartan(leftIndex) || this->IsGeneratorFromCartan(rightIndex)) {
       return false;
     }
-    int left = this->GetRootIndexFromGenerator(leftIndex);
-    int right = this->GetRootIndexFromGenerator(rightIndex);
+    int left = this->getRootIndexFromGenerator(leftIndex);
+    int right = this->getRootIndexFromGenerator(rightIndex);
     return (this->theWeyl.RootSystem[left] + this->theWeyl.RootSystem[right]).isEqualToZero();
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight);

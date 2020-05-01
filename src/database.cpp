@@ -252,7 +252,7 @@ std::string Database::ConvertStringToMongoKeyString(
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
     if (
-      HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) &&
+      HtmlRoutines::isRepresentedByItselfInURLs(input[i]) &&
       input[i] != '.'
     ) {
       out << input[i];
@@ -994,7 +994,7 @@ bool Database::User::SendActivationEmail(
 bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::loadFromOldFormat");
   MapList<std::string, std::string, MathRoutines::HashString> theMap;
-  if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure)) {
+  if (!HtmlRoutines::chopPercentEncodedString(inputData, theMap, commentsOnFailure)) {
     return false;
   }
   this->Points = 0;
@@ -1017,7 +1017,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
     this->addEmptyAnswerIdOnTop(HtmlRoutines::convertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.lastObject();
     std::string currentQuestion = HtmlRoutines::convertURLStringToNormal(theMap.theValues[i], false);
-    result = HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
+    result = HtmlRoutines::chopPercentEncodedString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result) {
       commentsOnFailure << "Failed to interpret as key-value pair: "
       << currentQuestion << ". ";
@@ -1089,7 +1089,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   MapList<std::string, std::string, MathRoutines::HashString> theMap;
-  if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure)) {
+  if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;
   }
   this->theProblemData.clear();
@@ -1504,15 +1504,15 @@ bool EmailRoutines::sendEmailWithMailGun(
   //Those MUST be sanitized (else an attacker would use username with " characters
   //to execute arbitrary code.
   commandToExecute << "-F to=\""
-  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->toEmail) << "\" "
+  << HtmlRoutines::convertStringEscapeQuotesAndBackslashes(this->toEmail) << "\" "
   << "-F subject=\""
-  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
+  << HtmlRoutines::convertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
   << "-F text=\""
-  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
+  << HtmlRoutines::convertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
   std::string commandResult = global.externalCommandReturnOutput(commandToExecute.str());
   if (commentsGeneralSensitive != nullptr) {
-    *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
+    *commentsGeneralSensitive << "Command: " << HtmlRoutines::convertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;
     if (commandResult.find("Forbidden") != std::string::npos) {
       isBad = true;
@@ -1521,7 +1521,7 @@ bool EmailRoutines::sendEmailWithMailGun(
     if (isBad) {
       *commentsGeneralSensitive << "<b style ='color:red'>";
     }
-    *commentsGeneralSensitive << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
+    *commentsGeneralSensitive << HtmlRoutines::convertStringToHtmlString(commandResult, true);
     if (isBad) {
       *commentsGeneralSensitive << "</b>";
     }

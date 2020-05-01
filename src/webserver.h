@@ -75,7 +75,7 @@ public:
   void PrepareFullMessageHeaderAndFooter();
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
-  JSData ProcessComputationIndicatorJSData();
+  JSData processComputationIndicatorJSData();
   int GetIndexIfRunningWorkerId(JSData& outputComputationStatus);
   int ProcessFolderOrFile();
   int ProcessFolder();
@@ -218,7 +218,7 @@ public:
   int NumConnectionsSoFar;
   int NumberOfServerRequestsWithinAllConnections;
   int NumProcessesReaped;
-  int NumProcessAssassinated;
+  int NumprocessAssassinated;
   int NumWorkersNormallyExited;
   int WebServerPingIntervalInSeconds;
   int previousServerStatReport;

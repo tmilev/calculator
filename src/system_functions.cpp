@@ -10,7 +10,7 @@
 
 static timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
-int64_t GlobalVariables::GetElapsedMilliseconds() {
+int64_t GlobalVariables::getElapsedMilliseconds() {
   gettimeofday(&LastMeasureOfCurrentTime, nullptr);
   return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
   (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
@@ -48,10 +48,10 @@ public:
 bool TimeoutThread::HandleComputationTimer() {
   if (global.flagComputationStarted) {
     if (global.millisecondsComputationStart < 0) {
-      global.millisecondsComputationStart = global.GetElapsedMilliseconds();
+      global.millisecondsComputationStart = global.getElapsedMilliseconds();
     }
   }
-  this->elapsedTimeInMilliseconds = global.GetElapsedMilliseconds();
+  this->elapsedTimeInMilliseconds = global.getElapsedMilliseconds();
   if (global.millisecondsComputationStart > 0) {
     this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - global.millisecondsComputationStart;
   }

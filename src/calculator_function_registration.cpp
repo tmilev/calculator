@@ -7482,7 +7482,7 @@ void Calculator::initPredefinedStandardOperations() {
     "a^(49);\n"
     "a^(7^3 );\n"
     "a^(7^4 );\n"
-    "a^(7^5 ); \n"
+    "a^(7^5 );\n"
     "r = a^( (7^6 - 1) /2);\n"
     "s = PolynomialModP(Value Value r - 1, 7);\n"
     "t = PolynomialModP(Value Value r, 7);\n"
@@ -7935,7 +7935,9 @@ void Calculator::initPredefinedStandardOperations() {
   << "A small integer is defined at compile time in the "
   << "variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntegerUnsigned::SquareRootOfCarryOverBound << "). "
-  << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
+//  << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+  << moreInfoOnIntegers.str();
+//  );
 
   this->addOperationHandler(
     "<",

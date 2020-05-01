@@ -343,7 +343,7 @@ std::string WebWorker::ToStringMessageFull() const {
   if (this->theMessageHeaderStrings.size > 0) {
     out << "<hr>\nStrings extracted from message: ";
     for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
-      out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->theMessageHeaderStrings[i], false);
+      out << "<br>" << HtmlRoutines::convertStringToHtmlString(this->theMessageHeaderStrings[i], false);
     }
   }
   return out.str();
@@ -362,21 +362,21 @@ std::string WebWorker::ToStringMessageShort() const {
   }
   std::string lineBreak = "\n<br>";
   out << "<hr>Address get or post:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
+  << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, true);
   out << lineBreak << "\nAddress computed:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true);
+  << HtmlRoutines::convertStringToHtmlString(this->addressComputed, true);
   out << lineBreak << "\nArgument computed:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true);
+  << HtmlRoutines::convertStringToHtmlString(this->argumentComputed, true);
   out << lineBreak << "\nVirtual file/directory name:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true);
+  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, true);
   out << lineBreak << "\nRelative physical file/directory name:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
+  << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << lineBreak << "\nExecutable url:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(global.DisplayNameExecutable, false);
+  << HtmlRoutines::convertStringToHtmlString(global.DisplayNameExecutable, false);
   out << lineBreak << "\nPhysical address project base:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathProjectBase, false);
+  << HtmlRoutines::convertStringToHtmlString(global.PhysicalPathProjectBase, false);
   out << lineBreak << "\nPhysical address server base:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathServerBase, false);
+  << HtmlRoutines::convertStringToHtmlString(global.PhysicalPathServerBase, false);
   out << "<hr>";
   if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
@@ -385,11 +385,11 @@ std::string WebWorker::ToStringMessageShort() const {
   }
   out << "<br>Cookies (" << this->cookies.size << " total):";
   for (int i = 0; i < this->cookies.size; i ++) {
-    out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->cookies[i], false);
+    out << "<br>" << HtmlRoutines::convertStringToHtmlString(this->cookies[i], false);
   }
-  out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(global.hostWithPort, false);
-  out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
-  out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
+  out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::convertStringToHtmlString(global.hostWithPort, false);
+  out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::convertStringToHtmlString(this->messageHead, true);
+  out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::convertStringToHtmlString(this->messageBody, true);
   return out.str();
 }
 
@@ -484,7 +484,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   MapList<std::string, std::string, MathRoutines::HashString> newlyFoundArgs;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
-    if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
+    if (!HtmlRoutines::chopPercentEncodedStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
       result = false;
     }
   }
@@ -534,7 +534,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
   }
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
   global.webArguments;
-  if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments)) {
+  if (!HtmlRoutines::chopPercentEncodedStringAppend(input, theArgs, argumentProcessingFailureComments)) {
     return false;
   }
   return true;
@@ -831,7 +831,7 @@ void WebWorker::ParseMessageHead() {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
         LargeIntegerUnsigned theLI;
         if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
-          if (!theLI.IsIntegerFittingInInt(&this->ContentLength)) {
+          if (!theLI.isIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
           }
         }
@@ -888,9 +888,9 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   global << Logger::red << "Unknown request. " << Logger::endL;
   global << Logger::blue << "Message head length: " << this->messageHead.size() << Logger::endL;
   std::string messageHeadHexed = Crypto::convertStringToHex(this->messageHead, 100, false);
-  global << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << Logger::endL;
+  global << HtmlRoutines::convertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << Logger::endL;
   global << Logger::orange << "Message body length: " << this->messageBody.size() << ". " << Logger::endL;
-  global << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << Logger::endL;
+  global << HtmlRoutines::convertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << Logger::endL;
   global << Logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0) {
     if (*this->theMessageHeaderStrings.lastObject() != "\n") {
@@ -1119,8 +1119,8 @@ int WebWorker::GetIndexIfRunningWorkerId(
   return indexOther;
 }
 
-JSData WebWorker::ProcessComputationIndicatorJSData() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
+JSData WebWorker::processComputationIndicatorJSData() {
+  MacroRegisterFunctionWithName("WebWorker::processComputationIndicatorJSData");
   // Timer thread will no longer time us out.
   JSData result;
   std::stringstream commentsOnFailure;
@@ -1236,17 +1236,17 @@ int WebWorker::ProcessFolder() {
   if (this->flagFileNameSanitized) {
     std::stringstream sanitization;
     sanitization << "<hr>The virtual file name I extracted was: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+    << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
     << "<br>However, I do not allow folder names that contain dots. "
     << "Therefore I have sanitized the main address to: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
+    << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, false);
     outPage << sanitization.str();
     outError << sanitization.str();
   }
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
     outError << "<b>Failed to open directory with physical address "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
+    << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, false)
     << " </b>";
     JSData result;
     result[WebAPI::result::error] = outError.str();
@@ -1254,8 +1254,8 @@ int WebWorker::ProcessFolder() {
     return 0;
   }
   outPage << "Browsing folder: "
-  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
-  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false) << "<hr>";
+  << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
+  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false) << "<hr>";
   List<std::string> folderLinksSanitized, fileLinksSanitized;
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
@@ -1264,7 +1264,7 @@ int WebWorker::ProcessFolder() {
     if (isDir) {
       currentStream << "/";
     }
-    currentStream << "\">" << HtmlRoutines::ConvertStringToHtmlString(theFileNames[i], false);
+    currentStream << "\">" << HtmlRoutines::convertStringToHtmlString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -1293,7 +1293,7 @@ int WebWorker::ProcessFolder() {
 int WebWorker::ProcessFileDoesntExist() {
   this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
   // WARNING: cross-site scripting danger. Pay attention when editing.
-  // Use ConvertStringToHtmlString to sanitize strings.
+  // Use convertStringToHtmlString to sanitize strings.
   // Never return non-sanitized user input back to the user.
   std::stringstream out;
   out << "<html>"
@@ -1305,21 +1305,21 @@ int WebWorker::ProcessFileDoesntExist() {
   if (this->flagFileNameSanitized) {
     out
     << "<hr>You requested virtual file: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+    << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
     << "<br>However, I do not allow addresses that contain dots "
     << "(to avoid access to folders below the server). "
     << "Therefore I have sanitized the address to a relative physical address: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
+    << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, false)
     << ".";
   }
   out << "<br><b>Address:</b> "
-  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
+  << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, true)
   << "<br><b>Virtual file name:</b> "
-  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
+  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
-  << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
+  << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << "<br><b>Request:</b> "
-  << HtmlRoutines::ConvertStringToHtmlString(global.requestType, true);
+  << HtmlRoutines::convertStringToHtmlString(global.requestType, true);
   out << "</body></html>";
   // End of WARNING: cross-site scripting danger.
   this->WriteToBody(out.str());
@@ -1528,7 +1528,7 @@ std::string WebWorker::MIMETypeFromFileExtension(const std::string& fileExtensio
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  global.theResponse.writeResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"), false);
+  global.theResponse.writeResponse(WebAPIResponse::getJSONUserInfo("Unknown request"), false);
   return 0;
 }
 
@@ -1674,7 +1674,7 @@ bool WebWorker::DoSetEmail(
   if (commentsGeneralSensitive != nullptr) {
     if (global.UserDefaultHasAdminRights()) {
       *commentsGeneralSensitive << "<hr>Content of sent email (administrator view only):<br>"
-      << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
+      << HtmlRoutines::convertStringToHtmlString(theEmail.emailContent, true);
     }
   } else {
     if (commentsGeneralNonSensitive != nullptr) {
@@ -1719,16 +1719,16 @@ int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthe
 JSData WebWorker::GetClonePageResult() {
   MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
   this->setHeaderOKNoContentLength("");
-  return WebAPIResponse::ClonePageResult();
+  return WebAPIResponse::clonePageResult();
 }
 
 std::string WebWorker::GetAddUserEmails() {
   MacroRegisterFunctionWithName("WebWorker::GetAddUserEmails");
-  return WebAPIResponse::AddUserEmails(this->hostWithPort);
+  return WebAPIResponse::addUserEmails(this->hostWithPort);
 }
 
-std::string WebAPIResponse::ModifyProblemReport() {
-  MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
+std::string WebAPIResponse::modifyProblemReport() {
+  MacroRegisterFunctionWithName("WebWorker::modifyProblemReport");
   bool shouldProceed = global.flagLoggedIn && global.UserDefaultHasAdminRights();
   if (shouldProceed) {
     shouldProceed = global.flagUsingSSLinCurrentConnection;
@@ -1770,15 +1770,15 @@ std::string WebAPIResponse::ModifyProblemReport() {
   return out.str();
 }
 
-std::string WebAPIResponse::GetJavascriptCaptcha() {
+std::string WebAPIResponse::getJavascriptCaptcha() {
   MacroRegisterFunctionWithName("WebAPIResponse::GetCaptchaJavascript");
   std::stringstream out;
   out << "<script src = 'https://www.google.com/recaptcha/api.js'></script>";
   return out.str();
 }
 
-std::string WebAPIResponse::GetCaptchaDiv() {
-  MacroRegisterFunctionWithName("WebAPIResponse::GetCaptchaDiv");
+std::string WebAPIResponse::getCaptchaDiv() {
+  MacroRegisterFunctionWithName("WebAPIResponse::getCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
   if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
@@ -1973,7 +1973,7 @@ bool WebWorker::RequireSSL() {
 
 int WebWorker::ServeClient() {
   MacroRegisterFunctionWithName("WebWorker::ServeClient");
-  global.millisecondsComputationStart = global.GetElapsedMilliseconds();
+  global.millisecondsComputationStart = global.getElapsedMilliseconds();
   global.flagComputationStarted = true;
   global.flagComputationCompletE = false;
   global.userDefault.flagMustLogin = true;
@@ -2015,13 +2015,13 @@ int WebWorker::ServeClient() {
   std::stringstream comments;
   comments << "Address, request computed: ";
   if (this->addressComputed != "") {
-    comments << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, false);
+    comments << HtmlRoutines::convertStringToHtmlString(this->addressComputed, false);
   } else {
     comments << "[empty]";
   }
   comments << ", ";
   if (global.requestType != "") {
-    comments << HtmlRoutines::ConvertStringToHtmlString(global.requestType, false);
+    comments << HtmlRoutines::convertStringToHtmlString(global.requestType, false);
   } else {
     comments << "[empty]";
   }
@@ -2082,7 +2082,7 @@ int WebWorker::ServeClient() {
     if (argumentProcessingFailureComments.str() != "") {
       global.SetWebInpuT("authenticationToken", "");
     }
-    return this->response.ProcessLoginUserInfo(argumentProcessingFailureComments.str());
+    return this->response.processLoginUserInfo(argumentProcessingFailureComments.str());
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
@@ -2100,7 +2100,7 @@ int WebWorker::ServeClient() {
       global.CookiesToSetUsingHeaders.setKeyValue("spoofHostName", global.hostNoPort);
     }
   }
-  if (this->response.ServeResponseFalseIfUnrecognized(
+  if (this->response.serveResponseFalseIfUnrecognized(
     argumentProcessingFailureComments, comments
   )) {
     return 0;
@@ -2125,7 +2125,7 @@ int WebWorker::ProcessFolderOrFile() {
     std::stringstream out;
     JSData result;
     out << "File name: "
-    << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
+    << HtmlRoutines::convertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
     << " <b style = 'color:red'>deemed unsafe</b>. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots. There may be additional restrictions "
@@ -2340,7 +2340,7 @@ WebServer::WebServer() {
   this->NumFailedSelectsSoFar = 0;
   this->NumSuccessfulSelectsSoFar = 0;
   this->NumProcessesReaped = 0;
-  this->NumProcessAssassinated = 0;
+  this->NumprocessAssassinated = 0;
   this->NumConnectionsSoFar = 0;
   this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
@@ -2546,7 +2546,7 @@ std::string WebServer::ToStringConnectionSummary() {
   out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
   int64_t timeRunninG = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    timeRunninG = global.GetElapsedMilliseconds();
+    timeRunninG = global.getElapsedMilliseconds();
   } else {
     timeRunninG = this->getActiveWorker().millisecondsLastPingServerSideOnly;
   }
@@ -2593,7 +2593,7 @@ std::string WebServer::ToStringStatusForLogFile() {
   << " worker(s) in use. The peak number of worker(s)/concurrent connections was "
   << this->theWorkers.size << ". ";
   out
-  << "<br>kill commands: " << this->NumProcessAssassinated
+  << "<br>kill commands: " << this->NumprocessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped
   << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
   << ", connections so far: " << this->NumConnectionsSoFar;
@@ -2857,7 +2857,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     // In particular, it should not be possible to terminate by accident
     // a pid that is not owned by the server.
     this->TerminateChildSystemCall(theIndices[j]);
-    this->NumProcessAssassinated ++;
+    this->NumprocessAssassinated ++;
     std::stringstream errorStream;
     errorStream
     << "Terminating child " << theIndices[j] + 1 << " with PID "
@@ -2935,7 +2935,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   currentPingPipe.ReadOnceIfFailThenCrash(true);
   if (currentPingPipe.lastRead.size > 0) {
     currentWorker.pingMessage = currentPingPipe.GetLastRead();
-    currentWorker.millisecondsLastPingServerSideOnly = global.GetElapsedMilliseconds();
+    currentWorker.millisecondsLastPingServerSideOnly = global.getElapsedMilliseconds();
     if (currentWorker.pingMessage != "") {
       global << Logger::blue << "Worker " << childIndex + 1 << " ping: "
       << currentWorker.pingMessage << ". " << Logger::endL;
@@ -2945,7 +2945,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   if (global.millisecondsNoPingBeforeChildIsPresumedDead <= 0) {
     return;
   }
-  int64_t millisecondsElapsed = global.GetElapsedMilliseconds() - currentWorker.millisecondsLastPingServerSideOnly;
+  int64_t millisecondsElapsed = global.getElapsedMilliseconds() - currentWorker.millisecondsLastPingServerSideOnly;
   if (millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead) {
     return;
   }
@@ -2964,7 +2964,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   global << Logger::red << pingTimeoutStream.str() << Logger::endL;
   currentWorker.pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
   numberInUse --;
-  this->NumProcessAssassinated ++;
+  this->NumprocessAssassinated ++;
 }
 
 void WebServer::HandleTooManyWorkers(int& numInUse) {
@@ -2988,7 +2988,7 @@ void WebServer::HandleTooManyWorkers(int& numInUse) {
     this->theWorkers[i].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
     numInUse --;
-    this->NumProcessAssassinated ++;
+    this->NumprocessAssassinated ++;
   }
   if (global.flagServerDetailedLog) {
     global << Logger::green
@@ -3369,7 +3369,7 @@ int WebServer::Run() {
     if (global.flagServerDetailedLog) {
       global << Logger::green << "Detail: select success. " << Logger::endL;
     }
-    int64_t millisecondsAfterSelect = global.GetElapsedMilliseconds();
+    int64_t millisecondsAfterSelect = global.getElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
       global << Logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
@@ -3378,11 +3378,11 @@ int WebServer::Run() {
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
     int reportCount =
-    this->NumProcessAssassinated + this->NumProcessesReaped +
+    this->NumprocessAssassinated + this->NumProcessesReaped +
     this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
     if (reportCount - previousServerStatReport > 99) {
       this->previousServerStatReport = reportCount;
-      global << "# kill commands: " << this->NumProcessAssassinated
+      global << "# kill commands: " << this->NumprocessAssassinated
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
       << " #connections so far: " << this->NumConnectionsSoFar << Logger::endL;
@@ -3419,7 +3419,7 @@ int WebServer::Run() {
     this->getActiveWorker().connectedSocketID = newConnectedSocket;
     this->ComputeSSLFlags();
     this->getActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
-    this->getActiveWorker().millisecondsServerAtWorkerStart = global.GetElapsedMilliseconds();
+    this->getActiveWorker().millisecondsServerAtWorkerStart = global.getElapsedMilliseconds();
     this->getActiveWorker().millisecondsLastPingServerSideOnly = this->getActiveWorker().millisecondsServerAtWorkerStart;
     this->getActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; // <- measured right after select()
     // <-cannot set earlier as the active worker may change after recycling.
@@ -3444,11 +3444,11 @@ int WebServer::Run() {
     // global << "\r\nChildPID: " << this->childPID;
     if (global.flagServerDetailedLog && incomingPID == 0) {
       global << "Detail: Fork() successful in worker; elapsed ms @ Fork(): "
-      << global.GetElapsedMilliseconds() << Logger::endL;
+      << global.getElapsedMilliseconds() << Logger::endL;
     }
     if (global.flagServerDetailedLog && incomingPID > 0) {
       global << "Detail: Fork() successful; elapsed ms @ Fork(): "
-      << global.GetElapsedMilliseconds() << Logger::endL;
+      << global.getElapsedMilliseconds() << Logger::endL;
     }
     if (incomingPID < 0) {
       global << Logger::red << " FAILED to spawn a child process. " << Logger::endL;
@@ -3479,7 +3479,7 @@ int WebServer::Run() {
     }
     if (global.flagServerDetailedLog) {
       global << Logger::green << "Detail: fork successful. Time elapsed: "
-      << global.GetElapsedMilliseconds() << " ms. "
+      << global.getElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << Logger::endL;
     }
     this->ReleaseWorkerSideResources();
@@ -3589,7 +3589,7 @@ bool WebWorker::RunOnce() {
   global << Logger::blue << "Received " << this->numberOfReceivesCurrentConnection
   << " times on this connection, waiting for more. "
   << Logger::endL;
-  global.millisecondOffset += global.GetElapsedMilliseconds();
+  global.millisecondOffset += global.getElapsedMilliseconds();
   this->parent->WorkerTimerPing(global.millisecondOffset);
   return true;
 }
@@ -3869,7 +3869,7 @@ bool WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
     return false;
   }
   int timeLimitInt = 0;
-  if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
+  if (timeLimit.isIntegerFittingInInt(&timeLimitInt)) {
     global.millisecondsMaxComputation = timeLimitInt;
     if (global.millisecondsMaxComputation <= 0) {
       global.millisecondsMaxComputation = 0;
@@ -4512,7 +4512,7 @@ int WebServer::mainCommandLine() {
   );
   global << theCalculator.outputString;
   outputFile << theCalculator.outputString;
-  global << "\nTotal running time: " << Logger::blue << global.GetElapsedMilliseconds() << " ms. "
+  global << "\nTotal running time: " << Logger::blue << global.getElapsedMilliseconds() << " ms. "
   << Logger::endL
   << "Output written in: " << Logger::green << outputFileName << Logger::endL << "\n";
   return 0;

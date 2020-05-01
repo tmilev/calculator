@@ -59,6 +59,7 @@ var domElements = {
   spanUserExtraInfo: "spanUserExtraInfo",
   spanStudentViewPanel: "spanStudentViewPanel",
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
+  divPerformance: "divPerformance",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
   divMathjaxProblematicRender: "divMathjaxProblematicRender",

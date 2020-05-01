@@ -1872,12 +1872,12 @@ bool Expression::isIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const 
   return true;
 }
 
-bool Expression::IsIntegerFittingInInt(int* whichInteger) const {
+bool Expression::isIntegerFittingInInt(int* whichInteger) const {
   Rational theRat;
   if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
-  return theRat.IsIntegerFittingInInt(whichInteger);
+  return theRat.isIntegerFittingInInt(whichInteger);
 }
 
 bool Expression::makeAtom(const std::string& atomName, Calculator& newBoss) {
@@ -2119,7 +2119,7 @@ bool Expression::toStringBuiltIn<std::string>(
       out
       << StringRoutines::ConvertStringToCalculatorDisplay(input.getValue<std::string>());
     } else {
-      out << HtmlRoutines::ConvertStringToHtmlString(input.getValue<std::string>(), false);
+      out << HtmlRoutines::convertStringToHtmlString(input.getValue<std::string>(), false);
     }
   } else {
     out << "\"" << StringRoutines::ConvertStringToJavascriptString(input.getValue<std::string>()) << "\"";

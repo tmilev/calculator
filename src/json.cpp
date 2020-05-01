@@ -243,7 +243,7 @@ void JSData::operator=(int64_t input) {
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->theType == JSData::token::tokenLargeInteger) {
-    return this->theInteger.getElement().IsIntegerFittingInInt(whichInteger);
+    return this->theInteger.getElement().isIntegerFittingInInt(whichInteger);
   }
   if (this->theType == JSData::token::tokenFloat) {
     double floatRounded = static_cast<double>(static_cast<int>(this->theFloat));
@@ -639,7 +639,7 @@ bool JSData::readstring(
       std::stringstream calculatorInput;
       calculatorInput
       << "TestJSON(\""
-      << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(json)
+      << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(json)
       << "\")";
       *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
       << "<a href=\""
@@ -647,7 +647,7 @@ bool JSData::readstring(
       << "?request=calculator&mainInput="
       << HtmlRoutines::convertStringToURLString(calculatorInput.str(), false)
       << "\">"
-      << HtmlRoutines::ConvertStringToHtmlString(json, true)
+      << HtmlRoutines::convertStringToHtmlString(json, true)
       << "</a>"
       << "<br>Result:<br>\n ";
       for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++) {

@@ -436,7 +436,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   }
   List<int> classmap;
   int sizeOfG = - 1;
-  G.getSize().IsIntegerFittingInInt(&sizeOfG);
+  G.getSize().isIntegerFittingInInt(&sizeOfG);
   classmap.setSize(sizeOfG);
 //  classmap.setSize(G.theElements.size);
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
@@ -541,7 +541,7 @@ template <typename somegroup>
 Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = nullptr) {
   List<int> invl;
   int classSize = - 1;
-  G.conjugacyClasses[cci].size.IsIntegerFittingInInt(&classSize);
+  G.conjugacyClasses[cci].size.isIntegerFittingInInt(&classSize);
   invl.setSize(classSize);
   for (int i = 0; i < G.conjugacyClasses[cci].size; i ++) {
     invl[i] = G.invert(G.theElements.getIndex(G.conjugacyClasses[cci].theElements[i]));

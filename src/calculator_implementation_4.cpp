@@ -863,7 +863,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   const Expression& middleE = input[2];
   const Expression& rightE  = input[3];
   int numRows, numCols;
-  if (!middleE.IsIntegerFittingInInt(&numRows) || !rightE.IsIntegerFittingInInt(&numCols)) {
+  if (!middleE.isIntegerFittingInInt(&numRows) || !rightE.isIntegerFittingInInt(&numCols)) {
     return false;
   }
   if (numRows <= 0 || numCols <= 0) {
@@ -2446,7 +2446,7 @@ std::string Function::toStringFull() const {
     if (this->theExample != "") {
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     }
-    out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
+    // out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "") {
       out2 << "<a href=\"" << global.DisplayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
@@ -2485,20 +2485,20 @@ std::string ObjectContainer::toString() {
   return out.str();
 }
 
-JSData Calculator::ToJSONOutputAndSpecials() {
-  MacroRegisterFunctionWithName("Calculator::ToJSONOutputAndSpecials");
+JSData Calculator::toJSONOutputAndSpecials() {
+  MacroRegisterFunctionWithName("Calculator::toJSONOutputAndSpecials");
   JSData result = this->outputJS;
   if (this->inputString == "") {
     return result;
   }
-  result["performance"] = this->ToStringPerformance();
-  result["parsingLog"] = this->parsingLog;
+  result[WebAPI::result::performance] = this->toStringPerformance();
+  result[WebAPI::result::parsingLog] = this->parsingLog;
   return result;
 }
 
 std::string Calculator::ToStringOutputAndSpecials() {
   MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
-  return this->ToJSONOutputAndSpecials().toString(nullptr);
+  return this->toJSONOutputAndSpecials().toString(nullptr);
 }
 
 void Calculator::WriteAutoCompleteKeyWordsToFile() {
@@ -2508,7 +2508,7 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
   out << "  var theAutocompleteDictionary = [\n  ";
   for (int i = 0; i < this->autoCompleteKeyWords.size; i ++) {
     if (this->autoCompleteKeyWords[i].size() > 2) {
-      out << "\"" << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
+      out << "\"" << HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(this->autoCompleteKeyWords[i]) << "\"";
       if (i != this->autoCompleteKeyWords.size - 1) {
         out << ", ";
       }
@@ -2542,15 +2542,13 @@ void Calculator::ComputeAutoCompleteKeyWords() {
   }
 }
 
-std::string Calculator::ToStringPerformance() {
-  MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
+std::string Calculator::toStringPerformance() {
+  MacroRegisterFunctionWithName("Calculator::toStringPerformance");
   std::stringstream out;
-  int64_t elapsedMilliseconds = global.GetElapsedMilliseconds();
+  int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
   int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
   int64_t requestMilliseconds = elapsedMilliseconds - global.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
-  out << "<b>Double-click formulas to get their LaTeX.</b>"
-  << "<br>Double-click back to hide the LaTeX. ";
   out << "<br>Computation time: "
   << computationMilliseconds
   << " ms (~"
@@ -2617,7 +2615,9 @@ std::string Calculator::ToStringPerformance() {
     << Rational::TotalLargeGCDcalls - static_cast<unsigned long long>(this->NumLargeGCDcallsStart)
     << ", total: " << Rational::TotalLargeGCDcalls;
   }
-  out << "<br>" << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
+  out << "<br>" << //HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+  moreDetails.str();
+//  , "More details");
   #endif
   return out.str();
 }
@@ -2705,9 +2705,10 @@ std::string Calculator::toString() {
       out << "<br>";
     }
   }
-  out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
-    out.str(), "info expand/collapse", "calculatorInternalDetails"
-  );
+  out2 << //HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+    out.str();
+  //  , "info expand/collapse", "calculatorInternalDetails"
+  //);
   return out2.str();
 }
 

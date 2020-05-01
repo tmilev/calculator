@@ -267,7 +267,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   return output.assignValueWithContext(outputUE, context, theCommands);
 }
 
-std::string HtmlRoutines::GetSliderSpanStartsHidden(
+std::string HtmlRoutines::getSliderSpanStartsHidden(
   const std::string& content, const std::string& label, const std::string& desiredID
 ) {
   (void) label;
@@ -1847,7 +1847,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
 
 Calculator::Test::Test(Calculator& inputOwner) {
   this->startIndex = 0;
-  this->startTime = global.GetElapsedMilliseconds();
+  this->startTime = global.getElapsedMilliseconds();
   this->inconsistencies = 0;
   this->unknown = 0;
   this->noTestSkips = 0;
@@ -1935,8 +1935,8 @@ bool Calculator::Test::ProcessResults() {
       this->unknown ++;
     } else {
       StringRoutines::Differ theDiffer;
-      theDiffer.left = HtmlRoutines::ConvertStringToHtmlString(currentTest.actualResult, false);
-      theDiffer.right = HtmlRoutines::ConvertStringToHtmlString(currentTest.expectedResult, false);
+      theDiffer.left = HtmlRoutines::convertStringToHtmlString(currentTest.actualResult, false);
+      theDiffer.right = HtmlRoutines::convertStringToHtmlString(currentTest.expectedResult, false);
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
       << "<td class = 'cellCalculatorResult'>";
       currentLine << theDiffer.DifferenceHTML("actual", "expected");
@@ -1994,7 +1994,7 @@ bool Calculator::Test::ProcessResults() {
     out << "<b style =\"color:green\">No inconsistencies or uknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";
-  out << "<br>Total run time: " << global.GetElapsedMilliseconds() - this->startTime << " ms. ";
+  out << "<br>Total run time: " << global.getElapsedMilliseconds() - this->startTime << " ms. ";
   this->reportHtml = out.str();
   return this->inconsistencies == 0;
 }

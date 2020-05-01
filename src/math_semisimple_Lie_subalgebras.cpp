@@ -389,7 +389,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
 }
 
 void SemisimpleSubalgebras::WriteReportToFiles() {
-  this->millisecondsComputationEnd = global.GetElapsedMilliseconds();
+  this->millisecondsComputationEnd = global.getElapsedMilliseconds();
   this->numAdditions = Rational::TotalSmallAdditions + Rational::TotalLargeAdditions;
   this->numMultiplications = Rational::TotalSmallMultiplications + Rational::TotalLargeMultiplications;
   this->currentFormat.flagUseHTML = true;
@@ -650,7 +650,7 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
   << "\n<body>";
   outputFileSubalgebra << this->ToStringSubalgebraNumberWithAmbientLink(subalgebraIndex, theFormat);
   outputFileSubalgebra << "<div class = \"divSubalgebraInformation\">";
-  outputFileSubalgebra << "Computations done by the " << HtmlRoutines::GetHtmlLinkToGithubRepo("calculator project");
+  outputFileSubalgebra << "Computations done by the " << HtmlRoutines::getHtmlLinkToGithubRepository("calculator project");
   outputFileSubalgebra << ".</div>";
   outputFileSubalgebra
   << "<br>" <<  currentSubalgebra.toString(theFormat);
@@ -5193,7 +5193,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
       out << "<tr>";
 
       out << "<td style =\\\"text-align: center;\\\">" << openTag;
-      out << "<span class =\\\"math\\\">" << HtmlRoutines::DoubleBackslashes(currentMod[i][j].toString()) << "</span>";
+      out << "<span class =\\\"math\\\">" << HtmlRoutines::doubleBackslashes(currentMod[i][j].toString()) << "</span>";
       out << closeTag << "</td>";
 
       Vector<Rational> tempV;

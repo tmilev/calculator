@@ -14,7 +14,7 @@ function clickDatabaseTable(currentCollection) {
 function callbackFetchProblemData(button, input, output) {
   var inputParsed = JSON.parse(input);
   var panelId = button.getAttribute("panelId");
-  var thePanel = new panels.PanelExpandable(panelId, false);
+  var thePanel = new panels.PanelExpandable(panelId);
   var transformer = new jsonToHtml.JSONToHTML();
   var problemData = [];
   try {
@@ -35,6 +35,7 @@ function callbackFetchProblemData(button, input, output) {
   }
   var resultHTML = transformer.getTableFromObject(problemData);
   thePanel.setPanelContent(resultHTML);
+  thePanel.initialize(true);
   transformer.bindButtons();
   //thePanel.attributes.panelStatus = "collapsed";
   thePanel.doToggleContent();

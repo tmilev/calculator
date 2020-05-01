@@ -340,7 +340,7 @@ int HtmlRoutines::numDottedLines = 0;
 int HtmlRoutines::shiftY = - 200;
 int HtmlRoutines::scale = 100;
 
-std::string HtmlRoutines::CleanUpForLaTeXLabelUse(const std::string& inputString) {
+std::string HtmlRoutines::cleanUpForLaTeXLabelUse(const std::string& inputString) {
   std::stringstream out;
   for (unsigned i = 0; i < inputString.size(); i ++) {
     if (
@@ -366,7 +366,7 @@ void HtmlRoutines::clearDollarSigns(std::string& theString, std::string& output)
   output = out.str();
 }
 
-std::string HtmlRoutines::DoubleBackslashes(const std::string& input) {
+std::string HtmlRoutines::doubleBackslashes(const std::string& input) {
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     out << input[i];
@@ -424,7 +424,7 @@ void HtmlRoutines::subEqualitiesWithSimeq(
   output = out.str();
 }
 
-void HtmlRoutines::ElementToStringTooltip(
+void HtmlRoutines::elementToStringTooltip(
   const std::string& input,
   const std::string& inputTooltip,
   std::string& output,
@@ -441,7 +441,7 @@ std::string HtmlRoutines::GetStyleButtonLikeHtml() {
   return " style =\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(const std::string& input) {
+std::string HtmlRoutines::convertStringEscapeQuotesAndBackslashes(const std::string& input) {
   MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringToBackslashEscapedString");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
@@ -508,8 +508,8 @@ std::string StringRoutines::ConvertStringToJavascriptString(const std::string& i
   return out.str();
 }
 
-std::string HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(const std::string& input) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes");
+std::string HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(const std::string& input) {
+  MacroRegisterFunctionWithName("HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -525,10 +525,10 @@ std::string HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(const std
   return out.str();
 }
 
-std::string HtmlRoutines::ConvertStringToHtmlStringRestrictSize(
+std::string HtmlRoutines::convertStringToHtmlStringRestrictSize(
   const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize
 ) {
-  std::string result = HtmlRoutines::ConvertStringToHtmlString(theString, doReplaceNewLineByBr);
+  std::string result = HtmlRoutines::convertStringToHtmlString(theString, doReplaceNewLineByBr);
   if (maxStringSize > 0) {
     if (static_cast<signed>(result.size()) > maxStringSize) {
       std::stringstream resultStream;
@@ -540,11 +540,11 @@ std::string HtmlRoutines::ConvertStringToHtmlStringRestrictSize(
   return result;
 }
 
-std::string HtmlRoutines::ConvertStringToHtmlString(
+std::string HtmlRoutines::convertStringToHtmlString(
   const std::string& theString, bool doReplaceNewLineByBr
 ) {
   std::string result;
-  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(
+  HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
     theString, result, doReplaceNewLineByBr
   );
   return result;
@@ -948,7 +948,7 @@ bool FileOperations::LoadFileToStringUnsecure(
   if (!FileOperations::FileExistsUnsecure(fileNameUnsecure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
-      << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
+      << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
       << " does not appear to exist. ";
     }
     return false;
@@ -957,7 +957,7 @@ bool FileOperations::LoadFileToStringUnsecure(
   if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
-      << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
+      << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
       << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
     }
     return false;
@@ -9867,23 +9867,23 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, Lis
   return result;
 }
 
-std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON) {
+std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(const std::string& theJSON) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
   if (!parser.readstring(theJSON)) {
     return StringRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
   }
-  return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
+  return HtmlRoutines::toHtmlTableRowsFromJSON(parser);
 }
 
-std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
+std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
   if (input.theType == JSData::token::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
       out << "<tr><td>" << input.objects.theKeys[i] << "</td>" << "<td>"
-      << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
     }
     out << "</table>";
     return out.str();
@@ -9893,7 +9893,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
       out << "<tr>" << "<td>"
-      << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+      << HtmlRoutines::toHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
     }
     out << "</table>";
     return out.str();
@@ -9920,7 +9920,7 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
       if (! nestTables) {
         out << "<td>" << StringRoutines::StringTrimToLengthForDisplay(content[i][j], 1000) << "</td>";
       } else {
-        out << "<td>" << HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(content[i][j]) << "</td>";
+        out << "<td>" << HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(content[i][j]) << "</td>";
       }
     }
     out << "</tr>";
@@ -9929,7 +9929,7 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
   return out.str();
 }
 
-bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(
+bool HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
   const std::string& input, std::string& output, bool doReplaceNewLineByBr
 ) {
   std::stringstream out;
@@ -9961,7 +9961,7 @@ bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(
   return modified;
 }
 
-bool HtmlRoutines::IsRepresentedByItselfInURLs(char input) {
+bool HtmlRoutines::isRepresentedByItselfInURLs(char input) {
   if (MathRoutines::isADigit(input)) {
     return true;
   }
@@ -9971,11 +9971,11 @@ bool HtmlRoutines::IsRepresentedByItselfInURLs(char input) {
   return input == '.' || input == '-' || input == '_';
 }
 
-std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input) {
+std::string HtmlRoutines::convertStringToURLStringExceptDashesAndSlashes(const std::string& input) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
     if (
-      HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) ||
+      HtmlRoutines::isRepresentedByItselfInURLs(input[i]) ||
       input[i] == '-' ||
       input[i] == '/'
     ) {
@@ -9992,7 +9992,7 @@ std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const s
 std::string HtmlRoutines::convertStringToURLString(const std::string& input, bool usePlusesForSpacebars) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i])) {
+    if (HtmlRoutines::isRepresentedByItselfInURLs(input[i])) {
       out << input[i];
     } else if (input[i] == ' ' && usePlusesForSpacebars) {
       out << '+';
@@ -10574,7 +10574,7 @@ std::string HtmlRoutines::GetHtmlButton(const std::string& buttonID, const std::
   return out.str();
 }
 
-std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+/*std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
   const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart
 ) {
   std::stringstream out;
@@ -10590,6 +10590,7 @@ std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
   out << input << "</span>";
   return out.str();
 }
+*/
 
 int DrawOperations::GetDimFromBilinearForm() {
   return this->theBilinearForm.numberOfRows;

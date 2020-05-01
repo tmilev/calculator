@@ -6,12 +6,12 @@
 #include <iomanip>
 #include "string_constants.h"
 
-JSData WebAPIResponse::GetProblemSolutionJSON() {
+JSData WebAPIResponse::getProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
   if (!global.UserDefaultHasAdminRights()) {
     global.theResponse.DisallowReport();
   }
-  int64_t startMilliseconds = global.GetElapsedMilliseconds();
+  int64_t startMilliseconds = global.getElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
   JSData result;
@@ -57,7 +57,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
       out << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
@@ -89,7 +89,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
@@ -100,12 +100,12 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (!theProblem.interpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   for (int i = 0; i < currentA.solutionElements.size; i ++) {
@@ -122,12 +122,12 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString;
   }
   result[WebAPI::result::resultHtml] = out.str();
-  result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
+  result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
   return result;
 }
 
-std::string WebAPIResponse::SetProblemWeight() {
-  MacroRegisterFunctionWithName("WebAPIReponse::SetProblemWeight");
+std::string WebAPIResponse::setProblemWeight() {
+  MacroRegisterFunctionWithName("WebAPIReponse::setProblemWeight");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -145,8 +145,8 @@ std::string WebAPIResponse::SetProblemWeight() {
   return out.str();
 }
 
-std::string WebAPIResponse::SetProblemDeadline() {
-  MacroRegisterFunctionWithName("WebAPIReponse::SetProblemWeight");
+std::string WebAPIResponse::setProblemDeadline() {
+  MacroRegisterFunctionWithName("WebAPIReponse::setProblemWeight");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -164,10 +164,10 @@ std::string WebAPIResponse::SetProblemDeadline() {
   return out.str();
 }
 
-std::string WebAPIResponse::GetSanitizedComment(
+std::string WebAPIResponse::getSanitizedComment(
   const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetSanitizedComment");
+  MacroRegisterFunctionWithName("WebAPIReponse::getSanitizedComment");
   theFormat.flagUseQuotes = false;
   resultIsPlot = false;
   std::string theString;
@@ -211,12 +211,12 @@ std::string WebAPIResponse::GetCommentsInterpretation(
   const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
   bool resultIsPlot = false;
   if (!currentE.startsWith(theInterpreterWithAdvice.opEndStatement())) {
-    out << WebAPIResponse::GetSanitizedComment(currentE, theFormat, resultIsPlot);
+    out << WebAPIResponse::getSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
   std::string currentS;
   for (int i = 1; i < currentE.size(); i ++) {
-    currentS = WebAPIResponse::GetSanitizedComment(currentE[i], theFormat,resultIsPlot);
+    currentS = WebAPIResponse::getSanitizedComment(currentE[i], theFormat,resultIsPlot);
     if (StringRoutines::StringTrimWhiteSpace(currentS) == "") {
       continue;
     }
@@ -228,8 +228,8 @@ std::string WebAPIResponse::GetCommentsInterpretation(
   return out.str();
 }
 
-JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::SubmitAnswersPreviewJSON");
+JSData WebAPIResponse::submitAnswersPreviewJSON() {
+  MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
   if (!global.UserDefaultHasAdminRights()) {
     global.theResponse.DisallowReport();
   }
@@ -400,8 +400,8 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   return result;
 }
 
-JSData WebAPIResponse::ClonePageResult() {
-  MacroRegisterFunctionWithName("WebAPIReponse::ClonePageResult");
+JSData WebAPIResponse::clonePageResult() {
+  MacroRegisterFunctionWithName("WebAPIReponse::clonePageResult");
   JSData result;
   if (
     ! global.flagLoggedIn ||
@@ -520,8 +520,8 @@ bool BuilderApplication::FileNameAllowedToBeMissing(const std::string& input) {
   return  false;
 }
 
-std::string WebAPIResponse::GetOnePageJS(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetOnePageJS");
+std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getOnePageJS");
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
@@ -573,8 +573,8 @@ std::string BuilderApplication::GetOnePageJSBrowserify() {
   return out.str();
 }
 
-std::string WebAPIResponse::GetApp(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetApp");
+std::string WebAPIResponse::getApp(bool appendBuildHash) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getApp");
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
@@ -703,16 +703,16 @@ JSData WebAPIResponse::getSelectCourseJSON() {
   return theCourses.toJSON();
 }
 
-std::string WebAPIResponse::GetHtmlTagWithManifest() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetHtmlTagWithManifest");
+std::string WebAPIResponse::getHtmlTagWithManifest() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getHtmlTagWithManifest");
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
   out << "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
   return out.str();
 }
 
-JSData WebAPIResponse::GetTopicTableJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetTopicTableJSON");
+JSData WebAPIResponse::getTopicTableJSON() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getTopicTableJSON");
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
@@ -734,14 +734,14 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   return thePage.toStringTopicListJSON();
 }
 
-void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetJSDataUserInfo");
+void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = global.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::result::useFallbackDatabase] = !global.flagDatabaseCompiled;
   outputAppend[WebAPI::result::httpsSupport] = global.flagSSLIsAvailable;
   if (comments != "") {
-    outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
+    outputAppend[WebAPI::result::comments] = HtmlRoutines::convertStringToHtmlString(comments, false);
   }
   if (global.theResponse.monitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
@@ -750,39 +750,39 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
   if (global.getWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(global.getWebInput(WebAPI::result::error), false);
+    outputAppend[WebAPI::result::error] = HtmlRoutines::convertStringToHtmlString(global.getWebInput(WebAPI::result::error), false);
   }
   if (!global.flagLoggedIn) {
     outputAppend[WebAPI::result::status] = "not logged in";
     return;
   }
   outputAppend[WebAPI::result::status] = "logged in";
-  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.username                 , false);
-  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.actualAuthenticationToken, false);
-  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.userRole                 , false);
-  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.instructorInDB           , false);
-  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.sectionInDB              , false);
-  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.courseInDB               , false);
-  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.deadlineSchema           , false);
+  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::convertStringToHtmlString(global.userDefault.username                 , false);
+  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::convertStringToHtmlString(global.userDefault.actualAuthenticationToken, false);
+  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::convertStringToHtmlString(global.userDefault.userRole                 , false);
+  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::convertStringToHtmlString(global.userDefault.instructorInDB           , false);
+  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionInDB              , false);
+  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::convertStringToHtmlString(global.userDefault.courseInDB               , false);
+  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::convertStringToHtmlString(global.userDefault.deadlineSchema           , false);
   JSData sectionsTaught;
   sectionsTaught.theType = JSData::token::tokenArray;
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
-    nextSection = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
+    nextSection = HtmlRoutines::convertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
     sectionsTaught.theList.addOnTop(nextSection);
   }
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
 }
 
-JSData WebAPIResponse::GetJSONUserInfo(const std::string& comments) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetJSONUserInfo");
+JSData WebAPIResponse::getJSONUserInfo(const std::string& comments) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getJSONUserInfo");
   JSData output;
-  WebAPIResponse::GetJSDataUserInfo(output, comments);
+  WebAPIResponse::getJSDataUserInfo(output, comments);
   return output;
 }
 
-std::string WebAPIResponse::GetJSONFromTemplate() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetJSONFromTemplate");
+std::string WebAPIResponse::getJSONFromTemplate() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getJSONFromTemplate");
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
@@ -803,12 +803,12 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   << global.getWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
-  out << "<small>Generated in " << global.GetElapsedMilliseconds() << " ms. </small>";
+  out << "<small>Generated in " << global.getElapsedMilliseconds() << " ms. </small>";
   return out.str();
 }
 
-JSData WebAPIResponse::GetExamPageJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetExamPageJSON");
+JSData WebAPIResponse::getExamPageJSON() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getExamPageJSON");
   std::stringstream out;
   JSData output;
   if (!global.flagLoggedIn && global.requestType == "scoredQuizJSON") {
@@ -856,8 +856,8 @@ JSData WebAPIResponse::GetExamPageJSON() {
   return output;
 }
 
-JSData WebAPIResponse::GetEditPageJSON() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetEditPageJSON");
+JSData WebAPIResponse::getEditPageJSON() {
+  MacroRegisterFunctionWithName("WebAPIReponse::getEditPageJSON");
   JSData output;
   if (
     !global.flagLoggedIn ||
@@ -912,11 +912,11 @@ JSData WebAPIResponse::GetEditPageJSON() {
   return output;
 }
 
-JSData WebAPIResponse::SubmitAnswersJSON() {
-  return WebAPIResponse::SubmitAnswersJSON(global.getWebInput(WebAPI::problem::randomSeed), nullptr, true);
+JSData WebAPIResponse::submitAnswersJSON() {
+  return WebAPIResponse::submitAnswersJSON(global.getWebInput(WebAPI::problem::randomSeed), nullptr, true);
 }
 
-JSData WebAPIResponse::SubmitAnswersJSON(
+JSData WebAPIResponse::submitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
@@ -1037,7 +1037,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     );
   }
   if (timeSafetyBrake) {
-    global.millisecondsMaxComputation = global.GetElapsedMilliseconds() + 20000; // + 20 sec
+    global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; // + 20 sec
   }
   Calculator theInterpreter;
   theInterpreter.initialize();
@@ -1063,7 +1063,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake) {
-      global.millisecondsMaxComputation = global.GetElapsedMilliseconds() + 20000; //+20 sec
+      global.millisecondsMaxComputation = global.getElapsedMilliseconds() + 20000; //+20 sec
     }
     isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
@@ -1241,8 +1241,8 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   return result;
 }
 
-std::string WebAPIResponse::AddTeachersSections() {
-  MacroRegisterFunctionWithName("WebAPIReponse::AddTeachersSections");
+std::string WebAPIResponse::addTeachersSections() {
+  MacroRegisterFunctionWithName("WebAPIReponse::addTeachersSections");
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
     out << "<b>Only admins may assign sections to teachers.</b>";
@@ -1315,8 +1315,8 @@ std::string WebAPIResponse::AddTeachersSections() {
   return out.str();
 }
 
-std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithPort) {
-  MacroRegisterFunctionWithName("WebAPIReponse::AddUserEmails");
+std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("WebAPIReponse::addUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
   if (
@@ -1339,7 +1339,7 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
   std::string userRole = HtmlRoutines::convertURLStringToNormal(global.getWebInput("userRole"), false);
 
   if (inputEmails == "") {
-    out << "AddUserEmails failed: <b>No emails to add</b>";
+    out << "addUserEmails failed: <b>No emails to add</b>";
     return out.str();
   }
   std::stringstream comments;
@@ -1376,17 +1376,17 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "
 "with a short explanation to the administrator of the web site. ";
 
-JSData WebAPIResponse::GetAnswerOnGiveUp() {
-  return WebAPIResponse::GetAnswerOnGiveUp(global.getWebInput(WebAPI::problem::randomSeed));
+JSData WebAPIResponse::getAnswerOnGiveUp() {
+  return WebAPIResponse::getAnswerOnGiveUp(global.getWebInput(WebAPI::problem::randomSeed));
 }
 
-JSData WebAPIResponse::GetAnswerOnGiveUp(
+JSData WebAPIResponse::getAnswerOnGiveUp(
   const std::string& inputRandomSeed,
   std::string* outputNakedAnswer,
   bool* answerGenerationSuccess,
   bool doIncludeTimeStats
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
+  MacroRegisterFunctionWithName("CalculatorHTML::getAnswerOnGiveUp");
   GlobalVariables::Response::StateMaintainer maintain(global.theResponse);
   if (!global.UserDefaultHasAdminRights()) {
     global.theResponse.DisallowReport();
@@ -1399,7 +1399,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   if (answerGenerationSuccess != nullptr) {
     *answerGenerationSuccess = false;
   }
-  int64_t startTimeInMilliseconds = global.GetElapsedMilliseconds();
+  int64_t startTimeInMilliseconds = global.getElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
   theProblem.loadCurrentProblemItem(false, inputRandomSeed, &errorStream);
@@ -1446,7 +1446,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
-    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
@@ -1482,7 +1482,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
-    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     return result;
   }
@@ -1498,7 +1498,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -1561,7 +1561,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     }
   }
   if (doIncludeTimeStats) {
-    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
   }
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
@@ -1581,8 +1581,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   return result;
 }
 
-JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWithPort) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetAccountsPageJSON");
+JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
@@ -1642,8 +1642,8 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   return output;
 }
 
-std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddressWithPort) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetAccountsPageBody");
+std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddressWithPort) {
+  MacroRegisterFunctionWithName("WebAPIReponse::getAccountsPageBody");
   (void) hostWebAddressWithPort;
   if (!global.flagDatabaseCompiled) {
     return "Database not available. ";
@@ -1689,31 +1689,31 @@ std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddres
     return out.str();
   }
   out << "<hr>";
-  out << WebAPIResponse::ToStringAssignSection();
+  out << WebAPIResponse::toStringAssignSection();
   out << "<hr>";
   out
-  << WebAPIResponse::ToStringUserDetails(true, admins, hostWebAddressWithPort);
+  << WebAPIResponse::toStringUserDetails(true, admins, hostWebAddressWithPort);
   out << "<hr>";
-  out << WebAPIResponse::ToStringUserDetails(
+  out << WebAPIResponse::toStringUserDetails(
     false, students, hostWebAddressWithPort
   );
   return out.str();
 }
 
-std::string WebAPIResponse::GetScoresPage() {
-  MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
+std::string WebAPIResponse::getScoresPage() {
+  MacroRegisterFunctionWithName("WebWorker::getScoresPage");
   std::stringstream out;
   CalculatorHTML thePage;
   thePage.loadDatabaseInfo(out);
-  std::string theScoresHtml = WebAPIResponse::ToStringUserScores();
+  std::string theScoresHtml = WebAPIResponse::toStringUserScores();
   out << theScoresHtml;
   return out.str();
 }
 
-std::string WebAPIResponse::ToStringUserDetailsTable(
+std::string WebAPIResponse::toStringUserDetailsTable(
   bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserDetailsTable");
+  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetailsTable");
   if (!global.flagDatabaseCompiled) {
     return "Compiled without database support. ";
   }
@@ -1892,8 +1892,8 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   return out.str();
 }
 
-std::string WebAPIResponse::ToStringAssignSection() {
-  MacroRegisterFunctionWithName("WebAPIReponse::ToStringAssignSection");
+std::string WebAPIResponse::toStringAssignSection() {
+  MacroRegisterFunctionWithName("WebAPIReponse::toStringAssignSection");
   std::stringstream out;
   std::string idAddressTextarea = "inputSetTeacher";
   std::string idExtraTextarea = "inputSections";
@@ -2205,8 +2205,8 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   return true;
 }
 
-std::string WebAPIResponse::GetScoresInCoursePage() {
-  MacroRegisterFunctionWithName("WebWorker::GetScoresInCoursePage");
+std::string WebAPIResponse::getScoresInCoursePage() {
+  MacroRegisterFunctionWithName("WebWorker::getScoresInCoursePage");
   if (!global.UserDefaultHasAdminRights()) {
     return "Only admins are allowed to view student scores.";
   }
@@ -2245,8 +2245,8 @@ std::string WebAPIResponse::GetScoresInCoursePage() {
   return out.str();
 }
 
-std::string WebAPIResponse::ToStringUserScores() {
-  MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserScores");
+std::string WebAPIResponse::toStringUserScores() {
+  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserScores");
   if (!global.UserDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
@@ -2376,10 +2376,10 @@ std::string WebAPIResponse::ToStringUserScores() {
   return out.str();
 }
 
-std::string WebAPIResponse::ToStringUserDetails(
+std::string WebAPIResponse::toStringUserDetails(
   bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserDetails");
+  MacroRegisterFunctionWithName("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
   if (!global.flagDatabaseCompiled) {
     out << "<b>Adding emails not available (database not present).</b> ";
@@ -2426,7 +2426,7 @@ std::string WebAPIResponse::ToStringUserDetails(
   << "', 'addUsers'"
   << " )\"> Add users</button> ";
   out << "<br><span id =\"" << idOutput << "\">\n";
-  out << WebAPIResponse::ToStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
+  out << WebAPIResponse::toStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
   out << "</span>";
   return out.str();
 }

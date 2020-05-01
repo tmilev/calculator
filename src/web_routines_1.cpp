@@ -576,7 +576,7 @@ void WebCrawler::FetchWebPagePart2(
   }
   this->bodyReceiveD = this->bodyReceivedWithHeader + secondPart;
   int theSize = 0;
-  this->expectedLength.IsIntegerFittingInInt(&theSize);
+  this->expectedLength.isIntegerFittingInInt(&theSize);
   if (static_cast<unsigned>(theSize) < this->bodyReceiveD.size()) {
     this->bodyReceivedOutsideOfExpectedLength = this->bodyReceiveD.substr(static_cast<unsigned>(theSize));
     this->bodyReceiveD = this->bodyReceiveD.substr(0, static_cast<unsigned>(theSize));
@@ -1042,12 +1042,12 @@ JSData WebWorker::GetSignUpRequestResult() {
 }
 
 bool WebWorker::writeToBodyJSON(const JSData& result) {
-  std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
+  std::string toWrite = HtmlRoutines::convertStringToHtmlString(
     result.toString(nullptr), false
   );
   if (toWrite.size() < 2000) {
     if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
-      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(global.displayApplication, false);
+      std::string sanitizedCalculatorApp = HtmlRoutines::convertStringToHtmlString(global.displayApplication, false);
       std::stringstream outLinkApp;
       outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
       << sanitizedCalculatorApp << "'>app</a>";

@@ -40,6 +40,8 @@ var urlFields = {
     resultHtml: "resultHtml",
     crashReport: "crashReport",
     error: "error",
+    // comments on performance:
+    performance: "performance",
     // comments for the specific task:
     comments: "comments",
     // global comments, usually used for debugging:

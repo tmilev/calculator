@@ -83,6 +83,8 @@ public:
     static std::string resultLabel;
     static std::string badInput;
     static std::string comments;
+    static std::string performance;
+    static std::string parsingLog;
     static std::string commentsGlobal;
     static std::string timeOut;
     static std::string timeOutComments;

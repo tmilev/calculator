@@ -220,7 +220,7 @@ int ThreadData::getCurrentThreadId() {
 
 std::string ThreadData::ToStringHtml() const {
   std::stringstream out;
-  out << "Process type: <b>" << global.logs.ToStringProcessType() << "</b>. ";
+  out << "Process type: <b>" << global.logs.ToStringprocessType() << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
     out << "<b style = 'color:green'>Current thread</b> ";
   } else {

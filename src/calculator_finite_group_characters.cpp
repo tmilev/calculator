@@ -1212,7 +1212,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       mainTableStream << "p{0.275cm}";
     }
     mainTableStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
-    << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.toString())
+    << HtmlRoutines::cleanUpForLaTeXLabelUse(this->theDynkinType.toString())
     << "}Multiplicity of the sign representation over the classes of root subgroups. "
     << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
     << " pseudo-parabolic subgroup classes that are not parabolic, and "
@@ -1337,7 +1337,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   }
   out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{rrcl}" << "\\caption{\\label{tableConjugacyClassTable"
-  << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.toString()) << "}}\\\\ ";
+  << HtmlRoutines::cleanUpForLaTeXLabelUse(this->theDynkinType.toString()) << "}}\\\\ ";
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
     out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasses[i].representative.toString()
@@ -2288,7 +2288,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   ) {
     currentInput->setSize(currentInputRat->size);
     for (int i = 0; i < currentInputRat->size; i ++) {
-      if (!(*currentInputRat)[i].IsIntegerFittingInInt(&(*currentInput)[i])) {
+      if (!(*currentInputRat)[i].isIntegerFittingInInt(&(*currentInput)[i])) {
         return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
       }
     }
@@ -2347,7 +2347,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   Vector<int> inputInt;
   inputInt.setSize(inputRat.size);
   for (int i = 0; i < inputRat.size; i ++) {
-    if (!(inputRat[i].IsIntegerFittingInInt(&inputInt[i]))) {
+    if (!(inputRat[i].isIntegerFittingInInt(&inputInt[i]))) {
       return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
     }
   }

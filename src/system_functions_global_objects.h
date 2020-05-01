@@ -11,7 +11,7 @@
 
 class Calculator;
 
-extern int GetElapsedMilliseconds();
+extern int getElapsedMilliseconds();
 extern int externalCommandNoOutput(const std::string& theCommand);
 extern std::string externalCommandReturnStandartOut(const std::string& theCommand);
 extern int externalCommandStreamOutput(const std::string& theCommand);

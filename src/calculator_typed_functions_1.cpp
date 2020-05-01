@@ -1217,8 +1217,8 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
   int radical = 0;
   int powerSmallInteger = 0;
   if (
-    !radicalLarge.IsIntegerFittingInInt(&radical) ||
-    !powerIntegral.IsIntegerFittingInInt(&powerSmallInteger)
+    !radicalLarge.isIntegerFittingInInt(&radical) ||
+    !powerIntegral.isIntegerFittingInInt(&powerSmallInteger)
   ) {
     // radical is too large.
     return false;
@@ -1563,10 +1563,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       currentPower = currentPowers[i];
       currentInsidePower = currentPower % exponentDenominator;
       currentOutsidePower = currentPower / exponentDenominator;
-      if (!currentInsidePower.IsIntegerFittingInInt(&currentInsidePowerInt)) {
+      if (!currentInsidePower.isIntegerFittingInInt(&currentInsidePowerInt)) {
         return false;
       }
-      if (!currentOutsidePower.IsIntegerFittingInInt(&currentOutsidePowerInt)) {
+      if (!currentOutsidePower.isIntegerFittingInInt(&currentOutsidePowerInt)) {
         return false;
       }
       if (
@@ -1614,23 +1614,23 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   int currentExpSmallInt = - 1;
   for (int i = 0; i < numeratorPowerS.size; i ++) {
     currentContribution = numeratorFactors[i];
-    if (!numeratorPowerS[i].IsIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!numeratorPowerS[i].isIntegerFittingInInt(&currentExpSmallInt)) {
       return false;
     }
     currentContribution.raiseToPower(currentExpSmallInt);
     currentNumerator *= currentContribution;
-    if (!currentNumerator.IsIntegerFittingInInt(nullptr)) {
+    if (!currentNumerator.isIntegerFittingInInt(nullptr)) {
       return false;
     }
   }
   for (int i = 0; i < denominatorPowerS.size; i ++) {
     currentContribution = denominatorFactors[i];
-    if (!denominatorPowerS[i].IsIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!denominatorPowerS[i].isIntegerFittingInInt(&currentExpSmallInt)) {
       return false;
     }
     currentContribution.raiseToPower(currentExpSmallInt);
     currentDenominator *= currentContribution;
-    if (!currentDenominator.IsIntegerFittingInInt(nullptr)) {
+    if (!currentDenominator.isIntegerFittingInInt(nullptr)) {
       return false;
     }
   }

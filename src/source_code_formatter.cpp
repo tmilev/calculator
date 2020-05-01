@@ -126,7 +126,7 @@ bool CodeFormatter::isSeparatorCharacter(char input) {
   return this->separatorCharactersMap[inputUnsigned];
 }
 
-bool CodeFormatter::ProcessSeparatorCharacters() {
+bool CodeFormatter::processSeparatorCharacters() {
   if (this->isSeparatorCharacter(this->currentChar)) {
     this->AddCurrentWord();
     this->currentWord = this->currentChar;
@@ -137,7 +137,7 @@ bool CodeFormatter::ProcessSeparatorCharacters() {
   return true;
 }
 
-bool CodeFormatter::ProcessCharacterInQuotes() {
+bool CodeFormatter::processCharacterInQuotes() {
   if (!this->flagInQuotes) {
     return false;
   }
@@ -174,10 +174,10 @@ bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   this->flagPreviousIsStandaloneBackSlash = false;
   for (unsigned i = 0; i < this->inputCode.size(); i ++) {
     this->currentChar = this->inputCode[i];
-    if (this->ProcessCharacterInQuotes()) {
+    if (this->processCharacterInQuotes()) {
       continue;
     }
-    if (this->ProcessSeparatorCharacters()) {
+    if (this->processSeparatorCharacters()) {
       continue;
     }
   }

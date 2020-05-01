@@ -1024,7 +1024,7 @@ bool SSLHelloExtension::ProcessRenegotiateConnection(std::stringstream *comments
   return false;
 }
 
-bool SSLHelloExtension::ProcessServerName(std::stringstream *commentsOnError) {
+bool SSLHelloExtension::processServerName(std::stringstream *commentsOnError) {
   TransportLayerSecurityServer::Session& session = this->owner->owner->owner->session;
   if (session.serverName.size > 0) {
     if (commentsOnError != nullptr) {
@@ -1068,7 +1068,7 @@ void SignatureAlgorithmSpecification::processValue() {
   this->signatureAlgorithm = this->value % 256;
 }
 
-bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOnError) {
+bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOnError) {
   // See:
   // 1. [7.4.1.4.1., RFC5246]
   // 2. [page 41, RFC 8446].
@@ -1102,13 +1102,13 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
   case SSLContent::tokensExtension::renegotiateConnection:
     return this->ProcessRenegotiateConnection(commentsOnError);
   case SSLContent::tokensExtension::serverName:
-    return this->ProcessServerName(commentsOnError);
+    return this->processServerName(commentsOnError);
   case SSLContent::tokensExtension::requestOnlineCertificateStatus:
     return this->ProcessRequestOnlineCertificateStatus(commentsOnError);
   case SSLContent::tokensExtension::requestSignedCertificateTimestamp:
     return this->ProcessRequestSignedCertificateTimestamp(commentsOnError);
   case SSLContent::tokensExtension::signatureAlgorithms:
-    return this->ProcessSignatureAlgorithms(commentsOnError);
+    return this->processSignatureAlgorithms(commentsOnError);
   default:
     break;
   }

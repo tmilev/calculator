@@ -227,10 +227,10 @@ public:
   bool checkInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
   bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
-  bool ProcessServerName(std::stringstream* commentsOnError);
+  bool processServerName(std::stringstream* commentsOnError);
   bool ProcessRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
   bool ProcessRequestSignedCertificateTimestamp(std::stringstream* commentsOnError);
-  bool ProcessSignatureAlgorithms(std::stringstream* commentsOnError);
+  bool processSignatureAlgorithms(std::stringstream* commentsOnError);
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations);
   void MakeEllipticCurvePointFormat(SSLContent* inputOwner);
   void MakeExtendedMasterSecret(SSLContent* inputOwner);

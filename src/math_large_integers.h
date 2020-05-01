@@ -40,9 +40,18 @@ public:
   class Test {
     public:
     static bool all();
-    static bool SerializationToHex(const LargeIntegerUnsigned& input);
-    static bool SerializationToHex();
-    static bool Comparisons();
+    static bool serializationToHex(const LargeIntegerUnsigned& input);
+    static bool serializationToHex();
+    static bool comparisons();
+    static bool factor();
+    static bool factorSmall(
+      const LargeIntegerUnsigned& input,
+      const std::string& expectedFactors,
+      const std::string& expectedMultiplicities,
+      int maximumDivisorToTry,
+      int numberMillerRabinRuns,
+      int64_t maximumRunningTime
+    );
   };
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
@@ -84,7 +93,7 @@ public:
   void operator*=(unsigned int x);
   void operator+=(unsigned int x);
   void operator++(int);
-  bool IsIntegerFittingInInt(int* whichInt);
+  bool isIntegerFittingInInt(int* whichInt) const;
   void AssignFactorial(unsigned int x);
   void multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const;
   void MultiplyByUInt(unsigned int x);
@@ -94,7 +103,7 @@ public:
   void AssignUInt64(uint64_t x);
   // returns ceiling of the logarithm base two of the number,
   // i.e., the smallest x such that this <= 2^x.
-  unsigned int LogarithmBaseNCeiling(unsigned int theBase) const;
+  unsigned int logarithmBaseNCeiling(unsigned int theBase) const;
   static void accountFactor(
     const LargeInteger& prime,
     List<LargeInteger>& outputPrimeFactors,
@@ -189,7 +198,7 @@ public:
     this->toString(tempS);
     return tempS;
   }
-  bool IsIntegerFittingInInt(int* whichInt);
+  bool isIntegerFittingInInt(int* whichInt);
   bool isPositive() const {
     return this->sign == 1 && (this->value.isPositive());
   }
@@ -534,12 +543,12 @@ public:
   void Assign(const Rational& r);
   void AssignInteger(int x);
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
-  bool IsIntegerFittingInInt(int* whichInt) const {
+  bool isIntegerFittingInInt(int* whichInt) const {
     LargeInteger theInt;
     if (!this->isInteger(&theInt)) {
       return false;
     }
-    return theInt.IsIntegerFittingInInt(whichInt);
+    return theInt.isIntegerFittingInInt(whichInt);
   }
   bool isSmallInteger(int* whichInteger = nullptr) const {
     if (this->extended != nullptr) {

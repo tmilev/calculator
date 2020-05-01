@@ -105,9 +105,9 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   progReportTimer.innerHTML = progressReportContent;
 
   if (doUpdateCalculatorPage) {
-    this.ownerCalculator.panelIdPairs = [];
+    this.ownerCalculator.panels.length = 0;
     var buffer = new BufferCalculator();
-    this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panelIdPairs);
+    this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panels);
     var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
     resultComponent.innerHTML = buffer.toString();
     this.ownerCalculator.afterWriteOutput();

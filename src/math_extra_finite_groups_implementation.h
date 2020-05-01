@@ -916,7 +916,7 @@ bool WeylGroupData::generateOrbit(
   Vector<Coefficient> currentRoot;
   ElementWeylGroup currentElt;
   if (expectedOrbitSize <= 0) {
-    if (!this->theGroup.getSize().IsIntegerFittingInInt(&expectedOrbitSize)) {
+    if (!this->theGroup.getSize().isIntegerFittingInInt(&expectedOrbitSize)) {
       expectedOrbitSize = - 1;
     }
   }

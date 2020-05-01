@@ -1035,7 +1035,7 @@ int SemisimpleLieAlgebra::GetGeneratorFromRootIndex(int theIndex) const {
   return theIndex;
 }
 
-int SemisimpleLieAlgebra::GetRootIndexFromGenerator(int theIndex) const {
+int SemisimpleLieAlgebra::getRootIndexFromGenerator(int theIndex) const {
   int numPosRoots = this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
   if (theIndex < numPosRoots) {
@@ -1047,60 +1047,7 @@ int SemisimpleLieAlgebra::GetRootIndexFromGenerator(int theIndex) const {
   return - 1;
 }
 
-void HtmlRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank) {
-  if (theWeylLetter == 'a') {
-    theWeylLetter = 'A';
-  }
-  if (theWeylLetter == 'b') {
-    theWeylLetter = 'B';
-  }
-  if (theWeylLetter == 'c') {
-    theWeylLetter = 'C';
-  }
-  if (theWeylLetter == 'd') {
-    theWeylLetter = 'D';
-  }
-  if (theWeylLetter == 'e') {
-    theWeylLetter = 'E';
-  }
-  if (theWeylLetter == 'f') {
-    theWeylLetter = 'F';
-  }
-  if (theWeylLetter == 'g') {
-    theWeylLetter = 'G';
-  }
-  if (!(
-    theWeylLetter == 'A' ||
-    theWeylLetter == 'B' ||
-    theWeylLetter == 'C' ||
-    theWeylLetter == 'D' ||
-    theWeylLetter == 'E' ||
-    theWeylLetter == 'F' ||
-    theWeylLetter == 'G'
-  )) {
-    theWeylLetter = 'A';
-  }
-  if (theRank > 8 || theRank < 1) {
-    theRank = 1;
-  }
-  if (theWeylLetter != 'A' && theRank == 1) {
-    theRank = 2;
-  }
-  if (theWeylLetter == 'E' && theRank < 6) {
-    theRank = 6;
-  }
-  if (theWeylLetter == 'F') {
-    theRank = 4;
-  }
-  if (theWeylLetter == 'G') {
-    theRank = 2;
-  }
-  if (theWeylLetter == 'D' && theRank < 4) {
-    theRank = 4;
-  }
-}
-
-void HtmlRoutines::ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput) {
+void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput) {
   for (unsigned i = 0; i < inputOutput.size(); i ++) {
     if (inputOutput[i] == '=' || inputOutput[i] == '&') {
       inputOutput[i] = ' ';
@@ -2971,14 +2918,14 @@ void MonomialP::trimTrailingZeroes() {
 
 bool MonomialP::hasSmallIntegralPositivePowers(int* whichTotalDegree) const {
   for (int i = 0; i < this->monBody.size; i ++) {
-    if (!this->monBody[i].IsIntegerFittingInInt(nullptr)) {
+    if (!this->monBody[i].isIntegerFittingInInt(nullptr)) {
       return false;
     }
     if (this->monBody[i] < 0) {
       return false;
     }
   }
-  return this->TotalDegree().IsIntegerFittingInInt(whichTotalDegree);
+  return this->TotalDegree().isIntegerFittingInInt(whichTotalDegree);
 }
 
 void MonomialP::raiseToPower(const Rational& thePower) {

@@ -77,7 +77,7 @@ void Calculator::reset() {
   this->flagDisplayFullExpressionTree = false;
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
-  this->flagForkingProcessAllowed = true;
+  this->flagForkingprocessAllowed = true;
   this->flagNoApproximationS = false;
   this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
@@ -1871,7 +1871,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   int counterReport = 0;
   int symbolsToIssueReport = 100;
   int minMillisecondsPerReport = 200;
-  int64_t lastMilliseconds = global.GetElapsedMilliseconds();
+  int64_t lastMilliseconds = global.getElapsedMilliseconds();
   ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
@@ -1881,7 +1881,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
     counterReport ++;
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
-      int64_t currentMilliseconds = global.GetElapsedMilliseconds();
+      int64_t currentMilliseconds = global.getElapsedMilliseconds();
       if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
         currentMilliseconds = lastMilliseconds;
         std::stringstream reportStream;

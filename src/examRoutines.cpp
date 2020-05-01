@@ -679,7 +679,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   std::string randomSeed = input[3].toString();
   std::string answerId = input[2].toString();
   global.SetWebInpuT(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
-  JSData result = WebAPIResponse::GetAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
+  JSData result = WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.RemoveKey(WebAPI::problem::calculatorAnswerPrefix + answerId);
   global.SetWebInpuT(WebAPI::problem::fileName, oldProblem);
   std::stringstream out;
@@ -816,13 +816,13 @@ std::string SyntacticElementHTML::toStringTagAndContent() {
 std::string SyntacticElementHTML::toStringDebug() {
   MacroRegisterFunctionWithName("SyntacticElementHTML::toString");
   if (this->syntacticRole == "") {
-    return HtmlRoutines::ConvertStringToHtmlString(this->toStringTagAndContent(), false);
+    return HtmlRoutines::convertStringToHtmlString(this->toStringTagAndContent(), false);
   }
   std::stringstream out;
   out << "<span style =\"color:green\">";
-  out << HtmlRoutines::ConvertStringToHtmlString(this->syntacticRole, false);
+  out << HtmlRoutines::convertStringToHtmlString(this->syntacticRole, false);
   out << "</span>";
-  out << "[" << HtmlRoutines::ConvertStringToHtmlString(this->toStringTagAndContent(), false) << "]";
+  out << "[" << HtmlRoutines::convertStringToHtmlString(this->toStringTagAndContent(), false) << "]";
   return out.str();
 }
 
@@ -1049,7 +1049,7 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(std::stringstream* comments)
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
   debugStream << "<a href='"
-  << HtmlRoutines::GetCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures)
+  << HtmlRoutines::getCalculatorComputationURL(this->theProblemData.commandsGenerateProblemNoEnclosures)
   << "'>"
   << "Input link </a>";
   this->theProblemData.commandsGenerateProblemLink = debugStream.str();
@@ -2754,7 +2754,7 @@ void CalculatorHTML::computeBodyDebugString() {
   << "\n<br>\n"
   << "<hr>"
   << "<hr>"
-  << HtmlRoutines::ConvertStringToHtmlString(this->toStringCalculatorArgumentsForProblem("exercise", "false"), true);
+  << HtmlRoutines::convertStringToHtmlString(this->toStringCalculatorArgumentsForProblem("exercise", "false"), true);
   this->outputDebugInformationBody = out.str();
 }
 

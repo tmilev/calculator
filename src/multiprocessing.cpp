@@ -803,7 +803,7 @@ std::string Logger::getStampShort() {
     return "[daemon] ";
   }
   std::stringstream out;
-  out << "[" << global.logs.ToStringProcessType() << ", ";
+  out << "[" << global.logs.ToStringprocessType() << ", ";
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ", ";
   }
@@ -818,7 +818,7 @@ std::string Logger::getStampShort() {
 
 std::string Logger::getStamp() {
   std::stringstream out;
-  out << global.logs.ToStringProcessType() << ", ";
+  out << global.logs.ToStringprocessType() << ", ";
   out
   << global.GetDateForLogFiles() << ", "
   << global.getElapsedSeconds() << " s, ";
@@ -877,7 +877,7 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
     incoming.theType = "";
     LargeInteger theLI;
     theLI.assignString(current);
-    if (!theLI.IsIntegerFittingInInt(&incoming.length)) {
+    if (!theLI.isIntegerFittingInInt(&incoming.length)) {
       global.fatal << "StringHighligher is not allowed to fail: this is an internal function, "
       << "please do not expose to the outside world. " << global.fatal;
     }
@@ -911,7 +911,7 @@ bool MathRoutines::ParseListInt(
     if (!success) {
       return false;
     }
-    if (!theInt.IsIntegerFittingInInt(&result[i])) {
+    if (!theInt.isIntegerFittingInInt(&result[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Integer at position " << i << " is too large. ";
       }

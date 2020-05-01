@@ -45,9 +45,9 @@ public:
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   );
-  bool ProcessCharacterInQuotes();
+  bool processCharacterInQuotes();
   bool isSeparatorCharacter(char input);
-  bool ProcessSeparatorCharacters();
+  bool processSeparatorCharacters();
   bool ExtractCodeElements(std::stringstream* comments);
   bool WriteFormatedCode(std::stringstream* comments);
   bool ApplyFormattingRules(std::stringstream* comments);

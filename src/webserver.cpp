@@ -3274,6 +3274,7 @@ int WebServer::daemon() {
   global.logs.logType = GlobalVariables::LogData::type::daemon;
   std::stringstream restartCommand;
   restartCommand << global.PhysicalNameExecutableWithPath << " ";
+  restartCommand << MainFlags::server << " ";
   for (int i = 2; i < global.programArguments.size; i ++) {
     restartCommand << global.programArguments[i] << " ";
   }

@@ -7883,7 +7883,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "=:",
-    Calculator::StandardIsDenotedBy,
+    Calculator::standardIsDenotedBy,
     "",
     "The operation =: is the \"is denoted by\" operation. "
     "The expression a =:b always reduces to a =b. "
@@ -7898,8 +7898,8 @@ void Calculator::initPredefinedStandardOperations() {
     "z;\n"
     "z=y;\n"
     "z",
-    "Calculator::StandardIsDenotedBy",
-    "StandardIsDenotedBy",
+    "Calculator::standardIsDenotedBy",
+    "standardIsDenotedBy",
     innerStandard
   );
 
@@ -8291,33 +8291,33 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   MacroRegisterFunctionWithName("Calculator::initializePredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-  this->AddOperationNoRepetitionAllowed("RulesOff");
-  this->AddOperationNoRepetitionAllowed("RulesOn");
-  this->AddOperationNoRepetitionAllowed("Freeze");
-  this->AddOperationNoRepetitionAllowed("\\infty");
-  this->AddOperationNoRepetitionAllowed("\\phantom");
-  this->AddOperationNoRepetitionAllowed("CommandEnclosure");
-  this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Melt");
-  this->AddOperationNoRepetitionAllowed("Bind");
-  this->AddOperationNoRepetitionAllowed("\\limits");
-  this->AddOperationNoRepetitionAllowed("[)");
-  this->AddOperationNoRepetitionAllowed("(]");
-  this->AddOperationNoRepetitionAllowed("IntervalClosed");
-  this->AddOperationNoRepetitionAllowed("IntervalOpen");
-  this->AddOperationNoRepetitionAllowed("IndefiniteIndicator");
-  this->AddOperationNoRepetitionAllowed("\\log");
+  this->addOperationNoRepetitionAllowed("RulesOff");
+  this->addOperationNoRepetitionAllowed("RulesOn");
+  this->addOperationNoRepetitionAllowed("Freeze");
+  this->addOperationNoRepetitionAllowed("\\infty");
+  this->addOperationNoRepetitionAllowed("\\phantom");
+  this->addOperationNoRepetitionAllowed("CommandEnclosure");
+  this->addOperationNoRepetitionAllowed("MonomialPoly");
+  this->addOperationNoRepetitionAllowed("Melt");
+  this->addOperationNoRepetitionAllowed("Bind");
+  this->addOperationNoRepetitionAllowed("\\limits");
+  this->addOperationNoRepetitionAllowed("[)");
+  this->addOperationNoRepetitionAllowed("(]");
+  this->addOperationNoRepetitionAllowed("IntervalClosed");
+  this->addOperationNoRepetitionAllowed("IntervalOpen");
+  this->addOperationNoRepetitionAllowed("IndefiniteIndicator");
+  this->addOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
-  this->AddOperationNoRepetitionAllowed("\\emptyset");
-  this->AddOperationNoRepetitionAllowed("\\pi");
-  this->AddOperationNoRepetitionAllowed("e");
-  this->AddOperationNoRepetitionAllowed("i");
-  this->AddOperationNoRepetitionAllowed("\\arctan");
-  this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
-  this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
-  this->AddOperationNoRepetitionAllowed("ExpressionHistory");
-  this->AddOperationNoRepetitionAllowed("ExpressionHistorySet");
-  this->AddOperationNoRepetitionAllowed("ExpressionHistorySetChild");
+  this->addOperationNoRepetitionAllowed("\\emptyset");
+  this->addOperationNoRepetitionAllowed("\\pi");
+  this->addOperationNoRepetitionAllowed("e");
+  this->addOperationNoRepetitionAllowed("i");
+  this->addOperationNoRepetitionAllowed("\\arctan");
+  this->addOperationNoRepetitionAllowed("CommandEnclosureStart");
+  this->addOperationNoRepetitionAllowed("CommandEnclosureFinish");
+  this->addOperationNoRepetitionAllowed("ExpressionHistory");
+  this->addOperationNoRepetitionAllowed("ExpressionHistorySet");
+  this->addOperationNoRepetitionAllowed("ExpressionHistorySetChild");
 }
 
 void Calculator::initializeAtomsNonCacheable() {
@@ -8426,7 +8426,7 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("LogBase");
 }
 
-void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
+void Calculator::addKnownDoubleConstant(const std::string& theConstantName, double theConstantValue) {
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew(theConstantName);
   Expression theConstantE;
   theConstantE.makeAtom(theConstantName, *this);
@@ -8438,8 +8438,8 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
   MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
   this->atomsNotInterpretedAsFunctions.setExpectedSize(30);
 
-  this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
-  this->AddKnownDoubleConstant("e", MathRoutines::E());
+  this->addKnownDoubleConstant("\\pi", MathRoutines::Pi());
+  this->addKnownDoubleConstant("e", MathRoutines::E());
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\int");
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");
 }

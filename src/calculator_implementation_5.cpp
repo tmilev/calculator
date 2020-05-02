@@ -321,7 +321,7 @@ void MeshTriangles::ComputeImplicitPlot() {
   this->thePlot.thePlots.addListOnTop(this->theCurve.thePlots);
 }
 
-bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
+bool Calculator::getMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
   return this->functionGetMatrix<double>(
     input,
     output,
@@ -331,7 +331,7 @@ bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& outpu
   );
 }
 
-bool Calculator::GetVectorDoubles(
+bool Calculator::getVectorDoubles(
   const Expression& input,
   Vector<double>& output,
   int DesiredDimensionNonMandatory
@@ -345,7 +345,7 @@ bool Calculator::GetVectorDoubles(
   );
 }
 
-bool Calculator::GetVectorDoublesFromFunctionArguments(
+bool Calculator::getVectorDoublesFromFunctionArguments(
   const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory
 ) {
   return this->getVectorFromFunctionArguments(
@@ -426,10 +426,10 @@ bool MeshTriangles::ComputePoints(
   }
   this->knownEs.addOnTopNoRepetitionMustBeNew(theFreeVars[0]);
   this->knownEs.addOnTopNoRepetitionMustBeNew(theFreeVars[1]);
-  if (!theCommands.GetVectorDoubles(input[2], this->lowerLeftCorner)) {
+  if (!theCommands.getVectorDoubles(input[2], this->lowerLeftCorner)) {
     return theCommands << "Failed to extract lower left corner from: " << input[2].toString();
   }
-  if (!theCommands.GetVectorDoubles(input[3], this->upperRightCorner)) {
+  if (!theCommands.getVectorDoubles(input[3], this->upperRightCorner)) {
     return theCommands << "Failed to extract upper right corner from: " << input[3].toString();
   }
   List<int> theGridCount;
@@ -607,7 +607,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
   }
   Expression remainingIntegrand, integralPart;
   remainingIntegrand.MakeXOX(
-    theCommands, theCommands.opThePower(), theVariableE, powerOfXE - theCommands.EOne()
+    theCommands, theCommands.opThePower(), theVariableE, powerOfXE - theCommands.expressionOne()
   );
   remainingIntegrand *= exponentPartE;
   integralPart.makeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
@@ -651,7 +651,7 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   theNewVarE = theVariableE * theVarChangeCF;
   theFunCoeff /= theVarChangeCF;
   Expression algSQRTPart, algPart, lnPart;
-  algSQRTPart = theNewVarE * theNewVarE - theCommands.EOne();
+  algSQRTPart = theNewVarE * theNewVarE - theCommands.expressionOne();
   algPart.makeSqrt(theCommands, algSQRTPart);
   lnPart.makeOX(theCommands, theCommands.opLog(), theNewVarE - algPart);
   output = theFunCoeff * (algPart * theNewVarE + lnPart) / 2;
@@ -679,7 +679,7 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   indefiniteExpression.makeAtom(theCommands.opIndefiniteIndicator(), theCommands);
   theIndefiniteIntegral.makeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
   Expression solvedIntegral;
-  if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral)) {
+  if (!theCommands.evaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral)) {
     return false;
   }
   if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral())) {
@@ -719,8 +719,8 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   theTopCommands.addChildOnTop(solvedIntegral);
   theBottomCommands.addChildOnTop(solvedIntegral);
   Expression theTop, theBottom;
-  theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.ETwo());
-  theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.ETwo());
+  theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.expressionTwo());
+  theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.expressionTwo());
   output = theTop - theBottom;
   return true;
 }
@@ -1146,7 +1146,7 @@ bool CalculatorFunctions::innerPlotLabel(
     return false;
   }
   Vector<double> labelPosition;
-  if (!theCommands.GetVectorDoubles(input[1], labelPosition, - 1)) {
+  if (!theCommands.getVectorDoubles(input[1], labelPosition, - 1)) {
     return false;
   }
   std::string theLabel;
@@ -1172,8 +1172,8 @@ bool CalculatorFunctions::innerPlotRectangle(
   Vectors<double> theRectangle;
   theRectangle.setSize(2);
   if (
-    !theCommands.GetVectorDoubles(input[1], theRectangle[0], 2) ||
-    !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2)
+    !theCommands.getVectorDoubles(input[1], theRectangle[0], 2) ||
+    !theCommands.getVectorDoubles(input[2], theRectangle[1], 2)
   ) {
     return false;
   }
@@ -1226,7 +1226,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, modifiedInput[2], convertedEqualityE)) {
       return theCommands << "Failed to interpret the equality " << modifiedInput[2].toString();
     }
-    if (!Calculator::EvaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE)) {
+    if (!Calculator::evaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE)) {
       return theCommands << "Failed to simplify: " << convertedEqualityE.toString();
     }
     modifiedInput.setChild(2, convertedSimplifiedEqualityE);
@@ -1410,7 +1410,7 @@ bool CalculatorFunctions::innerSqrt(
     return false;
   }
   if (!input[2].isRational() ) {
-    theCommands.CheckInputNotSameAsOutput(input, output);
+    theCommands.checkInputNotSameAsOutput(input, output);
     Expression theExponent;
     Rational thePowerRat(1, thePower);
     theExponent.assignValue(thePowerRat, theCommands);
@@ -1522,7 +1522,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   }
   const Expression& theMatE = input[1];
   Matrix<double> theMat;
-  if (!theCommands.GetMatrixDoubles(theMatE, theMat)) {
+  if (!theCommands.getMatrixDoubles(theMatE, theMat)) {
     return theCommands << "Failed to extract matrix from: " << theMatE.toString();
   }
   if (theMat.numberOfColumns != 2 && theMat.numberOfColumns != 3) {
@@ -1575,7 +1575,7 @@ bool CalculatorFunctions::innerPlotMarkSegment(
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
-  if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV)) {
+  if (!theCommands.getVectorDoubles(leftE, leftV) || !theCommands.getVectorDoubles(rightE, rightV)) {
     return false;
   }
   if (leftV.size != rightV.size) {
@@ -1596,8 +1596,8 @@ bool CalculatorFunctions::innerPlotMarkSegment(
   Expression theVector = (rightE - leftE);
   Expression midPt = (rightE + leftE) / 2;
   Expression theVectorX, theVectorY;
-  theVectorX.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.EOne());
-  theVectorY.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.ETwo());
+  theVectorX.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionOne());
+  theVectorY.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionTwo());
   Expression theOrthoV;
   theOrthoV.MakeXOX(theCommands, theCommands.opSequence(), theVectorY * (- 1), theVectorX);
   Expression leftPt = midPt - theOrthoV / 25;
@@ -1620,7 +1620,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
-  if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV)) {
+  if (!theCommands.getVectorDoubles(leftE, leftV) || !theCommands.getVectorDoubles(rightE, rightV)) {
     return false;
   }
   if (leftV.size != rightV.size) {
@@ -1697,11 +1697,11 @@ bool CalculatorFunctions::innerLCM(Calculator& theCommands, const Expression& in
     return false;
   }
   Vector<LargeInteger> theInts;
-  if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts)) {
+  if (!theCommands.getVectorLargeIntegerFromFunctionArguments(input, theInts)) {
     return false;
   }
   if (theInts.size < 1) {
-    //<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+    //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
     return false;
   }
   LargeIntegerUnsigned theResult = theInts[0].value;
@@ -1723,11 +1723,11 @@ bool CalculatorFunctions::innerGCD(Calculator& theCommands, const Expression& in
     return false;
   }
   Vector<LargeInteger> theInts;
-  if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts)) {
+  if (!theCommands.getVectorLargeIntegerFromFunctionArguments(input, theInts)) {
     return false;
   }
   if (theInts.size < 1) {
-    //<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+    //<-this shouldn't happen if getVectorLargeIntegerFromFunctionArguments works as intended.
     return false;
   }
   LargeIntegerUnsigned theResult = theInts[0].value;
@@ -1848,7 +1848,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   return true;
 }
 
-std::string InputBox::GetSliderName() const {
+std::string InputBox::getSliderName() const {
   List<unsigned char> hex;
   Crypto::computeSha256(this->name, hex);
   return this->name + "_" + Crypto::convertListUnsignedCharsToHex(hex);
@@ -1885,14 +1885,14 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDepthExceededHandleRoughly()) {
+  if (theCommands.recursionDepthExceededHandleRoughly()) {
     return false;
   }
   std::string atomString;
-  if (input == theCommands.EMInfinity()) {
+  if (input == theCommands.expressionMinusInfinity()) {
     return output.assignValue<std::string>("\"minusInfinity\"", theCommands);
   }
-  if (input == theCommands.EInfinity()) {
+  if (input == theCommands.expressionInfinity()) {
     return output.assignValue<std::string>("\"infinity\"", theCommands);
   }
   if (input.isOperation(&atomString)) {
@@ -1913,7 +1913,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   std::stringstream out;
   InputBox theBox;
   if (input.isOfType(&theBox)) {
-    out << "parseFloat(document.getElementsByName('" << theBox.GetSliderName() << "')[0].value)";
+    out << "parseFloat(document.getElementsByName('" << theBox.getSliderName() << "')[0].value)";
     return output.assignValue(out.str(), theCommands);
   }
   out.precision(7);
@@ -2041,8 +2041,8 @@ bool CalculatorFunctions::innerPlotSetProjectionScreenBasis(
   }
   Vector<double> v1, v2;
   if (
-    !theCommands.GetVectorDoubles(input[1], v1, 3) ||
-    !theCommands.GetVectorDoubles(input[2], v2, 3)
+    !theCommands.getVectorDoubles(input[1], v1, 3) ||
+    !theCommands.getVectorDoubles(input[2], v2, 3)
   ) {
     return theCommands << "Failed to extract 3d-vectors from "
     << input[1].toString() << ", " << input[2].toString() << ".";
@@ -2064,8 +2064,8 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
   }
   Vector<double> corner1, corner2;
   if (
-    !theCommands.GetVectorDoubles(input[1], corner1, 3) ||
-    !theCommands.GetVectorDoubles(input[2], corner2, 3)
+    !theCommands.getVectorDoubles(input[1], corner1, 3) ||
+    !theCommands.getVectorDoubles(input[2], corner2, 3)
   ) {
     return theCommands << "Failed to extract 3d-vectors from "
     << input[1].toString() << ", "
@@ -2241,7 +2241,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   thePlot.dimension = thePlot.coordinateFunctionsE.size;
   Plot result;
   result += thePlot;
-  input.HasInputBoxVariables(&result.boxesThatUpdateMe);
+  input.hasInputBoxVariables(&result.boxesThatUpdateMe);
   return output.assignValue(result, theCommands);
 }
 

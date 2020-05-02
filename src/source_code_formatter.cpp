@@ -227,8 +227,8 @@ std::string CodeFormatter::ToStringTransformed6() {
   return out.str();
 }
 
-bool CodeFormatter::ApplyOneRule(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyOneRule");
+bool CodeFormatter::applyOneRule(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::applyOneRule");
   (void) comments;
   int lastIndex = this->transformedElements.size - 1;
   CodeElement& last = this->transformedElements[lastIndex];
@@ -414,7 +414,7 @@ bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
     this->AddAndAccount(currentElement);
     int tooManyRulesCounter = 0;
     int maximumRules = 200;
-    while (this->ApplyOneRule(comments)) {
+    while (this->applyOneRule(comments)) {
       this->ComputeState(200);
       tooManyRulesCounter ++;
       if (tooManyRulesCounter > maximumRules) {

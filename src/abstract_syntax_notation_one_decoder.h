@@ -260,8 +260,8 @@ public:
     int offset;
     int totalByteLength;
     int reservedBytesForLength;
-    static int GetReservedBytesForLength(int length);
-    static void WriteLength(unsigned int input, List<unsigned char>& output, int offset);
+    static int getReservedBytesForLength(int length);
+    static void writeLength(unsigned int input, List<unsigned char>& output, int offset);
     WriterObjectFixedLength(
       unsigned char startByte,
       int expectedTotalElementByteLength,

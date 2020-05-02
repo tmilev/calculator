@@ -270,7 +270,7 @@ private:
     if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
-    if (this->children.size < 2 || !this->GetLastChild().isAtom()) {
+    if (this->children.size < 2 || !this->getLastChild().isAtom()) {
       return false;
     }
     return true;
@@ -299,7 +299,7 @@ private:
     if (!this->startsWith(this->getTypeOperation<theType>())) {
       return false;
     }
-    if (this->children.size < 2 || !this->GetLastChild().isAtom()) {
+    if (this->children.size < 2 || !this->getLastChild().isAtom()) {
       return false;
     }
     if (whichElement == 0) {
@@ -531,7 +531,7 @@ private:
     this->reset();
     this->theData = x;
   }
-  const Expression& GetLastChild() const {
+  const Expression& getLastChild() const {
     return (*this)[this->children.size - 1];
   }
   bool makeError (const std::string& theError, Calculator& owner);
@@ -574,7 +574,7 @@ private:
     const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
   bool hasBoundVariables() const;
-  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = nullptr) const;
+  bool hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = nullptr) const;
   bool isMeltable(int* numResultingChildren = nullptr) const;
   bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
@@ -827,14 +827,14 @@ class SyntacticElement {
   Expression theData;
   List<Expression> dataList;
   std::string errorString;
-  std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
+  std::string toStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
   SyntacticElement() {
     this->controlIndex = 0; //controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
   }
-  std::string GetIntegerStringCrashIfNot(Calculator& owner);
+  std::string getIntegerStringCrashIfNot(Calculator& owner);
 };
 
 class PlotObject {
@@ -889,34 +889,34 @@ public:
   std::string paramLowJS;
   std::string paramHighJS;
   ////////////////
-  std::string GetJavascriptSurfaceImmersion(
+  std::string getJavascriptSurfaceImmersion(
     std::string& outputSurfaceInstantiationJS,
     const std::string& canvasName,
     int& funCounter
   );
-  std::string GetJavascriptCurveImmersionIn3d(
+  std::string getJavascriptCurveImmersionIn3d(
     std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
   );
   std::string toStringDebug();
-  void ComputeYbounds();
-  std::string ToStringPointsList();
-  std::string GetPlotStringFromFunctionStringAndRanges(
+  void computeYBounds();
+  std::string toStringPointsList();
+  std::string getPlotStringFromFunctionStringAndRanges(
     bool useHtml,
     const std::string& functionStringPostfixNotation,
     const std::string& functionStringCalculatorFormat,
     double lowerBound,
     double upperBound
   );
-  std::string GetJavascript2dPlot(
+  std::string getJavascript2dPlot(
     std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
   );
-  std::string GetJavascriptParametricCurve2D(
+  std::string getJavascriptParametricCurve2D(
     std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
   );
-  std::string GetJavascriptPoints(
+  std::string getJavascriptPoints(
     std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
   );
-  std::string GetJavascriptDirectionField(
+  std::string getJavascriptDirectionField(
     std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
   );
   PlotObject();
@@ -948,20 +948,20 @@ public:
   // When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   // If the priorities are equal, the windows are combined to the smallest window that fits both.
   int priorityCanvasName; // same as priorityViewWindow but with respect to canvas names.
-  void SetCanvasName(const std::string& inputName);
-  std::string GetCanvasName() const;
+  void setCanvasName(const std::string& inputName);
+  std::string getCanvasName() const;
 
   std::string toStringDebug();
   std::string getPlotHtml(Calculator& owner);
-  void ComputeCanvasNameIfNecessary(int& canvasCounter);
+  void computeCanvasNameIfNecessary(int& canvasCounter);
   std::string commonCanvasSetup();
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
-  std::string GetPlotStringAddLatexCommands(bool useHtml);
-  bool IsOKVector(const Vector<double>& input);
+  std::string getPlotStringAddLatexCommands(bool useHtml);
+  bool isOKVector(const Vector<double>& input);
   Plot();
-  void ComputeAxesAndBoundingBox3d();
-  void ComputeAxesAndBoundingBox();
+  void computeAxesAndBoundingBox3d();
+  void computeAxesAndBoundingBox();
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   bool operator==(const Plot& other) const;
@@ -978,7 +978,7 @@ public:
   Expression min;
   Expression max;
   Expression step;
-  std::string GetSliderName() const;
+  std::string getSliderName() const;
   std::string getUserInputBox() const;
 };
 
@@ -995,8 +995,8 @@ public:
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunction> > theCategoryOmodules;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
-  HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
-  HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
+  HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
+  HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > polynomialsRational;
   HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
@@ -1011,7 +1011,7 @@ public:
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
-  HashedListReferences<Expression> ExpressionWithNotation;
+  HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<ElementZmodP> theEltsModP;
@@ -1027,17 +1027,17 @@ public:
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
   ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
-  WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
-  SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
+  WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
+  SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
-  int CurrentRandomSeed;
+  int currentRandomSeed;
   int canvasPlotCounter;
   void reset();
   void resetSliders();
   void resetPlots();
-  bool CheckConsistencyAfterReset();
+  bool checkConsistencyAfterReset();
   std::string toString();
-  std::string ToStringJavascriptForUserInputBoxes();
+  std::string toStringJavascriptForUserInputBoxes();
 };
 
 class ExpressionTripleCrunchers {
@@ -1074,7 +1074,7 @@ public:
   int startingRuleStackIndex;
   int startingRuleStackSize;
   StateMaintainerCalculator(Calculator& inputBoss);
-  void AddRule(const Expression& theRule);
+  void addRule(const Expression& theRule);
   ~StateMaintainerCalculator();
 };
 
@@ -1275,7 +1275,7 @@ public:
   List<SyntacticElement> syntacticStacK;
 
   List<SyntacticElement>* CurrrentSyntacticSouP;
-  List<SyntacticElement>* CurrentSyntacticStacK;
+  List<SyntacticElement>* currentSyntacticStack;
 
   HashedList<Expression> cachedExpressions;
   List<Expression> imagesCachedExpressions;
@@ -1316,29 +1316,29 @@ public:
   JSData toJSONPerformance();
   Expression getNewBoundVariable();
   Expression getNewAtom();
-  void ComputeAutoCompleteKeyWords();
-  void WriteAutoCompleteKeyWordsToFile();
+  void computeAutoCompleteKeyWords();
+  void writeAutoCompleteKeyWordsToFile();
   JSData toJSONOutputAndSpecials();
-  std::string ToStringOutputAndSpecials();
-  JSData ToJSONFunctionHandlers();
+  std::string toStringOutputAndSpecials();
+  JSData toJSONFunctionHandlers();
   // the purpose of the operator below is to save on typing when returning false with a comment.
   operator bool() const {
     return false;
   }
 
   void registerCalculatorFunction(Function& theFun, int indexOp);
-  std::string ToStringSemismipleLieAlgebraLinksFromHD(
+  std::string toStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
   );
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool isBoundVariableInContext(int inputOp);
-  bool IsNonBoundVarInContext(int inputOp);
-  Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
-  bool CheckPredefinedFunctionNameRepetitions();
-  bool CheckOperationHandlers();
-  bool CheckConsistencyAfterInitialization();
+  bool isNonBoundVariableInContext(int inputOp);
+  Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
+  bool checkPredefinedFunctionNameRepetitions();
+  bool checkOperationHandlers();
+  bool checkConsistencyAfterInitialization();
   //to make operations read only, we make operations private and return const pointer to it.
-  const HashedList<std::string, MathRoutines::hashString>& GetOperations() {
+  const HashedList<std::string, MathRoutines::hashString>& getOperations() {
     return this->operations.theKeys;
   }
   const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
@@ -1351,41 +1351,39 @@ public:
     result.controlIndex = this->controlSequences.getIndex(";");
     return result;
   }
-  bool DecreaseStackSetCharacterRangeS(int decrease) {
+  bool decreaseStackSetCharacterRanges(int decrease) {
     if (decrease <= 0) {
       return true;
     }
-    if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
+    if ((*this->currentSyntacticStack).size - decrease <= 0) {
       global.fatal << "Bad stack decrease. " << global.fatal;
     }
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - decrease);
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - decrease);
     return true;
   }
-  Expression EZero();
-  Expression EOne();
-  Expression ETwo();
-  Expression EThree();
-  Expression EFour();
-  Expression EFive();
-  Expression EMOne();
-  Expression EHalf();
-  Expression EMHalf();
-  Expression EInfinity();
-  Expression EMInfinity();
-  void DoLogEvaluationIfNeedBe(Function& inputF);
-  void LogPublicError(const std::string& theError);
-  bool DecreaseStackExceptLast(int decrease);
-  bool DecreaseStackExceptLastTwo(int decrease);
-  std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
-  std::string ToStringSyntacticStackHumanReadable(
+  Expression expressionZero();
+  Expression expressionOne();
+  Expression expressionTwo();
+  Expression expressionFour();
+  Expression expressionMinusOne();
+  Expression expressionHalf();
+  Expression expressionMinusHalf();
+  Expression expressionInfinity();
+  Expression expressionMinusInfinity();
+  void doLogEvaluationIfNeedBe(Function& inputF);
+  void logPublicError(const std::string& theError);
+  bool decreaseStackExceptLast(int decrease);
+  bool decreaseStackExceptLastTwo(int decrease);
+  std::string toStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
+  std::string toStringSyntacticStackHumanReadable(
     bool includeLispifiedExpressions, bool ignoreCommandEnclosures
   );
-  std::string WriteDefaultLatexFileReturnHtmlLink(
+  std::string writeDefaultLatexFileReturnHtmlLink(
     const std::string& fileContent,
     std::string* outputFileNameNoExtension,
     bool useLatexDviPSpsToPNG = false
   );
-  std::string ToStringIsCorrectAsciiCalculatorString(const std::string& input);
+  std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
@@ -1396,186 +1394,186 @@ public:
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);
-  bool AllowsPowerInPreceding(const std::string& lookAhead);
-  bool AllowsPowerInNext(const std::string& lookBehind);
-  bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo = "");
+  bool allowsPowerInPreceding(const std::string& lookAhead);
+  bool allowsPowerInNext(const std::string& lookBehind);
+  bool recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo = "");
 
-  bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
-  bool AllowsApplyFunctionInPreceding(const std::string& lookAhead);
+  bool allowsLimitProcessInPreceding(const std::string& lookAhead);
+  bool allowsApplyFunctionInPreceding(const std::string& lookAhead);
   bool allowsIfInPreceding(const std::string& lookAhead);
   bool allowsOrInPreceding(const std::string& lookAhead);
   bool allowsAndInPreceding(const std::string& lookAhead);
   bool allowsInInPreceding(const std::string& lookAhead);
-  bool AllowsPlusInPreceding(const std::string& lookAhead);
-  bool AllowsTimesInNext(const std::string& thePreceding);
-  bool AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
+  bool allowsPlusInPreceding(const std::string& lookAhead);
+  bool allowsTimesInNext(const std::string& thePreceding);
+  bool allowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
 
-  bool AllowsTimesInPreceding(const std::string& lookAhead);
-  bool AllowsTensorInPreceding(const std::string& lookAhead);
-  bool AllowsDivideInPreceding(const std::string& lookAhead);
-  bool PopTopSyntacticStack() {
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 1);
+  bool allowsTimesInPreceding(const std::string& lookAhead);
+  bool allowsTensorInPreceding(const std::string& lookAhead);
+  bool allowsDivideInPreceding(const std::string& lookAhead);
+  bool popTopSyntacticStack() {
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
-  bool ReplaceEXXEXEBy_CofEEE(int theOp);
-  bool ReplaceEXXEXEXBy_CofEEE_X(int theOp);
-  bool ReplaceEOXbyEX();
-  bool ReplaceEEBy_CofEE(int theControlIndex);
-  bool ReplaceEEXBy_CofEE_X(int theControlIndex);
-  bool ReplaceOOEEXbyEXpowerLike();
-  bool ReplaceEEByE();
-  bool ReplaceEXEXByEX();
-  bool ReplaceEXEXBy_OofEE_X(int theOp);
-  bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
-  bool ReplaceEXdotsXbySsXdotsX(int numDots);
-  bool ReplaceEXdotsXBySs(int numDots) {
-    this->ReplaceEXdotsXbySsXdotsX(numDots);
-    return this->DecreaseStackSetCharacterRangeS(numDots);
+  bool replaceEXXEXEBy_CofEEE(int theOp);
+  bool replaceEXXEXEXBy_CofEEE_X(int theOp);
+  bool replaceEOXbyEX();
+  bool replaceEEBy_CofEE(int theControlIndex);
+  bool replaceEEXBy_CofEE_X(int theControlIndex);
+  bool replaceOOEEXbyEXpowerLike();
+  bool replaceEEByE();
+  bool replaceEXEXByEX();
+  bool replaceEXEXBy_OofEE_X(int theOp);
+  bool replaceSsSsXdotsXbySsXdotsX(int numDots);
+  bool replaceEXdotsXbySsXdotsX(int numDots);
+  bool replaceEXdotsXBySs(int numDots) {
+    this->replaceEXdotsXbySsXdotsX(numDots);
+    return this->decreaseStackSetCharacterRanges(numDots);
   }
-  bool ReplaceOEXByE();
-  bool ReplaceOEXByEX();
-  bool ReplaceC1C2Eby_C2ofC1E();
-  bool ReplaceEOByE();
-  bool ReplaceOEByE();
-  bool ReplaceOXXByEXX    ();
-  bool ReplaceOXEByE      ();
-  bool ReplaceOXEXByEX    ();
-  bool ReplaceOXEEXByEX   ();
-  bool ReplaceOXXEXEXEXByE();
-  bool ReplaceSqrtEXXByEXX();
-  bool ReplaceSqrtEXByEX  ();
-  bool ReplaceSqrtXEXByEX ();
-  bool ReplaceOXEXEByE    ();
-  bool ReplaceOXEXEXByEX  ();
-  bool ReplaceOXEXEXXByEXX();
-  bool ReplaceOXEXEXEXByE ();
-  bool ReplaceEOEXByEX    ();
-  bool ReplaceUnderscoreEPowerEbyLimits();
-  bool ReplacePowerEUnderScoreEbyLimits();
-  bool ReplaceXEEXBy_OofEE_X(int inputOperation);
-  bool ReplaceXEEBy_OofEE(int inputOperation);
-  bool ReplaceECByC();
-  bool ReplaceEXEBySequence(int theControlIndex);
-  bool ReplaceYXBySequenceX(int theControlIndex);
-  bool ReplaceXXXbyE();
-  bool ReplaceYBySequenceY(int theControlIndex);
-  bool ReplaceXXYBySequenceY(int theControlIndex);
-  bool ReplaceXXYXBySequenceYX(int theControlIndex);
-  bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs = 0);
-  bool ReplaceSequenceXEBySequence    (int theControlIndex);
-  bool ReplaceSequenceUXEYBySequenceZY(int theControlIndex);
-  bool ReplaceCEByC();
-  bool ReplaceCCByC();
-  bool ReplaceEOEByE() {
-    return this->ReplaceEXEByCofEE((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex);
+  bool replaceOEXByE();
+  bool replaceOEXByEX();
+  bool replaceC1C2Eby_C2ofC1E();
+  bool replaceEOByE();
+  bool replaceOEByE();
+  bool replaceOXXByEXX    ();
+  bool replaceOXEByE      ();
+  bool replaceOXEXByEX    ();
+  bool replaceOXEEXByEX   ();
+  bool replaceOXXEXEXEXByE();
+  bool replaceSqrtEXXByEXX();
+  bool replaceSqrtEXByEX  ();
+  bool replaceSqrtXEXByEX ();
+  bool replaceOXEXEByE    ();
+  bool replaceOXEXEXByEX  ();
+  bool replaceOXEXEXXByEXX();
+  bool replaceOXEXEXEXByE ();
+  bool replaceEOEXByEX    ();
+  bool replaceUnderscoreEPowerEbyLimits();
+  bool replacePowerEUnderScoreEbyLimits();
+  bool replaceXEEXBy_OofEE_X(int inputOperation);
+  bool replaceXEEBy_OofEE(int inputOperation);
+  bool replaceECByC();
+  bool replaceEXEBySequence(int theControlIndex);
+  bool replaceYXBySequenceX(int theControlIndex);
+  bool replaceXXXbyE();
+  bool replaceYBySequenceY(int theControlIndex);
+  bool replaceXXYBySequenceY(int theControlIndex);
+  bool replaceXXYXBySequenceYX(int theControlIndex);
+  bool replaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs = 0);
+  bool replaceSequenceXEBySequence    (int theControlIndex);
+  bool replaceSequenceUXEYBySequenceZY(int theControlIndex);
+  bool replaceCEByC();
+  bool replaceCCByC();
+  bool replaceEOEByE() {
+    return this->replaceEXEByCofEE((*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].controlIndex);
   }
-  bool ReplaceMatrixEXByMatrix();
-  bool ReplaceMatrixEXByMatrixX();
-  bool ReplaceMatrixEXByMatrixNewRow();
-  bool ReplaceMatrixXByE();
-  bool ReplaceCXByE();
-  bool ReplaceCXByEX();
-  bool ReplaceXEXEXBy_CofEE(int theOperation);
-  bool ReplaceEXEByCofEE  (int theOperation);
-  bool ReplaceXYByConY(int theCon) {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = theCon;
+  bool replaceMatrixEXByMatrix();
+  bool replaceMatrixEXByMatrixX();
+  bool replaceMatrixEXByMatrixNewRow();
+  bool replaceMatrixXByE();
+  bool replaceCXByE();
+  bool replaceCXByEX();
+  bool replaceXEXEXBy_CofEE(int theOperation);
+  bool replaceEXEByCofEE  (int theOperation);
+  bool replaceXYByConY(int theCon) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXYYByConYY(int theCon) {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3].controlIndex = theCon;
+  bool replaceXYYByConYY(int theCon) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXYYYByConYYY(int theCon) {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4].controlIndex = theCon;
+  bool replaceXYYYByConYYY(int theCon) {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].controlIndex = theCon;
     return true;
   }
-  bool ReplaceXXByCon(int theCon) {
-    this->ReplaceXYByConY(theCon);
-    return this->DecreaseStackSetCharacterRangeS(1);
+  bool replaceXXByCon(int theCon) {
+    this->replaceXYByConY(theCon);
+    return this->decreaseStackSetCharacterRanges(1);
   }
-  bool ReplaceXByCon(int theCon);
-  bool ReplaceXByO(int theOperation);
-  bool ReplaceXByConCon(int con1, int con2);
-  bool ReplaceXXXByCon(int theCon);
-  bool ReplaceXXXByConCon(int con1, int con2);
-  bool ReplaceXXXXXByCon(int theCon);
-  bool ReplaceXXXXXByConCon(int con1, int con2);
-  bool ReplaceXXXXByConCon (int con1, int con2);
-  bool ReplaceXdotsXByMatrixStart(int numXes);
-  bool ReplaceXXXXByCon(int con1);
-  bool ReplaceXXYByY() {
-    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 3] =
-    (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 1];
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
+  bool replaceXByCon(int theCon);
+  bool replaceXByO(int theOperation);
+  bool replaceXByConCon(int con1, int con2);
+  bool replaceXXXByCon(int theCon);
+  bool replaceXXXByConCon(int con1, int con2);
+  bool replaceXXXXXByCon(int theCon);
+  bool replaceXXXXXByConCon(int con1, int con2);
+  bool replaceXXXXByConCon (int con1, int con2);
+  bool replaceXdotsXByMatrixStart(int numXes);
+  bool replaceXXXXByCon(int con1);
+  bool replaceXXYByY() {
+    (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 3] =
+    (*this->currentSyntacticStack)[this->currentSyntacticStack->size - 1];
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 2);
     return true;
   }
-  bool ReplaceXXYXByYX() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
+  bool replaceXXYXByYX() {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 2);
     return true;
   }
-  bool ReplaceXYYXByYY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
+  bool replaceXYYXByYY() {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 2);
     return true;
   }
-  bool ReplaceXYXByY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-    this->DecreaseStackSetCharacterRangeS(2);
+  bool replaceXYXByY() {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2];
+    this->decreaseStackSetCharacterRanges(2);
     return true;
   }
-  bool ReplaceXYByY() {
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] =
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 1);
+  bool replaceXYByY() {
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2] =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1];
+    (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size - 1);
     return true;
   }
-  bool ReplaceXEXByE();
-  bool ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
-  bool ReplaceAXbyEX();
-  bool ReplaceIntegerXbyEX();
-  bool ReplaceIntegerDotIntegerByE();
-  bool ReplaceXXByEEmptySequence();
-  bool ReplaCeOXdotsXbyEXdotsX(int numXs);
-  bool ReplaceOXbyEX();
-  bool ReplaCeObyE();
-  bool ReplaceXXbyEX();
-  bool ReplaceXXbyO(int theOperation);
-  bool ReplaceXXYbyOY(int theOperation);
-  bool ReplaceXEXByEcontainingOE(int inputOpIndex);
-  bool ReplaceXXByEmptyString();
-  bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  bool ReplaceXXbyE();
+  bool replaceXEXByE();
+  bool replaceVbyVdotsVAccordingToPredefinedWordSplits();
+  bool replaceAXbyEX();
+  bool replaceIntegerXbyEX();
+  bool replaceIntegerDotIntegerByE();
+  bool replaceXXByEEmptySequence();
+  bool replaceOXdotsXbyEXdotsX(int numXs);
+  bool replaceOXbyEX();
+  bool replaceObyE();
+  bool replaceXXbyEX();
+  bool replaceXXbyO(int theOperation);
+  bool replaceXXYbyOY(int theOperation);
+  bool replaceXEXByEContainingOE(int inputOpIndex);
+  bool replaceXXByEmptyString();
+  bool replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
+  bool replaceXXbyE();
   bool getMatrixExpressions(
     const Expression& input,
     Matrix<Expression>& output,
     int desiredNumRows = - 1,
     int desiredNumCols = - 1
   );
-  bool GetMatrixExpressionsFromArguments(
+  bool getMatrixExpressionsFromArguments(
     const Expression& input,
     Matrix<Expression>& output,
     int desiredNumRows = - 1,
     int desiredNumCols = - 1
   );
-  void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
-  bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
-  bool ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
-  int GetOperationIndexFromControlIndex(int controlIndex);
-  int GetExpressionIndex();
-  SyntacticElement GetEmptySyntacticElement();
+  void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
+  bool replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
+  bool replaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
+  int getOperationIndexFromControlIndex(int controlIndex);
+  int getExpressionIndex();
+  SyntacticElement getEmptySyntacticElement();
   bool accountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
-  bool ApplyOneRule();
+  bool applyOneRule();
   void resetStack() {
-    SyntacticElement emptyElement = this->GetEmptySyntacticElement();
-    (*this->CurrentSyntacticStacK).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
+    SyntacticElement emptyElement = this->getEmptySyntacticElement();
+    (*this->currentSyntacticStack).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
   }
   int conError() {
     return this->controlSequences.getIndexNoFail("Error");
@@ -1797,10 +1795,10 @@ public:
     return this->operations.getIndexNoFail("PolynomialModuloPolynomialModuloInteger");
   }
   int opEllipticCurveElementsRational() {
-    return this->operations.getIndexNoFail("EllipticCurveElementsRational");
+    return this->operations.getIndexNoFail("ellipticCurveElementsRational");
   }
   int opEllipticCurveElementsZmodP() {
-    return this->operations.getIndexNoFail("EllipticCurveElementsZmodP");
+    return this->operations.getIndexNoFail("ellipticCurveElementsZmodP");
   }
   int opRationalFunction() {
     return this->operations.getIndexNoFail("RationalFunction");
@@ -2012,14 +2010,14 @@ public:
   int opInterpretProblemGiveUp() {
     return this->operations.getIndexNoFail("ProblemGiveUp");
   }
-  bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
-  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
-    return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
+  bool appendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
+  bool appendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
+    return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
   bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
-    return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
+    return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
-  void SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
+  void specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
   Expression* patternMatch(
     const Expression& thePattern,
     Expression& theExpression,
@@ -2032,7 +2030,7 @@ public:
     Expression& theExpression,
     MapList<Expression, Expression>& bufferPairs, std::stringstream* theLog = nullptr
   );
-  static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
+  static void checkInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
       global.fatal << "This is a programming error: the input expression, equal to "
       << input.toString() << " has the same address as the output expression. "
@@ -2041,10 +2039,10 @@ public:
   }
   // TODO: move to calculator conversions.
   template <class theType>
-  bool ConvertToTypeUsingFunction(
+  bool convertToTypeUsingFunction(
     Expression::FunctionAddress theFun, const Expression& input, Expression& output
   ) {
-    MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
+    MacroRegisterFunctionWithName("Calculator::convertToTypeUsingFunction");
     if (input.isOfType<theType>()) {
       output = input;
       return true;
@@ -2060,14 +2058,14 @@ public:
   }
   // TODO: move to calculator conversions.
   template <class theType>
-  bool Convert(
+  bool convert(
     const Expression& input,
     Expression::FunctionAddress conversion,
     WithContext<theType>& output
   ) {
-    MacroRegisterFunctionWithName("Calculator::Convert");
+    MacroRegisterFunctionWithName("Calculator::convert");
     Expression conversionExpression;
-    if (!this->ConvertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
+    if (!this->convertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
       return false;
     }
     if (!conversionExpression.isOfType(&output.content)) {
@@ -2076,17 +2074,17 @@ public:
     output.context = conversionExpression.getContext();
     return true;
   }
-  bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
+  bool callCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
     if (&input == &output) {
       Expression inputCopy = input;
-      return this->CallCalculatorFunction(theFun, inputCopy, output);
+      return this->callCalculatorFunction(theFun, inputCopy, output);
     }
     if (!theFun(*this, input, output)) {
       return false;
     }
     return !output.isError();
   }
-  bool ExpressionMatchesPattern(
+  bool expressionMatchesPattern(
     const Expression& thePattern,
     const Expression& input,
     MapList<Expression, Expression>& matchedExpressions,
@@ -2120,7 +2118,7 @@ public:
   static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
-  std::string WriteFileToOutputFolderReturnLink(
+  std::string writeFileToOutputFolderReturnLink(
     const std::string& fileContent,
     const std::string& fileName,
     const std::string& linkText
@@ -2152,28 +2150,24 @@ public:
     MapList<std::string, Calculator::Test::OneTest, MathRoutines::hashString> commands;
     JSData storedResults;
     Test(Calculator& inputOwner);
-    bool ProcessResults();
-    bool LoadTestStrings(std::stringstream *commentsOnFailure);
-    bool WriteTestStrings(std::stringstream* commentsOnFailure);
-    bool ProcessOneTest(JSData& input);
+    bool processResults();
+    bool loadTestStrings(std::stringstream *commentsOnFailure);
+    bool writeTestStrings(std::stringstream* commentsOnFailure);
+    bool processOneTest(JSData& input);
     static bool all();
-    static bool NumberOfTestFunctions(Calculator& ownerInitialized);
-    static bool ParseDecimal(Calculator& ownerInitialized);
-    static bool ParseAllExamples(Calculator& ownerInitialized);
-    static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
+    static bool numberOfTestFunctions(Calculator& ownerInitialized);
+    static bool parseDecimal(Calculator& ownerInitialized);
+    static bool parseAllExamples(Calculator& ownerInitialized);
+    static bool builtInFunctionsABTest(Calculator& ownerInitialized);
 
-    static bool CheckBuiltInInitializations(Calculator& ownerInitialized);
-    void CalculatorTestPrepare();
-    void CalculatorTestProcessResults();
-    bool CalculatorTestRun();
+    static bool checkBuiltInInitializations(Calculator& ownerInitialized);
+    void calculatorTestPrepare();
+    bool calculatorTestRun();
   };
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
-  int GetNumBuiltInFunctions();
+  int getNumberOfBuiltInFunctions();
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule(
-    Calculator& theCommands, const Expression& input, Expression& output
-  );
   static bool outerStandardFunction(
     Calculator& theCommands,
     const Expression& input,
@@ -2197,20 +2191,20 @@ public:
   );
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool CollectCoefficientsPowersVar(
+  static bool collectCoefficientsPowersVariables(
     const Expression& input,
     const Expression& theVariable,
     VectorSparse<Expression>& outputPositionIiscoeffXtoIth
   );
-  bool CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
-  bool CollectOpandsAccumulate(const Expression& input, int theOp, List<Expression>& outputOpands);
+  bool collectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
+  bool collectOpandsAccumulate(const Expression& input, int theOp, List<Expression>& outputOpands);
   static bool functionCollectSummands(
     Calculator& theCommands,
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
   );
   static bool outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool standardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2258,7 +2252,7 @@ public:
     int theMultiplicativeOp = - 1,
     bool constantsOnly = false
   );
-  static bool EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool evaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
   template<class theType>
   bool functionGetMatrix(
     const Expression& input,
@@ -2288,18 +2282,18 @@ public:
       conversionFunction
     );
   }
-  bool GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
+  bool getSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
   bool getVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory = - 1);
-  bool ConvertExpressionsToCommonContext(
+  bool convertExpressionsToCommonContext(
     List<Expression>& inputOutputEs,
     ExpressionContext* inputOutputStartingContext = nullptr
   );
   bool getVectorInt(const Expression& input, List<int>& output);
-  bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInteger>& output);
-  bool GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols = - 1);
+  bool getVectorLargeIntegerFromFunctionArguments(const Expression& input, List<LargeInteger>& output);
+  bool getMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols = - 1);
 
-  bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1);
-  bool GetVectorDoublesFromFunctionArguments(
+  bool getVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1);
+  bool getVectorDoublesFromFunctionArguments(
     const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1
   );
   template <class theType>
@@ -2530,13 +2524,13 @@ public:
   static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasNoSolutions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasRegular(Calculator& theCommands, const Expression& input, Expression& output);
-  void AddEmptyHeadedCommand();
+  void addEmptyHeadedCommand();
   Calculator();
-  int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
-  void AddOperationNoRepetitionAllowed(const std::string& theOpName);
-  void AddOperationBuiltInType(const std::string& theOpName);
+  int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
+  void addOperationNoRepetitionAllowed(const std::string& theOpName);
+  void addOperationBuiltInType(const std::string& theOpName);
   void addTrigonometricSplit(const std::string& trigFun, const List<std::string>& theVars);
-  void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
+  void addKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void addOperationBinaryInnerHandlerWithTypes(
     const std::string& theOpName,
     Expression::FunctionAddress innerHandler,
@@ -2599,10 +2593,10 @@ public:
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   bool isTimedOut();
-  static bool EvaluateExpression(
+  static bool evaluateExpression(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool EvaluateExpression(Calculator& theCommands,
+  static bool evaluateExpression(Calculator& theCommands,
     const Expression& input,
     Expression& outpuT,
     bool& outputIsCacheable,
@@ -2820,11 +2814,11 @@ bool Calculator::getVector(const Expression& input,
   List<Expression> convertedEs;
   convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
+    if (!this->convertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
       return false;
     }
   }
-  if (!this->ConvertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
+  if (!this->convertExpressionsToCommonContext(convertedEs, inputOutputStartingContext)) {
     return false;
   }
   if (targetDimNonMandatory > 0) {
@@ -2895,7 +2889,7 @@ bool Expression::isOfTypeWithContext(WithContext<theType>* whichElement) const {
   if (!this->startsWith(this->getTypeOperation<theType>())) {
     return false;
   }
-  if (this->size() < 2 || !this->GetLastChild().isAtom()) {
+  if (this->size() < 2 || !this->getLastChild().isAtom()) {
     return false;
   }
   if (whichElement == 0) {
@@ -2933,7 +2927,7 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < nonConvertedEs.numberOfRows; i ++) {
     for (int j = 0; j < nonConvertedEs.numberOfColumns; j ++) {
-      if (!this->ConvertToTypeUsingFunction<theType>(
+      if (!this->convertToTypeUsingFunction<theType>(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
         if (!nonConvertedEs(i, j).convertInternally<theType>(convertedEs.elements[i][j])) {
@@ -3063,7 +3057,7 @@ bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   ) {
     global.fatal << "This may or may not be a programming error. "
     << "Assigning value WITHOUT CONTEXT to data type "
-    << this->owner->GetOperations()[curType]
+    << this->owner->getOperations()[curType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
     << global.fatal;
   }
@@ -3113,7 +3107,7 @@ bool Calculator::getTypeWeight(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::Convert(
+  if (!Calculator::convert(
     leftE,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSemisimpleLieAlgebra
@@ -3179,7 +3173,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::Convert(
+  if (!Calculator::convert(
     leftE,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSSalgebra

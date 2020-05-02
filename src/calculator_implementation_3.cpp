@@ -189,7 +189,7 @@ bool Calculator::innerAnimateLittelmannPaths(
     return output.makeError("This function takes 2 arguments", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -224,7 +224,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
     return theCommands << "Casimir function expects a single input. ";
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -254,7 +254,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
     return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   }
   HomomorphismSemisimpleLieAlgebra theHmm;
-  theCommands.MakeHmmG2InB3(theHmm);
+  theCommands.makeHmmG2InB3(theHmm);
 
   ElementUniversalEnveloping<RationalFunction> argument = output.getValue<ElementUniversalEnveloping<RationalFunction> >();
   ElementUniversalEnveloping<RationalFunction> outputUE;
@@ -512,13 +512,13 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
 }
 
-void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
-  MacroRegisterFunctionWithName("Calculator::MakeHmmG2InB3");
+void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
+  MacroRegisterFunctionWithName("Calculator::makeHmmG2InB3");
   DynkinType b3Type, g2Type;
   b3Type.MakeSimpleType('B', 3);
   g2Type.MakeSimpleType('G', 2);
-  output.domainAlg = &this->theObjectContainer.GetLieAlgebraCreateIfNotPresent(g2Type);
-  output.rangeAlg = &this->theObjectContainer.GetLieAlgebraCreateIfNotPresent(b3Type);
+  output.domainAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
+  output.rangeAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
   output.theRange().ComputeChevalleyConstants();
   output.theDomain().ComputeChevalleyConstants();
@@ -1072,7 +1072,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
     return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -1227,7 +1227,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   for (int i = 0; i < theRanks.size; i ++) {
     currentType.MakeSimpleType(theWeylLetters[i], theRanks[i]);
     SemisimpleLieAlgebra& currentAlg =
-    theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(currentType);
+    theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.ComputeChevalleyConstants();
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.ToStringLieAlgebraName() << "$}\\\\\\hline\n\n"
@@ -1359,7 +1359,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
     return output.makeError("LSPath needs at least two arguments.", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> theSSowner;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSowner
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -1388,7 +1388,7 @@ bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands
 bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
   WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;
@@ -1637,10 +1637,10 @@ bool Expression::assignMatrixExpressions(
   return true;
 }
 
-bool Calculator::GetMatrixExpressionsFromArguments(
+bool Calculator::getMatrixExpressionsFromArguments(
   const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols
 ) {
-  MacroRegisterFunctionWithName("Calculator::GetMatrixExpressionsFromArguments");
+  MacroRegisterFunctionWithName("Calculator::getMatrixExpressionsFromArguments");
   if (!input.isList()) {
     return false;
   }
@@ -1750,7 +1750,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   return output.assignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool Calculator::Test::ProcessOneTest(JSData& input) {
+bool Calculator::Test::processOneTest(JSData& input) {
   if (input["input"].theType != JSData::token::tokenString) {
     global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;
@@ -1775,10 +1775,10 @@ bool Calculator::Test::ProcessOneTest(JSData& input) {
   return true;
 }
 
-bool Calculator::Test::LoadTestStrings(
+bool Calculator::Test::loadTestStrings(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Calculator::LoadTestStrings");
+  MacroRegisterFunctionWithName("Calculator::loadTestStrings");
   if (!FileOperations::fileExistsVirtual(
     WebAPI::calculator::testFileNameVirtual, false, false, nullptr
   )) {
@@ -1813,21 +1813,21 @@ bool Calculator::Test::LoadTestStrings(
     return false;
   }
   for (int i = 0; i < this->storedResults.theList.size; i ++) {
-    this->ProcessOneTest(this->storedResults.theList[i]);
+    this->processOneTest(this->storedResults.theList[i]);
   }
   return true;
 }
 
-std::string Calculator::WriteFileToOutputFolderReturnLink(
+std::string Calculator::writeFileToOutputFolderReturnLink(
   const std::string& fileContent, const std::string& fileName, const std::string& linkText
 ) {
-  MacroRegisterFunctionWithName("Calculator::WriteFileToOutputFolderReturnLink");
+  MacroRegisterFunctionWithName("Calculator::writeFileToOutputFolderReturnLink");
   std::string fileNameVirtual = "output/" + fileName;
   return FileOperations::writeFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
 }
 
-bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
+bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("Calculator::writeTestStrings");
   JSData result;
   result.theType = JSData::token::tokenArray;
   result.theList.setSize(this->commands.size());
@@ -1879,14 +1879,14 @@ bool Calculator::innerAutomatedTest(
     << "index of the first test to run and total "
     << "number of tests to run after that. ";
   }
-  test.CalculatorTestRun();
+  test.calculatorTestRun();
   return output.assignValue(test.reportHtml, theCommands);
 }
 
-bool Calculator::Test::ProcessResults() {
+bool Calculator::Test::processResults() {
   std::stringstream commentsOnFailure, out;
 
-  if (!this->LoadTestStrings(&commentsOnFailure)) {
+  if (!this->loadTestStrings(&commentsOnFailure)) {
     global << Logger::red << "Failed to load test strings. " << Logger::endL
     << commentsOnFailure.str();
     out << "<b style='color:red'>Failed to load test strings. </b>" << commentsOnFailure.str();
@@ -1895,7 +1895,7 @@ bool Calculator::Test::ProcessResults() {
     out << "<b style='color:green'>Writing new test strings into: "
     << WebAPI::calculator::testFileNameVirtual << ". </b>";
     std::stringstream commentsOnFailure2;
-    if (!this->WriteTestStrings(&commentsOnFailure2)) {
+    if (!this->writeTestStrings(&commentsOnFailure2)) {
       global << Logger::red << "Failed to write test strings. " << Logger::endL
       << commentsOnFailure2.str();
       out << "<b style='color:red'>Write file failed. </b>" << commentsOnFailure2.str();
@@ -1999,7 +1999,7 @@ bool Calculator::Test::ProcessResults() {
   return this->inconsistencies == 0;
 }
 
-int Calculator::GetNumBuiltInFunctions() {
+int Calculator::getNumberOfBuiltInFunctions() {
   int result = 0;
   for (int i = this->NumPredefinedAtoms - 1; i >= 0; i --) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];

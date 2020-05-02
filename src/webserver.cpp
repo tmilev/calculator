@@ -3344,8 +3344,8 @@ int WebServer::run() {
   this->initializeSignals();
   global.calculator().getElement().initialize();
   // Cannot call initializeMutex here: not before we execute Fork();
-  global.calculator().getElement().ComputeAutoCompleteKeyWords();
-  global.calculator().getElement().WriteAutoCompleteKeyWordsToFile();
+  global.calculator().getElement().computeAutoCompleteKeyWords();
+  global.calculator().getElement().writeAutoCompleteKeyWordsToFile();
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();

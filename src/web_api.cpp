@@ -176,7 +176,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
 bool WebAPIResponse::processCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::processCalculatorExamplesJSON");
   global.theResponse.writeResponse(
-    global.calculator().getElement().ToJSONFunctionHandlers(), false
+    global.calculator().getElement().toJSONFunctionHandlers(), false
   );
   return true;
 }

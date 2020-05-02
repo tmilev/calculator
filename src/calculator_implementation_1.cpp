@@ -332,7 +332,7 @@ std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 
-std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
+std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType& theType, FormatExpressions* theFormat) {
   (void) theFormat;
   std::stringstream out;
   SemisimpleLieAlgebra folderComputer;
@@ -405,7 +405,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   List<DynkinType> precomputedTypes;
   DynkinType::GetPrecomputedDynkinTypes(precomputedTypes);
   for (int i = 0; i < precomputedTypes.size; i ++) {
-    outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
+    outFromHD << theCommands.toStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
     if (precomputedTypes[i].HasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
       recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].toString() << ")";
@@ -416,7 +416,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   std::string fileName = "semisimple_lie_algebra_structure.html";
   std::stringstream out;
   out
-  << theCommands.WriteFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
+  << theCommands.writeFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
   out << "<br>Recompute links.";
   out << outRecomputeLinks.str();
   out << outFromHD.str();
@@ -471,7 +471,7 @@ bool Calculator::innerPrintSSSubalgebras(
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject) {
-    if (!theCommands.Convert(
+    if (!theCommands.convert(
       input[1],
       CalculatorConversions::functionSemisimpleLieAlgebra,
       ownerAlgebra
@@ -579,7 +579,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
     return output.makeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerAlgebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -613,7 +613,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
     );
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -851,7 +851,7 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   }
   Matrix<Expression> theMat;
   if (input.startsWithGivenOperation("Transpose")) {
-    theCommands.GetMatrixExpressionsFromArguments(input, theMat);
+    theCommands.getMatrixExpressionsFromArguments(input, theMat);
   } else {
     theCommands.getMatrixExpressions(input, theMat);
   }
@@ -868,15 +868,15 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 void Plot::operator+=(const Plot& other) {
   MacroRegisterFunctionWithName("Plot::operator+=");
   if (other.priorityCanvasName > this->priorityCanvasName) {
-    this->SetCanvasName(other.GetCanvasName());
-  } else if (this->GetCanvasName() == "" && this->priorityCanvasName == other.priorityCanvasName) {
-    this->SetCanvasName(other.GetCanvasName());
+    this->setCanvasName(other.getCanvasName());
+  } else if (this->getCanvasName() == "" && this->priorityCanvasName == other.priorityCanvasName) {
+    this->setCanvasName(other.getCanvasName());
   }
   if (other.priorityCanvasName > this->priorityCanvasName) {
     this->priorityCanvasName = other.priorityCanvasName;
   }
   if (this->priorityCanvasName == 0) {
-    this->SetCanvasName("");
+    this->setCanvasName("");
   }
   if (this->dimension == - 1) {
     this->dimension = other.dimension;
@@ -926,7 +926,7 @@ bool Plot::operator==(const Plot& other) const {
   ((this->theUpperBoundAxes - other.theUpperBoundAxes) == 0.0) &&
   this->thePlots == other.thePlots &&
   this->boxesThatUpdateMe == other.boxesThatUpdateMe &&
-  this->GetCanvasName() == other.GetCanvasName() &&
+  this->getCanvasName() == other.getCanvasName() &&
   this->dimension == other.dimension &&
   this->flagIncludeCoordinateSystem == other.flagIncludeCoordinateSystem;
 }
@@ -941,7 +941,7 @@ void Plot::operator+=(const PlotObject& other) {
     this->dimension = other.dimension;
   }
   this->thePlots.addOnTop(other);
-  this->SetCanvasName("");
+  this->setCanvasName("");
 }
 
 bool PlotObject::operator==(const PlotObject& other) const {
@@ -1006,15 +1006,15 @@ PlotObject::PlotObject() {
   this->leftBoundaryIsMinusInfinity = false;
 }
 
-void PlotObject::ComputeYbounds() {
-  MacroRegisterFunctionWithName("PlotObject::ComputeYbounds");
+void PlotObject::computeYBounds() {
+  MacroRegisterFunctionWithName("PlotObject::computeYBounds");
   for (int i = 0; i < this->thePointsDouble.size; i ++) {
     this->yHigh = MathRoutines::Maximum(this->yHigh, this->thePointsDouble[i][1]);
     this->yLow = MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
   }
 }
 
-std::string PlotObject::GetPlotStringFromFunctionStringAndRanges(
+std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
   bool useHtml,
   const std::string& functionStringPostfixNotation,
   const std::string& functionStringCalculatorFormat,
@@ -1053,14 +1053,14 @@ Plot::Plot() {
   this->flagIncludeCoordinateSystem = true;
 }
 
-void Plot::ComputeAxesAndBoundingBox() {
-  MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
+void Plot::computeAxesAndBoundingBox() {
+  MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox");
   this->theLowerBoundAxes = - 0.5;
   this->theUpperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
   this->highBoundY = 1.1;
   for (int k = 0; k < this->thePlots.size; k ++) {
-    this->thePlots[k].ComputeYbounds();
+    this->thePlots[k].computeYBounds();
     this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
@@ -1078,7 +1078,7 @@ void Plot::ComputeAxesAndBoundingBox() {
     }*/
     for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
-      if (!this->IsOKVector(currentPoint)) {
+      if (!this->isOKVector(currentPoint)) {
         continue;
       }
       this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
@@ -1089,14 +1089,14 @@ void Plot::ComputeAxesAndBoundingBox() {
   }
 }
 
-void Plot::ComputeAxesAndBoundingBox3d() {
-  MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox3d");
+void Plot::computeAxesAndBoundingBox3d() {
+  MacroRegisterFunctionWithName("Plot::computeAxesAndBoundingBox3d");
   this->theLowerBoundAxes = - 0.5;
   this->theUpperBoundAxes = 1.1;
   this->lowBoundY = - 0.5;
   this->highBoundY = 1.1;
   for (int k = 0; k < this->thePlots.size; k ++) {
-    this->thePlots[k].ComputeYbounds();
+    this->thePlots[k].computeYBounds();
     this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
@@ -1114,7 +1114,7 @@ void Plot::ComputeAxesAndBoundingBox3d() {
     }*/
     for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
-      if (!this->IsOKVector(currentPoint)) {
+      if (!this->isOKVector(currentPoint)) {
         continue;
       }
       this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
@@ -1126,7 +1126,7 @@ void Plot::ComputeAxesAndBoundingBox3d() {
 
 }
 
-bool Plot::IsOKVector(const Vector<double>& input) {
+bool Plot::isOKVector(const Vector<double>& input) {
   for (int i = 0; i < input.size; i ++) {
     if (std::isnan(input[i])) {
       return false;
@@ -1139,10 +1139,10 @@ std::string Plot::commonCanvasSetup() {
   std::stringstream out;
   out
   << "var theDrawer = window.calculator.drawing;\n"
-  << "if (document.getElementById('" << this->GetCanvasName() << "') === null) {\n"
+  << "if (document.getElementById('" << this->getCanvasName() << "') === null) {\n"
   << "  return;\n"
   << "}\n"
-  << "theDrawer.deleteCanvas('" << this->GetCanvasName() << "');\n";
+  << "theDrawer.deleteCanvas('" << this->getCanvasName() << "');\n";
   return out.str();
 }
 
@@ -1150,21 +1150,21 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
   std::stringstream outContent, outScript;
-  this->ComputeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
   if (!owner.flagPlotShowJavascriptOnly) {
     outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
-    << this->GetCanvasName()
+    << this->getCanvasName()
     << "\" "
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>"
-    << "<span id =\"" << this->GetCanvasName() << "Messages\"></span>";
+    << "<span id =\"" << this->getCanvasName() << "Controls\"></span>"
+    << "<span id =\"" << this->getCanvasName() << "Messages\"></span>";
   }
   outContent << "<script language =\"javascript\">\n";
-  std::string canvasFunctionName = "functionMake" + this->GetCanvasName();
-  std::string canvasResetFunctionName = "functionReset" + this->GetCanvasName();
+  std::string canvasFunctionName = "functionMake" + this->getCanvasName();
+  std::string canvasResetFunctionName = "functionReset" + this->getCanvasName();
   outScript
   << "function " << canvasResetFunctionName << "() {\n"
   << canvasFunctionName << "();\n"
@@ -1174,7 +1174,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     InputBox& currentBox = owner.theObjectContainer.
     theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " window.calculator.drawing.plotUpdaters['"
-    << currentBox.GetSliderName() << "'] =" << "'" << this->GetCanvasName() << "'"
+    << currentBox.getSliderName() << "'] =" << "'" << this->getCanvasName() << "'"
     << ";\n";
   }
   List<std::string> the3dObjects;
@@ -1183,15 +1183,15 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentO = this->thePlots[i];
     if (currentO.thePlotType == "surface") {
-      outScript << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->GetCanvasName(), funCounter) << "\n ";
+      outScript << currentO.getJavascriptSurfaceImmersion(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
     }
     if (currentO.thePlotType == "parametricCurve") {
-      outScript << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->GetCanvasName(), funCounter) << "\n ";
+      outScript << currentO.getJavascriptCurveImmersionIn3d(the3dObjects[i], this->getCanvasName(), funCounter) << "\n ";
     }
   }
   outScript << this->commonCanvasSetup();
-  outScript << "var theCanvas = theDrawer.getCanvas('" << this->GetCanvasName() << "');\n"
-  << "theCanvas.initialize('" << this->GetCanvasName() << "');\n";
+  outScript << "var theCanvas = theDrawer.getCanvas('" << this->getCanvasName() << "');\n"
+  << "theCanvas.initialize('" << this->getCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
@@ -1258,15 +1258,15 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   outScript << canvasFunctionName << "();\n";
   outContent << outScript.str();
   outContent << "</script>";
-  owner.theObjectContainer.graphicsScripts.setKeyValue(this->GetCanvasName(), outScript.str());
+  owner.theObjectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
   return outContent.str();
 }
 
-void Plot::SetCanvasName(const std::string& input) {
+void Plot::setCanvasName(const std::string& input) {
   this->canvasNamE = StringRoutines::convertStringToJavascriptVariable(input);
 }
 
-std::string Plot::GetCanvasName() const {
+std::string Plot::getCanvasName() const {
   return this->canvasNamE;
 }
 
@@ -1293,10 +1293,10 @@ std::string PlotObject::toStringDebug() {
   return out.str();
 }
 
-std::string PlotObject::GetJavascriptCurveImmersionIn3d(
+std::string PlotObject::getJavascriptCurveImmersionIn3d(
   std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptCurveImmersionIn3d");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptCurveImmersionIn3d");
   std::stringstream out;
   funCounter ++;
   std::stringstream fnNameStream;
@@ -1332,10 +1332,10 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d(
   return out.str();
 }
 
-std::string PlotObject::GetJavascriptSurfaceImmersion(
+std::string PlotObject::getJavascriptSurfaceImmersion(
   std::string& outputSurfaceInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptSurfaceImmersion");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptSurfaceImmersion");
   std::stringstream out;
   funCounter ++;
   std::stringstream fnNameStream;
@@ -1407,10 +1407,10 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
-std::string PlotObject::GetJavascriptParametricCurve2D(
+std::string PlotObject::getJavascriptParametricCurve2D(
   std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascript2dPlot");
   std::stringstream out;
   List<std::string> fnNames;
   fnNames.setSize(this->coordinateFunctionsJS.size);
@@ -1453,10 +1453,10 @@ std::string PlotObject::GetJavascriptParametricCurve2D(
   return out.str();
 }
 
-std::string PlotObject::GetJavascriptDirectionField(
+std::string PlotObject::getJavascriptDirectionField(
   std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptDirectionField");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptDirectionField");
   std::stringstream out;
   std::string fnName;
   funCounter ++;
@@ -1518,10 +1518,10 @@ std::string PlotObject::GetJavascriptDirectionField(
   return out.str();
 }
 
-std::string PlotObject::GetJavascript2dPlot(
+std::string PlotObject::getJavascript2dPlot(
   std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascript2dPlot");
   std::stringstream out;
   std::stringstream fnNameStream;
   funCounter ++;
@@ -1556,10 +1556,10 @@ std::string PlotObject::GetJavascript2dPlot(
   return out.str();
 }
 
-std::string PlotObject::GetJavascriptPoints(
+std::string PlotObject::getJavascriptPoints(
   std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
-  MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptPoints");
+  MacroRegisterFunctionWithName("PlotSurfaceIn3d::getJavascriptPoints");
   (void) (canvasName);
   (void) funCounter;
   std::stringstream fnInstStream;
@@ -1583,8 +1583,8 @@ std::string PlotObject::GetJavascriptPoints(
   return "";
 }
 
-std::string PlotObject::ToStringPointsList() {
-  MacroRegisterFunctionWithName("PlotObject::ToStringPointsList");
+std::string PlotObject::toStringPointsList() {
+  MacroRegisterFunctionWithName("PlotObject::toStringPointsList");
   std::stringstream out;
   out << "[";
   for (int j = 0; j < this->thePointsDouble.size; j ++) {
@@ -1598,14 +1598,14 @@ std::string PlotObject::ToStringPointsList() {
   return out.str();
 }
 
-void Plot::ComputeCanvasNameIfNecessary(int& canvasCounter) {
-  if (this->GetCanvasName() != "") {
+void Plot::computeCanvasNameIfNecessary(int& canvasCounter) {
+  if (this->getCanvasName() != "") {
     return;
   }
   canvasCounter ++;
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << canvasCounter;
-  this->SetCanvasName(canvasNameStream.str());
+  this->setCanvasName(canvasNameStream.str());
 }
 
 std::string Plot::getPlotHtml2d(Calculator& owner) {
@@ -1615,28 +1615,28 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     return "[plot alredy displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
-  this->ComputeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
+  this->computeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
   std::stringstream out;
   if (this->priorityViewRectangle <= 0) {
-    this->ComputeAxesAndBoundingBox();
+    this->computeAxesAndBoundingBox();
   }
   if (!this->flagPlotShowJavascriptOnly) {
     out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
-    << this->GetCanvasName()
+    << this->getCanvasName()
     << "\" "
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>";
+    << "<span id =\"" << this->getCanvasName() << "Controls\"></span>";
     if (!owner.flagPlotNoControls) {
       out << "<br>";
     }
-    out << "<span id =\"" << this->GetCanvasName() << "Messages\"></span>";
+    out << "<span id =\"" << this->getCanvasName() << "Messages\"></span>";
   }
   std::stringstream outScript;
-  std::string canvasFunctionName = "functionMake" + this->GetCanvasName();
-  std::string canvasResetFunctionName = "functionReset" + this->GetCanvasName();
+  std::string canvasFunctionName = "functionMake" + this->getCanvasName();
+  std::string canvasResetFunctionName = "functionReset" + this->getCanvasName();
   outScript
   << "function " << canvasResetFunctionName << "() {\n"
   << canvasFunctionName << "();\n"
@@ -1646,8 +1646,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
     InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << "  window.calculator.drawing.plotUpdaters['"
-    << currentBox.GetSliderName() << "'] ="
-    << "'" << this->GetCanvasName() << "'"
+    << currentBox.getSliderName() << "'] ="
+    << "'" << this->getCanvasName() << "'"
     << ";\n";
   }
   int funCounter = 0;
@@ -1656,21 +1656,21 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction") {
-      outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
+      outScript << currentPlot.getJavascript2dPlot(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "parametricCurve") {
-      outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
+      outScript << currentPlot.getJavascriptParametricCurve2D(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "plotDirectionField") {
-      outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
+      outScript << currentPlot.getJavascriptDirectionField(theFnPlots[i], this->getCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "points") {
-      currentPlot.GetJavascriptPoints(theFnPlots[i], this->GetCanvasName(), funCounter);
+      currentPlot.getJavascriptPoints(theFnPlots[i], this->getCanvasName(), funCounter);
     }
   }
   outScript << this->commonCanvasSetup();
-  outScript << "var theCanvas = theDrawer.getCanvasTwoD('" << this->GetCanvasName() << "');\n"
-  << "theCanvas.initialize('" << this->GetCanvasName() << "');\n";
+  outScript << "var theCanvas = theDrawer.getCanvasTwoD('" << this->getCanvasName() << "');\n"
+  << "theCanvas.initialize('" << this->getCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   if (owner.flagPlotNoControls) {
     outScript << "theCanvas.flagShowPerformance = false;\n";
@@ -1721,7 +1721,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     }
     if (currentPlot.thePlotType == "pathFilled") {
       outScript << "theCanvas.drawPathFilled( ";
-      outScript << currentPlot.ToStringPointsList();
+      outScript << currentPlot.toStringPointsList();
       outScript << ", "
       << "\"" << currentPlot.colorJS << "\""
       << ","
@@ -1730,7 +1730,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       continue;
     }
     outScript << "theCanvas.drawPath( ";
-    outScript << currentPlot.ToStringPointsList();
+    outScript << currentPlot.toStringPointsList();
     outScript << ", " << "\"";
     if (currentPlot.colorJS == "") {
       outScript << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
@@ -1766,21 +1766,21 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   outScript
   << "theCanvas.redraw();\n"
   << "}\n"
-  << " var currentCanvas = window.calculator.drawing.getCanvasTwoDNullOnFailure('" << this->GetCanvasName() << "');\n"
+  << " var currentCanvas = window.calculator.drawing.getCanvasTwoDNullOnFailure('" << this->getCanvasName() << "');\n"
   << "if (currentCanvas !== null) {\n"
   << "currentCanvas.canvasResetFunction = "
   << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "}\n";
-  owner.theObjectContainer.graphicsScripts.setKeyValue(this->GetCanvasName(), outScript.str());
+  owner.theObjectContainer.graphicsScripts.setKeyValue(this->getCanvasName(), outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();
 }
 
-std::string Plot::GetPlotStringAddLatexCommands(bool useHtml) {
-  MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
+std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
+  MacroRegisterFunctionWithName("Plot::getPlotStringAddLatexCommands");
   std::stringstream resultStream;
-  this->ComputeAxesAndBoundingBox();
+  this->computeAxesAndBoundingBox();
   std::string lineSeparator = useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}"
   << "\\usepackage{pst-math}\\usepackage{pst-plot}";
@@ -2271,7 +2271,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -2675,7 +2675,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   Expression outputTransformation;
   bool notUsed = false;
   ExpressionHistoryEnumerator history;
-  theCommands.EvaluateExpression(
+  theCommands.evaluateExpression(
     theCommands,
     argument,
     outputTransformation,

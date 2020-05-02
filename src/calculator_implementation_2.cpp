@@ -22,8 +22,8 @@ JSData Calculator::OperationHandlers::toJSON() {
   return result;
 }
 
-JSData Calculator::ToJSONFunctionHandlers() {
-  MacroRegisterFunctionWithName("Calculator::ToJSONFunctionHandlers");
+JSData Calculator::toJSONFunctionHandlers() {
+  MacroRegisterFunctionWithName("Calculator::toJSONFunctionHandlers");
   JSData output;
   output.theType = JSData::token::tokenObject;
   for (int i = 0; i < this->operations.size(); i ++) {
@@ -58,51 +58,51 @@ Calculator::NamedRuleLocation::NamedRuleLocation() {
   this->isComposite = false;
 }
 
-Expression Calculator::EZero() {
+Expression Calculator::expressionZero() {
   Expression result;
   result.assignValue(0, *this);
   return result;
 }
 
-Expression Calculator::EOne() {
+Expression Calculator::expressionOne() {
   Expression result;
   result.assignValue(1, *this);
   return result;
 }
 
-Expression Calculator::EMOne() {
+Expression Calculator::expressionMinusOne() {
   Expression result;
   result.assignValue(- 1, *this);
   return result;
 }
 
-Expression Calculator::EFour() {
+Expression Calculator::expressionFour() {
   Expression result;
   result.assignValue(4, *this);
   return result;
 }
 
-Expression Calculator::ETwo() {
+Expression Calculator::expressionTwo() {
   Expression result;
   result.assignValue(2, *this);
   return result;
 }
 
-Expression Calculator::EMHalf() {
+Expression Calculator::expressionMinusHalf() {
   Expression result;
   result.assignValue(Rational(- 1, 2), *this);
   return result;
 }
 
-Expression Calculator::EInfinity() {
+Expression Calculator::expressionInfinity() {
   Expression result;
   result.makeAtom(this->opInfinity(), *this);
   return result;
 }
 
-Expression Calculator::EMInfinity() {
+Expression Calculator::expressionMinusInfinity() {
   Expression result;
-  result = this->EMOne() * this->EInfinity();
+  result = this->expressionMinusOne() * this->expressionInfinity();
   return result;
 }
 
@@ -144,7 +144,7 @@ std::string Calculator::toStringRuleStatusUser() {
   return out.str();
 }
 
-void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
+void Calculator::doLogEvaluationIfNeedBe(Function& inputF) {
   if (!this->flagLogEvaluatioN) {
     return;
   }
@@ -208,7 +208,7 @@ bool Calculator::outerStandardCompositeHandler(
       if (currentHandler.apply(
         theCommands, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        theCommands.DoLogEvaluationIfNeedBe(currentHandler);
+        theCommands.doLogEvaluationIfNeedBe(currentHandler);
         return true;
       }
     }
@@ -240,7 +240,7 @@ bool Function::apply(
     if (this->theFunction(theCommands, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        theCommands.DoLogEvaluationIfNeedBe(*this);
+        theCommands.doLogEvaluationIfNeedBe(*this);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -252,7 +252,7 @@ bool Function::apply(
   if (this->inputFitsMyInnerType(input)) {
     if (this->theFunction(theCommands, input, output)) {
       output.checkConsistency();
-      theCommands.DoLogEvaluationIfNeedBe(*this);
+      theCommands.doLogEvaluationIfNeedBe(*this);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -298,7 +298,7 @@ bool Calculator::outerStandardFunction(
 ) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
     return false;
   }
@@ -315,13 +315,13 @@ bool Calculator::outerStandardFunction(
   return false;
 }
 
-bool Calculator::ExpressionMatchesPattern(
+bool Calculator::expressionMatchesPattern(
   const Expression& thePattern,
   const Expression& input,
   MapList<Expression, Expression>& matchedExpressions,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
+  MacroRegisterFunctionWithName("Calculator::expressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.owner == this && input.owner == this)) {
@@ -365,7 +365,7 @@ bool Calculator::ExpressionMatchesPattern(
   bool isGoodRegularOrder = true;
   int numMatchedExpressionsAtStart = matchedExpressions.size();
   for (int i = 0; i < thePattern.size(); i ++) {
-    if (!(this->ExpressionMatchesPattern(thePattern[i], input[i], matchedExpressions, commentsGeneral))) {
+    if (!(this->expressionMatchesPattern(thePattern[i], input[i], matchedExpressions, commentsGeneral))) {
       if (i == 0) {
         return false;
       }
@@ -381,7 +381,7 @@ bool Calculator::ExpressionMatchesPattern(
     matchedExpressions.theValues.setSize(numMatchedExpressionsAtStart);
     matchedExpressions.theKeys.setSize(numMatchedExpressionsAtStart);
     for (int i = 1; i < thePattern.size(); i ++) {
-      if (!(this->ExpressionMatchesPattern(
+      if (!(this->expressionMatchesPattern(
         thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral
       ))) {
         return false;
@@ -394,7 +394,7 @@ bool Calculator::ExpressionMatchesPattern(
   return true;
 }
 
-void StateMaintainerCalculator::AddRule(const Expression& theRule) {
+void StateMaintainerCalculator::addRule(const Expression& theRule) {
   if (this->owner == nullptr) {
     global.fatal << "StackMaintainerCalculator has zero owner. " << global.fatal;
   }
@@ -411,7 +411,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
       if (!this->owner->namedRules.contains(currentRule)) {
         continue;
       }
-      this->owner->GetFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
+      this->owner->getFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
       theRule.startsWith(this->owner->opRulesOff());
     }
   }
@@ -453,7 +453,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
         if (!this->owner->namedRules.contains(currentRuleName)) {
           continue;
         }
-        Function& currentRule = this->owner->GetFunctionHandlerFromNamedRule(currentRuleName);
+        Function& currentRule = this->owner->getFunctionHandlerFromNamedRule(currentRuleName);
         currentRule.options.disabledByUser = currentRule.options.disabledByUserDefault;
         shouldUpdateRules = true;
       }
@@ -463,14 +463,14 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
       if (theRuleStack[i].startsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
-          Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
+          Function& currentFun = this->owner->getFunctionHandlerFromNamedRule(
             theRuleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = false;
         }
       } else if (theRuleStack[i].startsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
-          Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
+          Function& currentFun = this->owner->getFunctionHandlerFromNamedRule(
             theRuleStack[i][j].getValue<std::string>()
           );
           currentFun.options.disabledByUser = true;
@@ -519,7 +519,7 @@ bool Calculator::accountRule(
     return false;
   }
   if (ruleE.isCalculatorStatusChanger()) {
-    theRuleStackMaintainer.AddRule(ruleE);
+    theRuleStackMaintainer.addRule(ruleE);
   }
   if (!ruleE.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
@@ -538,12 +538,12 @@ bool Calculator::accountRule(
   return true;
 }
 
-bool Calculator::EvaluateExpression(
+bool Calculator::evaluateExpression(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+  MacroRegisterFunctionWithName("Calculator::evaluateExpression");
   bool notUsed = false;
-  return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
+  return theCommands.evaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
 }
 
 bool Calculator::isTimedOut() {
@@ -672,7 +672,7 @@ void Calculator::EvaluateLoop::initializeOneRun() {
       // replacing the cached value with the minusOneExpression,
       // which, having no context, will never match another expression.
       this->owner->cachedExpressions.setObjectAtIndex(
-        this->indexInCache, this->owner->EMOne()
+        this->indexInCache, this->owner->expressionMinusOne()
       );
     }
     this->indexInCache = - 1;
@@ -754,7 +754,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
     if (this->history != nullptr) {
       this->currentChild = (*this->outpuT)[i];
     }
-    if (this->owner->EvaluateExpression(
+    if (this->owner->evaluateExpression(
       *this->owner,
       (*this->outpuT)[i],
       childEvaluation,
@@ -918,7 +918,7 @@ void Calculator::EvaluateLoop::lookUpCache() {
   this->owner->imagesCachedExpressions.lastObject()->makeError("Error: not computed yet.", *this->owner);
 }
 
-bool Calculator::EvaluateExpression(
+bool Calculator::evaluateExpression(
   Calculator& theCommands,
   const Expression& input,
   Expression& outpuT,
@@ -927,7 +927,7 @@ bool Calculator::EvaluateExpression(
   Expression* outputHistory
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+  MacroRegisterFunctionWithName("Calculator::evaluateExpression");
   theCommands.stats.expressionEvaluated ++;
   theCommands.stats.callsSinceReport ++;
   Calculator::EvaluateLoop state(theCommands);
@@ -955,7 +955,7 @@ bool Calculator::EvaluateExpression(
     << " with rule stack cache index "
     << theCommands.RuleStackCacheIndex; // << this->RuleStack.toString();
   }
-  if (theCommands.RecursionDepthExceededHandleRoughly()) {
+  if (theCommands.recursionDepthExceededHandleRoughly()) {
     return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
   }
   state.setOutput(input, nullptr, "");
@@ -977,7 +977,7 @@ bool Calculator::EvaluateExpression(
   state.lookUpCache();
   // reduction phase:
   //////////////////////////////////
-  // EvaluateExpression is called recursively
+  // evaluateExpression is called recursively
   // inside state.evaluateChildren
   // inside state.reduceOnce.
   while (state.reduceOnce()) {
@@ -1013,7 +1013,7 @@ Expression* Calculator::patternMatch(
   }
   thePattern.checkInitialization();
   theExpression.checkInitialization();
-  if (!this->ExpressionMatchesPattern(
+  if (!this->expressionMatchesPattern(
     thePattern, theExpression, bufferPairs, theLog
   )) {
     return nullptr;
@@ -1030,13 +1030,13 @@ Expression* Calculator::patternMatch(
   if (theLog != nullptr) {
     (*theLog) << "<hr>Specializing condition pattern: " << tempExp.toString();
   }
-  this->SpecializeBoundVars(tempExp, bufferPairs);
+  this->specializeBoundVariables(tempExp, bufferPairs);
   tempExp.checkInitialization();
   if (theLog != nullptr) {
     (*theLog) << "<hr>Specialized condition: " << tempExp.toString() << "; evaluating...";
   }
   Expression conditionResult;
-  this->EvaluateExpression(*this, tempExp, conditionResult);
+  this->evaluateExpression(*this, tempExp, conditionResult);
   if (theLog != nullptr) {
     (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.toString()
     << "; evaluating...";
@@ -1047,8 +1047,8 @@ Expression* Calculator::patternMatch(
   return nullptr;
 }
 
-void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
-  MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
+void Calculator::specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
+  MacroRegisterFunctionWithName("Calculator::specializeBoundVariables");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
@@ -1060,7 +1060,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expressio
   Expression subbedE;
   for (int i = 0; i < toBeSubbedIn.size(); i ++) {
     subbedE = toBeSubbedIn[i];
-    this->SpecializeBoundVars(subbedE, matchedPairs);
+    this->specializeBoundVariables(subbedE, matchedPairs);
     toBeSubbedIn.setChild(i, subbedE);
   }
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
@@ -1105,7 +1105,7 @@ bool Calculator::processOneExpressionOnePatternOneSub(
   } else {
     *toBeSubbed = thePattern[2];
   }
-  this->SpecializeBoundVars(*toBeSubbed, bufferPairs);
+  this->specializeBoundVariables(*toBeSubbed, bufferPairs);
   return true;
 }
 
@@ -1122,11 +1122,11 @@ bool Calculator::parseAndExtractExpressions(
   std::string* outputSynErrors
 ) {
   MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
-  this->CurrentSyntacticStacK = &outputSynStack;
+  this->currentSyntacticStack = &outputSynStack;
   this->CurrrentSyntacticSouP = &outputSynSoup;
   this->parseFillDictionary(input);
   bool result = this->extractExpressions(output, outputSynErrors);
-  this->CurrentSyntacticStacK = &this->syntacticStacK;
+  this->currentSyntacticStack = &this->syntacticStacK;
   this->CurrrentSyntacticSouP = &this->syntacticSouP;
   return result;
 }
@@ -1174,7 +1174,7 @@ void Calculator::evaluateCommands() {
   if (!global.flagRunningConsoleRegular) {
     theReport.report("Evaluating expressions, current expression stack:\n");
   }
-  this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
+  this->evaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH != 0) {
     global.fatal << "This is a programming error: the starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "
@@ -1199,14 +1199,14 @@ void Calculator::evaluateCommands() {
     << this->theProgramExpression.toString(&global.theDefaultFormat.getElement())
     << Logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
-    std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
     this->theObjectContainer.resetSliders();
     this->theObjectContainer.resetPlots();
-    std::string javascriptString = this->theObjectContainer.ToStringJavascriptForUserInputBoxes();
+    std::string javascriptString = this->theObjectContainer.toStringJavascriptForUserInputBoxes();
     if (javascriptString != "") {
       this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
     }
@@ -1219,7 +1219,7 @@ void Calculator::evaluateCommands() {
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;
   } else {
-    std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    std::string badCharsString = this->toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {
       out << badCharsString << "<hr>";
       this->outputJS[WebAPI::result::badInput] = badCharsString;

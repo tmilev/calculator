@@ -536,7 +536,7 @@ std::string ASNElement::JSLabels::comment = "comment";
 
 int ASNElement::getLengthLengthEncoding() {
   List<unsigned char> lengthEncoding;
-  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
   return lengthEncoding.size;
@@ -555,7 +555,7 @@ void ASNElement::toJSON(JSData& output) const {
     output[ASNElement::JSLabels::offsetLastWrite] = this->offsetLastWrite;
   }
   List<unsigned char> lengthEncoding;
-  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
   output[ASNElement::JSLabels::lengthEncoding] = Crypto::convertListUnsignedCharsToHex(lengthEncoding);
@@ -861,7 +861,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
   return true;
 }
 
-void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
   unsigned int input, List<unsigned char>& output, int offset
 ) {
   if (offset >= output.size) {
@@ -877,7 +877,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLengt
     return;
   }
   int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
-  ::GetReservedBytesForLength(static_cast<signed>(input)) - 1;
+  ::getReservedBytesForLength(static_cast<signed>(input)) - 1;
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
@@ -920,7 +920,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   return out.str();
 }
 
-int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(int length) {
+int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::getReservedBytesForLength(int length) {
   int result = 1;
   if (length < 128) {
     return result;
@@ -946,7 +946,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFix
   this->offset = output.size;
   this->outputPointer->addOnTop(startByte);
   this->totalByteLength = expectedTotalElementByteLength;
-  this->reservedBytesForLength = this->GetReservedBytesForLength(expectedTotalElementByteLength);
+  this->reservedBytesForLength = this->getReservedBytesForLength(expectedTotalElementByteLength);
   for (int i = 0; i < this->reservedBytesForLength; i ++) {
     this->outputPointer->addOnTop(0);
   }
@@ -958,7 +958,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   if (this->outputTotalByteLength != nullptr) {
     *this->outputTotalByteLength = this->totalByteLength;
   }
-  int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
+  int actualBytesNeededForLength = this->getReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
     global << Logger::red << "Wrong number of reserved bytes for sequence writer. "
     << "This is non-fatal but affects negatively performance. " << Logger::endL;
@@ -974,7 +974,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
     );
   }
   this->reservedBytesForLength = actualBytesNeededForLength;
-  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
     static_cast<unsigned>(this->totalByteLength),
     *this->outputPointer,
     this->offset + 1

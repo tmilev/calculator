@@ -51,7 +51,7 @@ public:
   bool ExtractCodeElements(std::stringstream* comments);
   bool WriteFormatedCode(std::stringstream* comments);
   bool ApplyFormattingRules(std::stringstream* comments);
-  bool ApplyOneRule(std::stringstream* comments);
+  bool applyOneRule(std::stringstream* comments);
   std::string ToStringTransformed6();
   bool ComputeState(int maximumElementsToProcess);
   bool AddAndAccount(const CodeElement& incoming);

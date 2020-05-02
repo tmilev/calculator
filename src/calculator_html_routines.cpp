@@ -59,7 +59,7 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
   for (int i = 0; i < theElts.size; i ++) {
     SyntacticElement& currentElt = theElts[i];
     if (currentElt.controlIndex == theCommands.conVariable()) {
-      theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
+      theCommands.evaluateExpression(theCommands, currentElt.theData, evaluatedE);
       out << evaluatedE.toString();
       continue;
     }

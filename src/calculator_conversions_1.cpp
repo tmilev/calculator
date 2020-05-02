@@ -20,9 +20,9 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
     input.theGeneratorIndex >= input.owner->GetNumPosRoots() &&
     input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->getRank()
   ) {
-    generatorLetterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
+    generatorLetterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   } else {
-    generatorLetterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
+    generatorLetterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   }
   generatorIndexE.assignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
@@ -57,7 +57,7 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
   if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return false;
   }
-  SemisimpleLieAlgebra& theSA = theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theType);
+  SemisimpleLieAlgebra& theSA = theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(theType);
   return output.assignValue(theSA.theWeyl, theCommands);
 }
 
@@ -234,7 +234,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     << "(write me an email if you want to do that, I will help you). ";
   }
   bool newlyCreated = !theCommands.theObjectContainer.semisimpleLieAlgebras.contains(theDynkinType);
-  outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
+  outputPointer = &theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->checkConsistency();
   output.assignValue(outputPointer, theCommands);
   if (newlyCreated) {
@@ -255,7 +255,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS = input.theLetter;
-  letterE.makeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
+  letterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
   indexE.assignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.assignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
@@ -530,7 +530,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
   theReport.report(reportStream.str());
   outputSubalgebra.theWeylNonEmbedded = &
-  theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
+  theCommands.theObjectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
@@ -1259,7 +1259,7 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
     return false;
   }
   Matrix<Expression> theMatrix;
-  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMatrix)) {
+  if (!theCommands.getMatrixExpressionsFromArguments(input, theMatrix)) {
     return false;
   }
   Expression conversionAttempt;
@@ -1284,7 +1284,7 @@ bool CalculatorConversions::innerMakeMatrix(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
   Matrix<Expression> outMat;
-  if (theCommands.GetMatrixExpressionsFromArguments(input, outMat)) {
+  if (theCommands.getMatrixExpressionsFromArguments(input, outMat)) {
     return output.assignMatrixExpressions(outMat, theCommands, true, true);
   }
   return false;
@@ -1403,7 +1403,7 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
     << "Expected two arguments, polynomial and positive integer.";
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1],
     CalculatorConversions::functionPolynomial<Rational>,
     polynomial

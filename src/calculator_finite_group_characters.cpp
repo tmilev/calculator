@@ -422,7 +422,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   }
   const Expression& semisimpleLieAlgebraNode = input[1];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     semisimpleLieAlgebraNode,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebra
@@ -2105,7 +2105,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     return theCommands << "Macdonald polynomials expects as input a single argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -2412,7 +2412,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
     return output.makeError("Function WeylElement needs to know what group the element belongs to", theCommands);
   }
   WithContext<SemisimpleLieAlgebra*> thePointer;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, thePointer
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -2470,7 +2470,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
       reportStream << "<br>Evaluating: " << theProduct.toString();
       theReport.report(reportStream.str());
-      theCommands.EvaluateExpression(theCommands, theProduct, evaluatedProduct);
+      theCommands.evaluateExpression(theCommands, theProduct, evaluatedProduct);
       //if (evaluatedProduct == theSet[0])
       //{
       //}

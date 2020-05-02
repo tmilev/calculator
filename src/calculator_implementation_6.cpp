@@ -600,7 +600,7 @@ bool CalculatorFunctions::innerGetFirstSummandContaining(
     return false;
   }
   List<Expression> theSummands;
-  theCommands.CollectOpands(input[1], theCommands.opPlus(), theSummands);
+  theCommands.collectOpands(input[1], theCommands.opPlus(), theSummands);
   for (int i = 0; i < theSummands.size; i ++) {
     if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(input[2])) {
       output = theSummands[i];
@@ -628,7 +628,7 @@ bool CalculatorFunctions::innerGetSummand(
     }
     List<Expression> theSummands;
     List<Expression> theSums;
-    theCommands.CollectOpands(theExpression, theCommands.opPlus(), theSummands);
+    theCommands.collectOpands(theExpression, theCommands.opPlus(), theSummands);
     for (int i = 0; i < theSummands.size; i ++) {
       if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(theCommands.opSum())) {
         theSums.addOnTop(theSummands[i]);
@@ -684,7 +684,7 @@ bool CalculatorFunctions::innerGetSummand(
   theCommandSequence.addChildAtomOnTop(theCommands.opEndStatement());
   theCommandSequence.addChildOnTop(theSub);
   theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
-  return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.ETwo());
+  return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.expressionTwo());
 }
 
 bool CalculatorFunctions::innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -730,10 +730,10 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     input[7].evaluatesToDouble(&thePlotObj.lineWidth);
   }
   Vector<double> lowLeft, upRight;
-  if (!theCommands.GetVectorDoubles(input[2], lowLeft, 2)) {
+  if (!theCommands.getVectorDoubles(input[2], lowLeft, 2)) {
     return theCommands << "Failed to low left corner from: " << input[2].toString();
   }
-  if (!theCommands.GetVectorDoubles(input[3], upRight, 2)) {
+  if (!theCommands.getVectorDoubles(input[3], upRight, 2)) {
     return theCommands << "Failed to up right corner from: " << input[3].toString();
   }
   thePlotObj.yHigh = upRight[1];
@@ -761,7 +761,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(theCommands, thePlotObj.manifoldImmersion, jsConverterE)) {
     thePlotObj.manifoldImmersionJS = jsConverterE.toString();
-    thePlotObj.manifoldImmersion.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+    thePlotObj.manifoldImmersion.hasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     return theCommands << "Failed to extract javascript from " << input[1].toString();
   }
@@ -1158,7 +1158,7 @@ bool CalculatorFunctions::innerIsSquareFreePolynomial(
     return false;
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;
@@ -1327,7 +1327,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   for (int i = 1; i < input[1].size(); i ++) {
     theSubbed = input[2];
     theSubbed.substituteRecursively(toBeSubbed, input[1][i]);
-    if (!theCommands.EvaluateExpression(theCommands, theSubbed, subbedSimplified)) {
+    if (!theCommands.evaluateExpression(theCommands, theSubbed, subbedSimplified)) {
       return theCommands << "Failed to evaluate " << theSubbed.toString();
     }
     if (subbedSimplified.isEqualToOne()) {
@@ -1543,7 +1543,7 @@ bool CalculatorFunctions::innerMatchesPattern(
     return false;
   }
   MapList<Expression, Expression> matchedExpressions;
-  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, nullptr)) {
+  if (!theCommands.expressionMatchesPattern(input[2], input[1], matchedExpressions, nullptr)) {
     return output.assignValue(0, theCommands);
   }
   Expression commandList;
@@ -1675,7 +1675,7 @@ bool CalculatorFunctions::innerCollectOpands(
     return false;
   }
   List<Expression> theList;
-  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical(input[2], theList, input[1].theData);
+  theCommands.appendOpandsReturnTrueIfOrderNonCanonical(input[2], theList, input[1].theData);
   return output.makeSequence(theCommands, &theList);
 }
 
@@ -1687,7 +1687,7 @@ bool CalculatorFunctions::innerCollectMultiplicands(
     return false;
   }
   List<Expression> theList;
-  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical(input[1], theList, theCommands.opTimes());
+  theCommands.appendOpandsReturnTrueIfOrderNonCanonical(input[1], theList, theCommands.opTimes());
   return output.makeSequence(theCommands, &theList);
 }
 
@@ -1721,8 +1721,8 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(const Expression& left, c
   bool right1IsDouble = right[1].evaluatesToDouble(&right1);
   bool left2IsDouble = left[2].evaluatesToDouble(&left2);
   bool righ2IsDouble = right[2].evaluatesToDouble(&right2);
-  const Expression& inftyE = right.owner->EInfinity();
-  const Expression& mInftyE = right.owner->EMInfinity();
+  const Expression& inftyE = right.owner->expressionInfinity();
+  const Expression& mInftyE = right.owner->expressionMinusInfinity();
   if (left1IsDouble && right1IsDouble) {
     if (left1 > right1) {
       return true;
@@ -2027,7 +2027,7 @@ bool CalculatorFunctions::innerNormalizeIntervals(
     return false;
   }
   List<Expression> outputList;
-  if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), outputList)) {
+  if (!theCommands.collectOpands(input[1], theCommands.opUnion(), outputList)) {
     return false;
   }
   List<Expression>::Comparator order(CalculatorFunctions::leftIntervalGreaterThanRight);
@@ -2068,10 +2068,10 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
     return theCommands << "Could not extract precision from the last argument.";
   }
   List<Expression> leftList, rightList;
-  if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), leftList)) {
+  if (!theCommands.collectOpands(input[1], theCommands.opUnion(), leftList)) {
     return false;
   }
-  if (!theCommands.CollectOpands(input[2], theCommands.opUnion(), rightList)) {
+  if (!theCommands.collectOpands(input[2], theCommands.opUnion(), rightList)) {
     return false;
   }
   if (leftList.size != rightList.size) {
@@ -2144,7 +2144,7 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
     return false;
   }
   List<List<Expression> > theSummands;
-  if (!theCommands.GetSumProductsExpressions(input[2], theSummands)) {
+  if (!theCommands.getSumProductsExpressions(input[2], theSummands)) {
     return theCommands << "Failed to extract sum from "
     << input[2].toString();
   }
@@ -2172,13 +2172,13 @@ bool CalculatorFunctions::innerIsProductLinearOrConstTermsIn(
     return false;
   }
   List<Expression> theMultiplicands;
-  if (!theCommands.CollectOpands(input[2], theCommands.opTimes(),theMultiplicands)) {
+  if (!theCommands.collectOpands(input[2], theCommands.opTimes(),theMultiplicands)) {
     return theCommands << "Could not extract multiplicands from: "
     << input[2].toString();
   }
   for (int k = 0; k < theMultiplicands.size; k ++) {
     List<List<Expression> > theSummands;
-    if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands)) {
+    if (!theCommands.getSumProductsExpressions(theMultiplicands[k], theSummands)) {
       return theCommands << "Failed to extract sum from "
       << theMultiplicands[k].toString();
     }
@@ -2409,14 +2409,14 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
     }
   }
   List<Expression> theMultiplicands;
-  if (!theCommands.CollectOpands(input[2], theCommands.opTimes(), theMultiplicands)) {
+  if (!theCommands.collectOpands(input[2], theCommands.opTimes(), theMultiplicands)) {
     return theCommands << "Could not extract multiplicands from: "
     << input[2].toString();
   }
 
   for (int k = 0; k < theMultiplicands.size; k ++) {
     List<List<Expression> > theSummands;
-    if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands)) {
+    if (!theCommands.getSumProductsExpressions(theMultiplicands[k], theSummands)) {
       return theCommands << "Failed to extract sum from "
       << theMultiplicands[k].toString();
     }
@@ -2478,7 +2478,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
     return false;
   }
   Expression theRadical, reduced;
-  theRadical.MakeXOX(theCommands, theCommands.opSqrt(), theCommands.ETwo(), input[1]);
+  theRadical.MakeXOX(theCommands, theCommands.opSqrt(), theCommands.expressionTwo(), input[1]);
   if (!CalculatorFunctions::innerSqrt(theCommands, theRadical, reduced)) {
     return false;
   }

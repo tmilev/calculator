@@ -29,7 +29,7 @@ MemorySaving<Calculator>& GlobalVariables::calculator() {
   return result;
 }
 
-std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
+std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   const std::string& fileContent,
   std::string* outputFileNameNoExtension,
   bool useLatexDviPSpsToPNG
@@ -786,7 +786,7 @@ bool Calculator::innerHWVCommon(
   return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction> >(theElt, hwContext, theCommands);
 }
 
-bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
+bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
   if (this->RecursionDeptH <= this->MaxRecursionDeptH) {
     return false;
   }
@@ -800,8 +800,8 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
   return true;
 }
 
-bool Calculator::CheckOperationHandlers() {
-  MacroRegisterFunctionWithName("Calculator::CheckOperationHandlers");
+bool Calculator::checkOperationHandlers() {
+  MacroRegisterFunctionWithName("Calculator::checkOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
     if (current.isZeroPointer()) {
@@ -819,7 +819,7 @@ bool Calculator::CheckOperationHandlers() {
   return true;
 }
 
-bool Calculator::CheckConsistencyAfterInitialization() {
+bool Calculator::checkConsistencyAfterInitialization() {
   this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
@@ -851,7 +851,7 @@ bool Calculator::CheckConsistencyAfterInitialization() {
     << this->EvaluatedExpressionsStack.size
     << " elements. " << global.fatal;
   }
-  return this->theObjectContainer.CheckConsistencyAfterReset();
+  return this->theObjectContainer.checkConsistencyAfterReset();
 }
 
 bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -901,7 +901,7 @@ bool Calculator::innerGetChevGen(
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -935,7 +935,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
@@ -975,7 +975,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   }
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input[1],
     CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgebra
@@ -1014,7 +1014,7 @@ bool Calculator::innerWriteSSLieAlgebraToHD(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
     return output.makeError(
       "Caching structure constants to HD available to admins only. ",
@@ -1049,7 +1049,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   MacroRegisterFunctionWithName("Calculator::functionWriteToHDOrPrintSSLieAlgebra");
   WithContext<SemisimpleLieAlgebra*> tempSSpointer;
   input.checkInitialization();
-  if (!theCommands.Convert(
+  if (!theCommands.convert(
     input,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     tempSSpointer
@@ -1082,15 +1082,15 @@ bool Expression::checkInitialization() const {
   return true;
 }
 
-bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames) const {
-  MacroRegisterFunctionWithName("Expression::HasInputBoxVariables");
+bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames) const {
+  MacroRegisterFunctionWithName("Expression::hasInputBoxVariables");
   if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
     global.fatal << "This is a programming error: "
-    << "function HasInputBoxVariables has exceeded "
+    << "function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
   }
   bool result = false;
@@ -1104,7 +1104,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::hash
     }
   }
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].HasInputBoxVariables(boxNames)) {
+    if ((*this)[i].hasInputBoxVariables(boxNames)) {
       if (boxNames == nullptr) {
         return true;
       } else {
@@ -1183,7 +1183,7 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
   return true;
 }
 
-bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
+bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   const Expression& input, List<Expression>& output, int theOp
 ) {
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
@@ -1195,7 +1195,7 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
     output.addOnTop(input);
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (this->AppendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp)) {
+      if (this->appendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp)) {
         result = true;
       }
       if (i < input.size() - 1 && input[i].isListStartingWithAtom(theOp) && input[i].size() > 2) {
@@ -1251,7 +1251,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           }
         }
         if (isGood) {
-          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.EOne());
+          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.expressionOne());
           return output.MakeXOX(theCommands, theCommands.opThePower(), *left, thePower);
         }
       }
@@ -1376,8 +1376,8 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
   return true;
 }
 
-bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::StandardIsDenotedBy");
+bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.startsWith(theCommands.opIsDenotedBy(), 3)) {
     return false;
@@ -1387,7 +1387,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   theCommands << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
   theCommands.theObjectContainer.ExpressionNotation.addOnTop(theNotation.toString());
-  theCommands.theObjectContainer.ExpressionWithNotation.addOnTop(withNotation);
+  theCommands.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, theCommands.opDefine());
   ////
@@ -1413,8 +1413,8 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   return true;
 }
 
-bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
-  MacroRegisterFunctionWithName("Calculator::GetVectorLargeIntFromFunctionArguments");
+bool Calculator::getVectorLargeIntegerFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
+  MacroRegisterFunctionWithName("Calculator::getVectorLargeIntegerFromFunctionArguments");
   Vector<Rational> theRats;
   if (!this->getVectorFromFunctionArguments(input, theRats)) {
     return false;
@@ -1583,17 +1583,17 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool Calculator::CollectCoefficientsPowersVar(
+bool Calculator::collectCoefficientsPowersVariables(
   const Expression& input, const Expression& theVariable, VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
-  MacroRegisterFunctionWithName("Calculator::CollectCoefficientsPowersVar");
+  MacroRegisterFunctionWithName("Calculator::collectCoefficientsPowersVariables");
   List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
   Calculator& theCommands = *input.owner;
-  theCommands.CollectOpands(input, theCommands.opPlus(), theSummands);
+  theCommands.collectOpands(input, theCommands.opPlus(), theSummands);
   Expression currentCoeff;
   outputPositionIiscoeffXtoIth.makeZero();
   for (int i = 0; i < theSummands.size; i ++) {
-    theCommands.CollectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
+    theCommands.collectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
     bool found = false;
     for (int j = 0; j < currentMultiplicands.size; j ++) {
       const Expression& currentE = currentMultiplicands[j];
@@ -1627,22 +1627,22 @@ bool Calculator::CollectCoefficientsPowersVar(
   return true;
 }
 
-bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands) {
-  MacroRegisterFunctionWithName("Calculator::CollectOpands");
+bool Calculator::collectOpands(const Expression& input, int theOp, List<Expression>& outputOpands) {
+  MacroRegisterFunctionWithName("Calculator::collectOpands");
   outputOpands.setSize(0);
-  return this->CollectOpandsAccumulate(input, theOp, outputOpands);
+  return this->collectOpandsAccumulate(input, theOp, outputOpands);
 }
 
-bool Calculator::CollectOpandsAccumulate(
+bool Calculator::collectOpandsAccumulate(
   const Expression& input, int theOp, List<Expression>& outputOpands
 ) {
-  MacroRegisterFunctionWithName("Calculator::CollectOpandsAccumulate");
+  MacroRegisterFunctionWithName("Calculator::collectOpandsAccumulate");
   if (!input.startsWith(theOp)) {
     outputOpands.addOnTop(input);
     return true;
   }
   for (int i = 1; i < input.size(); i ++) {
-    this->CollectOpandsAccumulate(input[i], theOp, outputOpands);
+    this->collectOpandsAccumulate(input[i], theOp, outputOpands);
   }
   return true;
 }
@@ -1686,7 +1686,7 @@ bool Calculator::functionCollectSummands(
       }
     }
     if (summands[i].isRational(&coeffRat)) {
-      outputSum.addMonomial(theCommands.EOne(), coeffRat);
+      outputSum.addMonomial(theCommands.expressionOne(), coeffRat);
     } else {
       outputSum.addMonomial(summands[i], 1);
     }
@@ -1789,13 +1789,13 @@ bool Expression::makeAtom(int input, Calculator& newBoss) {
 
 bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss) {
   Matrix<Expression> theMat;
-  theMat.MakeIdMatrix(theDim, inputBoss.EOne(), inputBoss.EZero());
+  theMat.MakeIdMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPlus");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(theCommands.opPlus())) {
     return false;
   }
@@ -1822,7 +1822,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
   return true;
 }
 
-bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::evaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
   if (!input.startsWith(theCommands.opDefineConditional(), 4)) {
     return output.makeError("Error: operation :if = takes three arguments.", theCommands);
   }
@@ -2063,7 +2063,7 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
   Expression differenceE = *this;
   differenceE -= other;
   Expression differenceEsimplified;
-  if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified)) {
+  if (!this->owner->evaluateExpression(*this->owner, differenceE, differenceEsimplified)) {
     return false;
   }
   if (differenceEsimplified.isEqualToZero()) {
@@ -2101,7 +2101,7 @@ SemisimpleLieAlgebra* Expression::getAmbientSemisimpleLieAlgebraNonConstUseWithC
   return &this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[indexSSalg];
 }
 
-Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
+Function& Calculator::getFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
   const Calculator::NamedRuleLocation& current =
   this->namedRules.getValueNoFail(inputNamedRule);
   const MemorySaving<Calculator::OperationHandlers>& currentOperation =
@@ -2117,7 +2117,7 @@ Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNa
   return currentOperation.getElementConst().handlers[current.index];
 }
 
-int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
+int Calculator::addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
   int result = this->operations.getIndex(theOpName);
   if (result == - 1) {
     result = this->operations.size();
@@ -2126,12 +2126,12 @@ int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& th
   return result;
 }
 
-void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
-  this->AddOperationNoRepetitionAllowed(theOpName);
+void Calculator::addOperationBuiltInType(const std::string& theOpName) {
+  this->addOperationNoRepetitionAllowed(theOpName);
   this->builtInTypes.addOnTop(theOpName);
 }
 
-void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
+void Calculator::addOperationNoRepetitionAllowed(const std::string& theOpName) {
   if (this->operations.contains(theOpName)) {
     global.fatal << "This is a programming error: operation "
     << theOpName << " already created. " << global.fatal;
@@ -2496,13 +2496,13 @@ JSData Calculator::toJSONOutputAndSpecials() {
   return result;
 }
 
-std::string Calculator::ToStringOutputAndSpecials() {
-  MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
+std::string Calculator::toStringOutputAndSpecials() {
+  MacroRegisterFunctionWithName("Calculator::toStringOutputAndSpecials");
   return this->toJSONOutputAndSpecials().toString(nullptr);
 }
 
-void Calculator::WriteAutoCompleteKeyWordsToFile() {
-  MacroRegisterFunctionWithName("Calculator::WriteAutoCompleteKeyWordsToFile");
+void Calculator::writeAutoCompleteKeyWordsToFile() {
+  MacroRegisterFunctionWithName("Calculator::writeAutoCompleteKeyWordsToFile");
   std::stringstream out;
   out << "\"use strict\"; //This file is automatically generated, please do not modify.\n";
   out << "  var theAutocompleteDictionary = [\n  ";
@@ -2524,8 +2524,8 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
   theFileStream << out.str();
 }
 
-void Calculator::ComputeAutoCompleteKeyWords() {
-  MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
+void Calculator::computeAutoCompleteKeyWords() {
+  MacroRegisterFunctionWithName("Calculator::computeAutoCompleteKeyWords");
   this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
   for (int i = 0; i < this->operations.size(); i ++) {
     this->autoCompleteKeyWords.addOnTopNoRepetition(this->operations.theKeys[i]);
@@ -2706,31 +2706,31 @@ std::string Calculator::toString() {
   return out2.str();
 }
 
-std::string Calculator::ToStringSyntacticStackHumanReadable(
+std::string Calculator::toStringSyntacticStackHumanReadable(
   bool includeLispifiedExpressions, bool ignoreCommandEnclosures
 ) {
-  MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
+  MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHumanReadable");
   std::stringstream out;
-  if ((*this->CurrentSyntacticStacK).size< this->numEmptyTokensStart) {
+  if ((*this->currentSyntacticStack).size< this->numEmptyTokensStart) {
     return
     "Error: this is a programming error: "
     "not enough empty tokens in the start of the syntactic stack.";
   }
-  bool isBad = ((*this->CurrentSyntacticStacK).size > this->numEmptyTokensStart + 1);
-  SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).lastObject();
-  if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1) {
+  bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
+  SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
+  if ((*this->currentSyntacticStack).size == this->numEmptyTokensStart + 1) {
     if (lastSyntacticElt.controlIndex != this->conExpression()) {
       isBad = true;
     }
   }
   if (!isBad) {
-    out << this->CurrentSyntacticStacK->lastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
+    out << this->currentSyntacticStack->lastObject()->toStringHumanReadable(*this, includeLispifiedExpressions);
     return out.str();
   }
   out << "<table style =\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
   int counter = 0;
-  for (int i = this->numEmptyTokensStart; i < (*this->CurrentSyntacticStacK).size; i ++) {
-    SyntacticElement& currentElt = (*this->CurrentSyntacticStacK)[i];
+  for (int i = this->numEmptyTokensStart; i < (*this->currentSyntacticStack).size; i ++) {
+    SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
     if (ignoreCommandEnclosures) {
       if (
         currentElt.controlIndex == this->conExpression() ||
@@ -2751,7 +2751,7 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
     out
     << "<td style =\"vertical-align:top;background-color:"
     << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "\">"
-    << currentElt.ToStringHumanReadable(*this, includeLispifiedExpressions)
+    << currentElt.toStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
     counter ++;
   }
@@ -2759,8 +2759,8 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(
   return out.str();
 }
 
-std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures) {
-  return this->ToStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
+std::string Calculator::toStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures) {
+  return this->toStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
 }
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
@@ -2769,8 +2769,8 @@ SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPrese
   return currentSAs;
 }
 
-SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
+SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const DynkinType& input) {
+  MacroRegisterFunctionWithName("ObjectContainer::getLieAlgebraCreateIfNotPresent");
   bool needToInit = false;
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
@@ -2783,12 +2783,12 @@ SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const Dyn
   return theLA;
 }
 
-WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
-  MacroRegisterFunctionWithName("ObjectContainer::GetWeylGroupDataCreateIfNotPresent");
-  return this->GetLieAlgebraCreateIfNotPresent(input).theWeyl;
+WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(const DynkinType& input) {
+  MacroRegisterFunctionWithName("ObjectContainer::getWeylGroupDataCreateIfNotPresent");
+  return this->getLieAlgebraCreateIfNotPresent(input).theWeyl;
 }
 
-std::string ObjectContainer::ToStringJavascriptForUserInputBoxes() {
+std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
   std::stringstream out;
   out << "<script>\n";
   out << "window.calculator.calculator.inputBoxNames = [";
@@ -2805,7 +2805,7 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes() {
     InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "window.calculator.calculator.inputBoxToSliderUpdaters['"
     << currentBox.name << "'] ='"
-    << currentBox.GetSliderName() << "';\n";
+    << currentBox.getSliderName() << "';\n";
   }
   //out << "console.log(window.calculator.calculator.inputBoxNames);\n ";
   out << "</script>";
@@ -2823,8 +2823,8 @@ void ObjectContainer::resetSliders() {
   this->userInputBoxSliderDisplayed.initializeFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
 }
 
-bool ObjectContainer::CheckConsistencyAfterReset() {
-  MacroRegisterFunctionWithName("ObjectContainer::CheckConsistencyAfterReset");
+bool ObjectContainer::checkConsistencyAfterReset() {
+  MacroRegisterFunctionWithName("ObjectContainer::checkConsistencyAfterReset");
   if (this->theWeylGroupElements.size != 0) {
     global.fatal << "WeylGroupElements expected to be empty, got "
     << this->theWeylGroupElements.size << " elements. " << global.fatal;
@@ -2844,8 +2844,8 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   }
   // ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   // ListReferences<SltwoSubalgebras> theSltwoSAs;
-  // HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
-  // HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
+  // HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
+  // HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
   // HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
 
   if (this->polynomialsRational.size != 0) {
@@ -2864,7 +2864,7 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   }
   // HashedListReferences<std::string, MathRoutines::hashString> theStrings;
   // HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
-  // HashedListReferences<Expression> ExpressionWithNotation;
+  // HashedListReferences<Expression> expressionWithNotation;
   // HashedListReferences<LittelmannPath> theLSpaths;
   // HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   // HashedListReferences<ElementZmodP> theEltsModP;
@@ -2882,8 +2882,8 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   // HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
   // ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
   // HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
-  // WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
-  // SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
+  // WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
+  // SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   // SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   return true;
 }
@@ -2910,7 +2910,7 @@ void ObjectContainer::reset() {
   this->theDoubles.addOnTop(std::nan(""));
   this->theStrings.clear();
   this->ExpressionNotation.clear();
-  this->ExpressionWithNotation.clear();
+  this->expressionWithNotation.clear();
   this->theLSpaths.clear();
   //this->theMatRats.clear();
   this->theMatTensorRats.clear();
@@ -2928,13 +2928,13 @@ void ObjectContainer::reset() {
   this->theWeightsPoly.clear();
   this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.clear();
-  this->CurrentRandomSeed = static_cast<int>(time(nullptr));
+  this->currentRandomSeed = static_cast<int>(time(nullptr));
   this->theUserInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
-  this->EllipticCurveElementsZmodP.clear();
-  this->EllipticCurveElementsRational.clear();
+  this->ellipticCurveElementsZmodP.clear();
+  this->ellipticCurveElementsRational.clear();
    //Setting up a random seed.
-  global.unsecurePseudoRandomGenerator.setRandomSeed(this->CurrentRandomSeed);
+  global.unsecurePseudoRandomGenerator.setRandomSeed(this->currentRandomSeed);
   this->canvasPlotCounter = 0;
   this->resetPlots();
   this->resetSliders();
@@ -3135,10 +3135,10 @@ bool Expression::mergeContextsMyAruments(
   return true;
 }
 
-bool Calculator::ConvertExpressionsToCommonContext(
+bool Calculator::convertExpressionsToCommonContext(
   List<Expression>& inputOutputEs, ExpressionContext* inputOutputStartingContext
 ) {
-  MacroRegisterFunctionWithName("Calculator::ConvertExpressionsToCommonContext");
+  MacroRegisterFunctionWithName("Calculator::convertExpressionsToCommonContext");
   ExpressionContext commonContext(*this);
   if (inputOutputStartingContext != nullptr) {
     commonContext = *inputOutputStartingContext;
@@ -3147,7 +3147,7 @@ bool Calculator::ConvertExpressionsToCommonContext(
     if (!inputOutputEs[i].isBuiltInType()) {
       return
       *this << "<hr>Possible programming error: "
-      << "calling ConvertExpressionsToCommonContext "
+      << "calling convertExpressionsToCommonContext "
       << "on expressions without context. "
       << global.fatal.GetStackTraceEtcErrorMessageHTML();
     }

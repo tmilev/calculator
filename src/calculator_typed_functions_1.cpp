@@ -415,7 +415,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (input.size() != 3) {
     return false;
   }
@@ -442,7 +442,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -470,7 +470,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -545,7 +545,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -682,7 +682,7 @@ bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& theCommands, cons
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyUEByAny");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (input.size() != 3) {
     return false;
   }
@@ -700,7 +700,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -734,7 +734,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -895,7 +895,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPolynomialModPToPol
 
 bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -921,7 +921,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerPolynomialBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1028,7 +1028,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -1117,7 +1117,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInt
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberPolynomialBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1140,7 +1140,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteg
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerPolynomialModuloIntegerBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1169,7 +1169,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPB
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerPolynomialModPModuloPolynomialModPBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1195,7 +1195,7 @@ bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1259,7 +1259,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1313,7 +1313,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1373,7 +1373,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRat");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1405,7 +1405,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1444,7 +1444,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -1461,7 +1461,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
@@ -1492,7 +1492,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
     << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
-  idMatE.MakeIdMatrix(theMat.numberOfRows, theCommands.EOne(), theCommands.EZero());
+  idMatE.MakeIdMatrix(theMat.numberOfRows, theCommands.expressionOne(), theCommands.expressionZero());
   MathRoutines::raiseToPower(theMat, thePower, idMatE);
   return output.assignMatrixExpressions(theMat, theCommands, true, true);
 }
@@ -1522,7 +1522,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       Expression theDenBase, theDenominator;
       theDenBase.assignValue(Rational(base.getDenominator()), theCommands);
       theDenominator.MakeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
-      output = theCommands.EOne() / theDenominator;
+      output = theCommands.expressionOne() / theDenominator;
       return true;
     }
   }
@@ -1663,7 +1663,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1705,7 +1705,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRation
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1728,7 +1728,7 @@ bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -1751,7 +1751,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg");
-  theCommands.CheckInputNotSameAsOutput(input, output);
+  theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -2268,8 +2268,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded(
   leftE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][1], lieBracket);
   lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[1],input[2][1]);
   rightE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2], lieBracket);
-  leftE = theCommands.EMOne() * leftE;
-  rightE = theCommands.EMOne() * rightE;
+  leftE = theCommands.expressionMinusOne() * leftE;
+  rightE = theCommands.expressionMinusOne() * rightE;
   output = leftE + rightE;
   return true;
 }
@@ -2292,7 +2292,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
   }
   Expression theBracket;
   theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2], input[1]);
-  output = theCommands.EMOne() * theBracket;
+  output = theCommands.expressionMinusOne() * theBracket;
   return true;
 }
 
@@ -2444,7 +2444,7 @@ bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix(
   ) {
     return false;
   }
-  leftMat.DirectSumWith(rightMat,theCommands.EZero());
+  leftMat.DirectSumWith(rightMat,theCommands.expressionZero());
   return output.assignMatrixExpressions(leftMat, theCommands, false, true);
 }
 

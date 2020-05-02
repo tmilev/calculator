@@ -698,7 +698,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
-  theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.CurrentRandomSeed);
+  theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.currentRandomSeed);
   theProblem.interpretHtml(&theCommands.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;

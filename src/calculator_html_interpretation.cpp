@@ -87,7 +87,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     out << "<b style = 'color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
+    << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
     return result;
@@ -298,7 +298,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   theInterpreteR.evaluate(studentAnswerWithComments.str());
   if (theInterpreteR.syntaxErrors != "") {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
+    << theInterpreteR.toStringSyntacticStackHumanReadable(false, true);
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
@@ -890,7 +890,7 @@ JSData WebAPIResponse::getEditPageJSON() {
   if (theFile.flagIsExamProblem) {
     Calculator tempCalculator;
     tempCalculator.initialize();
-    tempCalculator.ComputeAutoCompleteKeyWords();
+    tempCalculator.computeAutoCompleteKeyWords();
     theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     theFile.initAutocompleteExtras();
@@ -1067,7 +1067,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     }
     isolatedInterpreter.evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
-      output << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
+      output << isolatedInterpreter.toStringSyntacticStackHumanReadable(false, true);
     } else {
       output << isolatedInterpreter.outputString;
     }
@@ -1221,7 +1221,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   output << currentA.currentAnswerClean;
   output << "\\)";
   std::string errorMessage;
-  errorMessage = theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
+  errorMessage = theInterpreter.toStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
   if (errorMessage != "") {
     output << "<br>" << errorMessage
     << "<hr><b>If you entered this expression through the "
@@ -1480,7 +1480,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       );
     }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
+    << theInterpreteR.toStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;

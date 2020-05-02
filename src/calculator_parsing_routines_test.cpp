@@ -5,36 +5,36 @@
 bool Calculator::Test::all() {
   Calculator tester;
   tester.initialize();
-  Calculator::Test::CheckBuiltInInitializations(tester);
-  Calculator::Test::ParseAllExamples(tester);
-  Calculator::Test::NumberOfTestFunctions(tester);
-  Calculator::Test::ParseDecimal(tester);
-  Calculator::Test::BuiltInFunctionsABTest(tester);
+  Calculator::Test::checkBuiltInInitializations(tester);
+  Calculator::Test::parseAllExamples(tester);
+  Calculator::Test::numberOfTestFunctions(tester);
+  Calculator::Test::parseDecimal(tester);
+  Calculator::Test::builtInFunctionsABTest(tester);
   return true;
 }
 
-bool Calculator::Test::CheckBuiltInInitializations(Calculator& ownerInitialized) {
-  if (!ownerInitialized.CheckPredefinedFunctionNameRepetitions()) {
+bool Calculator::Test::checkBuiltInInitializations(Calculator& ownerInitialized) {
+  if (!ownerInitialized.checkPredefinedFunctionNameRepetitions()) {
     global.fatal << "Predefined function name repetitions." << global.fatal;
     return false;
   }
-  if (!ownerInitialized.CheckOperationHandlers()) {
+  if (!ownerInitialized.checkOperationHandlers()) {
     global.fatal << "Operation handler checks failed." << global.fatal;
     return false;
   }
   return true;
 }
 
-bool Calculator::Test::NumberOfTestFunctions(Calculator& ownerInitialized) {
-  int numberOfBuiltInFunction = ownerInitialized.GetNumBuiltInFunctions();
+bool Calculator::Test::numberOfTestFunctions(Calculator& ownerInitialized) {
+  int numberOfBuiltInFunction = ownerInitialized.getNumberOfBuiltInFunctions();
   if (numberOfBuiltInFunction <= 0) {
     global.fatal << "Calculator built in functions: " << numberOfBuiltInFunction << global.fatal;
   }
   return true;
 }
 
-bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
-  MacroRegisterFunctionWithName("Calculator::Test::ParseAllExamples");
+bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
+  MacroRegisterFunctionWithName("Calculator::Test::parseAllExamples");
   for (int i = 0; i < ownerInitialized.NumPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& operationPointer =
     ownerInitialized.operations.theValues[i];
@@ -61,7 +61,7 @@ bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
   return true;
 }
 
-bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
+bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
   std::string mustEvaluateToZero = "2.01 - 201/100";
   ownerInitialized.evaluate(mustEvaluateToZero);
   if (ownerInitialized.theProgramExpression.toString() != "0") {
@@ -80,10 +80,10 @@ bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
   return true;
 }
 
-bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
+bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
-  test.CalculatorTestPrepare();
-  if (!test.CalculatorTestRun()) {
+  test.calculatorTestPrepare();
+  if (!test.calculatorTestRun()) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile << "<html><link "

@@ -557,7 +557,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   ) {
     theCrawler.flagHomeworkRatherThanSlides = true;
   }
-  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
+  if (!theCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
     resultOnError["targetPdfFileName"] = theCrawler.targetPDFFileNameWithPathVirtual;
     resultOnError[WebAPI::result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;
@@ -611,7 +611,7 @@ bool WebAPIResponse::processSlidesSource() {
   }
   theCrawler.flagSourceOnly = true;
   theCrawler.flagCrawlTexSourcesRecursively = true;
-  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
+  if (!theCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
     this->owner->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
     result[WebAPI::result::error] = comments.str();

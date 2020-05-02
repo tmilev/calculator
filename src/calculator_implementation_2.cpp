@@ -27,7 +27,7 @@ JSData Calculator::ToJSONFunctionHandlers() {
   JSData output;
   output.theType = JSData::token::tokenObject;
   for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.theValues[i].IsZeroPointer()) {
+    if (this->operations.theValues[i].isZeroPointer()) {
       continue;
     }
     const std::string& operationName = this->operations.theKeys[i];
@@ -136,7 +136,7 @@ std::string Calculator::toStringRuleStatusUser() {
   MacroRegisterFunctionWithName("Calculator::toStringRuleStatusUser");
   std::stringstream out;
   for (int i = 0; i < this->operations.size(); i ++) {
-    if (this->operations.theValues[i].IsZeroPointer()) {
+    if (this->operations.theValues[i].isZeroPointer()) {
       continue;
     }
     out << this->operations.theValues[i].getElement().toStringRuleStatusUser();
@@ -164,10 +164,10 @@ const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
     // [note: I no longer remember the orginal rationale, if any].
     global.fatal << "Corrupt atom index: " << theOp << global.fatal;
   }
-  if (this->operations.theValues[theOp].IsZeroPointer()) {
+  if (this->operations.theValues[theOp].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.theValues[theOp].GetElementConst().compositeHandlers;
+  return &this->operations.theValues[theOp].getElementConst().compositeHandlers;
 }
 
 const List<Function>* Calculator::getOperationHandlers(int theOp) {
@@ -178,10 +178,10 @@ const List<Function>* Calculator::getOperationHandlers(int theOp) {
     // [note: I no longer remember the original rationale, if any].
     global.fatal << "Corrupt atom index: " << theOp << global.fatal;
   }
-  if (this->operations.theValues[theOp].IsZeroPointer()) {
+  if (this->operations.theValues[theOp].isZeroPointer()) {
     return nullptr;
   }
-  return &this->operations.theValues[theOp].GetElementConst().handlers;
+  return &this->operations.theValues[theOp].getElementConst().handlers;
 }
 
 bool Calculator::outerStandardCompositeHandler(
@@ -274,7 +274,7 @@ bool Calculator::outerStandardHandler(
   if (!functionNameNode.isOperation(operationIndex)) {
     return false;
   }
-  if (theCommands.operations.theValues[operationIndex].IsZeroPointer()) {
+  if (theCommands.operations.theValues[operationIndex].isZeroPointer()) {
     return false;
   }
   const List<Function>& handlers = theCommands.operations.theValues[operationIndex].getElement().handlers;
@@ -351,7 +351,7 @@ bool Calculator::ExpressionMatchesPattern(
     if (!matchedExpressions.contains(thePattern)) {
       matchedExpressions.setKeyValue(thePattern, input);
     }
-    if (matchedExpressions.GetValueCreate(thePattern) != input) {
+    if (matchedExpressions.getValueCreate(thePattern) != input) {
       return false;
     }
     if (commentsGeneral != nullptr) {
@@ -718,13 +718,13 @@ void Calculator::EvaluateLoop::reportChildEvaluation(Expression& output, int chi
       output[j].startsWith(this->owner->opDefine()) ||
       output[j].startsWith(this->owner->opDefineConditional())
     ) {
-      reportStream << "<br>" << StringRoutines::StringShortenInsertDots(
+      reportStream << "<br>" << StringRoutines::stringShortenInsertDots(
         output[j].toString(), 100
       );
    }
   }
   reportStream << "<br>Evaluating:<br><b>"
-  << StringRoutines::StringShortenInsertDots(output[childIndex].toString(), 100) << "</b>";
+  << StringRoutines::stringShortenInsertDots(output[childIndex].toString(), 100) << "</b>";
   theReport.report(reportStream.str());
 }
 
@@ -1052,7 +1052,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapList<Expressio
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
-      toBeSubbedIn = matchedPairs.GetValueCreate(toBeSubbedIn);
+      toBeSubbedIn = matchedPairs.getValueCreate(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
       return;
     }
@@ -1133,9 +1133,9 @@ bool Calculator::parseAndExtractExpressions(
 
 void Calculator::initComputationStats() {
   this->startTimeEvaluationMilliseconds = global.getElapsedMilliseconds();
-  this->NumListsStart                   = static_cast<signed>( ParallelComputing::NumListsCreated    );
-  this->NumListResizesStart             = static_cast<signed>( ParallelComputing::NumListResizesTotal);
-  this->NumHashResizesStart             = static_cast<signed>( ParallelComputing::NumHashResizes     );
+  this->NumListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
+  this->NumListResizesStart             = static_cast<signed>( GlobalStatistics::numListResizesTotal);
+  this->NumHashResizesStart             = static_cast<signed>( GlobalStatistics::numHashResizes     );
   this->NumSmallAdditionsStart          = static_cast<signed>( Rational::TotalSmallAdditions         );
   this->NumSmallMultiplicationsStart    = static_cast<signed>( Rational::TotalSmallMultiplications   );
   this->NumSmallGCDcallsStart           = static_cast<signed>( Rational::TotalSmallGCDcalls          );

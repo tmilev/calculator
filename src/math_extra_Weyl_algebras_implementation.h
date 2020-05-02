@@ -66,7 +66,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       int multDrop = tempSel.Multiplicities[k];
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);
-      coeffBuff *= Rational::NChooseK(theDOPower, multDrop) * Rational::NChooseK(thePolPower, multDrop) * Rational::Factorial(multDrop);
+      coeffBuff *= Rational::nChooseK(theDOPower, multDrop) * Rational::nChooseK(thePolPower, multDrop) * Rational::factorial(multDrop);
       buffer.polynomialPart.setVariable(k, left.polynomialPart(k) + right.polynomialPart(k) - multDrop);
       buffer.differentialPart.setVariable(k, left.differentialPart(k) + right.differentialPart(k) - multDrop);
     }

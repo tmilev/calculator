@@ -477,7 +477,7 @@ bool ProblemDataAdministrative::getWeightFromCourse(
   if (outputAsGivenByInstructor == nullptr) {
     outputAsGivenByInstructor = &tempString;
   }
-  *outputAsGivenByInstructor = this->problemWeightsPerCoursE.GetValueCreate(theCourseNonURLed);
+  *outputAsGivenByInstructor = this->problemWeightsPerCoursE.getValueCreate(theCourseNonURLed);
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
@@ -621,9 +621,9 @@ bool UserCalculator::authenticateWithToken(std::stringstream* commentsOnFailure)
     return false;
   }
   TimeWrapper now;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   this->approximateHoursSinceLastTokenWasIssued =
-  now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(this->authenticationCreationTime);
+  now.subtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(this->authenticationCreationTime);
   //<-to do: revoke authentication token if expired.
   return this->enteredAuthenticationToken == this->actualAuthenticationToken;
 }
@@ -727,7 +727,7 @@ JSData UserCalculatorData::toJSON() {
   for (int i = result.objects.size() - 1; i >= 0; i --) {
     JSData& currentValue = result.objects.theValues[i];
     if (currentValue.theString == "" && currentValue.theType == JSData::token::tokenString) {
-      result.objects.RemoveKey(result.objects.theKeys[i]);
+      result.objects.removeKey(result.objects.theKeys[i]);
     }
   }
   return result;
@@ -865,7 +865,7 @@ bool UserCalculator::authenticateWithUserNameAndPass(std::stringstream* comments
 bool UserCalculator::resetAuthenticationToken(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::resetAuthenticationToken");
   TimeWrapper now;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   std::stringstream out;
   List<unsigned char> authenticationToken;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(authenticationToken, 20);
@@ -955,7 +955,7 @@ bool Database::User::SendActivationEmail(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
-  StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
+  StringRoutines::stringSplitDefaultDelimiters(emailList, theEmails);
   return Database::User::SendActivationEmail(
     theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
@@ -993,7 +993,7 @@ bool Database::User::SendActivationEmail(
 
 bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::loadFromOldFormat");
-  MapList<std::string, std::string, MathRoutines::HashString> theMap;
+  MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::chopPercentEncodedString(inputData, theMap, commentsOnFailure)) {
     return false;
   }
@@ -1003,13 +1003,13 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (theMap.contains(WebAPI::problem::randomSeed)) {
-      this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate(WebAPI::problem::randomSeed).c_str()));
+      this->randomSeed = static_cast<unsigned>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
   this->theAnswers.clear();
   bool result = true;
-  MapList<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
+  MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
     if (theMap.theKeys[i] == WebAPI::problem::randomSeed) {
       continue;
@@ -1025,14 +1025,14 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
     }
     if (currentQuestionMap.contains("numCorrectSubmissions")) {
       currentA.numCorrectSubmissions =
-      atoi(currentQuestionMap.GetValueCreate("numCorrectSubmissions").c_str());
+      atoi(currentQuestionMap.getValueCreate("numCorrectSubmissions").c_str());
     }
     if (currentQuestionMap.contains("numSubmissions")) {
       currentA.numSubmissions =
-      atoi(currentQuestionMap.GetValueCreate("numSubmissions").c_str());
+      atoi(currentQuestionMap.getValueCreate("numSubmissions").c_str());
     }
     if (currentQuestionMap.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
+      currentA.firstCorrectAnswerURLed = currentQuestionMap.getValueCreate("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean = HtmlRoutines::convertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed = HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
@@ -1088,7 +1088,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
 
 bool UserCalculator::interpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
-  MapList<std::string, std::string, MathRoutines::HashString> theMap;
+  MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::chopPercentEncodedString(theInfo, theMap, commentsOnFailure)) {
     return false;
   }
@@ -1145,7 +1145,7 @@ bool UserCalculator::exists(std::stringstream* comments) {
 bool UserCalculator::computeAndStoreActivationToken(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::computeAndStoreActivationToken");
   TimeWrapper now;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   List<unsigned char> activationToken;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
   this->actualActivationToken = Crypto::convertListUnsignedCharsToBase64(activationToken, true);
@@ -1202,16 +1202,16 @@ bool UserCalculator::computeAndStoreActivationStats(
   }
   numActivationsThisEmail ++;
   TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   if (lastEmailTime != "") {
     lastActivationOnThisEmail.operator=(lastEmailTime);
     lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "<br>Last activation on this email, GM time: "
-      << lastActivationOnThisEmail.ToStringGM() << ".\n"
+      << lastActivationOnThisEmail.toStringGM() << ".\n"
       << "<br>Last activation on this account, GM time: "
-      << lastActivationOnThisEmail.ToStringGM() << ".\n";
+      << lastActivationOnThisEmail.toStringGM() << ".\n";
     }
   }
   if (commentsGeneral != nullptr) {
@@ -1309,8 +1309,8 @@ bool Database::User::AddUsersFromEmails(
   global.millisecondsMaxComputation = 100000; //100 seconds
   global.millisecondsReplyAfterComputation = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
-  StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
-  StringRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
+  StringRoutines::stringSplitDefaultDelimiters(emailList, theEmails);
+  StringRoutines::stringSplitDefaultDelimiters(userPasswords, thePasswords);
   if (thePasswords.size > 0) {
     if (thePasswords.size != theEmails.size) {
       comments << "Different number of usernames/emails and passwords: "
@@ -1796,9 +1796,9 @@ std::string UserCalculator::getActivationAddressFromActivationToken(
 ) {
   MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
-  if (StringRoutines::StringBeginsWith(calculatorBase, "localhost")) {
+  if (StringRoutines::stringBeginsWith(calculatorBase, "localhost")) {
     out << "https://" << calculatorBase;
-  } else if (StringRoutines::StringBeginsWith(calculatorBase, "https://localhost")) {
+  } else if (StringRoutines::stringBeginsWith(calculatorBase, "https://localhost")) {
     out << calculatorBase;
   } else {
     out << global.hopefullyPermanentWebAdress;

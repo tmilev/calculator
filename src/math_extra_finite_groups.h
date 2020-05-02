@@ -759,7 +759,7 @@ public:
     bool LabelDynkinDiagramVertices = false,
     Vectors<Rational>* predefinedProjectionPlane = nullptr
   );
-  bool HasStronglyPerpendicularDecompositionWRT(
+  bool hasStronglyPerpendicularDecompositionWRT(
     Vector<Rational>& input,
     int UpperBoundNumBetas,
     Vectors<Rational>& theSet,
@@ -787,8 +787,8 @@ public:
     this->getEpsilonCoordinates(input, output);
     return output;
   }
-  bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
-  bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
+  bool isStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
+  bool isStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void getEpsilonCoordinatesWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   bool IsElementWeylGroup(const MatrixTensor<Rational>& theMat);
@@ -1228,10 +1228,10 @@ public:
   JSData JSOut();
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString(FormatExpressions* fmt = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, GroupRepresentation<someGroup, Coefficient>& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
   bool operator== (const GroupRepresentation<someGroup, Coefficient>& right) const {
     if (this->ownerGroup != right.ownerGroup) {
@@ -1346,7 +1346,7 @@ void GroupRepresentation<someGroup, Coefficient>::MakeTensorRepresentation(
 
 template <typename someGroup, typename Coefficient>
 template <typename somestream>
-somestream& GroupRepresentation<someGroup, Coefficient>::IntoStream(somestream& out) const {
+somestream& GroupRepresentation<someGroup, Coefficient>::intoStream(somestream& out) const {
   if (!this->flagCharacterIsComputed) {
     //this->ComputeCharacter();
     out << "Representation of the character not computed yet.";
@@ -1366,7 +1366,7 @@ template <typename someGroup, typename Coefficient>
 std::string GroupRepresentation<someGroup, Coefficient>::toString(FormatExpressions* fmt) const {
   (void) fmt;//portable way of avoiding unused parameter warning
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 

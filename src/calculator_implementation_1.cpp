@@ -56,7 +56,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   for (int j = 0; j < matA.numberOfRows; j ++) {
     tempMatA.elements[j][j + NumTrueVariables].makeOne();
     matX[j + NumTrueVariables] = (matb.elements[j][0]);
-    BaseVariables.AddSelectionAppendNewIndex(j + NumTrueVariables);
+    BaseVariables.addSelectionAppendNewIndex(j + NumTrueVariables);
   }
   Rational ChangeGradient; //Change, PotentialChange;
   int EnteringVariable = 0;
@@ -1172,7 +1172,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
     InputBox& currentBox = owner.theObjectContainer.
-    theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
+    theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] =" << "'" << this->GetCanvasName() << "'"
     << ";\n";
@@ -1263,7 +1263,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
 }
 
 void Plot::SetCanvasName(const std::string& input) {
-  this->canvasNamE = StringRoutines::ConvertStringToJavascriptVariable(input);
+  this->canvasNamE = StringRoutines::convertStringToJavascriptVariable(input);
 }
 
 std::string Plot::GetCanvasName() const {
@@ -1644,7 +1644,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
 
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
-    InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
+    InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(this->boxesThatUpdateMe[i]);
     outScript << "  window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] ="
     << "'" << this->GetCanvasName() << "'"
@@ -1814,10 +1814,10 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml) {
   return resultStream.str();
 }
 
-bool Expression::AssignStringParsed(
-  const std::string& theString, MapList<std::string, Expression, MathRoutines::HashString>* substitutions, Calculator& owner
+bool Expression::assignStringParsed(
+  const std::string& theString, MapList<std::string, Expression, MathRoutines::hashString>* substitutions, Calculator& owner
 ) {
-  MacroRegisterFunctionWithName("Expression::AssignStringParsed");
+  MacroRegisterFunctionWithName("Expression::assignStringParsed");
   Expression commands, result;
   List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
   std::string outputSyntacticErrors;
@@ -1843,7 +1843,7 @@ bool Expression::AssignStringParsed(
   return true;
 }
 
-bool Expression::IsSuitableForSubstitution() const {
+bool Expression::isSuitableForSubstitution() const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -1853,7 +1853,7 @@ bool Expression::IsSuitableForSubstitution() const {
   return true;
 }
 
-bool Expression::IsSuitableForRecursion() const {
+bool Expression::isSuitableForRecursion() const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -1865,23 +1865,23 @@ bool Expression::IsSuitableForRecursion() const {
 
 void Expression::substituteRecursively(MapList<Expression, Expression>& theSubs) {
   if (theSubs.contains(*this)) {
-    (*this) = theSubs.GetValueCreate(*this);
+    (*this) = theSubs.getValueCreate(*this);
     return;
   }
-  this->SubstituteRecursivelyInChildren(theSubs);
+  this->substituteRecursivelyInChildren(theSubs);
 }
 
-void Expression::SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs) {
-  if (!this->IsSuitableForSubstitution()) {
+void Expression::substituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs) {
+  if (!this->isSuitableForSubstitution()) {
     return;
   }
   Expression tempE;
   for (int i = 0; i < this->size(); i ++) {
     if (theSubs.contains((*this)[i])) {
-      this->setChild(i, theSubs.GetValueCreate((*this)[i]));
+      this->setChild(i, theSubs.getValueCreate((*this)[i]));
     } else {
       tempE = (*this)[i];
-      tempE.SubstituteRecursivelyInChildren(theSubs);
+      tempE.substituteRecursivelyInChildren(theSubs);
       if (!(tempE == (*this)[i])) {
         this->setChild(i, tempE);
       }
@@ -1894,11 +1894,11 @@ void Expression::substituteRecursively(const Expression& toBeSubbed, const Expre
     (*this) = toBeSubbedWith;
     return;
   }
-  this->SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
+  this->substituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
 }
 
-void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
-  if (!this->IsSuitableForSubstitution()) {
+void Expression::substituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith) {
+  if (!this->isSuitableForSubstitution()) {
     return;
   }
   Expression tempE;
@@ -1907,7 +1907,7 @@ void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, c
       this->setChild(i, toBeSubbedWith);
     } else {
       tempE = (*this)[i];
-      tempE.SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
+      tempE.substituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
       if (!(tempE == (*this)[i])) {
         this->setChild(i, tempE);
       }
@@ -2052,7 +2052,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   if (output.isError()) {
     return true;
   }
-  if (parSel.CardinalitySelection != 0) {
+  if (parSel.cardinalitySelection != 0) {
     return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> theElt;
@@ -2145,7 +2145,7 @@ bool Calculator::innerReverseOrderRecursivelY(Calculator& theCommands, const Exp
 bool Calculator::functionReverseOrderRecursively(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!input.IsSuitableForRecursion()) {
+  if (!input.isSuitableForRecursion()) {
     output = input;
     return true;
   }
@@ -2164,7 +2164,7 @@ bool Calculator::functionReverseOrderRecursively(
 
 bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrder");
-  if (!input.IsSuitableForRecursion()) {
+  if (!input.isSuitableForRecursion()) {
     output = input;
     return true;
   }
@@ -2197,7 +2197,7 @@ Coefficient ElementUniversalEnveloping<Coefficient>::GetKillingFormProduct(
   Coefficient result = 0;
   ElementUniversalEnveloping<Coefficient> adadAppliedToMon, tempElt;
   SemisimpleLieAlgebra* theOwner;
-  theOwner = &this->GetOwner();
+  theOwner = &this->getOwner();
   MonomialUniversalEnveloping<Coefficient> baseGen;
   for (int i = 0; i < theOwner->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(i, *theOwner);
@@ -2255,12 +2255,12 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   if (left.isEqualToZero() || right.isEqualToZero()) {
     return output.assignValue(0, theCommands);
   }
-  if (&left.GetOwner() != &right.GetOwner()) {
+  if (&left.getOwner() != &right.getOwner()) {
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> leftEltSS, rightEltSS;
   if (left.getLieAlgebraElementIfPossible(leftEltSS) && right.getLieAlgebraElementIfPossible(rightEltSS)) {
-    return output.assignValue(leftEltSS.GetOwner()->getKillingForm(leftEltSS, rightEltSS), theCommands);
+    return output.assignValue(leftEltSS.getOwner()->getKillingForm(leftEltSS, rightEltSS), theCommands);
   }
   return output.assignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
 }
@@ -2380,8 +2380,8 @@ public:
   List<Expression> output;
   List<List<std::string> > rulesNames;
   // List<List<std::string> > rulesDisplayNames;
-  HashedList<std::string, MathRoutines::HashString> rulesToBeIgnored;
-  MapList<std::string, std::string, MathRoutines::HashString> rulesDisplayNamesMap;
+  HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
+  MapList<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
   bool ComputeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
   bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
   bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);

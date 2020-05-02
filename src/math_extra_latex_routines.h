@@ -27,7 +27,7 @@ class LaTeXCrawler {
   public:
     std::string title;
     List<LaTeXCrawler::FileWithOption> filesToCrawl;
-    void AddSlidesOnTop(const List<std::string>& input);
+    void addSlidesOnTop(const List<std::string>& input);
     JSData toJSON();
     bool FromJSON(JSData& input, std::stringstream* commentsOnFailure);
     bool FromString(const std::string& input, std::stringstream* commentsOnFailure);
@@ -83,18 +83,18 @@ class LaTeXCrawler {
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
   bool flagPDFExists;
-  void AddSlidesOnTop(List<std::string>& inputSlides);
-  static std::string AdjustDisplayTitle(const std::string& input, bool isHomework);
-  bool IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure);
-  void ComputeAllowedFolders();
-  bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
-  bool ExtractFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void addSlidesOnTop(List<std::string>& inputSlides);
+  static std::string adjustDisplayTitle(const std::string& input, bool isHomework);
+  bool isInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure);
+  void computeAllowedFolders();
+  bool extractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
+  bool extractFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void crawl();
-  bool ExtractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void BuildFreecalC();
-  void CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
+  bool extractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool buildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool buildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void buildFreecalc();
+  void crawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
   bool initializeFromGlobalVariables(std::stringstream* commentsOnFailure);
   std::stringstream displayResult;
   std::stringstream errorStream;

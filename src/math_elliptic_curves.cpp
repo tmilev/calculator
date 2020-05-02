@@ -7,7 +7,7 @@ unsigned int EllipticCurveWeierstrassNormalForm::hashFunction(const EllipticCurv
   input.constantTerm.hashFunction() * someRandomPrimes[1] ;
 }
 
-bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
+bool EllipticCurveWeierstrassNormalForm::getOrderNISTCurve(
   const std::string& curveName, LargeIntegerUnsigned &output, std::stringstream* commentsOnFailure
 ) {
   if (curveName == "secp256k1") {
@@ -26,7 +26,7 @@ bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstra
 }
 
 template < >
-void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
+void ElementEllipticCurve<ElementZmodP>::makeGeneratorSecp256k1() {
   LargeIntegerUnsigned theModulo;
   theModulo.assignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
   this->xCoordinate.theModulus = theModulo;
@@ -41,12 +41,12 @@ void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
 }
 
 template < >
-bool ElementEllipticCurve<ElementZmodP>::MakeGeneratorNISTCurve(
+bool ElementEllipticCurve<ElementZmodP>::makeGeneratorNISTCurve(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ElementEllipticCurve::MakeGeneratorNISTCurve");
+  MacroRegisterFunctionWithName("ElementEllipticCurve::makeGeneratorNISTCurve");
   if (input == "secp256k1") {
-    this->MakeGeneratorSecp256k1();
+    this->makeGeneratorSecp256k1();
     return true;
   }
   if (commentsOnFailure != nullptr) {

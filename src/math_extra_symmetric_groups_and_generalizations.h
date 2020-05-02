@@ -41,7 +41,7 @@ public:
     this->flagDeallocated = true;
   }
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString() const;
 };
 
@@ -85,7 +85,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::DenseVe
 
 template <class templateVector, class templateMonomial, class Coefficient>
 template <typename somestream>
-somestream& SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::IntoStream(somestream& out) const {
+somestream& SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::intoStream(somestream& out) const {
   out << "Sparse subspace basis object for basis of rank " << this->rank;
   out << " involving monomials " << this->involvedMonomials.toStringCommaDelimited() << '\n';
   out << " with projection operator\n" << this->projectionOperator.toStringPlainText() << '\n';
@@ -95,13 +95,13 @@ somestream& SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::
 template <class templateVector, class templateMonomial, class Coefficient>
 std::string SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
 template <class templateVector, class templateMonomial, class Coefficient>
 std::ostream& operator<<(std::ostream& out, const SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>& data) {
-  return data.IntoStream(out);
+  return data.intoStream(out);
 }
 
 class Partition;
@@ -139,17 +139,17 @@ public:
   bool operator>(const Partition& right) const;
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString() const;
   std::string ToStringForArticles(
     const std::string& leftParenthesis = "[",
     const std::string& rightParenthesis = "]"
   ) const;
   friend std::ostream& operator<<(std::ostream& out, const Partition& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
   unsigned int hashFunction() const {
-    return MathRoutines::HashListInts(this->p);
+    return MathRoutines::hashListInts(this->p);
   }
   static unsigned int hashFunction(const Partition& input) {
     return input.hashFunction();
@@ -172,10 +172,10 @@ public:
   );
   List<int> TurnIntoList() const;
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString() const;
   friend std::ostream& operator<<(std::ostream& out, const Tableau& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
 };
 
@@ -278,10 +278,10 @@ public:
     return this->cycles > other.cycles;
   }
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
 };
 
@@ -294,7 +294,7 @@ class TrivialOuterAutomorphism {
   }
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out) {
+  somestream& intoStream(somestream& out) {
     out << "Identity function";
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const {
@@ -686,7 +686,7 @@ public:
   }
   std::string toString() const;
   template <typename somestream>
-  somestream& IntoStream(somestream& outstream) const;
+  somestream& intoStream(somestream& outstream) const;
 };
 std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data);
 
@@ -738,12 +738,12 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
                                         return in.hashFunction();}
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
 
   std::string toString(FormatExpressions* unused = 0) const;
 
   friend std::ostream& operator<<(std::ostream& out, const ElementHyperoctahedralGroup& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
 };*/
 
@@ -761,7 +761,7 @@ public:
   int representativeIndex;
   List<int> theElements;
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
   std::string toString() const;
   ConjugacyClassR2() {
     this->flagRepresentativeComputed = false;
@@ -1218,10 +1218,10 @@ public:
   void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, Coefficient>& rep);
   void ComputeSpechtModules();
   template <typename somestream>
-  somestream& IntoStream(somestream& out);
+  somestream& intoStream(somestream& out);
   std::string toString();
   friend std::ostream& operator<<(std::ostream& out, PermutationGroupData& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
 };
 
@@ -1258,11 +1258,11 @@ class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
 
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& intoStream(somestream& out) const;
 
   std::string toString() const;
   friend std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroup& data) {
-    return data.IntoStream(out);
+    return data.intoStream(out);
   }
 };
 */
@@ -1345,7 +1345,7 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
 }
 
 template <typename somestream>
-somestream& Partition::IntoStream(somestream& out) const {
+somestream& Partition::intoStream(somestream& out) const {
   out << this->n << ": ";
   for (int i = 0; i < this->p.size; i ++) {
     out << this->p[i];
@@ -1381,7 +1381,7 @@ void Tableau::YoungSymmetrizerAction(
 }
 
 template <typename somestream>
-somestream& Tableau::IntoStream(somestream& out) const {
+somestream& Tableau::intoStream(somestream& out) const {
   out << "[";
   for (int i = 0; i < this->t.size; i ++) {
     out << "[";
@@ -1399,7 +1399,7 @@ somestream& Tableau::IntoStream(somestream& out) const {
 }
 
 template <typename somestream>
-somestream& PermutationR2::IntoStream(somestream& out) const {
+somestream& PermutationR2::intoStream(somestream& out) const {
   out << "[";
   for (int i = 0; i < this->cycles.size; i ++) {
     out << "(";
@@ -1513,7 +1513,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesW
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup x = this->theElements[i] ^ this->generators[j];
       int xi = this->theElements.getIndex(x);
-      conjugacygraph.AddEdge(i, xi);
+      conjugacygraph.addEdge(i, xi);
     }
   }
   List<List<int> > components = conjugacygraph.DestructivelyGetConnectedComponents();
@@ -1855,7 +1855,7 @@ void FiniteGroup<elementSomeGroup>::VerifyWords() {
 /*
 template <typename elementSomeGroup>
 template <typename somestream>
-somestream& FiniteGroup<elementSomeGroup>::IntoStream(somestream& out) const {
+somestream& FiniteGroup<elementSomeGroup>::intoStream(somestream& out) const {
   out << "Finite Group with " << this->generators.size << " generators";
   if (this->haveElements)
     out << ", " << this->theElements.size << " elements";
@@ -1872,7 +1872,7 @@ somestream& FiniteGroup<elementSomeGroup>::IntoStream(somestream& out) const {
 */
 
 template <typename somestream>
-somestream& PermutationGroupData::IntoStream(somestream& out) {
+somestream& PermutationGroupData::intoStream(somestream& out) {
   if (!this->flagIsSymmetricGroup) {
     out << "Permutation Group with " << this->theGroup->theElements.size << " elements, generated by: ";
     for (int i = 0; i < this->theGroup->generators.size; i ++) {
@@ -1897,7 +1897,7 @@ somestream& PermutationGroupData::IntoStream(somestream& out) {
 template <typename elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 */
@@ -1913,12 +1913,12 @@ void PermutationGroupData::SpechtModuleOfPartition(
 /*
 template <typename elementSomeGroup>
 std::ostream& operator<<(std::ostream& out, const FiniteGroup<elementSomeGroup>& data) {
-  return data.IntoStream(out);
+  return data.intoStream(out);
 }
 */
 
 /*template <typename somestream>
-somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const {
+somestream& ElementHyperoctahedralGroup::intoStream(somestream& out) const {
   out << '[' << this->p << ',';
   for (int i = 0; i < this->s.size; i ++)
     if (this->s[i])
@@ -1931,7 +1931,7 @@ somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const {
 
 /*
 template <typename somestream>
-somestream& HyperoctahedralGroup::IntoStream(somestream& out) const {
+somestream& HyperoctahedralGroup::intoStream(somestream& out) const {
   if (this->isEntireHyperoctahedralGroup) {
     out << "Hyperoctahedral Group of rank " << this->generators[0].s.size;
   } else if (this->isEntireDn) {
@@ -1947,7 +1947,7 @@ somestream& HyperoctahedralGroup::IntoStream(somestream& out) const {
 
 template <typename elementSomeGroup>
 template <typename somestream>
-somestream& ConjugacyClassR2<elementSomeGroup>::IntoStream(somestream& out) const {
+somestream& ConjugacyClassR2<elementSomeGroup>::intoStream(somestream& out) const {
   out << "[" << this->representative << ", " << this->theElements.size << "]";
   return out;
 }
@@ -1955,13 +1955,13 @@ somestream& ConjugacyClassR2<elementSomeGroup>::IntoStream(somestream& out) cons
 template <typename elementSomeGroup>
 std::string ConjugacyClassR2<elementSomeGroup>::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
 template <typename elementSomeGroup>
 std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGroup>& data) {
-  return data.IntoStream(out);
+  return data.intoStream(out);
 }
 
 template <typename someGroup, typename Coefficient>
@@ -2033,7 +2033,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::DescribeAsDirectSum() {
 }
 
 template <typename somestream>
-somestream& HyperoctahedralGroupData::IntoStream(somestream& out) const {
+somestream& HyperoctahedralGroupData::intoStream(somestream& out) const {
   if (this->flagIsEntireHyperoctahedralGroup) {
     out << "Hyperoctahedral group with " << this->theGroup->GetSizeByFormula(*(this->theGroup)) << " elements";
   } else if (this->flagIsEntireDn) {

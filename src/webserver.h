@@ -25,7 +25,7 @@ public:
 
   JSData resultWork;
 
-  MonomialWrapper<std::string, MathRoutines::HashString> userAddress;
+  MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
   std::string cookiesApache;
@@ -50,7 +50,7 @@ public:
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   List<std::string> theMessageHeaderStrings;
-  MapList<std::string, std::string, MathRoutines::HashString> requestHeaders;
+  MapList<std::string, std::string, MathRoutines::hashString> requestHeaders;
   int ContentLength;
   int requestTypE;
   int connectedSocketID;
@@ -228,7 +228,7 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
   TransportLayerSecurity theTLS;
-  LinearCombination<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInteger> currentlyConnectedAddresses;
+  LinearCombination<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;
@@ -236,14 +236,14 @@ public:
   List<int> theListeningSockets;
   //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
-  MapList<std::string, int, MathRoutines::HashString> workerIds;
+  MapList<std::string, int, MathRoutines::hashString> workerIds;
 
-  HashedList<std::string, MathRoutines::HashString> requestsNotNeedingLogin;
+  HashedList<std::string, MathRoutines::hashString> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
-  HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
+  HashedList<std::string, MathRoutines::hashString> addressStartsInterpretedAsCalculatorRequest;
 
-  MapList<std::string, std::string, MathRoutines::HashString> MIMETypes;
+  MapList<std::string, std::string, MathRoutines::hashString> MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;

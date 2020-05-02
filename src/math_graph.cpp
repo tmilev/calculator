@@ -8,7 +8,7 @@ GraphOLD::GraphOLD(int max_vertices, int max_edges) {
   this->data.initializeFillInObject(max_vertices * max_edges, - 1);
 }
 
-void GraphOLD::AddEdge(int v1, int v2) {
+void GraphOLD::addEdge(int v1, int v2) {
   this->AddDiEdge(v1, v2);
   this->AddDiEdge(v2, v1);
 }
@@ -69,12 +69,12 @@ std::string GraphEdge::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-void GraphWeightedLabeledEdges::AddEdge(int i, int j) {
+void GraphWeightedLabeledEdges::addEdge(int i, int j) {
   GraphEdge theEdge(i, j);
   this->theEdges.addMonomial(theEdge, 1);
 }
 
-void GraphWeightedLabeledEdges::AddEdge(int i, int j, const std::string& inputLabel) {
+void GraphWeightedLabeledEdges::addEdge(int i, int j, const std::string& inputLabel) {
   GraphEdge theEdge(i, j, inputLabel);
   this->theEdges.addMonomial(theEdge, 1);
 }
@@ -108,8 +108,8 @@ bool GraphWeightedLabeledEdges:: checkConsistency() const {
   return true;
 }
 
-void GraphWeightedLabeledEdges::ComputeEdgesPerNodesNoMultiplicities() {
-  MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
+void GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities() {
+  MacroRegisterFunctionWithName("Graph::computeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
   this->checkConsistency();
@@ -118,8 +118,8 @@ void GraphWeightedLabeledEdges::ComputeEdgesPerNodesNoMultiplicities() {
   }
 }
 
-void GraphWeightedLabeledEdges::AddNodeToComponent(int nodeIndex) {
-  MacroRegisterFunctionWithName("Graph::AddNodeToComponent");
+void GraphWeightedLabeledEdges::addNodeToComponent(int nodeIndex) {
+  MacroRegisterFunctionWithName("Graph::addNodeToComponent");
   int componentIndex = this->baseNode[nodeIndex];
   if (componentIndex == - 1) {
     global.fatal << "Bad component index." << global.fatal;
@@ -147,8 +147,8 @@ void GraphWeightedLabeledEdges::AddNodeToComponent(int nodeIndex) {
   currentDistanceGroup.addOnTop(nodeIndex);
 }
 
-void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances() {
-  MacroRegisterFunctionWithName("Graph::ComputeConnectedComponentsAndBaseNodeDistances");
+void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances() {
+  MacroRegisterFunctionWithName("Graph::computeConnectedComponentsAndBaseNodeDistances");
   this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
   this->baseNode.initializeFillInObject(this->numNodes, - 1);
   List<int> theOrbit;
@@ -173,12 +173,12 @@ void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances()
   }
   this->connectedComponents.setSize(0);
   for (int i = 0; i < this->numNodes; i ++) {
-    this->AddNodeToComponent(i);
+    this->addNodeToComponent(i);
   }
 }
 
-void GraphWeightedLabeledEdges::ComputeDisplayGroups() {
-  MacroRegisterFunctionWithName("Graph::ComputeDisplayGroups");
+void GraphWeightedLabeledEdges::computeDisplayGroups() {
+  MacroRegisterFunctionWithName("Graph::computeDisplayGroups");
   int numGroups = 0;
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     numGroups += this->connectedComponents[i].size;
@@ -204,10 +204,10 @@ void GraphWeightedLabeledEdges::ComputeDisplayGroups() {
   }
 }
 
-std::string GraphWeightedLabeledEdges::GetNodePSStrings(int groupIndex, int indexInGroup) {
-  MacroRegisterFunctionWithName("Graph::GetNodePSStrings");
+std::string GraphWeightedLabeledEdges::getNodePSStrings(int groupIndex, int indexInGroup) {
+  MacroRegisterFunctionWithName("Graph::getNodePSStrings");
   std::stringstream out;
-  out << "\\rput[l](" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
+  out << "\\rput[l](" << this->getXNode(groupIndex, indexInGroup) << ", " << this->getYNode(groupIndex, indexInGroup)
   << ") " << "{\\framebox{\\parbox{0.8cm}{ ";
   int nodeIndex = this->nodeGroupsForDisplay[groupIndex][indexInGroup];
   if (nodeIndex < this->nodeLabels.size) {
@@ -219,12 +219,12 @@ std::string GraphWeightedLabeledEdges::GetNodePSStrings(int groupIndex, int inde
   return out.str();
 }
 
-double GraphWeightedLabeledEdges::GetXnode(int groupIndex, int indexInGroup) {
+double GraphWeightedLabeledEdges::getXNode(int groupIndex, int indexInGroup) {
   (void) indexInGroup;
   return groupIndex;
 }
 
-double GraphWeightedLabeledEdges::GetYnode(int groupIndex, int indexInGroup) {
+double GraphWeightedLabeledEdges::getYNode(int groupIndex, int indexInGroup) {
   double result = 0;
   if (groupIndex % 2 == 1) {
     result = indexInGroup / 2;
@@ -241,8 +241,8 @@ double GraphWeightedLabeledEdges::GetYnode(int groupIndex, int indexInGroup) {
   return result;
 }
 
-std::string GraphWeightedLabeledEdges::ToStringNodesAndEdges(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("Graph::ToStringNodesAndEdges");
+std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::toStringNodesAndEdges");
   (void) theFormat;
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
@@ -265,18 +265,18 @@ std::string GraphWeightedLabeledEdges::ToStringNodesAndEdges(FormatExpressions* 
   return out.str();
 }
 
-std::string GraphWeightedLabeledEdges::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("Graph::ToStringPsTricksEdge");
+std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::toStringPsTricksEdge");
   (void) theFormat;
   std::stringstream out;
   int startGroupIndex = this->displayGroupIndices[fromIndex];
   int startIndexInGroup = this->positionInDisplayGroup[fromIndex];
   int endGroupIndex = this->displayGroupIndices[toIndex];
   int endIndexInGroup = this->positionInDisplayGroup[toIndex];
-  double startX = this->GetXnode(startGroupIndex, startIndexInGroup);
-  double startY = this->GetYnode(startGroupIndex, startIndexInGroup);
-  double endX = this->GetXnode(endGroupIndex, endIndexInGroup);
-  double endY = this->GetYnode(endGroupIndex, endIndexInGroup);
+  double startX = this->getXNode(startGroupIndex, startIndexInGroup);
+  double startY = this->getYNode(startGroupIndex, startIndexInGroup);
+  double endX = this->getXNode(endGroupIndex, endIndexInGroup);
+  double endY = this->getYNode(endGroupIndex, endIndexInGroup);
   bool goingRight = (startX < endX);
   bool goingLeft = (startX > endX);
   if (goingRight) {
@@ -293,14 +293,14 @@ std::string GraphWeightedLabeledEdges::ToStringPsTricksEdge(int fromIndex, int t
   return out.str();
 }
 
-std::string GraphWeightedLabeledEdges::ToStringPsTricks(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("Graph::ToStringPsTricks");
-  this->ComputeEdgesPerNodesNoMultiplicities();
-  this->ComputeConnectedComponentsAndBaseNodeDistances();
-  this->ComputeDisplayGroups();
+std::string GraphWeightedLabeledEdges::toStringPsTricks(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("Graph::toStringPsTricks");
+  this->computeEdgesPerNodesNoMultiplicities();
+  this->computeConnectedComponentsAndBaseNodeDistances();
+  this->computeDisplayGroups();
   this->checkConsistency();
   std::stringstream out;
-//  out << this->ToStringNodesAndEdges(theFormat);
+//  out << this->toStringNodesAndEdges(theFormat);
   out << "<br>\\documentclass{article}<br>\n\n";
   out << "\\usepackage{pstricks}\\usepackage{lscape}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";
@@ -309,12 +309,12 @@ std::string GraphWeightedLabeledEdges::ToStringPsTricks(FormatExpressions* theFo
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++) {
     for (int j = 0; j < this->edgesPerNodeNoMultiplicities[i].size; j ++) {
-      out << this->ToStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], theFormat);
+      out << this->toStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], theFormat);
     }
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++) {
-      out << this->GetNodePSStrings(i, j);
+      out << this->getNodePSStrings(i, j);
     }
   }
   out << "\n<br>\\end{pspicture}";

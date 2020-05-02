@@ -14,9 +14,9 @@ public:
   Vectors<double> BasisProjectionPlane;
   static const int GraphicsUnitDefault = 100;
   int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
-  Vectors<double> BasisToDrawCirclesAt;
+  Vectors<double> basisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
-  MapList<std::string, List<int>, MathRoutines::HashString> frames;
+  MapList<std::string, List<int>, MathRoutines::hashString> frames;
   double ClickToleranceX;
   double ClickToleranceY;
   double centerX;
@@ -30,16 +30,16 @@ public:
   int indexStartingModifiableTextCommands;
   void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
   static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
-  void MakeMeAStandardBasis(int theDim);
+  void makeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
     this->theBilinearForm = bilinearForm;
-    this->BasisToDrawCirclesAt = draggableBasis;
+    this->basisToDrawCirclesAt = draggableBasis;
     this->BasisProjectionPlane = startingPlane;
     this->centerX = 300;
     this->centerY = 300;
     this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
-    this->ComputeProjectionsEiVectors();
+    this->computeProjectionsEiVectors();
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
     Matrix<double> tempMat;
@@ -52,15 +52,15 @@ public:
     this->initDimensions(tempMat, draggableBasis, startingPlane);
   }
   void initDimensions(int theDim);
-  int GetDimFirstDimensionDependentOperation();
-  int GetDimFromBilinearForm();
-  void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
+  int getDimensionFirstDimensionDependentOperation();
+  int getDimensionFromBilinearForm();
+  void getCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
     X1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[0]);
     Y1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[1]);
     X1 = X1 * this->GraphicsUnit + this->centerX;
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
   }
-  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1) {
+  void getCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1) {
     X1 = 0;
     Y1 = 0;
     for (int j = 0; j < input.size; j ++) {
@@ -70,7 +70,7 @@ public:
     X1 = X1 * this->GraphicsUnit + this->centerX;
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
   }
-  void GetCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2) {
+  void getCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2) {
     X1 = 0;
     X2 = 0;
     Y1 = 0;
@@ -86,8 +86,8 @@ public:
     Y1 = Y1 * this->GraphicsUnit + this->centerY;
     Y2 = Y2 * this->GraphicsUnit + this->centerY;
   }
-  void EnsureProperInitialization();
-  bool AreWithinClickTolerance(double x1, double y1, double x2, double y2) {
+  void ensureProperInitialization();
+  bool areWithinClickTolerance(double x1, double y1, double x2, double y2) {
     x1 -= x2;
     y1 -= y2;
     if (x1 < 0) {
@@ -141,12 +141,12 @@ public:
   );
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, const std::string& color, double radius);
   double getAngleFromXandY(double x, double y);
-  void ScaleToUnitLength(Vector<double>& theRoot) {
+  void scaleToUnitLength(Vector<double>& theRoot) {
     double theLength = this->theBilinearForm.scalarProduct(theRoot, theRoot);
     theLength = FloatingPoint::Sqrt(theLength);
     theRoot /= theLength;
   }
-  void RotateOutOfPlane(
+  void rotateOutOfPlane(
     std::stringstream& Logger,
     Vector<double>& input,
     Vector<double>& output,
@@ -155,9 +155,8 @@ public:
     double oldTanSquared,
     double newTanSquared
   );
-  void ModifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2);
-  void ComputeXYsFromProjectionsEisAndGraphicsUnit();
-  void ComputeProjectionsEiVectors();
+  void modifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2);
+  void computeProjectionsEiVectors();
   DrawOperations() {
     this->initDimensions(2);
     this->flagAnimatingMovingCoordSystem = false;
@@ -241,21 +240,8 @@ public:
   DrawingVariables() {
     this->initDrawingVariables();
   }
-  void SetDrawLineFunction(drawLineFunction theFunction) {
-    this->theDrawLineFunction = theFunction;
-  }
-  void SetDrawTextFunction(drawTextFunction theFunction) {
-    this->theDrawTextFunction = theFunction;
-  }
-  void SetDrawCircleFunction(drawCircleFunction theFunction) {
-    this->theDrawCircleFunction = theFunction;
-  }
-  void SetDrawClearFunction(drawClearScreenFunction theFunction) {
-    this->theDrawClearScreenFunction = theFunction;
-  }
-  int GetColorFromChamberIndex(int index);
-  static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
-  static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output);
+  int getColorFromChamberIndex(int index);
+  static void projectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output);
   static std::string GetColorHtmlFromColorIndex(int colorIndex);
   std::string GetColorPsTricksFromColorIndex(int colorIndex);
   static bool GetColorIntFromColorString(const std::string& input, int& output);

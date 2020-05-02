@@ -58,7 +58,7 @@ JSData& JSData::operator[](int i) {
 }
 
 JSData JSData::getValue(const std::string& key) {
-  int theIndex = this->GetKeyIndex(key);
+  int theIndex = this->getKeyIndex(key);
   if (theIndex != - 1) {
     return this->objects.theValues[theIndex];
   }
@@ -67,17 +67,17 @@ JSData JSData::getValue(const std::string& key) {
   return result;
 }
 
-bool JSData::HasKey(const std::string& key) const {
-  return this->GetKeyIndex(key) != - 1;
+bool JSData::hasKey(const std::string& key) const {
+  return this->getKeyIndex(key) != - 1;
 }
 
-bool JSData::HasCompositeKeyOfType(
+bool JSData::hasCompositeKeyOfType(
   const std::string& key,
   LargeIntegerUnsigned& output,
   std::stringstream* commentsOnFailure
 ) const {
   JSData container;
-  if (!this->HasCompositeKeyOfTokeN(
+  if (!this->hasCompositeKeyOfToken(
     key,
     &container,
     JSData::token::tokenLargeInteger,
@@ -95,33 +95,33 @@ bool JSData::HasCompositeKeyOfType(
   return true;
 }
 
-bool JSData::HasCompositeKeyOfType(
+bool JSData::hasCompositeKeyOfType(
   const std::string& key, std::string& output, std::stringstream* commentsOnFailure
 ) const {
   JSData container;
-  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenString, commentsOnFailure)) {
+  if (!this->hasCompositeKeyOfToken(key, &container, JSData::token::tokenString, commentsOnFailure)) {
     return false;
   }
   output = container.theString;
   return true;
 }
 
-bool JSData::HasCompositeKeyOfType(
+bool JSData::hasCompositeKeyOfType(
   const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure
 ) const {
   JSData container;
-  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenString, commentsOnFailure)) {
+  if (!this->hasCompositeKeyOfToken(key, &container, JSData::token::tokenString, commentsOnFailure)) {
     return false;
   }
   output = container.theString;
   return true;
 }
 
-bool JSData::HasCompositeKeyValueNull(const std::string &key, std::stringstream *commentsOnFailure) const {
-  return this->HasCompositeKeyOfTokeN(key, nullptr, JSData::token::tokenNull, commentsOnFailure);
+bool JSData::hasCompositeKeyValueNull(const std::string &key, std::stringstream *commentsOnFailure) const {
+  return this->hasCompositeKeyOfToken(key, nullptr, JSData::token::tokenNull, commentsOnFailure);
 }
 
-bool JSData::HasCompositeKeyOfTokeN(
+bool JSData::hasCompositeKeyOfToken(
   const std::string& key,
   JSData* whichValue,
   char targetType,
@@ -131,7 +131,7 @@ bool JSData::HasCompositeKeyOfTokeN(
   if (whichValue == nullptr) {
     whichValue = &container;
   }
-  if (!JSData::HasCompositeKey(key, whichValue, commentsOnFailure)) {
+  if (!JSData::hasCompositeKey(key, whichValue, commentsOnFailure)) {
     return false;
   }
   if (whichValue->theType != targetType) {
@@ -147,13 +147,13 @@ bool JSData::HasCompositeKeyOfTokeN(
   return true;
 }
 
-bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, std::stringstream* commentsOnFailure) const {
+bool JSData::hasCompositeKey(const std::string& inputKeys, JSData* whichValue, std::stringstream* commentsOnFailure) const {
   List<char> delimiters;
   delimiters.addOnTop('.');
   delimiters.addOnTop('[');
   delimiters.addOnTop(']');
   List<std::string> keys;
-  StringRoutines::StringSplitExcludeDelimiters(inputKeys, delimiters, keys);
+  StringRoutines::stringSplitExcludeDelimiters(inputKeys, delimiters, keys);
   const JSData* currentData = this;
   if (keys.size == 0) {
     if (commentsOnFailure != nullptr) {
@@ -192,7 +192,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       }
       return false;
     }
-    if (!currentData->HasKey(keys[i])) {
+    if (!currentData->hasKey(keys[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Key: " << keys[i]
         << " not present in: " << currentData->toString(&JSData::PrintOptions::HTML());
@@ -207,7 +207,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
   return true;
 }
 
-int JSData::GetKeyIndex(const std::string& key) const {
+int JSData::getKeyIndex(const std::string& key) const {
   return this->objects.getIndex(key);
 }
 
@@ -217,7 +217,7 @@ void JSData::setKeyValue(const std::string& key, const JSData& value) {
 
 JSData& JSData::operator[](const std::string& key) {
   this->theType = JSData::token::tokenObject;
-  return this->objects.GetValueCreate(key);
+  return this->objects.getValueCreate(key);
 }
 
 void JSData::operator=(const List<unsigned char>& other) {
@@ -309,7 +309,7 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
   return true;
 }
 
-bool JSData::IsValidElement() {
+bool JSData::isValidElement() {
   return
   this->theType == JSData::token::tokenNull ||
   this->theType == JSData::token::tokenBool ||
@@ -320,7 +320,7 @@ bool JSData::IsValidElement() {
   this->theType == JSData::token::tokenObject;
 }
 
-bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
+bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
   if (this->theType != JSData::token::tokenUnknown) {
     return true;
   }
@@ -343,7 +343,7 @@ bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
   }
   if (this->theString.size() > 0) {
     if (this->theString[0] == '-' || MathRoutines::isADigit(this->theString[0])) {
-      this->theInteger.FreeMemory();
+      this->theInteger.freeMemory();
       this->theType = JSData::token::tokenUndefined;
       Rational parser;
       if (parser.AssignStringFailureAllowed(this->theString)) {
@@ -367,17 +367,17 @@ bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool JSData::ConvertTwoByteHexToChar(
+bool JSData::convertTwoByteHexToChar(
   char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
 ) {
-  char leftHex = MathRoutines::ConvertHumanReadableHexToCharValue(inputLeft);
+  char leftHex = MathRoutines::convertHumanReadableHexToCharValue(inputLeft);
   if (leftHex < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to interpret " << inputLeft << " as a hex digit. ";
     }
     return false;
   }
-  char rightHex = MathRoutines::ConvertHumanReadableHexToCharValue(inputRight);
+  char rightHex = MathRoutines::convertHumanReadableHexToCharValue(inputRight);
   if (rightHex < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to interpret " << inputRight << " as a hex digit. ";
@@ -406,7 +406,7 @@ bool JSData::readstringConsumeFourHexAppendUnicode(
     char right = input[currentIndex];
     currentIndex ++;
     char next = 0;
-    if (!JSData::ConvertTwoByteHexToChar(left, right, next, commentsOnFailure)) {
+    if (!JSData::convertTwoByteHexToChar(left, right, next, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to read hex characters at positions "
         << currentIndex - 2 << ", " << currentIndex - 1 << ". ";
@@ -507,12 +507,12 @@ bool JSData::readstringConsumeNextCharacter(
   return true;
 }
 
-bool JSData::TokenizePrependOneDummyElement(
+bool JSData::tokenizePrependOneDummyElement(
   const std::string& input,
   List<JSData>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("JSData::TokenizePrependOneDummyElement");
+  MacroRegisterFunctionWithName("JSData::tokenizePrependOneDummyElement");
   output.setSize(0);
   output.setExpectedSize(static_cast<int>(input.size()));
   JSData emptyElt;
@@ -523,14 +523,14 @@ bool JSData::TokenizePrependOneDummyElement(
     }
   }
   for (int i = 1; i < output.size; i ++) {
-    if (!output[i].TryToComputeType(commentsOnFailure)) {
+    if (!output[i].tryToComputeType(commentsOnFailure)) {
       return false;
     }
   }
   return true;
 }
 
-bool JSData::MergeInMe(const JSData& input, std::stringstream* commentsOnFailure) {
+bool JSData::mergeInMe(const JSData& input, std::stringstream* commentsOnFailure) {
   if (
     this->theType != JSData::token::tokenObject
   ) {
@@ -557,7 +557,7 @@ bool JSData::MergeInMe(const JSData& input, std::stringstream* commentsOnFailure
       ) {
         (*this)[key] = value;
       } else {
-        if (!(*this)[key].MergeInMe(value, commentsOnFailure)) {
+        if (!(*this)[key].mergeInMe(value, commentsOnFailure)) {
           return false;
         }
       }
@@ -572,7 +572,7 @@ bool JSData::readstring(
   MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
   List<JSData> theTokenS;
-  if (!JSData::TokenizePrependOneDummyElement(json, theTokenS, commentsOnFailure)) {
+  if (!JSData::tokenizePrependOneDummyElement(json, theTokenS, commentsOnFailure)) {
     return false;
   }
   if (theTokenS.size == 1) {
@@ -596,13 +596,13 @@ bool JSData::readstring(
     //JSData& fifthToLast = theTokenS[i - 4];
     if (
       fourthToLast.theType == JSData::token::tokenOpenBrace && thirdToLast.theType == JSData::token::tokenString &&
-      secondToLast.theType == JSData::token::tokenColon && last.IsValidElement()
+      secondToLast.theType == JSData::token::tokenColon && last.isValidElement()
     ) {
       fourthToLast.objects.setKeyValue(thirdToLast.theString, last);
       readingStack.setSize(readingStack.size - 3);
       continue;
     }
-    if (secondToLast.theType == JSData::token::tokenOpenBracket && last.IsValidElement()) {
+    if (secondToLast.theType == JSData::token::tokenOpenBracket && last.isValidElement()) {
       secondToLast.theList.addOnTop(last);
       readingStack.removeLastObject();
       continue;
@@ -660,7 +660,7 @@ bool JSData::readstring(
   if (JSData::numEmptyTokensAtStart < readingStack.size) {
     *this = readingStack[JSData::numEmptyTokensAtStart];
   }
-  bool result = this->IsValidElement();
+  bool result = this->isValidElement();
   if (!result) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->toString(nullptr)
@@ -696,11 +696,11 @@ const JSData::PrintOptions& JSData::PrintOptions::HTML() {
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(
+somestream& JSData::intoStream(
   somestream& out,
   const JSData::PrintOptions* optionsIncoming
 ) const {
-  //MacroRegisterFunctionWithName("JSData::IntoStream");
+  //MacroRegisterFunctionWithName("JSData::intoStream");
   std::string whiteSpaceOuter = "";
   std::string whiteSpaceInner = "";
   JSData::PrintOptions options;
@@ -738,7 +738,7 @@ somestream& JSData::IntoStream(
       out << this->theFloat;
       return out;
     case JSData::token::tokenLargeInteger:
-      out << this->theInteger.GetElementConst().toString();
+      out << this->theInteger.getElementConst().toString();
       return out;
     case JSData::token::tokenBool:
       if (this->theBoolean == true) {
@@ -749,10 +749,10 @@ somestream& JSData::IntoStream(
       return out;
     case JSData::token::tokenString:
       if (!options.hexEncodeNonAsciiStrings) {
-        out << '"' << StringRoutines::ConvertStringToJSONString(this->theString) << '"';
+        out << '"' << StringRoutines::convertStringToJSONString(this->theString) << '"';
       } else {
-        out << '"' << StringRoutines::ConvertStringToJSONString(
-          StringRoutines::ConvertStringToHexIfNonReadable(this->theString, 0, false)
+        out << '"' << StringRoutines::convertStringToJSONString(
+          StringRoutines::convertStringToHexIfNonReadable(this->theString, 0, false)
         ) << '"';
       }
       return out;
@@ -764,7 +764,7 @@ somestream& JSData::IntoStream(
       out << "[" << newLine;
       for (int i = 0; i < this->theList.size; i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        this->theList[i].IntoStream(out, &options);
+        this->theList[i].intoStream(out, &options);
         if (i != this->theList.size - 1) {
           out << "," << newLine;
         }
@@ -779,9 +779,9 @@ somestream& JSData::IntoStream(
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        out << '"' << StringRoutines::ConvertStringToJSONString(this->objects.theKeys[i]) << '"';
+        out << '"' << StringRoutines::convertStringToJSONString(this->objects.theKeys[i]) << '"';
         out << ':';
-        this->objects.theValues[i].IntoStream(out, &options);
+        this->objects.theValues[i].intoStream(out, &options);
         if (i != this->objects.size() - 1) {
           out << "," << newLine;
         }
@@ -923,7 +923,7 @@ void JSData::reset(char inputType) {
   this->theString = "";
   this->theList.setSize(0);
   this->objects.clear();
-  this->theInteger.FreeMemory();
+  this->theInteger.freeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {
     this->theInteger.getElement().AssignInt(0);
   }
@@ -931,11 +931,11 @@ void JSData::reset(char inputType) {
 
 std::string JSData::toString(const JSData::PrintOptions* options) const {
   std::stringstream out;
-  this->IntoStream(out, options);
+  this->intoStream(out, options);
   return out.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
-  return data.IntoStream(out, nullptr);
+  return data.intoStream(out, nullptr);
 }
 

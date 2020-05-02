@@ -377,7 +377,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
 }
 
 template<class Coefficient>
-void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
+void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   HomomorphismSemisimpleLieAlgebra& theHmm,
   Selection& LeviInSmall,
   List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors,
@@ -385,7 +385,7 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   Vectors<Coefficient>* outputEigenSpace,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg");
+  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size() != 1) {
     if (comments != nullptr) {
       std::stringstream out;
@@ -411,21 +411,21 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
   InvertedLeviInSmall.InvertSelection();
-  eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.CardinalitySelection);
+  eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.cardinalitySelection);
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;
   Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
   theFinalEigenSpace.setSize(0);
-  if (InvertedLeviInSmall.CardinalitySelection == 0) {
+  if (InvertedLeviInSmall.cardinalitySelection == 0) {
     theFinalEigenSpace.makeEiBasis(this->getDimension());
   }
-  for (int i = 0; i < InvertedLeviInSmall.CardinalitySelection; i ++) {
+  for (int i = 0; i < InvertedLeviInSmall.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     MatrixTensor<Coefficient> currentOp, tempMat;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
-      tempMat = this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
+      tempMat = this->getActionGeneratorIndex(currentElt[j].theGeneratorIndex);
       tempMat *= currentElt.coefficients[j];
       currentOp += tempMat;
     }
@@ -468,12 +468,12 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   }
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
-    currentElt.makeZero(this->GetOwner());
+    currentElt.makeZero(this->getOwner());
     Vector<Coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].isEqualToZero())) {
-        tempElt.makeZero(this->GetOwner());
+        tempElt.makeZero(this->getOwner());
         tempElt.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
         currentElt += tempElt;
@@ -506,7 +506,7 @@ void ModuleSSalgebra<Coefficient>::SplitFDpartOverFKLeviRedSubalg(
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-  theReport.report("SplitFDpartOverFKLeviRedSubalg done!");
+  theReport.report("splitFDpartOverFKLeviRedSubalg done!");
   if (comments != nullptr) {
     *comments << out.str();
   }
@@ -552,7 +552,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   (void) input;
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
-  bool isFD = (theG2B3Data.selInducing.CardinalitySelection == 0);
+  bool isFD = (theG2B3Data.selInducing.cardinalitySelection == 0);
   if (isFD) {
     out << "<table border =\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td>"
     <<  "<td>$G_2\\cap b$-eigenvectors </td></tr>";
@@ -767,7 +767,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   Vector<Rational> theHW;
   std::stringstream out;
   std::stringstream latexTable;
-  bool isFD = (theg2b3data.selInducing.CardinalitySelection == 0);
+  bool isFD = (theg2b3data.selInducing.cardinalitySelection == 0);
   if (isFD) {
     out << "<table>"
     << "<tr><td>$so(7)$-highest weight</td>"
@@ -912,7 +912,7 @@ bool ElementSumGeneralizedVermas<Coefficient>::ExtractElementUE(
       return false;
     }
     tempMon = currentMon.theMonCoeffOne;
-    tempMon *= currentMon.GetOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
+    tempMon *= currentMon.getOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
     output.addMonomial(tempMon, this->coefficients[i]);
   }
   return true;
@@ -921,15 +921,15 @@ bool ElementSumGeneralizedVermas<Coefficient>::ExtractElementUE(
 bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunction> theModCopy;
-  theModCopy.MakeFromHW(
+  theModCopy.makeFromHW(
     theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, nullptr, false
   );
   theG2B3Data.resetOutputData();
   theG2B3Data.initAssumingParSelAndHmmInitted();
   theG2B3Data.SelSplittingParSel = theG2B3Data.selInducing;
   if (theG2B3Data.SelSplittingParSel.selected[0] != theG2B3Data.SelSplittingParSel.selected[2]) {
-    theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
-    theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(2);
+    theG2B3Data.SelSplittingParSel.addSelectionAppendNewIndex(0);
+    theG2B3Data.SelSplittingParSel.addSelectionAppendNewIndex(2);
   }
   Vector<Rational> splittingParSel;
   splittingParSel = theG2B3Data.SelSplittingParSel;
@@ -937,11 +937,11 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   theCommands.theObjectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
   int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
   ModuleSSalgebra<RationalFunction>& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
-  theMod.GetOwner().flagHasNilradicalOrder = true;
+  theMod.getOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
   theCommands << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
   double timeAtStart = global.getElapsedSeconds();
-  theMod.SplitFDpartOverFKLeviRedSubalg(
+  theMod.splitFDpartOverFKLeviRedSubalg(
     theG2B3Data.theHmm,
     theG2B3Data.selSmallParSel,
     &theG2B3Data.outputEigenWords,
@@ -1001,7 +1001,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   theG2B3Data.theShapovalovProducts.setSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theUEelts.setSize(theG2B3Data.g2Weights.size);
   ElementSumGeneralizedVermas<RationalFunction>& theHWV = *theG2B3Data.theEigenVectorsLevi.lastObject();
-  theHWV.MakeHWV(theMod, 1);
+  theHWV.makeHWV(theMod, 1);
   theHWV *= - 1;
   *theG2B3Data.theEigenVectorS.lastObject() = theHWV;
   Vector<RationalFunction> weightDifference;
@@ -1021,7 +1021,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     currentTensorEltLevi = theHWV;
     currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k]);
     currentTensorEltEigen = currentTensorEltLevi;
-    if (theG2B3Data.selInducing.CardinalitySelection > 0) {
+    if (theG2B3Data.selInducing.cardinalitySelection > 0) {
       for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
         weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
         if (weightDifference.isPositive()) {
@@ -1275,7 +1275,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       } else {
         out << "<td>has non-adapted string</td>";
       }
-/*      if (theMod.MakeFromHW
+/*      if (theMod.makeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
            currentHW, tempSel, 1, 0, 0, true)) {
         out << "<td>is good</td>";
@@ -1770,7 +1770,7 @@ bool Calculator::Test::ProcessOneTest(JSData& input) {
     << " is missing its expected output. " << Logger::endL;
     return false;
   }
-  Calculator::Test::OneTest& currentTest = this->commands.GetValueCreate(command);
+  Calculator::Test::OneTest& currentTest = this->commands.getValueCreate(command);
   currentTest.expectedResult = input["output"].theString;
   return true;
 }
@@ -1939,7 +1939,7 @@ bool Calculator::Test::ProcessResults() {
       theDiffer.right = HtmlRoutines::convertStringToHtmlString(currentTest.expectedResult, false);
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
       << "<td class = 'cellCalculatorResult'>";
-      currentLine << theDiffer.DifferenceHTML("actual", "expected");
+      currentLine << theDiffer.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
       currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n";
@@ -2003,7 +2003,7 @@ int Calculator::GetNumBuiltInFunctions() {
   int result = 0;
   for (int i = this->NumPredefinedAtoms - 1; i >= 0; i --) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
-    if (current.IsZeroPointer()) {
+    if (current.isZeroPointer()) {
       continue;
     }
     result += current.getElement().handlers.size + current.getElement().compositeHandlers.size;

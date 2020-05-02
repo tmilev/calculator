@@ -20,7 +20,7 @@ public:
     static const std::string calculator;
     static const std::string polynomial;
   };
-  HashedList<std::string, MathRoutines::HashString> inputs;
+  HashedList<std::string, MathRoutines::hashString> inputs;
   bool flagTestAll;
   void initialize(List<std::string>& inputArguments);
   void run();

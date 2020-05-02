@@ -8,7 +8,7 @@
 #include "math_general_implementation.h"
 
 template<>
-List<ElementWeylGroup>::Comparator* FormatExpressions::GetMonOrder<ElementWeylGroup>() {
+List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<ElementWeylGroup>() {
   return nullptr;
 }
 
@@ -1074,7 +1074,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   Vectors<Rational> EiBasis;
   EiBasis.makeEiBasis(G.getDimension());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
-  int d = inputGeneratingSimpleRoots.CardinalitySelection;
+  int d = inputGeneratingSimpleRoots.cardinalitySelection;
   this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
     for (int jj = 0; jj < d; jj ++) {
@@ -1160,7 +1160,7 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   this->GetSignCharacter(signRep.data);
   Selection sel;
   sel.initialize(this->getDimension());
-  int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.MaxSize);
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
@@ -1192,7 +1192,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.makeEiBasis(this->getDimension());
   extendedBasis.addOnTop(this->RootSystem[0]);
-  outputSubgroups.setExpectedSize(MathRoutines::TwoToTheNth(this->getDimension()));
+  outputSubgroups.setExpectedSize(MathRoutines::twoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;
   do {

@@ -145,7 +145,7 @@ class WebAPIResponse {
 class HtmlRoutines {
 public:
 public:
-  static MapList<std::string, std::string, MathRoutines::HashString>& preLoadedFiles();
+  static MapList<std::string, std::string, MathRoutines::hashString>& preLoadedFiles();
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -272,17 +272,17 @@ public:
   static bool accountOneInputPercentEncodedString(
     const std::string& fieldName,
     const std::string& fieldValue,
-    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool chopPercentEncodedString(
     const std::string& input,
-    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool chopPercentEncodedStringAppend(
     const std::string& input,
-    MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+    MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
     std::stringstream& commentsOnFailure
   );
   static void elementToStringTooltip(

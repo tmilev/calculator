@@ -11,17 +11,17 @@ public:
   tm timeLocal;
   std::string theTimeStringNonReadable;
 //  std::string GetRFC1123time();
-  void AssignLocalTime();
-  void ComputeTimeStringNonReadable();
+  void assignLocalTime();
+  void computeTimeStringNonReadable();
   std::string toString() const;
-  static std::string ToStringYMDHMS(const tm* input);
-  std::string ToStringGM() const;
-  std::string ToStringLocal() const;
+  static std::string toStringYMDHMS(const tm* input);
+  std::string toStringGM() const;
+  std::string toStringLocal() const;
   void operator=(const std::string& inputTime);
-  double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
-  double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
-  bool AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
-  static std::string ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort);
+  double subtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
+  double subtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
+  bool assignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
+  static std::string toStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort);
   TimeWrapper();
 };
 

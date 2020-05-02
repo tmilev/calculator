@@ -122,7 +122,7 @@ std::string Database::FallBack::ToStringIndices() const {
   out << this->indices.size() << " indices total.\n";
   int maxIndexedToDisplay = 3;
   for (int i = 0; i < this->indices.size(); i ++) {
-    const MapList<std::string, List<int32_t>, MathRoutines::HashString>& currentLocation =
+    const MapList<std::string, List<int32_t>, MathRoutines::hashString>& currentLocation =
     this->indices.theValues[i].locations;
     out << this->indices.theKeys[i] << ": " << currentLocation.size() << " indexed: ";
     int numberToDisplay = MathRoutines::Minimum(currentLocation.size(), maxIndexedToDisplay);
@@ -164,7 +164,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
     }
     return false;
   }
-  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
+  Database::FallBack::Index& currentIndex = indices.getValueCreate(key);
   if (query.value.theType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "At the moment, only string value queries are supported.";
@@ -209,7 +209,7 @@ bool Database::FallBack::HasCollection(
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;
   }
-  if (this->reader.HasKey(collection)) {
+  if (this->reader.hasKey(collection)) {
     return true;
   }
   if (commentsOnFailure != nullptr) {
@@ -261,7 +261,7 @@ bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailu
     return false;
   }
   for (int i = 0; i < this->knownIndices.size; i ++) {
-    this->indices.GetValueCreate(this->knownIndices[i]);
+    this->indices.getValueCreate(this->knownIndices[i]);
   }
   for (int i = 0; i < this->reader.objects.size(); i ++) {
     std::string collection = this->reader.objects.theKeys[i];
@@ -289,8 +289,8 @@ void Database::FallBack::IndexOneRecord(
     if (keyToIndexBy.theType != JSData::token::tokenString) {
       continue;
     }
-    Database::FallBack::Index& currentIndex = this->indices.GetValueCreate(indexLabel);
-    currentIndex.locations.GetValueCreate(keyToIndexBy.theString).addOnTop(row);
+    Database::FallBack::Index& currentIndex = this->indices.getValueCreate(indexLabel);
+    currentIndex.locations.getValueCreate(keyToIndexBy.theString).addOnTop(row);
   }
 }
 

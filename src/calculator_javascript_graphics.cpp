@@ -110,7 +110,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   theData["widthHTML"] = this->DefaultHtmlWidth;
   theData["heightHTML"] = this->DefaultHtmlHeight;
   theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;
-  theData["draggablePoints"] = this->theBuffer.BasisToDrawCirclesAt;
+  theData["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
   theData["bilinearForm"] = this->theBuffer.theBilinearForm;
   theData["graphicsUnit"] = this->theBuffer.GraphicsUnit;
   theData["frameLength"] = this->theBuffer.frameLengthInMilliseconds;

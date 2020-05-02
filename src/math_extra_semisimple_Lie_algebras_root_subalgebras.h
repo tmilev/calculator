@@ -586,7 +586,7 @@ public:
     if (other.owner == nullptr) {
       return false;
     }
-    return this->GetOwner() == other.GetOwner();
+    return this->getOwner() == other.getOwner();
   }
   bool checkConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const {
@@ -596,9 +596,9 @@ public:
     }
   }
   WeylGroupData& GetOwnerWeyl() const {
-    return this->GetOwner().theWeyl;
+    return this->getOwner().theWeyl;
   }
-  SemisimpleLieAlgebra& GetOwner() const {
+  SemisimpleLieAlgebra& getOwner() const {
     this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }

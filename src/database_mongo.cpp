@@ -835,7 +835,7 @@ bool Database::isDeleteable(
   const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::isDeleteable");
-  if (theEntry.theType != JSData::token::tokenObject || !theEntry.HasKey(DatabaseStrings::labelFields)) {
+  if (theEntry.theType != JSData::token::tokenObject || !theEntry.hasKey(DatabaseStrings::labelFields)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. ";
@@ -1233,7 +1233,7 @@ bool Database::FetchTable(
   Database::get().FindFromJSON(
     tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
   );
-  HashedList<std::string, MathRoutines::HashString> theLabels;
+  HashedList<std::string, MathRoutines::hashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
       theLabels.addOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
@@ -1261,7 +1261,7 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
   std::stringstream commentsOnFailure;
   if (!labels.readstring(incomingLabels, &commentsOnFailure)) {
     commentsOnFailure << "Failed to parse labels from: "
-    << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
+    << StringRoutines::stringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();
     return result;
   }

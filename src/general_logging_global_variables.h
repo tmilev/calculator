@@ -309,10 +309,10 @@ public:
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
 
-  MapList<std::string, std::string, MathRoutines::HashString> webArguments;
-  MapList<std::string, std::string, MathRoutines::HashString> CookiesToSetUsingHeaders;
+  MapList<std::string, std::string, MathRoutines::hashString> webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString> CookiesToSetUsingHeaders;
   UserCalculatorData userDefault;
-  MapList<std::string, int, MathRoutines::HashString> problemExpectedNumberOfAnswers;
+  MapList<std::string, int, MathRoutines::hashString> problemExpectedNumberOfAnswers;
 
   std::string requestType;
 
@@ -403,7 +403,7 @@ public:
       return *this;
     }
     void resetComments() {
-      this->container.FreeMemory();
+      this->container.freeMemory();
     }
     std::string getCurrentReset() {
       std::string result = this->container.getElement().str();

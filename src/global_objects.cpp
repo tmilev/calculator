@@ -15,9 +15,9 @@ std::string GlobalVariables::getDateForLogFiles() {
     return tempDate;
   }
   TimeWrapper now;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   std::stringstream out;
-  out << "GM_" << now.ToStringGM();
+  out << "GM_" << now.toStringGM();
   tempDate = out.str();
   for (unsigned i = 0; i < tempDate.size(); i ++) {
     if (tempDate[i] == ' ') {
@@ -29,14 +29,14 @@ std::string GlobalVariables::getDateForLogFiles() {
 
 std::string GlobalVariables::getTimeGM() {
   TimeWrapper now;
-  now.AssignLocalTime();
-  return now.ToStringGM();
+  now.assignLocalTime();
+  return now.toStringGM();
 }
 
 std::string GlobalVariables::getTimeLocal() {
   TimeWrapper now;
-  now.AssignLocalTime();
-  return now.ToStringLocal();
+  now.assignLocalTime();
+  return now.toStringLocal();
 }
 
 void InitializeGlobalObjects() {

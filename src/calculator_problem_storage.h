@@ -21,7 +21,7 @@ public:
   std::string syntacticRole;
   std::string content;
   std::string tag;
-  MapList<std::string, std::string, MathRoutines::HashString> properties;
+  MapList<std::string, std::string, MathRoutines::hashString> properties;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
   List<std::string> tagKeysWithoutValue;
@@ -93,7 +93,7 @@ public:
   std::string commandsSolutionOnly;
   std::string commandsNoEnclosureAnswerOnGiveUpOnly;
   List<SyntacticElementHTML> solutionElements;
-  MapList<std::string, std::string, MathRoutines::HashString> properties;
+  MapList<std::string, std::string, MathRoutines::hashString> properties;
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;
@@ -135,8 +135,8 @@ public:
 
 class ProblemDataAdministrative {
 public:
-  MapList<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
-  MapList<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
+  MapList<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
+  MapList<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
   bool getWeightFromCourse(
     const std::string& theCourseNonURLed,
     Rational& output,
@@ -165,7 +165,7 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapList<std::string, Answer, MathRoutines::HashString> theAnswers;
+  MapList<std::string, Answer, MathRoutines::hashString> theAnswers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
   void addEmptyAnswerIdOnTop(const std::string& inputAnswerId);
@@ -202,15 +202,15 @@ public:
 class TopicElement;
 class UserCalculator : public UserCalculatorData {
 public:
-  MapList<std::string, ProblemData, MathRoutines::HashString> theProblemData;
+  MapList<std::string, ProblemData, MathRoutines::hashString> theProblemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   void computeExpectedNumberOfAnswersPerProblem();
   void computePointsEarned(
-    const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
-    MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
+    const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+    MapList<std::string, TopicElement, MathRoutines::hashString>* theTopics,
     std::stringstream& commentsOnFailure
   );
   void setProblemData(const std::string& problemName, const ProblemData& inputData);

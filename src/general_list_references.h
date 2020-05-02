@@ -164,8 +164,8 @@ void ListReferences<Object>::allocateElements(int newSize) {
     this->theReferences[i] = (new Object);
   }
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += newSize - oldReferencesSize;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter += newSize - oldReferencesSize;
+  GlobalStatistics::checkPointerCounters();
 #endif
 }
 
@@ -174,8 +174,8 @@ void ListReferences<Object>::killAllElements() {
   for (int i = 0; i < this->theReferences.size; i ++) {
     delete this->theReferences[i];
 #ifdef AllocationLimitsSafeguard
-    ParallelComputing::GlobalPointerCounter --;
-    ParallelComputing::CheckPointerCounters();
+    GlobalStatistics::globalPointerCounter --;
+    GlobalStatistics::checkPointerCounters();
 #endif
     this->theReferences[i] = 0;
   }

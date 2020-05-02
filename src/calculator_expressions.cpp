@@ -47,7 +47,7 @@ Expression operator-(const Expression& left, const Expression& right) {
 
 template < >
 List<Expression>::Comparator*
-FormatExpressions::GetMonOrder<Expression>() {
+FormatExpressions::getMonomialOrder<Expression>() {
   return nullptr;
 }
 
@@ -1121,8 +1121,8 @@ bool Expression::convertInternally<double>(Expression& output) const {
 }
 //end Expression::convertToType specializations.
 
-bool Expression::CheckConsistencyRecursively() const {
-  MacroRegisterFunctionWithName("Expression::CheckConsistencyRecursively");
+bool Expression::checkConsistencyRecursively() const {
+  MacroRegisterFunctionWithName("Expression::checkConsistencyRecursively");
   this->checkConsistency();
   for (int i = 0; i < this->children.size; i ++) {
     (*this)[i].checkConsistency();
@@ -1334,13 +1334,13 @@ bool Expression::startsWith(int theOp, int N) const {
   return (*this)[0].theData == theOp;
 }
 
-bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
-  MacroRegisterFunctionWithName("Expression::GetExpressionLeafs");
+bool Expression::getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
+  MacroRegisterFunctionWithName("Expression::getExpressionLeafs");
   if (this->owner == nullptr) {
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:")) {
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::getExpressionLeafs:")) {
     return false;
   }
   if (this->isBuiltInType() || this->isAtom()) {
@@ -1348,7 +1348,7 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (!((*this)[i].GetExpressionLeafs(outputAccumulateLeafs))) {
+    if (!((*this)[i].getExpressionLeafs(outputAccumulateLeafs))) {
       return false;
     }
   }
@@ -1361,7 +1361,7 @@ bool Expression::getBoundVariables(HashedList<Expression>& outputAccumulateBound
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
   if (this->isBuiltInType()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
@@ -1379,7 +1379,7 @@ bool Expression::getBoundVariables(HashedList<Expression>& outputAccumulateBound
   return true;
 }
 
-bool Expression::AllowedAsFreeVariableAtom(const std::string &input) const {
+bool Expression::allowedAsFreeVariableAtom(const std::string &input) const {
   return
     input != "="              &&
     input != ">"              &&
@@ -1403,13 +1403,13 @@ bool Expression::AllowedAsFreeVariableAtom(const std::string &input) const {
   ;
 }
 
-bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
-  MacroRegisterFunctionWithName("Expression::GetFreeVariables");
+bool Expression::getFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
+  MacroRegisterFunctionWithName("Expression::getFreeVariables");
   if (this->owner == nullptr) {
     return true;
   }
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:")) {
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
   if (this->isBuiltInType()) { //<- this may need to be rewritten as some built in types will store free variables in their context.
@@ -1422,7 +1422,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   if (this->isOperation(&atomName)) {
     bool doAddExpression = !this->isKnownFunctionWithComplexRange();
     if (doAddExpression) {
-      doAddExpression = this->AllowedAsFreeVariableAtom(atomName);
+      doAddExpression = this->allowedAsFreeVariableAtom(atomName);
     }
     if (doAddExpression && excludeNamedConstants) {
       if (this->owner->knownDoubleConstants.contains(*this)) {
@@ -1435,7 +1435,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (!((*this)[i].GetFreeVariables(outputAccumulateFreeVariables, excludeNamedConstants))) {
+    if (!((*this)[i].getFreeVariables(outputAccumulateFreeVariables, excludeNamedConstants))) {
       return false;
     }
   }
@@ -1510,7 +1510,7 @@ bool Expression::isDifferentialOneFormOneVariable(
   return true;
 }
 
-bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const {
+bool Expression::containsAsSubExpressionNoBuiltInTypes(const Expression& input) const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -1521,24 +1521,24 @@ bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) 
   if (*this == input) {
     return true;
   }
-  if (!this->IsSuitableForRecursion()) {
+  if (!this->isSuitableForRecursion()) {
     return false;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].ContainsAsSubExpressionNoBuiltInTypes(input)) {
+    if ((*this)[i].containsAsSubExpressionNoBuiltInTypes(input)) {
       return true;
     }
   }
   return false;
 }
 
-bool Expression::ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
+bool Expression::containsAsSubExpressionNoBuiltInTypes(int inputAtom) const {
   if (this->owner == nullptr) {
     return false;
   }
   Expression theE;
   theE.makeAtom(inputAtom, *this->owner);
-  return this->ContainsAsSubExpressionNoBuiltInTypes(theE);
+  return this->containsAsSubExpressionNoBuiltInTypes(theE);
 }
 
 bool Expression::isContext() const {
@@ -1614,7 +1614,7 @@ bool Expression::isEqualToOne() const {
   return false;
 }
 
-bool Expression::IsEqualToTwo() const {
+bool Expression::isEqualToTwo() const {
   int theInt;
   if (this->isSmallInteger(&theInt)) {
     return theInt == 2;
@@ -1622,7 +1622,7 @@ bool Expression::IsEqualToTwo() const {
   return false;
 }
 
-bool Expression::IsEqualToHalf() const {
+bool Expression::isEqualToHalf() const {
   Rational theRat;
   if (this->isRational(&theRat)) {
     Rational half(1, 2);
@@ -1631,8 +1631,8 @@ bool Expression::IsEqualToHalf() const {
   return false;
 }
 
-bool Expression::IsKnownToBeNonNegative() const {
-  MacroRegisterFunctionWithName("Expression::IsKnownToBeNonNegative");
+bool Expression::isKnownToBeNonNegative() const {
+  MacroRegisterFunctionWithName("Expression::isKnownToBeNonNegative");
   double theDouble = 0;
   if (this->evaluatesToDouble(&theDouble)) {
     return theDouble >= 0;
@@ -1657,7 +1657,7 @@ bool Expression::IsKnownToBeNonNegative() const {
   return false;
 }
 
-bool Expression::IsNegativeConstant() const {
+bool Expression::isNegativeConstant() const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -1675,8 +1675,8 @@ bool Expression::IsNegativeConstant() const {
   return tempD < 0;
 }
 
-bool Expression::IsEqualToMOne() const {
-  MacroRegisterFunctionWithName("Expression::IsEqualToMOne");
+bool Expression::isEqualToMOne() const {
+  MacroRegisterFunctionWithName("Expression::isEqualToMOne");
   if (!this->isConstantNumber()) {
     return false;
   }
@@ -1805,13 +1805,13 @@ bool Expression::isConstantNumber() const {
   return false;
 }
 
-bool Expression::IsAlgebraicRadical() const {
-  MacroRegisterFunctionWithName("Expression::IsAlgebraicRadical");
+bool Expression::isAlgebraicRadical() const {
+  MacroRegisterFunctionWithName("Expression::isAlgebraicRadical");
   if (this->owner == nullptr) {
     return false;
   }
   RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsAlgebraicRadical: ")) {
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::isAlgebraicRadical: ")) {
     return false;
   }
   if (this->isOfType<Rational>() || this->isOfType<AlgebraicNumber>()) {
@@ -1824,7 +1824,7 @@ bool Expression::IsAlgebraicRadical() const {
     this->startsWith(this->owner->opDivide())
   ) {
     for (int i = 1; i < this->size(); i ++) {
-      if (!(*this)[i].IsAlgebraicRadical()) {
+      if (!(*this)[i].isAlgebraicRadical()) {
         return false;
       }
     }
@@ -1834,13 +1834,13 @@ bool Expression::IsAlgebraicRadical() const {
     if (!(*this)[2].isRational()) {
       return false;
     }
-    return (*this)[1].IsAlgebraicRadical();
+    return (*this)[1].isAlgebraicRadical();
   }
   if (this->startsWith(this->owner->opSqrt(), 3)) {
     if (!(*this)[1].isRational()) {
       return false;
     }
-    return (*this)[2].IsAlgebraicRadical();
+    return (*this)[2].isAlgebraicRadical();
   }
   return false;
 }
@@ -2058,12 +2058,12 @@ bool Expression::operator>(const Expression& other) const {
     bool result = leftCoeff > rightCoeff;
     return result;
   }
-  bool result = leftMon.GreaterThanNoCoeff(rightMon);
+  bool result = leftMon.greaterThanNoCoefficient(rightMon);
   return result;
 }
 
-bool Expression::GreaterThanNoCoeff(const Expression& other) const {
-  MacroRegisterFunctionWithName("Expression::GreaterThanNoCoeff");
+bool Expression::greaterThanNoCoefficient(const Expression& other) const {
+  MacroRegisterFunctionWithName("Expression::greaterThanNoCoefficient");
   if (this->isOfType<Rational>() && other.isOfType<Rational>()) {
     return this->getValue<Rational>() > other.getValue<Rational>();
   }
@@ -2117,12 +2117,12 @@ bool Expression::toStringBuiltIn<std::string>(
   if (!useQuotes) {
     if (isFinal) {
       out
-      << StringRoutines::ConvertStringToCalculatorDisplay(input.getValue<std::string>());
+      << StringRoutines::convertStringToCalculatorDisplay(input.getValue<std::string>());
     } else {
       out << HtmlRoutines::convertStringToHtmlString(input.getValue<std::string>(), false);
     }
   } else {
-    out << "\"" << StringRoutines::ConvertStringToJavascriptString(input.getValue<std::string>()) << "\"";
+    out << "\"" << StringRoutines::convertStringToJavascriptString(input.getValue<std::string>()) << "\"";
   }
   return true;
 }
@@ -2946,7 +2946,7 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
 }
 
 std::string Expression::toStringAllSlidersInExpression() const {
-  HashedList<std::string, MathRoutines::HashString> boxNames;
+  HashedList<std::string, MathRoutines::hashString> boxNames;
   if (!this->HasInputBoxVariables(&boxNames)) {
     return "";
   }
@@ -2956,7 +2956,7 @@ std::string Expression::toStringAllSlidersInExpression() const {
   ) {
     this->owner->theObjectContainer.resetSliders();
   }
-  MapReferences<std::string, InputBox, MathRoutines::HashString>&
+  MapReferences<std::string, InputBox, MathRoutines::hashString>&
   theSliders = this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {
@@ -3000,8 +3000,8 @@ std::string Expression::toStringAllSlidersInExpression() const {
   return out.str();
 }
 
-JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const {
-  MacroRegisterFunctionWithName("Expression::ToJSData");
+JSData Expression::toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const {
+  MacroRegisterFunctionWithName("Expression::toJSData");
   JSData result, input, output;
   input.theType = JSData::token::tokenArray;
   output.theType = JSData::token::tokenArray;
@@ -3095,7 +3095,7 @@ bool Expression::toStringTimes(
       mustHaveTimes = true;
     }
     if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
-      if (StringRoutines::StringBeginsWith(secondE, "\\frac")) {
+      if (StringRoutines::stringBeginsWith(secondE, "\\frac")) {
         mustHaveTimes = true;
       }
     }
@@ -3245,7 +3245,7 @@ bool Expression::toStringPower(
   const Expression& secondE = input[2];
   if (firstE.startsWith(- 1, 2)) {
     bool shouldProceed = firstE[0].isAtomWhoseExponentsAreInterpretedAsFunction() &&
-    !secondE.IsEqualToMOne() && secondE.isRational();
+    !secondE.isEqualToMOne() && secondE.isRational();
     if (
       shouldProceed && firstE[0].isOperationGiven(commands.opLog()) &&
       commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
@@ -3392,7 +3392,7 @@ bool Expression::toStringEndStatement(
       }
       out << "</td><td class =\"cellCalculatorResult\">";
       if ((*this)[i].isOfType<std::string>() && isFinal) {
-        currentOutput = StringRoutines::ConvertStringToCalculatorDisplay(currentE.getValue<std::string>());
+        currentOutput = StringRoutines::convertStringToCalculatorDisplay(currentE.getValue<std::string>());
       } else if ((
           currentE.hasType<Plot> () ||
           currentE.isOfType<SemisimpleSubalgebras>() ||
@@ -3643,7 +3643,7 @@ bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
     return false;
   }
   std::string theArg = input[1].toString(theFormat);
-  if (!StringRoutines::StringBeginsWith(theArg, "\\left|")) {
+  if (!StringRoutines::stringBeginsWith(theArg, "\\left|")) {
     out << "\\ln \\left|" << theArg << "\\right|";
   } else {
     out << "\\ln " << theArg;
@@ -4817,7 +4817,7 @@ bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMulti
   if (theMultiplicands.size == 0) {
     return this->assignValue(1, owner);
   }
-  return this->MakeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
+  return this->makeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
 }
 
 bool Expression::makeSum(Calculator& owner, const List<Expression>& theSummands) {
@@ -4825,11 +4825,11 @@ bool Expression::makeSum(Calculator& owner, const List<Expression>& theSummands)
   if (theSummands.size == 0) {
     return this->assignValue(0, owner);
   }
-  return this->MakeXOXOdotsOX(owner, owner.opPlus(), theSummands);
+  return this->makeXOXOdotsOX(owner, owner.opPlus(), theSummands);
 }
 
-bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
-  MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
+bool Expression::makeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
+  MacroRegisterFunctionWithName("Expression::makeOXdotsX");
   if (theOpands.size == 0) {
     global.fatal << "zero opands not allowed at this point. " << global.fatal;
   }
@@ -4841,7 +4841,7 @@ bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression
   for (int i = theOpands.size - 2; i >= 0; i --) {
     this->MakeXOX(owner, theOp, theOpands[i], *this);
   }
-  this->CheckConsistencyRecursively();
+  this->checkConsistencyRecursively();
   return true;
 }
 
@@ -4925,10 +4925,10 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
   return this->addChildOnTop(right);
 }
 
-bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgument) {
+bool Expression::makeOX(Calculator& owner, int theOp, const Expression& opArgument) {
   if (&opArgument == this) {
     Expression copyE = opArgument;
-    return this->MakeOX(owner, theOp, copyE);
+    return this->makeOX(owner, theOp, copyE);
   }
   this->reset(owner);
   this->theData = owner.opLisT();
@@ -4941,7 +4941,7 @@ bool Expression::sequencefy() {
   if (this->isSequenceNElements()) {
     return true;
   }
-  return this->MakeOX(*this->owner, this->owner->opSequence(), *this);
+  return this->makeOX(*this->owner, this->owner->opSequence(), *this);
 }
 
 bool Expression::operator==(int other) const {
@@ -5001,7 +5001,7 @@ std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
           if (MathRoutines::isADigit(secondUTF8String[0])) {
             mustHaveTimes = true;
           }
-          if (StringRoutines::StringBeginsWith(secondString, "\\frac")) {
+          if (StringRoutines::stringBeginsWith(secondString, "\\frac")) {
             mustHaveTimes = true;
           }
         }

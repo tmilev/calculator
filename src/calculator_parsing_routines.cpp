@@ -342,10 +342,10 @@ void Calculator::initialize() {
 
 bool Calculator::CheckPredefinedFunctionNameRepetitions() {
   MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctionNameRepetitions");
-  HashedList<std::string, MathRoutines::HashString> ruleIds;
+  HashedList<std::string, MathRoutines::hashString> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
-    if (current.IsZeroPointer()) {
+    if (current.isZeroPointer()) {
       continue;
     }
     List<Function>* currentHandlers = &current.getElement().handlers;
@@ -1379,7 +1379,7 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
     global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
   }
-  List<std::string>& theSplit = this->predefinedWordSplits.GetValueCreate(currentVar);
+  List<std::string>& theSplit = this->predefinedWordSplits.getValueCreate(currentVar);
   SyntacticElement newElt;
   this->PopTopSyntacticStack();
   *this << "Predefined symbol replacement: replacing "

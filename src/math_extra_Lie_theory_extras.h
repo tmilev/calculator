@@ -149,25 +149,25 @@ public:
   std::string prepareReport();
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
-  std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
-  void GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
-  void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
-  void InitTheMaxComputation();
-  void ComputeQPsFromChamberComplex();
-  void GetSubFromIndex(
+  std::string prepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
+  void getProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
+  void splitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
+  void initTheMaxComputation();
+  void computeQPsFromChamberComplex();
+  void getSubstitutionFromIndex(
     PolynomialSubstitution<Rational>& outputSub,
     Matrix<LargeInteger>& outputMat,
     LargeIntegerUnsigned& ouputDen,
     int theIndex
   );
-  void SortMultiplicities();
-  void GetSubFromNonParamArray(
+  void sortMultiplicities();
+  void getSubstitutionFromNonParametricArray(
     Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams
   );
   void initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input);
-  void TransformToWeylProjectiveStep1();
-  void TransformToWeylProjectiveStep2();
-  void TransformToWeylProjective(int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal);
+  void transformToWeylProjectiveStep1();
+  void transformToWeylProjectiveStep2();
+  void transformToWeylProjective(int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal);
 };
 
 template<class Coefficient>
@@ -195,9 +195,9 @@ public:
     const MonomialUniversalEnveloping<Coefficient>& other,
     ElementUniversalEnvelopingOrdered<Coefficient>& output
   );
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
-  void MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
+  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
+  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
+  void multiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
   void makeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void makeZero(const Coefficient& theRingZero, SemisimpleLieAlgebraOrdered& theOwner);
   bool modOutFDRelationsExperimental(

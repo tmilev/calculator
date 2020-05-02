@@ -12,12 +12,12 @@ public:
   List<int> elements;
   List<bool> selected;
   int MaxSize;
-  int CardinalitySelection;
-  void AddSelectionAppendNewIndex(int index);
+  int cardinalitySelection;
+  void addSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
   void RemoveSelection(int index) {
     this->selected[index] = false;
-    this->ComputeIndicesFromSelection();
+    this->computeIndicesFromSelection();
   }
   void MakeFullSelection(int inputMaxSize) {
     this->initialize(inputMaxSize);
@@ -28,13 +28,13 @@ public:
       this->elements[i] = i;
       this->selected[i] = true;
     }
-    this->CardinalitySelection = this->MaxSize;
+    this->cardinalitySelection = this->MaxSize;
   }
   bool IsSubset(const Selection& other) const {
     if (this->MaxSize != other.MaxSize) {
       return false;
     }
-    for (int i = 0; i < this->CardinalitySelection; i ++) {
+    for (int i = 0; i < this->cardinalitySelection; i ++) {
       if (!other.selected[this->elements[i]]) {
         return false;
       }
@@ -42,7 +42,7 @@ public:
     return true;
   }
   void initialize(int maxNumElements);
-  void ComputeIndicesFromSelection();
+  void computeIndicesFromSelection();
   void initNoMemoryAllocation();
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const Selection& input) {
@@ -52,27 +52,25 @@ public:
   void incrementSelection();
   bool IncrementReturnFalseIfPastLast() {
     this->incrementSelection();
-    if (this->CardinalitySelection == 0) {
+    if (this->cardinalitySelection == 0) {
       return false;
     }
     return true;
   }
   int SelectionToIndex();
-  void ExpandMaxSize();
+  void expandMaxSize();
   int GetNumCombinationsFixedCardinality(int theCardinality) {
-    return MathRoutines::NChooseK(this->MaxSize, theCardinality);
+    return MathRoutines::nChooseK(this->MaxSize, theCardinality);
   }
-  void ShrinkMaxSize();
-  void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
+  void shrinkMaxSize();
+  void makeSubSelection(Selection& theSelection, Selection& theSubSelection);
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input);
   void InvertSelection() {
     for (int i = 0; i < this->MaxSize; i ++) {
       this->selected[i] = !this->selected[i];
     }
-    this->ComputeIndicesFromSelection();
+    this->computeIndicesFromSelection();
   }
   void operator=(const Selection& right);
   void operator=(const Vector<Rational>& other);
@@ -80,10 +78,10 @@ public:
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
   bool operator==(const Selection& right) const {
-    if (this->MaxSize != right.MaxSize || this->CardinalitySelection != right.CardinalitySelection) {
+    if (this->MaxSize != right.MaxSize || this->cardinalitySelection != right.cardinalitySelection) {
       return false;
     }
-    for (int i = 0; i < this->CardinalitySelection; i ++) {
+    for (int i = 0; i < this->cardinalitySelection; i ++) {
       if (this->selected[this->elements[i]] != right.selected[this->elements[i]]) {
         return false;
       }
@@ -95,7 +93,7 @@ public:
   Selection(const Vector<Rational>& other) {
     this->operator=(other);
   }
-  Selection(const Selection& other): MaxSize(0), CardinalitySelection(0) {
+  Selection(const Selection& other): MaxSize(0), cardinalitySelection(0) {
     *this = other;
   }
 };
@@ -266,7 +264,7 @@ public:
   int DesiredSubsetSize;
   LargeInteger totalCombinations() {
     LargeInteger result;
-    MathRoutines::NChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
+    MathRoutines::nChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
     return result;
   }
   void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
@@ -346,16 +344,16 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   }
   int theDimension = this->theObjects[0].size;
   output.setSize(theDimension);
-  bufferMat.initialize(theSelection.CardinalitySelection + 2, theDimension);
+  bufferMat.initialize(theSelection.cardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
-    for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+    for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
       bufferMat.elements[i][j].Assign(this->theObjects[theSelection.elements[i]].theObjects[j]);
     }
-    bufferMat.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.theObjects[j]);
-    bufferMat.elements[theSelection.CardinalitySelection + 1][j].Assign(ExtraRoot2.theObjects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection][j].Assign(ExtraRoot1.theObjects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection + 1][j].Assign(ExtraRoot2.theObjects[j]);
   }
   bufferMat.gaussianEliminationByRows(0, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1) {
+  if (NonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
   bufferMat.nonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -366,7 +364,7 @@ template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrix(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output
 ) {
-  output.initialize(OutputDimension, theSelection.CardinalitySelection);
+  output.initialize(OutputDimension, theSelection.cardinalitySelection);
   this->selectionToMatrix(theSelection, OutputDimension, output, 0);
 }
 
@@ -374,7 +372,7 @@ template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrixAppend(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
-  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
     Vector<Coefficient>& tempRoot = this->theObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
@@ -386,7 +384,7 @@ template <typename Coefficient>
 void Vectors<Coefficient>::selectionToMatrix(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
-  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
     Vector<Rational>& tempRoot = this->theObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
@@ -415,7 +413,7 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1) {
+  if (NonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
   bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -431,14 +429,14 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
 ) const {
   Selection NonPivotPoints;
   output.setSize(theDimension);
-  bufferMatrix.initialize(theSelection.CardinalitySelection, theDimension);
-  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+  bufferMatrix.initialize(theSelection.cardinalitySelection, theDimension);
+  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       bufferMatrix.elements[i][j] = this->theObjects[theSelection.elements[i]].theObjects[j];
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1) {
+  if (NonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
   bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -460,16 +458,16 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   output.setSize(theDimension);
   Matrix<Coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
-  bufferMatrix.initialize(theSelection.CardinalitySelection + 1, theDimension);
+  bufferMatrix.initialize(theSelection.cardinalitySelection + 1, theDimension);
   matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
-    for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+    for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
       bufferMatrix.elements[i][j].Assign(this->theObjects[theSelection.elements[i]][j]);
     }
-    bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
+    bufferMatrix.elements[theSelection.cardinalitySelection][j].Assign(ExtraRoot[j]);
   }
   bufferMatrix.gaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection != 1) {
+  if (NonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
   bufferMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -505,7 +503,7 @@ int Vectors<Coefficient>::GetRankOfSpanOfElements(Matrix<Coefficient>* buffer, S
     bufferSelection = &emergencySelBuf.getElement();
   }
   this->gaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
-  return (theDimension - bufferSelection->CardinalitySelection);
+  return (theDimension - bufferSelection->cardinalitySelection);
 }
 
 template <class Coefficient>
@@ -513,7 +511,7 @@ bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputTheLin
   Matrix<Coefficient> tempMat;
   Selection nonPivotPoints;
   this->getLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
-  if (nonPivotPoints.CardinalitySelection == 0) {
+  if (nonPivotPoints.cardinalitySelection == 0) {
     return false;
   }
   tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
@@ -553,7 +551,7 @@ bool Vectors<Coefficient>::LinearAlgebraForVertexComputation(
   }
   int theDimension = this->theObjects[0].size;
   output.setSize(theDimension);
-  if (theDimension - 1 != theSelection.CardinalitySelection) {
+  if (theDimension - 1 != theSelection.cardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;
   }
   buffer.initialize(theDimension - 1, theDimension);
@@ -563,7 +561,7 @@ bool Vectors<Coefficient>::LinearAlgebraForVertexComputation(
     }
   }
   buffer.gaussianEliminationByRows(0, NonPivotPointsBuffer);
-  if (NonPivotPointsBuffer.CardinalitySelection == 1) {
+  if (NonPivotPointsBuffer.cardinalitySelection == 1) {
     buffer.nonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
     return true;
   }

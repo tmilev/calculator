@@ -481,7 +481,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
 
 bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
-  MapList<std::string, std::string, MathRoutines::HashString> newlyFoundArgs;
+  MapList<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (!HtmlRoutines::chopPercentEncodedStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments)) {
@@ -532,7 +532,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
     argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs =
   global.webArguments;
   if (!HtmlRoutines::chopPercentEncodedStringAppend(input, theArgs, argumentProcessingFailureComments)) {
     return false;
@@ -552,7 +552,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     return true;
   }
 
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   UserCalculatorData& theUser = global.userDefault;
   theUser.username = HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("username"), true
@@ -1382,7 +1382,7 @@ int WebWorker::ProcessFile() {
   << this->HeaderFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
-    if (StringRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
+    if (StringRoutines::stringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
       theHeader << WebAPI::HeaderCacheControl << "\r\n";
       break;
     }
@@ -1904,7 +1904,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
 
 bool WebWorker::ProcessRedirectAwayFromWWW() {
   std::string addressNoWWW;
-  if (!StringRoutines::StringBeginsWith(
+  if (!StringRoutines::stringBeginsWith(
     global.hostWithPort, "www.", &addressNoWWW
   )) {
     return false;
@@ -2033,7 +2033,7 @@ int WebWorker::ServeClient() {
   if (global.server().addressStartsInterpretedAsCalculatorRequest.contains(this->addressComputed)) {
     global.requestType = this->addressComputed;
     std::string correctedRequest;
-    if (StringRoutines::StringBeginsWith(global.requestType, "/", &correctedRequest)) {
+    if (StringRoutines::stringBeginsWith(global.requestType, "/", &correctedRequest)) {
       global.requestType = correctedRequest;
       comments << "Address was interpretted as request, so your request was set to: "
       << global.requestType << ". ";
@@ -2542,8 +2542,8 @@ std::string WebServer::ToStringConnectionSummary() {
   MacroRegisterFunctionWithName("WebServer::ToStringConnectionSummary");
   std::stringstream out;
   TimeWrapper now;
-  now.AssignLocalTime();
-  out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
+  now.assignLocalTime();
+  out << "<b>Server status.</b> Server time: local: " << now.toStringLocal() << ", gm: " << now.toStringGM() << ".<br>";
   int64_t timeRunninG = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
     timeRunninG = global.getElapsedMilliseconds();
@@ -2553,7 +2553,7 @@ std::string WebServer::ToStringConnectionSummary() {
   out
   << (double(timeRunninG) / 1000)
   << " seconds = "
-  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(timeRunninG / 1000, false, false)
+  << TimeWrapper::toStringSecondsToDaysHoursSecondsString(timeRunninG / 1000, false, false)
   << " web server uptime. ";
   int64_t approxNumPings = timeRunninG / this->WebServerPingIntervalInSeconds / 1000;
   if (approxNumPings < 0) {
@@ -2773,7 +2773,7 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
     }
   }
   for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++) {
-    if (StringRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i])) {
+    if (StringRoutines::stringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i])) {
       return false;
     }
   }
@@ -2824,7 +2824,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     global << Logger::red << "Detail: "
     << "too many connections handler start. " << Logger::endL;
   }
-  MonomialWrapper<std::string, MathRoutines::HashString>
+  MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
     this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
@@ -2879,7 +2879,7 @@ void WebServer::MarkChildNotInUse(int childIndex) {
   this->currentlyConnectedAddresses.SubtractMonomial(
     worker.userAddress, 1
   );
-  this->workerIds.RemoveKey(worker.workerId);
+  this->workerIds.removeKey(worker.workerId);
   worker.workerId = "";
 }
 
@@ -3558,7 +3558,7 @@ bool WebWorker::runOnce() {
     return this->failReceiveReturnFalse();
   }
   if (this->numberOfReceivesCurrentConnection > 0) {
-    global.calculator().FreeMemory();
+    global.calculator().freeMemory();
     global.calculator().getElement().initialize();
     global.comments.resetComments();
     global << Logger::blue << "Created new calculator for connection: "
@@ -3904,7 +3904,7 @@ std::string MainFlags::test = "test";
 class ArgumentAnalyzer {
 public:
   int currentIndex;
-  HashedList<std::string, MathRoutines::HashString> commandLineConfigurations;
+  HashedList<std::string, MathRoutines::hashString> commandLineConfigurations;
   bool processOneArgument();
   bool setServer();
   bool setTest();
@@ -4044,7 +4044,7 @@ void WebServer::initializeMainHashes() {
     global.externalCommandReturnOutput("git rev-parse HEAD")
   );
   for (unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++) {
-    if (!MathRoutines::IsAHexDigit(global.buildHeadHashWithServerTime[i])) {
+    if (!MathRoutines::isHexDigit(global.buildHeadHashWithServerTime[i])) {
       global.buildHeadHashWithServerTime = "x";
       break;
     }
@@ -4151,7 +4151,7 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
 }
 
 void WebServer::initializeMainAll() {
-  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
+  GlobalStatistics::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->initializeMainHashes();
   FileOperations::initializeFoldersULTRASensitive();
   FileOperations::initializeFoldersSensitive();

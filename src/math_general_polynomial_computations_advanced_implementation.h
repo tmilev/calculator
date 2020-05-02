@@ -561,7 +561,7 @@ void GroebnerBasisComputation<Coefficient>::getSubstitutionFromPartialSolutionSe
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getSubstitutionFromPartialSolutionSerreLikeSystem");
   outputSub.makeIdentitySubstitution(this->systemSolution.getElement().size);
-  for (int i = 0; i < this->solutionsFound.getElement().CardinalitySelection; i ++) {
+  for (int i = 0; i < this->solutionsFound.getElement().cardinalitySelection; i ++) {
     outputSub[this->solutionsFound.getElement().elements[i]] = this->systemSolution.getElement()[
       this->solutionsFound.getElement().elements[i]
     ];
@@ -664,14 +664,14 @@ template <class Coefficient>
 int GroebnerBasisComputation<Coefficient>::getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem) {
   Selection varSel;
   this->getVariablesToSolveFor(inputSystem, varSel);
-  if (varSel.CardinalitySelection == 0) {
+  if (varSel.cardinalitySelection == 0) {
     return - 1;
   }
   int championIndex = varSel.elements[0];
   int championImprovement = GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
     championIndex, inputSystem
   );
-  for (int i = 1; i < varSel.CardinalitySelection; i ++) {
+  for (int i = 1; i < varSel.cardinalitySelection; i ++) {
     if (
       GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
         varSel.elements[i], inputSystem
@@ -746,7 +746,7 @@ template <class Coefficient>
 int GroebnerBasisComputation<Coefficient>::getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input) {
   Selection theSel;
   GroebnerBasisComputation<Coefficient>::getVariablesToSolveFor(input, theSel);
-  return theSel.CardinalitySelection;
+  return theSel.cardinalitySelection;
 }
 
 template <class Coefficient>
@@ -757,11 +757,11 @@ void GroebnerBasisComputation<Coefficient>::getVariablesToSolveFor(const List<Po
     NumVars = MathRoutines::Maximum(NumVars, input[i].minimalNumberOfVariables());
   }
   output.initialize(NumVars);
-  for (int i = 0; i < input.size && output.CardinalitySelection < output.MaxSize; i ++) {
-    for (int j = 0; j < input[i].size() && output.CardinalitySelection < output.MaxSize; j ++) {
-      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.CardinalitySelection < output.MaxSize; k ++) {
+  for (int i = 0; i < input.size && output.cardinalitySelection < output.MaxSize; i ++) {
+    for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.MaxSize; j ++) {
+      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.MaxSize; k ++) {
         if (input[i][j](k) != 0) {
-          output.AddSelectionAppendNewIndex(k);
+          output.addSelectionAppendNewIndex(k);
         }
       }
     }
@@ -1161,7 +1161,7 @@ void GroebnerBasisComputation<Coefficient>::solveSerreLikeSystem(List<Polynomial
     }
   }
   if (this->flagSystemSolvedOverBaseField) {
-    if (this->solutionsFound.getElement().CardinalitySelection != this->solutionsFound.getElement().MaxSize) {
+    if (this->solutionsFound.getElement().cardinalitySelection != this->solutionsFound.getElement().MaxSize) {
       for (int i = 0; i < this->solutionsFound.getElement().MaxSize; i ++) {
         if (!this->solutionsFound.getElement().selected[i]) {
           this->setSerreLikeSolutionIndex(i, 0);
@@ -1212,7 +1212,7 @@ void GroebnerBasisComputation<Coefficient>::setSerreLikeSolutionIndex(
     global.fatal << "This a programming error: attempting to set "
     << "value to a variable whose value has already been computed. " << global.fatal;
   }
-  this->solutionsFound.getElement().AddSelectionAppendNewIndex(theIndex);
+  this->solutionsFound.getElement().addSelectionAppendNewIndex(theIndex);
 }
 
 template<class Coefficient>

@@ -29,7 +29,7 @@ void WebServer::ComputeActiveWorkerId() {
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
   WebWorker& worker = this->getActiveWorker();
   if (worker.workerId != "") {
-    this->workerIds.RemoveKey(worker.workerId);
+    this->workerIds.removeKey(worker.workerId);
   }
   worker.workerId = Crypto::convertListUnsignedCharsToHex(incomingId);
   this->workerIds.setKeyValue(worker.workerId, this->activeWorker);

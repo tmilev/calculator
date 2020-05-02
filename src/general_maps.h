@@ -20,7 +20,7 @@ public:
   bool contains(const key& inputKey) const {
     return this->getIndex(inputKey) != - 1;
   }
-  void RemoveKey(const key& theKey) {
+  void removeKey(const key& theKey) {
     int theIndex = this->theKeys.getIndex(theKey);
     if (theIndex == - 1) {
       return;
@@ -42,7 +42,7 @@ public:
     }
     return this->theValues[theIndex];
   }
-  value& GetValueCreate(const key& input) {
+  value& getValueCreate(const key& input) {
     int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
@@ -52,7 +52,7 @@ public:
     }
     return this->theValues[theIndex];
   }
-  value& GetValueCreateNoInit(const key& input) {
+  value& getValueCreateNoInit(const key& input) {
     int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
@@ -93,7 +93,7 @@ public:
     return out.str();
   }
   inline value& operator[](const key& index) {
-    return this->GetValueCreate(index);
+    return this->getValueCreate(index);
   }
 };
 
@@ -103,48 +103,4 @@ template <class key, class value, unsigned int hashFunction(const key&) = key::h
 using MapReferences = MapTemplate<ListReferences<value>, key, value, hashFunction>;
 template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
 using MapList = MapTemplate<List<value>, key, value, hashFunction>;
-
-/*
-template <class value, class key, unsigned int hashFunction(const key&)=key::hashFunction>
-class MapReferences
-{
-public:
-  HashedList<key, hashFunction> theKeys;
-  ListReferences<value> theValues;
-  int getIndex(const key& input) const {
-    return this->theKeys.getIndex(input);
-  }
-  bool contains(const key& input) const {
-    return this->getIndex(input) != - 1;
-  }
-  value& GetValueCreateIfNotPresent(const key& input) {
-    int theIndex = this->theKeys.getIndex(input);
-    if (theIndex == - 1) {
-      theIndex = this->theKeys.size;
-      this->theKeys.addOnTop(input);
-      this->theValues.setSize(this->theValues.size + 1);
-    }
-    return this->theValues[theIndex];
-  }
-  void SetValue(const value& inputValue, const key& inputKey) {
-    if (this->contains(inputKey)) {
-      this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
-      return;
-    }
-    this->theValues.addOnTop(inputValue);
-    this->theKeys.addOnTop(inputKey);
-  }
-  void setExpectedSize(int theSize) {
-    this->theKeys.setExpectedSize(theSize);
-    this->theValues.setExpectedSize(theSize);
-  }
-  void clear() {
-    this->theKeys.clear();
-    this->theValues.setSize(0);
-  }
-  value& operator[](int i) const {
-    return this->theValues[i];
-  }
-};
-*/
 #endif

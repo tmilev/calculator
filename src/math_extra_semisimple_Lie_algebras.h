@@ -356,7 +356,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
   }
   void checkNonZeroOwner() const {
     this->checkConsistency();
-    if (this->GetOwner() == 0) {
+    if (this->getOwner() == 0) {
       global.fatal << "This is a programming error: CharacterSemisimpleLieAlgebraModule has no owner semisimple Lie algebra, "
       << "which is not allowed at by the calling function. " << global.fatal;
     }
@@ -397,7 +397,7 @@ class CharacterSemisimpleLieAlgebraModule : public LinearCombination<Weight<Coef
     return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, true);
   }
   void DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars) const;
-  SemisimpleLieAlgebra* GetOwner() const {
+  SemisimpleLieAlgebra* getOwner() const {
     if (this->size() == 0) {
       global.fatal << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << global.fatal;
     }

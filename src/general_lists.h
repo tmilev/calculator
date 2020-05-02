@@ -228,11 +228,11 @@ public:
     result *= b;
     return result;
   }
-  static int TwoToTheNth(int n);
+  static int twoToTheNth(int n);
   static bool isALatinLetter(char input);
   static bool isADigit(const std::string& input, int* whichDigit = nullptr);
   static bool hasDecimalDigitsOnly(const std::string& input);
-  static bool IsAHexDigit(char digitCandidate);
+  static bool isHexDigit(char digitCandidate);
   static bool isADigit(char theChar, int* whichDigit = nullptr);
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
@@ -248,10 +248,10 @@ public:
     void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
   );
 
-  static char ConvertHumanReadableHexToCharValue(char input);
-  static void NChooseK(int n, int k, LargeInteger& result);
-  static int NChooseK(int n, int k);
-  static int Factorial(int n);
+  static char convertHumanReadableHexToCharValue(char input);
+  static void nChooseK(int n, int k, LargeInteger& result);
+  static int nChooseK(int n, int k);
+  static int factorial(int n);
   static inline double E() {
     return 2.718281828459;
   }
@@ -263,7 +263,7 @@ public:
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
-  static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
+  static int binomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
   template <class Coefficient, typename theIntegerType>
   static void raiseToPower(
@@ -319,17 +319,17 @@ public:
     result.append(")");
     return result;
   }
-  static double ReducePrecision(double x);
+  static double reducePrecision(double x);
   static unsigned int HashDouble(const double& input);
-  static unsigned int HashVectorDoubles(const Vector<double>& input);
-  static unsigned int HashListDoubles(const List<double>& input);
-  static unsigned int HashListInts(const List<int>& input);
-  static unsigned int HashListUnsignedChars(const List<unsigned char>& input);
-  static unsigned int HashListStrings(const List<std::string>& input);
+  static unsigned int hashVectorDoubles(const Vector<double>& input);
+  static unsigned int hashListDoubles(const List<double>& input);
+  static unsigned int hashListInts(const List<int>& input);
+  static unsigned int hashListUnsignedChars(const List<unsigned char>& input);
+  static unsigned int hashListStrings(const List<std::string>& input);
   inline static unsigned int IntUnsignIdentity(const int& input) {
     return static_cast<unsigned>(input);
   }
-  static unsigned int HashString(const std::string& x);
+  static unsigned int hashString(const std::string& x);
   static unsigned int HashChar(const char& x) {
     return static_cast<unsigned int>(x);
   }
@@ -502,8 +502,8 @@ void ListLight<Object>::setSize(int theSize) {
   }
   if (theSize == 0) {
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->size;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->size;
+  GlobalStatistics::checkPointerCounters();
 #endif
     this->size = 0;
     delete [] this->theObjects;
@@ -512,8 +512,8 @@ void ListLight<Object>::setSize(int theSize) {
   }
   Object* newArray = new Object[theSize];
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += theSize;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter += theSize;
+  GlobalStatistics::checkPointerCounters();
 #endif
   int copyUpTo = this->size;
   if (this->size > theSize) {
@@ -524,8 +524,8 @@ void ListLight<Object>::setSize(int theSize) {
   }
   delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->size;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->size;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->theObjects = newArray;
   this->size = theSize;
@@ -541,8 +541,8 @@ template <class Object>
 ListLight<Object>::~ListLight() {
   delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->size;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->size;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->theObjects = 0;
 }
@@ -656,7 +656,7 @@ private:
     this->actualSize = 0;
     this->size = 0;
     this->flagDeallocated = false;
-    MacroIncrementCounter(ParallelComputing::NumListsCreated);
+    MacroIncrementCounter(GlobalStatistics::numListsCreated);
   }
   int actualSize;
 public:
@@ -1584,7 +1584,7 @@ public:
     if (HS == static_cast<unsigned>(this->theHashedArrays.size)) {
       return;
     }
-    MacroIncrementCounter(ParallelComputing::NumHashResizes);
+    MacroIncrementCounter(GlobalStatistics::numHashResizes);
     List<int> emptyList; //<-empty list has size 0
     this->theHashedArrays.initializeFillInObject(HS, emptyList);
     if (this->size > 0) {
@@ -2210,8 +2210,8 @@ void List<Object>::releaseMemory() {
   this->size = 0;
   this->theObjects = 0;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->actualSize;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->actualSize;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->actualSize = 0;
 }
@@ -2220,8 +2220,8 @@ template <class Object>
 List<Object>::~List() {
   delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->actualSize;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->actualSize;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->size = 0;
   this->actualSize = 0;
@@ -2234,7 +2234,7 @@ void List<Object>::expandArrayOnTop(int increase) {
   if (increase <= 0) {
     return;
   }
-  MacroIncrementCounter(ParallelComputing::NumListResizesTotal);
+  MacroIncrementCounter(GlobalStatistics::numListResizesTotal);
   Object* newArray = 0;
   try {
     newArray = new Object[this->actualSize + increase];
@@ -2245,8 +2245,8 @@ void List<Object>::expandArrayOnTop(int increase) {
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += this->actualSize + increase;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter += this->actualSize + increase;
+  GlobalStatistics::checkPointerCounters();
 #endif
   for (int i = 0; i < this->size; i ++) {
     newArray[i] = this->theObjects[i];
@@ -2259,8 +2259,8 @@ void List<Object>::expandArrayOnTop(int increase) {
   // on our list exactly between the two instructions above
   // we are safe with this implementation.
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter -= this->actualSize;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter -= this->actualSize;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->actualSize += increase;
 }

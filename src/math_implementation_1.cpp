@@ -361,7 +361,7 @@ bool LittelmannPath::generateOrbit(
       result = false;
       break;
     } else {
-      for (int j = 0; j < parabolicSelectionSelectedAreInLeviPart.CardinalitySelection; j ++) {
+      for (int j = 0; j < parabolicSelectionSelectedAreInLeviPart.cardinalitySelection; j ++) {
         bool found = true;
         currentPath = hashedOutput[lowestNonExplored];
         currentSequence = outputOperators[lowestNonExplored];
@@ -540,7 +540,7 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   basisCoordForm.reserve(theElements.size);
   Selection selectedBasis;
   outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
-  for (int i = 0; i < selectedBasis.CardinalitySelection; i ++) {
+  for (int i = 0; i < selectedBasis.cardinalitySelection; i ++) {
     outputTheBasis.addOnTop(theElements.theObjects[selectedBasis.elements[i]]);
   }
   Matrix<Coefficient> bufferMat;
@@ -580,8 +580,8 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyMinusTransposeAutoOnMe() {
   MonomialUniversalEnveloping<Coefficient> tempMon;
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
-  int numPosRoots = this->GetOwner().GetNumPosRoots();
-  int theRank = this->GetOwner().getRank();
+  int numPosRoots = this->getOwner().GetNumPosRoots();
+  int theRank = this->getOwner().getRank();
   Coefficient theCoeff;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->theObjects[i];
@@ -600,7 +600,7 @@ bool ElementUniversalEnveloping<Coefficient>::ApplyMinusTransposeAutoOnMe() {
       } else if (theGenerator >= numPosRoots + theRank) {
         theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
       }
-      tempMon.MultiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
+      tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
       if (thePower % 2 == 1) {
         theCoeff *= - 1;
       }
@@ -696,8 +696,8 @@ std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
   List<ElementUniversalEnveloping<Coefficient> > theOrbit;
   theOrbit.reserve(1000);
   ElementUniversalEnveloping<Coefficient> theElt;
-  int theDim = this->GetOwner().getRank();
-  int numPosRoots = this->GetOwner().GetNumPosRoots();
+  int theDim = this->getOwner().getRank();
+  int numPosRoots = this->getOwner().GetNumPosRoots();
   theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
@@ -733,7 +733,7 @@ bool ElementUniversalEnveloping<Coefficient>::ConvertToRationalCoeff(ElementUniv
       if (!currentMon.Powers[j].isConstant(tempRat)) {
         return false;
       }
-      tempMon.MultiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
+      tempMon.multiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
     }
     output.addMonomial(tempMon, Coefficient(1));
   }
@@ -752,7 +752,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     for (int j = 0; j < currentV.size; j ++) {
       if (!currentV[j].isEqualToZero() && this->selInducing.selected[j]) {
         this->generatorsSmallSub.removeLastObject();
-        this->selSmallParSel.AddSelectionAppendNewIndex(i);
+        this->selSmallParSel.addSelectionAppendNewIndex(i);
         break;
       }
     }
@@ -773,7 +773,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
     bool isInNilradical = false;
-    for (int k = 0; k < this->selInducing.CardinalitySelection; k ++) {
+    for (int k = 0; k < this->selInducing.cardinalitySelection; k ++) {
       if (!currentWeight[this->selInducing.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;
@@ -789,7 +789,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   for (int i = 0; i < numG2NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theSmallWeyl.RootSystem[i];
     bool isInNilradical = false;
-    for (int k = 0; k < this->selSmallParSel.CardinalitySelection; k ++) {
+    for (int k = 0; k < this->selSmallParSel.cardinalitySelection; k ++) {
       if (!currentWeight[this->selSmallParSel.elements[k]].isEqualToZero()) {
         isInNilradical = true;
         break;

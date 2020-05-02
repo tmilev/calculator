@@ -37,7 +37,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   std::fstream theFile;
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
-  fileName << "defaultOutput" << MathRoutines::HashString(fileContent);
+  fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
   if (!FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, global.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
   )) {
@@ -109,9 +109,9 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
 }
 
 template <class Coefficient>
-bool ModuleSSalgebra<Coefficient>::IsNotInParabolic(int theGeneratorIndex) {
-  Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
-  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
+bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int theGeneratorIndex) {
+  Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
     if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
       return true;
     }
@@ -120,9 +120,9 @@ bool ModuleSSalgebra<Coefficient>::IsNotInParabolic(int theGeneratorIndex) {
 }
 
 template <class Coefficient>
-bool ModuleSSalgebra<Coefficient>::IsNotInLevi(int theGeneratorIndex) {
-  Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
-  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++) {
+bool ModuleSSalgebra<Coefficient>::isNotInLevi(int theGeneratorIndex) {
+  Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
       return true;
     }
@@ -131,15 +131,15 @@ bool ModuleSSalgebra<Coefficient>::IsNotInLevi(int theGeneratorIndex) {
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
   ElementUniversalEnveloping<RationalFunction>& output,
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
-  this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
+  this->getElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
   RationalFunction tempRF;
   output.makeZero(*this->theAlgebras, this->indexAlgebra);
   MonomialUniversalEnveloping<RationalFunction> tempMon;
@@ -150,22 +150,22 @@ void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
   }
   for (int i = 0; i < eltsNilrad.size; i ++) {
     tempRF.makeOneLetterMonomial(i + varShift, 1);
-    tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+    tempMon.multiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.makeOne();
   output.addMonomial(tempMon, tempRF);
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
   ElementUniversalEnveloping<Polynomial<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
-  this->GetElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
+  this->getElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
@@ -176,7 +176,7 @@ void ModuleSSalgebra<Coefficient>::GetGenericUnMinusElt(
   }
   for (int i = 0; i < eltsNilrad.size; i ++) {
     tempRF.makeMonomial(i + varShift, 1, 1);
-    tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+    tempMon.multiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.makeOne();
   output.addMonomial(tempMon, tempRF);
@@ -389,10 +389,10 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(FormatExpressions* 
 }
 
 template <class Coefficient>
-bool ModuleSSalgebra<Coefficient>::GetActionEulerOperatorPart(
+bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
   const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra::GetActionEulerOperatorPart");
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getActionEulerOperatorPart");
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.makeOne();
@@ -411,18 +411,18 @@ bool ModuleSSalgebra<Coefficient>::GetActionEulerOperatorPart(
 }
 
 template <class Coefficient>
-bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
+bool ModuleSSalgebra<Coefficient>::getActionGenVermaModuleAsDiffOperator(
   ElementSemisimpleLieAlgebra<Rational>& inputElt,
   QuasiDifferentialOperator<Rational>& output,
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
+  MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::getActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   List<int> indicesNilrad;
-  this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
+  this->getElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
-  this->GetGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
+  this->getGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
   result.assignElementLieAlgebra(inputElt, *this->owner, 1);
   theGenElt.simplify();
   result *= theGenElt;
@@ -448,7 +448,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
       if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
         return false;
       }
-      tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
+      tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
       tempMT.makeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
         if (tempMat1.coefficients[k].expressionType == RationalFunction::typeRationalFunction) {
@@ -476,7 +476,7 @@ bool ModuleSSalgebra<Coefficient>::GetActionGenVermaModuleAsDiffOperator(
       }
     }
     for (int l = 0; l < theCoeff.size(); l ++) {
-      if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution)) {
+      if (!this->getActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution)) {
         return false;
       }
       weylPartSummand = exponentContribution;
@@ -580,15 +580,15 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   for (int i = 0; i < theHws.size; i ++) {
     ModuleSSalgebra<RationalFunction>& theMod = theMods[i];
     tempV = theHws[i];
-    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
+    if (!theMod.makeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
       return output.makeError("Failed to create module.", theCommands);
     }
     if (i == 0) {
-      theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
+      theMod.getElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.makeOne();
       Pzero.makeZero();
-      theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
+      theMod.getGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
       theWeylFormat.weylAlgebraLetters.setSize(numStartingVars + elementsNegativeNilrad.size);
       theUEformat.polynomialAlphabet.setSize(numStartingVars + elementsNegativeNilrad.size);
@@ -657,7 +657,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       currentTime = global.getElapsedSeconds();
       currentAdditions = Rational::TotalAdditions();
       currentMultiplications = Rational::TotalMultiplications();
-      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
+      theMod.getActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
       totalAdditions += Rational::TotalAdditions() - currentAdditions;
       totalMultiplications += Rational::TotalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
@@ -767,7 +767,7 @@ bool Calculator::innerHWVCommon(
   }
   ModuleSSalgebra<RationalFunction>& theMod = theMods[indexOfModule];
   if (!theMod.flagIsInitialized) {
-    bool isGood = theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
+    bool isGood = theMod.makeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
       theCommands << theMod.toString();
     }
@@ -775,11 +775,11 @@ bool Calculator::innerHWVCommon(
       return output.makeError("Error while generating highest weight module. See comments for details. ", theCommands);
     }
   }
-  if (&theMod.GetOwner() != owner) {
+  if (&theMod.getOwner() != owner) {
     global.fatal << "This is a programming error: module has owner that is not what it should be. " << global.fatal;
   }
-  theElt.MakeHWV(theMod, RFOne);
-  if (&theElt.GetOwnerSS() != owner) {
+  theElt.makeHWV(theMod, RFOne);
+  if (&theElt.getOwnerSemisimple() != owner) {
     global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
@@ -804,7 +804,7 @@ bool Calculator::CheckOperationHandlers() {
   MacroRegisterFunctionWithName("Calculator::CheckOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
-    if (current.IsZeroPointer()) {
+    if (current.isZeroPointer()) {
       continue;
     }
     current.getElement().checkConsistency();
@@ -1065,11 +1065,11 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   return output.assignValue(result, theCommands);
 }
 
-bool Expression::CheckInitializationRecursively() const {
-  MacroRegisterFunctionWithName("Expression::CheckInitializationRecursively");
+bool Expression::checkInitializationRecursively() const {
+  MacroRegisterFunctionWithName("Expression::checkInitializationRecursively");
   this->checkInitialization();
   for (int i = 0; i < this->children.size; i ++) {
-    (*this)[i].CheckInitializationRecursively();
+    (*this)[i].checkInitializationRecursively();
   }
   return true;
 }
@@ -1082,7 +1082,7 @@ bool Expression::checkInitialization() const {
   return true;
 }
 
-bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames) const {
+bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames) const {
   MacroRegisterFunctionWithName("Expression::HasInputBoxVariables");
   if (this->owner == nullptr) {
     return false;
@@ -1259,7 +1259,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
         if ((*left)[1] == (*right)[1]) {
           bool isGood = (*left)[2].isInteger() || (*right)[2].isInteger();
           if (!isGood) {
-            isGood = (*left)[1].IsKnownToBeNonNegative();
+            isGood = (*left)[1].isKnownToBeNonNegative();
           }
           if (!isGood) {
             continue;
@@ -1392,10 +1392,10 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   output.setChildAtomValue(0, theCommands.opDefine());
   ////
   if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
+    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().isHWV()) {
       MonomialGeneralizedVerma<RationalFunction>& theElt =
       withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
-      theElt.GetOwner().highestWeightVectorNotation = theNotation.toString();
+      theElt.getOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }
   return true;
@@ -1717,7 +1717,7 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
     return false;
   }
   bool isGood = false;
-  if (input[1][1].IsKnownToBeNonNegative()) {
+  if (input[1][1].isKnownToBeNonNegative()) {
     isGood = true;
   }
   if (input[2].isInteger()) {
@@ -1758,8 +1758,8 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
   return false;
 }
 
-bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
-  MacroRegisterFunctionWithName("Expression::MakeXOXOdotsOX");
+bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
+  MacroRegisterFunctionWithName("Expression::makeXOXOdotsOX");
   if (input.size == 0) {
     global.fatal
     << "This is a programming error: cannot "
@@ -2034,8 +2034,8 @@ bool Expression::operator==(const Expression& other) const {
   return this->theData == other.theData && this->children == other.children;
 }
 
-bool Expression::IsEqualToMathematically(const Expression& other) const {
-  MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
+bool Expression::isEqualToMathematically(const Expression& other) const {
+  MacroRegisterFunctionWithName("Expression::isEqualToMathematically");
   if (this->owner == nullptr && other.owner == nullptr) {
     return this->theData == other.theData;
   }
@@ -2084,7 +2084,7 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
     return this->theData == other.theData;
   }
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].IsEqualToMathematically(other[i])) {
+    if (!(*this)[i].isEqualToMathematically(other[i])) {
       return false;
     }
   }
@@ -2106,22 +2106,22 @@ Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNa
   this->namedRules.getValueNoFail(inputNamedRule);
   const MemorySaving<Calculator::OperationHandlers>& currentOperation =
   this->operations.getValueNoFail(current.containerOperation);
-  if (currentOperation.IsZeroPointer()) {
+  if (currentOperation.isZeroPointer()) {
     global.fatal << "Named rule " << inputNamedRule
     << " registered with operation " << current.containerOperation
     << " but the operation has no handlers. " << global.fatal;
   }
   if (current.isComposite) {
-    return currentOperation.GetElementConst().compositeHandlers[current.index];
+    return currentOperation.getElementConst().compositeHandlers[current.index];
   }
-  return currentOperation.GetElementConst().handlers[current.index];
+  return currentOperation.getElementConst().handlers[current.index];
 }
 
 int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
   int result = this->operations.getIndex(theOpName);
   if (result == - 1) {
     result = this->operations.size();
-    this->operations.GetValueCreate(theOpName);
+    this->operations.getValueCreate(theOpName);
   }
   return result;
 }
@@ -2136,7 +2136,7 @@ void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
     global.fatal << "This is a programming error: operation "
     << theOpName << " already created. " << global.fatal;
   }
-  this->operations.GetValueCreate(theOpName);
+  this->operations.getValueCreate(theOpName);
 }
 
 Function::Function() {
@@ -2189,7 +2189,7 @@ void Calculator::addOperationBinaryInnerHandlerWithTypes(
   int indexOp = this->operations.getIndex(theOpName);
   if (indexOp == - 1) {
     indexOp = this->operations.size();
-    this->operations.GetValueCreate(theOpName);
+    this->operations.getValueCreate(theOpName);
   }
   Function innerFunction(
     *this,
@@ -2262,7 +2262,7 @@ void Calculator::addOperationHandler(
   int indexOp = this->operations.getIndex(theOpName);
   if (indexOp == - 1) {
     indexOp = this->operations.size();
-    this->operations.GetValueCreate(theOpName);
+    this->operations.getValueCreate(theOpName);
   }
   int indexParentOpThatBansHandler = this->operations.getIndex(parentOpThatBansHandler);
   Function theFun(
@@ -2571,13 +2571,13 @@ JSData Calculator::toJSONPerformance() {
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
-  << (ParallelComputing::NumListsCreated - static_cast<unsigned>(this->NumListsStart))
-  << ", total: " << ParallelComputing::NumListsCreated;
+  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->NumListsStart))
+  << ", total: " << GlobalStatistics::numListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (ParallelComputing::NumListResizesTotal - static_cast<unsigned>(this->NumListResizesStart))
-  << ", total: " << ParallelComputing::NumListResizesTotal
-  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes - static_cast<unsigned>(this->NumHashResizesStart))
-  << ", total: " << ParallelComputing::NumHashResizes;
+  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->NumListResizesStart))
+  << ", total: " << GlobalStatistics::numListResizesTotal
+  << "<br> # hash resizing: computation: " << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->NumHashResizesStart))
+  << ", total: " << GlobalStatistics::numHashResizes;
   if (Rational::TotalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
     << Rational::TotalSmallAdditions - static_cast<unsigned long long>(this->NumSmallAdditionsStart)
@@ -2765,7 +2765,7 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 
 SemisimpleSubalgebras& ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::getSemisimpleSubalgebrasCreateIfNotPresent");
-  SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
+  SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.getValueCreateNoInit(input);
   return currentSAs;
 }
 
@@ -2775,7 +2775,7 @@ SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const Dyn
   if (!this->semisimpleLieAlgebras.contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.GetValueCreateNoInit(input);
+  SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
   if (needToInit) {
     this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
     theLA.theWeyl.MakeFromDynkinType(input);
@@ -2862,8 +2862,8 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   if (this->theDoubles.size != 1) {
     global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<std::string, MathRoutines::HashString> theStrings;
-  // HashedListReferences<std::string, MathRoutines::HashString> ExpressionNotation;
+  // HashedListReferences<std::string, MathRoutines::hashString> theStrings;
+  // HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   // HashedListReferences<Expression> ExpressionWithNotation;
   // HashedListReferences<LittelmannPath> theLSpaths;
   // HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -2873,8 +2873,8 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   // ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   // ListReferences<Plot> thePlots;
   // List<bool> userInputBoxSliderDisplayed;
-  // MapReferences<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
-  // MapReferences<std::string, std::string, MathRoutines::HashString> graphicsScripts;
+  // MapReferences<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  // MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   // AlgebraicClosureRationals theAlgebraicClosure;
   if (this->theAlgebraicNumbers.size != 0) {
     global.fatal << "Algebraic numbers expected to be empty, have: " << this->theAlgebraicNumbers.size << " elements instead. " << global.fatal;
@@ -3019,7 +3019,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   if (output.isError()) {
     return true;
   }
-  if (tempSel.CardinalitySelection > 0) {
+  if (tempSel.cardinalitySelection > 0) {
     return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
@@ -3046,7 +3046,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   if (output.isError()) {
     return true;
   }
-  if (tempSel.CardinalitySelection > 0) {
+  if (tempSel.cardinalitySelection > 0) {
     return output.makeError("Failed to extract highest weight. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;

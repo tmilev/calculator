@@ -1583,16 +1583,16 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "IsAlgebraicRadical",
+    "isAlgebraicRadical",
     CalculatorFunctions::innerIsAlgebraicRadical,
     "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
-    "IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
-    "IsAlgebraicRadical(\\sqrt{x}); "
-    "IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
+    "isAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
+    "isAlgebraicRadical(\\sqrt{x}); "
+    "isAlgebraicRadical(\\sqrt{\\pi + e + 1})",
     "CalculatorFunctions::innerIsAlgebraicRadical",
-    "IsAlgebraicRadical",
+    "isAlgebraicRadical",
     innerStandard
   );
   this->addOperationHandler(

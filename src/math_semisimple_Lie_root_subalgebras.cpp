@@ -83,13 +83,13 @@ void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
         outputBasis1[j] = theEigenSpace[0][j].Re;
         outputBasis2[j] = theEigenSpace[0][j].Im;
       }
-      tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     } else if (coxeterNumber <= 2 && theEigenSpace.size > 1) {
       for (int j = 0; j < theDimension; j ++) {
         outputBasis1[j] = theEigenSpace[0][j].Re;
         outputBasis2[j] = theEigenSpace[1][j].Re;
       }
-      tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     }
   }
 }
@@ -133,7 +133,7 @@ void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   }
   for (int i = 0; i < this->Modules.size; i ++) {
     if (this->Modules[i].size == 1) {
-      this->CentralizerKmods.AddSelectionAppendNewIndex(i);
+      this->CentralizerKmods.addSelectionAppendNewIndex(i);
       if (!this->WeightsModulesPrimalSimple[i][0].isEqualToZero()) {
         this->CentralizerRoots.addOnTop(this->WeightsModulesPrimalSimple[i][0]);
         this->SimpleBasisCentralizerRoots.addOnTop(this->WeightsModulesPrimalSimple[i][0]);
@@ -313,7 +313,7 @@ void RootSubalgebra::GeneratePossibleNilradicalsRecursive(
     if (RecursionDepth > - 1) {
       counters[RecursionDepth] ++;
     }
-    PauseMutex.SafePointDontCallMeFromDestructors();
+    PauseMutex.safePointDontCallMeFromDestructors();
   }
 }
 
@@ -339,10 +339,10 @@ bool RootSubalgebra::IndexIsCompatibleWithPrevious(
   Selection& targetSel = impliedSelections[RecursionDepth + 1];
   Selection& originalSel = impliedSelections[RecursionDepth];
   targetSel = originalSel;
-  targetSel.AddSelectionAppendNewIndex(startIndex);
-  for (int k = targetSel.CardinalitySelection - 1; k < targetSel.CardinalitySelection; k ++) {
+  targetSel.addSelectionAppendNewIndex(startIndex);
+  for (int k = targetSel.cardinalitySelection - 1; k < targetSel.cardinalitySelection; k ++) {
     int tempI = targetSel.elements[k];
-    for (int i = 0; i < targetSel.CardinalitySelection; i ++) {
+    for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
       if (targetSel.selected[oppositeKmods[targetSel.elements[i]]]) {
         return false;
       }
@@ -351,7 +351,7 @@ bool RootSubalgebra::IndexIsCompatibleWithPrevious(
         if (tempList[j] < startIndex && !originalSel.selected[tempList[j]]) {
           return false;
         } else {
-          targetSel.AddSelectionAppendNewIndex(tempList[j]);
+          targetSel.addSelectionAppendNewIndex(tempList[j]);
         }
       }
     }
@@ -381,8 +381,8 @@ void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSuba
       if (owner.flagStoringNilradicals) {
         List<List<int> >& currentSAList = owner.storedNilradicals[indexInOwner];
         List<int> newNilradical;
-        newNilradical.setSize(selKmods.CardinalitySelection);
-        for (int i = 0; i < selKmods.CardinalitySelection; i ++) {
+        newNilradical.setSize(selKmods.cardinalitySelection);
+        for (int i = 0; i < selKmods.cardinalitySelection; i ++) {
           newNilradical[i] = selKmods.elements[i];
         }
         currentSAList.addOnTop(newNilradical);
@@ -697,7 +697,7 @@ void RootSubalgebra::ComputeKModules() {
 
 int RootSubalgebra::NumRootsInNilradical() {
   int result = 0;
-  for (int i = 0; i < this->NilradicalKmods.CardinalitySelection; i ++) {
+  for (int i = 0; i < this->NilradicalKmods.cardinalitySelection; i ++) {
     result += this->Modules[this->NilradicalKmods.elements[i]].size;
   }
   return result;
@@ -737,7 +737,7 @@ bool RootSubalgebra::ConeConditionHolds(RootSubalgebras& owner, int indexInOwner
   }
   NilradicalRoots.size = 0;
   int counter = 0;
-  for (int i = 0; i < this->NilradicalKmods.CardinalitySelection; i ++) {
+  for (int i = 0; i < this->NilradicalKmods.cardinalitySelection; i ++) {
     Vectors<Rational>& tempKmod = this->WeightsModulesPrimalSimple[this->NilradicalKmods.elements[i]];
     for (int j = 0; j < tempKmod.size; j ++) {
       NilradicalRoots.addOnTop(tempKmod[j]);
@@ -789,7 +789,7 @@ bool RootSubalgebra::CheckForSmallRelations(ConeRelation& theRel, Vectors<Ration
               theRel.Betas[0] =(nilradicalRoots[tempI]);
             } else {
               tempBool =
-              this->GetAmbientWeyl().HasStronglyPerpendicularDecompositionWRT(
+              this->GetAmbientWeyl().hasStronglyPerpendicularDecompositionWRT(
                 weightSum, - 1, nilradicalRoots, theRel.Betas, theRel.BetaCoeffs, true
               );
             }
@@ -881,14 +881,14 @@ void RootSubalgebra::ExtractRelations(
       if (theRel.theDiagram.toString() == "C^{2}_3") {
         Selection tempSel;
         tempSel.initialize(Ksingular.size);
-        int tempNum=MathRoutines::NChooseK(Ksingular.size, 2);
+        int tempNum=MathRoutines::nChooseK(Ksingular.size, 2);
         for (int i = 0; i < tempNum; i ++) {
           tempSel.incrementSelectionFixedCardinality(2);
           theRel.Alphas.setSize(2);
           theRel.AlphaCoeffs.setSize(2);
           theRel.Betas.size = 0;
           theRel.BetaCoeffs.size = 0;
-          for (int j = 0; j < tempSel.CardinalitySelection; j ++) {
+          for (int j = 0; j < tempSel.cardinalitySelection; j ++) {
             theRel.Alphas[j] = Ksingular[tempSel.elements[j]];
           }
           if (theRel.IsStrictlyWeaklyProhibiting(*this, NilradicalRoots, owner, indexInOwner)) {
@@ -940,7 +940,7 @@ bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
       }
       theRel.Betas.size = 0; theRel.BetaCoeffs.size = 0;
       if (!Accum.isEqualToZero()) {
-        if (this->GetAmbientWeyl().HasStronglyPerpendicularDecompositionWRT(
+        if (this->GetAmbientWeyl().hasStronglyPerpendicularDecompositionWRT(
           Accum, - 1, NilradicalRoots, theRel.Betas, theRel.BetaCoeffs, true
         )) {
           int startNumBetas = theRel.Betas.size;
@@ -954,7 +954,7 @@ bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
             int goalNumBetas = 2;
             theRel.Betas.size = 0; theRel.BetaCoeffs.size = 0;
             for (int l = goalNumBetas - 1; l < startNumBetas; l ++) {
-              if (this->GetAmbientWeyl().HasStronglyPerpendicularDecompositionWRT(
+              if (this->GetAmbientWeyl().hasStronglyPerpendicularDecompositionWRT(
                 Accum, l + 1, NilradicalRoots, theRel.Betas, theRel.BetaCoeffs, true
               )) {
                 break;
@@ -1767,7 +1767,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
   Selection emptySel;
   emptySel.initialize(this->SimpleBasisCentralizerRoots.size);
   owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this);
-  int numCycles = MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
+  int numCycles = MathRoutines::twoToTheNth(this->SimpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
   StartingNilradicalsNoRepetition.reserve(numCycles);
   Selection tempSel, ParabolicsGenerator;
@@ -1784,7 +1784,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
       tempSel.initialize(this->Modules.size);
       for (int j = 0; j < this->CentralizerRoots.size; j ++) {
         if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsGenerator, this->CentralizerRoots[j])) {
-          tempSel.AddSelectionAppendNewIndex(j);
+          tempSel.addSelectionAppendNewIndex(j);
         }
       }
       if (owner.flagUsingActionsNormalizerCentralizerNilradical) {
@@ -2018,7 +2018,7 @@ void RootSubalgebra::DoKRootsEnumeration() {
 
 void RootSubalgebra::DoKRootsEnumerationRecursively(int indexEnumeration) {
   int theRank = this->theKComponentRanks[indexEnumeration];
-  int numRuns = MathRoutines::NChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
+  int numRuns = MathRoutines::nChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
   this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
   for (int i = 0; i < numRuns; i ++) {
     this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
@@ -2410,7 +2410,7 @@ bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   Matrix<Rational>& outputSystemColumnVector
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
-  if (theZeroCharacteristics.CardinalitySelection == theZeroCharacteristics.MaxSize) {
+  if (theZeroCharacteristics.cardinalitySelection == theZeroCharacteristics.MaxSize) {
     return false;
   }
   Vectors<Rational> rootsInPlay;
@@ -2611,7 +2611,7 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
   }
   InvertedRelativeKillingForm.invert();
-  int numCycles = MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
+  int numCycles = MathRoutines::twoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport;
   Vectors<Rational> rootsZeroChar;
   rootsZeroChar.reserve(selectionRootsWithZeroCharacteristic.MaxSize);
@@ -3148,10 +3148,10 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::GetRootIMustBeWeight(
       << this->toString() << global.fatal;
     }
     Vector<Rational> result;
-    result.makeZero(this->GetOwner()->getRank());
+    result.makeZero(this->getOwner()->getRank());
     return result;
   }
-  return this->GetOwner()->GetWeightOfGenerator((*this)[0].theGeneratorIndex);
+  return this->getOwner()->GetWeightOfGenerator((*this)[0].theGeneratorIndex);
 }
 
 std::string RootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theFormat) {
@@ -3818,8 +3818,8 @@ void RootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
   tempSel.initialize(targetSel.MaxSize);
-  for (int i = 0; i < targetSel.CardinalitySelection; i ++) {
-    tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
+  for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
+    tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }
   targetSel = tempSel;
 }
@@ -3827,8 +3827,8 @@ void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetS
 bool RootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
   tempSel.initialize(targetSel.MaxSize);
-  for (int i = 0; i < targetSel.CardinalitySelection; i ++) {
-    tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
+  for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
+    tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }
   for (int i = 0; i < tempSel.MaxSize; i ++) {
     if (targetSel.selected[i] && !tempSel.selected[i]) {

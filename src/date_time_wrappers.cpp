@@ -30,14 +30,14 @@ TimeWrapper::TimeWrapper() {
   this->timeLocal.tm_zone = nullptr;
 }
 
-bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
-  this->AssignLocalTime(); //<-hopefully this initialized time properly ...
+bool TimeWrapper::assignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
+  this->assignLocalTime(); //<-hopefully this initialized time properly ...
   List<char> theDelimiters;
   theDelimiters.addOnTop('/');
   theDelimiters.addOnTop('-');
   theDelimiters.addOnTop('.');
   List<std::string> output;
-  StringRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
+  StringRoutines::stringSplitExcludeDelimiters(input, theDelimiters, output);
   if (output.size < 3) {
     commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
     return false;
@@ -55,7 +55,7 @@ bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream
   return true;
 }
 
-void TimeWrapper::ComputeTimeStringNonReadable() {
+void TimeWrapper::computeTimeStringNonReadable() {
   std::stringstream out;
   out << this->timeGM.tm_year << "-" << this->timeGM.tm_mon << "-"
   << this->timeGM.tm_mday
@@ -66,17 +66,17 @@ void TimeWrapper::ComputeTimeStringNonReadable() {
   this->theTimeStringNonReadable = out.str();
 }
 
-void TimeWrapper::AssignLocalTime() {
+void TimeWrapper::assignLocalTime() {
   std::time_t rawtime;
   time(&rawtime);
   this->timeGM = *std::gmtime(&rawtime);
   this->timeLocal = *localtime(&rawtime);
   mktime(&this->timeGM);
   mktime(&this->timeLocal);
-  this->ComputeTimeStringNonReadable();
+  this->computeTimeStringNonReadable();
 }
 
-std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort) {
+std::string TimeWrapper::toStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort) {
   std::stringstream out;
   out.precision(2);
   bool isPositive = (input > 0);
@@ -110,26 +110,26 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
   return out.str();
 }
 
-double TimeWrapper::SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other) {
-  return this->SubtractAnotherTimeFromMeInSeconds(other) / 3600;
+double TimeWrapper::subtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other) {
+  return this->subtractAnotherTimeFromMeInSeconds(other) / 3600;
 }
 
-double TimeWrapper::SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other) {
+double TimeWrapper::subtractAnotherTimeFromMeInSeconds(TimeWrapper& other) {
   return difftime(mktime(&this->timeGM), mktime(&other.timeGM));
 }
 
-std::string TimeWrapper::ToStringYMDHMS(const tm* input) {
+std::string TimeWrapper::toStringYMDHMS(const tm* input) {
   char buffer[80];
   strftime(buffer, sizeof(buffer), "%Y-%m-%d-%I:%M:%S", input);
   return std::string(buffer);
 }
 
-std::string TimeWrapper::ToStringGM() const {
-  return this->ToStringYMDHMS(&this->timeGM);
+std::string TimeWrapper::toStringGM() const {
+  return this->toStringYMDHMS(&this->timeGM);
 }
 
-std::string TimeWrapper::ToStringLocal() const {
-  return this->ToStringYMDHMS(&this->timeLocal);
+std::string TimeWrapper::toStringLocal() const {
+  return this->toStringYMDHMS(&this->timeLocal);
 }
 
 std::string TimeWrapper::toString() const {
@@ -163,5 +163,5 @@ void TimeWrapper::operator=(const std::string& input) {
   inputStream >> this->timeGM.tm_hour;
   inputStream >> this->timeGM.tm_min;
   inputStream >> this->timeGM.tm_sec;
-  this->ComputeTimeStringNonReadable();
+  this->computeTimeStringNonReadable();
 }

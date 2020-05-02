@@ -46,7 +46,7 @@ public:
   std::string theString;
   MemorySaving<LargeInteger> theInteger;
   ListReferences<JSData> theList;
-  MapReferences<std::string, JSData, MathRoutines::HashString> objects;
+  MapReferences<std::string, JSData, MathRoutines::hashString> objects;
   void operator=(const bool other);
   void operator=(int other);
   void operator=(int64_t other);
@@ -56,17 +56,17 @@ public:
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData getValue(const std::string& key);
-  bool MergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
-  bool HasKey(const std::string& key) const;
-  bool HasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfTokeN(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfType(const std::string& key, std::string& output, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyValueNull(const std::string& key, std::stringstream* commentsOnFailure) const;
+  bool mergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
+  bool hasKey(const std::string& key) const;
+  bool hasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
+  bool hasCompositeKeyOfToken(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
+  bool hasCompositeKeyOfType(const std::string& key, std::string& output, std::stringstream* commentsOnFailure) const;
+  bool hasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const;
+  bool hasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
+  bool hasCompositeKeyValueNull(const std::string& key, std::stringstream* commentsOnFailure) const;
 
   void setKeyValue(const std::string& key, const JSData& value);
-  int GetKeyIndex(const std::string& key) const;
+  int getKeyIndex(const std::string& key) const;
   JSData();
   ~JSData();
   JSData(const JSData& other);
@@ -95,8 +95,7 @@ public:
   bool isListOfStrings(List<std::string>* whichStrings);
   bool isString(std::string* whichString);
   // parsing
-  void ExtractScalar(const std::string& json, int begin, int end);
-  bool IsValidElement();
+  bool isValidElement();
   void reset(char inputType = JSData::token::tokenUndefined);
   class PrintOptions {
   public:
@@ -111,16 +110,16 @@ public:
   };
   std::string toString(const JSData::PrintOptions* options = nullptr) const;
   template <typename somestream>
-  somestream& IntoStream(
+  somestream& intoStream(
     somestream& out,
     const JSData::PrintOptions* optionsIncoming
   ) const;
-  bool TokenizePrependOneDummyElement(
+  bool tokenizePrependOneDummyElement(
     const std::string& input,
     List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
-  static bool ConvertTwoByteHexToChar(
+  static bool convertTwoByteHexToChar(
     char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
   );
   static bool readstringConsumeFourHexAppendUnicode(
@@ -136,13 +135,13 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool readstring(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
-  bool TryToComputeType(std::stringstream* commentsOnFailure);
-  static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
+  bool tryToComputeType(std::stringstream* commentsOnFailure);
+  static void filterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
   class Test {
   public:
     static bool all();
-    static bool TestRecode();
-    static bool TestBadInput();
+    static bool testRecode();
+    static bool testBadInput();
   };
 };
 

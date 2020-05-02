@@ -437,8 +437,8 @@ private:
     }
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter ++;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter ++;
+  GlobalStatistics::checkPointerCounters();
 #endif
   }
   bool InitExtendedFromShortIfNeeded() {
@@ -447,8 +447,8 @@ private:
     }
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter ++;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter ++;
+  GlobalStatistics::checkPointerCounters();
 #endif
     this->extended->denominator.AssignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
     this->extended->numerator.AssignInt(this->numeratorShort);
@@ -461,8 +461,8 @@ private:
     delete this->extended;
     this->extended = nullptr;
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter ++;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter ++;
+  GlobalStatistics::checkPointerCounters();
 #endif
   }
   bool ShrinkExtendedPartIfPossible();
@@ -700,9 +700,9 @@ public:
   static long long int TotalArithmeticOperations() {
     return Rational::TotalAdditions() + Rational::TotalMultiplications();
   }
-  static Rational NChooseK(const Rational& n, int k);
-  static Rational Factorial(int n);
-  static Rational TwoToTheNth(int n);
+  static Rational nChooseK(const Rational& n, int k);
+  static Rational factorial(int n);
+  static Rational twoToTheNth(int n);
   static Rational NtoTheKth(int n, int k);
   void raiseToPower(int x);
   // Calling the following constructor on an already initialized object will leak the

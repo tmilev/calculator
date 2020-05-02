@@ -414,7 +414,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
 ) {
   std::stringstream errorStream;
   errorStream << "Failed write: " << toBeSent.size() << " bytes ["
-  << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->toString() << numBadAttempts
+  << StringRoutines::stringShortenInsertDots(toBeSent, 200) << "] onto: " << this->toString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
   global << Logger::red << errorStream.str() << Logger::endL;
@@ -860,7 +860,7 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
   delimiters.addOnTop('[');
   delimiters.addOnTop(']');
   List<std::string> inputStrings;
-  StringRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
+  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
     std::string current = StringRoutines::stringTrimWhiteSpace(inputStrings[i]);
     Logger::StringHighligher::Section incoming;
@@ -903,7 +903,7 @@ bool MathRoutines::ParseListInt(
   delimiters.addOnTopNoRepetition('(');
   delimiters.addOnTopNoRepetition(')');
   List<std::string> theNumbers;
-  StringRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
+  StringRoutines::stringSplitExcludeDelimiters(input, delimiters, theNumbers);
   result.setSize(theNumbers.size);
   for (int i = 0; i < theNumbers.size; i ++) {
     LargeInteger theInt;

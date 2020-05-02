@@ -9,7 +9,7 @@
 
 template<>
 List<DynkinSimpleType>::Comparator*
-FormatExpressions::GetMonOrder<DynkinSimpleType>() {
+FormatExpressions::getMonomialOrder<DynkinSimpleType>() {
   return nullptr;
 }
 
@@ -542,8 +542,8 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
       out << "\\mathfrak h_{" << (currentSA.centralizerRank - typeCentralizer.getRank()).toString() << "}";
     }
     out << "$";
-    if (!currentSA.charFormaT.IsZeroPointer()) {
-      tempCharFormat = currentSA.charFormaT.GetElementConst();
+    if (!currentSA.charFormaT.isZeroPointer()) {
+      tempCharFormat = currentSA.charFormaT.getElementConst();
     }
     out << "&$" << currentSA.theCharNonPrimalFundCoords.toString(&tempCharFormat) << "$ ";
     out << "&$" << currentSA.thePrimalChaR.toString(&tempCharFormat) << "$ ";
@@ -852,7 +852,7 @@ void SemisimpleSubalgebras::getCentralizerChains(List<List<int> >& outputChains)
       int maxSScontainer = this->theSubalgebras.theValues[i].indexMaxSSContainer;
       if (maxSScontainer != - 1) {
         outputChains.lastObject()->addOnTop(maxSScontainer);
-        Explored.AddSelectionAppendNewIndex(maxSScontainer);
+        Explored.addSelectionAppendNewIndex(maxSScontainer);
       }
     }
   }
@@ -1017,7 +1017,7 @@ void SemisimpleSubalgebras::MakeEmptyCandidateSA(CandidateSSSubalgebra& output) 
   this->MakeCandidateSA(zeroType, output);
   Matrix<Rational> theZeroCartan;
   output.theSubalgebraNonEmbeddedDefaultScale =
-  &this->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(theZeroCartan);
+  &this->theSubalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(theZeroCartan);
   output.indexNonEmbeddedMeNonStandardCartan =
   this->theSubalgebrasNonDefaultCartanAndScale.getIndex(theZeroCartan);
 }
@@ -1029,7 +1029,7 @@ void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSS
   if (!this->theSubalgebrasNonEmbedded->contains(input)) {
     needsInit = true;
   }
-  output.theWeylNonEmbedded = &this->theSubalgebrasNonEmbedded->GetValueCreateNoInit(input).theWeyl;
+  output.theWeylNonEmbedded = &this->theSubalgebrasNonEmbedded->getValueCreateNoInit(input).theWeyl;
   output.indexNonEmbeddedMeStandard = this->theSubalgebrasNonEmbedded->getIndex(input);
   if (needsInit) {
     output.theWeylNonEmbedded->MakeFromDynkinType(input);
@@ -1182,7 +1182,7 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents() {
   Matrix<Rational> cartanInComponentOrder;
   this->theWeylNonEmbedded->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale =
-  &this->owner->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(cartanInComponentOrder);
+  &this->owner->theSubalgebrasNonDefaultCartanAndScale.getValueCreateNoInit(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.MakeFromDynkinTypeDefaultLengthKeepComponentOrder(
     this->theWeylNonEmbedded->theDynkinType
   );
@@ -3122,13 +3122,13 @@ Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight() const {
 }
 
 bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inputNilradSel) {
-  if (inputNilradSel.CardinalitySelection == 1) {
+  if (inputNilradSel.cardinalitySelection == 1) {
     return true;
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
-  for (int i = 0; i < inputNilradSel.CardinalitySelection; i ++) {
+  for (int i = 0; i < inputNilradSel.cardinalitySelection; i ++) {
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftElt = this->theNilradical[inputNilradSel.elements[i]];
-    for (int j = 0; j < inputNilradSel.CardinalitySelection; j ++) {
+    for (int j = 0; j < inputNilradSel.cardinalitySelection; j ++) {
       if (i == j) {
         continue;
       }
@@ -3147,8 +3147,8 @@ bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inpu
       }
     }
   }
-  for (int i = 0; i < inputNilradSel.CardinalitySelection; i ++) {
-    for (int j = i + 1; j < inputNilradSel.CardinalitySelection; j ++) {
+  for (int i = 0; i < inputNilradSel.cardinalitySelection; i ++) {
+    for (int j = i + 1; j < inputNilradSel.cardinalitySelection; j ++) {
       if (this->owner->GetScalarSA(
           this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]]
         ) < 0
@@ -3269,7 +3269,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
   this->theNilradSubsel.initialize(this->theNilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
   for (int i = 1; i < this->theNilradicalWeights.size && i < 5; i ++) {
-    int numcycles = MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
+    int numcycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
     for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
@@ -3280,7 +3280,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           betterIntersection.ScaleNormalizeFirstNonZero();
           this->ConeStrongIntersection.makeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.setSize(0);
-          for (int k = 0; k < this->theNilradSubsel.CardinalitySelection; k ++) {
+          for (int k = 0; k < this->theNilradSubsel.cardinalitySelection; k ++) {
             this->ConeStrongIntersection[this->theNilradSubsel.elements[k]] = betterIntersection[k];
             this->ConeRelativelyStrongIntersection.addOnTop(betterIntersection[k]);
           }
@@ -3305,7 +3305,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
   ProgressReport theReport;
   this->flagComputedRelativelyStrongIntersections = true;
   for (int i = 1; i < this->theNilradicalWeights.size + 1 && i < 5; i ++) {
-    int numcycles = MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
+    int numcycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
 //    this->FKnilradicalLog+= out.str();
     for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
@@ -3352,7 +3352,7 @@ bool NilradicalCandidate::IsStronglySingularRelativeToSubset(int nonFKweightInde
   MacroRegisterFunctionWithName("NilradicalCandidate::IsStronglySingularRelativeToSubset");
   this->checkInitialization();
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
-  for (int j = 0; j < this->theNilradSubsel.CardinalitySelection; j ++) {
+  for (int j = 0; j < this->theNilradSubsel.cardinalitySelection; j ++) {
     this->owner->owner->owner->LieBracket(
       this->theNilradical[this->theNilradSubsel.elements[j]],
       this->theNonFKhwVectors[nonFKweightIndex],
@@ -4527,7 +4527,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   inputOwner.checkConsistency();
   output.reset(inputOwner);
   output.checkConsistency();
-  output.GetOwner().ComputeChevalleyConstants();
+  output.getOwner().ComputeChevalleyConstants();
   output.theRootSAs.owner = &inputOwner;
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, global);
@@ -4979,7 +4979,7 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
     }
   } else {
     out2 << "It turns out by direct computation that, in the current case of "
-    << this->GetOwner().ToStringLieAlgebraName()
+    << this->getOwner().ToStringLieAlgebraName()
     << ",  e(P,P_0)= 0 implies that an S-sl(2) subalgebra "
     << "of the root subalgebra generated by P with characteristic with 2's in the simple roots of P_0 "
     << " always exists. Note that Theorem 10.3 is stated in one direction only.";
@@ -5251,7 +5251,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
 //  theMat.
 
 
-  Vectors<Rational> BasisToDrawCirclesAt;
+  Vectors<Rational> basisToDrawCirclesAt;
   DrawingVariables theDV;
   theDV.theBuffer.theBilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
@@ -5261,7 +5261,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   }
   Vector<Rational> zeroVector;
   zeroVector.makeZero(thePrimalRank);
-  BasisToDrawCirclesAt.makeEiBasis(thePrimalRank);
+  basisToDrawCirclesAt.makeEiBasis(thePrimalRank);
   Vectors<Rational> cornerWeights;
   int maxModDim = 0;
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -5282,10 +5282,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
             cornerWeights.addOnTop(this->WeightsModulesPrimal[i][k]);
           }
         }
-        if (k == this->Modules[i][j].size - 1 && BasisToDrawCirclesAt.size < thePrimalRank) {
-          BasisToDrawCirclesAt.addOnTop(this->WeightsModulesPrimal[i][k]);
-          if (BasisToDrawCirclesAt.GetRankOfSpanOfElements() != BasisToDrawCirclesAt.size) {
-            BasisToDrawCirclesAt.removeLastObject();
+        if (k == this->Modules[i][j].size - 1 && basisToDrawCirclesAt.size < thePrimalRank) {
+          basisToDrawCirclesAt.addOnTop(this->WeightsModulesPrimal[i][k]);
+          if (basisToDrawCirclesAt.GetRankOfSpanOfElements() != basisToDrawCirclesAt.size) {
+            basisToDrawCirclesAt.removeLastObject();
           }
         }
       }
@@ -5339,13 +5339,13 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     }
     theDV.theBuffer.drawHighlightGroup(highlightGroup, highlightLabels, "black", 5);
   }
-  theDV.theBuffer.BasisToDrawCirclesAt.setSize(BasisToDrawCirclesAt.size);
-  for (int i = 0; i < theDV.theBuffer.BasisToDrawCirclesAt.size; i ++) {
-    theDV.theBuffer.BasisToDrawCirclesAt[i].setSize(thePrimalRank);
+  theDV.theBuffer.basisToDrawCirclesAt.setSize(basisToDrawCirclesAt.size);
+  for (int i = 0; i < theDV.theBuffer.basisToDrawCirclesAt.size; i ++) {
+    theDV.theBuffer.basisToDrawCirclesAt[i].setSize(thePrimalRank);
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.BasisToDrawCirclesAt[i][j] = BasisToDrawCirclesAt[i][j].GetDoubleValue();
+      theDV.theBuffer.basisToDrawCirclesAt[i][j] = basisToDrawCirclesAt[i][j].GetDoubleValue();
     }
-    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], "red", 4);
+    theDV.drawCircleAtVectorBufferRational(basisToDrawCirclesAt[i], "red", 4);
   }
   theDV.theBuffer.BasisProjectionPlane.makeEiBasis(thePrimalRank);
   out << theDV.GetHtmlDiv(thePrimalRank);
@@ -5366,8 +5366,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompositionLaTeX(FormatExpres
   std::stringstream out;
   //out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   FormatExpressions tempCharFormat;
-  if (!this->charFormaT.IsZeroPointer()) {
-    tempCharFormat = this->charFormaT.GetElementConst();
+  if (!this->charFormaT.isZeroPointer()) {
+    tempCharFormat = this->charFormaT.getElementConst();
   }
   //bool useModuleIndex = false;
   out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}"
@@ -5441,8 +5441,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   out << "<table class = 'tableStandard'>";
   FormatExpressions tempCharFormat;
-  if (!this->charFormaT.IsZeroPointer()) {
-    tempCharFormat = this->charFormaT.GetElementConst();
+  if (!this->charFormaT.isZeroPointer()) {
+    tempCharFormat = this->charFormaT.getElementConst();
   }
   out << "<tr><td>Isotypical components + highest weight</td>";
   for (int i = 0; i < this->HighestWeightsPrimal.size; i ++) {
@@ -5815,8 +5815,8 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
     << "\\caption{Nilradicals\\label{tableNilrads} }\\\\ $ \\mathfrak n _{\\mathfrak l} $ & Cones intersect & Cone intersection ";
     FormatExpressions tempFormat;
-    if (!this->charFormaT.IsZeroPointer()) {
-      tempFormat = this->charFormaT.GetElementConst();
+    if (!this->charFormaT.isZeroPointer()) {
+      tempFormat = this->charFormaT.getElementConst();
     }
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
     for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
@@ -5983,8 +5983,8 @@ std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* 
   }
   out << "} \\caption{Pairing table\\label{tablePairingTable}}\\\\<br>\n";
   FormatExpressions tempCharFormat;
-  if (!this->charFormaT.IsZeroPointer()) {
-    tempCharFormat = this->charFormaT.GetElementConst();
+  if (!this->charFormaT.isZeroPointer()) {
+    tempCharFormat = this->charFormaT.getElementConst();
   }
   out << "<br>\n";
   for (int i = 0; i < this->NilradicalPairingTable.size; i ++) {
@@ -6074,8 +6074,8 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << theSAvector.ToStringLetterFormat("V");
   out << "<br><table><tr><td>Modules</td>";
   FormatExpressions tempCharFormat;
-  if (!this->charFormaT.IsZeroPointer()) {
-    tempCharFormat = this->charFormaT.GetElementConst();
+  if (!this->charFormaT.isZeroPointer()) {
+    tempCharFormat = this->charFormaT.getElementConst();
   }
   for (int i = 0; i < this->NilradicalPairingTable.size; i ++) {
     out << "<td><b>" << "W_{" << i + 1 << "}"
@@ -6586,8 +6586,8 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
     out << this->theWeylNonEmbedded->coCartanSymmetric.toString(theFormat);
   }
   FormatExpressions charFormatNonConst;
-  if (!this->charFormaT.IsZeroPointer()) {
-    charFormatNonConst = this->charFormaT.GetElementConst();
+  if (!this->charFormaT.isZeroPointer()) {
+    charFormatNonConst = this->charFormaT.getElementConst();
   }
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX) {
@@ -6840,7 +6840,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       conjugationCandidates.setSize(0);
       for (int i = 0; i < selectedTypes.theElements.size; i ++) {
         Selection& currentSel = selectedTypes.theElements[i].theSelection;
-        for (int j = 0; j < currentSel.CardinalitySelection; j ++) {
+        for (int j = 0; j < currentSel.cardinalitySelection; j ++) {
           currentComponent = theHsScaledToActByTwoByType[i][currentSel.elements[j]];
           conjugationCandidates.addListOnTop(currentComponent);
         }

@@ -9,7 +9,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, input, theArguments, &theCommands.comments)) {
     return false;
   }
@@ -18,7 +18,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
+    return output.assignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName), theCommands);
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -87,7 +87,7 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
-  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
     theCommands, input, theArguments, &theCommands.comments
   )) {
@@ -104,9 +104,9 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
     return theCommands << "Input box with name: " << boxName << " already has value.";
   }
   InputBox& theBox =
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName);
+  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName);
   theBox.name = boxName;
-  theBox.value = theArguments.GetValueCreate("value");
+  theBox.value = theArguments.getValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.assignValue(out.str(), theCommands);
@@ -118,7 +118,7 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBo
     return "non-initialized-expression";
   }
   Calculator& theCommands = *theBox.owner;
-  MapList<std::string, Expression, MathRoutines::HashString> theArguments;
+  MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementLisT(theCommands, theBox, theArguments)) {
     return "corrupt-box";
   }
@@ -126,8 +126,8 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBo
     return "box-without-name";
   }
   std::string theBoxName = "faultyBoxName";
-  if (!theArguments.GetValueCreate("name").isOfType<std::string>(&theBoxName)) {
-    theBoxName = theArguments.GetValueCreate("name").toString();
+  if (!theArguments.getValueCreate("name").isOfType<std::string>(&theBoxName)) {
+    theBoxName = theArguments.getValueCreate("name").toString();
   }
   return theBoxName;
 }

@@ -429,10 +429,10 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     startStructureConstantComputation = global.getElapsedSeconds();
   }
   Rational tempRat;
-  while (nonExploredRoots.CardinalitySelection > 0) {
+  while (nonExploredRoots.cardinalitySelection > 0) {
     int theBorelIndex = nonExploredRoots.elements[0];
     Rational theHeight = posRoots[theBorelIndex].SumCoords();
-    for (int i = 1; i < nonExploredRoots.CardinalitySelection; i ++) {
+    for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
       tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
       if (theHeight.IsGreaterThan(tempRat)) {
         theHeight = tempRat;
@@ -472,7 +472,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
       }
     }
     nonExploredRoots.selected[theBorelIndex] = false;
-    nonExploredRoots.ComputeIndicesFromSelection();
+    nonExploredRoots.computeIndicesFromSelection();
   }
   double startMultTable = - 1;
   if (theReport.tickAndWantReport()) {

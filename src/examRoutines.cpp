@@ -58,7 +58,7 @@ CalculatorHTML::CalculatorHTML() {
 
 bool CalculatorHTML::mergeProblemWeight(
   const JSData& inputJSON,
-  MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+  MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
   bool checkFileExistence,
   std::stringstream* commentsOnFailure
 ) {
@@ -87,7 +87,7 @@ bool CalculatorHTML::mergeProblemWeight(
     if (!outputAppendProblemInfo.contains(currentProblemName)) {
       outputAppendProblemInfo.setKeyValue(currentProblemName, emptyData);
     }
-    ProblemData& currentProblemValue = outputAppendProblemInfo.GetValueCreate(currentProblemName);
+    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProblemName);
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
     if (currentWeight.theType == JSData::token::tokenString) {
       currentProblemValue.adminData.problemWeightsPerCoursE.setKeyValue(currentCourse, currentWeight.theString);
@@ -120,7 +120,7 @@ bool CalculatorHTML::mergeProblemWeight(
 
 bool CalculatorHTML::mergeProblemDeadline(
   const JSData& inputJSON,
-  MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+  MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
   std::stringstream *commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
@@ -138,7 +138,7 @@ bool CalculatorHTML::mergeProblemDeadline(
     if (!outputAppendProblemInfo.contains(currentProbName)) {
       outputAppendProblemInfo.setKeyValue(currentProbName, emptyData);
     }
-    ProblemData& currentProblemValue = outputAppendProblemInfo.GetValueCreate(currentProbName);
+    ProblemData& currentProblemValue = outputAppendProblemInfo.getValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
     if (currentDeadlines.theType == JSData::token::tokenObject) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
@@ -158,7 +158,7 @@ bool CalculatorHTML::mergeProblemDeadline(
 }
 
 JSData CalculatorHTML::toJSONDeadlines(
-  MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
+  MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toJSONDeadlines");
   JSData output;
@@ -189,7 +189,7 @@ JSData CalculatorHTML::toJSONDeadlines(
 }
 
 QuerySet CalculatorHTML::toQuerySetProblemWeights(
-  MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
+  MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toQuerySetProblemWeights");
   QuerySet output;
@@ -238,14 +238,14 @@ bool CalculatorHTML::mergeOneProblemAdminData(
     this->currentUseR.theProblemData.setKeyValue(inputProblemName, inputProblemInfo);
   }
   ProblemDataAdministrative& currentProblem =
-  this->currentUseR.theProblemData.GetValueCreate(inputProblemName).adminData;
-  MapList<std::string, std::string, MathRoutines::HashString>&
+  this->currentUseR.theProblemData.getValueCreate(inputProblemName).adminData;
+  MapList<std::string, std::string, MathRoutines::hashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
-  MapList<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::hashString>&
   incomingDeadlines = inputProblemInfo.adminData.deadlinesPerSection;
-  MapList<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::hashString>&
   currentWeightS = currentProblem.problemWeightsPerCoursE;
-  MapList<std::string, std::string, MathRoutines::HashString>&
+  MapList<std::string, std::string, MathRoutines::hashString>&
   incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCoursE;
 
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
@@ -276,7 +276,7 @@ bool CalculatorHTML::mergeProblemWeightAndStore(
     }
     return false;
   }
-  MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
+  MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
   if (!this->mergeProblemWeight(theProblemJSON, incomingProblems, true, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your request";
@@ -297,7 +297,7 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
     }
     return false;
   }
-  MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
+  MapList<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
   if (!this->mergeProblemDeadline(theProblemJSON, incomingProblems, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your request";
@@ -308,7 +308,7 @@ bool CalculatorHTML::mergeProblemDeadlineAndStore(
 }
 
 bool CalculatorHTML::storeProblemWeights(
-  MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+  MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
   std::stringstream *commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
@@ -332,7 +332,7 @@ bool CalculatorHTML::storeProblemWeights(
 }
 
 bool CalculatorHTML::storeProblemDeadlines(
-  MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+  MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
@@ -387,7 +387,7 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   }
 
   if (this->currentUseR.theProblemData.contains(this->fileName)) {
-    this->theProblemData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
+    this->theProblemData = this->currentUseR.theProblemData.getValueCreate(this->fileName);
   }
   global.userDefault = this->currentUseR;
   return true;
@@ -477,7 +477,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << "it's a bug. Please take a screenshot and email the site administrator/your instructor. </b>";
     out
     << "Generated in "
-    << MathRoutines::ReducePrecision(global.getElapsedSeconds() - startTime)
+    << MathRoutines::reducePrecision(global.getElapsedSeconds() - startTime)
     << " second(s). ";
     return out.str();
   }
@@ -620,7 +620,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
   if (
     theFileName == this->topicListFileName ||
     theFileName == this->courseHome ||
-    StringRoutines::StringEndsWith(theFileName, ".txt")
+    StringRoutines::stringEndsWith(theFileName, ".txt")
   ) {
     out << "<a href=\"" << global.DisplayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
@@ -651,7 +651,7 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
     if (this->currentUseR.theProblemData.contains(theFileName)) {
-      ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
+      ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
       if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
         problemAlreadySolved = true;
       }
@@ -680,7 +680,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   std::string answerId = input[2].toString();
   global.setWebInput(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
   JSData result = WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
-  global.webArguments.RemoveKey(WebAPI::problem::calculatorAnswerPrefix + answerId);
+  global.webArguments.removeKey(WebAPI::problem::calculatorAnswerPrefix + answerId);
   global.setWebInput(WebAPI::problem::fileName, oldProblem);
   std::stringstream out;
   out << WebAPI::problem::answerGenerationSuccess
@@ -992,10 +992,10 @@ std::string CalculatorHTML::prepareUserInputBoxes() {
     return "";
   }
   std::stringstream out;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   std::string inputNonAnswerReader;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
+    if (StringRoutines::stringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader)) {
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "") {
         out << Calculator::Atoms::setInputBox << "(name = "
         << inputNonAnswerReader
@@ -1464,11 +1464,11 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   if (!this->currentUseR.theProblemData.contains(id)) {
     return "";
   }
-  ProblemDataAdministrative& currentProb = this->currentUseR.theProblemData.GetValueCreateNoInit((id)).adminData;
+  ProblemDataAdministrative& currentProb = this->currentUseR.theProblemData.getValueCreateNoInit((id)).adminData;
   if (!currentProb.deadlinesPerSection.contains(this->currentUseR.sectionComputed)) {
     return "";
   }
-  return currentProb.deadlinesPerSection.GetValueCreate(this->currentUseR.sectionComputed);
+  return currentProb.deadlinesPerSection.getValueCreate(this->currentUseR.sectionComputed);
 }
 
 std::string CalculatorHTML::getDeadline(
@@ -1487,13 +1487,13 @@ std::string CalculatorHTML::getDeadline(
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
   }
-  TopicElement& currentTopic = this->topics.theTopics.GetValueCreate(problemName);
+  TopicElement& currentTopic = this->topics.theTopics.getValueCreate(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
     const std::string& containerName = this->topics.theTopics.theKeys[currentTopic.parentTopics[i]];
     if (this->currentUseR.theProblemData.contains(containerName)) {
       ProblemDataAdministrative& currentProb =
-      this->currentUseR.theProblemData.GetValueCreateNoInit(containerName).adminData;
-      result = currentProb.deadlinesPerSection.GetValueCreate(sectionNumber);
+      this->currentUseR.theProblemData.getValueCreateNoInit(containerName).adminData;
+      result = currentProb.deadlinesPerSection.getValueCreate(sectionNumber);
       if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
         return result;
@@ -1529,14 +1529,14 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   TimeWrapper now, deadline; //<-needs a fix for different time formats.
   //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
   std::stringstream badDateStream;
-  if (!deadline.AssignMonthDayYear(currentDeadline, badDateStream)) {
+  if (!deadline.assignMonthDayYear(currentDeadline, badDateStream)) {
     out << "<span style =\"color:red\">" << badDateStream.str() << "</span>";
   }
   //  out << "deadline.date: " << deadline.theTime.tm_mday;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
   //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-  double secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+  double secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
 
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear = secondsTillDeadline < 24 * 3600 && !problemAlreadySolved && !isSection;
@@ -1551,9 +1551,9 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   if (!deadlineHasPassed) {
     if (deadlineIsNear) {
       hoursTillDeadlineStream << "<span style =\"color:red\">"
-      << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, true) << "</span>";
+      << TimeWrapper::toStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, true) << "</span>";
     } else {
-      hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, true)
+      hoursTillDeadlineStream << TimeWrapper::toStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, true)
       << " left. ";
     }
   } else {
@@ -1651,9 +1651,9 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     ProblemDataAdministrative& currentProb =
-    this->currentUseR.theProblemData.GetValueCreateNoInit(inputOutput.id).adminData;
+    this->currentUseR.theProblemData.getValueCreateNoInit(inputOutput.id).adminData;
     inputOutput.deadlinesPerSectioN[i] =
-    currentProb.deadlinesPerSection.GetValueCreate(this->databaseStudentSections[i]);
+    currentProb.deadlinesPerSection.getValueCreate(this->databaseStudentSections[i]);
   }
 }
 
@@ -2301,7 +2301,7 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
       } else {
         secondToLast.content = secondToLast.toStringOpenTag("");
         if (global.userDefaultHasProblemComposingRights() && comments != nullptr) {
-          if (StringRoutines::StringBeginsWith(tagClass, "calculator")) {
+          if (StringRoutines::stringBeginsWith(tagClass, "calculator")) {
             if (!this->calculatorClasses.contains(tagClass)) {
               *comments
               << "<hr><b style =\"color:red\">Warning: found class tag: "
@@ -2508,7 +2508,7 @@ bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
         return false;
       }
       answerIdsSeenSoFar.addOnTopNoRepetition(currentId);
-      this->theProblemData.theAnswers.GetValueCreate(currentId).MQpanelButtonOptions =
+      this->theProblemData.theAnswers.getValueCreate(currentId).MQpanelButtonOptions =
       currentE.getKeyValue("buttons");
       continue;
     }
@@ -2725,7 +2725,7 @@ void CalculatorHTML::computeProblemLabel() {
   if (!this->topics.theTopics.contains(this->fileName)) {
     return;
   }
-  TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
+  TopicElement& current = this->topics.theTopics.getValueCreate(this->fileName);
   current.computeLinks(*this, true);
   this->outputProblemLabel = current.problemNumberString;
   this->outputProblemTitle = current.title;
@@ -2787,7 +2787,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     global.requestType != "templateNoLogin"
   ) {
     if (this->topics.theTopics.contains(this->fileName)) {
-      TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
+      TopicElement& current = this->topics.theTopics.getValueCreate(this->fileName);
       current.computeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar) {
@@ -2805,7 +2805,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
       if (this->currentUseR.theProblemData.contains(this->fileName)) {
-        ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
+        ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(this->fileName);
         if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
           problemAlreadySolved = true;
         }
@@ -2871,7 +2871,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (this->flagIsExamProblem) {
     if (theInterpreter.flagHasGraphics) {
-      MapReferences<std::string, std::string, MathRoutines::HashString>& theScripts =
+      MapReferences<std::string, std::string, MathRoutines::hashString>& theScripts =
       theInterpreter.theObjectContainer.graphicsScripts;
       for (int i = 0; i < theScripts.size(); i ++) {
         this->theScripts.setKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
@@ -3105,7 +3105,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
   }
   Rational currentWeight;
   if (this->currentUseR.theProblemData.contains(theFileName)) {
-    ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
+    ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.getWeightFromCourse(this->currentUseR.courseComputed, currentWeight)) {
@@ -3157,7 +3157,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
   if (this->currentUseR.theProblemData.contains(theFileName)) {
-    theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
+    theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
@@ -3330,11 +3330,11 @@ bool TopicElement::pdfSlidesOpenIfAvailable(
   LaTeXCrawler theCrawler;
   theCrawler.desiredPresentationTitle = this->title;
 
-  theCrawler.AddSlidesOnTop(owner.slidesSourcesHeaders);
-  theCrawler.AddSlidesOnTop(this->sourceSlides);
+  theCrawler.addSlidesOnTop(owner.slidesSourcesHeaders);
+  theCrawler.addSlidesOnTop(this->sourceSlides);
   theCrawler.flagProjectorMode = true;
   theCrawler.flagHomeworkRatherThanSlides = false;
-  if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+  if (!theCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
   std::string actualOutput;
@@ -3365,10 +3365,10 @@ bool TopicElement::pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::strin
   LaTeXCrawler theCrawler;
   theCrawler.desiredPresentationTitle = this->title;
 
-  theCrawler.AddSlidesOnTop(owner.sourcesHomeworkHeaders);
-  theCrawler.AddSlidesOnTop(this->sourceHomework);
+  theCrawler.addSlidesOnTop(owner.sourcesHomeworkHeaders);
+  theCrawler.addSlidesOnTop(this->sourceHomework);
   theCrawler.flagHomeworkRatherThanSlides = true;
-  if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+  if (!theCrawler.extractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
   std::string actualOutput;
@@ -3460,7 +3460,7 @@ void TopicElementParser::insertTopicBundle(TopicElementParser::TopicLine& input)
     this->bundleStack.addOnTop(input);
     return;
   }
-  List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.GetValueCreate(bundleId);
+  List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.getValueCreate(bundleId);
   for (int i = currentBundle.size - 1; i >= 0; i --) {
     this->bundleStack.addOnTop(currentBundle[i]);
   }
@@ -3507,7 +3507,7 @@ void TopicElementParser::loadTopicBundleFile(
       }
     } else {
       for (int i = 0; i < bundleNameStack.size; i ++) {
-        this->knownTopicBundles.GetValueCreate(bundleNameStack[i]).addOnTop(currentLine);
+        this->knownTopicBundles.getValueCreate(bundleNameStack[i]).addOnTop(currentLine);
       }
     }
   }
@@ -4001,7 +4001,7 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
     global.userDefaultHasAdminRights() &&
     !global.userStudentVieWOn() &&
     global.requestType != "templateNoLogin";
-    HashedList<std::string, MathRoutines::HashString> gradableProblems;
+    HashedList<std::string, MathRoutines::hashString> gradableProblems;
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
       if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
         gradableProblems.addOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
@@ -4048,7 +4048,7 @@ bool LaTeXCrawler::FileWithOption::fromJSON(JSData& input, std::stringstream* co
   return true;
 }
 
-void LaTeXCrawler::Slides::AddSlidesOnTop(const List<std::string>& input) {
+void LaTeXCrawler::Slides::addSlidesOnTop(const List<std::string>& input) {
   for (int i = 0; i < input.size; i ++) {
     this->filesToCrawl.addOnTop(LaTeXCrawler::FileWithOption(input[i]));
   }
@@ -4118,15 +4118,15 @@ bool LaTeXCrawler::Slides::FromString(
 
 JSData TopicElement::computeSlidesJSON(CalculatorHTML& owner) {
   LaTeXCrawler::Slides theSlides;
-  theSlides.AddSlidesOnTop(owner.slidesSourcesHeaders);
-  theSlides.AddSlidesOnTop(this->sourceSlides);
+  theSlides.addSlidesOnTop(owner.slidesSourcesHeaders);
+  theSlides.addSlidesOnTop(this->sourceSlides);
   theSlides.title = this->title;
   return theSlides.toJSON();
 }
 
 JSData TopicElement::computeHomeworkJSON(CalculatorHTML& owner) {
   LaTeXCrawler::Slides theSlides;
-  theSlides.AddSlidesOnTop(owner.sourcesHomeworkHeaders);
+  theSlides.addSlidesOnTop(owner.sourcesHomeworkHeaders);
   for (int i = 0; i < this->sourceHomework.size; i ++) {
     LaTeXCrawler::FileWithOption file;
     file.fileName = this->sourceHomework[i];
@@ -4273,7 +4273,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::toJSON");
   JSData output;
   output["title"] = this->title;
-  std::string elementType = owner.topics.elementNames.GetValueCreate(this->type);
+  std::string elementType = owner.topics.elementNames.getValueCreate(this->type);
   if (elementType == "") {
     elementType = "not documented";
   }
@@ -4308,7 +4308,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output[WebAPI::problem::idProblem] = this->id;
   if (global.flagDatabaseCompiled) {
     if (owner.currentUseR.theProblemData.contains(this->problemFileName)) {
-      ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problemFileName);
+      ProblemData& currentData = owner.currentUseR.theProblemData.getValueCreate(this->problemFileName);
       output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
       output["totalQuestions"] = currentData.theAnswers.size();
       Rational currentWeight;

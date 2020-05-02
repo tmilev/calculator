@@ -9,7 +9,7 @@
 
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*
-FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
+FormatExpressions::getMonomialOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
   return nullptr;
 }
 
@@ -678,12 +678,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       if (isGood) {
         std::stringstream reflectionStream;
         reflectionStream << "s_{" << i << "}";
-        integralPositiveRootReflectionGraph.AddEdge(i, outputOrbit.getIndex(currentWeight), reflectionStream.str());
+        integralPositiveRootReflectionGraph.addEdge(i, outputOrbit.getIndex(currentWeight), reflectionStream.str());
       }
     }
   }
   integralPositiveRootReflectionGraph.checkConsistency();
-  out << integralPositiveRootReflectionGraph.ToStringPsTricks(nullptr);
+  out << integralPositiveRootReflectionGraph.toStringPsTricks(nullptr);
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
@@ -1394,7 +1394,7 @@ public:
 };
 
 unsigned int KostkaNumber::hashFunction(const KostkaNumber& input) {
-  return  MathRoutines::HashListInts(input.partition) + MathRoutines::HashListInts(input.tuple);
+  return  MathRoutines::hashListInts(input.partition) + MathRoutines::hashListInts(input.tuple);
 }
 
 bool KostkaNumber::operator==(const KostkaNumber& other) const {
@@ -1897,9 +1897,9 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
     theWeyl.GetSignSignatureParabolics(parabolicSubgroupS);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups);
-    List<Pair<std::string, List<Rational>, MathRoutines::HashString> > tauSigPairs;
+    List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
     finalSubGroups.reserve(allRootSubgroups.size);
-    Pair<std::string, List<Rational>, MathRoutines::HashString> currentTauSig;
+    Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
     for (int j = 0; j < 3; j ++) {
       List<SubgroupDataRootReflections>* currentSGs = nullptr;
       if (j == 0) {
@@ -2026,11 +2026,11 @@ std::string MonomialMacdonald::toString(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
     return "(non-initialized)";
   }
-  if (this->rootSel.CardinalitySelection == 0) {
+  if (this->rootSel.cardinalitySelection == 0) {
     return "1";
   }
   std::stringstream out;
-  for (int i = 0; i < this->rootSel.CardinalitySelection; i ++) {
+  for (int i = 0; i < this->rootSel.cardinalitySelection; i ++) {
     out << "a_" << this->rootSel.elements[i] << "";
   }
   return out.str();
@@ -2075,9 +2075,9 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
       << ": the vector " << currentV.toString()
       << " is not a root. " << global.fatal;
     }
-    this->rootSel.AddSelectionAppendNewIndex(indexInRoots);
+    this->rootSel.addSelectionAppendNewIndex(indexInRoots);
   }
-  this->rootSel.ComputeIndicesFromSelection();
+  this->rootSel.computeIndicesFromSelection();
 }
 
 void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
@@ -2086,14 +2086,14 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
   this->rootSel.initialize(this->owner->theWeyl.RootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
-  for (int i = 0; i <originalSel.CardinalitySelection; i ++) {
+  for (int i = 0; i <originalSel.cardinalitySelection; i ++) {
     currentV = this->owner->theWeyl.RootSystem[originalSel.elements[i]];
     this->owner->theWeyl.reflectSimple(indexSimpleReflection, currentV);
     if (currentV.isNegative()) {
       currentV *= - 1;
       outputMultiple *= - 1;
     }
-    this->rootSel.AddSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.getIndex(currentV));
+    this->rootSel.addSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.getIndex(currentV));
   }
 }
 

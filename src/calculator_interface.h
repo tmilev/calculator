@@ -348,22 +348,21 @@ private:
   template <class theType>
   bool mergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
 
-  bool ContainsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
-  bool ContainsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
-  bool ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar);
+  bool containsAsSubExpressionNoBuiltInTypes(const Expression& input) const;
+  bool containsAsSubExpressionNoBuiltInTypes(int inputAtom) const;
+  bool contextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar);
   SemisimpleLieAlgebra* getAmbientSemisimpleLieAlgebraNonConstUseWithCaution() const;
   bool isEqualToZero() const;
   bool isEqualToOne() const;
-  bool IsEqualToTwo() const;
-  bool IsEqualToHalf() const;
-  bool IsEqualToMOne() const;
-  bool IsKnownToBeNonNegative() const;
-  bool IsNegativeConstant() const;
+  bool isEqualToTwo() const;
+  bool isEqualToHalf() const;
+  bool isEqualToMOne() const;
+  bool isKnownToBeNonNegative() const;
+  bool isNegativeConstant() const;
   bool makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss);
   bool makeAtom(int input, Calculator& newBoss);
   // TODO(tmilev): rename to MakeOperation
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
-  bool EvaluatesToVariableNonBound() const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   bool makeIntegral(
     Calculator& theCommands,
@@ -385,16 +384,16 @@ private:
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
-  bool MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
-  bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
-  bool MakeOX(Calculator& owner, int theOp, const Expression& opArgument);
+  bool makeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
+  bool makeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
+  bool makeOX(Calculator& owner, int theOp, const Expression& opArgument);
   bool sequencefy();
-  bool IsSuitableForSubstitution() const;
-  bool IsSuitableForRecursion() const;
+  bool isSuitableForSubstitution() const;
+  bool isSuitableForRecursion() const;
 
   void substituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
-  void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
-  void AssignXOXToChild(
+  void substituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
+  void assignXOXToChild(
     int childIndex,
     Calculator& owner,
     int theOp,
@@ -506,21 +505,21 @@ private:
     FormatExpressions* theFormat
   ) const;
 
-  JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
+  JSData toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int hashFunction(const Expression& input) {
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return this->HashFunctionRecursive(0, 1000);
+    return this->hashFunctionRecursive(0, 1000);
   }
-  unsigned int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
+  unsigned int hashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
     if (RecursionDepth > MaxRecursionDepth) {
       return 0;
     }
     unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
     int numCycles = MathRoutines::Minimum(this->children.size, someRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
-      result += (*this)[i].HashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
+      result += (*this)[i].hashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
     }
     return result;
   }
@@ -546,15 +545,15 @@ private:
     this->flagDeallocated = true;
   }
   bool checkInitialization() const;
-  bool CheckInitializationRecursively() const;
+  bool checkInitializationRecursively() const;
   bool checkConsistency() const;
-  bool CheckConsistencyRecursively() const;
+  bool checkConsistencyRecursively() const;
   bool isIntegerFittingInInt(int* whichInteger = nullptr) const;
   bool isSmallInteger(int* whichInteger = nullptr) const;
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
   bool isIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const;
   bool isRational(Rational* whichRational = nullptr) const;
-  bool IsAlgebraicRadical() const;
+  bool isAlgebraicRadical() const;
   bool isConstantNumber() const;
   bool isPositiveNumber() const;
   bool evaluatesToDoubleInRange(
@@ -567,17 +566,17 @@ private:
     Vectors<double>* outputPoints = nullptr
   ) const;
   bool evaluatesToDouble(double* whichDouble = nullptr) const;
-  bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
-  bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const;
-  bool AllowedAsFreeVariableAtom(const std::string& input) const;
+  bool getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
+  bool getFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const;
+  bool allowedAsFreeVariableAtom(const std::string& input) const;
   bool getBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables) const;
-  bool EvaluatesToDoubleUnderSubstitutions(
+  bool evaluatesToDoubleUnderSubstitutions(
     const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble = nullptr
   ) const;
   bool hasBoundVariables() const;
-  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::HashString>* boxNames = nullptr) const;
+  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = nullptr) const;
   bool isMeltable(int* numResultingChildren = nullptr) const;
-  bool AreEqualExcludingChildren(const Expression& other) const {
+  bool areEqualExcludingChildren(const Expression& other) const {
     return this->owner == other.owner &&
     this->theData == other.theData &&
     this->children.size == other.children.size;
@@ -588,9 +587,9 @@ private:
   // We would need to create a large expression tree, so many calls of Expression::MakeXOX.
   // Instead, we can simply parse the expression from a string.
   // The inputExpressions give us the ability to specify substitutions
-  bool AssignStringParsed(
+  bool assignStringParsed(
     const std::string& theString,
-    MapList<std::string, Expression, MathRoutines::HashString>* substitutions,
+    MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
     Calculator& owner
   );
   void operator/=(const Expression& other);
@@ -606,7 +605,7 @@ private:
   Expression operator/(const Expression& other);
   void operator*=(const Expression& other);
   // Rational GetConstantTerm() const;
-  bool IsEqualToMathematically(const Expression& other) const;
+  bool isEqualToMathematically(const Expression& other) const;
   bool operator==(int other) const;
   bool operator==(const Expression& other) const;
   bool operator==(const std::string& other) const;
@@ -618,14 +617,14 @@ private:
   }
   // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
-  bool GreaterThanNoCoeff(const Expression& other) const;
+  bool greaterThanNoCoefficient(const Expression& other) const;
   void substituteRecursively(MapList<Expression, Expression>& theSubs);
-  void SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
+  void substituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
   class Test {
   public:
     static bool all();
-    static bool ToStringTestRecode(Calculator& ownerInitialized);
-    static bool ToStringTestRecodeOnce(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
+    static bool toStringTestRecode(Calculator& ownerInitialized);
+    static bool toStringTestRecodeOnce(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
   };
 };
 
@@ -930,7 +929,7 @@ private:
   std::string canvasNamE;
 public:
   List<PlotObject> thePlots;
-  HashedList<std::string, MathRoutines::HashString> boxesThatUpdateMe;
+  HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -1010,8 +1009,8 @@ public:
   HashedListReferences<Rational> theRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
-  HashedListReferences<std::string, MathRoutines::HashString> theStrings;
-  HashedListReferences<std::string, MathRoutines::HashString> ExpressionNotation;
+  HashedListReferences<std::string, MathRoutines::hashString> theStrings;
+  HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -1021,8 +1020,8 @@ public:
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferences<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
-  MapReferences<std::string, std::string, MathRoutines::HashString> graphicsScripts;
+  MapReferences<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  MapReferences<std::string, std::string, MathRoutines::hashString> graphicsScripts;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
@@ -1108,26 +1107,26 @@ public:
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
-  MapReferences<std::string, MemorySaving<OperationHandlers>, MathRoutines::HashString> operations;
+  MapReferences<std::string, MemorySaving<OperationHandlers>, MathRoutines::hashString> operations;
 
-  HashedList<std::string, MathRoutines::HashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
-  HashedList<std::string, MathRoutines::HashString> atomsNotAllowingChainRule;
-  HashedList<std::string, MathRoutines::HashString> builtInTypes;
-  HashedList<std::string, MathRoutines::HashString> arithmeticOperations;
-  HashedList<std::string, MathRoutines::HashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
-  HashedList<std::string, MathRoutines::HashString> knownFunctionsWithComplexRange;
-  HashedList<std::string, MathRoutines::HashString> atomsThatFreezeArguments;
-  HashedList<std::string, MathRoutines::HashString> atomsWhoseExponentsAreInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::HashString> atomsNotInterpretedAsFunctions;
-  HashedList<std::string, MathRoutines::HashString> atomsThatMustNotBeCached;
-  HashedList<std::string, MathRoutines::HashString> autoCompleteKeyWords;
-  HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
+  HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
+  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
+  HashedList<std::string, MathRoutines::hashString> builtInTypes;
+  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
+  HashedList<std::string, MathRoutines::hashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
+  HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
+  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
+  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
+  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
+  HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
 
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersAtoms;
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersComposite;
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringDataHandlers;
 
-  MapList<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
+  MapList<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
   class NamedRuleLocation {
   public:
     // Operation for which the named rule was registered.
@@ -1138,7 +1137,7 @@ public:
     int index;
     NamedRuleLocation();
   };
-  MapList<std::string, NamedRuleLocation, MathRoutines::HashString> namedRules;
+  MapList<std::string, NamedRuleLocation, MathRoutines::hashString> namedRules;
 
   // Calculator functions have as arguments two expressions passed by reference,
   // const Expression& input and Expression& output. Calculator functions
@@ -1187,7 +1186,7 @@ public:
 
 
   // Control sequences parametrize the syntactical elements
-  HashedList<std::string, MathRoutines::HashString> controlSequences;
+  HashedList<std::string, MathRoutines::hashString> controlSequences;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
   List<Function> theCruncherS;
@@ -1339,10 +1338,10 @@ public:
   bool CheckOperationHandlers();
   bool CheckConsistencyAfterInitialization();
   //to make operations read only, we make operations private and return const pointer to it.
-  const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
+  const HashedList<std::string, MathRoutines::hashString>& GetOperations() {
     return this->operations.theKeys;
   }
-  const HashedList<std::string, MathRoutines::HashString>& getBuiltInTypes() {
+  const HashedList<std::string, MathRoutines::hashString>& getBuiltInTypes() {
     return this->builtInTypes;
   }
   const List<Function>* getOperationHandlers(int theOp);
@@ -2150,7 +2149,7 @@ public:
       // empty string = not known
       std::string expectedResult;
     };
-    MapList<std::string, Calculator::Test::OneTest, MathRoutines::HashString> commands;
+    MapList<std::string, Calculator::Test::OneTest, MathRoutines::hashString> commands;
     JSData storedResults;
     Test(Calculator& inputOwner);
     bool ProcessResults();
@@ -2731,7 +2730,7 @@ public:
   static bool innerLoadKeysFromStatementLisT(
     Calculator& theCommands,
     const Expression& input,
-    MapList<std::string, Expression, MathRoutines::HashString>& output,
+    MapList<std::string, Expression, MathRoutines::hashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
@@ -3019,7 +3018,7 @@ bool Expression::makeSum(
       }
     }
   }
-  return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
+  return this->makeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
 template <typename theType>
@@ -3226,7 +3225,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     outputInducingSel.initialize(ambientSSalgebra->getRank());
     for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
       if (!outputWeightHWFundcoords[i].isSmallInteger()) {
-        outputInducingSel.AddSelectionAppendNewIndex(i);
+        outputInducingSel.addSelectionAppendNewIndex(i);
       }
     }
   }

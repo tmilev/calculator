@@ -6,26 +6,26 @@
 #include <assert.h>
 #include <mutex>
 
-void ParallelComputing::CheckPointerCounters() {
-  if (ParallelComputing::GlobalPointerCounter > ParallelComputing::cgiLimitRAMuseNumPointersInList) {
+void GlobalStatistics::checkPointerCounters() {
+  if (GlobalStatistics::globalPointerCounter > GlobalStatistics::cgiLimitRAMuseNumPointersInList) {
     /////////////////////////////////////////////////
     // *** Deadlock alert: critical section start ***
     global.MutexParallelComputingCrash.LockMe();
-    if (ParallelComputing::flagUngracefulExitInitiated) {
+    if (GlobalStatistics::flagUngracefulExitInitiated) {
       global.MutexParallelComputingCrash.UnlockMe();
       return;
     }
-    ParallelComputing::flagUngracefulExitInitiated = true;
+    GlobalStatistics::flagUngracefulExitInitiated = true;
     global.MutexParallelComputingCrash.UnlockMe();
     // *** Deadlock alert: critical section end ***
     /////////////////////////////////////////////////
     global.fatal << "This may or may not be an error: the number of pointers "
     << "allocated by the program exceeded the allowed <b>limit of "
-    << ParallelComputing::cgiLimitRAMuseNumPointersInList
+    << GlobalStatistics::cgiLimitRAMuseNumPointersInList
     << ".</b>" << global.fatal;
   }
-  if (ParallelComputing::PointerCounterPeakRamUse < ParallelComputing::GlobalPointerCounter) {
-    ParallelComputing::PointerCounterPeakRamUse = ParallelComputing::GlobalPointerCounter;
+  if (GlobalStatistics::pointerCounterPeakRamUse < GlobalStatistics::globalPointerCounter) {
+    GlobalStatistics::pointerCounterPeakRamUse = GlobalStatistics::globalPointerCounter;
   }
 }
 
@@ -44,7 +44,7 @@ void MutexRecursiveWrapper::initConstructorCallOnly() {
   this->theMutexImplementation = nullptr;
   this->lastLockerThread = - 1;
 #ifdef AllocationLimitsSafeguard
-ParallelComputing::GlobalPointerCounter ++;
+GlobalStatistics::globalPointerCounter ++;
 #endif
 }
 
@@ -107,14 +107,14 @@ void MutexRecursiveWrapper::UnlockMe() {
   static_cast<std::mutex*>(this->theMutexImplementation)->unlock();
 }
 
-void PauseThread::SafePointDontCallMeFromDestructors() {
+void PauseThread::safePointDontCallMeFromDestructors() {
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
   this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
+void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
   this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
   if (this->flagIsPausedWhileRunning) {
     this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
@@ -127,26 +127,26 @@ void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesS
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-void PauseThread::UnlockSafePoint() {
+void PauseThread::unlockSafePoint() {
   this->flagIsPausedWhileRunning = false;
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void PauseThread::InitComputation() {
+void PauseThread::initComputation() {
   this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->flagIsRunning = true;
 }
 
-void PauseThread::ExitComputation() {
+void PauseThread::exitComputation() {
   this->flagIsRunning = false;
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-bool& PauseThread::GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe() {
+bool& PauseThread::getFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe() {
   return this->flagIsPausedWhileRunning;
 }
 
-bool& PauseThread::GetFlagIsRunningUnsafeUseWithMutexHoldMe() {
+bool& PauseThread::getFlagIsRunningUnsafeUseWithMutexHoldMe() {
   return this->flagIsRunning;
 }
 
@@ -155,7 +155,7 @@ PauseThread::PauseThread() {
   this->flagIsPausedWhileRunning = false;
 }
 
-bool PauseThread::IsPausedWhileRunning() const {
+bool PauseThread::isPausedWhileRunning() const {
   return this->flagIsPausedWhileRunning;
 }
 

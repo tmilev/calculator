@@ -28,11 +28,11 @@ public:
     bool accountIfStateChanger(CalculatorHTML& owner) const;
   };
   CalculatorHTML* owner;
-  MapList<std::string, TopicElement, MathRoutines::HashString> theTopics;
-  MapList<std::string, List<TopicElementParser::TopicLine>, MathRoutines::HashString> knownTopicBundles;
-  HashedList<std::string, MathRoutines::HashString> loadedTopicBundleFiles;
+  MapList<std::string, TopicElement, MathRoutines::hashString> theTopics;
+  MapList<std::string, List<TopicElementParser::TopicLine>, MathRoutines::hashString> knownTopicBundles;
+  HashedList<std::string, MathRoutines::hashString> loadedTopicBundleFiles;
 
-  MapList<std::string, int, MathRoutines::HashString> elementTypes;
+  MapList<std::string, int, MathRoutines::hashString> elementTypes;
   MapList<int, std::string, MathRoutines::IntUnsignIdentity> elementNames;
   List<TopicElementParser::TopicLine> crawled;
   List<TopicElementParser::TopicLine> bundleStack;
@@ -255,14 +255,14 @@ public:
   std::string outputProblemLabel;
   std::string outputProblemTitle;
   std::string outputDebugInformationBody;
-  MapList<std::string, std::string, MathRoutines::HashString> outputScripts;
+  MapList<std::string, std::string, MathRoutines::hashString> outputScripts;
 
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
 
   static const std::string BugsGenericMessage;
-  HashedList<std::string, MathRoutines::HashString> tagKeysNoValue;
+  HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorTagsRecordedLiterally;
   List<std::string> calculatorClasses;
@@ -278,9 +278,9 @@ public:
   int topicLectureCounter;
   std::string topicListContent;
   std::string topicListFileName;
-  HashedList<std::string, MathRoutines::HashString> problemNamesNoTopics;
+  HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
   TopicElementParser topics;
-  MapList<std::string, std::string, MathRoutines::HashString> theScripts;
+  MapList<std::string, std::string, MathRoutines::hashString> theScripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -349,25 +349,25 @@ public:
   );
   bool mergeProblemWeight(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+    MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadline(
     const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+    MapList<std::string, ProblemData, MathRoutines::hashString>& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
-    MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+    MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
-    MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+    MapList<std::string, ProblemData, MathRoutines::hashString>& toStore,
     std::stringstream* commentsOnFailure
   );
-  QuerySet toQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
-  JSData toJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  QuerySet toQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  JSData toJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   std::string toStringDeadline(
     const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection
   );
@@ -404,7 +404,7 @@ public:
     return input.hashFunction();
   }
   unsigned int hashFunction() const {
-    return MathRoutines::HashString(this->fileName);
+    return MathRoutines::hashString(this->fileName);
   }
   bool operator==(const CalculatorHTML& other) const {
     return this->fileName == other.fileName;

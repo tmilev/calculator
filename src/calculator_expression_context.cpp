@@ -208,10 +208,10 @@ bool ExpressionContext::setAmbientSemisimpleLieAlgebra(
   return true;
 }
 
-bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
+bool Expression::contextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
   if (!this->isContext()) {
     global.fatal << "This is a programming error: calling "
-    << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << global.fatal;
+    << "Expression::contextSetDiffOperatorVar on a non-context expression. " << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
@@ -359,7 +359,7 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
         << " and " << differentialOperatorVariable.toString();
       }
     }
-    differentialOperatorVariablesFound.AddSelectionAppendNewIndex(theIndex);
+    differentialOperatorVariablesFound.addSelectionAppendNewIndex(theIndex);
     outputContext.differentialOperatorVariables[theIndex] = this->differentialOperatorVariables[i];
   }
   // Generate missing differntial operator variables.

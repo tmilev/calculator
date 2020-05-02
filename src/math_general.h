@@ -90,7 +90,7 @@ public:
     this->Powers.reserve(other.size);
     this->makeConstant();
     for (int i = 0; i < other.size; i ++) {
-      this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
+      this->multiplyByGeneratorPowerOnTheRight(other[i], 1);
     }
   }
   bool checkConsistency() {
@@ -125,7 +125,7 @@ public:
     }
   }
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
+  void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
   void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const Coefficient& thePower);
   unsigned int hashFunction() const {
     int top = MathRoutines::Minimum(someRandomPrimesSize, this->generatorsIndices.size);
@@ -1353,14 +1353,14 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
   if (r > this->ActualNumRows || c > this->ActualNumCols) {
     newElements  = new Element * [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += newActualNumRows;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter += newActualNumRows;
+  GlobalStatistics::checkPointerCounters();
 #endif
     for (int i = 0; i < newActualNumRows; i ++) {
       newElements[i] = new Element[newActualNumCols];
 #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter += newActualNumCols;
-  ParallelComputing::CheckPointerCounters();
+  GlobalStatistics::globalPointerCounter += newActualNumCols;
+  GlobalStatistics::checkPointerCounters();
 #endif
     }
   }
@@ -1442,7 +1442,7 @@ bool Vectors<Coefficient>::computeNormal(Vector<Coefficient>& output, int inputD
   NonPivotPoints.initialize(theDimension);
   output.setSize(theDimension);
   this->gaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
-  if (NonPivotPoints.CardinalitySelection != 1) {
+  if (NonPivotPoints.cardinalitySelection != 1) {
     return false;
   }
   tempMatrix.nonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -1469,8 +1469,8 @@ void Matrix<Element>::releaseMemory() {
   }
   delete [] this->elements;
 #ifdef AllocationLimitsSafeguard
-ParallelComputing::GlobalPointerCounter -= this->ActualNumRows * this->ActualNumCols + this->ActualNumRows;
-  ParallelComputing::CheckPointerCounters();
+GlobalStatistics::globalPointerCounter -= this->ActualNumRows * this->ActualNumCols + this->ActualNumRows;
+  GlobalStatistics::checkPointerCounters();
 #endif
   this->elements = nullptr;
   this->numberOfColumns = 0;
@@ -1491,7 +1491,7 @@ bool Matrix<Coefficient>::invert() {
   theInverse.MakeIdMatrix(this->numberOfRows);
   Selection NonPivotCols;
   this->gaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
-  if (NonPivotCols.CardinalitySelection != 0) {
+  if (NonPivotCols.cardinalitySelection != 0) {
     return false;
   }
   *this = theInverse;
@@ -1790,7 +1790,7 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows(
         outputNonPivotPoints__WarningSelectionNotInitialized->selected[outputPivotPointCols.theObjects[i]] = false;
       }
     }
-    outputNonPivotPoints__WarningSelectionNotInitialized->ComputeIndicesFromSelection();
+    outputNonPivotPoints__WarningSelectionNotInitialized->computeIndicesFromSelection();
   }
 }
 
@@ -1879,7 +1879,7 @@ public:
   char AmbientWeylLetter;
   List<MonomialP>::Comparator monomialOrder;
   template <typename templateMonomial>
-  typename List<templateMonomial>::Comparator* GetMonOrder();
+  typename List<templateMonomial>::Comparator* getMonomialOrder();
   std::string GetPolyLetter(int index) const;
   FormatExpressions();
 };
@@ -3897,7 +3897,7 @@ void Matrix<Coefficient>::NonPivotPointsToEigenVectorMatrixForm(
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (!TheNonPivotPoints.selected[i]) {
       output(i, 0) = 0;
-      for (int j = 0; j < TheNonPivotPoints.CardinalitySelection; j ++) {
+      for (int j = 0; j < TheNonPivotPoints.cardinalitySelection; j ++) {
         output(i, 0) -= this->elements[RowCounter][TheNonPivotPoints.elements[j]];
       }
       RowCounter ++;
@@ -3919,7 +3919,7 @@ void Matrix<Coefficient>::nonPivotPointsToEigenVector(
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (!theNonPivotPoints.selected[i]) {
       output[i] = theRingZero;
-      for (int j = 0; j < theNonPivotPoints.CardinalitySelection; j ++) {
+      for (int j = 0; j < theNonPivotPoints.cardinalitySelection; j ++) {
         output[i] -= this->elements[RowCounter][theNonPivotPoints.elements[j]];
       }
       RowCounter ++;
@@ -4058,7 +4058,7 @@ public:
   bool getCoordinatesInBasis(
     const List<ElementSemisimpleLieAlgebra<Coefficient> >& theBasis, Vector<Coefficient>& output
   ) const;
-  SemisimpleLieAlgebra* GetOwner() const {
+  SemisimpleLieAlgebra* getOwner() const {
     this->checkConsistency();
     if (this->size() == 0) {
       return nullptr;
@@ -4406,8 +4406,8 @@ void Matrix<Coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& 
   }
   Selection nonPivotPts;
   this->gaussianEliminationByRows(0, &nonPivotPts);
-  output.setSize(nonPivotPts.CardinalitySelection);
-  for (int i = 0; i < nonPivotPts.CardinalitySelection; i ++) {
+  output.setSize(nonPivotPts.cardinalitySelection);
+  for (int i = 0; i < nonPivotPts.cardinalitySelection; i ++) {
     int currentPivotIndex = nonPivotPts.elements[i];
     output[i].makeEi(this->numberOfColumns, currentPivotIndex);
     int rowCounter = 0;
@@ -4472,8 +4472,8 @@ void List<Object>::SubSelection(const Selection& theSelection, List<Object>& out
     thisCopy.SubSelection(theSelection, output);
     return;
   }
-  output.setSize(theSelection.CardinalitySelection);
-  for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
+  output.setSize(theSelection.cardinalitySelection);
+  for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
     output[i] = (*this)[theSelection.elements[i]];
   }
 }
@@ -4563,7 +4563,7 @@ void MonomialTensor<Coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnT
 }
 
 template <class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
-void MonomialTensor<Coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight(
+void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnTheRight(
   int theGeneratorIndex, const Coefficient& thePower
 ) {
   if (thePower == 0) {
@@ -4904,11 +4904,11 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
   List<templateMonomial> sortedMons;
   sortedMons = this->theMonomials;
   // If this line fails to link, you must do the following.
-  // You need to implement FormatExpressions::GetMonOrder<templateMonomial>()
+  // You need to implement FormatExpressions::getMonomialOrder<templateMonomial>()
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
   typename List<templateMonomial>::Comparator*
-  theOrder = (theFormat == nullptr) ? 0 : theFormat->GetMonOrder<templateMonomial>();
+  theOrder = (theFormat == nullptr) ? 0 : theFormat->getMonomialOrder<templateMonomial>();
   sortedMons.quickSortDescending(theOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
@@ -4944,9 +4944,9 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
       }
       if (useFracSpecial) {
         std::string tempS3;
-        if (StringRoutines::StringBeginsWith(tempS1, "\\frac{1}", &tempS3)) {
+        if (StringRoutines::stringBeginsWith(tempS1, "\\frac{1}", &tempS3)) {
           tempS1 = "\\frac{" + tempS2 + "}" + tempS3;
-        } else if (StringRoutines::StringBeginsWith(tempS1, "-\\frac{1}", &tempS3)) {
+        } else if (StringRoutines::stringBeginsWith(tempS1, "-\\frac{1}", &tempS3)) {
           tempS1 = "-\\frac{" + tempS2 + "}" + tempS3;
         } else {
           useFracSpecial = false;
@@ -5382,7 +5382,7 @@ public:
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void TransformToWeylProjective(ConeComplex& owner);
+  void transformToWeylProjective(ConeComplex& owner);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   void GetLinesContainedInCone(Vectors<Rational>& output);
@@ -5572,7 +5572,7 @@ public:
   void RefineAndSort();
   void FindMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima);
   void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
-  void TransformToWeylProjective();
+  void transformToWeylProjective();
   int getDimension() {
     if (this->size <= 0) {
       return - 1;
@@ -6441,9 +6441,9 @@ public:
       if (this->coefficients[i] != 1) {
         return false;
       }
-      theSel.AddSelectionAppendNewIndex((*this)[i].vIndex);
+      theSel.addSelectionAppendNewIndex((*this)[i].vIndex);
     }
-    return theSel.CardinalitySelection == theDim;
+    return theSel.cardinalitySelection == theDim;
   }
   bool isPositiveDefinite() {
     Matrix<Coefficient> other;
@@ -6808,17 +6808,17 @@ class MonomialGeneralizedVerma {
     return this->theMonCoeffOne > other.theMonCoeffOne;
   }
   void reduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
-  bool IsHWV() const {
+  bool isHWV() const {
     if (!this->theMonCoeffOne.isEqualToOne()) {
       return false;
     }
-    return this->GetOwner().getDimension() - 1 == this->indexFDVector;
+    return this->getOwner().getDimension() - 1 == this->indexFDVector;
   }
   void makeConstant(ModuleSSalgebra<Coefficient>& inputOwner) {
     this->owner = &inputOwner;
     this->theMonCoeffOne.makeOne(*inputOwner.owner);
   }
-  ModuleSSalgebra<Coefficient>& GetOwner() const {
+  ModuleSSalgebra<Coefficient>& getOwner() const {
     return *this->owner;
   }
 };
@@ -6835,7 +6835,7 @@ public:
   }
   ElementSumGeneralizedVermas() {
   }
-  void MakeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit);
+  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit);
   int minimalNumberOfVariables() {
     if (this->owner == nullptr) {
       return - 1;
@@ -6919,11 +6919,11 @@ public:
     }
     return true;
   }
-  bool IsHWV() const {
+  bool isHWV() const {
     if (this->theMons.size != 1) {
       return false;
     }
-    return this->theMons[0].IsHWV();
+    return this->theMons[0].isHWV();
   }
   bool operator>(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
     if (this->theMons.size > other.theMons.size) {
@@ -7064,7 +7064,7 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpress
   std::stringstream out;
   if (this->theMons.size > 1) {
     for (int i = 0; i < this->theMons.size; i ++) {
-      bool ishwv = this->theMons[i].IsHWV();
+      bool ishwv = this->theMons[i].isHWV();
       if (!ishwv) {
         out << "(";
       }
@@ -7114,7 +7114,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* t
     out << "\\cdot ";
   }
   if (includeV) {
-    out << theMod.ElementToStringHWV(theFormat);
+    out << theMod.elementToStringHWV(theFormat);
   }
   return out.str();
 }
@@ -7206,7 +7206,7 @@ void MonomialGeneralizedVerma<Coefficient>::MultiplyMeByUEEltOnTheLefT(
   output.makeZero();
   ElementSumGeneralizedVermas<Coefficient> buffer;
   ProgressReport theReport;
-  if (!this->GetOwner().owner->flagHasNilradicalOrder) {
+  if (!this->getOwner().owner->flagHasNilradicalOrder) {
     global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
     << global.fatal;
   }
@@ -7265,7 +7265,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
     return;
   }
   ElementUniversalEnveloping<Coefficient> theUEelt;
-  theUEelt.makeZero(*this->GetOwner().owner);
+  theUEelt.makeZero(*this->getOwner().owner);
   theUEelt.addMonomial(this->theMonCoeffOne, 1);
   theUEelt.simplify();
 
@@ -7289,11 +7289,11 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
         break;
       }
       int theIndex = currentMon.generatorsIndices[k];
-      if (theMod.HasFreeAction(theIndex)) {
+      if (theMod.hasFreeAction(theIndex)) {
         break;
       }
       tempMat2 = tempMat1;
-      tempMat1 = theMod.GetActionGeneratorIndeX(theIndex);
+      tempMat1 = theMod.getActionGeneratorIndex(theIndex);
       tempMat1.raiseToPower(thePower);
       tempMat1 *= tempMat2;
       currentMon.Powers.size --;
@@ -7319,7 +7319,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       }
     }
   }
-  theMod.GetOwner().OrderStandardAscending();
+  theMod.getOwner().OrderStandardAscending();
 }
 
 template<class Coefficient>
@@ -7349,10 +7349,10 @@ void Vectors<Coefficient>::IntersectTwoLinSpaces(
     }
   }
   theMat.gaussianEliminationByRows(0, &tempSel);
-  output.reserve(tempSel.CardinalitySelection);
+  output.reserve(tempSel.cardinalitySelection);
   output.size = 0;
   Vector<Coefficient> nextIntersection;
-  for (int i = 0; i < tempSel.CardinalitySelection; i ++) {
+  for (int i = 0; i < tempSel.cardinalitySelection; i ++) {
     int currentIndex = tempSel.elements[i];
     if (currentIndex < firstReduced.size) {
       global.fatal << "Unexpected condition in Vectors::IntersectTwoLinSpaces. " << global.fatal;
@@ -7368,13 +7368,13 @@ void Vectors<Coefficient>::IntersectTwoLinSpaces(
 }
 
 template <class Coefficient>
-void ElementSumGeneralizedVermas<Coefficient>::MakeHWV(
+void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
   ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit
 ) {
   this->makeZero();
   MonomialGeneralizedVerma<Coefficient> theMon;
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
-  theMon.theMonCoeffOne.makeOne(theOwner.GetOwner());
+  theMon.theMonCoeffOne.makeOne(theOwner.getOwner());
   theMon.owner = &theOwner;
   this->addMonomial(theMon, theRingUnit);
 }

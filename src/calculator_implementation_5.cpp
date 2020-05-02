@@ -24,7 +24,7 @@ public:
   double minTriangleSideAsPercentOfWidthPlusHeight;
   List<bool> trianglesUsed;
   List<List<Vector<double> > > theTriangles;
-  MapList<Vector<double>, double, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
+  MapList<Vector<double>, double, MathRoutines::hashVectorDoubles> theEvaluatedPoints;
   HashedList<Expression> knownEs;
   List<double> knownValues;
   Vector<double> lowerLeftCorner, upperRightCorner;
@@ -91,7 +91,7 @@ double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
   this->knownValues[this->knownValues.size - 2] = thePoint[0];
   this->knownValues[this->knownValues.size - 1] = thePoint[1];
   double functionValue = 0;
-  if (this->theFun.EvaluatesToDoubleUnderSubstitutions(this->knownEs, this->knownValues, &functionValue)) {
+  if (this->theFun.evaluatesToDoubleUnderSubstitutions(this->knownEs, this->knownValues, &functionValue)) {
     this->numGoodEvaluations ++;
   } else {
     this->numBadEvaluations ++;
@@ -365,7 +365,7 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   if (!theMesh.ComputePoints(theCommands, input, false)) {
     return false;
   }
-  HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
+  HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
   for (int i = 0; i < theMesh.theCurve.thePlots.size; i ++) {
     thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
     thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
@@ -403,7 +403,7 @@ bool MeshTriangles::ComputePoints(
   this->knownValues.addOnTop(0);
   this->knownValues.addOnTop(0);
   HashedList<Expression> theFreeVars;
-  if (!this->theFun.GetFreeVariables(theFreeVars, true)) {
+  if (!this->theFun.getFreeVariables(theFreeVars, true)) {
     return theCommands << "Failed to extract free variables from: " << this->theFun.toString();
   }
   theFreeVars.quickSortAscending();
@@ -519,7 +519,7 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   if (!theFunNoCoeff.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!theFunNoCoeff[2].IsEqualToHalf()) {
+  if (!theFunNoCoeff[2].isEqualToHalf()) {
     return false;
   }
   Expression a, b, c;
@@ -529,7 +529,7 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   if (!b.isEqualToZero()) {
     return false;
   }
-  if (!a.IsNegativeConstant()) {
+  if (!a.isNegativeConstant()) {
     return false;
   }
   if (!c.isPositiveNumber()) {
@@ -542,7 +542,7 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   theRad.makeSqrt(theCommands, theRadSquared);
   Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
   rescaledArgument = theVariableE / theRad;
-  arcCosPart.MakeOX(theCommands, theCommands.opArcCos(), rescaledArgument);
+  arcCosPart.makeOX(theCommands, theCommands.opArcCos(), rescaledArgument);
   arcCosPart *= theRadSquared / - 2;
   algSQRTPart = theRadSquared - theVariableE * theVariableE;
   algPart.makeSqrt(theCommands, algSQRTPart);
@@ -628,7 +628,7 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   if (!theFunNoCoeff.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!theFunNoCoeff[2].IsEqualToHalf()) {
+  if (!theFunNoCoeff[2].isEqualToHalf()) {
     return false;
   }
   Expression a, b, c;
@@ -641,7 +641,7 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   if (!a.isPositiveNumber()) {
     return false;
   }
-  if (!c.IsNegativeConstant()) {
+  if (!c.isNegativeConstant()) {
     return false;
   }
   Expression extraCF, theVarChangeCF, theNewVarE;
@@ -653,7 +653,7 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   Expression algSQRTPart, algPart, lnPart;
   algSQRTPart = theNewVarE * theNewVarE - theCommands.EOne();
   algPart.makeSqrt(theCommands, algSQRTPart);
-  lnPart.MakeOX(theCommands, theCommands.opLog(), theNewVarE - algPart);
+  lnPart.makeOX(theCommands, theCommands.opLog(), theNewVarE - algPart);
   output = theFunCoeff * (algPart * theNewVarE + lnPart) / 2;
   return true;
 }
@@ -670,8 +670,8 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
     return false;
   }
   if (
-    theSetE[1].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity()) ||
-    theSetE[2].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity())
+    theSetE[1].containsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity()) ||
+    theSetE[2].containsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity())
   ) {
     return false;
   }
@@ -682,13 +682,13 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral)) {
     return false;
   }
-  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral())) {
+  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral())) {
     return false;
   }
-  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide())) {
+  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(theCommands.opDivide())) {
     return false;
   }
-  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opLog())) {
+  if (solvedIntegral.containsAsSubExpressionNoBuiltInTypes(theCommands.opLog())) {
     return false;
   }
   HashedList<Expression> theVar;
@@ -698,7 +698,7 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   for (int i = 1; i <= 2; i ++) {
     if (theSetE[i].evaluatesToDouble(&theValue[0])) {
       double theResult = 0;
-      if (!solvedIntegral.EvaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult)) {
+      if (!solvedIntegral.evaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult)) {
         return false;
       }
     }
@@ -943,7 +943,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
     allowedFreeVars.addOnTopNoRepetition(input[i]);
   }
   std::stringstream out;
-  theExpression.GetFreeVariables(presentFreeVars, true);
+  theExpression.getFreeVariables(presentFreeVars, true);
   if (!allowedFreeVars.contains(presentFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
@@ -1074,7 +1074,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
     }
   }
   presentFreeVars.setExpectedSize(input.size() - 2);
-  theExpression.GetFreeVariables(presentFreeVars, excludeNamedConstants);
+  theExpression.getFreeVariables(presentFreeVars, excludeNamedConstants);
   std::stringstream out;
   if (!presentFreeVars.contains(mandatoryFreeVars)) {
     out << "<hr>";
@@ -1750,7 +1750,7 @@ bool CalculatorFunctions::innerLogBaseNaturalToLn(Calculator& theCommands, const
   if (!input[1].isOperationGiven(theCommands.opE())) {
     return false;
   }
-  return output.MakeOX(theCommands, theCommands.opLog(), input[2]);
+  return output.makeOX(theCommands, theCommands.opLog(), input[2]);
 }
 
 bool CalculatorFunctions::innerLogBaseSimpleCases(
@@ -2115,7 +2115,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     << "functions expressions to use for "
     << "the surface. ";
   }
-  thePlot.manifoldImmersion.GetFreeVariables(thePlot.variablesInPlay, true);
+  thePlot.manifoldImmersion.getFreeVariables(thePlot.variablesInPlay, true);
   if (thePlot.variablesInPlay.size > 2) {
     return theCommands << "Got a surface with "
     << thePlot.variablesInPlay.size
@@ -2186,25 +2186,25 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
       }
     }
   }
-  MapList<std::string, Expression, MathRoutines::HashString> theKeys;
+  MapList<std::string, Expression, MathRoutines::hashString> theKeys;
   if (CalculatorConversions::innerLoadKeysFromStatementLisT(
     theCommands, input, theKeys, &theCommands.comments, true
   )) {
     if (theKeys.contains("color1")) {
-      thePlot.colorUV = theKeys.GetValueCreate("color1").toString();
+      thePlot.colorUV = theKeys.getValueCreate("color1").toString();
     }
     if (theKeys.contains("color2")) {
-      thePlot.colorVU = theKeys.GetValueCreate("color2").toString();
+      thePlot.colorVU = theKeys.getValueCreate("color2").toString();
     }
-    MapList<std::string, std::string, MathRoutines::HashString> keysToConvert;
-    keysToConvert.GetValueCreate("numSegments1");
-    keysToConvert.GetValueCreate("numSegments2");
-    keysToConvert.GetValueCreate("lineWidth");
+    MapList<std::string, std::string, MathRoutines::hashString> keysToConvert;
+    keysToConvert.getValueCreate("numSegments1");
+    keysToConvert.getValueCreate("numSegments2");
+    keysToConvert.getValueCreate("lineWidth");
     for (int i = 0; i < keysToConvert.size(); i ++) {
       if (!theKeys.contains(keysToConvert.theKeys[i])) {
         continue;
       }
-      Expression expressionToConvert = theKeys.GetValueCreate(keysToConvert.theKeys[i]);
+      Expression expressionToConvert = theKeys.getValueCreate(keysToConvert.theKeys[i]);
       bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
         theCommands, expressionToConvert, jsConverter
       );
@@ -2218,14 +2218,14 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
       }
     }
     thePlot.numSegmenTsJS.setSize(2);
-    if (keysToConvert.GetValueCreate("numSegments1") != "") {
-      thePlot.numSegmenTsJS[0] = keysToConvert.GetValueCreate("numSegments1");
+    if (keysToConvert.getValueCreate("numSegments1") != "") {
+      thePlot.numSegmenTsJS[0] = keysToConvert.getValueCreate("numSegments1");
     }
-    if (keysToConvert.GetValueCreate("numSegments2") != "") {
-      thePlot.numSegmenTsJS[1] = keysToConvert.GetValueCreate("numSegments2");
+    if (keysToConvert.getValueCreate("numSegments2") != "") {
+      thePlot.numSegmenTsJS[1] = keysToConvert.getValueCreate("numSegments2");
     }
-    if (keysToConvert.GetValueCreate("lineWidth") != "") {
-      thePlot.lineWidthJS = keysToConvert.GetValueCreate("lineWidth");
+    if (keysToConvert.getValueCreate("lineWidth") != "") {
+      thePlot.lineWidthJS = keysToConvert.getValueCreate("lineWidth");
     }
   }
   if (

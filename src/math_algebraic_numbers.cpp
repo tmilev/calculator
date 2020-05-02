@@ -46,7 +46,7 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
         resultVectorSel.selected[i] = true;
       }
     }
-    resultVectorSel.ComputeIndicesFromSelection();
+    resultVectorSel.computeIndicesFromSelection();
     tempM.MakeEij(this->getIndexFromRadicalSelection(resultVectorSel), this->getIndexFromRadicalSelection(vectorActedOnSel));
     outputOp.addMonomial(tempM, theCoeff);
   } while (vectorActedOnSel.IncrementReturnFalseIfPastLast());
@@ -63,7 +63,7 @@ void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
   do {
     std::stringstream out;
     LargeInteger theRad = 1;
-    for (int i = 0; i < theSel.CardinalitySelection; i ++) {
+    for (int i = 0; i < theSel.cardinalitySelection; i ++) {
       theRad *= this->theQuadraticRadicals[theSel.elements[i]];
     }
     if (theRad != 1) {
@@ -81,7 +81,7 @@ bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Sel
   int counter = 0;
   while (inputIndex > 0) {
     if (inputIndex % 2 == 1) {
-      theSel.AddSelectionAppendNewIndex(counter);
+      theSel.addSelectionAppendNewIndex(counter);
     }
     inputIndex /= 2;
     counter ++;
@@ -152,7 +152,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
     << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
     return (false);
   }
-  this->latestBasis.setSize(MathRoutines::TwoToTheNth(radicalsNew.size));
+  this->latestBasis.setSize(MathRoutines::twoToTheNth(radicalsNew.size));
   MatrixTensor<Rational> currentInjection;
   currentInjection.makeZero();
   Selection largerFieldSel, smallerFieldSel;
@@ -163,12 +163,12 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
     for (int j = 0; j < this->theQuadraticRadicals.size; j ++) {
       if (smallerFieldSel.selected[j]) {
         if (this->theQuadraticRadicals[j] == - 1) {
-          largerFieldSel.AddSelectionAppendNewIndex(radicalsNew.getIndex(- 1));
+          largerFieldSel.addSelectionAppendNewIndex(radicalsNew.getIndex(- 1));
           continue;
         }
         for (int k = 0; k < radicalsNew.size; k ++) {
           if (this->theQuadraticRadicals[j] % radicalsNew[k] == 0 && radicalsNew[k] != - 1) {
-            largerFieldSel.AddSelectionAppendNewIndex(k);
+            largerFieldSel.addSelectionAppendNewIndex(k);
           }
         }
       }
@@ -1120,7 +1120,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
     if (outputWhichDouble != nullptr) {
       currentMultiplicand = this->element.coefficients[i].GetDoubleValue();
     }
-    for (int j = 0; j < currentRadicalSelection.CardinalitySelection; j ++) {
+    for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
         return false;
       } else {
@@ -1198,12 +1198,12 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   FactorSel.initialize(inputOwner.theQuadraticRadicals.size);
   for (int i = 0; i < theFactors.size; i ++) {
     if (theFactors[i] == - 1) {
-      FactorSel.AddSelectionAppendNewIndex(inputOwner.theQuadraticRadicals.getIndex(- 1));
+      FactorSel.addSelectionAppendNewIndex(inputOwner.theQuadraticRadicals.getIndex(- 1));
     } else {
       for (int j = 0; j < inputOwner.theQuadraticRadicals.size; j ++) {
         if (inputOwner.theQuadraticRadicals[j] != - 1) {
           if (theFactors[i] % inputOwner.theQuadraticRadicals[j] == 0) {
-            FactorSel.AddSelectionAppendNewIndex(j);
+            FactorSel.addSelectionAppendNewIndex(j);
           }
         }
       }

@@ -461,13 +461,13 @@ void Vectors<Coefficient>::SelectABasisInSubspace(
     currentRow ++;
     if (currentRow == MaxNumRows || i == input.size - 1) {
       theMat.gaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
-      currentRow = outputSelectedPivotColumns.CardinalitySelection;
+      currentRow = outputSelectedPivotColumns.cardinalitySelection;
     }
     if (currentRow == MaxNumRows) {
       break;
     }
   }
-  output.setSize(outputSelectedPivotColumns.CardinalitySelection);
+  output.setSize(outputSelectedPivotColumns.cardinalitySelection);
   for (int i = 0; i < output.size; i ++) {
     theMat.GetVectorFromRow(i, output[i]);
   }
@@ -543,7 +543,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     if (NumFoundPivots == MaxRankMat) {
       if (outputNonPivotColumns != nullptr) {
         for (int j = i; j < this->numberOfColumns; j ++) {
-          outputNonPivotColumns->AddSelectionAppendNewIndex(j);
+          outputNonPivotColumns->addSelectionAppendNewIndex(j);
         }
       }
       break;
@@ -551,7 +551,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     tempI = this->FindPivot(i, NumFoundPivots);
     if (tempI == - 1) {
       if (outputNonPivotColumns != nullptr) {
-        outputNonPivotColumns->AddSelectionAppendNewIndex(i);
+        outputNonPivotColumns->addSelectionAppendNewIndex(i);
       }
       continue;
     }
@@ -581,7 +581,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       }
     }
     if (outputPivotColumns != nullptr) {
-      outputPivotColumns->AddSelectionAppendNewIndex(i);
+      outputPivotColumns->addSelectionAppendNewIndex(i);
     }
     this->switchRows(NumFoundPivots, tempI);
     if (carbonCopyMat != 0) {

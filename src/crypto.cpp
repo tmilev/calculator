@@ -1464,16 +1464,16 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
   this->keyid = "";
   this->theModulusString = "";
   this->theExponentString = "";
-  if (input.HasKey("alg")) {
+  if (input.hasKey("alg")) {
     this->algorithm = input.getValue("alg").theString;
   }
-  if (input.HasKey("kid")) {
+  if (input.hasKey("kid")) {
     this->keyid = input.getValue("kid").theString;
   }
-  if (input.HasKey("n")) {
+  if (input.hasKey("n")) {
     this->theModulusString = input.getValue("n").theString;
   }
-  if (input.HasKey("e")) {
+  if (input.hasKey("e")) {
     this->theExponentString = input.getValue("e").theString;
   }
   return this->LoadFromModulusAndExponentStrings(commentsOnFailure);
@@ -1506,7 +1506,7 @@ bool Crypto::LoadOneKnownCertificate(
   PublicKeyRSA currentCert;
   bool isGood = false;
   if (certificateJSON.theType == JSData::token::tokenObject) {
-    if (certificateJSON.HasKey("keys")) {
+    if (certificateJSON.hasKey("keys")) {
       JSData theKeys = certificateJSON.getValue("keys");
       if (theKeys.theType == JSData::token::tokenArray) {
         isGood = true;
@@ -1560,13 +1560,13 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     if (theFileNames[i] == "." || theFileNames[i] == "..") {
       continue;
     }
-    if (StringRoutines::StringBeginsWith(theFileNames[i], "debug")) {
+    if (StringRoutines::stringBeginsWith(theFileNames[i], "debug")) {
       continue;
     }
-    if (StringRoutines::StringEndsWith(theFileNames[i], "readme.md")) {
+    if (StringRoutines::stringEndsWith(theFileNames[i], "readme.md")) {
       continue;
     }
-    if (StringRoutines::StringEndsWith(theFileNames[i], "README.md")) {
+    if (StringRoutines::stringEndsWith(theFileNames[i], "README.md")) {
       continue;
     }
     std::string currentCert;
@@ -1696,7 +1696,7 @@ bool JSONWebToken::verifyRSA256(
 bool JSONWebToken::assignString(const std::string& other, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("JSONWebToken::assignString");
   List<std::string> theStrings;
-  StringRoutines::StringSplitExcludeDelimiter(other, '.', theStrings);
+  StringRoutines::stringSplitExcludeDelimiter(other, '.', theStrings);
   if (theStrings.size != 3) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Expected 3 strings separated by two dots, got: "

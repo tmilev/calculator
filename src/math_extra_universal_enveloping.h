@@ -29,7 +29,7 @@ public:
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
   }
-  SemisimpleLieAlgebra& GetOwner() const {
+  SemisimpleLieAlgebra& getOwner() const {
     return *this->owner;
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
@@ -268,7 +268,7 @@ public:
     Rational tempRat = coeff;
     this->makeConstant(tempRat, numVars, &theOwner);
   }
-  SemisimpleLieAlgebra& GetOwner() const {
+  SemisimpleLieAlgebra& getOwner() const {
     return *this->owner;
   }
   template <class otherType>

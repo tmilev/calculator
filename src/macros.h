@@ -14,7 +14,7 @@
 //-----------------------------------------------------------
 // The following option turns on a RAM memory limit safeguard, as well as
 // very limited memory allocation statistics. See
-// ParallelComputing::CheckPointerCounters.
+// GlobalStatistics::checkPointerCounters.
 // The project should compile and link just fine with
 // the following 3 lines commented out.
 // If not, it's a bug.

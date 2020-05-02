@@ -86,7 +86,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     }
   }
   if (!global.flagNotAllocated) {
-    if (!global.calculator().IsZeroPointer()) {
+    if (!global.calculator().isZeroPointer()) {
       if (global.calculator().getElement().comments.str() != "") {
         this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator().getElement().comments.str();
       }
@@ -495,7 +495,7 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::s
 }
 
 std::string GlobalVariables::getWebInput(const std::string& inputName) {
-  return this->webArguments.GetValueCreate(inputName);
+  return this->webArguments.getValueCreate(inputName);
 }
 
 void GlobalVariables::makeReport() {
@@ -527,7 +527,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
     this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
     inputAbbreviated = this->userInputStringIfAvailable;
   }
-  StringRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
+  StringRoutines::stringTrimToLengthWithHash(inputAbbreviated, 150);
   this->RelativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
 }
 
@@ -613,13 +613,13 @@ std::string UserCalculatorData::toStringUnsecure() {
 
 template<>
 List<Weight<RationalFunction> >::Comparator*
-FormatExpressions::GetMonOrder<Weight<RationalFunction> >() {
+FormatExpressions::getMonomialOrder<Weight<RationalFunction> >() {
   return nullptr;
 }
 
 template<>
 List<Weight<Rational> >::Comparator*
-FormatExpressions::GetMonOrder<Weight<Rational> >() {
+FormatExpressions::getMonomialOrder<Weight<Rational> >() {
   return nullptr;
 }
 
@@ -1356,7 +1356,7 @@ void WeylGroupData::generateRootSubsystem(Vectors<Rational>& theRoots) {
   }
 }
 
-void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
+void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
@@ -1409,7 +1409,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
     QuasiPolynomial& currentSum = this->theMultiplicities.theObjects[i];
     currentSum.MakeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
     for (int k = 0; k < this->theLinearOperators.size; k ++) {
-      this->GetProjection(k, this->projectivizedChambeR.theObjects[i].GetInternalPoint(), tempRoot);
+      this->getProjection(k, this->projectivizedChambeR.theObjects[i].GetInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
       global.fatal << global.fatal ;
       int theIndex = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
@@ -1448,8 +1448,8 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     return "Error: algebra is not so(7).";
   }
   this->initFromHomomorphism(parabolicSel, this->theHmm);
-  this->TransformToWeylProjectiveStep1();
-  this->TransformToWeylProjectiveStep2();
+  this->transformToWeylProjectiveStep1();
+  this->transformToWeylProjectiveStep2();
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
   highestWeightLargerAlgSimpleCoords = LargerWeyl.getSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
   Matrix<Rational> tempMat;
@@ -1467,7 +1467,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   drawOps.theBuffer.BasisProjectionPlane[0][1] = 0;
   drawOps.theBuffer.BasisProjectionPlane[1][0] = 1;
   drawOps.theBuffer.BasisProjectionPlane[1][1] = 1;
-  drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
+  drawOps.theBuffer.modifyToOrthonormalNoShiftSecond
   (drawOps.theBuffer.BasisProjectionPlane[1], drawOps.theBuffer.BasisProjectionPlane[0]);
   drawOps.theBuffer.GraphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
@@ -1523,7 +1523,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::SortMultiplicities() {
+void GeneralizedVermaModuleCharacters::sortMultiplicities() {
   List<Cone> tempList;
   tempList = this->projectivizedChambeR;
   tempList.quickSortAscending();
@@ -1566,32 +1566,32 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
 
 void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& parabolicSel) {
   std::stringstream out;
-  this->thePauseControlleR.InitComputation();
+  this->thePauseControlleR.initComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
   switch (this->computationPhase) {
     case 0:
 //      this->theParser.theHmm.MakeG2InB3(this->theParser);
       this->initFromHomomorphism(parabolicSel, this->theHmm);
-      this->TransformToWeylProjectiveStep1();
+      this->transformToWeylProjectiveStep1();
 //      out << global.theIndicatorVariables.StatusString1;
-      this->TransformToWeylProjectiveStep2();
+      this->transformToWeylProjectiveStep2();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 1:
       this->projectivizedChambeR.Refine();
-      this->SortMultiplicities();
+      this->sortMultiplicities();
       out << this->projectivizedChambeR.toString(false);
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 2:
-      this->ComputeQPsFromChamberComplex();
+      this->computeQPsFromChamberComplex();
       out << this->elementToStringMultiplicitiesReport();
       break;
     case 3:
 //      out << this->checkMultiplicitiesVsOrbits();
       break;
     case 4:
-      this->InitTheMaxComputation();
+      this->initTheMaxComputation();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
@@ -1614,7 +1614,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
       break;
   }
   this->computationPhase ++;
-  this->thePauseControlleR.ExitComputation();
+  this->thePauseControlleR.exitComputation();
 }
 
 GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
@@ -1710,7 +1710,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < input.theDomain().getRank(); i ++) {
     DualCartanEmbedding.GetVectorFromColumn(i, tempRoot);
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).isPositive()) {
-      this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
+      this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
     }
   }
   this->log << "\nDual cartan embedding smaller into larger:\n" <<
@@ -1943,7 +1943,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       numFoundChambers ++;
       out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
       DisplayIndicesprojectivizedChambers.addOnTop(numFoundChambers);
-      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR[i]) << "&";
+      out << this->prepareReportOneCone(theFormat, this->projectivizedChambeR[i]) << "&";
       out << "\\begin{tabular}{c}";
       out << theMult.toString(false, true, &theFormat) << "\\end{tabular}\\\\\n";
     } else {
@@ -1985,7 +1985,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       if (indexMultFreeChamber!= - 1) {
         numFoundChambers++;
         out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.theObjects[i] << "}\\\\\n";
-        out << this->PrepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.theObjects[indexMultFreeChamber]) << "&";
+        out << this->prepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.theObjects[indexMultFreeChamber]) << "&";
         out << theMult.toString(false, true, theFormat) << "\\\\\n";
       }
     }
@@ -1996,8 +1996,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
-  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::InitTheMaxComputation");
+void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
+  MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initTheMaxComputation");
   this->theMaxComputation.numNonParaM = 2;
   this->theMaxComputation.theConesLargerDim.reserve(this->projectivizedChambeR.size);
   this->theMaxComputation.LPtoMaximizeLargerDim.reserve(this->theMultiplicities.size);
@@ -2031,7 +2031,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
   }
 }
 
-std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone) {
+std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone) {
   std::stringstream out1;
   Vector<Rational> normalNoConstant;
   int dimSmallerAlgebra = this->theLinearOperators[0].numberOfRows;
@@ -2070,13 +2070,13 @@ std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesRepor
     numInequalities += this->projectivizedChambeR[i].Normals.size;
   }
   out << "\nNumber of inequalities: " << numInequalities;
-  if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection != 0) {
+  if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection != 0) {
     out << this->prepareReport();
   }
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray(
+void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
   Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams
 ) {
   //reminder: the very last variable comes from the projectivization and contributes to the translation only!
@@ -2095,7 +2095,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray(
   }
 }
 
-void GeneralizedVermaModuleCharacters::GetProjection(
+void GeneralizedVermaModuleCharacters::getProjection(
   int indexOperator, const Vector<Rational>& input, Vector<Rational>& output
 ) {
   Matrix<Rational>& currentExtendedOperator = this->theLinearOperatorsExtended[indexOperator];
@@ -2111,7 +2111,7 @@ void GeneralizedVermaModuleCharacters::GetProjection(
   output += currentTranslation;
 }
 
-void GeneralizedVermaModuleCharacters::GetSubFromIndex(
+void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen, int theIndex
 ) {
   Matrix<Rational>& theOperator = this->theLinearOperators[theIndex];
@@ -2132,7 +2132,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex(
   outputSub.MakeSubFromMatrixIntAndDen(outputMat, outputDen);
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjective(
+void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal
 ) {
   Matrix<Rational> theOperatorExtended = this->theLinearOperatorsExtended[indexOperator];
@@ -2147,7 +2147,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective(
   *outputNormal.lastObject() = - theConst;
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1() {
+void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep1() {
   this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
   ProgressReport theReport1;
   ProgressReport theReport2;
@@ -2158,7 +2158,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1() {
   theReport2.report(this->log.str());
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2() {
+void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   std::stringstream out;
   ConeComplex projectivizedChamberFinal;
   Cone currentProjectiveCone;
@@ -2170,7 +2170,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2() {
     Cone& currentAffineCone = this->smallerAlgebraChamber.theObjects[i];
     tempRoots.setSize(currentAffineCone.Normals.size);
     for (int j = 0; j < currentAffineCone.Normals.size; j ++) {
-      this->TransformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
+      this->transformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
     }
     tempRoots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
     theReport.report(tempRoots.toString());
@@ -2203,7 +2203,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2() {
   for (int k = 1; k < this->theLinearOperators.size; k ++) {
     for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
       for (int j = 0; j < this->smallerAlgebraChamber[i].Normals.size; j ++) {
-        this->TransformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
+        this->transformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
         wallToSliceWith.ScaleNormalizeFirstNonZero();
         this->projectivizedChambeR.splittingNormals.addOnTopNoRepetition(wallToSliceWith);
       }

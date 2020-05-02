@@ -17,13 +17,13 @@ private:
   }
 public:
   void operator=(const MemorySaving<Object>& other) {
-    if (!other.IsZeroPointer()) {
-      this->getElement() = other.GetElementConst();
+    if (!other.isZeroPointer()) {
+      this->getElement() = other.getElementConst();
     } else {
-      this->FreeMemory();
+      this->freeMemory();
     }
   }
-  const Object& GetElementConst() const {
+  const Object& getElementConst() const {
     if (this->theValue == 0) {
       fatalCrash("Attempt to access zero pointer. ");
     }
@@ -33,46 +33,46 @@ public:
     if (this->theValue == 0) {
       this->theValue = new Object;
       #ifdef AllocationLimitsSafeguard
-      ParallelComputing::GlobalPointerCounter ++;
-      ParallelComputing::CheckPointerCounters();
+      GlobalStatistics::globalPointerCounter ++;
+      GlobalStatistics::checkPointerCounters();
       #endif
     }
     return *(this->theValue);
   }
   bool operator==(const MemorySaving<Object>& other) const {
-    if (this->IsZeroPointer() != other.IsZeroPointer()) {
+    if (this->isZeroPointer() != other.isZeroPointer()) {
       return false;
     }
-    if (this->IsZeroPointer()) {
+    if (this->isZeroPointer()) {
       return true;
     }
-    return this->GetElementConst() == other.GetElementConst();
+    return this->getElementConst() == other.getElementConst();
   }
   int hashFunction() const {
-    if (this->IsZeroPointer()) {
+    if (this->isZeroPointer()) {
       return 0;
     }
-    return this->GetElementConst().hashFunction();
+    return this->getElementConst().hashFunction();
   }
   static inline int hashFunction(const MemorySaving<Object>& input) {
     return input.hashFunction();
   }
-  bool IsZeroPointer() const {
+  bool isZeroPointer() const {
     return this->theValue == 0;
   }
-  void FreeMemory() {
+  void freeMemory() {
     delete this->theValue;
     this->theValue = 0;
     #ifdef AllocationLimitsSafeguard
-    ParallelComputing::GlobalPointerCounter --;
-    ParallelComputing::CheckPointerCounters();
+    GlobalStatistics::globalPointerCounter --;
+    GlobalStatistics::checkPointerCounters();
     #endif
   }
   MemorySaving() {
     this->theValue = 0;
   }
   ~MemorySaving() {
-    this->FreeMemory();
+    this->freeMemory();
   }
 };
 

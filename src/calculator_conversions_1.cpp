@@ -349,14 +349,14 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
     << eltE.toString()
     << ", " << eltF.toString() << ". ";
   }
-  if (eltE.GetOwner() != eltF.GetOwner()) {
+  if (eltE.getOwner() != eltF.getOwner()) {
     return theCommands << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. "
     << "More precisely, the owner of e is "
-    << eltE.GetOwner()->toString() << " and the owner of f is " << eltF.GetOwner()->toString();
+    << eltE.getOwner()->toString() << " and the owner of f is " << eltF.getOwner()->toString();
   }
   output.theE = eltE;
   output.theF= eltF;
-  output.owner = eltE.GetOwner();
+  output.owner = eltE.getOwner();
   DynkinType& theType = output.owner->theWeyl.theDynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
   theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(theType);
@@ -392,7 +392,7 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
 bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   Calculator& theCommands,
   const Expression& input,
-  MapList<std::string, Expression, MathRoutines::HashString>& output,
+  MapList<std::string, Expression, MathRoutines::hashString>& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
@@ -588,7 +588,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     return theCommands << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
   SemisimpleLieAlgebra& currentNonEmbededSA =
-  owner.theSubalgebrasNonEmbedded->GetValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
+  owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
   owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   currentNonEmbededSA.theWeyl.ComputeRho(true);

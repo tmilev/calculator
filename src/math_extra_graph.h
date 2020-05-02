@@ -15,7 +15,7 @@ public:
   int edges;
   int max_edges;
   List<int> data;
-  void AddEdge(int v1, int v2);
+  void addEdge(int v1, int v2);
   void AddDiEdge(int v1, int v2);
   List<List<int> > DestructivelyGetConnectedComponents();
 private:
@@ -69,18 +69,18 @@ public:
   List<int> connectedComponentSizes;
   GraphWeightedLabeledEdges(): numNodes(- 1), groupMaxSize(- 1){}
   bool checkConsistency() const;
-  void AddEdge(int i, int j);
-  void ComputeEdgesPerNodesNoMultiplicities();
-  double GetXnode(int groupIndex, int indexInGroup);
-  double GetYnode(int groupIndex, int indexInGroup);
-  std::string GetNodePSStrings(int groupIndex, int indexInGroup);
-  void ComputeDisplayGroups();
-  void ComputeConnectedComponentsAndBaseNodeDistances();
-  void AddNodeToComponent(int nodeIndex);
-  void AddEdge(int i, int j, const std::string& inputLabel);
-  std::string ToStringPsTricks(FormatExpressions* theFormat);
-  std::string ToStringNodesAndEdges(FormatExpressions* theFormat);
-  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = nullptr);
+  void addEdge(int i, int j);
+  void computeEdgesPerNodesNoMultiplicities();
+  double getXNode(int groupIndex, int indexInGroup);
+  double getYNode(int groupIndex, int indexInGroup);
+  std::string getNodePSStrings(int groupIndex, int indexInGroup);
+  void computeDisplayGroups();
+  void computeConnectedComponentsAndBaseNodeDistances();
+  void addNodeToComponent(int nodeIndex);
+  void addEdge(int i, int j, const std::string& inputLabel);
+  std::string toStringPsTricks(FormatExpressions* theFormat);
+  std::string toStringNodesAndEdges(FormatExpressions* theFormat);
+  std::string toStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = nullptr);
 };
 
 #endif

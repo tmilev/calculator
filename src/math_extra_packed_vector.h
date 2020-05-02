@@ -625,14 +625,14 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
   Selection sel;
   sel.initialize(G->cartanSymmetric.numberOfColumns);
-  int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.setSize(numCycles);
   List<ElementWeylGroup> theGenerators;
   for (int i = 0; i < numCycles - 2; i ++) {
     sel.incrementSelection();
-    theGenerators.setSize(sel.CardinalitySelection);
-    for (int j = 0; j < sel.CardinalitySelection; j ++) {
+    theGenerators.setSize(sel.cardinalitySelection);
+    for (int j = 0; j < sel.cardinalitySelection; j ++) {
       theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
     }
     GetTauSignaturesFromSubgroup(*G,theGenerators,tss[i]);
@@ -651,8 +651,8 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
     ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.initialize(G->cartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
-      theGenerators.setSize(sel.CardinalitySelection);
-      for (int j = 0; j < sel.CardinalitySelection; j ++) {
+      theGenerators.setSize(sel.cardinalitySelection);
+      for (int j = 0; j < sel.cardinalitySelection; j ++) {
         theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
       }
       theGenerators.addOnTop(hr);
@@ -686,9 +686,9 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 template <typename elementSomeGroup>
 void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
   data.theType = JSData::token::tokenObject;
-  JSData& representatives = data.objects.GetValueCreate("representatives");
-  JSData& sizes = data.objects.GetValueCreate("sizes");
-  JSData& characters = data.objects.GetValueCreate("characters");
+  JSData& representatives = data.objects.getValueCreate("representatives");
+  JSData& sizes = data.objects.getValueCreate("sizes");
+  JSData& characters = data.objects.getValueCreate("characters");
   representatives.theType = JSData::token::tokenArray;
   representatives.theList.setSize(G.ConjugacyClassCount());
 

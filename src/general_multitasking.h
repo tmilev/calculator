@@ -82,39 +82,39 @@ class PauseThread {
   MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
-  bool IsPausedWhileRunning() const;
+  bool isPausedWhileRunning() const;
   void operator=(const PauseThread& other);
   PauseThread(const PauseThread& other);
 public:
   MutexRecursiveWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
-  void SafePointDontCallMeFromDestructors();
-  void SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-  void UnlockSafePoint();
-  void InitComputation();
-  void ExitComputation();
-  bool& GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe();
-  bool& GetFlagIsRunningUnsafeUseWithMutexHoldMe();
+  void safePointDontCallMeFromDestructors();
+  void signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+  void unlockSafePoint();
+  void initComputation();
+  void exitComputation();
+  bool& getFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe();
+  bool& getFlagIsRunningUnsafeUseWithMutexHoldMe();
   PauseThread();
 };
 
 class ControllerStartsRunning: public PauseThread {
 public:
   ControllerStartsRunning() {
-    this->InitComputation();
+    this->initComputation();
   }
 };
 
-class ParallelComputing {
+class GlobalStatistics {
 public:
-  static long long GlobalPointerCounter;
-  static long long PointerCounterPeakRamUse;
+  static long long globalPointerCounter;
+  static long long pointerCounterPeakRamUse;
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
-  static unsigned int NumListsCreated;
-  static unsigned int NumListResizesTotal;
-  static unsigned int NumHashResizes;
+  static unsigned int numListsCreated;
+  static unsigned int numListResizesTotal;
+  static unsigned int numHashResizes;
 
-  static void CheckPointerCounters();
+  static void checkPointerCounters();
 };
 
 #endif // header_vpfHeader1General2Mutexes_already_Defined

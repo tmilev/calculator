@@ -1675,8 +1675,8 @@ void Rational::AssignLargeInteger(const LargeInteger& other){
   if (this->extended == nullptr) {
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
-ParallelComputing::GlobalPointerCounter ++;
-ParallelComputing::CheckPointerCounters();
+GlobalStatistics::globalPointerCounter ++;
+GlobalStatistics::checkPointerCounters();
 #endif
   }
   this->extended->numerator = other;
@@ -1945,7 +1945,7 @@ bool Rational::ShrinkExtendedPartIfPossible() {
   return true;
 }
 
-Rational Rational::Factorial(int n) {
+Rational Rational::factorial(int n) {
   if (n < 0) {
     global.fatal << "This is a programming error: taking factorial of the negative number " << n << ". " << global.fatal;
     return 0;
@@ -1957,7 +1957,7 @@ Rational Rational::Factorial(int n) {
   return answer;
 }
 
-Rational Rational::TwoToTheNth(int n) {
+Rational Rational::twoToTheNth(int n) {
   Rational result = 1;
   if (n>= 0) {
     for (int i = 0; i < n; i ++) {
@@ -1971,7 +1971,7 @@ Rational Rational::TwoToTheNth(int n) {
   return result;
 }
 
-Rational Rational::NChooseK(const Rational& n, int k) {
+Rational Rational::nChooseK(const Rational& n, int k) {
   Rational result;
   result.makeOne();
   for (int i = 0; i < k; i ++) {

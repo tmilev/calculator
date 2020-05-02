@@ -23,7 +23,7 @@ bool Calculator::innerOperationBinary(
   int theOp
 ) {
   MemorySaving<Calculator::OperationHandlers>& theOperation = theCommands.operations.theValues[theOp];
-  if (theOperation.IsZeroPointer()) {
+  if (theOperation.isZeroPointer()) {
     return false;
   }
   List<Function>& handlers = theOperation.getElement().handlers;
@@ -252,7 +252,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
   }
   leftAN /= rightAN;
   output.assignValue(leftAN, theCommands);
-  output.CheckInitializationRecursively();
+  output.checkInitializationRecursively();
   return true;
 }
 
@@ -427,7 +427,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
   }
   ElementTensorsGeneralizedVermas<RationalFunction> resultTensor;
   resultTensor = inputConverted[1].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
-  resultTensor.TensorOnTheRight(inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >());
+  resultTensor.tensorOnTheRight(inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >());
   return output.assignValueWithContext(resultTensor, inputConverted[1].getContext(), theCommands);
 }
 
@@ -557,7 +557,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
     return false;
   }
   SemisimpleLieAlgebra& theSSalg =
-  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerSS();
+  inputConverted[2].getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().getOwnerSemisimple();
   Expression leftE;
   inputConverted[1].checkConsistency();
   input[1].checkConsistency();
@@ -572,7 +572,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
     output = inputConverted[2];
     return true;
   }
-  theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
+  theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
   if (!rightEltETGVM.multiplyOnTheLeft(
     leftE.getValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
@@ -1762,7 +1762,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   if (!input[2].isOfType(&rightC)) {
     return false;
   }
-  if (leftC.GetOwner() != rightC.GetOwner()) {
+  if (leftC.getOwner() != rightC.getOwner()) {
     return theCommands << "You asked me to multiply characters over "
     << "different semisimple Lie algebras. Could this be a typo?";
   }
@@ -2662,7 +2662,7 @@ bool CalculatorFunctionsBinaryOps::innerNChooseK(
     return false;
   }
   if (input[1].isOfType<Rational>(&N)) {
-    Rational result = result.NChooseK(N, K);
+    Rational result = result.nChooseK(N, K);
     return output.assignValue(result, theCommands);
   }
   if (K < 11) {

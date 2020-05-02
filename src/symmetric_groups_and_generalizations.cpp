@@ -13,7 +13,7 @@ int Partition::Fulton61z() const {
       samecount ++;
     } else {
       acc *= MathRoutines::KToTheNth(this->p[j - 1], samecount);
-      acc *= MathRoutines::Factorial(samecount);
+      acc *= MathRoutines::factorial(samecount);
       samecount = 1;
     }
   }
@@ -272,7 +272,7 @@ bool Partition::operator>(const Partition& right) const {
 
 std::string Partition::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
@@ -383,7 +383,7 @@ void Tableau::ColumnStabilizer(FiniteGroup<PermutationR2>& in) const {
 
 std::string Tableau::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
@@ -722,7 +722,7 @@ std::string PermutationR2::toString(FormatExpressions* format) const {
     out << ")";
     return out.str();
   }
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
@@ -830,7 +830,7 @@ LargeInteger PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<Pe
     // control reaches end of non-void function
     return - 1;
   }
-  return MathRoutines::Factorial(G.generators.size + 1);
+  return MathRoutines::factorial(G.generators.size + 1);
 }
 
 void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
@@ -844,7 +844,7 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
   List<Partition> parts;
   Partition::GetPartitions(parts, N);
   G.conjugacyClasses.setSize(parts.size);
-  int facn = MathRoutines::Factorial(N);
+  int facn = MathRoutines::factorial(N);
   for (int i = 0; i < parts.size; i ++) {
     Tableau t;
     parts[i].FillTableauOrdered(t);
@@ -863,7 +863,7 @@ bool PermutationGroupData::GetWordjjPlus1Implementation(FiniteGroup<PermutationR
 
 std::string PermutationGroupData::toString() {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
@@ -1102,7 +1102,7 @@ bool ElementHyperoctahedralGroup::operator>(const ElementHyperoctahedralGroup& r
 
 std::string ElementHyperoctahedralGroup::toString(FormatExpressions* unused) const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }*/
 
@@ -1419,10 +1419,10 @@ LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGrou
     global.fatal << "Consistency error. " << global.fatal;
   }
   if (HD->flagIsEntireHyperoctahedralGroup) {
-    return MathRoutines::Factorial(HD->N) * (1 << HD->N);
+    return MathRoutines::factorial(HD->N) * (1 << HD->N);
   }
   if (HD->flagIsEntireDn) {
-    return MathRoutines::Factorial(HD->N) * (1 << HD->N) / 2;
+    return MathRoutines::factorial(HD->N) * (1 << HD->N) / 2;
   }
   global.fatal << "This method should not have been called. " << global.fatal;
   // control reaches end of non-void function
@@ -1492,7 +1492,7 @@ void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementati
         else
           G->conjugacyClasses[pi*ssize + si].representative.s[i] = false;
       G->conjugacyClasses[pi*ssize + si].size = snccsz;
-      G->conjugacyClasses[pi*ssize +si].size *= MathRoutines::NChooseK(G->N, si);
+      G->conjugacyClasses[pi*ssize +si].size *= MathRoutines::nChooseK(G->N, si);
       G->conjugacyClasses[pi*ssize +si].flagRepresentativeWordComputed = true;
       G->getWord(G->conjugacyClasses[pi*ssize +si].representative, G->conjugacyClasses[pi*ssize +si].representativeWord);
     }
@@ -1512,7 +1512,7 @@ void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementati
 /*
 std::string HyperoctahedralGroup::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 */
@@ -1535,10 +1535,10 @@ void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in) {
 
 std::string HyperoctahedralGroupData::toString() const {
   std::stringstream out;
-  this->IntoStream(out);
+  this->intoStream(out);
   return out.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data) {
-  return data.IntoStream(out);
+  return data.intoStream(out);
 }

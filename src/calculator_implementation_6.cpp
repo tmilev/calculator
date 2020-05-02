@@ -198,7 +198,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   randomSeedStringStarting << this->randomSeed;
   theProblem.fileName = this->fileName;
   this->flagSuccess = false;
-  StateMaintainer<MapList<std::string, std::string, MathRoutines::HashString> >
+  StateMaintainer<MapList<std::string, std::string, MathRoutines::hashString> >
   maintainArguments(global.webArguments);
   if (!theProblem.loadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)) {
     this->errorLoad = commentsOnFailure.str();
@@ -228,7 +228,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
       &current.flagBuiltInGenerated,
       false
     );
-    global.webArguments.RemoveKey(current.answerIdWebAPI);
+    global.webArguments.removeKey(current.answerIdWebAPI);
     if (!current.flagBuiltInGenerated) {
       commentsOnFailure << "Failed to generate answer: " << current.answerId << "<br>";
       commentsOnFailure << current.builtInAnswerAPICall[WebAPI::result::resultHtml].theString;
@@ -243,7 +243,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     current.builtInAnswerReply = WebAPIResponse::submitAnswersJSON(
       randomSeedStream.str(), &current.flagBuiltInWorks, false
     );
-    global.webArguments.RemoveKey(current.answerIdWebAPI);
+    global.webArguments.removeKey(current.answerIdWebAPI);
     if (!current.flagBuiltInWorks) {
       this->flagAllBuiltInAnswersOK = false;
       commentsOnFailure << "<br>Built-in answer of index: "
@@ -602,7 +602,7 @@ bool CalculatorFunctions::innerGetFirstSummandContaining(
   List<Expression> theSummands;
   theCommands.CollectOpands(input[1], theCommands.opPlus(), theSummands);
   for (int i = 0; i < theSummands.size; i ++) {
-    if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(input[2])) {
+    if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(input[2])) {
       output = theSummands[i];
       return true;
     }
@@ -630,7 +630,7 @@ bool CalculatorFunctions::innerGetSummand(
     List<Expression> theSums;
     theCommands.CollectOpands(theExpression, theCommands.opPlus(), theSummands);
     for (int i = 0; i < theSummands.size; i ++) {
-      if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum())) {
+      if (theSummands[i].containsAsSubExpressionNoBuiltInTypes(theCommands.opSum())) {
         theSums.addOnTop(theSummands[i]);
         theSummands.removeIndexShiftDown(i);
         i --;
@@ -765,7 +765,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   } else {
     return theCommands << "Failed to extract javascript from " << input[1].toString();
   }
-  thePlotObj.manifoldImmersion.GetFreeVariables(thePlotObj.variablesInPlay, true);
+  thePlotObj.manifoldImmersion.getFreeVariables(thePlotObj.variablesInPlay, true);
   Expression xE, yE;
   xE.makeAtom("x", theCommands);
   yE.makeAtom("y", theCommands);
@@ -2032,7 +2032,7 @@ bool CalculatorFunctions::innerNormalizeIntervals(
   }
   List<Expression>::Comparator order(CalculatorFunctions::leftIntervalGreaterThanRight);
   outputList.quickSortAscending(&order);
-  return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
+  return output.makeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
 }
 
 bool CalculatorFunctions::innerUnionEmptySet(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2224,10 +2224,10 @@ bool CalculatorFunctions::innerSineOfAngleSumToTrig(
     return false;
   }
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(), argument[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(), argument[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(), argument[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(), argument[2]);
+  sinA.makeOX(theCommands, theCommands.opSin(), argument[1]);
+  sinB.makeOX(theCommands, theCommands.opSin(), argument[2]);
+  cosA.makeOX(theCommands, theCommands.opCos(), argument[1]);
+  cosB.makeOX(theCommands, theCommands.opCos(), argument[2]);
   output = sinA * cosB + cosA * sinB;
   return true;
 }
@@ -2244,13 +2244,13 @@ bool CalculatorFunctions::innerTrigSumToTrigProduct(
   int leftSign = 1;
   int rightSign = 1;
   if (leftE.startsWith(theCommands.opTimes(), 3)) {
-    if (leftE[1].IsEqualToMOne()) {
+    if (leftE[1].isEqualToMOne()) {
       leftE = leftE[2];
       leftSign = - 1;
     }
   }
   if (rightE.startsWith(theCommands.opTimes(), 3)) {
-    if (rightE[1].IsEqualToMOne()) {
+    if (rightE[1].isEqualToMOne()) {
       rightE = rightE[2];
       rightSign = - 1;
     }
@@ -2273,16 +2273,16 @@ bool CalculatorFunctions::innerTrigSumToTrigProduct(
   if (leftE.startsWith(theCommands.opSin(), 2)) {
     argSum =  (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
     argDiff = (leftE[1] * leftSign - rightE[1] * rightSign) / 2;
-    leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
-    rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
+    leftMultiplicand.makeOX(theCommands, theCommands.opCos(), argDiff);
+    rightMultiplicand.makeOX(theCommands, theCommands.opSin(), argSum);
     output = leftMultiplicand * rightMultiplicand * 2;
     return true;
   } else {
     if (leftSign == rightSign) {
       argSum = (leftE[1] + rightE[1]) / 2;
       argDiff = (leftE[1] - rightE[1]) / 2;
-      leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
-      rightMultiplicand.MakeOX(theCommands, theCommands.opCos(), argSum);
+      leftMultiplicand.makeOX(theCommands, theCommands.opCos(), argDiff);
+      rightMultiplicand.makeOX(theCommands, theCommands.opCos(), argSum);
       output = leftMultiplicand * rightMultiplicand * 2;
       if (leftSign == - 1) {
         output *= - 1;
@@ -2291,8 +2291,8 @@ bool CalculatorFunctions::innerTrigSumToTrigProduct(
     } else {
       argSum = (leftE[1] + rightE[1]) / 2;
       argDiff = (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
-      leftMultiplicand.MakeOX(theCommands, theCommands.opSin(), argDiff);
-      rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
+      leftMultiplicand.makeOX(theCommands, theCommands.opSin(), argDiff);
+      rightMultiplicand.makeOX(theCommands, theCommands.opSin(), argSum);
       output = leftMultiplicand * rightMultiplicand * 2;
       return true;
     }
@@ -2312,10 +2312,10 @@ bool CalculatorFunctions::innerCosineOfAngleSumToTrig(
     return false;
   }
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(), argument[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(), argument[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(), argument[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(), argument[2]);
+  sinA.makeOX(theCommands, theCommands.opSin(), argument[1]);
+  sinB.makeOX(theCommands, theCommands.opSin(), argument[2]);
+  cosA.makeOX(theCommands, theCommands.opCos(), argument[1]);
+  cosB.makeOX(theCommands, theCommands.opCos(), argument[2]);
   output = cosA * cosB - sinA * sinB;
   return true;
 }
@@ -2360,7 +2360,7 @@ bool CalculatorFunctions::innerIsAlgebraicRadical(Calculator& theCommands, const
   if (input.size() != 2) {
     return false;
   }
-  int result = static_cast<int>(input[1].IsAlgebraicRadical());
+  int result = static_cast<int>(input[1].isAlgebraicRadical());
   return output.assignValue(result, theCommands);
 }
 
@@ -2500,7 +2500,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
     theFun = input[1];
   }
   HashedList<Expression> theVars;
-  if (!theFun.GetFreeVariables(theVars, true)) {
+  if (!theFun.getFreeVariables(theVars, true)) {
     return theCommands << "Failed to get free variables from: " << theFun.toString();
   }
   if (theVars.size != 1) {
@@ -2524,7 +2524,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
     << " iterations. However, the number of iterations is required to be a number between 1 and 50. ";
     return output.makeError(errorStream.str(), theCommands);
   }
-  MapList<std::string, Expression, MathRoutines::HashString> theSub;
+  MapList<std::string, Expression, MathRoutines::hashString> theSub;
   theSub.setKeyValue("x", theVars[0]);
   theSub.setKeyValue("f", theFun);
   theSub.setKeyValue("a", theCommands.getNewAtom());
@@ -2533,7 +2533,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
   theSub.setKeyValue("y", theCommands.getNewAtom());
   theSub.setKeyValue("startingPoint", input[2]);
   theSub.setKeyValue("numIterations", input[3]);
-  return output.AssignStringParsed(
+  return output.assignStringParsed(
     "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
     "y_{0} = startingPoint;"
     "y_{{a}} = NewtonMap{}(y_{a- 1});"
@@ -2580,9 +2580,9 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   const Expression& xDefE = input[2];
   const Expression& yDefE = input[3];
   //  HashedList<Expression> xEcandidates, yEcandidates;
-  //  if (!xDefE.GetFreeVariables(xEcandidates, false))
+  //  if (!xDefE.getFreeVariables(xEcandidates, false))
   //    return theCommands << "Failed to get free variables from " << xDefE.toString();
-  //  if (!yDefE.GetFreeVariables(yEcandidates, false))
+  //  if (!yDefE.getFreeVariables(yEcandidates, false))
   //    return theCommands << "Failed to get free variables from " << yDefE.toString();
   //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
   //    return theCommands << "Couldn't get single free variable from " << xEcandidates.toStringCommaDelimited()
@@ -2802,34 +2802,34 @@ bool CalculatorFunctions::innerTestASN1Decode(
     result.writeBytesUpdatePromisedLength(recoded);
     std::string originalHex = Crypto::convertStringToHex(data, 0, false);
     std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
-    out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex, "original", "recoded");
+    out << StringRoutines::Differ::differenceHTMLStatic(originalHex, recodedHex, "original", "recoded");
     out << theDecoder.toStringAnnotateBinary();
   }
   return output.assignValue(out.str(), theCommands);
 }
 
-std::string StringRoutines::ConvertStringToCalculatorDisplay(
+std::string StringRoutines::convertStringToCalculatorDisplay(
   const std::string& input
 ) {
-  std::string converted = StringRoutines::ConvertStringToHexIfNonReadable(input, 100, true);
+  std::string converted = StringRoutines::convertStringToHexIfNonReadable(input, 100, true);
   if (converted == input) {
     return converted;
   }
   std::stringstream out;
   out << "ConvertHexToString{}\"" << converted << "\"";
   out << "<br>\""
-  << StringRoutines::ConvertStringToJavascriptString(input)
+  << StringRoutines::convertStringToJavascriptString(input)
   << "\"";
   return out.str();
 }
 
-std::string StringRoutines::ConvertByteToHex(unsigned char byte) {
+std::string StringRoutines::convertByteToHex(unsigned char byte) {
   std::stringstream out;
   out << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>(byte);
   return out.str();
 }
 
-std::string StringRoutines::ConvertStringToHexIfNonReadable(
+std::string StringRoutines::convertStringToHexIfNonReadable(
   const std::string& input, int lineWidthZeroForNone, bool useHTML
 ) {
   bool foundBad = false;

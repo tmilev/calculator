@@ -139,11 +139,11 @@ void WebServerMonitor::Monitor(int pidServer) {
     theCrawler.PingCalculatorStatus();
     numPings ++;
     if (theCrawler.lastTransactionErrors != "") {
-      now.AssignLocalTime();
+      now.assignLocalTime();
       numConsecutiveFailedPings ++;
       global << Logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
-      << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
+      << " failed. GM time: " << now.toStringGM() << ", local time: " << now.toStringLocal()
       << ". " << "Errors: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
@@ -160,7 +160,7 @@ void WebServerMonitor::Monitor(int pidServer) {
 
 void WebServerMonitor::Restart() {
   TimeWrapper now;
-  now.AssignLocalTime();
+  now.assignLocalTime();
   global << Logger::red << "Server stopped responding (probably locked pipe?)"
   << ", restarting. " << Logger::endL;
   std::fstream theFile;
@@ -168,7 +168,7 @@ void WebServerMonitor::Restart() {
     theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
   );
   theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: local: "
-  << now.ToStringLocal() << ", GM: " << now.ToStringGM() << "</b><br>\n";
+  << now.toStringLocal() << ", GM: " << now.toStringGM() << "</b><br>\n";
   theFile.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
@@ -518,7 +518,7 @@ void WebCrawler::FetchWebPagePart2(
     this->headerReceived = this->headerReceived.substr(0, bodyStart);
   }
   List<std::string> theHeaderPieces;
-  StringRoutines::StringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
+  StringRoutines::stringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
   std::string expectedLengthString;
   for (int i = 0; i < theHeaderPieces.size; i ++) {
     if (
@@ -771,7 +771,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     return false;
   }
   if (header.theType == JSData::token::tokenObject) {
-    if (header.HasKey("kid")) {
+    if (header.hasKey("kid")) {
       keyIDstring = header.getValue("kid").theString;
     }
   }
@@ -880,7 +880,7 @@ bool WebCrawler::VerifyRecaptcha(
     }
     return 0;
   }
-  if (!theJSparser.HasKey("success")) {
+  if (!theJSparser.hasKey("success")) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "<b style ='color:red'>" << "Captcha failure: could not find key 'success'."
@@ -1051,7 +1051,7 @@ bool WebWorker::writeToBodyJSON(const JSData& result) {
       std::stringstream outLinkApp;
       outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
       << sanitizedCalculatorApp << "'>app</a>";
-      toWrite = StringRoutines::ReplaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
+      toWrite = StringRoutines::replaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
     }
   }  
   return this->writeToBody(toWrite);

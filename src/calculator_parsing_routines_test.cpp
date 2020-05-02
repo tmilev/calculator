@@ -38,7 +38,7 @@ bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
   for (int i = 0; i < ownerInitialized.NumPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& operationPointer =
     ownerInitialized.operations.theValues[i];
-    if (operationPointer.IsZeroPointer()) {
+    if (operationPointer.isZeroPointer()) {
       continue;
     }
     Calculator::OperationHandlers& operationHandlers = operationPointer.getElement();

@@ -5,11 +5,11 @@
 bool Expression::Test::all() {
   Calculator tester;
   tester.initialize();
-  Expression::Test::ToStringTestRecode(tester);
+  Expression::Test::toStringTestRecode(tester);
   return true;
 }
 
-bool Expression::Test::ToStringTestRecodeOnce(
+bool Expression::Test::toStringTestRecodeOnce(
   const std::string& inputHardCodedMustParse, Calculator& ownerInitialized
 ) {
   Expression parsed;
@@ -25,7 +25,7 @@ bool Expression::Test::ToStringTestRecodeOnce(
   return true;
 }
 
-bool Expression::Test::ToStringTestRecode(Calculator& ownerInitialized) {
-  Expression::Test::ToStringTestRecodeOnce("1+1", ownerInitialized);
+bool Expression::Test::toStringTestRecode(Calculator& ownerInitialized) {
+  Expression::Test::toStringTestRecodeOnce("1+1", ownerInitialized);
   return true;
 }

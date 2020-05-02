@@ -458,8 +458,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     }
   }
   Vector<Rational> left, right;
-  while (NonExplored.CardinalitySelection > 0) {
-    for (int i = 0; i < NonExplored.CardinalitySelection; i ++) {
+  while (NonExplored.cardinalitySelection > 0) {
+    for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
       for (int j = 0; j < theDimension; j ++) {
@@ -615,8 +615,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
     }
   }
   Vector<Rational> right;
-  while (NonExplored.CardinalitySelection > 0) {
-    for (int i = 0; i < NonExplored.CardinalitySelection; i ++) {
+  while (NonExplored.cardinalitySelection > 0) {
+    for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
       for (int j = 0; j < NonExplored.MaxSize; j ++) {
@@ -771,7 +771,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
   DynkinType theType;
   theType.MakeSimpleType(theWeylLetter, theWeylDim);
-  this->domainAlg = &ownerOfAlgebras.GetValueCreateNoInit(theType);
+  this->domainAlg = &ownerOfAlgebras.getValueCreateNoInit(theType);
   this->rangeAlg = this->domainAlg;
   this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
   this->theDomain().ComputeChevalleyConstants();
@@ -1217,26 +1217,26 @@ void RationalFunction::invert() {
 
 bool RationalFunction::checkConsistency() const {
   if (this->expressionType == this->typePoly) {
-    if (this->Numerator.IsZeroPointer()) {
+    if (this->Numerator.isZeroPointer()) {
       global.fatal << "A rational function is flagged as being a "
       << "non-constant polynomial, but the numerator pointer is zero. "
       << global.fatal;
       return false;
     }
-    if (this->Numerator.GetElementConst().isConstant()) {
+    if (this->Numerator.getElementConst().isConstant()) {
       global.fatal << "This is a programming error: a rational function is flagged as "
       << "having a non-constant numerator, but the numerator is constant. " << global.fatal;
       return false;
     }
   }
   if (this->expressionType == this->typeRationalFunction) {
-    if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer()) {
+    if (this->Numerator.isZeroPointer() || this->Denominator.isZeroPointer()) {
       global.fatal << "This is a programming error: a rational function is flagged as "
       << "having non-constant denominator, but either the numerator or the denominator pointer is zero. "
       << global.fatal;
       return false;
     }
-    if (this->Denominator.GetElementConst().isConstant()) {
+    if (this->Denominator.getElementConst().isConstant()) {
       global.fatal << "This is a programming error: a rational function is flagged as "
       << "having non-constant denominator, but the denominator is constant. " << global.fatal;
       return false;
@@ -1304,8 +1304,8 @@ void RationalFunction::makeOne() {
 void RationalFunction::makeZero() {
   this->expressionType = this->typeRational;
   this->ratValue.makeZero();
-  this->Numerator.FreeMemory();
-  this->Denominator.FreeMemory();
+  this->Numerator.freeMemory();
+  this->Denominator.freeMemory();
   if (!this->checkConsistency()) {
     global.fatal << "makeZero produced corrupt output in rational function old. " << global.fatal;
   }
@@ -1324,7 +1324,7 @@ Rational RationalFunction::RationalValue() const {
     case RationalFunction::typeError:
       return 0;
     default:
-      return this->Numerator.GetElementConst().GetConstantTerm();
+      return this->Numerator.getElementConst().GetConstantTerm();
   }
 }
 
@@ -1379,7 +1379,7 @@ bool RationalFunction::needsParenthesisForMultiplication(FormatExpressions* unus
     case RationalFunction::typeRational:
       return false;
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().needsParenthesisForMultiplication();
+      return this->Numerator.getElementConst().needsParenthesisForMultiplication();
     case RationalFunction::typeRationalFunction:
       return false;
   }
@@ -1394,13 +1394,13 @@ std::string RationalFunction::toString(FormatExpressions* theFormat) const {
     return this->ratValue.toString();
   }
   if (this->expressionType == this->typePoly) {
-    return this->Numerator.GetElementConst().toString(theFormat);
+    return this->Numerator.getElementConst().toString(theFormat);
   }
   std::stringstream out;
   bool useFrac = theFormat == nullptr ? false : theFormat->flagUseFrac;
   bool needParenthesis = false;
   if (!useFrac) {
-    needParenthesis = this->Numerator.GetElementConst().needsParenthesisForMultiplication();
+    needParenthesis = this->Numerator.getElementConst().needsParenthesisForMultiplication();
   }
   if (useFrac) {
     out << "\\frac{";
@@ -1408,7 +1408,7 @@ std::string RationalFunction::toString(FormatExpressions* theFormat) const {
   if (needParenthesis) {
     out << "(";
   }
-  out << this->Numerator.GetElementConst().toString(theFormat);
+  out << this->Numerator.getElementConst().toString(theFormat);
   if (needParenthesis) {
     out << ")";
   }
@@ -1417,7 +1417,7 @@ std::string RationalFunction::toString(FormatExpressions* theFormat) const {
   } else {
     out << "/(";
   }
-  out << this->Denominator.GetElementConst().toString(theFormat);
+  out << this->Denominator.getElementConst().toString(theFormat);
   if (useFrac) {
     out << "}";
   } else {
@@ -1500,17 +1500,17 @@ void RationalFunction::operator=(const RationalFunction& other) {
       this->ratValue = other.ratValue;
       break;
     case RationalFunction::typePoly:
-      if (other.Numerator.IsZeroPointer()) {
+      if (other.Numerator.isZeroPointer()) {
         global.fatal << "zero pointer in numerator of other. " << global.fatal;
       }
-      this->Numerator.getElement() = other.Numerator.GetElementConst();
+      this->Numerator.getElement() = other.Numerator.getElementConst();
       break;
     case RationalFunction::typeRationalFunction:
-      if (other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer()) {
+      if (other.Numerator.isZeroPointer() || other.Denominator.isZeroPointer()) {
         global.fatal << "zero pointer in numerator or denominator of other. " << global.fatal;
       }
-      this->Numerator.getElement() = other.Numerator.GetElementConst();
-      this->Denominator.getElement() = other.Denominator.GetElementConst();
+      this->Numerator.getElement() = other.Numerator.getElementConst();
+      this->Denominator.getElement() = other.Denominator.getElementConst();
       break;
     default:
       break;
@@ -1633,7 +1633,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
     return;
   }
   if (other.expressionType == this->typePoly) {
-    this->operator*=(other.Numerator.GetElementConst());
+    this->operator*=(other.Numerator.getElementConst());
     return;
   }
   if (this->expressionType == this->typeRational) {
@@ -1657,15 +1657,15 @@ void RationalFunction::operator*=(const RationalFunction& other) {
     out << "Multiplying " << this->toString() << " by " << other.toString();
     theReport.report(out.str());
   }
-  RationalFunction::gcd(other.Denominator.GetElementConst(), this->Numerator.getElement(), theGCD1);
-  RationalFunction::gcd(this->Denominator.getElement(), other.Numerator.GetElementConst(), theGCD2);
+  RationalFunction::gcd(other.Denominator.getElementConst(), this->Numerator.getElement(), theGCD1);
+  RationalFunction::gcd(this->Denominator.getElement(), other.Numerator.getElementConst(), theGCD2);
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderForGreatestCommonDivisor();
   this->Numerator.getElement().DivideBy(theGCD1, tempP1, tempP2, monomialOrder);
   this->Numerator.getElement() = tempP1;
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
-  other.Denominator.GetElementConst().DivideBy(theGCD1, tempP1, tempP2, monomialOrder);
+  other.Denominator.getElementConst().DivideBy(theGCD1, tempP1, tempP2, monomialOrder);
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
@@ -1675,7 +1675,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Denominator.getElement() = tempP1;
-  other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2, monomialOrder);
+  other.Numerator.getElementConst().DivideBy(theGCD2, tempP1, tempP2, monomialOrder);
   if (!tempP2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
@@ -2480,7 +2480,7 @@ void RationalFunction::addSameTypes(const RationalFunction& other) {
       this->ratValue += other.ratValue;
       break;
     case RationalFunction::typePoly:
-      this->Numerator.getElement() += other.Numerator.GetElementConst();
+      this->Numerator.getElement() += other.Numerator.getElementConst();
       break;
     case RationalFunction::typeRationalFunction:
       this->addHonestRationalFunction(other);
@@ -2501,7 +2501,7 @@ void RationalFunction::ReducePolynomialToRational() {
       } else {
         this->ratValue = this->Numerator.getElement().coefficients[0];
       }
-      this->Numerator.FreeMemory();
+      this->Numerator.freeMemory();
     }
   }
 }
@@ -2509,17 +2509,17 @@ void RationalFunction::ReducePolynomialToRational() {
 void RationalFunction::addHonestRationalFunction(const RationalFunction& other) {
   MacroRegisterFunctionWithName("RationalFunctionOld::addHonestRationalFunction");
   Rational tempRat;
-  if (!this->Denominator.getElement().isProportionalTo(other.Denominator.GetElementConst(), tempRat, Rational(1))) {
+  if (!this->Denominator.getElement().isProportionalTo(other.Denominator.getElementConst(), tempRat, Rational(1))) {
     Polynomial<Rational> buffer;
 //    RationalFunctionOld debugger;
 //    debugger = other;
 //    debugger.ComputeDebugString();
 //    this->ComputeDebugString();
     buffer = this->Denominator.getElement();
-    this->Numerator.getElement() *= other.Denominator.GetElementConst();
-    buffer *= other.Numerator.GetElementConst();
+    this->Numerator.getElement() *= other.Denominator.getElementConst();
+    buffer *= other.Numerator.getElementConst();
     this->Numerator.getElement() += buffer;
-    this->Denominator.getElement() *= other.Denominator.GetElementConst();
+    this->Denominator.getElement() *= other.Denominator.getElementConst();
     if (this->Denominator.getElement().isEqualToZero())
       global.fatal << "Denominator of rational function is zero." << global.fatal;
     this->simplify();
@@ -2527,7 +2527,7 @@ void RationalFunction::addHonestRationalFunction(const RationalFunction& other) 
   } else {
     this->Numerator.getElement() *= tempRat;
     this->Denominator.getElement() *= tempRat;
-    this->Numerator.getElement() += other.Numerator.GetElementConst();
+    this->Numerator.getElement() += other.Numerator.getElementConst();
     this->reduceMemory();
     this->simplifyLeadingCoefficientOnly();
   }
@@ -2542,10 +2542,10 @@ bool RationalFunction::isEqualTo(const RationalFunction& other) const {
   }
   switch (this->expressionType) {
     case RationalFunction::typeRationalFunction:
-      return this->Numerator.GetElementConst().isEqualTo(other.Numerator.GetElementConst()) &&
-      this->Denominator.GetElementConst().isEqualTo(other.Denominator.GetElementConst());
+      return this->Numerator.getElementConst().isEqualTo(other.Numerator.getElementConst()) &&
+      this->Denominator.getElementConst().isEqualTo(other.Denominator.getElementConst());
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().isEqualTo(other.Numerator.GetElementConst());
+      return this->Numerator.getElementConst().isEqualTo(other.Numerator.getElementConst());
     case RationalFunction::typeRational:
       return this->ratValue == other.ratValue;
   }
@@ -2576,10 +2576,10 @@ unsigned int RationalFunction::hashFunction() const {
     case RationalFunction::typeRational:
       return this->ratValue.hashFunction();
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().hashFunction();
+      return this->Numerator.getElementConst().hashFunction();
     case RationalFunction::typeRationalFunction:
-      return this->Numerator.GetElementConst().hashFunction() * someRandomPrimes[0] +
-      this->Denominator.GetElementConst().hashFunction() * someRandomPrimes[1];
+      return this->Numerator.getElementConst().hashFunction() * someRandomPrimes[0] +
+      this->Denominator.getElementConst().hashFunction() * someRandomPrimes[1];
     default:
       return static_cast<unsigned int>(- 1);
   }
@@ -2607,7 +2607,7 @@ void RationalFunction::getNumerator(Polynomial<Rational>& output) const {
       output.makeConstant(this->ratValue);
       return;
     default:
-      output = this->Numerator.GetElementConst();
+      output = this->Numerator.getElementConst();
       return;
   }
 }
@@ -2622,11 +2622,11 @@ bool RationalFunction::isNegative() {
 void RationalFunction::getDenominator(Polynomial<Rational>& output) const {
   switch (this->expressionType) {
     case RationalFunction::typeRationalFunction:
-      if (this->Denominator.IsZeroPointer()) {
+      if (this->Denominator.isZeroPointer()) {
         global.fatal << "This is a programming error: the rational function is "
         << "supposed to be honest, but the denominator pointer is zero. " << global.fatal;
       }
-      output = this->Denominator.GetElementConst();
+      output = this->Denominator.getElementConst();
       return;
     default:
       output.makeConstant(Rational(1));
@@ -2667,15 +2667,15 @@ bool RationalFunction::operator>(const RationalFunction& other) const {
     case RationalFunction::typeRational:
       return this->ratValue > other.ratValue;
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst() > other.Numerator.GetElementConst();
+      return this->Numerator.getElementConst() > other.Numerator.getElementConst();
     case RationalFunction::typeRationalFunction:
-      if (other.Denominator.GetElementConst() > this->Denominator.GetElementConst()) {
+      if (other.Denominator.getElementConst() > this->Denominator.getElementConst()) {
         return true;
       }
-      if (this->Denominator.GetElementConst() > other.Denominator.GetElementConst()) {
+      if (this->Denominator.getElementConst() > other.Denominator.getElementConst()) {
         return false;
       }
-      return this->Numerator.GetElementConst() > other.Numerator.GetElementConst();
+      return this->Numerator.getElementConst() > other.Numerator.getElementConst();
     default:
       return false;
   }

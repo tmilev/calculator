@@ -44,9 +44,9 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::StringBeginsWith(theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
+    StringRoutines::stringBeginsWith(theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.getAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
@@ -172,7 +172,7 @@ std::string WebAPIResponse::getSanitizedComment(
   resultIsPlot = false;
   std::string theString;
   if (input.isOfType<std::string>(&theString)) {
-    if (StringRoutines::StringBeginsWith(theString, "Approximations have been")) {
+    if (StringRoutines::stringBeginsWith(theString, "Approximations have been")) {
       return "";
     }
     return input.toString(&theFormat);
@@ -237,11 +237,11 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs =
   global.webArguments;
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::StringBeginsWith(
+    if (StringRoutines::stringBeginsWith(
       theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
     ) {
       lastAnswer = "(" + HtmlRoutines::convertURLStringToNormal(theArgs.theValues[i], false) + "); ";
@@ -482,8 +482,8 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
       continue;
     }
     std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
-    StringRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
-    StringRoutines::SplitStringInTwo(
+    StringRoutines::splitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
+    StringRoutines::splitStringInTwo(
       secondAndThirdPart,
       static_cast<int>(WebAPI::request::calculatorHTML.size()),
       notUsed,
@@ -501,7 +501,7 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
         outFirstPart << lineStream.str();
       }
     } else {
-      StringRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
+      StringRoutines::stringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
       this->jsFileNames.addOnTop(splitterStrings[0]);
     }
   }
@@ -562,7 +562,7 @@ std::string BuilderApplication::getOnePageJavascriptBrowserify() {
   out << "var theJSContent = {\n";
   for (int i = 0; i < this->jsFileContents.size; i ++) {
     std::string fileNameNoJS;
-    if (!StringRoutines::StringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
+    if (!StringRoutines::stringEndsWith(this->jsFileNames[i], ".js", &fileNameNoJS)) {
       fileNameNoJS = this->jsFileNames[i];
     }
     out << "\"" << fileNameNoJS << "\" : function(require, module, exports){\n";
@@ -635,28 +635,28 @@ bool CourseList::loadFromString(const std::string& input) {
   std::string currentLine, currentArgument;
   Course current;
   while (std::getline(tableReader, currentLine, '\n')) {
-    if (StringRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument)) {
+    if (StringRoutines::stringBeginsWith(currentLine, "Html:", &currentArgument)) {
       if (current.courseTemplate != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
       current.courseTemplate = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
+    if (StringRoutines::stringBeginsWith(currentLine, "Topics:", &currentArgument)) {
       if (current.courseTopicsNoFolder != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
       current.courseTopicsNoFolder = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
+    if (StringRoutines::stringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
         this->theCourses.addOnTop(current);
         current.reset();
       }
       current.title = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
-    if (StringRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
+    if (StringRoutines::stringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
       if (current.flagRoughDraft != "") {
         this->theCourses.addOnTop(current);
         current.reset();
@@ -884,7 +884,7 @@ JSData WebAPIResponse::getEditPageJSON() {
     output[WebAPI::result::error] = errorStream.str();
     //return output.toString(false);
   }
-  HashedList<std::string, MathRoutines::HashString> theAutocompleteKeyWords;
+  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
   std::stringstream comments;
   if (theFile.flagIsExamProblem) {
@@ -950,10 +950,10 @@ JSData WebAPIResponse::submitAnswersJSON(
   }
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.initialize(theProblem.theProblemData.theAnswers.size());
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::StringBeginsWith(
+    if (StringRoutines::stringBeginsWith(
       theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
       int newAnswerIndex = theProblem.getAnswerIndex(studentAnswerNameReader);
@@ -1002,7 +1002,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   currentA.currentAnswerURLed = HtmlRoutines::convertStringToURLString(
     currentA.currentAnswerClean, false
   );//<-encoding back to overwrite malformed input
-  theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
+  theProblem.studentTagsAnswered.addSelectionAppendNewIndex(answerIdIndex);
   std::stringstream completedProblemStreamNoEnclosures;
 
   std::stringstream completedProblemStream;
@@ -1145,7 +1145,7 @@ JSData WebAPIResponse::submitAnswersJSON(
           // <-For the time being, we hard-code it
           // to month/day/year format (no time to program it better).
           std::stringstream badDateStream;
-          if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream)) {
+          if (!deadline.assignMonthDayYear(theDeadlineString, badDateStream)) {
             output << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
             << theDeadlineString << ". Comments: "
             << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
@@ -1155,10 +1155,10 @@ JSData WebAPIResponse::submitAnswersJSON(
             result[WebAPI::result::resultHtml] = output.str();
             return result;
           }
-          now.AssignLocalTime();
+          now.assignLocalTime();
           // out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
           // << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-          secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+          secondsTillDeadline = deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
           deadLinePassed = (secondsTillDeadline < - 18000);
         }
       }
@@ -1200,12 +1200,12 @@ JSData WebAPIResponse::submitAnswersJSON(
         }
         if (deadLinePassed) {
           output << "<tr><td><span style =\"color:red\"><b>Submission "
-          << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(
+          << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
             secondsTillDeadline, false, false
           ) << " after deadline. </b></span></td></tr>";
         } else {
           output << "<tr><td><span style =\"color:green\"><b>Submission "
-          << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(
+          << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
             secondsTillDeadline, false, false
           ) << " before deadline. </b></span></td></tr>";
         }
@@ -1282,9 +1282,9 @@ std::string WebAPIResponse::addTeachersSections() {
   delimiters.addOnTop(',');
   delimiters.addOnTop(';');
   delimiters.addOnTop(static_cast<char>(160)); //<-&nbsp
-  StringRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
+  StringRoutines::stringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
 
-  StringRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
+  StringRoutines::stringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
   if (theTeachers.size == 0) {
     out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
@@ -1427,9 +1427,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::StringBeginsWith(
+    StringRoutines::stringBeginsWith(
       theArgs.theKeys[i],
       WebAPI::problem::calculatorAnswerPrefix,
       &lastStudentAnswerID
@@ -1532,7 +1532,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       }
       std::string stringAnswer;
       if (currentE[j].isOfType<std::string>(&stringAnswer)) {
-        if (StringRoutines::StringBeginsWith(stringAnswer, "Approximations have been")) {
+        if (StringRoutines::stringBeginsWith(stringAnswer, "Approximations have been")) {
           continue;
         }
       }
@@ -1733,7 +1733,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << "<br>";
   }
   UserCalculator currentUser;
-  HashedList<std::string, MathRoutines::HashString> theSections;
+  HashedList<std::string, MathRoutines::hashString> theSections;
   List<std::string> sectionDescriptions;
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
@@ -1972,7 +1972,7 @@ int ProblemData::getExpectedNumberOfAnswers(
     }
   }
   if (global.problemExpectedNumberOfAnswers.contains(problemName)) {
-    return global.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
+    return global.problemExpectedNumberOfAnswers.getValueCreate(problemName);
   }
   global << Logger::yellow << "Couldn't find problem info in DB for: "
   << problemName << ", trying to read problem from hd. " << Logger::endL;
@@ -2010,8 +2010,8 @@ int ProblemData::getExpectedNumberOfAnswers(
 }
 
 void UserCalculator::computePointsEarned(
-  const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
-  MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
+  const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+  MapList<std::string, TopicElement, MathRoutines::hashString>* theTopics,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("UserCalculator::computePointsEarned");
@@ -2057,7 +2057,7 @@ void UserCalculator::computePointsEarned(
     }
     if (theTopics != nullptr) {
       if (theTopics->contains(problemName)) {
-        TopicElement& currentElt = theTopics->GetValueCreate(problemName);
+        TopicElement& currentElt = theTopics->getValueCreate(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElt.parentTopics.size; j ++) {
           (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.Points;
@@ -2080,7 +2080,7 @@ public:
   CalculatorHTML theProblem;
   std::string currentSection;
   std::string currentCourse;
-  List<MapList<std::string, Rational, MathRoutines::HashString> > scoresBreakdown;
+  List<MapList<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;

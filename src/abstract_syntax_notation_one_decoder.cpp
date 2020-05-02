@@ -223,7 +223,7 @@ std::string ASNElement::InterpretAsObjectIdentifierGetNameAndId() const {
   if (!ASNObject::ObjectIdsToNames().contains(this->ASNAtom)) {
     out << "[unknown]";
   } else {
-    out << ASNObject::ObjectIdsToNames().GetValueCreate(this->ASNAtom).name;
+    out << ASNObject::ObjectIdsToNames().getValueCreate(this->ASNAtom).name;
   }
   return out.str();
 }
@@ -544,8 +544,8 @@ int ASNElement::getLengthLengthEncoding() {
 
 void ASNElement::toJSON(JSData& output) const {
   output.reset();
-  output[ASNElement::JSLabels::tag] = StringRoutines::ConvertByteToHex(this->tag);
-  output[ASNElement::JSLabels::startByteOriginal] = StringRoutines::ConvertByteToHex(this->startByte);
+  output[ASNElement::JSLabels::tag] = StringRoutines::convertByteToHex(this->tag);
+  output[ASNElement::JSLabels::startByteOriginal] = StringRoutines::convertByteToHex(this->startByte);
   output[ASNElement::JSLabels::lengthPromised] = this->lengthPromised;
   output[ASNElement::JSLabels::type] = AbstractSyntaxNotationOneSubsetDecoder::getType(this->tag);
   if (this->offsetLastRead >= 0) {
@@ -1004,7 +1004,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeObjectId(
 }
 
 void ASNObject::initializeAddSample(
-  MapList<std::string, ASNObject, MathRoutines::HashString>& container,
+  MapList<std::string, ASNObject, MathRoutines::hashString>& container,
   const std::string& inputName,
   const std::string& inputObjectIdHex,
   unsigned char inputContentTag
@@ -1024,8 +1024,8 @@ void ASNObject::initializeAddSample(
   container.setKeyValue(incoming.name, incoming);
 }
 
-MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ASNObject::ObjectIdsToNames() {
-  static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> result;
+MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& ASNObject::ObjectIdsToNames() {
+  static MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars> result;
   return result;
 }
 
@@ -1046,8 +1046,8 @@ std::string ASNObject::names::basicConstraints        = "basicConstraints"      
 std::string ASNObject::names::subjectKeyIdentifier    = "subjectKeyIdentifier"   ;
 std::string ASNObject::names::authorityKeyIdentifier  = "authorityKeyIdentifier" ;
 
-MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
-  static MapList<std::string, ASNObject, MathRoutines::HashString> container;
+MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
+  static MapList<std::string, ASNObject, MathRoutines::hashString> container;
   // Object ids of some hash functions are given in RFC4055.
   // Object ids of hash functions may be deduced from [Page 42, RFC 3447]
   if (container.size() != 0) {
@@ -1151,7 +1151,7 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
     "551d13",
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
-  MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap =
+  MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& reverseMap =
   ASNObject::ObjectIdsToNames();
   for (int i = 0; i < container.theValues.size; i ++) {
     ASNObject& current = container.theValues[i];
@@ -1161,7 +1161,7 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
 }
 
 int ASNObject::loadField(
-  const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName
+  const MapList<std::string, ASNObject, MathRoutines::hashString>& inputFields, const std::string& fieldName
 ) {
   if (!ASNObject::NamesToObjectIdsNonThreadSafe().contains(fieldName)) {
     global.fatal << "Field " << fieldName << " is hard-coded but is yet unknown. " << global.fatal;
@@ -1180,7 +1180,7 @@ std::string ASNObject::toString() const {
   out << "objectId: " << Crypto::convertListUnsignedCharsToHex(this->objectId.ASNAtom)
   << ", name: " << Crypto::convertStringToHex(this->name, 0, false);
   std::string content = this->content.ASNAtom.toStringConcatenate();
-  out << ", content: " << StringRoutines::ConvertStringToHexIfNonReadable(content, 0, false);
+  out << ", content: " << StringRoutines::convertStringToHexIfNonReadable(content, 0, false);
   return out.str();
 }
 
@@ -1209,7 +1209,7 @@ const List<unsigned char>& ASNObject::objectIdFromNameNoFail(const std::string& 
 
 bool ASNObject::loadFieldsFromASNSequence(
   const ASNElement& input,
-  MapList<std::string, ASNObject, MathRoutines::HashString>& output,
+  MapList<std::string, ASNObject, MathRoutines::hashString>& output,
   std::stringstream *commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("ASNObject::loadFieldsFromASNSequence");
@@ -1278,7 +1278,7 @@ bool ASNObject::loadFromASN(
     }
     return false;
   }
-  *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId.ASNAtom);
+  *this = ASNObject::ObjectIdsToNames().getValueCreateNoInit(this->objectId.ASNAtom);
   const ASNElement& second = internal.theElements[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {
@@ -1513,7 +1513,7 @@ std::string X509Certificate::ToStringTestEncode() {
   this->WriteBytesASN1(recoded, nullptr);
   std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
   out << "Original, recoded binary source:<br>"
-  << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex, "sourceHex", "recodedHex");
+  << StringRoutines::Differ::differenceHTMLStatic(sourceHex, recodedHex, "sourceHex", "recodedHex");
   return out.str();
 }
 
@@ -1597,7 +1597,7 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
 bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
   std::string certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
-  if (!StringRoutines::StringBeginsWith(
+  if (!StringRoutines::stringBeginsWith(
     certificateContentStripped,
     "-----BEGIN PRIVATE KEY-----",
     &certificateContentStripped
@@ -1607,7 +1607,7 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
     }
     return false;
   }
-  if (!StringRoutines::StringEndsWith(
+  if (!StringRoutines::stringEndsWith(
     certificateContentStripped,
     "-----END PRIVATE KEY-----",
     &certificateContentStripped
@@ -1823,7 +1823,7 @@ bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *c
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
   std::string beginCertificate = "-----BEGIN CERTIFICATE-----";
   std::string endCertificate = "-----END CERTIFICATE-----";
-  if (!StringRoutines::StringBeginsWith(
+  if (!StringRoutines::stringBeginsWith(
     certificateContentStripped, beginCertificate, &certificateContentStripped
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1831,7 +1831,7 @@ bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *c
     }
     return false;
   }
-  if (!StringRoutines::StringEndsWith(
+  if (!StringRoutines::stringEndsWith(
     certificateContentStripped, endCertificate, &certificateContentStripped
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1926,7 +1926,7 @@ bool TBSCertificateInfo::Organization::loadFromASN(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFieldsFromASN");
-  MapList<std::string, ASNObject, MathRoutines::HashString> fields;
+  MapList<std::string, ASNObject, MathRoutines::hashString> fields;
   if (!ASNObject::loadFieldsFromASNSequence(input, fields, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read certificate fields. Certificate fields decoded: "
@@ -1938,7 +1938,7 @@ bool TBSCertificateInfo::Organization::loadFromASN(
 }
 
 bool TBSCertificateInfo::Organization::LoadFields(
-  const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
+  const MapList<std::string, ASNObject, MathRoutines::hashString>& fields,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFields");

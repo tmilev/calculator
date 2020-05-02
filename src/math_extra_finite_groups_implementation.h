@@ -1952,7 +1952,7 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets() {
   GraphOLD orbitg = GraphOLD(this->theGroup->theElements.size, this->theSubgroup->generators.size);
   for (int i = 0; i < this->theGroup->theElements.size; i ++) {
     for (int j = 0; j < this->theSubgroup->generators.size; j ++) {
-      orbitg.AddEdge(
+      orbitg.addEdge(
         this->theGroup->theElements.getIndex(
           this->theGroup->theElements[i] * this->theSubgroup->generators[j]
         ), i

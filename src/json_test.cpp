@@ -3,14 +3,14 @@
 
 bool JSData::Test::all() {
   MacroRegisterFunctionWithName("JSData::Test::all");
-  JSData::Test::TestRecode();
-  JSData::Test::TestBadInput();
+  JSData::Test::testRecode();
+  JSData::Test::testBadInput();
   return true;
 }
 
 
-bool JSData::Test::TestRecode() {
-  MacroRegisterFunctionWithName("JSData::Test::TestRecode");
+bool JSData::Test::testRecode() {
+  MacroRegisterFunctionWithName("JSData::Test::testRecode");
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
@@ -56,8 +56,8 @@ bool JSData::Test::TestRecode() {
   return true;
 }
 
-bool JSData::Test::TestBadInput() {
-  MacroRegisterFunctionWithName("JSData::Test::TestBadInput");
+bool JSData::Test::testBadInput() {
+  MacroRegisterFunctionWithName("JSData::Test::testBadInput");
   // first element is string input, second element
   // is expected recoded output.
   List<std::string> broken = List<std::string>({

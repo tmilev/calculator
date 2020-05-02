@@ -7,8 +7,8 @@
 #include <iomanip>
 #include "string_constants.h"
 
-MapList<std::string, std::string, MathRoutines::HashString>& HtmlRoutines::preLoadedFiles() {
-  static MapList<std::string, std::string, MathRoutines::HashString> result;
+MapList<std::string, std::string, MathRoutines::hashString>& HtmlRoutines::preLoadedFiles() {
+  static MapList<std::string, std::string, MathRoutines::hashString> result;
   return result;
 }
 
@@ -65,7 +65,7 @@ void HtmlRoutines::loadStrings() {
 
 const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
-    return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
+    return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("AceEditor");
   }
   std::stringstream out;
   out << "<script type =\"text/javascript\" src =\""
@@ -73,7 +73,7 @@ const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   << "\" charset =\"utf-8\"></script>";
   out << HtmlRoutines::getJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles().setKeyValue("AceEditor", out.str());
-  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("AceEditor");
 }
 
 const std::string& HtmlRoutines::getFile(
@@ -84,8 +84,8 @@ const std::string& HtmlRoutines::getFile(
   MacroRegisterFunctionWithName("HtmlRoutines::getFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
-    if (HtmlRoutines::preLoadedFiles().GetValueCreate(theID) != "") {
-      return HtmlRoutines::preLoadedFiles().GetValueCreate(theID);
+    if (HtmlRoutines::preLoadedFiles().getValueCreate(theID) != "") {
+      return HtmlRoutines::preLoadedFiles().getValueCreate(theID);
     }
   }
   std::stringstream out, commentsOnFailure;
@@ -99,7 +99,7 @@ const std::string& HtmlRoutines::getFile(
     << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles().setKeyValue(theID, out.str());
-  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit(theID);
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInit(theID);
 }
 
 const std::string& HtmlRoutines::getJavascriptAddScriptTags(const std::string& fileNameVirtual) {
@@ -212,7 +212,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   if (recursionDepth > 50) {
     return input;
   }
-  MapList<std::string, std::string, MathRoutines::HashString> currentMap;
+  MapList<std::string, std::string, MathRoutines::hashString> currentMap;
   std::stringstream notUsed;
   if (!HtmlRoutines::chopPercentEncodedString(input, currentMap, notUsed)) {
     return input;
@@ -284,13 +284,13 @@ std::string HtmlRoutines::getJavascriptMathjax(const std::string& baseFolder) {
   << "</script>\n";
   out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
   HtmlRoutines::preLoadedFiles().setKeyValue("MathJax", out.str());
-  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("MathJax");
+  return HtmlRoutines::preLoadedFiles().getValueCreateNoInit("MathJax");
 }
 
 bool HtmlRoutines::accountOneInputPercentEncodedString(
   const std::string& fieldName,
   const std::string& fieldValue,
-  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::accountOneInputPercentEncodedString");
@@ -311,7 +311,7 @@ bool HtmlRoutines::accountOneInputPercentEncodedString(
 
 bool HtmlRoutines::chopPercentEncodedString(
   const std::string& input,
-  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedString");
@@ -322,7 +322,7 @@ bool HtmlRoutines::chopPercentEncodedString(
 
 bool HtmlRoutines::chopPercentEncodedStringAppend(
   const std::string& input,
-  MapList<std::string, std::string, MathRoutines::HashString>& outputMap,
+  MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::chopPercentEncodedStringAppend");
@@ -374,12 +374,12 @@ bool HtmlRoutines::URLStringToNormalOneStep(std::string& readAhead, std::strings
   if (readAhead.size() == 3) {
     if (
       readAhead[0] == '%' &&
-      MathRoutines::IsAHexDigit(readAhead[1]) &&
-      MathRoutines::IsAHexDigit(readAhead[2])
+      MathRoutines::isHexDigit(readAhead[1]) &&
+      MathRoutines::isHexDigit(readAhead[2])
     ) {
       char next =
-      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1]) * 16 +
-      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[2]);
+      MathRoutines::convertHumanReadableHexToCharValue(readAhead[1]) * 16 +
+      MathRoutines::convertHumanReadableHexToCharValue(readAhead[2]);
       out << next;
       return true;
     }

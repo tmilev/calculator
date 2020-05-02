@@ -11,8 +11,7 @@ public:
   std::string name;
   LargeIntegerUnsigned order;
   LargeIntegerUnsigned modulo;
-  void MakeSecp256k1();
-  static bool GetOrderNISTCurve(
+  static bool getOrderNISTCurve(
     const std::string& curveName, LargeIntegerUnsigned& output, std::stringstream *commentsOnFailure
   );
   static unsigned int hashFunction(const EllipticCurveWeierstrassNormalForm& input);
@@ -28,8 +27,8 @@ public:
   bool flagInfinity;
   static unsigned int hashFunction(const ElementEllipticCurve<Coefficient>& input);
   void invert();
-  bool MakeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
-  void MakeGeneratorSecp256k1();
+  bool makeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
+  void makeGeneratorSecp256k1();
   void makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);

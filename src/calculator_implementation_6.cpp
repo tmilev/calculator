@@ -2775,7 +2775,7 @@ bool CalculatorFunctions::innerShowKnownObjectIds(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerShowKnownObjectIds");
   (void) input;
-  return output.assignValue(ASNObject::ToStringAllRecognizedObjectIds(), theCommands);
+  return output.assignValue(ASNObject::toStringAllRecognizedObjectIds(), theCommands);
 }
 
 bool CalculatorFunctions::innerTestASN1Decode(
@@ -2795,15 +2795,15 @@ bool CalculatorFunctions::innerTestASN1Decode(
   std::stringstream commentsOnError;
   std::stringstream out;
   ASNElement result;
-  if (!theDecoder.Decode(dataList, 0, result, &commentsOnError)) {
+  if (!theDecoder.decode(dataList, 0, result, &commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();
   } else {
     List<unsigned char> recoded;
-    result.WriteBytesUpdatePromisedLength(recoded);
+    result.writeBytesUpdatePromisedLength(recoded);
     std::string originalHex = Crypto::convertStringToHex(data, 0, false);
     std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
     out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex, "original", "recoded");
-    out << theDecoder.ToStringAnnotateBinary();
+    out << theDecoder.toStringAnnotateBinary();
   }
   return output.assignValue(out.str(), theCommands);
 }

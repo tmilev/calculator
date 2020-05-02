@@ -63,7 +63,7 @@ public:
   List<unsigned char> ASNAtom;
   List<ASNElement> theElements;
   ASNElement();
-  void ComputeTag();
+  void computeTag();
   bool hasBit7Set() const;
   bool hasBit8Set() const;
   bool hasCostructedStartByte() const;
@@ -75,14 +75,14 @@ public:
   std::string InterpretAsObjectIdentifierGetNameAndId() const;
   void toJSON(JSData& output) const;
   JSData toJSON() const;
-  void WriteAnnotations(List<Serialization::Marker>& output);
+  void writeAnnotations(List<Serialization::Marker>& output);
   std::string toString() const;
   bool isComposite() const;
   bool isPureComposite() const;
   bool isNonPureComposite() const;
-  std::string GetType() const;
+  std::string getType() const;
   bool isTime() const;
-  int GetLengthLengthEncoding();
+  int getLengthLengthEncoding();
   void makeSequence(int numberOfEmptyElements);
   void makeSequence(const List<ASNElement>& input);
   // The following method
@@ -91,51 +91,51 @@ public:
   // While this is awkward,
   // it is in fact used for public key and
   // certificate extension serializations.
-  void MakeBitStringSequence(const List<ASNElement>& input);
-  void MakeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
-  void MakeNull();
-  void MakeInteger(const LargeIntegerUnsigned& input);
-  void MakeBitStrinG(const List<unsigned char>& input);
-  void MakeOctetString(const List<unsigned char>& input);
-  void SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
-  void MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
-  void MakeObjectId(const List<unsigned char>& input);
+  void makeBitStringSequence(const List<ASNElement>& input);
+  void makeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
+  void makeNull();
+  void makeInteger(const LargeIntegerUnsigned& input);
+  void mMakeBitString(const List<unsigned char>& input);
+  void makeOctetString(const List<unsigned char>& input);
+  void setStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
+  void makeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
+  void makeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
-  static bool HasSubElementTemplate(
+  static bool hasSubElementTemplate(
     thisPointerType* thisPointer,
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     thisPointerType** whichElement,
     std::stringstream* commentsOnFailure
   );
-  bool HasSubElementConst(
+  bool hasSubElementConst(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     const ASNElement** whichElement,
     std::stringstream* commentsOnFailure
   ) const;
-  bool HasSubElementNonConst(
+  bool hasSubElementNonConst(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     ASNElement** whichElement,
     std::stringstream* commentsOnFailure
   );
-  bool HasSubElementGetCopy(
+  bool hasSubElementGetCopy(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     ASNElement& output,
     std::stringstream* commentsOnFailure
   ) const;
   template <typename desiredType>
-  bool HasSubElementOfType(
+  bool hasSubElementOfType(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     desiredType& output,
     std::stringstream* commentsOnFailure
   ) const;
-  void WriteBytesConst(List<unsigned char>& output) const;
-  void WriteBytesUpdatePromisedLength(List<unsigned char>& output);
-  static void WriteBytesASNAtom(
+  void writeBytesConst(List<unsigned char>& output) const;
+  void writeBytesUpdatePromisedLength(List<unsigned char>& output);
+  static void writeBytesASNAtom(
     unsigned char startByte,
     const List<unsigned char>& content,
     List<unsigned char>& output
@@ -175,8 +175,6 @@ public:
   std::string name;
   ASNElement objectId;
   ASNElement content;
-  void MakeLookupId(const std::string& inputName, List<unsigned char>& inputContent);
-  void Make(List<unsigned char>& inputObjectId, List<unsigned char>& inputContent);
   static void initializeAddSample(
     MapList<std::string, ASNObject, MathRoutines::HashString>& container,
     const std::string& inputName,
@@ -188,23 +186,23 @@ public:
   static MapList<std::string, ASNObject, MathRoutines::HashString>& NamesToObjectIdsNonThreadSafe();
   static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ObjectIdsToNames();
   static void initializeNonThreadSafe();
-  bool LoadFromASN(
+  bool loadFromASN(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  static bool LoadFieldsFromASNSequence(
+  static bool loadFieldsFromASNSequence(
     const ASNElement& input,
     MapList<std::string, ASNObject, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure
   );
   // Returns 1 if field was found, 0 otherwise.
-  int LoadField(
+  int loadField(
     const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields,
     const std::string& fieldName
   );
-  static const List<unsigned char>& ObjectIdFromNameNoFail(const std::string& input);
-  static std::string ToStringAllRecognizedObjectIds();
-  void ComputeASN(ASNElement& output);
+  static const List<unsigned char>& objectIdFromNameNoFail(const std::string& input);
+  static std::string toStringAllRecognizedObjectIds();
+  void computeASN(ASNElement& output);
   std::string toString() const;
   bool isEmpty() const;
 };
@@ -282,29 +280,28 @@ public:
     AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError
   );
   List<typeDecoder> decodersByByteValue;
-  bool Decode(
+  bool decode(
     const List<unsigned char>& inputRawData,
     int inputOffset,
     ASNElement& output,
     std::stringstream* commentsOnError
   );
-  static std::string GetType(unsigned char startByte);
-  bool PointerIsBad(ASNElement& outputError);
-  bool DecodeCurrent(ASNElement& output);
-  bool DecodeSequenceLikeContent(ASNElement& output);
-  bool DecodeBitString(ASNElement& output);
+  static std::string getType(unsigned char startByte);
+  bool pointerIsBad(ASNElement& outputError);
+  bool decodeCurrent(ASNElement& output);
+  bool decodeSequenceLikeContent(ASNElement& output);
+  bool decodeBitString(ASNElement& output);
   static LargeInteger VariableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
-  void DecodeASNAtomContent(ASNElement& output);
-  bool DecodeNull(ASNElement& output);
-  bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
-  bool DecodeLengthIncrementDataPointerNoCheck(ASNElement& output);
-  bool DecodeLengthIncrementDataPointer(ASNElement& output);
+  void decodeASNAtomContent(ASNElement& output);
+  bool decodeNull(ASNElement& output);
+  bool decodeLengthIncrementDataPointerNoCheck(ASNElement& output);
+  bool decodeLengthIncrementDataPointer(ASNElement& output);
 
-  static void WriteUnsignedIntegerObject(const LargeIntegerUnsigned& input, List<unsigned char>& output);
-  static void WriteObjectId(const List<unsigned char>& input, List<unsigned char>& output);
-  static void WriteNull(List<unsigned char>& output);
+  static void writeUnsignedIntegerObject(const LargeIntegerUnsigned& input, List<unsigned char>& output);
+  static void writeObjectId(const List<unsigned char>& input, List<unsigned char>& output);
+  static void writeNull(List<unsigned char>& output);
 
-  std::string ToStringAnnotateBinary();
+  std::string toStringAnnotateBinary();
   bool checkInitialization() const;
   void reset();
   AbstractSyntaxNotationOneSubsetDecoder();

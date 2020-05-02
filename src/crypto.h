@@ -75,13 +75,13 @@ public:
     ASNObject organizationalUnitName;
     ASNObject commonName;
     ASNObject emailAddress;
-    void ComputeASN(ASNElement& output);
+    void computeASN(ASNElement& output);
     std::string toString();
     bool LoadFields(
       const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
       std::stringstream* commentsOnFailure
     );
-    bool LoadFromASN(
+    bool loadFromASN(
       const ASNElement &input,
       std::stringstream* commentsOnFailure
     );
@@ -123,7 +123,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toString();
-  void ComputeASN(ASNElement& output);
+  void computeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);
   void ComputeASNValidityWrapper(ASNElement& output);
   void ComputeASNSignatureAlgorithmIdentifier(ASNElement& output);
@@ -161,7 +161,7 @@ public:
   std::string toString();
   std::string ToHex();
   std::string ToStringTestEncode();
-  void ComputeASN(ASNElement& output);
+  void computeASN(ASNElement& output);
   void ComputeASNSignatureAlgorithm(ASNElement& output);
   void WriteBytesASN1(List<unsigned char>& output, List<Serialization::Marker>* annotations);
 };

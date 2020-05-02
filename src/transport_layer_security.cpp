@@ -593,7 +593,7 @@ void SSLContent::WriteBytesHandshakeServerHello(
   this->WriteBytesExtensionsOnly(output, annotations);
 }
 
-std::string SSLContent::GetType(unsigned char theToken) {
+std::string SSLContent::getType(unsigned char theToken) {
   switch (theToken) {
   case SSLContent::tokens::certificate:
     return "certificate";
@@ -648,7 +648,7 @@ void SSLContent::WriteType(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   if (annotations != nullptr) {
-    annotations->addOnTop(Serialization::Marker(output.size, 1, this->GetType(this->theType)));
+    annotations->addOnTop(Serialization::Marker(output.size, 1, this->getType(this->theType)));
   }
   output.addOnTop(this->theType);
 }
@@ -809,8 +809,8 @@ void SSLContent::WriteBytesExtensionsOnly(
   }
 }
 
-bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("SSLHello::Decode");
+bool SSLContent::decode(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLHello::decode");
   if (this->owner->incomingBytes.size == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty message. ";
@@ -1628,8 +1628,8 @@ std::string SSLRecord::toString() const {
   return result.toString(&JSData::PrintOptions::HexEncodeNonASCII());
 }
 
-bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
-  MacroRegisterFunctionWithName("SSLRecord::Decode");
+bool SSLRecord::decode(std::stringstream *commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLRecord::decode");
   this->checkInitialization();
   if (this->incomingBytes.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
@@ -1678,7 +1678,7 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
 bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
   switch (this->theType) {
     case SSLRecord::tokens::handshake:
-      return this->content.Decode(commentsOnFailure);
+      return this->content.decode(commentsOnFailure);
     default:
       break;
   }
@@ -1690,7 +1690,7 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
 
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
-  if (!this->lastReaD.Decode(commentsOnFailure)) {
+  if (!this->lastReaD.decode(commentsOnFailure)) {
     return false;
   }
   return true;

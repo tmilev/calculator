@@ -312,12 +312,12 @@ public:
   };
   static const unsigned char namedCurve = 3;
   SSLContent();
-  static std::string GetType(unsigned char theToken);
+  static std::string getType(unsigned char theToken);
   void resetExceptOwner();
   TransportLayerSecurityServer& GetServer() const;
   bool checkInitialization() const;
   Logger::StringHighligher getStringHighlighter();
-  bool Decode(std::stringstream* commentsOnFailure);
+  bool decode(std::stringstream* commentsOnFailure);
   bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool DecodeExtensions(std::stringstream* commentsOnFailure);
   bool ProcessExtensions(std::stringstream* commentsOnFailure);
@@ -402,7 +402,7 @@ public:
   SSLRecord();
   void resetExceptOwner();
   bool checkInitialization() const;
-  bool Decode(std::stringstream* commentsOnFailure);
+  bool decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToBytes() const;
   std::string ToHtml(int id);

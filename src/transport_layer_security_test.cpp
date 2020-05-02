@@ -36,7 +36,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   )) {
     global.fatal << "Bad hard-coded test hex string!" << global.fatal;
   }
-  if (!theRecord.Decode(&comments)) {
+  if (!theRecord.decode(&comments)) {
     global.fatal << "Failed to decode built-in message. " << comments.str() << global.fatal;
   }
   List<unsigned char> encoded;
@@ -46,7 +46,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
     << Crypto::convertListUnsignedCharsToHex(theRecord.incomingBytes) << Logger::endL;
     global << "Encoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::convertListUnsignedCharsToHex(encoded) << Logger::endL;
-    global.fatal << "Decode->Encode did not reproduce the original input. " << global.fatal;
+    global.fatal << "decode->Encode did not reproduce the original input. " << global.fatal;
   }
   return true;
 }

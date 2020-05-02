@@ -11,7 +11,7 @@
 
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -29,7 +29,7 @@ bool TransportLayerSecurity::LoadPEMPrivateKey(
   static bool accessULTRASensitiveFoldersAllowed = true;
   // Access to ultra sensitive folders is allowed only once, at the start of the program.
   // No further attempts to load allowed.
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     TransportLayerSecurity::fileKey,
     certificateContent,
     true,

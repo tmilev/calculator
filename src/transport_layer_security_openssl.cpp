@@ -75,8 +75,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
     return false;
   }
   if (
-    FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) &&
-    FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
+    FileOperations::fileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) &&
+    FileOperations::fileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
   ) {
     return true;
   }
@@ -84,10 +84,10 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   global << Logger::green << "Let me try to create those files for you." << Logger::endL;
   std::stringstream theCommand;
   std::string certificatePhysicalName, keyPhysicalName;
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileCertificate, certificatePhysicalName, true, true, nullptr
   );
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileKey, keyPhysicalName, true, true, nullptr
   );
   theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
@@ -112,8 +112,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
     return false;
   }
   if (
-    !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
-    !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
+    !FileOperations::fileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
+    !FileOperations::fileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
   ) {
     global.flagSSLIsAvailable = false;
     return false;
@@ -182,35 +182,35 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::signedFileCertificate1,
     singedFileCertificate1Physical,
     true,
     true,
     nullptr
   );
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::signedFileCertificate3,
     signedFileCertificate3Physical,
     true,
     true,
     nullptr
   );
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileCertificate,
     fileCertificatePhysical,
     true,
     true,
     nullptr
   );
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::fileKey,
     fileKeyPhysical,
     true,
     true,
     nullptr
   );
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     TransportLayerSecurity::signedFileKey,
     signedFileKeyPhysical,
     true,
@@ -459,7 +459,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
       }
-      global.FallAsleep(500000);
+      global.fallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
       break;
@@ -691,7 +691,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... ";
       }
-      global.FallAsleep(500000);
+      global.fallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
       break;

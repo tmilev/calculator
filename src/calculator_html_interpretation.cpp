@@ -8,8 +8,8 @@
 
 JSData WebAPIResponse::getProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
-  if (!global.UserDefaultHasAdminRights()) {
-    global.theResponse.DisallowReport();
+  if (!global.userDefaultHasAdminRights()) {
+    global.theResponse.disallowReport();
   }
   int64_t startMilliseconds = global.getElapsedMilliseconds();
   CalculatorHTML theProblem;
@@ -53,7 +53,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
-    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+    if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       out << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::resultHtml] = out.str();
@@ -113,7 +113,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
       out << currentA.solutionElements[i].toStringInterpretedBody();
     }
   }
-  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+  if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out << "<hr>"
     << "<a href=\"" << global.DisplayNameExecutable
     << "?request=calculator&mainInput="
@@ -131,7 +131,7 @@ std::string WebAPIResponse::setProblemWeight() {
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML theProblem;
@@ -150,7 +150,7 @@ std::string WebAPIResponse::setProblemDeadline() {
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML theProblem;
@@ -230,8 +230,8 @@ std::string WebAPIResponse::GetCommentsInterpretation(
 
 JSData WebAPIResponse::submitAnswersPreviewJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
-  if (!global.UserDefaultHasAdminRights()) {
-    global.theResponse.DisallowReport();
+  if (!global.userDefaultHasAdminRights()) {
+    global.theResponse.disallowReport();
   }
   double startTime = global.getElapsedSeconds();
   std::string lastStudentAnswerID;
@@ -252,7 +252,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   CalculatorHTML theProblem;
   std::stringstream errorStream, comments;
   theProblem.loadCurrentProblemItem(
-    global.UserRequestRequiresLoadingRealExamData(),
+    global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorStream
   );
@@ -275,7 +275,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   if (!theProblem.prepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
-    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+    if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
     result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
@@ -356,7 +356,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (global.UserDefaultHasAdminRights()) {
+    if (global.userDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
       << theInterpreterWithAdvice.outputString << "<br>"
@@ -371,7 +371,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b>";
-    if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
+    if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       out << "<br>Logged-in as administator with debug flag on => printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
@@ -387,7 +387,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     out << WebAPIResponse::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
   result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
-  if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
+  if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
     << calculatorInputStreamNoEnclosures.str()
@@ -405,7 +405,7 @@ JSData WebAPIResponse::clonePageResult() {
   JSData result;
   if (
     ! global.flagLoggedIn ||
-    ! global.UserDefaultHasAdminRights() ||
+    ! global.userDefaultHasAdminRights() ||
     ! global.flagUsingSSLinCurrentConnection
   ) {
     result[WebAPI::result::error] = "Cloning problems allowed only for logged-in admins under ssl connection.";
@@ -415,18 +415,18 @@ JSData WebAPIResponse::clonePageResult() {
   std::string fileNameToBeCloned = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
+  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
     out << "Could not find input file: " << fileNameToBeCloned;
     result[WebAPI::result::error] = out.str();
     return result;
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
+  if (FileOperations::fileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
     out << "Output file: " << fileNameTarget << " already exists. ";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
+  if (!FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
     theFile, fileNameTarget, false, false, false, &out
   )) {
     out << "Failed to open output file: " << fileNameTarget << ".";
@@ -437,7 +437,7 @@ JSData WebAPIResponse::clonePageResult() {
   theFile.close();
   std::string fileNameNonVirtual;
   std::stringstream comments;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     fileNameTarget, fileNameNonVirtual, &comments
   )) {
     out << "Could not get physical file name from virtual. " << comments.str();
@@ -525,7 +525,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     "/calculator-html/index.html", theInterpretation.htmlRaw, false, &errorStream
   )) {
     out << "<html><body><b>Failed to load the application file. </b>"
@@ -535,7 +535,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
   theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
   theInterpretation.jsFileContents.setSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
-    if (!FileOperations::LoadFileToStringVirtual(
+    if (!FileOperations::loadFileToStringVirtual(
       theInterpretation.jsFileNames[i],
       theInterpretation.jsFileContents[i],
       false,
@@ -578,7 +578,7 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     "/calculator-html/index.html",
     theInterpretation.htmlRaw,
     false,
@@ -614,7 +614,7 @@ std::string Course::toString() const {
   return out.str();
 }
 
-bool Course::IsEmpty() {
+bool Course::isEmpty() {
   return this->courseTemplate == "" && this->courseTopicsNoFolder == "" && this->title == "";
 }
 
@@ -629,8 +629,8 @@ std::string CourseList::toHtml() {
   return this->theCourses.toString();
 }
 
-bool CourseList::LoadFromString(const std::string& input) {
-  MacroRegisterFunctionWithName("CourseList::LoadFromString");
+bool CourseList::loadFromString(const std::string& input) {
+  MacroRegisterFunctionWithName("CourseList::loadFromString");
   std::stringstream tableReader(input);
   std::string currentLine, currentArgument;
   Course current;
@@ -664,7 +664,7 @@ bool CourseList::LoadFromString(const std::string& input) {
       current.flagRoughDraft = StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
   }
-  if (!current.IsEmpty()) {
+  if (!current.isEmpty()) {
     this->theCourses.addOnTop(current);
   }
   return true;
@@ -673,14 +673,14 @@ bool CourseList::LoadFromString(const std::string& input) {
 bool CourseList::load() {
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
     "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
   )) {
     commentsOnFailure << "Failed to fetch available courses from /coursesavailable/default.txt. ";
     this->errorMessage = commentsOnFailure.str();
     return false;
   }
-  return this->LoadFromString(theTopicFile);
+  return this->loadFromString(theTopicFile);
 }
 
 JSData CourseList::toJSON() {
@@ -819,7 +819,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   theFile.flagDoPrependProblemNavigationBar = false;
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
-    global.UserRequestRequiresLoadingRealExamData(),
+    global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
@@ -861,7 +861,7 @@ JSData WebAPIResponse::getEditPageJSON() {
   JSData output;
   if (
     !global.flagLoggedIn ||
-    !global.UserDefaultHasAdminRights()
+    !global.userDefaultHasAdminRights()
   ) {
     output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
     return output;
@@ -920,8 +920,8 @@ JSData WebAPIResponse::submitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  if (!global.UserDefaultHasAdminRights()) {
-    global.theResponse.DisallowReport();
+  if (!global.userDefaultHasAdminRights()) {
+    global.theResponse.disallowReport();
   }
 
   std::stringstream output, errorStream, comments;
@@ -929,7 +929,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   double startTime = global.getElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.loadCurrentProblemItem(
-    global.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
+    global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
@@ -1030,9 +1030,9 @@ JSData WebAPIResponse::submitAnswersJSON(
   completedProblemStreamNoEnclosures << theProblem.cleanUpCommandString(currentA.commandVerificationOnly);
 
   std::stringstream debugInputStream;
-  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+  if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     debugInputStream
-    << global.ToStringCalculatorComputation(
+    << global.toStringCalculatorComputation(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
@@ -1071,7 +1071,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     } else {
       output << isolatedInterpreter.outputString;
     }
-    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+    if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       output << "<hr><b>Administartor view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
       << theInterpreter.outputString
@@ -1100,7 +1100,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     output << "<tr><td>";
     output << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
     output << "</td></tr>";
-    if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
+    if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       output << "<tr><td>Administrator view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
@@ -1244,7 +1244,7 @@ JSData WebAPIResponse::submitAnswersJSON(
 std::string WebAPIResponse::addTeachersSections() {
   MacroRegisterFunctionWithName("WebAPIReponse::addTeachersSections");
   std::stringstream out;
-  if (!global.UserDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
+  if (!global.userDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
     out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
@@ -1320,7 +1320,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
   (void) hostWebAddressWithPort;
   std::stringstream out;
   if (
-    !global.UserDefaultHasAdminRights() ||
+    !global.userDefaultHasAdminRights() ||
     !global.flagUsingSSLinCurrentConnection
   ) {
     out << "<b>Only admins may add users, under ssl connection. </b>";
@@ -1388,8 +1388,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::getAnswerOnGiveUp");
   GlobalVariables::Response::StateMaintainer maintain(global.theResponse);
-  if (!global.UserDefaultHasAdminRights()) {
-    global.theResponse.DisallowReport();
+  if (!global.userDefaultHasAdminRights()) {
+    global.theResponse.disallowReport();
   }
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
@@ -1443,7 +1443,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
-    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+    if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << "<hr>" << theProblem.theProblemData.toStringAvailableAnswerIds();
     }
     result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startTimeInMilliseconds;
@@ -1454,7 +1454,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
+    if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()) {
       out << "<br>Answer status: " << currentA.toString();
     }
     result[WebAPI::result::error] = out.str();
@@ -1474,8 +1474,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (theInterpreteR.syntaxErrors != "") {
     out << "<b style ='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
-    if (global.UserDefaultHasProblemComposingRights()) {
-      out << global.ToStringCalculatorComputation(
+    if (global.userDefaultHasProblemComposingRights()) {
+      out << global.toStringCalculatorComputation(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1489,8 +1489,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
-    if (global.UserDefaultHasProblemComposingRights()) {
-      out << global.ToStringCalculatorComputation(
+    if (global.userDefaultHasProblemComposingRights()) {
+      out << global.toStringCalculatorComputation(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1564,16 +1564,16 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     int64_t ellapsedTime = global.getElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
   }
-  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
+  if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
     << "<hr>"
-    << global.ToStringCalculatorComputation(
+    << global.toStringCalculatorComputation(
       answerCommandsNoEnclosure.str(),
       "Calculator input no enclosures"
     );
     out << theInterpreteR.outputString << "<hr>"
     << theInterpreteR.outputCommentsString
-    << "<hr>" << global.ToStringCalculatorComputation(
+    << "<hr>" << global.toStringCalculatorComputation(
       theInterpreteR.inputString, "Raw calculator input"
     );
   }
@@ -1590,7 +1590,7 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
     return output;
   }
   if (
-    !global.UserDefaultHasAdminRights() ||
+    !global.userDefaultHasAdminRights() ||
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
@@ -1650,7 +1650,7 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
   }
   std::stringstream out;
   if (
-    !global.UserDefaultHasAdminRights() ||
+    !global.userDefaultHasAdminRights() ||
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
@@ -1727,7 +1727,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     << currentCourse << "</b>. "
     << "<a href=\"" << global.DisplayNameExecutable
     << "?request=accounts&"
-    << global.ToStringCalcArgsNoNavigation(nullptr)
+    << global.toStringCalculatorArgumentsNoNavigation(nullptr)
     << "filterAccounts=false&"
     << "\">Show all. </a>"
     << "<br>";
@@ -2150,7 +2150,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       if (currentUserRecord.currentUseR.courseComputed != this->currentCourse) {
         continue;
       }
-      if (global.UserStudentVieWOn()) {
+      if (global.userStudentVieWOn()) {
         if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
           continue;
         }
@@ -2207,7 +2207,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
 
 std::string WebAPIResponse::getScoresInCoursePage() {
   MacroRegisterFunctionWithName("WebWorker::getScoresInCoursePage");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "Only admins are allowed to view student scores.";
   }
   std::stringstream out;
@@ -2247,7 +2247,7 @@ std::string WebAPIResponse::getScoresInCoursePage() {
 
 std::string WebAPIResponse::toStringUserScores() {
   MacroRegisterFunctionWithName("WebAPIReponse::toStringUserScores");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
   if (!global.flagDatabaseCompiled) {

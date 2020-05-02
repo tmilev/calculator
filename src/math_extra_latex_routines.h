@@ -89,7 +89,7 @@ class LaTeXCrawler {
   void ComputeAllowedFolders();
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void Crawl();
+  void crawl();
   bool ExtractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);

@@ -432,7 +432,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
 JSData WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
   JSData result;
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     result[WebAPI::result::error] = "Only logged-in admins can access database. ";
     return result;
   }
@@ -446,7 +446,7 @@ JSData WebWorker::GetDatabaseJSON() {
     } else {
       result[WebAPI::result::error] = "Uknown database operation: " + operation + ". ";
     }
-    if (global.UserDebugFlagOn()) {
+    if (global.userDebugFlagOn()) {
       result["databaseOperation"] = operation;
       result["databaseLabels"] = labels;
     }
@@ -458,7 +458,7 @@ JSData WebWorker::GetDatabaseJSON() {
 
 std::string WebWorker::GetDatabaseDeleteOneItem() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseDeleteOneItem");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "Only logged-in admins can execute the delete command. ";
   }
   std::stringstream commentsStream;
@@ -585,7 +585,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = false;
     global.flagLogInAttempted = true;
-    if (global.UserDebugFlagOn() && comments != nullptr) {
+    if (global.userDebugFlagOn() && comments != nullptr) {
       *comments << "Password was entered: all other authentication methods ignored. ";
     }
   }
@@ -595,7 +595,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = true;
     global.flagLogInAttempted = true;
-    if (global.UserDebugFlagOn() && comments != nullptr) {
+    if (global.userDebugFlagOn() && comments != nullptr) {
       *comments << "Activation token entered: authentication token and google token ignored. ";
     }
   }
@@ -677,7 +677,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
       // <-URL-encoded fashion, NO PLUSES.
     );
-    global.SetWebInpuT(
+    global.setWebInput(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
     );
@@ -1070,7 +1070,7 @@ int WebWorker::GetIndexIfRunningWorkerId(
   if (indexOther >= 0) {
     this->parent->theWorkers[indexOther].writingReportFile.Lock();
   }
-  bool success = FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  bool success = FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId,
     computationResult,
     true,
@@ -1157,11 +1157,11 @@ void WebWorker::WriteAfterTimeoutCarbonCopy(
     return;
   }
   std::string extraFilename = "output/";
-  extraFilename += FileOperations::CleanUpForFileNameUse(
+  extraFilename += FileOperations::cleanUpForFileNameUse(
     fileNameCarbonCopy
   ) + ".json";
   std::stringstream commentsOnError;
-  bool success = FileOperations::WriteFileVirual(extraFilename, input.toString(nullptr), &commentsOnError);
+  bool success = FileOperations::writeFileVirual(extraFilename, input.toString(nullptr), &commentsOnError);
   if (!success) {
     global << Logger::red << "Error writing optional file. " << commentsOnError.str() << Logger::endL;
   }
@@ -1201,7 +1201,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
   result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
   std::string toWrite = result.toString(nullptr);
   currentWorker.writingReportFile.Lock();
-  bool success = FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  bool success = FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + currentWorker.workerId,
     toWrite,
     true,
@@ -1244,7 +1244,7 @@ int WebWorker::ProcessFolder() {
     outError << sanitization.str();
   }
   List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::GetFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
+  if (!FileOperations::getFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
     outError << "<b>Failed to open directory with physical address "
     << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, false)
     << " </b>";
@@ -1363,13 +1363,13 @@ int WebWorker::ProcessFileTooLarge(long fileSize) {
 
 int WebWorker::ProcessFile() {
   MacroRegisterFunctionWithName("WebWorker::ProcessFile");
-  if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE)) {
+  if (!FileOperations::fileExistsUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFileDoesntExist();
   }
-  std::string fileExtension = FileOperations::GetFileExtensionWithDot(this->RelativePhysicalFileNamE);
+  std::string fileExtension = FileOperations::getFileExtensionWithDot(this->RelativePhysicalFileNamE);
   bool isBinary = this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
-  if (!FileOperations::OpenFileUnsecure(theFile, this->RelativePhysicalFileNamE, false, false, !isBinary)) {
+  if (!FileOperations::openFileUnsecure(theFile, this->RelativePhysicalFileNamE, false, false, !isBinary)) {
     return this->ProcessFileCantOpen();
   }
   theFile.seekp(0, std::ifstream::end);
@@ -1490,7 +1490,7 @@ void WebWorker::WrapUpConnection() {
     global << "Detail: released. " << Logger::endL;
   }
   global.flagComputationCompletE = true;
-  global.JoinAllThreads();
+  global.joinAllThreads();
 }
 
 WebWorker::~WebWorker() {
@@ -1543,7 +1543,7 @@ bool WebWorker::ShouldDisplayLoginPage() {
   ) {
     return true;
   }
-  if (global.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !global.flagLoggedIn) {
+  if (global.userRequestMustBePromptedToLogInIfNotLoggedIn() && !global.flagLoggedIn) {
     return true;
   }
   return false;
@@ -1672,7 +1672,7 @@ bool WebWorker::DoSetEmail(
   }
   theEmail.sendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != nullptr) {
-    if (global.UserDefaultHasAdminRights()) {
+    if (global.userDefaultHasAdminRights()) {
       *commentsGeneralSensitive << "<hr>Content of sent email (administrator view only):<br>"
       << HtmlRoutines::convertStringToHtmlString(theEmail.emailContent, true);
     }
@@ -1698,11 +1698,11 @@ JSData WebWorker::SetEmail(const std::string& input) {
   std::stringstream out, debugStream;
   global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
-  if (global.UserDefaultHasAdminRights()) {
+  if (global.userDefaultHasAdminRights()) {
     adminOutputStream = &out;
   }
   this->DoSetEmail(global.userDefault, &out, &out, adminOutputStream);
-  if (global.UserDefaultHasAdminRights()) {
+  if (global.userDefaultHasAdminRights()) {
     out << "<hr><b>Administrator view only. </b>" << debugStream.str();
   }
   out << "<br>Response time: " << global.getElapsedSeconds() << " second(s).";
@@ -1729,7 +1729,7 @@ std::string WebWorker::GetAddUserEmails() {
 
 std::string WebAPIResponse::modifyProblemReport() {
   MacroRegisterFunctionWithName("WebWorker::modifyProblemReport");
-  bool shouldProceed = global.flagLoggedIn && global.UserDefaultHasAdminRights();
+  bool shouldProceed = global.flagLoggedIn && global.userDefaultHasAdminRights();
   if (shouldProceed) {
     shouldProceed = global.flagUsingSSLinCurrentConnection;
   }
@@ -1744,14 +1744,14 @@ std::string WebAPIResponse::modifyProblemReport() {
     global.getWebInput(WebAPI::problem::fileName), false
   );
   std::stringstream commentsOnFailure;
-  bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(
+  bool fileExists = FileOperations::fileExistsVirtualCustomizedReadOnly(
     fileName, &commentsOnFailure
   );
   std::fstream theFile;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     global.userDefault.instructorComputed = "default";
   }
-  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(
+  if (!FileOperations::openFileVirtualCustomizedWriteOnly(
     theFile, fileName, false, true, false, &commentsOnFailure
   )) {
     commentsOnFailure
@@ -1781,7 +1781,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
   MacroRegisterFunctionWithName("WebAPIResponse::getCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out
   )) {
     out << "<b style =\"color:red\">Couldn't find the recaptcha key in file: "
@@ -2080,7 +2080,7 @@ int WebWorker::ServeClient() {
     argumentProcessingFailureComments << comments.str();
     global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
-      global.SetWebInpuT("authenticationToken", "");
+      global.setWebInput("authenticationToken", "");
     }
     return this->response.processLoginUserInfo(argumentProcessingFailureComments.str());
   }
@@ -2090,9 +2090,9 @@ int WebWorker::ServeClient() {
       global.requestType == WebAPI::request::userInfoJSON
     )
   ) {
-    global.SetWebInpuT("error", argumentProcessingFailureComments.str());
+    global.setWebInput("error", argumentProcessingFailureComments.str());
   }
-  if (global.UserDefaultHasAdminRights() && global.flagLoggedIn) {
+  if (global.userDefaultHasAdminRights() && global.flagLoggedIn) {
     if (global.getWebInput("spoofHostName") != "") {
       global.hostNoPort = HtmlRoutines::convertURLStringToNormal(
         global.getWebInput("spoofHostName"), false
@@ -2114,10 +2114,10 @@ int WebWorker::ProcessFolderOrFile() {
   this->SanitizeVirtualFileName();
   std::stringstream commentsOnFailure;
   if (
-    !FileOperations::GetPhysicalFileNameFromVirtual(
+    !FileOperations::getPhysicalFileNameFromVirtual(
       this->VirtualFileName,
       this->RelativePhysicalFileNamE,
-      global.UserDefaultHasAdminRights(),
+      global.userDefaultHasAdminRights(),
       false,
       &commentsOnFailure
   )) {
@@ -2133,7 +2133,7 @@ int WebWorker::ProcessFolderOrFile() {
     result[WebAPI::result::error] = out.str();
     return global.theResponse.writeResponse(result);
   }
-  if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE)) {
+  if (FileOperations::isFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFolder();
   }
   return this->ProcessFile();
@@ -2207,7 +2207,7 @@ void WebWorker::writeAfterTimeoutShowIndicator(const std::string& message) {
   }
   this->writeToBodyJSON(result);
   this->writeAfterTimeoutProgress(
-    global.ToStringProgressReportNoThreadData(true), true
+    global.toStringProgressReportNoThreadData(true), true
   );
   this->sendPending();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
@@ -2604,14 +2604,14 @@ std::string WebServer::ToStringStatusAll() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
   std::stringstream out;
 
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     out << this->ToStringConnectionSummary();
     return out.str();
   }
   out << this->ToStringStatusForLogFile();
   out << "<hr>";
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
-  out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
+  out << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   if (this->activeWorker == - 1) {
     out << "The is a server process.";
   } else {
@@ -2702,7 +2702,7 @@ void WebServer::StopKillAll() {
     }
     global << Logger::blue << "Still waiting on "
     << workersStillInUse << " workers to finish. " << Logger::endL;
-    global.FallAsleep(1000000);
+    global.fallAsleep(1000000);
   }
   this->ReleaseEverything();
   exit(0);
@@ -3293,7 +3293,7 @@ int WebServer::daemon() {
       global << Logger::green;
     }
     global << "Server exited with status: " << exitStatus << Logger::endL;
-    global.FallAsleep(100000);
+    global.fallAsleep(100000);
   }
 }
 
@@ -3580,7 +3580,7 @@ bool WebWorker::runOnce() {
   if (
     (!this->flagKeepAlive) ||
     global.flagRestartNeeded ||
-    global.theResponse.TimedOut()
+    global.theResponse.isTimedOut()
   ) {
     return false;
   }
@@ -3768,9 +3768,9 @@ void WebServer::checkFreecalcSetup() {
   WebServer::figureOutOperatingSystem();
   global << Logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << Logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
-  std::string startingDir = FileOperations::GetCurrentFolder();
+  std::string startingDir = FileOperations::getCurrentFolder();
   global.changeDirectory(global.PhysicalPathProjectBase + "../");
-  global << Logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << Logger::endL;
+  global << Logger::green << "Current folder: " << FileOperations::getCurrentFolder() << Logger::endL;
   global << Logger::green << "git clone https://github.com/tmilev/freecalc.git" << Logger::endL;
   global.externalCommandNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
   global.configuration["freecalcSetup"] = "Setup complete";
@@ -3804,7 +3804,7 @@ void WebServer::checkMathJaxSetup() {
   std::string mathjaxZipSource;
   std::string publicHtmlFolder;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     Configuration::mathJaxLatest,
     mathjaxBase,
     false,
@@ -3820,7 +3820,7 @@ void WebServer::checkMathJaxSetup() {
   "key: " + Configuration::mathJaxSetup +
   " to any string different from its current value.";
 
-  if (FileOperations::FileExistsUnsecure(mathjaxBase)) {
+  if (FileOperations::fileExistsUnsecure(mathjaxBase)) {
     // Mathjax folder is there.
     // We assume it is correctly installed.
     global << Logger::yellow
@@ -3833,14 +3833,14 @@ void WebServer::checkMathJaxSetup() {
   << Logger::endL
   << "To disable mathjax checks/auto-installation: "
   << toDisableMathJaxChecks << Logger::endL;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     Configuration::publicHTML, publicHtmlFolder, false, false, & commentsOnFailure
   )) {
     global << Logger::red << "Failed to compute public html folder. "
     << Logger::endL << commentsOnFailure.str() << Logger::endL;
     return;
   }
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     Configuration::HTMLCommon + "MathJax-2.7-latest.zip",
     mathjaxZipSource,
     false,
@@ -3852,7 +3852,7 @@ void WebServer::checkMathJaxSetup() {
     return;
   }
   global << "Proceeding to unzip MathJax. ";
-  global << "Current folder: " << FileOperations::GetCurrentFolder() << Logger::endL;
+  global << "Current folder: " << FileOperations::getCurrentFolder() << Logger::endL;
   std::stringstream unzipCommand, moveCommand;
   unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
   moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
@@ -4051,10 +4051,10 @@ void WebServer::initializeMainHashes() {
   }
   std::stringstream buildHeadHashWithTimeStream;
   buildHeadHashWithTimeStream << global.buildHeadHashWithServerTime
-  << global.GetGlobalTimeInSeconds();
+  << global.getGlobalTimeInSeconds();
   global.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
 
-  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().addOnTopNoRepetitionMustBeNew(
+  FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().addOnTopNoRepetitionMustBeNew(
     WebAPI::request::calculatorHTML
   );
   WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
@@ -4122,14 +4122,14 @@ void WebServer::initializeMainAddresses() {
   // this would be fatal as proper logout resets
   // the authentication tokens.
   this->addressStartsNotNeedingLogin.addListOnTop(
-    FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
+    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()
   );
 
   this->addressStartsSentWithCacheMaxAge.addOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.addOnTop("/html-common/");
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
+  for (int i = 0; i < FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     this->addressStartsSentWithCacheMaxAge.addOnTop(
-      FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
+      FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
       global.buildHeadHashWithServerTime
     );
   }
@@ -4145,18 +4145,18 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
     Configuration::problemsFolder  ,
   });
   for (int i = 0; i < incoming.size; i ++) {
-    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop(incoming[i]);
-    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop("/" + incoming[i]);
+    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop(incoming[i]);
+    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop("/" + incoming[i]);
   }
 }
 
 void WebServer::initializeMainAll() {
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->initializeMainHashes();
-  FileOperations::InitializeFoldersULTRASensitive();
-  FileOperations::InitializeFoldersSensitive();
-  FileOperations::InitializeFoldersNonSensitive();
-  FileOperations::CheckFolderLinks();
+  FileOperations::initializeFoldersULTRASensitive();
+  FileOperations::initializeFoldersSensitive();
+  FileOperations::initializeFoldersNonSensitive();
+  FileOperations::checkFolderLinks();
   this->initializeMainFoldersInstructorSpecific();
   this->initializeMainRequests();
   this->initializeMainAddresses();
@@ -4191,12 +4191,12 @@ bool GlobalVariables::configurationLoad() {
   if (this->configurationFileName == "") {
     this->configurationFileName = "/configuration/configuration.json";
   }
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     this->configurationFileName, global.configurationFileContent, true, &out
   )) {
     global << Logger::yellow << "Failed to read configuration file. " << out.str() << Logger::endL;
     std::string computedPhysicalFileName;
-    if (FileOperations::GetPhysicalFileNameFromVirtual(
+    if (FileOperations::getPhysicalFileNameFromVirtual(
       this->configurationFileName, computedPhysicalFileName, true, false, nullptr
     )) {
       global << Logger::yellow << "Computed configuration file name: "
@@ -4231,7 +4231,7 @@ bool GlobalVariables::configurationStore() {
   )) {
     global << Logger::red << "Could not open file: " << this->configurationFileName << Logger::endL;
     std::string configFileNamePhysical;
-    if (FileOperations::GetPhysicalFileNameFromVirtual(
+    if (FileOperations::getPhysicalFileNameFromVirtual(
       this->configurationFileName, configFileNamePhysical, true, false, nullptr
     )) {
       global << Logger::red << "Physical file name configuration: "
@@ -4366,7 +4366,7 @@ void GlobalVariables::configurationProcess() {
   if (global.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
     global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
-  List<List<std::string> > folderVirtualLinksDefault = FileOperations::InitializeFolderVirtualLinksDefaults();
+  List<List<std::string> > folderVirtualLinksDefault = FileOperations::initializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
     std::string key = folderVirtualLinksDefault[i][0];
     std::string value = folderVirtualLinksDefault[i][1];
@@ -4388,7 +4388,7 @@ void WebServer::checkInstallation() {
 
 int WebServer::main(int argc, char **argv) {
   global.initialize();
-  global.InitThreadsExecutableStart();
+  global.initThreadsExecutableStart();
   MacroRegisterFunctionWithName("main");
   try {
     // Initializations basic (timer, ...).
@@ -4409,13 +4409,13 @@ int WebServer::main(int argc, char **argv) {
     // directory.
     global.changeDirectory(global.PhysicalPathProjectBase);
     // Initializes folder locations needed by logging facilities.
-    FileOperations::InitializeFoldersSensitive();
+    FileOperations::initializeFoldersSensitive();
 
     global << Logger::green << "Project base folder: "
     << Logger::blue << global.PhysicalPathProjectBase
     << Logger::endL;
     global << Logger::green << "Current folder: "
-    << Logger::blue << FileOperations::GetCurrentFolder()
+    << Logger::blue << FileOperations::getCurrentFolder()
     << Logger::endL;
     // Compute configuration file location.
     // load the configuration file.
@@ -4441,7 +4441,7 @@ int WebServer::main(int argc, char **argv) {
     // Calls again global.server().InitializeMainFoldersSensitive();
     global.server().initializeMainAll();
     global.server().checkMathJaxSetup();
-    bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
+    bool mathJaxPresent = FileOperations::fileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
       global << Logger::red << "MathJax not available. " << Logger::endL;
     }
@@ -4502,7 +4502,7 @@ int WebServer::mainCommandLine() {
   theCalculator.evaluate(theCalculator.inputString);
   std::fstream outputFile;
   std::string outputFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     "output/outputFileCommandLine.html", outputFileName, false, false, nullptr
   )) {
     outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";

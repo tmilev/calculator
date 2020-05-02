@@ -23,9 +23,9 @@ public:
     std::string contentTrimmedWhiteSpace;
     void makeError(const std::string& message);
     void MakeEmpty();
-    TopicElement ToTopicElement() const;
+    TopicElement toTopicElement() const;
     std::string toString() const;
-    bool AccountIfStateChanger(CalculatorHTML& owner) const;
+    bool accountIfStateChanger(CalculatorHTML& owner) const;
   };
   CalculatorHTML* owner;
   MapList<std::string, TopicElement, MathRoutines::HashString> theTopics;
@@ -39,36 +39,36 @@ public:
   List<TopicElement> elements;
   int maximumTopics;
   TopicElementParser();
-  void ParseTopicList(const std::string& inputString);
-  void CompressTopicLines();
-  void ComputeIds();
-  void ComputeTopicHierarchy();
-  void ComputeTopicNumbers();
-  void ComputeTopicHierarchyPartOne();
-  void ComputeTopicHierarchyPartTwo();
-  void AddNewTopicElementFromLine(const TopicLine &input);
-  void CompressOneTopicLine(const TopicLine &input, CalculatorHTML& owner);
-  void Crawl(const std::string& inputString);
-  void ExhaustCrawlStack();
-  void LoadTopicBundleFile(TopicLine& input);
-  void InsertTopicBundle(TopicLine& input);
+  void parseTopicList(const std::string& inputString);
+  void compressTopicLines();
+  void computeIds();
+  void computeTopicHierarchy();
+  void computeTopicNumbers();
+  void computeTopicHierarchyPartOne();
+  void computeTopicHierarchyPartTwo();
+  void addNewTopicElementFromLine(const TopicLine &input);
+  void compressOneTopicLine(const TopicLine &input, CalculatorHTML& owner);
+  void crawl(const std::string& inputString);
+  void exhaustCrawlStack();
+  void loadTopicBundleFile(TopicLine& input);
+  void insertTopicBundle(TopicLine& input);
   bool checkInitialization();
-  bool CheckConsistencyParsed();
-  bool CheckNoErrors(std::stringstream* commentsOnFailure);
-  bool CheckProblemsOpen(std::stringstream* commentsOnFailure);
-  bool CheckTopicPdfs(std::stringstream* commentsOnFailure);
-  void AddTopic(TopicElement& inputElt, int index);
+  bool checkConsistencyParsed();
+  bool checkNoErrors(std::stringstream* commentsOnFailure);
+  bool checkProblemsOpen(std::stringstream* commentsOnFailure);
+  bool checkTopicPdfs(std::stringstream* commentsOnFailure);
+  void addTopic(TopicElement& inputElt, int index);
   std::string toString() const;
   void initializeElementTypes();
-  TopicLine ExtractLine(const std::string& inputNonTrimmed);
+  TopicLine extractLine(const std::string& inputNonTrimmed);
   class Test {
   public:
     std::stringstream comments;
     static bool all();
-    static bool DefaultTopicListsOKCrashOnFailure();
-    static bool DefaultPdfsOKCrashOnFailure();
-    bool DefaultPdfsOK();
-    bool DefaultTopicListsOK();
+    static bool defaultTopicListsOKCrashOnFailure();
+    static bool defaultPdfsOKCrashOnFailure();
+    bool defaultPdfsOK();
+    bool defaultTopicListsOK();
   };
 };
 
@@ -156,27 +156,27 @@ public:
   Rational maxPointsInAllChildren;
   //  Rational numAnsweredInAllChildren;
   //  Rational maxCorrectAnswersInAllChildren;
-  void ComputeID(int elementIndex, TopicElementParser& owner);
+  void computeID(int elementIndex, TopicElementParser& owner);
   void reset();
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
     output << theElt.toString();
     return output;
   }
   bool isError();
-  bool ProblemOpensIfAvailable(std::stringstream* commentsOnFailure);
-  bool PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  bool PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool problemOpensIfAvailable(std::stringstream* commentsOnFailure);
+  bool pdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool pdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   std::string toString() const;
   JSData toJSON(CalculatorHTML& owner);
-  void ComputeSlides(CalculatorHTML& owner);
-  JSData ComputeSlidesJSON(CalculatorHTML& owner);
-  void ComputeHomework(CalculatorHTML& owner);
-  JSData ComputeHomeworkJSON(CalculatorHTML& owner);
-  void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
+  void computeSlides(CalculatorHTML& owner);
+  JSData computeSlidesJSON(CalculatorHTML& owner);
+  void computeHomework(CalculatorHTML& owner);
+  JSData computeHomeworkJSON(CalculatorHTML& owner);
+  void computeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement();
   void makeError(const std::string& message);
-  bool MergeTopicLine(const TopicElementParser::TopicLine& input);
+  bool mergeTopicLine(const TopicElementParser::TopicLine& input);
 };
 
 class ProblemResources {
@@ -455,7 +455,7 @@ public:
       List<OneAnswer> answers;
       OneProblemTest();
       bool run();
-      std::string ToStringHTMLTableRow(int rowIndex);
+      std::string toStringHTMLTableRow(int rowIndex);
     };
     int filesToInterpret;
     int firstFileIndex;
@@ -467,7 +467,7 @@ public:
     List<OneProblemTest> results;
     std::string errorComments;
     Test();
-    bool ComputeTotalFiles();
+    bool computeTotalFiles();
     static bool BuiltInMultiple(
       int inputFirstFileIndex,
       int inputFilesToInterpret,
@@ -475,16 +475,16 @@ public:
       int numberOfRepetitions,
       std::stringstream* comments
     );
-    bool BuiltIn(
+    bool builtIn(
       int inputFirstFileIndex,
       int inputFilesToInterpret,
       int inputRandomSeed
     );
     static bool BuiltInCrashOnFailure();
     static bool all();
-    std::string ToStringSummary();
-    std::string ToHTMLBuiltIn();
-    std::string ToHTMLDebug();
+    std::string toStringSummary();
+    std::string toHTMLBuiltIn();
+    std::string toHTMLDebug();
   };
 };
 
@@ -494,7 +494,7 @@ public:
   std::string courseTopicsNoFolder;
   std::string title;
   std::string flagRoughDraft;
-  bool IsEmpty();
+  bool isEmpty();
   void reset();
   std::string courseTopicsWithFolder();
   std::string toString() const;
@@ -505,7 +505,7 @@ class CourseList {
 public:
   List<Course> theCourses;
   std::string errorMessage;
-  bool LoadFromString(const std::string& input);
+  bool loadFromString(const std::string& input);
   std::string toHtml();
   bool load();
   JSData toJSON();

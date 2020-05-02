@@ -653,13 +653,13 @@ void Logger::reset() {
   if (this->theFile.is_open()) {
     this->theFile.close();
   }
-  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+  FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     this->theFile, this->theFileName, false, true, false, true
   );
   if (!this->theFile.is_open()) {
     this->currentColor = Logger::red;
     std::string computedFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(
+    FileOperations::getPhysicalFileNameFromVirtual(
       this->theFileName, computedFileName, true, false, nullptr
     );
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
@@ -671,7 +671,7 @@ void Logger::reset() {
   this->theFile.seekp(0);
 }
 
-void Logger::CheckLogSize() {
+void Logger::checkLogSize() {
   this->initializeIfNeeded();
   if (theFile.tellp() > this->MaxLogSize) {
     if (this->flagResetLogFileWhenTooLarge) {
@@ -820,7 +820,7 @@ std::string Logger::getStamp() {
   std::stringstream out;
   out << global.logs.ToStringprocessType() << ", ";
   out
-  << global.GetDateForLogFiles() << ", "
+  << global.getDateForLogFiles() << ", "
   << global.getElapsedSeconds() << " s, ";
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ",";
@@ -983,7 +983,7 @@ Logger& Logger::operator<<(const std::string& input) {
 
 Logger& Logger::operator<<(const loggerSpecialSymbols& input) {
   this->initializeIfNeeded();
-  this->CheckLogSize();
+  this->checkLogSize();
   bool doUseColors =
     global.flagRunningBuiltInWebServer ||
     global.flagRunningConsoleRegular ||

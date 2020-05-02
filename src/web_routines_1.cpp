@@ -89,7 +89,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   commandStream << "mongodump --db calculator --archive ="
   << global.PhysicalPathProjectBase
   << "database-backups/dbBackup"
-  << global.GetDateForLogFiles() << ".mongo";
+  << global.getDateForLogFiles() << ".mongo";
   global << Logger::orange << "Backing up database with command: " << Logger::endL;
   global << commandStream.str() << Logger::endL;
   global.externalCommandReturnOutput(commandStream.str());
@@ -120,8 +120,8 @@ void WebServerMonitor::Monitor(int pidServer) {
   FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, "/LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true
   );
-  theFile << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">"
-  << GlobalVariables::GetDateForLogFiles() << "</a>" << "<br>\n";
+  theFile << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">"
+  << GlobalVariables::getDateForLogFiles() << "</a>" << "<br>\n";
   theFile.close();
   WebCrawler theCrawler;
   theCrawler.initialize();
@@ -134,7 +134,7 @@ void WebServerMonitor::Monitor(int pidServer) {
   int numPings = 0;
   TimeWrapper now;
   for (;;) {
-    global.FallAsleep(microsecondsToSleep);
+    global.fallAsleep(microsecondsToSleep);
     this->BackupDatabaseIfNeeded();
     theCrawler.PingCalculatorStatus();
     numPings ++;
@@ -603,7 +603,7 @@ void WebCrawler::FetchWebPagePart2(
 
 bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
@@ -633,7 +633,7 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Ex
 
 bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
@@ -670,7 +670,7 @@ bool CalculatorFunctions::innerFetchKnownPublicKeys(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchKnownPublicKeys");
   (void) input;
   std::stringstream out;
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     out << "You need to be a logged-in administrator to call this function. ";
     return output.assignValue(out.str(), theCommands);
   }
@@ -836,7 +836,7 @@ bool WebCrawler::VerifyRecaptcha(
   if (commentsOnFailure == nullptr) {
     commentsOnFailure = &notUsed;
   }
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -926,7 +926,7 @@ bool WebAPIResponse::processForgotLogin() {
     return global.theResponse.writeResponse(result, false);
   }
   std::stringstream out;
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     Database::get().theUser.LogoutViaDatabase();
   }
   UserCalculator theUser;
@@ -958,7 +958,7 @@ bool WebAPIResponse::processForgotLogin() {
   out << "<b style ='color:green'>"
   << "Your email is on record. "
   << "</b>";
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     this->owner->DoSetEmail(theUser, &out, &out, nullptr);
   } else {
     this->owner->DoSetEmail(theUser, &out, &out, &out);
@@ -1029,7 +1029,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     return result;
   }
   std::stringstream* adminOutputStream = nullptr;
-  if (global.UserDefaultHasAdminRights()) {
+  if (global.userDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;
   }
   //int fixThis;
@@ -1099,13 +1099,13 @@ void GlobalVariables::Response::report(const std::string &input) {
   return global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
 }
 
-void GlobalVariables::Response::Initiate(const std::string& message) {
+void GlobalVariables::Response::initiate(const std::string& message) {
   // TODO(tmilev): investigate the performance of this snippet
   if (global.theResponse.flagTimedOut) {
     return;
   }
   MutexLockGuard guard(global.mutexReturnBytes);
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::initiate");
   if (!global.theResponse.monitoringAllowed()) {
     return;
   }

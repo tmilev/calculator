@@ -86,7 +86,7 @@ void MutexRecursiveWrapper::LockMe() {
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << Logger::endL
-        << global.ToStringProgressReportConsole() << Logger::endL;
+        << global.toStringProgressReportConsole() << Logger::endL;
       }
     }
     static_cast<std::mutex*>(this->theMutexImplementation)->lock();
@@ -168,7 +168,7 @@ ThreadData::~ThreadData() {
 
 }
 
-void GlobalVariables::JoinAllThreads() {
+void GlobalVariables::joinAllThreads() {
   this->flagComputationFinishedAllOutputSentClosing = true;
   for (int i = 1; i < this->theThreads.size; i ++) {
     this->theThreads[i].join();
@@ -179,11 +179,11 @@ GlobalVariables::~GlobalVariables() {
   this->flagDeallocated = true;
 }
 
-void ThreadData::RegisterFirstThread(const std::string& inputName) {
-  ThreadData::RegisterNewThread(inputName).theId = std::this_thread::get_id();
+void ThreadData::registerFirstThread(const std::string& inputName) {
+  ThreadData::registerNewThread(inputName).theId = std::this_thread::get_id();
 }
 
-ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
+ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
   ListReferences<ThreadData>& theThreadData =
   global.theThreadData;
   ThreadData newThreadData;
@@ -200,9 +200,9 @@ ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
   return global.theThreadData.lastObject();
 }
 
-void ThreadData::CreateThread(void (*InputFunction)(int), const std::string& inputName) {
+void ThreadData::createThread(void (*InputFunction)(int), const std::string& inputName) {
   MutexLockGuard(global.MutexRegisterNewThread);
-  ThreadData& theData = ThreadData::RegisterNewThread(inputName);
+  ThreadData& theData = ThreadData::registerNewThread(inputName);
   std::thread newThread(InputFunction, theData.index);
   global.theThreads.lastObject().swap(newThread);
 }
@@ -218,7 +218,7 @@ int ThreadData::getCurrentThreadId() {
   return - 1;
 }
 
-std::string ThreadData::ToStringHtml() const {
+std::string ThreadData::toStringHtml() const {
   std::stringstream out;
   out << "Process type: <b>" << global.logs.ToStringprocessType() << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
@@ -237,7 +237,7 @@ std::string ThreadData::ToStringHtml() const {
   return out.str();
 }
 
-std::string ThreadData::ToStringConsole() const {
+std::string ThreadData::toStringConsole() const {
   std::stringstream out;
   out << "Thread ";
   if (this->name == "") {
@@ -249,22 +249,22 @@ std::string ThreadData::ToStringConsole() const {
   return out.str();
 }
 
-std::string ThreadData::ToStringAllThreadsHtml() {
+std::string ThreadData::toStringAllThreadsHtml() {
   std::stringstream out;
   out << global.theThreadData.size << " threads registered. <br> "
   << global.theThreads.size << " total threads.<br>";
   for (int i = 0; i < global.theThreadData.size; i ++) {
-    out << global.theThreadData[i].ToStringHtml() << "<br>";
+    out << global.theThreadData[i].toStringHtml() << "<br>";
   }
   return out.str();
 }
 
-std::string ThreadData::ToStringAllThreadsConsole() {
+std::string ThreadData::toStringAllThreadsConsole() {
   std::stringstream out;
   out << global.theThreadData.size << " threads registered. "
   << global.theThreads.size << " total threads.\n";
   for (int i = 0; i < global.theThreadData.size; i ++) {
-    out << global.theThreadData[i].ToStringConsole() << "\n";
+    out << global.theThreadData[i].toStringConsole() << "\n";
   }
   return out.str();
 }

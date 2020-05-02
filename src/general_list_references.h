@@ -61,7 +61,7 @@ public:
   }
   void removeIndexSwapWithLast(int theIndex) {
     //This is not thread-safe
-    this->KillElementIndex(theIndex);
+    this->killElementIndex(theIndex);
     this->theReferences[theIndex] = this->theReferences[this->size - 1];
     this->theReferences[this->size - 1] = 0;
     this->size --;
@@ -69,26 +69,26 @@ public:
   void swapTwoIndices(int index1, int index2) {
     this->theReferences.swapTwoIndices(index1, index2);
   }
-  void AllocateElements(int newSize);
+  void allocateElements(int newSize);
   void reserve(int desiredSize) {
-    this->AllocateElements(desiredSize);
+    this->allocateElements(desiredSize);
   }
   void clear() {
     this->setSize(0);
   }
   void setSize(int newSize) {
     //std::cout << "Setting size to: " << newSize << std::endl;
-    this->AllocateElements(newSize);
+    this->allocateElements(newSize);
     this->size = newSize;
   }
   void setExpectedSize(int theSize) {
     int newSize = (theSize * 6) / 5;
     if (newSize > 0) {
-      this->AllocateElements(newSize);
+      this->allocateElements(newSize);
     }
   }
-  void KillAllElements();
-  void KillElementIndex(int i) {
+  void killAllElements();
+  void killElementIndex(int i) {
     delete this->theReferences[i]; //<- NOT thread safe!
     this->theReferences[i] = 0;
   }
@@ -118,7 +118,7 @@ public:
     if (this == &other) {
       return;
     }
-    this->KillAllElements();
+    this->killAllElements();
     this->reserve(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->addOnTop(other[i]);
@@ -141,12 +141,12 @@ public:
   }
   ~ListReferences() {
     this->flagDeallocated = true;
-    this->KillAllElements();
+    this->killAllElements();
   }
 };
 
 template<class Object>
-void ListReferences<Object>::AllocateElements(int newSize) {
+void ListReferences<Object>::allocateElements(int newSize) {
   if (newSize < 0) {
     std::stringstream commentsOnCrash;
     commentsOnCrash << "This is a programming error: requested to set negative size "
@@ -170,7 +170,7 @@ void ListReferences<Object>::AllocateElements(int newSize) {
 }
 
 template<class Object>
-void ListReferences<Object>::KillAllElements() {
+void ListReferences<Object>::killAllElements() {
   for (int i = 0; i < this->theReferences.size; i ++) {
     delete this->theReferences[i];
 #ifdef AllocationLimitsSafeguard

@@ -73,7 +73,7 @@ bool CalculatorHTML::mergeProblemWeight(
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
     std::string currentProblemName = inputJSON.objects.theKeys[i];
     if (checkFileExistence) {
-      if (!FileOperations::FileExistsVirtualCustomizedReadOnly(
+      if (!FileOperations::fileExistsVirtualCustomizedReadOnly(
         currentProblemName, commentsOnFailure
       )) {
         if (commentsOnFailure != nullptr) {
@@ -229,8 +229,8 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   if (!this->topics.theTopics.contains(inputProblemName)) {
     commentsOnFailure << "Did not find " << inputProblemName
     << " among the list of topics/problems. ";
-    if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
-      commentsOnFailure << "The topics are: " << this->topics.theTopics.ToStringHtml();
+    if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
+      commentsOnFailure << "The topics are: " << this->topics.theTopics.toStringHtml();
     }
     return false;
   }
@@ -399,7 +399,7 @@ bool CalculatorHTML::loadMe(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::loadMe");
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -409,7 +409,7 @@ bool CalculatorHTML::loadMe(
     return false;
   }
   (void) doLoadDatabase;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
     this->fileName, this->inputHtml, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -418,7 +418,7 @@ bool CalculatorHTML::loadMe(
     }
     return false;
   }
-  this->flagIsForReal = global.UserRequestRequiresLoadingRealExamData();
+  this->flagIsForReal = global.userRequestRequiresLoadingRealExamData();
   if (global.flagDatabaseCompiled) {
     this->topicListFileName = HtmlRoutines::convertURLStringToNormal(
       global.getWebInput(WebAPI::problem::topicList), false
@@ -500,7 +500,7 @@ void CalculatorHTML::loadCurrentProblemItem(
   MacroRegisterFunctionWithName("CalculatorHTML::loadCurrentProblemItem");
   this->loadFileNames();
   this->flagLoadedSuccessfully = false;
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     needToLoadDatabaseMayIgnore = false;
   }
   this->flagLoadedSuccessfully = true;
@@ -525,7 +525,7 @@ bool CalculatorHTML::isStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   if (tagClass == "setCalculatorExamHome") {
     this->flagIsExamHome = true;
     this->flagIsExamProblem = false;
-    global.SetWebInpuT(WebAPI::problem::courseHome, HtmlRoutines::convertStringToURLString(this->fileName, false));
+    global.setWebInput(WebAPI::problem::courseHome, HtmlRoutines::convertStringToURLString(this->fileName, false));
   }
   if (tagClass == "setCalculatorExamProblem") {
     this->flagIsExamHome = false;
@@ -563,7 +563,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   const std::string& displayString, bool setDebugFlag, bool includeRandomSeed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringLinkCurrentAdmin");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return "";
   }
   std::stringstream out;
@@ -573,7 +573,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   List<std::string> randomSeedContainer;
   randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
   out << "fileName=" << urledProblem << "&"
-  << global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
+  << global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
   }
@@ -588,7 +588,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   if (this->courseHome != "") {
     out << "courseHome=" << this->courseHome << "&";
   }
-  if (global.UserStudentVieWOn()) {
+  if (global.userStudentVieWOn()) {
     out << "studentView=true&";
     if (global.getWebInput("studentSection") != "") {
       out << "studentSection=" << global.getWebInput("studentSection") << "&";
@@ -602,9 +602,9 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
   MacroRegisterFunctionWithName("CalculatorHTML::toStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem = HtmlRoutines::convertStringToURLString(theFileName, false);
-  refStreamNoRequest << global.ToStringCalcArgsNoNavigation(nullptr)
+  refStreamNoRequest << global.toStringCalculatorArgumentsNoNavigation(nullptr)
   << "fileName=" << urledProblem << "&";
-  if (global.UserStudentVieWOn()) {
+  if (global.userStudentVieWOn()) {
     refStreamNoRequest << "studentView=true&";
     if (global.getWebInput("studentSection") != "") {
       refStreamNoRequest << "studentSection="
@@ -626,7 +626,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();
   }
-  if (!global.UserGuestMode()) {
+  if (!global.userGuestMode()) {
     refStreamExercise << global.DisplayNameExecutable
     << "?request=exercise&" << refStreamNoRequest.str();
     refStreamForReal << global.DisplayNameExecutable
@@ -634,7 +634,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
   } else {
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   }
-  if (!global.UserGuestMode()) {
+  if (!global.userGuestMode()) {
     out << "<b><a class =\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
     << CalculatorHTML::stringScoredQuizzes << "</a></b>";
   }
@@ -660,7 +660,7 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   }
   std::string finalStringToDisplay = stringToDisplay;
   if (finalStringToDisplay == "") {
-    finalStringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
+    finalStringToDisplay = FileOperations::getFileNameFromFileNameWithPath(theFileName);
   }
   out << finalStringToDisplay;
   return out.str();
@@ -675,13 +675,13 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   }
   std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
   std::string testedProblem = input[1].toString();
-  global.SetWebInpuT(WebAPI::problem::fileName, testedProblem);
+  global.setWebInput(WebAPI::problem::fileName, testedProblem);
   std::string randomSeed = input[3].toString();
   std::string answerId = input[2].toString();
-  global.SetWebInpuT(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
+  global.setWebInput(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
   JSData result = WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.RemoveKey(WebAPI::problem::calculatorAnswerPrefix + answerId);
-  global.SetWebInpuT(WebAPI::problem::fileName, oldProblem);
+  global.setWebInput(WebAPI::problem::fileName, oldProblem);
   std::stringstream out;
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
@@ -1226,7 +1226,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
   theInterpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds()-startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("calculator initialize time");
-  if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
+  if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()) {
     this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
     << "<br>\n"
@@ -1238,12 +1238,12 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
-    << global.ToStringCalculatorComputation(
+    << global.toStringCalculatorComputation(
       this->theProblemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
     ) << "<br>"
     << this->theProblemData.commandsGenerateProblem
     << "<br>";
-    if (global.UserDefaultHasAdminRights()) {
+    if (global.userDefaultHasAdminRights()) {
       *comments << "The result of the interpretation attempt is:<br>"
       << theInterpreter.outputString << "<br><b>Comments</b><br>"
       << theInterpreter.outputCommentsString;
@@ -1293,7 +1293,7 @@ bool CalculatorHTML::prepareSectionList(std::stringstream& commentsOnFailure) {
 
 void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::interpretManageClass");
-  if (!global.UserDefaultHasAdminRights() || global.UserStudentVieWOn()) {
+  if (!global.userDefaultHasAdminRights() || global.userStudentVieWOn()) {
     return;
   }
   if (!global.flagDatabaseCompiled) {
@@ -1541,7 +1541,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear = secondsTillDeadline < 24 * 3600 && !problemAlreadySolved && !isSection;
   bool deadlineHasPassed = (secondsTillDeadline < 0);
-  if (deadlineIsInherited && !global.UserStudentVieWOn()) {
+  if (deadlineIsInherited && !global.userStudentVieWOn()) {
     out << "Inherited: ";
   } else if (deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline) {
     return "";
@@ -1579,7 +1579,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
 
 std::string CalculatorHTML::toStringAllSectionDeadlines(const std::string& topicID, bool isSection) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringAllSectionDeadlines");
-  if (!global.UserDefaultHasAdminRights())
+  if (!global.userDefaultHasAdminRights())
     return "";
   std::stringstream out;
   out << "<table>";
@@ -1608,11 +1608,11 @@ std::string CalculatorHTML::toStringDeadline(
   if (!global.flagDatabaseCompiled) {
     return "Database not available";
   }
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     return "deadlines require login";
   } else if (
-    global.UserDefaultHasAdminRights() &&
-    global.UserStudentVieWOn()
+    global.userDefaultHasAdminRights() &&
+    global.userStudentVieWOn()
   ) {
     std::string sectionNum = HtmlRoutines::convertURLStringToNormal(
       global.getWebInput("studentSection"), false
@@ -1748,7 +1748,7 @@ bool CalculatorHTML::interpretProcessExecutedCommands(
 }
 
 void CalculatorHTML::logProblemGenerationObsolete(Calculator &theInterpreter) {
-  if (!global.UserDebugFlagOn() || !global.UserDefaultHasProblemComposingRights()) {
+  if (!global.userDebugFlagOn() || !global.userDefaultHasProblemComposingRights()) {
     return;
   }
   std::stringstream streamLog;
@@ -2300,7 +2300,7 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
         secondToLast.syntacticRole = "command";
       } else {
         secondToLast.content = secondToLast.toStringOpenTag("");
-        if (global.UserDefaultHasProblemComposingRights() && comments != nullptr) {
+        if (global.userDefaultHasProblemComposingRights() && comments != nullptr) {
           if (StringRoutines::StringBeginsWith(tagClass, "calculator")) {
             if (!this->calculatorClasses.contains(tagClass)) {
               *comments
@@ -2726,7 +2726,7 @@ void CalculatorHTML::computeProblemLabel() {
     return;
   }
   TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
-  current.ComputeLinks(*this, true);
+  current.computeLinks(*this, true);
   this->outputProblemLabel = current.problemNumberString;
   this->outputProblemTitle = current.title;
 }
@@ -2734,7 +2734,7 @@ void CalculatorHTML::computeProblemLabel() {
 void CalculatorHTML::computeBodyDebugString() {
   MacroRegisterFunctionWithName("CalculatorHTML::computeBodyDebugString");
   this->outputDebugInformationBody = "";
-  if (!global.UserDebugFlagOn() || !global.UserDefaultHasAdminRights()) {
+  if (!global.userDebugFlagOn() || !global.userDefaultHasAdminRights()) {
     return;
   }
   std::stringstream out;
@@ -2788,7 +2788,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   ) {
     if (this->topics.theTopics.contains(this->fileName)) {
       TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
-      current.ComputeLinks(*this, true);
+      current.computeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar) {
         problemLabel += current.displayResourcesLinks;
@@ -2926,13 +2926,13 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemNavigation");
   std::stringstream out;
   std::string exerciseRequest = "exercise";
-  std::string studentView = global.UserStudentVieWOn() ? "true" : "false";
+  std::string studentView = global.userStudentVieWOn() ? "true" : "false";
   std::string linkSeparator = " | ";
   std::string linkBigSeparator = " || ";
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     exerciseRequest = "exerciseNoLogin";
   }
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     out << "<b>Guest mode</b>" << linkSeparator;
   }
   if (!global.flagLoggedIn) {
@@ -2942,7 +2942,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
   List<std::string> randomSeedContainer;
   randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
   std::string calcArgsNoPassExamDetails =
-  global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
+  global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem) {
     if (global.requestType == "exercise") {
       out << "<a href=\"" << global.DisplayNameExecutable << "?request=scoredQuiz&"
@@ -3006,8 +3006,8 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
     << "\">" << this->stringProblemLink << " (#"
     << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
   }
-  if (global.UserDefaultHasAdminRights()) {
-    if (global.UserStudentVieWOn()) {
+  if (global.userDefaultHasAdminRights()) {
+    if (global.userStudentVieWOn()) {
       out << "<a href=\"" << global.DisplayNameExecutable << "?"
       << this->toStringCalculatorArgumentsForProblem(
         global.requestType,
@@ -3018,7 +3018,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
       out << "<b>Admin view</b>" << linkSeparator;
     }
     if (this->databaseStudentSections.size == 0) {
-      if (global.UserStudentVieWOn()) {
+      if (global.userStudentVieWOn()) {
         out << "<b>Student View</b>";
       } else {
         out << "<a href=\"" << global.DisplayNameExecutable << "?"
@@ -3031,7 +3031,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
     for (int i = 0; i < this->databaseStudentSections.size; i ++) {
       if (this->databaseStudentSections[i] != "") {
         if (
-          global.UserStudentVieWOn() &&
+          global.userStudentVieWOn() &&
           this->databaseStudentSections[i] == HtmlRoutines::convertURLStringToNormal(
             global.getWebInput("studentSection"), false
           )
@@ -3065,14 +3065,14 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   bool includeRandomSeedIfAppropriate
 ) const {
   MacroRegisterFunctionWithName("WebWorker::toStringCalculatorArgumentsForProblem");
-  if (!global.flagLoggedIn && !global.UserGuestMode()) {
+  if (!global.flagLoggedIn && !global.userGuestMode()) {
     return "";
   }
   std::stringstream out;
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.addOnTop(WebAPI::problem::randomSeed);
-  out << global.ToStringCalcArgsNoNavigation(&excludedTags)
+  out << global.toStringCalculatorArgumentsNoNavigation(&excludedTags)
   << "courseHome=" << global.getWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::convertStringToURLString(this->fileName, false) << "&";
@@ -3095,7 +3095,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
   MacroRegisterFunctionWithName("CalculatorHTML::toStringProblemScoreFull");
   (void) theFileName;
   std::stringstream out;
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     out << "scores require login";
     return out.str();
   }
@@ -3146,13 +3146,13 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
     return "Error: database not running. ";
   }
   std::stringstream out;
-  if (global.UserGuestMode()) {
+  if (global.userGuestMode()) {
     out << "scores require login";
     return out.str();
   }
   std::stringstream problemWeight;
   ProblemData theProbData;
-  bool showModifyButton = global.UserDefaultHasAdminRights() && !global.UserStudentVieWOn();
+  bool showModifyButton = global.userDefaultHasAdminRights() && !global.userStudentVieWOn();
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
@@ -3202,8 +3202,8 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   return finalOut.str();
 }
 
-void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
-  MacroRegisterFunctionWithName("TopicElement::ComputeID");
+void TopicElement::computeID(int elementIndex, TopicElementParser& owner) {
+  MacroRegisterFunctionWithName("TopicElement::computeID");
   if (this->problemFileName != "") {
     this->id = this->problemFileName;
     if (this->type != TopicElement::types::problem) {
@@ -3226,8 +3226,8 @@ TopicElementParser::TopicElementParser() {
   this->maximumTopics = 10000;
 }
 
-void TopicElementParser::AddTopic(TopicElement& inputElt, int index) {
-  MacroRegisterFunctionWithName("TopicElement::AddTopic");
+void TopicElementParser::addTopic(TopicElement& inputElt, int index) {
+  MacroRegisterFunctionWithName("TopicElement::addTopic");
   if (this->theTopics.contains(inputElt.id)) {
     std::stringstream out;
     out << index << ". [Error] Element id: " << inputElt.id << " already present. ";
@@ -3278,8 +3278,8 @@ void TopicElement::reset() {
   this->type = TopicElement::types::unknown;
 }
 
-bool TopicElementParser::CheckConsistencyParsed() {
-  MacroRegisterFunctionWithName("TopicElementParser::CheckConsistencyParsed");
+bool TopicElementParser::checkConsistencyParsed() {
+  MacroRegisterFunctionWithName("TopicElementParser::checkConsistencyParsed");
   for (int i = 0; i < this->theTopics.size(); i ++) {
     if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
       if (this->theTopics.theValues[i].immediateChildren.size > 0) {
@@ -3293,8 +3293,8 @@ bool TopicElementParser::CheckConsistencyParsed() {
   return true;
 }
 
-bool TopicElementParser::CheckNoErrors(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TopicElementParser::CheckNoErrors");
+bool TopicElementParser::checkNoErrors(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TopicElementParser::checkNoErrors");
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
     if (current.isError()) {
@@ -3312,7 +3312,7 @@ bool TopicElement::isError() {
   return this->type == TopicElement::types::error;
 }
 
-bool TopicElement::PdfSlidesOpenIfAvailable(
+bool TopicElement::pdfSlidesOpenIfAvailable(
   CalculatorHTML& owner, std::stringstream* commentsOnFailure
 ) {
   if (
@@ -3338,7 +3338,7 @@ bool TopicElement::PdfSlidesOpenIfAvailable(
     return false;
   }
   std::string actualOutput;
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
   );
   global << "Physical filename: " << actualOutput << Logger::endL;
@@ -3349,7 +3349,7 @@ bool TopicElement::PdfSlidesOpenIfAvailable(
   return theCrawler.flagPDFExists;
 }
 
-bool TopicElement::PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+bool TopicElement::pdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
   if (
     this->type != TopicElement::types::chapter &&
     this->type != TopicElement::types::section &&
@@ -3372,7 +3372,7 @@ bool TopicElement::PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::strin
     return false;
   }
   std::string actualOutput;
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
   );
   global << "Physical filename: " << actualOutput << Logger::endL;
@@ -3383,17 +3383,17 @@ bool TopicElement::PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::strin
   return theCrawler.flagPDFExists;
 }
 
-bool TopicElement::PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+bool TopicElement::pdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
   return
-  this->PdfSlidesOpenIfAvailable(owner, commentsOnFailure) &&
-  this->PdfHomeworkOpensIfAvailable(owner, commentsOnFailure);
+  this->pdfSlidesOpenIfAvailable(owner, commentsOnFailure) &&
+  this->pdfHomeworkOpensIfAvailable(owner, commentsOnFailure);
 }
 
-bool TopicElement::ProblemOpensIfAvailable(std::stringstream* commentsOnFailure) {
+bool TopicElement::problemOpensIfAvailable(std::stringstream* commentsOnFailure) {
   if (this->problemFileName == "") {
     return true;
   }
-  bool result = FileOperations::FileExistsVirtualCustomizedReadOnly(
+  bool result = FileOperations::fileExistsVirtualCustomizedReadOnly(
     this->problemFileName, commentsOnFailure
   );
   if (!result && commentsOnFailure != nullptr) {
@@ -3404,27 +3404,27 @@ bool TopicElement::ProblemOpensIfAvailable(std::stringstream* commentsOnFailure)
   return result;
 }
 
-bool TopicElementParser::CheckProblemsOpen(
+bool TopicElementParser::checkProblemsOpen(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::CheckProblemsOpen");
+  MacroRegisterFunctionWithName("TopicElementParser::checkProblemsOpen");
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
-    if (!current.ProblemOpensIfAvailable(commentsOnFailure)) {
+    if (!current.problemOpensIfAvailable(commentsOnFailure)) {
       return false;
     }
   }
   return true;
 }
 
-bool TopicElementParser::CheckTopicPdfs(
+bool TopicElementParser::checkTopicPdfs(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::CheckTopicPdfs");
+  MacroRegisterFunctionWithName("TopicElementParser::checkTopicPdfs");
   this->checkInitialization();
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
-    if (!current.PdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
+    if (!current.pdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
       return false;
     }
   }
@@ -3450,8 +3450,8 @@ void TopicElementParser::TopicLine::MakeEmpty() {
   this->theType = TopicElement::types::empty;
 }
 
-void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input) {
-  MacroRegisterFunctionWithName("TopicElementParser::InsertTopicBundle");
+void TopicElementParser::insertTopicBundle(TopicElementParser::TopicLine& input) {
+  MacroRegisterFunctionWithName("TopicElementParser::insertTopicBundle");
   std::string bundleId = input.contentTrimmedWhiteSpace;
   if (!this->knownTopicBundles.contains(bundleId)) {
     std::stringstream out;
@@ -3466,23 +3466,23 @@ void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input)
   }
 }
 
-void TopicElementParser::LoadTopicBundleFile(
+void TopicElementParser::loadTopicBundleFile(
   TopicElementParser::TopicLine& input
 ) {
-  MacroRegisterFunctionWithName("TopicElement::LoadTopicBundleFile");
+  MacroRegisterFunctionWithName("TopicElement::loadTopicBundleFile");
   std::string fileName = input.contentTrimmedWhiteSpace;
   if (this->loadedTopicBundleFiles.contains(fileName)) {
     return;
   }
   std::string newTopicBundles;
   std::stringstream errorStream;
-  if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream)) {
+  if (!FileOperations::isOKFileNameVirtual(fileName, false, &errorStream)) {
     errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
     input.makeError(errorStream.str());
     this->bundleStack.addOnTop(input);
     return;
   }
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
+  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
     errorStream << "Could not open topic bundle file. ";
     input.makeError(errorStream.str());
     this->bundleStack.addOnTop(input);
@@ -3493,7 +3493,7 @@ void TopicElementParser::LoadTopicBundleFile(
   List<std::string> bundleNameStack;
   std::stringstream bundleReader(newTopicBundles);
   while (std::getline(bundleReader, currentLineString, '\n')) {
-    TopicElementParser::TopicLine currentLine = this->ExtractLine(currentLineString);
+    TopicElementParser::TopicLine currentLine = this->extractLine(currentLineString);
     if (currentLine.theType == TopicElement::types::bundleBegin) {
       bundleNameStack.addOnTop(currentLine.contentTrimmedWhiteSpace);
     } else if (currentLine.theType == TopicElement::types::bundleEnd) {
@@ -3513,7 +3513,7 @@ void TopicElementParser::LoadTopicBundleFile(
   }
 }
 
-TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string& inputNonTrimmed) {
+TopicElementParser::TopicLine TopicElementParser::extractLine(const std::string& inputNonTrimmed) {
   TopicElementParser::TopicLine result;
   std::string input = StringRoutines::stringTrimWhiteSpace(inputNonTrimmed);
   if (input.size() == 0) {
@@ -3545,7 +3545,7 @@ TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string&
   return result;
 }
 
-void TopicElementParser::ExhaustCrawlStack() {
+void TopicElementParser::exhaustCrawlStack() {
   while (this->bundleStack.size > 0) {
     if (this->crawled.size > this->maximumTopics) {
       TopicElementParser::TopicLine errorLine;
@@ -3557,18 +3557,18 @@ void TopicElementParser::ExhaustCrawlStack() {
     }
     TopicElementParser::TopicLine nextLine = bundleStack.popLastObject();
     if (nextLine.theType == TopicElement::types::loadTopicBundles) {
-      this->LoadTopicBundleFile(nextLine);
+      this->loadTopicBundleFile(nextLine);
       continue;
     }
     if (nextLine.theType == TopicElement::types::topicBundle) {
-      this->InsertTopicBundle(nextLine);
+      this->insertTopicBundle(nextLine);
       continue;
     }
     this->crawled.addOnTop(nextLine);
   }
 }
 
-void TopicElementParser::Crawl(const std::string& inputString) {
+void TopicElementParser::crawl(const std::string& inputString) {
   this->initializeElementTypes();
   std::string currentLine, currentArgument;
   std::stringstream tableReader(inputString);
@@ -3582,15 +3582,15 @@ void TopicElementParser::Crawl(const std::string& inputString) {
       this->crawled.addOnTop(errorLine);
       return;
     }
-    this->ExhaustCrawlStack();
+    this->exhaustCrawlStack();
     if (!std::getline(tableReader, currentLine, '\n')) {
       break;
     }
-    this->bundleStack.addOnTop(this->ExtractLine(currentLine));
+    this->bundleStack.addOnTop(this->extractLine(currentLine));
   }
 }
 
-bool TopicElementParser::TopicLine::AccountIfStateChanger(CalculatorHTML& owner) const {
+bool TopicElementParser::TopicLine::accountIfStateChanger(CalculatorHTML& owner) const {
   if (this->theType == TopicElement::types::slidesSourceHeader) {
     owner.slidesSourcesHeaders.addOnTop(this->contentTrimmedWhiteSpace);
     return true;
@@ -3602,15 +3602,15 @@ bool TopicElementParser::TopicLine::AccountIfStateChanger(CalculatorHTML& owner)
   return false;
 }
 
-void TopicElementParser::AddNewTopicElementFromLine(const TopicElementParser::TopicLine& input) {
-  TopicElement incoming = input.ToTopicElement();
+void TopicElementParser::addNewTopicElementFromLine(const TopicElementParser::TopicLine& input) {
+  TopicElement incoming = input.toTopicElement();
   if (incoming.type == TopicElement::types::empty) {
     return;
   }
   this->elements.addOnTop(incoming);
 }
 
-bool TopicElement::MergeTopicLine(
+bool TopicElement::mergeTopicLine(
   const TopicElementParser::TopicLine& input
 ) {
   if (this->type != TopicElement::types::problem) {
@@ -3662,7 +3662,7 @@ std::string TopicElementParser::TopicLine::toString() const {
   return out.str();
 }
 
-TopicElement TopicElementParser::TopicLine::ToTopicElement() const {
+TopicElement TopicElementParser::TopicLine::toTopicElement() const {
   TopicElement result;
   result.type = TopicElement::types::empty;
   if (this->theType == TopicElement::types::problem) {
@@ -3684,35 +3684,35 @@ TopicElement TopicElementParser::TopicLine::ToTopicElement() const {
   return result;
 }
 
-void TopicElementParser::CompressOneTopicLine(
+void TopicElementParser::compressOneTopicLine(
   const TopicElementParser::TopicLine& input, CalculatorHTML& owner
 ) {
-  if (input.AccountIfStateChanger(owner)) {
+  if (input.accountIfStateChanger(owner)) {
     return;
   }
   if (this->elements.size == 0) {
-    this->AddNewTopicElementFromLine(input);
+    this->addNewTopicElementFromLine(input);
     return;
   }
   TopicElement& last = *this->elements.lastObject();
-  if (last.MergeTopicLine(input)) {
+  if (last.mergeTopicLine(input)) {
     return;
   }
-  this->AddNewTopicElementFromLine(input);
+  this->addNewTopicElementFromLine(input);
 }
 
-void TopicElementParser::CompressTopicLines() {
-  MacroRegisterFunctionWithName("TopicElementParser::CompressTopicLines");
+void TopicElementParser::compressTopicLines() {
+  MacroRegisterFunctionWithName("TopicElementParser::compressTopicLines");
   this->checkInitialization();
   this->elements.setSize(0);
   for (int i = 0; i < this->crawled.size; i ++) {
-    this->CompressOneTopicLine(this->crawled[i], *this->owner);
+    this->compressOneTopicLine(this->crawled[i], *this->owner);
   }
 }
 
-void TopicElementParser::ComputeIds() {
+void TopicElementParser::computeIds() {
   for (int i = 0; i < this->elements.size; i ++) {
-    this->elements[i].ComputeID(i, *this);
+    this->elements[i].computeID(i, *this);
   }
 }
 
@@ -3720,25 +3720,25 @@ std::string TopicElementParser::toString() const {
   std::stringstream out;
   out << "Loaded bundle files: " << this->loadedTopicBundleFiles;
   out << "<hr>";
-  out << "Known bundles: " << this->knownTopicBundles.ToStringHtml();
+  out << "Known bundles: " << this->knownTopicBundles.toStringHtml();
   return out.str();
 }
 
-void TopicElementParser::ParseTopicList(
+void TopicElementParser::parseTopicList(
   const std::string& inputString
 ) {
-  MacroRegisterFunctionWithName("TopicElementParser::ParseTopicList");
-  this->Crawl(inputString);
-  this->CompressTopicLines();
-  this->ComputeIds();
+  MacroRegisterFunctionWithName("TopicElementParser::parseTopicList");
+  this->crawl(inputString);
+  this->compressTopicLines();
+  this->computeIds();
   for (int i = 0; i < this->elements.size; i ++) {
-    this->AddTopic(this->elements[i], i);
+    this->addTopic(this->elements[i], i);
   }
-  this->ComputeTopicHierarchy();
-  this->ComputeTopicNumbers();
+  this->computeTopicHierarchy();
+  this->computeTopicNumbers();
 }
 
-void TopicElementParser::ComputeTopicNumbers() {
+void TopicElementParser::computeTopicNumbers() {
   List<int> currentProblemNumber;
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
@@ -3755,13 +3755,13 @@ void TopicElementParser::ComputeTopicNumbers() {
   }
 }
 
-void TopicElementParser::ComputeTopicHierarchy() {
-  this->ComputeTopicHierarchyPartOne();
-  this->ComputeTopicHierarchyPartTwo();
+void TopicElementParser::computeTopicHierarchy() {
+  this->computeTopicHierarchyPartOne();
+  this->computeTopicHierarchyPartTwo();
 }
 
-void TopicElementParser::ComputeTopicHierarchyPartOne() {
-  MacroRegisterFunctionWithName("ComputeTopicHierarchyPartOne");
+void TopicElementParser::computeTopicHierarchyPartOne() {
+  MacroRegisterFunctionWithName("computeTopicHierarchyPartOne");
   List<int> parentChain;
   List<int> parentTypes;
   for (int i = 0; i < this->theTopics.size(); i ++) {
@@ -3792,8 +3792,8 @@ void TopicElementParser::ComputeTopicHierarchyPartOne() {
   }
 }
 
-void TopicElementParser::ComputeTopicHierarchyPartTwo() {
-  MacroRegisterFunctionWithName("TopicElementParser::ComputeTopicHierarchyPartTwo");
+void TopicElementParser::computeTopicHierarchyPartTwo() {
+  MacroRegisterFunctionWithName("TopicElementParser::computeTopicHierarchyPartTwo");
   for (int i = this->theTopics.size() - 1; i >= 0; i --) {
     TopicElement& currentElt = this->theTopics.theValues[i];
     if (currentElt.problemFileName != "") {
@@ -3823,7 +3823,7 @@ void TopicElementParser::ComputeTopicHierarchyPartTwo() {
       currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
     }
   }
-  this->CheckConsistencyParsed();
+  this->checkConsistencyParsed();
 }
 
 void CalculatorHTML::interpretAccountInformationLinks(SyntacticElementHTML& inputOutput) {
@@ -3840,7 +3840,7 @@ void CalculatorHTML::interpretAccountInformationLinks(SyntacticElementHTML& inpu
     return;
   }
   out << "<a href=\"" << global.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
-  if (global.UserDefaultHasAdminRights()) {
+  if (global.userDefaultHasAdminRights()) {
     out << "<br>\n<a href=\"" << global.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
   }
   inputOutput.interpretedCommand = out.str();
@@ -3853,7 +3853,7 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
     return true;
   }
   if (this->topicListContent == "") {
-    if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+    if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
       this->topicListFileName, this->topicListContent, &comments
     )) {
       comments << "Failed to load the topic list associated with this course. "
@@ -3865,7 +3865,7 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
     comments  << "Topic list empty. Topic list file name: " << this->topicListFileName << ". ";
     return false;
   }
-  this->topics.ParseTopicList(this->topicListContent);
+  this->topics.parseTopicList(this->topicListContent);
   this->problemNamesNoTopics.clear();
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     if (this->topics.theTopics.theValues[i].problemFileName != "") {
@@ -3998,8 +3998,8 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
   }
   if (global.flagDatabaseCompiled) {
     this->flagIncludeStudentScores =
-    global.UserDefaultHasAdminRights() &&
-    !global.UserStudentVieWOn() &&
+    global.userDefaultHasAdminRights() &&
+    !global.userStudentVieWOn() &&
     global.requestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::HashString> gradableProblems;
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
@@ -4116,7 +4116,7 @@ bool LaTeXCrawler::Slides::FromString(
   return this->FromJSON(parsed, commentsOnFailure);
 }
 
-JSData TopicElement::ComputeSlidesJSON(CalculatorHTML& owner) {
+JSData TopicElement::computeSlidesJSON(CalculatorHTML& owner) {
   LaTeXCrawler::Slides theSlides;
   theSlides.AddSlidesOnTop(owner.slidesSourcesHeaders);
   theSlides.AddSlidesOnTop(this->sourceSlides);
@@ -4124,7 +4124,7 @@ JSData TopicElement::ComputeSlidesJSON(CalculatorHTML& owner) {
   return theSlides.toJSON();
 }
 
-JSData TopicElement::ComputeHomeworkJSON(CalculatorHTML& owner) {
+JSData TopicElement::computeHomeworkJSON(CalculatorHTML& owner) {
   LaTeXCrawler::Slides theSlides;
   theSlides.AddSlidesOnTop(owner.sourcesHomeworkHeaders);
   for (int i = 0; i < this->sourceHomework.size; i ++) {
@@ -4140,27 +4140,27 @@ JSData TopicElement::ComputeHomeworkJSON(CalculatorHTML& owner) {
 }
 
 
-void TopicElement::ComputeHomework(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::ComputeHomework");
+void TopicElement::computeHomework(CalculatorHTML& owner) {
+  MacroRegisterFunctionWithName("TopicElement::computeHomework");
   if (this->sourceHomework.size == 0) {
     return;
   }
-  JSData resultJSON = this->ComputeHomeworkJSON(owner);
+  JSData resultJSON = this->computeHomeworkJSON(owner);
   this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
 
 
-void TopicElement::ComputeSlides(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::ComputeSlides");
+void TopicElement::computeSlides(CalculatorHTML& owner) {
+  MacroRegisterFunctionWithName("TopicElement::computeSlides");
   if (this->sourceSlides.size == 0) {
     return;
   }
-  JSData resultJSON = this->ComputeSlidesJSON(owner);
+  JSData resultJSON = this->computeSlidesJSON(owner);
   this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
 
-void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
-  MacroRegisterFunctionWithName("TopicElement::ComputeLinks");
+void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
+  MacroRegisterFunctionWithName("TopicElement::computeLinks");
   (void) plainStyle;
   if (this->displayProblemLink != "") {
     return;
@@ -4224,8 +4224,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayHandwrittenSolution = "<a href=\"" +
     this->handwrittenSolution + "\" class =\"slidesLink\">Handwritten solutions</a>";
   }
-  this->ComputeSlides(owner);
-  this->ComputeHomework(owner);
+  this->computeSlides(owner);
+  this->computeHomework(owner);
   bool problemSolved = false;
   bool returnEmptyStringIfNoDeadline = false;
   if (this->problemFileName == "") {
@@ -4279,7 +4279,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   }
   output["type"] = elementType;
   output["children"].theType = JSData::token::tokenArray;
-  this->ComputeLinks(owner, true);
+  this->computeLinks(owner, true);
   if (this->type == TopicElement::types::problem && this->immediateChildren.size > 0) {
     global.fatal << "Error: Problem " << this->toString() << " reported to have children topic elements: "
     << this->immediateChildren.toStringCommaDelimited() << global.fatal;
@@ -4298,7 +4298,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     output[WebAPI::request::slides::queryHomework] = this->queryHomework;
   }
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
-  if (!global.UserDefaultHasProblemComposingRights()) {
+  if (!global.userDefaultHasProblemComposingRights()) {
     std::string theDeadline = owner.getDeadlineNoInheritance(this->id);
     output[WebAPI::problem::deadlineSingle] = theDeadline;
   }

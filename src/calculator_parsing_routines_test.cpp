@@ -92,7 +92,7 @@ bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
     << "href = '../calculator-html/styleCalculator.css'>"
     << "<body>" << test.reportHtml << "</body></html>";
 
-    FileOperations::WriteFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
+    FileOperations::writeFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
     global.fatal << crashFileWriteReport.str() << "Calculator AB test failed with " << test.inconsistencies
     << " inconsistencies. See report html in file output/crash_test.html. " << global.fatal;
   }

@@ -4,11 +4,11 @@
 #include "general_logging_global_variables.h"
 
 bool GlobalVariables::Test::all() {
-  GlobalVariables::Test::Builds();
+  GlobalVariables::Test::builds();
   return true;
 }
 
-bool GlobalVariables::Test::Builds() {
+bool GlobalVariables::Test::builds() {
   global.externalCommandNoOutput("make clean", true);
   // This is the most restrictive build allowed:
   int result = global.externalCommandNoOutput("make -j20 noMongo=1 nossl=1 noPublicDomain=1", true);

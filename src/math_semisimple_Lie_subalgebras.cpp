@@ -317,7 +317,7 @@ int SemisimpleSubalgebras::getDisplayIndexFromActual(int actualIndexSubalgebra) 
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra) const {
   std::stringstream out;
   out << this->owner->ToStringVirtualFolderName();
-  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -325,7 +325,7 @@ std::string SemisimpleSubalgebras::getRelativePhysicalFileNameSubalgebra(int act
 std::string SemisimpleSubalgebras::getRelativePhysicalFileNameFKFTNilradicals(int actualIndexSubalgebra) const {
   std::stringstream out;
   out << this->owner->ToStringVirtualFolderName();
-  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -334,7 +334,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraAbsolute(int actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->ToStringVirtualFolderName();
-  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -343,7 +343,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraRelative(int actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << "./";
-  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
+  out << FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString())
   << "_subalgebra_" << this->getDisplayIndexFromActual(actualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -352,7 +352,7 @@ std::string SemisimpleSubalgebras::getDisplayFileNameFKFTNilradicals(int actualI
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << this->owner->ToStringVirtualFolderName();
-  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) << "_subalgebra_"
+  out << FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) << "_subalgebra_"
   << this->getDisplayIndexFromActual(actualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -369,12 +369,12 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   std::string testFileNameRelative =
   this->owner->ToStringVirtualFolderName() + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual(
     this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
   global.externalCommandNoOutput("mkdir " + testFileFolderPhysical, true);
 
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
+  if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     global.fatal << "<br>This may or may not be a programming error. I requested to create file "
     << this->VirtualNameMainFile1
     << " for output. However, the file failed to create. "
@@ -815,9 +815,9 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
     << this->ToStringProgressReport(theFormat);
   } else {
     std::string sl2SubalgebraReports = this->owner->ToStringVirtualFolderName() + "orbit_computation_information_" +
-    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) + ".html";
+    FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) + ".html";
     std::string loadSubalgebrasFile = this->owner->ToStringVirtualFolderName() + "load_algebra_" +
-    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) + ".html";
+    FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) + ".html";
 
     out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
     out << "<hr><a href = '" << loadSubalgebrasFile  << "'>Calculator input for subalgebras load</a>.";
@@ -832,8 +832,8 @@ std::string SemisimpleSubalgebras::toStringPart3(FormatExpressions* theFormat) {
     << "<body>"
     << this->ToStringProgressReport(theFormat)
     << "</body></html>";
-    FileOperations::WriteFileVirual(sl2SubalgebraReports, fileSl2Content.str(), nullptr);
-    FileOperations::WriteFileVirual(loadSubalgebrasFile, fileLoadContent.str(), nullptr);
+    FileOperations::writeFileVirual(sl2SubalgebraReports, fileSl2Content.str(), nullptr);
+    FileOperations::writeFileVirual(loadSubalgebrasFile, fileLoadContent.str(), nullptr);
   }
   return out.str();
 }
@@ -995,7 +995,7 @@ void SemisimpleSubalgebras::findTheSemisimpleSubalgebrasInitialize() {
   }
   if (global.theResponse.monitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
-    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) +
+    FileOperations::cleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.toString()) +
     ".html";
     std::fstream LogFile;
     if (!FileOperations::openFileCreateIfNotPresentVirtual(
@@ -4933,8 +4933,8 @@ std::string SltwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "In turn, the highest weight is a positive integer multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{l\\psi}\\) is \\(l + 1\\)-dimensional. ";
 
-std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SltwoSubalgebras::ToStringSummary");
+std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SltwoSubalgebras::toStringSummary");
   std::stringstream out;
   bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
   std::string displayPathAlgebra;
@@ -5100,7 +5100,7 @@ std::string SltwoSubalgebras::toString(FormatExpressions* theFormat) {
   if (useHtml) {
     out << "<br>";
   }
-  out << this->ToStringSummary(theFormat);
+  out << this->toStringSummary(theFormat);
   out << body.str();
   return out.str();
 }
@@ -5129,7 +5129,7 @@ void SltwoSubalgebras::toHTML(FormatExpressions* theFormat) {
   out << this->toString(theFormat);
   out << "</body></html>";
   std::stringstream commentsOnError;
-  if (!FileOperations::WriteFileVirual(virtualFileName, out.str(), &commentsOnError)) {
+  if (!FileOperations::writeFileVirual(virtualFileName, out.str(), &commentsOnError)) {
     global.fatal << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << global.fatal;
   }
 }

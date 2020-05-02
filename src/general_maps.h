@@ -80,7 +80,7 @@ public:
   int size() const {
     return this->theValues.size;
   }
-  std::string ToStringHtml() const {
+  std::string toStringHtml() const {
     std::stringstream out;
     out << "{";
     for (int i = 0; i < this->size(); i ++) {

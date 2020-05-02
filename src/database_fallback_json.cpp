@@ -9,7 +9,7 @@ std::string Database::FallBack::databaseFilename = "database_fallback/database.j
 
 bool Database::FallBack::DeleteDatabase(std::stringstream* commentsOnFailure) {
   this->reader.reset(JSData::token::tokenObject);
-  if (!FileOperations::WriteFileVirual(Database::FallBack::databaseFilename, "{}", commentsOnFailure)) {
+  if (!FileOperations::writeFileVirual(Database::FallBack::databaseFilename, "{}", commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to delete database. ";
     }
@@ -295,7 +295,7 @@ void Database::FallBack::IndexOneRecord(
 }
 
 bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
-  return FileOperations::WriteFileVirualWithPermissions(
+  return FileOperations::writeFileVirualWithPermissions(
     Database::FallBack::databaseFilename,
     this->reader.toString(nullptr),
     true,
@@ -305,13 +305,13 @@ bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
 
 bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
   std::string theDatabase;
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     Database::FallBack::databaseFilename, theDatabase, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database load failed. ";
     }
-    if (!FileOperations::FileExistsVirtual(
+    if (!FileOperations::fileExistsVirtual(
       Database::FallBack::databaseFilename,
       true,
       false,

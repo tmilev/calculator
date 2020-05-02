@@ -16,7 +16,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   if (!theArguments.contains("name")) {
     return theCommands << "User input name not specified in: " << input.toString();
   }
-  std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
     return output.assignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   }
@@ -99,7 +99,7 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   if (!theArguments.contains("value")) {
     return theCommands << "Input box value not specified in: " << input.toString();
   }
-  std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
     return theCommands << "Input box with name: " << boxName << " already has value.";
   }
@@ -112,8 +112,8 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
   return output.assignValue(out.str(), theCommands);
 }
 
-std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
+std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBox) {
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::getUserInputBoxName");
   if (theBox.owner == nullptr) {
     return "non-initialized-expression";
   }

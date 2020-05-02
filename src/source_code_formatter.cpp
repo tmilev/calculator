@@ -11,7 +11,7 @@ bool CodeFormatter::initializeFileNames(
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
-  if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, comments)) {
+  if (!FileOperations::loadFileToStringVirtual(this->inputFileName, this->inputCode, false, comments)) {
     if (comments != nullptr) {
       *comments << "Failed to load file. ";
     }
@@ -54,7 +54,7 @@ bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::s
     directory += "/";
   }
   List<std::string> allFiles, newFileNames, oldFileNames, allFileExtensions;
-  if (!FileOperations::GetFolderFileNamesVirtual(directory, allFiles, &allFileExtensions, false, false, comments)) {
+  if (!FileOperations::getFolderFileNamesVirtual(directory, allFiles, &allFileExtensions, false, false, comments)) {
     return false;
   }
   newFileNames.setExpectedSize(allFiles.size);
@@ -451,7 +451,7 @@ CodeFormatter::CodeFormatter() {
 bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::WriteFormatedCode");
   std::fstream fileOut;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+  if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     fileOut, this->outputFileName, false, true, false
   )) {
     if (comments != nullptr) {

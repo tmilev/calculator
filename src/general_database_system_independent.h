@@ -78,13 +78,13 @@ class UserCalculatorData {
   bool loadFromJSON(JSData& input);
   JSData toJSON();
   UserCalculatorData();
-  bool ComputeCourseInfo();
+  bool computeCourseInformation();
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();
-  std::string ToStringUnsecure();
-  std::string ToStringCourseInfo();
-  List<QueryExact> GetFindMeFromUserNameQuery();
+  std::string toStringUnsecure();
+  std::string toStringCourseInfo();
+  List<QueryExact> getFindMeFromUserNameQuery();
 };
 
 #endif

@@ -45,8 +45,8 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   }
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false, nullptr);
-  FileOperations::GetPhysicalFileNameFromVirtual(
+  FileOperations::getPhysicalFileNameFromVirtual("output/", baseFolder, false, false, nullptr);
+  FileOperations::getPhysicalFileNameFromVirtual(
     "output/" + fileName.str(), fileNameWithPathPhysical, false, false, nullptr
   );
   theFile << fileContent;
@@ -1015,7 +1015,7 @@ bool Calculator::innerWriteSSLieAlgebraToHD(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!global.UserDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
+  if (!global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
     return output.makeError(
       "Caching structure constants to HD available to admins only. ",
       theCommands);
@@ -2333,7 +2333,7 @@ std::string Function::ToStringShort() const {
   return out.str();
 }
 
-std::string Function::ToStringSummary() const {
+std::string Function::toStringSummary() const {
   if (this->owner == nullptr) {
     return "(non-initialized)";
   }
@@ -2360,7 +2360,7 @@ bool Function::shouldBeApplied(int parentOpIfAvailable) {
     return false;
   }
   if (this->options.adminOnly) {
-    if (!global.UserDefaultHasAdminRights()) {
+    if (!global.userDefaultHasAdminRights()) {
       return (*this->owner) << "Rule " << this->calculatorIdentifier
       << " requires logged-in administrator account. ";
     }
@@ -2649,7 +2649,7 @@ std::string Calculator::toString() {
     out2 << HtmlRoutines::getHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id =\"calculatorExamples\"></span>";
   }
-  if (!global.UserDebugFlagOn()) {
+  if (!global.userDebugFlagOn()) {
     return out2.str();
   }
   std::stringstream out;

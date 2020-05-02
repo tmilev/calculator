@@ -389,7 +389,7 @@ bool MongoQuery::FindMultiple(
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  if (commentsGeneralNonSensitive != nullptr && global.UserDefaultHasAdminRights()) {
+  if (commentsGeneralNonSensitive != nullptr && global.userDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
     << "Query: " << this->findQuery << ". Options: " << inputOptions.toString(nullptr);
   }
@@ -853,7 +853,7 @@ bool Database::isDeleteable(
 
 bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::DeleteOneEntry");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only logged-in admins can delete DB entries.";
     }
@@ -1153,7 +1153,7 @@ bool Database::User::LoadUserInfo(
   }
   JSData userEntry;
   if (!this->owner->FindOneFromSome(
-    output.GetFindMeFromUserNameQuery(),
+    output.getFindMeFromUserNameQuery(),
     userEntry,
     commentsOnFailure
   )) {
@@ -1303,7 +1303,7 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   long long totalItems = 0;
   std::stringstream comments;
   std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = global.UserDefaultIsDebuggingAdmin();
+  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
@@ -1330,7 +1330,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   std::stringstream out;
   result["currentTable"] = currentTable;
   if (currentTable == "") {
-    if (global.UserDebugFlagOn() != 0) {
+    if (global.userDebugFlagOn() != 0) {
       result[WebAPI::result::comments] = "Requested table empty, returning list of tables. ";
     }
     List<std::string> theCollectionNames;
@@ -1355,7 +1355,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   long long totalItems = 0;
   std::stringstream comments;
   std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = global.UserDefaultIsDebuggingAdmin();
+  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }

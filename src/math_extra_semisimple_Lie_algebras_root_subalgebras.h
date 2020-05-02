@@ -608,7 +608,7 @@ public:
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
   void toHTML(FormatExpressions* theFormat = nullptr);
-  std::string ToStringSummary(FormatExpressions* theFormat = nullptr);
+  std::string toStringSummary(FormatExpressions* theFormat = nullptr);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string toString(FormatExpressions* theFormat = nullptr);
 };

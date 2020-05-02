@@ -16,14 +16,14 @@ public:
   std::thread::id theId;
   int index;
   std::string name;
-  std::string ToStringHtml() const;
-  std::string ToStringConsole() const;
+  std::string toStringHtml() const;
+  std::string toStringConsole() const;
   static int getCurrentThreadId();
-  static void RegisterFirstThread(const std::string& inputName = "");
-  static ThreadData& RegisterNewThread(const std::string& inputName = "");
-  static void CreateThread(void (*InputFunction)(int), const std::string& inputName);
-  static std::string ToStringAllThreadsHtml();
-  static std::string ToStringAllThreadsConsole();
+  static void registerFirstThread(const std::string& inputName = "");
+  static ThreadData& registerNewThread(const std::string& inputName = "");
+  static void createThread(void (*InputFunction)(int), const std::string& inputName);
+  static std::string toStringAllThreadsHtml();
+  static std::string toStringAllThreadsConsole();
   ThreadData();
   ~ThreadData();
 };
@@ -58,7 +58,7 @@ class Logger {
   bool flagTagColorConsoleOpened;
   bool flagResetLogFileWhenTooLarge;
   Logger();
-  void CheckLogSize();
+  void checkLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   static std::string consoleRed();
   static std::string consoleBlue();
@@ -285,17 +285,17 @@ public:
     // Respond functions start here.
     // The functions below lock one another out.
     void report(const std::string& input);
-    void Initiate(const std::string& message);
+    void initiate(const std::string& message);
     // Respond functions end here.
 
     // returns true
     bool writeResponse(const JSData& incoming, bool isCrash = false);
 
     bool monitoringAllowed();
-    bool ReportDesired(int type = Response::ReportType::general);
-    void DisallowReport();
-    void AllowReport();
-    bool TimedOut();
+    bool reportDesired(int type = Response::ReportType::general);
+    void disallowReport();
+    void allowReport();
+    bool isTimedOut();
     Response();
   };
   // Do not use for cryptographic purposes.
@@ -412,27 +412,27 @@ public:
     }
   };
   CommentsCurrentConnection comments;
-  void JoinAllThreads();
+  void joinAllThreads();
   bool configurationStore();
   bool configurationLoad();
   void configurationProcess();
-  int GetGlobalTimeInSeconds();
+  int getGlobalTimeInSeconds();
   int64_t getElapsedMilliseconds();
   double getElapsedSeconds() {
     return static_cast<double>(this->getElapsedMilliseconds()) / 1000;
   }
-  static void InitThreadsExecutableStart();
-  bool UserDefaultIsDebuggingAdmin();
-  bool UserDefaultHasAdminRights();
-  bool UserDefaultHasProblemComposingRights();
-  bool UserRequestRequiresLoadingRealExamData();
-  bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
-  void FallAsleep(int microseconds);
+  static void initThreadsExecutableStart();
+  bool userDefaultIsDebuggingAdmin();
+  bool userDefaultHasAdminRights();
+  bool userDefaultHasProblemComposingRights();
+  bool userRequestRequiresLoadingRealExamData();
+  bool userRequestMustBePromptedToLogInIfNotLoggedIn();
+  void fallAsleep(int microseconds);
 
-  static std::string GetDateForLogFiles();
-  static std::string GetTimeGM();
-  static std::string GetTimeLocal();
-  void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
+  static std::string getDateForLogFiles();
+  static std::string getTimeGM();
+  static std::string getTimeLocal();
+  void setWebInput(const std::string& inputName, const std::string& inputValue);
   std::string getWebInput(const std::string& inputName);
   void initialize();
   void initModifiableDatabaseFields();
@@ -442,29 +442,29 @@ public:
     const std::string& inputUserStringRAW,
     const std::string& inputUserStringCivilized
   );
-  bool UserSecureNonAdminOperationsAllowed();
-  bool UserGuestMode();
-  bool UserDebugFlagOn();
-  bool UserStudentVieWOn();
+  bool userSecureNonAdminOperationsAllowed();
+  bool userGuestMode();
+  bool userDebugFlagOn();
+  bool userStudentVieWOn();
   bool checkConsistency();
   int externalCommandStream(const std::string& systemCommand);
   int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
   std::string externalCommandReturnOutput(const std::string& systemCommand);
   void changeDirectory(const std::string& systemCommand);
-  std::string ToStringCalculatorComputation(const std::string& computation, const std::string &display);
-  std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
-  std::string ToStringHTMLTopCommandLinuxSystem();
-  std::string ToStringFolderInfo() const;
-  std::string ToStringThreadData(bool useHTML);
-  std::string ToStringProgressReportNoThreadData(bool useHTML);
-  std::string ToStringProgressReportWithThreadData(bool useHTML);
-  std::string ToStringProgressReportConsole();
+  std::string toStringCalculatorComputation(const std::string& computation, const std::string &display);
+  std::string toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude);
+  std::string toHTMLTopCommandLinuxSystem();
+  std::string toStringFolderInfo() const;
+  std::string toStringThreadData(bool useHTML);
+  std::string toStringProgressReportNoThreadData(bool useHTML);
+  std::string toStringProgressReportWithThreadData(bool useHTML);
+  std::string toStringProgressReportConsole();
   WebServer& server();
   void makeReport();
   class Test {
   public:
     static bool all();
-    static bool Builds();
+    static bool builds();
   };
   /// @endcond
 };
@@ -479,7 +479,7 @@ Logger& Logger::doTheLogging(const theType& toBePrinted) {
   if (!this->flagStopWritingToFile) {
     this->bufferFile += out.str();
   }
-  this->CheckLogSize();
+  this->checkLogSize();
   return *this;
 }
 #endif

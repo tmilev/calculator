@@ -76,13 +76,13 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     if (global.progressReportStrings.size > 0) {
       this->crashReportHtml
       << "<hr><b>Computation progress report strings:</b><br>"
-      << global.ToStringProgressReportNoThreadData(true);
+      << global.toStringProgressReportNoThreadData(true);
       this->crashReportFile
       << "<hr><b>Computation progress report strings:</b><br>"
-      << global.ToStringProgressReportNoThreadData(true);
+      << global.toStringProgressReportNoThreadData(true);
 
       this->crashReportConsolE << "Computation progress strings:\n";
-      this->crashReportConsolE << global.ToStringProgressReportNoThreadData(false);
+      this->crashReportConsolE << global.toStringProgressReportNoThreadData(false);
     }
   }
   if (!global.flagNotAllocated) {
@@ -147,7 +147,7 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
       << " threads. " << "</b></td>";
       break;
     }
-    out << "<td>" << global.theThreadData[threadCounter].ToStringHtml() << "</td>";
+    out << "<td>" << global.theThreadData[threadCounter].toStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
   for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
@@ -197,9 +197,9 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageConsole() {
   return out.str();
 }
 
-std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
-  if (!global.UserDefaultHasAdminRights()) {
+std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
+  MacroRegisterFunctionWithName("GlobalVariables::toHTMLTopCommandLinuxSystem");
+  if (!global.userDefaultHasAdminRights()) {
     return "Login as admin for RAM memory statistics.";
   }
   std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
@@ -222,7 +222,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
   return out.str();
 }
 
-std::string GlobalVariables::ToStringFolderInfo() const {
+std::string GlobalVariables::toStringFolderInfo() const {
   std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
@@ -231,13 +231,13 @@ std::string GlobalVariables::ToStringFolderInfo() const {
   return out.str();
 }
 
-std::string GlobalVariables::ToStringThreadData(bool useHTML) {
+std::string GlobalVariables::toStringThreadData(bool useHTML) {
   std::stringstream out;
   for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     if (useHTML) {
       out << "<hr><b>";
     }
-    out << this->theThreadData[threadIndex].ToStringHtml();
+    out << this->theThreadData[threadIndex].toStringHtml();
     if (useHTML) {
       out << "</b><br>";
     }
@@ -246,15 +246,15 @@ std::string GlobalVariables::ToStringThreadData(bool useHTML) {
   return out.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportWithThreadData(bool useHTML) {
+std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
   std::stringstream out;
-  out << global.ToStringThreadData(useHTML);
-  out << global.ToStringProgressReportNoThreadData(useHTML);
+  out << global.toStringThreadData(useHTML);
+  out << global.toStringProgressReportNoThreadData(useHTML);
   return out.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
+std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlNoThreadData");
   std::stringstream reportStream;
   for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
@@ -307,8 +307,8 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
   return reportStream.str();
 }
 
-std::string GlobalVariables::ToStringProgressReportConsole() {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
+std::string GlobalVariables::toStringProgressReportConsole() {
+  MacroRegisterFunctionWithName("GlobalVariables::toStringProgressReportConsole");
   std::stringstream reportStream;
   for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     if (ThreadData::getCurrentThreadId() != threadIndex) {
@@ -316,7 +316,7 @@ std::string GlobalVariables::ToStringProgressReportConsole() {
       //<-to avoid coordinating threads
       continue;
     }
-    reportStream << this->theThreadData[threadIndex].ToStringConsole();
+    reportStream << this->theThreadData[threadIndex].toStringConsole();
     for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
       reportStream << this->progressReportStrings[threadIndex][i];
     }
@@ -325,22 +325,22 @@ std::string GlobalVariables::ToStringProgressReportConsole() {
   return reportStream.str();
 }
 
-void GlobalVariables::InitThreadsExecutableStart() {
+void GlobalVariables::initThreadsExecutableStart() {
   //<-Stack trace forbidden this is running before anything has been initialized!
-  ThreadData::RegisterFirstThread("main");
+  ThreadData::registerFirstThread("main");
 }
 
 void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  this->PhysicalPathProjectBase = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
+  this->PhysicalPathProjectBase = FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
   this->changeDirectory(this->PhysicalPathProjectBase);
-  this->PhysicalPathProjectBase = FileOperations::GetCurrentFolder() + "/";
+  this->PhysicalPathProjectBase = FileOperations::getCurrentFolder() + "/";
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames() {
   this->initFoldersProjectBase(global.PathExecutableUserInputOrDeduced);
   this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase;
-  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(global.PathExecutableUserInputOrDeduced);
+  this->PhysicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.PathExecutableUserInputOrDeduced);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   this->PhysicalPathServerBase = this->PhysicalPathProjectBase;
   this->DisplayPathOutputFolder = "/output/";
@@ -351,20 +351,20 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   this->initOutputReportAndCrashFileNames("", "");
 }
 
-void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::string& inputValue) {
+void GlobalVariables::setWebInput(const std::string& inputName, const std::string& inputValue) {
   MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
   this->webArguments.setKeyValue(inputName, inputValue);
 }
 
-bool GlobalVariables::UserSecureNonAdminOperationsAllowed() {
+bool GlobalVariables::userSecureNonAdminOperationsAllowed() {
   return this->flagLoggedIn && this->flagUsingSSLinCurrentConnection;
 }
 
-bool GlobalVariables::UserDebugFlagOn() {
+bool GlobalVariables::userDebugFlagOn() {
   return global.getWebInput(WebAPI::request::debugFlag) == "true";
 }
 
-bool GlobalVariables::UserStudentVieWOn() {
+bool GlobalVariables::userStudentVieWOn() {
   return global.getWebInput("studentView") == "true";
 }
 
@@ -390,25 +390,25 @@ bool GlobalVariables::checkConsistency() {
   return true;
 }
 
-bool GlobalVariables::UserDefaultIsDebuggingAdmin() {
-  return this->UserDefaultHasAdminRights() && this->UserDebugFlagOn();
+bool GlobalVariables::userDefaultIsDebuggingAdmin() {
+  return this->userDefaultHasAdminRights() && this->userDebugFlagOn();
 }
 
-bool GlobalVariables::UserDefaultHasAdminRights() {
+bool GlobalVariables::userDefaultHasAdminRights() {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
   return this->flagLoggedIn && (this->userDefault.userRole == UserCalculatorData::Roles::administator);
 }
 
-bool GlobalVariables::UserDefaultHasProblemComposingRights() {
+bool GlobalVariables::userDefaultHasProblemComposingRights() {
   return this->flagLoggedIn && (
     this->userDefault.userRole == UserCalculatorData::Roles::administator ||
     this->userDefault.userRole == UserCalculatorData::Roles::teacher
   );
 }
 
-bool GlobalVariables::UserGuestMode() {
+bool GlobalVariables::userGuestMode() {
   if (!this->flagUsingSSLinCurrentConnection) {
     return true;
   }
@@ -420,8 +420,8 @@ bool GlobalVariables::UserGuestMode() {
   this->requestType == "templateNoLogin";
 }
 
-bool GlobalVariables::UserRequestRequiresLoadingRealExamData() {
-  if (this->UserGuestMode()) {
+bool GlobalVariables::userRequestRequiresLoadingRealExamData() {
+  if (this->userGuestMode()) {
     return false;
   }
   return this->flagLoggedIn && (
@@ -432,13 +432,13 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData() {
   );
 }
 
-bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn() {
+bool GlobalVariables::userRequestMustBePromptedToLogInIfNotLoggedIn() {
   return
   this->requestType == "scoredQuiz" ||
   this->requestType == "exercise";
 }
 
-std::string GlobalVariables::ToStringCalculatorComputation(
+std::string GlobalVariables::toStringCalculatorComputation(
   const std::string& computation,
   const std::string& display
 ) {
@@ -453,9 +453,9 @@ std::string GlobalVariables::ToStringCalculatorComputation(
   return out.str();
 }
 
-std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude) {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
-  if (!this->flagLoggedIn && !this->UserGuestMode()) {
+std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude) {
+  MacroRegisterFunctionWithName("GlobalVariables::toStringCalculatorArgumentsNoNavigation");
+  if (!this->flagLoggedIn && !this->userGuestMode()) {
     return "";
   }
   std::stringstream out;
@@ -505,9 +505,9 @@ void GlobalVariables::makeReport() {
   }
   std::string reportString;
   if (this->flagRunningConsoleRegular || this->flagRunningConsoleTest) {
-    reportString = this->ToStringProgressReportConsole();
+    reportString = this->toStringProgressReportConsole();
   } else {
-    reportString = this->ToStringProgressReportNoThreadData(true);
+    reportString = this->toStringProgressReportNoThreadData(true);
   }
   this->theResponse.report(reportString);
 }
@@ -517,7 +517,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
 ) {
   std::string inputAbbreviated;
   this->userInputStringIfAvailable =
-  FileOperations::CleanUpForFileNameUse(
+  FileOperations::cleanUpForFileNameUse(
     inputUserStringCivilized
   );
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -585,7 +585,7 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword() {
   this->actualAuthenticationToken = "";
 }
 
-std::string UserCalculatorData::ToStringCourseInfo() {
+std::string UserCalculatorData::toStringCourseInfo() {
   std::stringstream out;
   out << "Course name:\n" << this->courseComputed
   << "\n<br>Deadline schema:\n" << this->deadlines.toString(nullptr)
@@ -593,11 +593,11 @@ std::string UserCalculatorData::ToStringCourseInfo() {
   return out.str();
 }
 
-std::string UserCalculatorData::ToStringUnsecure() {
-  MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
+std::string UserCalculatorData::toStringUnsecure() {
+  MacroRegisterFunctionWithName("UserCalculatorData::toStringUnsecure");
   std::stringstream out;
   out << "User: " << this->username << "\n<br>"
-  << this->ToStringCourseInfo()
+  << this->toStringCourseInfo()
   << "\n<br>Actual authentication token: "
   << this->actualAuthenticationToken
   << "\n<br>Entered authentication token: "

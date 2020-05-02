@@ -55,7 +55,7 @@ bool Database::User::UserExists(
 
 bool Database::User::UserDefaultHasInstructorRights() {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
-  if (global.UserDefaultHasAdminRights())
+  if (global.userDefaultHasAdminRights())
     return true;
   if (!global.flagDatabaseCompiled) {
     return true;
@@ -80,7 +80,7 @@ bool Database::User::LogoutViaDatabase() {
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(global.userDefault);
   theUser.resetAuthenticationToken(nullptr);
-  global.SetWebInpuT("authenticationToken", "");
+  global.setWebInput("authenticationToken", "");
   global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "");
   return true;
 }
@@ -398,9 +398,9 @@ bool Database::initializeServer() {
 }
 
 void GlobalVariables::initialize() {
-  this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html";
-  this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
-  this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
+  this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/logCommon.html";
+  this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/global.html";
+  this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::getDateForLogFiles() + "/global.html";
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {
@@ -483,8 +483,8 @@ bool ProblemDataAdministrative::getWeightFromCourse(
 
 std::string ProblemDataAdministrative::toString() const {
   std::stringstream out;
-  out << this->deadlinesPerSection.ToStringHtml();
-  out << this->problemWeightsPerCoursE.ToStringHtml();
+  out << this->deadlinesPerSection.toStringHtml();
+  out << this->problemWeightsPerCoursE.toStringHtml();
   return out.str();
 }
 
@@ -635,7 +635,7 @@ bool UserCalculator::loadFromDatabase(std::stringstream* commentsOnFailure, std:
   if (!Database::get().theUser.LoadUserInfo(*this, commentsOnFailure)) {
     return false;
   }
-  this->ComputeCourseInfo();
+  this->computeCourseInformation();
   if (this->deadlineSchema != "") {
     QueryExact findDeadlines(DatabaseStrings::tableDeadlines, DatabaseStrings::labelDeadlinesSchema, this->deadlineSchema);
     JSData outDeadlinesQuery;
@@ -733,16 +733,16 @@ JSData UserCalculatorData::toJSON() {
   return result;
 }
 
-bool UserCalculatorData::ComputeCourseInfo() {
-  MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
+bool UserCalculatorData::computeCourseInformation() {
+  MacroRegisterFunctionWithName("UserCalculator::computeCourseInformation");
   bool isAdmin = (this->userRole == UserCalculator::Roles::administator && this->username == global.userDefault.username);
   if (
-    global.UserStudentVieWOn() &&
+    global.userStudentVieWOn() &&
     isAdmin &&
     global.getWebInput("studentSection") != ""
   ) {
     // <- warning, the user may not be
-    // fully logged-in yet so global.UserDefaultHasAdminRights()
+    // fully logged-in yet so global.userDefaultHasAdminRights()
     // does not work right.
     this->sectionComputed = HtmlRoutines::convertURLStringToNormal(global.getWebInput("studentSection"), false);
   } else {
@@ -1001,7 +1001,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (global.UserRequestRequiresLoadingRealExamData()) {
+  if (global.userRequestRequiresLoadingRealExamData()) {
     if (theMap.contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
@@ -1049,7 +1049,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (global.UserRequestRequiresLoadingRealExamData()) {
+  if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<unsigned>(atoi(
         inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).theString.c_str()
@@ -1138,7 +1138,7 @@ bool UserCalculator::exists(std::stringstream* comments) {
   MacroRegisterFunctionWithName("UserCalculator::exists");
   JSData notUsed;
   return Database::get().FindOneFromSome(
-    this->GetFindMeFromUserNameQuery(), notUsed, comments
+    this->getFindMeFromUserNameQuery(), notUsed, comments
   );
 }
 
@@ -1263,7 +1263,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-List<QueryExact> UserCalculatorData::GetFindMeFromUserNameQuery() {
+List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() {
   List<QueryExact> result;
   if (this->username != "") {
     QueryExact findByUsername(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
@@ -1292,7 +1292,7 @@ bool UserCalculator::storeProblemData(
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.storeJSON();
   return Database::get().UpdateOneFromSome(
-    this->GetFindMeFromUserNameQuery(), update, commentsOnFailure
+    this->getFindMeFromUserNameQuery(), update, commentsOnFailure
   );
 }
 
@@ -1398,7 +1398,7 @@ bool Database::User::AddUsersFromEmails(
   }
   if (doSendEmails) {
     std::stringstream* commentsGeneralSensitive = nullptr;
-    if (global.UserDefaultHasAdminRights()) {
+    if (global.userDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
     if (!Database::User::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
@@ -1444,7 +1444,7 @@ bool EmailRoutines::sendEmailWithMailGun(
 ) {
   MacroRegisterFunctionWithName("EmailRoutines::sendEmailWithMailGun");
   std::string mailGunKey, hostnameToSendEmailFrom;
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1454,17 +1454,17 @@ bool EmailRoutines::sendEmailWithMailGun(
     }
     return false;
   }
-  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, nullptr
   )) {
     hostnameToSendEmailFrom = global.hostNoPort;
-    if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
+    if (global.userDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
   } else {
     hostnameToSendEmailFrom = StringRoutines::stringTrimWhiteSpace(hostnameToSendEmailFrom);
-    if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
+    if (global.userDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::convertStringToURLString(hostnameToSendEmailFrom, false);
     }

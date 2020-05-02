@@ -23,10 +23,10 @@ CalculatorHTML::Test::Test() {
   this->flagCorrectedTotalFiles = false;
 }
 
-bool CalculatorHTML::Test::ComputeTotalFiles() {
-  MacroRegisterFunctionWithName("CalculatorHTML::Test::ComputeTotalFiles");
+bool CalculatorHTML::Test::computeTotalFiles() {
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::computeTotalFiles");
   std::stringstream commentsOnFailure;
-  if (!FileOperations::GetFolderFileNamesVirtual(
+  if (!FileOperations::getFolderFileNamesVirtual(
     "problems/default/",
     this->fileNamesAll,
     &this->fileExtensionsAll,
@@ -76,8 +76,8 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   return  out.str();
 }
 
-std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIndex) {
-  MacroRegisterFunctionWithName("CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow");
+std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(int rowIndex) {
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow");
   std::stringstream out;
   out << "<tr>";
   out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
@@ -120,7 +120,7 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
   return out.str();
 }
 
-std::string CalculatorHTML::Test::ToHTMLDebug() {
+std::string CalculatorHTML::Test::toHTMLDebug() {
   std::stringstream out;
   out << "File names all: " << this->fileNamesAll.toStringCommaDelimited() << "<br>";
   out << "Extensions all: " << this->fileExtensionsAll.toStringCommaDelimited() << "<br>";
@@ -128,7 +128,7 @@ std::string CalculatorHTML::Test::ToHTMLDebug() {
   return out.str();
 }
 
-std::string CalculatorHTML::Test::ToHTMLBuiltIn() {
+std::string CalculatorHTML::Test::toHTMLBuiltIn() {
   std::stringstream tableBad, tableGood, out;
   std::stringstream tableHeader;
   tableHeader
@@ -145,7 +145,7 @@ std::string CalculatorHTML::Test::ToHTMLBuiltIn() {
 
   int numberBad = 0;
   for (int i = 0; i < this->results.size; i ++) {
-    std::string nextRow = this->results[i].ToStringHTMLTableRow(
+    std::string nextRow = this->results[i].toStringHTMLTableRow(
       this->firstFileIndex + i
     );
     bool isGood = true;
@@ -214,14 +214,14 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   randomSeedStream << theProblem.theProblemData.randomSeed;
   this->answers.setSize(theProblem.theProblemData.theAnswers.size());
   this->flagAllBuiltInAnswersOK = true;
-  global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
-  global.SetWebInpuT(WebAPI::problem::randomSeed, randomSeedStream.str());
+  global.setWebInput(WebAPI::problem::fileName, theProblem.fileName);
+  global.setWebInput(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
     current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
     current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
-    global.SetWebInpuT(current.answerIdWebAPI, "1");
+    global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::getAnswerOnGiveUp(
       randomSeedStream.str(),
       &current.builtInAnswer,
@@ -239,7 +239,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     current.builtInAnswerEncoded = HtmlRoutines::convertStringToURLString(
       current.builtInAnswer, false
     );
-    global.SetWebInpuT(current.answerIdWebAPI, current.builtInAnswerEncoded);
+    global.setWebInput(current.answerIdWebAPI, current.builtInAnswerEncoded);
     current.builtInAnswerReply = WebAPIResponse::submitAnswersJSON(
       randomSeedStream.str(), &current.flagBuiltInWorks, false
     );
@@ -259,7 +259,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   return this->flagSuccess;
 }
 
-std::string CalculatorHTML::Test::ToStringSummary() {
+std::string CalculatorHTML::Test::toStringSummary() {
   std::stringstream out;
   out << "First file index: "
   << this->firstFileIndex << ", inputFilesToInterpret: "
@@ -294,12 +294,12 @@ bool CalculatorHTML::Test::BuiltInMultiple(
     << ", starting random seed: " << randomSeeds[i] << ". ";
     theReport.report(reportStream.str());
     CalculatorHTML::Test tester;
-    if (!tester.BuiltIn(inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i])) {
+    if (!tester.builtIn(inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i])) {
       if (comments != nullptr) {
         *comments << "Failed run " << i + 1 << " out of " << numberOfRepetitions << ". "
-        << tester.ToHTMLBuiltIn();
+        << tester.toHTMLBuiltIn();
         *comments << "Failed run " << i + 1 << " out of " << numberOfRepetitions << ". "
-        << tester.ToStringSummary();
+        << tester.toStringSummary();
       }
       return false;
     }
@@ -309,24 +309,24 @@ bool CalculatorHTML::Test::BuiltInMultiple(
       << "The tests were carried out with starting random seeds: "
       << randomSeeds.toStringCommaDelimited()
       << "<br>"
-      << tester.ToHTMLBuiltIn();
+      << tester.toHTMLBuiltIn();
     }
   }
   return true;
 }
 
-bool CalculatorHTML::Test::BuiltIn(
+bool CalculatorHTML::Test::builtIn(
   int inputFirstFileIndex,
   int inputFilesToInterpret,
   int inputRandomSeed
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::Test::BuiltIn");
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::builtIn");
   this->firstFileIndex = inputFirstFileIndex;
   this->filesToInterpret = inputFilesToInterpret;
   this->randomSeed = inputRandomSeed;
 
   ProgressReport theReport;
-  if (!this->ComputeTotalFiles()) {
+  if (!this->computeTotalFiles()) {
     return false;
   }
   if (this->firstFileIndex < 0) {
@@ -396,29 +396,29 @@ bool CalculatorHTML::Test::BuiltIn(
 
 bool TopicElementParser::Test::all() {
   std::stringstream comments;
-  TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure();
-  TopicElementParser::Test::DefaultPdfsOKCrashOnFailure();
+  TopicElementParser::Test::defaultTopicListsOKCrashOnFailure();
+  TopicElementParser::Test::defaultPdfsOKCrashOnFailure();
   return true;
 }
 
-bool TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure() {
+bool TopicElementParser::Test::defaultTopicListsOKCrashOnFailure() {
   TopicElementParser::Test tester;
-  if (!tester.DefaultTopicListsOK()) {
+  if (!tester.defaultTopicListsOK()) {
     global.fatal << "Topic list tests failed. " << tester.comments.str() << global.fatal;
   }
   return false;
 }
 
-bool TopicElementParser::Test::DefaultPdfsOKCrashOnFailure() {
+bool TopicElementParser::Test::defaultPdfsOKCrashOnFailure() {
   TopicElementParser::Test tester;
-  if (!tester.DefaultPdfsOK()) {
+  if (!tester.defaultPdfsOK()) {
     global.fatal << "Default pdfs are broken. " << tester.comments.str() << global.fatal;
   }
   return false;
 }
 
-bool TopicElementParser::Test::DefaultPdfsOK() {
- MacroRegisterFunctionWithName("TopicElementParser::Test::DefaultPdfsOK");
+bool TopicElementParser::Test::defaultPdfsOK() {
+ MacroRegisterFunctionWithName("TopicElementParser::Test::defaultPdfsOK");
   CourseList courses;
   if (!courses.load()) {
     this->comments << "Failed to load the list of available courses. "
@@ -433,7 +433,7 @@ bool TopicElementParser::Test::DefaultPdfsOK() {
       << owner.topicListFileName << ". ";
       return false;
     }
-    if (!owner.topics.CheckTopicPdfs(&this->comments)) {
+    if (!owner.topics.checkTopicPdfs(&this->comments)) {
       this->comments << "Topic pdf check failed. ";
       return false;
     }
@@ -441,8 +441,8 @@ bool TopicElementParser::Test::DefaultPdfsOK() {
   return true;
 }
 
-bool TopicElementParser::Test::DefaultTopicListsOK() {
-  MacroRegisterFunctionWithName("TopicElementParser::Test::DefaultTopicListsOK");
+bool TopicElementParser::Test::defaultTopicListsOK() {
+  MacroRegisterFunctionWithName("TopicElementParser::Test::defaultTopicListsOK");
   CourseList courses;
   if (!courses.load()) {
     this->comments << "Failed to load the list of available courses. "
@@ -457,12 +457,12 @@ bool TopicElementParser::Test::DefaultTopicListsOK() {
       << owner.topicListFileName << ". ";
       return false;
     }
-    if (!owner.topics.CheckNoErrors(&this->comments)) {
+    if (!owner.topics.checkNoErrors(&this->comments)) {
       this->comments << "Errors in topic list: "
       << owner.topicListFileName << ". ";
       return false;
     }
-    if (!owner.topics.CheckProblemsOpen(&this->comments)) {
+    if (!owner.topics.checkProblemsOpen(&this->comments)) {
       this->comments << "Not all problems open correctly in topic list: "
       << owner.topicListFileName << ". ";
       return false;
@@ -495,12 +495,12 @@ bool CalculatorFunctions::innerTestTopicListProblems(
   Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTopicListProblems");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Topic list tests available to logged-in admins only. ";
   }
   (void) input;
   TopicElementParser::Test tester;
-  tester.DefaultTopicListsOK();
+  tester.defaultTopicListsOK();
   return output.assignValue(tester.comments, theCommands);
 }
 
@@ -510,7 +510,7 @@ bool CalculatorFunctions::innerTestProblemInterpretation(
   Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestProblemInterpretation");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Automated tests available to logged-in admins only. ";
   }
   if (input.size() != 4) {
@@ -523,7 +523,7 @@ bool CalculatorFunctions::innerTestProblemInterpretation(
     ;
   }
   if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.Initiate("Triggered by innerTestProblemInterpretation.");
+    global.theResponse.initiate("Triggered by innerTestProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
@@ -851,7 +851,7 @@ bool CalculatorFunctions::innerJWTVerifyAgainstKnownKeys(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerJWTverifyAgainstKnownKeys");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "This function is only available to logged-in admins. ";
   }
   if (input.size() != 2) {
@@ -1066,7 +1066,7 @@ bool CalculatorFunctions::innerSendEmailWithMailGun(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSendEmailWithMailGun");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Sending mail available to logged-in admins only. ";
   }
   std::stringstream out;
@@ -2715,7 +2715,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
   if (!global.theResponse.monitoringAllowed()) {
-    global.theResponse.Initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
+    global.theResponse.initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;
   List<DynkinType> theTypes;

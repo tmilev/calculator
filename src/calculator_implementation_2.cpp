@@ -148,7 +148,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
   if (!this->flagLogEvaluatioN) {
     return;
   }
-  *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
+  *this << "<hr>Built-in substitution: " << inputF.toStringSummary()
   << "<br>" << global.getElapsedSeconds() - this->LastLogEvaluationTime
   << " second(s) since last log entry. "
   << "Rule stack id: "
@@ -334,7 +334,7 @@ bool Calculator::ExpressionMatchesPattern(
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral << " <hr> current input: " << input.toString() << "<br>current pattern: " << thePattern.toString();
-    *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
+    *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.toStringHtml();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->RecursionDeptH>this->MaxRecursionDeptH) {
@@ -546,7 +546,7 @@ bool Calculator::EvaluateExpression(
   return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
 }
 
-bool Calculator::TimedOut() {
+bool Calculator::isTimedOut() {
   if (global.millisecondsMaxComputation <= 0) {
     return false;
   }
@@ -684,7 +684,7 @@ void Calculator::EvaluateLoop::initializeOneRun() {
 
 bool Calculator::EvaluateLoop::outputHasErrors() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::outputHasErrors");
-  if (this->owner->TimedOut()) {
+  if (this->owner->isTimedOut()) {
     return true;
   }
   if (
@@ -1020,7 +1020,7 @@ Expression* Calculator::patternMatch(
   }
   if (theLog != nullptr) {
     (*theLog) << "<hr>found pattern: " << theExpression.toString() << " -> "
-    << thePattern.toString() << " with " << bufferPairs.ToStringHtml();
+    << thePattern.toString() << " with " << bufferPairs.toStringHtml();
   }
   if (condition == nullptr) {
     return &theExpression;

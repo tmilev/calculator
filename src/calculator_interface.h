@@ -774,7 +774,7 @@ class Function {
   Expression::FunctionAddress theFunction;
 
   std::string ToStringShort() const;
-  std::string ToStringSummary() const;
+  std::string toStringSummary() const;
   std::string toStringFull() const;
   JSData toJSON() const;
   bool shouldBeApplied(int parentOpIfAvailable);
@@ -2599,7 +2599,7 @@ public:
   void initComputationStats();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
-  bool TimedOut();
+  bool isTimedOut();
   static bool EvaluateExpression(
     Calculator& theCommands, const Expression& input, Expression& output
   );

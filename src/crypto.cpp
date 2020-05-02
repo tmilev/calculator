@@ -1547,7 +1547,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
   Crypto::knownCertificates.setSize(0);
   List<std::string> theFileNames;
-  if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames, nullptr)) {
+  if (! FileOperations::getFolderFileNamesVirtual("certificates-public/", theFileNames, nullptr)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     }
@@ -1570,7 +1570,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
       continue;
     }
     std::string currentCert;
-    if (!FileOperations::LoadFileToStringVirtual(
+    if (!FileOperations::loadFileToStringVirtual(
       "certificates-public/" + theFileNames[i], currentCert, false, commentsOnFailure
     )) {
       continue;

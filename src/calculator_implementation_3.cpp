@@ -1779,7 +1779,7 @@ bool Calculator::Test::LoadTestStrings(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Calculator::LoadTestStrings");
-  if (!FileOperations::FileExistsVirtual(
+  if (!FileOperations::fileExistsVirtual(
     WebAPI::calculator::testFileNameVirtual, false, false, nullptr
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1789,7 +1789,7 @@ bool Calculator::Test::LoadTestStrings(
     return false;
   }
   std::string testStrings;
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::loadFileToStringVirtual(
     WebAPI::calculator::testFileNameVirtual,
     testStrings,
     false,
@@ -1823,7 +1823,7 @@ std::string Calculator::WriteFileToOutputFolderReturnLink(
 ) {
   MacroRegisterFunctionWithName("Calculator::WriteFileToOutputFolderReturnLink");
   std::string fileNameVirtual = "output/" + fileName;
-  return FileOperations::WriteFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
+  return FileOperations::writeFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
 }
 
 bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
@@ -1838,7 +1838,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
     nextEntry["output"] = output.actualResult;
     result.theList[i] = nextEntry;
   }
-  return FileOperations::WriteFileVirual(
+  return FileOperations::writeFileVirual(
     WebAPI::calculator::testFileNameVirtual,
     result.toString(&JSData::PrintOptions::NewLine()),
     commentsOnFailure
@@ -1861,7 +1861,7 @@ bool Calculator::innerAutomatedTest(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Automated test requires administrator access";
   }
   if (input.size() != 3) {
@@ -1922,7 +1922,7 @@ bool Calculator::Test::ProcessResults() {
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.theKeys[i] << "\n";
     currentLine << "<td style = 'min-width:200px;'>"
-    << global.ToStringCalculatorComputation(
+    << global.toStringCalculatorComputation(
       this->commands.theKeys[i], this->commands.theKeys[i]
     ) << "</td>";
     bool isBad = false;

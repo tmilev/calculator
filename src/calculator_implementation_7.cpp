@@ -2388,7 +2388,7 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
 bool CalculatorFunctions::innerFormatCPPSourceCode(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
@@ -2404,7 +2404,7 @@ bool CalculatorFunctions::innerFormatCPPSourceCode(
 bool CalculatorFunctions::innerFormatCPPDirectory(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
@@ -8622,10 +8622,10 @@ bool CalculatorFunctions::innerTestTopCommand(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTopCommand");
   (void) input;
   (void) theCommands;//portable way of avoiding unused parameter warning
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     return theCommands << "Test top command available only to logged-in admins. ";
   }
-  return output.assignValue(global.ToStringHTMLTopCommandLinuxSystem(), theCommands);
+  return output.assignValue(global.toHTMLTopCommandLinuxSystem(), theCommands);
 }
 
 bool CalculatorFunctions::innerTestIndicator(
@@ -8676,13 +8676,13 @@ bool CalculatorFunctions::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  global.theResponse.Initiate("Triggered by test indicator. ");
+  global.theResponse.initiate("Triggered by test indicator. ");
   ProgressReport theReport;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i + 1 << " out of " << numRuns << ".";
     theReport.report(reportStream.str());
-    global.FallAsleep(4000);
+    global.fallAsleep(4000);
   }
   std::stringstream out;
   out << numRuns << " iterations of the indicator test executed. ";
@@ -8724,8 +8724,8 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
   outRootHtmlFileName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
   outRootHtmlDisplayName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
   if (
-    !FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
-    !FileOperations::FileExistsVirtual(outRootHtmlFileName.str())
+    !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
+    !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
   ) {
     MustRecompute = true;
   }
@@ -8749,7 +8749,7 @@ bool CalculatorFunctions::innerCrawlTexFile(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCrawlTexFile");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
@@ -8760,7 +8760,7 @@ bool CalculatorFunctions::innerCrawlTexFile(
   LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
-  theCrawler.Crawl();
+  theCrawler.crawl();
   return output.assignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -8768,7 +8768,7 @@ bool CalculatorFunctions::innerBuildFreecalcSlidesOnTopic(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalcSlidesOnTopic");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
@@ -8787,7 +8787,7 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalcSingleSlides");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
@@ -8799,7 +8799,7 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
   theCrawler.flagBuildSingleSlides = true;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
-  std::string startingFolder = FileOperations::GetCurrentFolder();
+  std::string startingFolder = FileOperations::getCurrentFolder();
   theCrawler.BuildFreecalC();
   global.changeDirectory(startingFolder);
   return output.assignValue(theCrawler.displayResult.str(), theCommands);
@@ -8809,7 +8809,7 @@ bool CalculatorFunctions::innerBuildFreecalc(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerBuildFreecalc");
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.userDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
@@ -8821,7 +8821,7 @@ bool CalculatorFunctions::innerBuildFreecalc(
   theCrawler.flagBuildSingleSlides = false;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
-  std::string startingFolder = FileOperations::GetCurrentFolder();
+  std::string startingFolder = FileOperations::getCurrentFolder();
   theCrawler.BuildFreecalC();
   global.changeDirectory(startingFolder);
   return output.assignValue(theCrawler.displayResult.str(), theCommands);
@@ -9067,7 +9067,7 @@ void Calculator::Test::CalculatorTestPrepare() {
 bool Calculator::Test::CalculatorTestRun() {
   MacroRegisterFunctionWithName("Calculator::Test::CalculatorTestRun");
   this->debugFlagAtStart = global.getWebInput(WebAPI::request::debugFlag);
-  global.SetWebInpuT(WebAPI::request::debugFlag, "false");
+  global.setWebInput(WebAPI::request::debugFlag, "false");
   this->CalculatorTestPrepare();
   Calculator theTester;
   ProgressReport theReport;
@@ -9102,7 +9102,7 @@ bool Calculator::Test::CalculatorTestRun() {
     reportStream << "<br>Done in: " << global.getElapsedSeconds() - this->startTime << " seconds. ";
     theReport.report(reportStream.str());
   }
-  global.SetWebInpuT(WebAPI::request::debugFlag, this->debugFlagAtStart);
+  global.setWebInput(WebAPI::request::debugFlag, this->debugFlagAtStart);
   return this->ProcessResults();
 }
 

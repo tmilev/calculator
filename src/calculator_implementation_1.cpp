@@ -456,12 +456,12 @@ bool Calculator::innerPrintSSSubalgebras(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (doForceRecompute) {
-    if (!global.UserDefaultHasAdminRights()) {
+    if (!global.userDefaultHasAdminRights()) {
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
   if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.Initiate("Triggered by printSemisimpleSubalgebras.");
+    global.theResponse.initiate("Triggered by printSemisimpleSubalgebras.");
   }
   if (input.size() != 2) {
     return theCommands << "Semisimple Lie algebra expects a single argument. ";
@@ -534,7 +534,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
-  if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
+  if (!FileOperations::fileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
       this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }

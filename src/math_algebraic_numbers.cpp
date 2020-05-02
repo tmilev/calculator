@@ -1394,7 +1394,7 @@ std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   VectorSparse<Rational> theAdditiveVector;
   this->owner->getAdditionTo(*this, theAdditiveVector);
   out << theAdditiveVector.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
-  if (this->basisIndex < this->owner->basisInjections.size - 1 && global.UserDebugFlagOn()) {
+  if (this->basisIndex < this->owner->basisInjections.size - 1 && global.userDebugFlagOn()) {
     out << "[=" << this->ToStringNonInjected() << "]";
   }
   return out.str();

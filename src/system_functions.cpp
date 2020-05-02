@@ -20,12 +20,12 @@ void InitializeTimeR() {
   gettimeofday(&ComputationStartGlobal, nullptr);
 }
 
-int GlobalVariables::GetGlobalTimeInSeconds() {
+int GlobalVariables::getGlobalTimeInSeconds() {
   time_t result = time(nullptr);
   return static_cast<int>(result);
 }
 
-void GlobalVariables::FallAsleep(int microseconds) {
+void GlobalVariables::fallAsleep(int microseconds) {
   usleep(static_cast<useconds_t>(microseconds));
 }
 
@@ -123,7 +123,7 @@ bool TimeoutThread::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
     return false;
   }
-  global.theResponse.Initiate("Triggered by timer thread.");
+  global.theResponse.initiate("Triggered by timer thread.");
   return false;
 }
 
@@ -149,7 +149,7 @@ void TimeoutThread::run() {
     this->counter ++;
     global.checkConsistency();
     this->HandleComputationTimer();
-    global.FallAsleep(this->intervalBetweenChecksInMilliseconds);
+    global.fallAsleep(this->intervalBetweenChecksInMilliseconds);
     this->HandleComputationTimeout();
     // Will crash if max computation time is exceeded.
     // This loop will never be exited;
@@ -171,7 +171,7 @@ void RunTimerThread(int threadIndex) {
 }
 
 void CreateTimerThread() {
-  ThreadData::CreateThread(RunTimerThread, "timer");
+  ThreadData::createThread(RunTimerThread, "timer");
 }
 
 int externalCommandNoOutput(const std::string& theCommand) {

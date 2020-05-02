@@ -15,7 +15,7 @@ public:
   static bool innerUserInputBox(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetInputBox(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEvaluateSymbols(Calculator& theCommands, const Expression& input, Expression& output);
-  static std::string GetUserInputBoxName(const Expression& theBox);
+  static std::string getUserInputBoxName(const Expression& theBox);
 };
 
 #endif // calculator_html_functions_H

@@ -9,7 +9,7 @@
 
 GlobalVariables global;
 
-std::string GlobalVariables::GetDateForLogFiles() {
+std::string GlobalVariables::getDateForLogFiles() {
   static std::string tempDate;
   if (tempDate != "") {
     return tempDate;
@@ -27,13 +27,13 @@ std::string GlobalVariables::GetDateForLogFiles() {
   return tempDate;
 }
 
-std::string GlobalVariables::GetTimeGM() {
+std::string GlobalVariables::getTimeGM() {
   TimeWrapper now;
   now.AssignLocalTime();
   return now.ToStringGM();
 }
 
-std::string GlobalVariables::GetTimeLocal() {
+std::string GlobalVariables::getTimeLocal() {
   TimeWrapper now;
   now.AssignLocalTime();
   return now.ToStringLocal();

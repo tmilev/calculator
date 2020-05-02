@@ -3018,8 +3018,8 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   this->checkInitialization();
   std::string myPathVirtual = this->owner->ToStringVirtualFolderName() + this->owner->ToStringFileNameNoPathRootSubalgebras();
   std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
-  if (!FileOperations::FileExistsVirtual(myPathVirtual)) {
+  FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
+  if (!FileOperations::fileExistsVirtual(myPathVirtual)) {
     global.fatal << "This may or may not be a programming error. Failed to create virtual file " << myPathVirtual
     << ". Possible explanations. 1. File permissions - can I write in that folder? "
     << "2. Programming error (less likely). "

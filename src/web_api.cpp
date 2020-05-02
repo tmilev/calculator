@@ -26,7 +26,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
 ) {
   MacroRegisterFunctionWithName("WebAPIResponse::serveResponseFalseIfUnrecognized");
   if (
-    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
+    global.flagLoggedIn && global.userDefaultHasAdminRights() &&
     global.requestType == WebAPI::request::database
   ) {
     return this->processDatabaseJSON();
@@ -36,7 +36,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   ) {
     return this->processDatabaseDeleteEntry();
   } else if (
-    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
+    global.flagLoggedIn && global.userDefaultHasAdminRights() &&
     global.requestType == "databaseModifyEntry"
   ) {
     return this->processDatabaseModifyEntry();
@@ -92,7 +92,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processScores();
   } else if (global.requestType == "scoresInCoursePage" && global.flagLoggedIn) {
     return this->processScoresInCoursePage();
-  } else if (global.UserGuestMode() && global.requestType == "submitExerciseNoLogin") {
+  } else if (global.userGuestMode() && global.requestType == "submitExerciseNoLogin") {
     return this->processSubmitAnswers();
   } else if ((
       global.requestType == WebAPI::request::problemGiveUp &&
@@ -117,7 +117,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processSubmitAnswersPreview();
   } else if (
     global.requestType == WebAPI::request::submitExercisePreviewNoLogin &&
-    global.UserGuestMode()
+    global.userGuestMode()
   ) {
     return this->processSubmitAnswersPreview();
   } else if (
@@ -187,7 +187,7 @@ bool WebAPIResponse::processServerStatusJSON() {
   std::stringstream out;
   out << " <table><tr><td style =\"vertical-align:top\">"
   << this->owner->parent->ToStringStatusAll() << "</td><td>"
-  << global.ToStringHTMLTopCommandLinuxSystem()
+  << global.toHTMLTopCommandLinuxSystem()
   << "</td></tr></table>";
   JSData outputJS;
   outputJS[WebAPI::result::resultHtml] = out.str();
@@ -356,9 +356,9 @@ bool WebAPIResponse::processCompute() {
   // the initialization below moved to the start of the web server!
   // theParser.initialize();
   ////////////////////////////////////////////////
-  global.theResponse.AllowReport();
+  global.theResponse.allowReport();
   theCalculator.evaluate(theCalculator.inputString);
-  global.theResponse.DisallowReport();
+  global.theResponse.disallowReport();
   JSData result;
   result = theCalculator.toJSONOutputAndSpecials();
   result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();

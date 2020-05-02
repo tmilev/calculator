@@ -118,11 +118,11 @@ std::string GlobalVariables::externalCommandReturnOutput(const std::string& syst
 void GlobalVariables::changeDirectory(const std::string& systemCommand) {
   // When not nullptr, this most likely points to: CallChDirWrapper.
   if (this->pointerCallChDir != nullptr) {
-    this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
+    this->pointerCallChDir(FileOperations::convertStringToEscapedStringFileNameSafe(systemCommand));
   }
 }
 
-bool GlobalVariables::Response::TimedOut() {
+bool GlobalVariables::Response::isTimedOut() {
   return this->flagTimedOut;
 }
 
@@ -130,16 +130,16 @@ bool GlobalVariables::Response::monitoringAllowed() {
   return !this->flagBanProcessMonitorinG && this->flagReportAllowed;
 }
 
-bool GlobalVariables::Response::ReportDesired(int type) {
+bool GlobalVariables::Response::reportDesired(int type) {
   (void) type;
   return this->monitoringAllowed() && this->flagTimedOut && this->flagReportDesired;
 }
 
-void GlobalVariables::Response::AllowReport() {
+void GlobalVariables::Response::allowReport() {
   this->flagReportAllowed = true;
 }
 
-void GlobalVariables::Response::DisallowReport() {
+void GlobalVariables::Response::disallowReport() {
   this->flagReportAllowed = false;
 }
 
@@ -557,8 +557,8 @@ uint32_t HtmlRoutines::RedGreenBlue(unsigned int r, unsigned int g, unsigned int
   return r * 65536 + g * 256 + b;
 }
 
-bool FileOperations::IsFolderUnsecure(const std::string& theFolderName) {
-  MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
+bool FileOperations::isFolderUnsecure(const std::string& theFolderName) {
+  MacroRegisterFunctionWithName("FileOperations::isFolderUnsecure");
   DIR *pDir;
   pDir = opendir(theFolderName.c_str());
   if (pDir != nullptr) {
@@ -568,16 +568,16 @@ bool FileOperations::IsFolderUnsecure(const std::string& theFolderName) {
   return false;
 }
 
-std::string FileOperations::GetFileExtensionWithDot(
+std::string FileOperations::getFileExtensionWithDot(
   const std::string& theFileName, std::string* outputFileNameNoExtension
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
+  MacroRegisterFunctionWithName("FileOperations::getFileExtensionWithDot");
   if (theFileName == "" || theFileName.size() <= 0) {
     return "";
   }
   if (&theFileName == outputFileNameNoExtension) {
     std::string theCopy = theFileName;
-    return FileOperations::GetFileExtensionWithDot(theCopy, outputFileNameNoExtension);
+    return FileOperations::getFileExtensionWithDot(theCopy, outputFileNameNoExtension);
   }
   for (int i = static_cast<signed>(theFileName.size() - 1); i >= 0; i --) {
     if (theFileName[static_cast<unsigned>(i)] == '.') {
@@ -590,8 +590,8 @@ std::string FileOperations::GetFileExtensionWithDot(
   return "";
 }
 
-std::string FileOperations::ConvertStringToLatexFileName(const std::string& input) {
-  MacroRegisterFunctionWithName("FileOperations::ConvertStringToLatexFileName");
+std::string FileOperations::convertStringToLatexFileName(const std::string& input) {
+  MacroRegisterFunctionWithName("FileOperations::convertStringToLatexFileName");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
@@ -607,8 +607,8 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
   return result;
 }
 
-std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::string& input) {
-  MacroRegisterFunctionWithName("FileOperations::ConvertStringToEscapedStringFileNameSafe");
+std::string FileOperations::convertStringToEscapedStringFileNameSafe(const std::string& input) {
+  MacroRegisterFunctionWithName("FileOperations::convertStringToEscapedStringFileNameSafe");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == ' ') {
@@ -624,15 +624,15 @@ std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::
   return out.str();
 }
 
-bool FileOperations::IsOKfileNameVirtual(
+bool FileOperations::isOKFileNameVirtual(
   const std::string& theFileName,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
+  MacroRegisterFunctionWithName("FileOperations::isOKFileNameVirtual");
   (void) accessSensitiveFolders;
-  std::string theFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
-  std::string theFilePath = FileOperations::GetPathFromFileNameWithPath(theFileName);
+  std::string theFileNameNoPath = FileOperations::getFileNameFromFileNameWithPath(theFileName);
+  std::string theFilePath = FileOperations::getPathFromFileNameWithPath(theFileName);
   if (theFilePath.size() > 10000000) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid file name: too long. ";
@@ -672,8 +672,8 @@ bool FileOperations::IsOKfileNameVirtual(
   return true;
 }
 
-bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileName) {
-  MacroRegisterFunctionWithName("FileOperations::IsFileNameWithoutDotsAndSlashes");
+bool FileOperations::isFileNameWithoutDotsAndSlashes(const std::string& theFileName) {
+  MacroRegisterFunctionWithName("FileOperations::isFileNameWithoutDotsAndSlashes");
   for (unsigned i = 0; i < theFileName.size(); i ++) {
     if (theFileName[i] == '/' || theFileName[i] == '\\' || theFileName[i] == '.') {
       return false;
@@ -683,7 +683,7 @@ bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileN
 }
 
 List<bool> FileOperations::safeFileCharacters;
-List<bool>& FileOperations::GetSafeFileChars() {
+List<bool>& FileOperations::getSafeFileChars() {
   if (FileOperations::safeFileCharacters.size == 0) {
     FileOperations::safeFileCharacters.initializeFillInObject(256, false);
     std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -699,7 +699,7 @@ List<bool>& FileOperations::GetSafeFileChars() {
   return FileOperations::safeFileCharacters;
 }
 
-std::string FileOperations::CleanUpForFileNameUse(const std::string& inputString) {
+std::string FileOperations::cleanUpForFileNameUse(const std::string& inputString) {
   std::stringstream out;
   for (unsigned i = 0; i < inputString.size(); i ++) {
     if (inputString[i] == '/') {
@@ -713,10 +713,10 @@ std::string FileOperations::CleanUpForFileNameUse(const std::string& inputString
   return out.str();
 }
 
-bool FileOperations::IsFileNameSafeForSystemCommands(
+bool FileOperations::isFileNameSafeForSystemCommands(
   const std::string& theFileName, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::IsFileNameSafeForSystemCommands");
+  MacroRegisterFunctionWithName("FileOperations::isFileNameSafeForSystemCommands");
   const unsigned maxAllowedFileNameSize = 1000;
   if (theFileName.size() > maxAllowedFileNameSize) {
     if (commentsOnFailure != nullptr) {
@@ -726,7 +726,7 @@ bool FileOperations::IsFileNameSafeForSystemCommands(
     return false;
   }
   for (unsigned i = 0; i < theFileName.size(); i ++) {
-    if (!FileOperations::GetSafeFileChars()[theFileName[i]]) {
+    if (!FileOperations::getSafeFileChars()[theFileName[i]]) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Character: " << theFileName[i] << " not allowed in file name. ";
       }
@@ -736,7 +736,7 @@ bool FileOperations::IsFileNameSafeForSystemCommands(
   return true;
 }
 
-std::string FileOperations::GetFileNameFromFileNameWithPath(const std::string& fileName) {
+std::string FileOperations::getFileNameFromFileNameWithPath(const std::string& fileName) {
   unsigned startNameWithoutFolderInfo = 0;
   for (unsigned i = 0; i < fileName.size(); i ++) {
     if (fileName[i] == '/' || fileName[i] == '\\') {
@@ -750,7 +750,7 @@ std::string FileOperations::GetFileNameFromFileNameWithPath(const std::string& f
   return nameWithoutFolderInfo.str();
 }
 
-std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileName) {
+std::string FileOperations::getPathFromFileNameWithPath(const std::string& fileName) {
   unsigned startNameWithoutFolderInfo = 0;
   for (unsigned i = 0; i < fileName.size(); i ++) {
     if (fileName[i] == '/' || fileName[i] == '\\') {
@@ -764,7 +764,7 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
   return folderName.str();
 }
 
-bool FileOperations::GetFolderFileNamesVirtual(
+bool FileOperations::getFolderFileNamesVirtual(
   const std::string& theFolderName,
   List<std::string>& outputFileNamesNoPath,
   List<std::string>* outputFileTypesWithDot,
@@ -772,9 +772,9 @@ bool FileOperations::GetFolderFileNamesVirtual(
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesVirtual");
+  MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesVirtual");
   std::string computedFolderName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFolderName,
     computedFolderName,
     accessSensitiveFolders,
@@ -783,17 +783,17 @@ bool FileOperations::GetFolderFileNamesVirtual(
   )) {
     return false;
   }
-  return FileOperations::GetFolderFileNamesUnsecure(
+  return FileOperations::getFolderFileNamesUnsecure(
     computedFolderName, outputFileNamesNoPath, outputFileTypesWithDot
   );
 }
 
-bool FileOperations::GetFolderFileNamesUnsecure(
+bool FileOperations::getFolderFileNamesUnsecure(
   const std::string& theFolderName,
   List<std::string>& outputFileNamesNoPath,
   List<std::string>* outputFileTypesWithDot
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
+  MacroRegisterFunctionWithName("FileOperations::getFolderFileNamesUnsecure");
   DIR *theDirectory = opendir(theFolderName.c_str());
   if (theDirectory == nullptr) {
     return false;
@@ -812,10 +812,10 @@ bool FileOperations::GetFolderFileNamesUnsecure(
     if (outputFileTypesWithDot != nullptr) {
       fileNameNoPath = fileOrFolder->d_name;
       fullName = theFolderName + fileNameNoPath;
-      if (FileOperations::IsFolderUnsecure(fullName)) {
+      if (FileOperations::isFolderUnsecure(fullName)) {
         outputFileTypesWithDot->addOnTop(".d");
       } else {
-        theExtension = FileOperations::GetFileExtensionWithDot(fileNameNoPath);
+        theExtension = FileOperations::getFileExtensionWithDot(fileNameNoPath);
         if (theExtension == ".d") {
           theExtension = "";
         }
@@ -827,7 +827,7 @@ bool FileOperations::GetFolderFileNamesUnsecure(
   return true;
 }
 
-bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+bool FileOperations::loadFileToStringVirtualCustomizedReadOnly(
   const std::string& theFileName,
   std::string& output,
   std::stringstream* commentsOnFailure
@@ -839,7 +839,7 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
     return false;
   }
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     theFileName, computedFileName, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -849,33 +849,33 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
     }
     return false;
   }
-  return FileOperations::LoadFileToStringUnsecure(
+  return FileOperations::loadFileToStringUnsecure(
     computedFileName, output, commentsOnFailure
   );
 }
 
-bool FileOperations::WriteFileVirual(
+bool FileOperations::writeFileVirual(
   const std::string& fileNameVirtual,
   const std::string& fileContent,
   std::stringstream* commentsOnError
 ) {
-  return FileOperations::WriteFileVirualWithPermissions(
+  return FileOperations::writeFileVirualWithPermissions(
     fileNameVirtual, fileContent, false, commentsOnError
   );
 }
 
-bool FileOperations::WriteFileVirualWithPermissions(
+bool FileOperations::writeFileVirualWithPermissions(
   const std::string& fileNameVirtual,
   const std::string& fileContent,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnError
 ) {
-  return FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  return FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     fileNameVirtual, fileContent, accessSensitiveFolders, false, commentsOnError
   );
 }
 
-bool FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+bool FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
   const std::string& fileNameVirtual,
   const std::string& fileContent,
   bool accessSensitiveFolders,
@@ -883,7 +883,7 @@ bool FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersI
   std::stringstream* commentsOnError
 ) {
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+  if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
     theFile,
     fileNameVirtual,
     false,
@@ -901,12 +901,12 @@ bool FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersI
   return true;
 }
 
-std::string FileOperations::WriteFileReturnHTMLLink(
+std::string FileOperations::writeFileReturnHTMLLink(
   const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
 ) {
-  MacroRegisterFunctionWithName("Calculator::WriteFileReturnHTMLLink");
+  MacroRegisterFunctionWithName("Calculator::writeFileReturnHTMLLink");
   std::stringstream commentsOnError;
-  bool success = FileOperations::WriteFileVirual(fileNameVirtual, fileContent, &commentsOnError);
+  bool success = FileOperations::writeFileVirual(fileNameVirtual, fileContent, &commentsOnError);
   if (!success) {
     global.fatal << "Failed to write file. " << commentsOnError.str() << global.fatal;
   }
@@ -915,18 +915,18 @@ std::string FileOperations::WriteFileReturnHTMLLink(
   return out.str();
 }
 
-bool FileOperations::LoadFileToStringVirtual(
+bool FileOperations::loadFileToStringVirtual(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  return FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  return FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     theFileName, output, accessSensitiveFolders, false, commentsOnFailure
   );
 }
 
-bool FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+bool FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
@@ -934,18 +934,18 @@ bool FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded
   std::stringstream* commentsOnFailure
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure
   )) {
     return false;
   }
-  return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
+  return FileOperations::loadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
-bool FileOperations::LoadFileToStringUnsecure(
+bool FileOperations::loadFileToStringUnsecure(
   const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure
 ) {
-  if (!FileOperations::FileExistsUnsecure(fileNameUnsecure)) {
+  if (!FileOperations::fileExistsUnsecure(fileNameUnsecure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
@@ -954,7 +954,7 @@ bool FileOperations::LoadFileToStringUnsecure(
     return false;
   }
   std::ifstream theFile;
-  if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
+  if (!FileOperations::openFileUnsecureReadOnly(theFile, fileNameUnsecure, false)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The requested file "
       << HtmlRoutines::convertStringToHtmlString(fileNameUnsecure, false)
@@ -971,54 +971,54 @@ bool FileOperations::LoadFileToStringUnsecure(
 #include "general_list_references.h"
 
 MapList<std::string, std::string, MathRoutines::HashString>&
-FileOperations::FolderVirtualLinksNonSensitive() {
+FileOperations::folderVirtualLinksNonSensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
   return result;
 }
 
 HashedList<std::string, MathRoutines::HashString>&
-FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash() {
+FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash() {
   static HashedList<std::string, MathRoutines::HashString> result;
   return result;
 }
 
 HashedList<std::string, MathRoutines::HashString>&
-FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
+FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
   static HashedList<std::string, MathRoutines::HashString> result;
   return result;
 }
 
 MapList<std::string, std::string, MathRoutines::HashString>&
-FileOperations::FolderVirtualLinksSensitive() {
+FileOperations::folderVirtualLinksSensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
   return result;
 }
 
 MapList<std::string, std::string, MathRoutines::HashString>&
-FileOperations::FolderVirtualLinksULTRASensitive() {
+FileOperations::folderVirtualLinksULTRASensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
   return result;
 }
 
-List<List<std::string> >& FileOperations::FolderVirtualLinksDefault() {
+List<List<std::string> >& FileOperations::folderVirtualLinksDefault() {
   static List<List<std::string> > result;
   return result;
 }
 
-void FileOperations::InitializeFoldersULTRASensitive() {
+void FileOperations::initializeFoldersULTRASensitive() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersULTRASensitive");
   MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsULTRASensitive = FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
+  folderSubstitutionsULTRASensitive = FileOperations::folderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsULTRASensitive.setKeyValue("certificates/", "certificates/");
   folderSubstitutionsULTRASensitive.setKeyValue("/results/", "results/");
   folderSubstitutionsULTRASensitive.setKeyValue("results/", "results/");
   folderSubstitutionsULTRASensitive.setKeyValue("crashes/", "results/crashes/");
 }
 
-void FileOperations::InitializeFoldersSensitive() {
+void FileOperations::initializeFoldersSensitive() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
   MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
+  folderSubstitutionsSensitive = FileOperations::folderVirtualLinksSensitive();
   folderSubstitutionsSensitive.clear();
 
   folderSubstitutionsSensitive.setKeyValue("LogFiles/", "LogFiles/");
@@ -1031,8 +1031,8 @@ void FileOperations::InitializeFoldersSensitive() {
   folderSubstitutionsSensitive.setKeyValue("/database_fallback/database.json", "database_fallback/database.json");
 }
 
-List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults() {
-  List<List<std::string> >& result = FileOperations::FolderVirtualLinksDefault();
+List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults() {
+  List<List<std::string> >& result = FileOperations::folderVirtualLinksDefault();
   // The default values given here are overridden by file configuration.json.
   // substitution order matters, earlier substitutions are processed first.
   // Once a substitution is found, no more substitutions are carried out.
@@ -1063,11 +1063,11 @@ List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults()
     List<std::string>({Configuration::freecalc                  , "../freecalc/"                               }),
     List<std::string>({"favicon.ico"                            , "calculator-html/favicon.ico"                }),
   });
-  FileOperations::CheckFolderLinks();
+  FileOperations::checkFolderLinks();
   return result;
 }
 
-void FileOperations::InitializeFoldersNonSensitive() {
+void FileOperations::initializeFoldersNonSensitive() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersNonSensitive");
   // Warning: order of substitutions is important.
   // Only the first rule that applies is applied, once.
@@ -1075,15 +1075,15 @@ void FileOperations::InitializeFoldersNonSensitive() {
   // Location keys that start with "/" are coming from webserver references.
   // Location keys that do not start with "/" are for internal use.
   MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
+  folderSubstitutionsNonSensitive = FileOperations::folderVirtualLinksNonSensitive();
 
-  // InitializeFolderVirtualLinksDefaults() is called in
+  // initializeFolderVirtualLinksDefaults() is called in
   // GlobalVariables::configurationProcess and its contents
   // are used together with file configuration.json,
   // to compute the folder locations below.
 
   std::string HTMLCommonFolder = global.configuration[Configuration::HTMLCommon].theString;
-  List<List<std::string> >& links = FileOperations::FolderVirtualLinksDefault();
+  List<List<std::string> >& links = FileOperations::folderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     std::string& key = links[i][0];
     std::string value = global.configuration.getValue(key).theString;
@@ -1096,9 +1096,9 @@ void FileOperations::InitializeFoldersNonSensitive() {
   }
 }
 
-bool FileOperations::CheckFolderLinks() {
-  MacroRegisterFunctionWithName("FileOperations::CheckFolderLinks");
-  List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
+bool FileOperations::checkFolderLinks() {
+  MacroRegisterFunctionWithName("FileOperations::checkFolderLinks");
+  List<List<std::string> > links = FileOperations::folderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     if (links[i].size != 2) {
       global.fatal << "Folder links incorrectly initialized. " << global.fatal;
@@ -1114,26 +1114,26 @@ bool FileOperations::CheckFolderLinks() {
   return true;
 }
 
-bool FileOperations::FileExistsVirtualCustomizedReadOnly(
+bool FileOperations::fileExistsVirtualCustomizedReadOnly(
   const std::string& theFileName, std::stringstream* commentsOnFailure
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     theFileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
-  return FileOperations::FileExistsUnsecure(computedFileName);
+  return FileOperations::fileExistsUnsecure(computedFileName);
 }
 
-bool FileOperations::FileExistsVirtual(
+bool FileOperations::fileExistsVirtual(
   const std::string& theFileName,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName,
     computedFileName,
     accessSensitiveFolders,
@@ -1145,10 +1145,10 @@ bool FileOperations::FileExistsVirtual(
     }
     return false;
   }
-  return FileOperations::FileExistsUnsecure(computedFileName);
+  return FileOperations::fileExistsUnsecure(computedFileName);
 }
 
-bool FileOperations::FileExistsUnsecure(const std::string& theFileName) {
+bool FileOperations::fileExistsUnsecure(const std::string& theFileName) {
   std::fstream theFile;
   theFile.open(theFileName.c_str(), std::fstream::in);
   if (theFile.is_open()) {
@@ -1158,22 +1158,22 @@ bool FileOperations::FileExistsUnsecure(const std::string& theFileName) {
   }
 }
 
-bool FileOperations::OpenFileVirtualReadOnly(
+bool FileOperations::openFileVirtualReadOnly(
   std::ifstream& theFile,
   const std::string& theFileName,
   bool openAsBinary,
   bool accessSensitiveFolders
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName, computedFileName, accessSensitiveFolders, false, nullptr
   )) {
     return false;
   }
-  return FileOperations::OpenFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
+  return FileOperations::openFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
 }
 
-bool FileOperations::OpenFileVirtualCustomizedWriteOnly(
+bool FileOperations::openFileVirtualCustomizedWriteOnly(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1181,19 +1181,19 @@ bool FileOperations::OpenFileVirtualCustomizedWriteOnly(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::OpenFileVirtualCustomizedWriteOnly");
+  MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
     theFileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
-  return FileOperations::OpenFileUnsecure(
+  return FileOperations::openFileUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
-bool FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
+bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1201,19 +1201,19 @@ bool FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::OpenFileVirtualCustomizedWriteOnly");
+  MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedWriteOnly");
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
     theFileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
-  return FileOperations::OpenFileCreateIfNotPresentUnsecure(
+  return FileOperations::openFileCreateIfNotPresentUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
-bool FileOperations::OpenFileVirtualCustomizedReadOnly(
+bool FileOperations::openFileVirtualCustomizedReadOnly(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1221,19 +1221,19 @@ bool FileOperations::OpenFileVirtualCustomizedReadOnly(
   bool openAsBinary,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::OpenFileVirtualCustomizedReadOnly");
+  MacroRegisterFunctionWithName("FileOperations::openFileVirtualCustomizedReadOnly");
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+  if (!FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     theFileName, computedFileName, commentsOnFailure
   )) {
     return false;
   }
-  return FileOperations::OpenFileUnsecure(
+  return FileOperations::openFileUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
-bool FileOperations::OpenFileVirtual(
+bool FileOperations::openFileVirtual(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1242,28 +1242,28 @@ bool FileOperations::OpenFileVirtual(
   bool accessSensitiveFolders
 ) {
   std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName, computedFileName, accessSensitiveFolders, false, nullptr
   )) {
     return false;
   }
-  return FileOperations::OpenFileUnsecure(
+  return FileOperations::openFileUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
 #include <unistd.h>
 
-std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
+std::string FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
   // TODO: Investigate whether this code is safe.
-  std::string currentFolder = FileOperations::GetCurrentFolder();
+  std::string currentFolder = FileOperations::getCurrentFolder();
   global.changeDirectory(wouldBePath);
-  std::string result = FileOperations::GetCurrentFolder();
+  std::string result = FileOperations::getCurrentFolder();
   global.changeDirectory(currentFolder);
   return result;
 }
 
-std::string FileOperations::GetCurrentFolder() {
+std::string FileOperations::getCurrentFolder() {
   char cwd[100000];
   if (getcwd(cwd, sizeof(cwd)) != nullptr) {
     return std::string(cwd);
@@ -1273,7 +1273,7 @@ std::string FileOperations::GetCurrentFolder() {
   return "";
 }
 
-bool FileOperations::OpenFileUnsecure(
+bool FileOperations::openFileUnsecure(
   std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary
 ) {
   if (OpenInAppendMode) {
@@ -1296,7 +1296,7 @@ bool FileOperations::OpenFileUnsecure(
   return theFile.is_open();
 }
 
-bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary) {
+bool FileOperations::openFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary) {
   if (openAsBinary) {
     theFile.open(theFileName.c_str(), std::fstream::in | std::fstream::binary);
   } else {
@@ -1309,8 +1309,8 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
   MacroRegisterFunctionWithName("FileOperations::GetVirtualNameWithHash");
   std::string result = inputFileName;
   std::string fileNameEnd;
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
-    const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
+  for (int i = 0; i < FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
+    const std::string& currentStart = FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
     if (StringRoutines::StringBeginsWith(result, currentStart, &fileNameEnd)) {
       result = currentStart + global.buildHeadHashWithServerTime + fileNameEnd;
       break;
@@ -1319,17 +1319,17 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
   return result;
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
+bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly");
+  MacroRegisterFunctionWithName("FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly");
   std::string fileEnd = "";
   std::string inputStart = "";
-  for (int i = 0; i < FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++)
+  for (int i = 0; i < FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++)
     if (StringRoutines::StringBeginsWith(
-      inputFileName, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd
+      inputFileName, FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd
     )) {
-      inputStart = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i];
+      inputStart = FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[i];
       break;
     }
   if (inputStart == "") {
@@ -1349,15 +1349,15 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
   }
   std::string inputCopy = inputStart + customized + "/" + fileEnd;
   std::string outputCandidate;
-  bool result = FileOperations::GetPhysicalFileNameFromVirtual(
+  bool result = FileOperations::getPhysicalFileNameFromVirtual(
     inputCopy, outputCandidate, false, false, commentsOnFailure
   );
-  if (!FileOperations::FileExistsVirtual(outputCandidate, false, false)) {
+  if (!FileOperations::fileExistsVirtual(outputCandidate, false, false)) {
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
-    if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
+    if (FileOperations::loadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
-      if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+      if (FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
         theFile, inputCopy, false, true, false, false
       )) {
         theFile << fileContent;
@@ -1371,24 +1371,24 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
   return result;
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
+bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
   const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly");
+  MacroRegisterFunctionWithName("FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly");
   std::string fileEnd = "";
   std::string inputStart = "";
-  for (int i = 0; i < FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++) {
+  for (int i = 0; i < FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().size; i ++) {
     if (StringRoutines::StringBeginsWith(
       inputFileName,
-      FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i],
+      FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[i],
       &fileEnd
     )) {
-      inputStart = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i];
+      inputStart = FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[i];
       break;
     }
   }
   if (inputStart == "") {
-    return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
+    return FileOperations::getPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   }
   std::string customized =
   HtmlRoutines::convertStringToURLString(global.userDefault.instructorComputed, false) + "/";
@@ -1396,23 +1396,23 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     customized = "default/";
   }
   std::string inputCopy = inputStart + customized + fileEnd;
-  if (!FileExistsVirtual(inputCopy, false, false)) {
+  if (!fileExistsVirtual(inputCopy, false, false)) {
     customized = "default/";
   }
   inputCopy = inputStart + customized + fileEnd;
-  return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output, false, false, commentsOnFailure);
+  return FileOperations::getPhysicalFileNameFromVirtual(inputCopy, output, false, false, commentsOnFailure);
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtual(
+bool FileOperations::getPhysicalFileNameFromVirtual(
   const std::string& inputFileNamE,
   std::string& output,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
+  MacroRegisterFunctionWithName("FileOperations::getPhysicalFileNameFromVirtual");
   // Using loggers forbidden here: function is used by the loggers themselves.
-  if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders)) {
+  if (!FileOperations::isOKFileNameVirtual(inputFileNamE, accessSensitiveFolders)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
     }
@@ -1420,45 +1420,45 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   }
   std::string inputCopy = inputFileNamE;
   std::string folderEnd, folderEnd2;
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
+  for (int i = 0; i < FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     if (StringRoutines::StringBeginsWith(
       inputCopy,
-      FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i], &folderEnd
+      FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i], &folderEnd
     )) {
       if (StringRoutines::StringBeginsWith(
         folderEnd, global.buildHeadHashWithServerTime, &folderEnd2
       )) {
-        inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
+        inputCopy = FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
       }
     }
   }
-  for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i ++) {
+  for (int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size(); i ++) {
     if (StringRoutines::StringBeginsWith(
-      inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd
+      inputCopy, FileOperations::folderVirtualLinksNonSensitive().theKeys[i], &folderEnd
     )) {
       output = global.PhysicalPathProjectBase +
-      FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
+      FileOperations::folderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       return true;
     }
   }
   if (accessSensitiveFolders) {
-    for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i ++) {
+    for (int i = 0; i < FileOperations::folderVirtualLinksSensitive().size(); i ++) {
       if (StringRoutines::StringBeginsWith(
-        inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd
+        inputCopy, FileOperations::folderVirtualLinksSensitive().theKeys[i], &folderEnd
       )) {
         output = global.PhysicalPathProjectBase +
-        FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
+        FileOperations::folderVirtualLinksSensitive().theValues[i] + folderEnd;
         return true;
       }
     }
   }
   if (accessULTRASensitiveFolders) {
-    for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i ++) {
+    for (int i = 0; i < FileOperations::folderVirtualLinksULTRASensitive().size(); i ++) {
       if (StringRoutines::StringBeginsWith(
-        inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
+        inputCopy, FileOperations::folderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
       )) {
         output = global.PhysicalPathProjectBase +
-        FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
+        FileOperations::folderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         return true;
       }
     }
@@ -1473,7 +1473,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   return true;
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1481,7 +1481,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   bool openAsBinary,
   bool accessSensitiveFolders
 ) {
-  return FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+  return FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
     theFile,
     theFileName,
     OpenInAppendMode,
@@ -1491,7 +1491,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   );
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
   std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
@@ -1502,7 +1502,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
 ) {
   std::string computedFileName;
   // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName,
     computedFileName,
     accessSensitiveFolders,
@@ -1511,11 +1511,11 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   )) {
     return false;
   }
-  std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
+  std::string folderName = FileOperations::getPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
   global.externalCommandReturnOutput(mkDirCommand.str());
-  return FileOperations::OpenFileCreateIfNotPresentUnsecure(
+  return FileOperations::openFileCreateIfNotPresentUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
@@ -1530,17 +1530,17 @@ bool FileOperations::openFileCreateIfNotPresentVirtual(std::fstream& theFile,
 ) {
   std::string computedFileName;
   // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+  if (!FileOperations::getPhysicalFileNameFromVirtual(
     theFileName, computedFileName, accessSensitiveFolders, accessUltraSensitiveFolders, nullptr
   )) {
     return false;
   }
-  return FileOperations::OpenFileCreateIfNotPresentUnsecure(
+  return FileOperations::openFileCreateIfNotPresentUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentUnsecure(
+bool FileOperations::openFileCreateIfNotPresentUnsecure(
   std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary
 ) {
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
@@ -1580,7 +1580,7 @@ bool FileOperations::OpenFileCreateIfNotPresentUnsecure(
 }
 
 StateMaintainerCurrentFolder::StateMaintainerCurrentFolder() {
-  this->currentFolderPhysicalAbsolute = FileOperations::GetCurrentFolder();
+  this->currentFolderPhysicalAbsolute = FileOperations::getCurrentFolder();
 }
 
 StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {

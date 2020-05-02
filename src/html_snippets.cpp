@@ -40,11 +40,11 @@ std::string HtmlRoutines::getHtmlLinkFromProjectFileName(
 ) {
   std::stringstream out;
   out << " <a href=\"" << HtmlRoutines::gitRepository << "/blob/master/src/"
-  << FileOperations::GetFileNameFromFileNameWithPath(fileName);
+  << FileOperations::getFileNameFromFileNameWithPath(fileName);
   if (line > 0) {
     out << "#L" << line;
   }
-  out << "\">" << FileOperations::GetFileNameFromFileNameWithPath(fileName);
+  out << "\">" << FileOperations::getFileNameFromFileNameWithPath(fileName);
   if (fileDesc != "") {
     out << " (" << fileDesc << ")";
   }
@@ -90,7 +90,7 @@ const std::string& HtmlRoutines::getFile(
   }
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
+  if (FileOperations::loadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
     global << Logger::red << "File: "

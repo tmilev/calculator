@@ -125,7 +125,7 @@ const elementRepresentation& OrbitIterator<elementGroup, elementRepresentation>:
 }
 
 template <class elementGroup, class elementRepresentation>
-std::string OrbitIterator<elementGroup, elementRepresentation>::ToStringLayerSize() const {
+std::string OrbitIterator<elementGroup, elementRepresentation>::toStringLayerSize() const {
   std::stringstream out;
   out << " Total number of elements stored in layers: "
   << this->privateLayer1.size + this->privateLayer2.size + this->privateLayer3.size;

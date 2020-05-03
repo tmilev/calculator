@@ -482,14 +482,11 @@ public:
     this->DebugString = this->toString(tempFormat);
   }
   std::string toString(const FormatExpressions& theFormat) const;
-  void toString(std::string& output) const {
-    output = this->toString();
-  }
   bool isEqualToZero() const {
     return this->theElT.isEqualToZero();
   }
   bool needsParenthesisForMultiplication() const;
-  void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
+  void assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
     ElementUniversalEnvelopingOrdered<Coefficient>& input,
     const ElementVermaModuleOrdered<Coefficient>& theRingZero,
     const Coefficient& theRingUnit

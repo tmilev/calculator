@@ -418,7 +418,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
   theRootSA.genK.makeEiBasis(theDimension);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theAutos;
-  theRootSA.GenerateAutomorphismsPreservingBorel(theAutos);
+  theRootSA.generateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
   int theAutoIndex = theAutos.ExternalAutomorphisms.size > 1 ? 1 : 0;
   /*if (this->theWeyl.WeylLetter == 'D' && theDimension ==4)
@@ -466,7 +466,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
         left.makeEi(theDimension, j);
         for (int k = 0; k < 2; k ++, left.minus()) {
           right = current - left;
-          if (this->theWeyl.IsARoot(right)) {
+          if (this->theWeyl.isARoot(right)) {
             int leftIndex = this->theWeyl.RootSystem.getIndex(left);
             int rightIndex = this->theWeyl.RootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
@@ -547,7 +547,7 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
         for (int j = 0; j < this->theWeyl.RootSystem.size; j ++)
           if (Explored.theObjects[j]) {
             Vector<Rational> tempRoot = this->theWeyl.RootSystem.theObjects[i] + this->theWeyl.RootSystem.theObjects[j];
-            if (this->theWeyl.IsARoot(tempRoot)) {
+            if (this->theWeyl.isARoot(tempRoot)) {
               int index = this->theWeyl.RootSystem.getIndex(tempRoot);
               if (!Explored.theObjects[index]) {
                 Explored.theObjects[index] = true;
@@ -623,7 +623,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
         if (!NonExplored.selected[j]) {
           const Vector<Rational>& left = this->theDomain().theWeyl.RootSystem[j];
           right = current - left;
-          if (this->theDomain().theWeyl.IsARoot(right)) {
+          if (this->theDomain().theWeyl.isARoot(right)) {
             int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(left);
             int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {

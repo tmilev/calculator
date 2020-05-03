@@ -221,7 +221,7 @@ public:
   void exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void exploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void exploitTheCyclicTrick(int i, int j, int k);
-  bool getMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const;
+  bool getMaxQForWhichBetaMinusQAlphaisARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const;
   Rational getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
   Vector<Rational> getWeightOfGenerator(int index) {
     if (index < this->getNumberOfPositiveRoots()) {

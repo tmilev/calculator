@@ -2112,7 +2112,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   }
   RootSubalgebras theRootSAs;
   theRootSAs.owner = algebra.content;
-  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
+  theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;

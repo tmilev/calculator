@@ -2515,7 +2515,7 @@ public:
     bool doForceRecompute,
     bool doAttemptToSolveSystems,
     bool docomputePairingTable,
-    bool doComputeModuleDecomposition,
+    bool docomputeModuleDecompositionsition,
     bool doComputeNilradicals,
     bool doAdjustCentralizers
   );

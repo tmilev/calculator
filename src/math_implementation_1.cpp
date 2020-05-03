@@ -29,7 +29,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
         genWeight.minus();
       }
       newWeight = theWeight + genWeight;
-      if (newWeight.isEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
+      if (newWeight.isEqualToZero() || this->theWeyl.isARoot(newWeight)) {
         theWeight = newWeight;
         int theIndex = this->getGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);

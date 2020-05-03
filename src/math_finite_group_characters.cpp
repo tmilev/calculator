@@ -1142,7 +1142,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   theSSlieAlg.theWeyl.MakeFromDynkinType(this->theDynkinType);
 //  theSSlieAlg.computeChevalleyConstants(global);
   theRootSAs.owner = &theSSlieAlg;
-  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
+  theRootSAs.computeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
   theRootSAsBases.setExpectedSize(theRootSAs.theSubalgebras.size);
   for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {

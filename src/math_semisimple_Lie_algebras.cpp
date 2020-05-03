@@ -412,7 +412,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     for (int j = i; j < this->theWeyl.RootSystem.size; j ++) {
       tempRoot = this->theWeyl.RootSystem[i] + this->theWeyl.RootSystem[j];
       if (!tempRoot.isEqualToZero()) {
-        if (!this->theWeyl.IsARoot(tempRoot)) {
+        if (!this->theWeyl.isARoot(tempRoot)) {
           this->Computed.elements[i][j] = true;
           this->ChevalleyConstants.elements[i][j].makeZero();
           this->Computed.elements[j][i] = true;
@@ -459,7 +459,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
             FirstIndexFirstPosChoice = FirstPosIndex;
             SecondIndexFirstPosChoice = SecondPosIndex;
             int thePower;
-            this->getMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2, thePower);
+            this->getMaxQForWhichBetaMinusQAlphaisARoot(smallRoot1, smallRoot2, thePower);
             this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex] = - 1 - thePower;
             this->Computed.elements[FirstNegIndex][SecondNegIndex] = true;
           } else {
@@ -591,7 +591,7 @@ void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(int indexI, int ind
     global.fatal << "Bad root sum. " << global.fatal;
   }
   int thePower;
-  this->getMaxQForWhichBetaMinusQAlphaIsARoot(
+  this->getMaxQForWhichBetaMinusQAlphaisARoot(
     this->theWeyl.RootSystem[indexMinusI], this->theWeyl.RootSystem[indexMinusJ], thePower
   );
   int i = 1 + thePower;
@@ -624,17 +624,17 @@ void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
   this->exploitSymmetryChevalleyConstants(k, i);
 }
 
-bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaIsARoot(
+bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaisARoot(
   const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output
 ) const {
   output = - 1;
   Vector<Rational> tempRoot = beta;
   if (alpha.isEqualToZero()) {
     global.fatal << "This is a programming error: calling function "
-    << "getMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. " << global.fatal;
+    << "getMaxQForWhichBetaMinusQAlphaisARoot with zero value for alpha is not allowed. " << global.fatal;
   }
   bool foundRoot = false;
-  while (this->theWeyl.IsARoot(tempRoot)) {
+  while (this->theWeyl.isARoot(tempRoot)) {
     output ++;
     tempRoot -= alpha;
     foundRoot = true;
@@ -654,7 +654,7 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
   if (eta != gamma + delta) {
     global.fatal << "Eta must equal gamma plus delta. " << global.fatal;
   }
-  if (!this->theWeyl.IsARoot(eta + minusEpsilon)) {
+  if (!this->theWeyl.isARoot(eta + minusEpsilon)) {
     global.fatal << "Eta minus epsilon must be a root. " << global.fatal;
   }
   if (

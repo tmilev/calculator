@@ -746,7 +746,7 @@ public:
   bool AreMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights);
   template <class Coefficient>
   void RaiseToMaximallyDominanT(List<Vector<Coefficient> >& theWeights);
-  void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
+  void getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
   void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const;
   ElementWeylGroup SimpleConjugation(int i, const ElementWeylGroup& vv);
   Matrix<Rational> SimpleReflectionMatrix(int indexSimpleRoot) const;
@@ -821,7 +821,7 @@ public:
   void ComputeRootsOfBorel(Vectors<Rational>& output);
   static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
   static LargeInteger SizeByFormulaOrNeg1(char weylLetter, int theDim);
-  bool IsARoot(const Vector<Rational>& input) const {
+  bool isARoot(const Vector<Rational>& input) const {
     return this->RootSystem.contains(input);
   }
   void generateRootSubsystem(Vectors<Rational>& theRoots);
@@ -893,7 +893,7 @@ public:
   );
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt);
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input);
-  void GetCoxeterElement(ElementWeylGroup& outputWeylElt) {
+  void getCoxeterElement(ElementWeylGroup& outputWeylElt) {
     outputWeylElt.generatorsLastAppliedFirst.setSize(this->getDimension());
     for (int i = 0; i < outputWeylElt.generatorsLastAppliedFirst.size; i ++) {
       outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
@@ -1532,7 +1532,7 @@ public:
     this->resetNoActionChange();
   }
   bool checkInitialization() const;
-  std::string ToStringLayerSize() const;
+  std::string toStringLayerSize() const;
   void resetNoActionChange() {
     this->previousLayer = &this->privateLayer1;
     this->currentLayer = &this->privateLayer2;

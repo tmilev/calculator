@@ -1112,7 +1112,7 @@ bool ElementVermaModuleOrdered<Coefficient>::needsParenthesisForMultiplication()
 }
 
 template <class Coefficient>
-void ElementVermaModuleOrdered<Coefficient>::AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
+void ElementVermaModuleOrdered<Coefficient>::assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
   ElementUniversalEnvelopingOrdered<Coefficient>& input,
   const ElementVermaModuleOrdered<Coefficient>& theRingZero,
   const Coefficient& theRingUnit

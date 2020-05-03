@@ -450,7 +450,7 @@ bool Calculator::innerPrintSSSubalgebras(
   bool doForceRecompute,
   bool doAttemptToSolveSystems,
   bool docomputePairingTable,
-  bool doComputeModuleDecomposition,
+  bool docomputeModuleDecompositionsition,
   bool doComputeNilradicals,
   bool doAdjustCentralizers
 ) {
@@ -508,7 +508,7 @@ bool Calculator::innerPrintSSSubalgebras(
     doForceRecompute,
     !isAlreadySubalgebrasObject,
     doComputeNilradicals,
-    doComputeModuleDecomposition,
+    docomputeModuleDecompositionsition,
     doAttemptToSolveSystems,
     docomputePairingTable,
     doAdjustCentralizers
@@ -539,7 +539,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
       this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }
     this->flagComputeNilradicals = computeNilradicals;
-    this->flagComputeModuleDecomposition = computeModuleDecomposition;
+    this->flagcomputeModuleDecompositionsition = computeModuleDecomposition;
     this->flagAttemptToSolveSystems = attemptToSolveSystems;
     this->flagcomputePairingTable = computePairingTable;
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;

@@ -5,7 +5,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-void RootSubalgebra::GetCoxeterElement(Matrix<Rational>& output) {
+void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
   int theDim = this->getAmbientWeyl().getDimension();
   output.MakeIdMatrix(theDim);
   Matrix<Rational> tempMat;
@@ -15,7 +15,7 @@ void RootSubalgebra::GetCoxeterElement(Matrix<Rational>& output) {
   }
 }
 
-void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
+void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
   //this->ComputeRho(true);
   int theDimension = this->getAmbientWeyl().getDimension();
   if (theDimension < 2) {
@@ -37,8 +37,8 @@ void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(theDimension);
   Matrix<Rational>  matCoxeterElt;
-  this->GetCoxeterElement(matCoxeterElt);
-  this->ComputeDynkinDiagramKandCentralizer();
+  this->getCoxeterElement(matCoxeterElt);
+  this->computeDynkinDiagramKAndCentralizer();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
   int coxeterNumber = 1;
   for (int i = 0; i < this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i ++) {
@@ -94,7 +94,7 @@ void RootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   }
 }
 
-void RootSubalgebra::ComputeDynkinDiagramKandCentralizer() {
+void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
   this->SimpleBasisK = this->genK;
   this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->getAmbientWeyl());
   this->SimpleBasisCentralizerRoots.size = 0;
@@ -106,16 +106,16 @@ void RootSubalgebra::ComputeDynkinDiagramKandCentralizer() {
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
 }
 
-void RootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly");
+void RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly");
   this->moduleDecompoAmbientAlgebraDimensionsOnly.makeZero();
   for (int i = 0; i < this->getNumberOfModules(); i ++) {
     this->moduleDecompoAmbientAlgebraDimensionsOnly.addMonomial(MonomialVector(this->Modules[i].size - 1), 1);
   }
 }
 
-void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules");
+void RootSubalgebra::computeCentralizerFromKModulesAndSortKModules() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeCentralizerFromKModulesAndSortKModules");
   this->CentralizerKmods.initialize(this->Modules.size);
   this->CentralizerRoots.size = 0;
   this->CentralizerRoots.reserve(this->Modules.size);
@@ -151,30 +151,30 @@ void RootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   }
 }
 
-void RootSubalgebra::ComputeExtremeWeightInTheSameKMod(
+void RootSubalgebra::computeExtremeWeightInTheSameKModule(
   const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest
 ) {
   this->getAmbientWeyl().ComputeExtremeRootInTheSameKMod(this->SimpleBasisK, input, outputW, lookingForHighest);
 }
 
-void RootSubalgebra::ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW) {
-  this->ComputeExtremeWeightInTheSameKMod(input, outputHW, true);
+void RootSubalgebra::computeHighestWeightInTheSameKModule(const Vector<Rational>& input, Vector<Rational>& outputHW) {
+  this->computeExtremeWeightInTheSameKModule(input, outputHW, true);
 }
 
-void RootSubalgebra::ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW) {
-  this->ComputeExtremeWeightInTheSameKMod(input, outputLW, false);
+void RootSubalgebra::computeLowestWeightInTheSameKModule(const Vector<Rational>& input, Vector<Rational>& outputLW) {
+  this->computeExtremeWeightInTheSameKModule(input, outputLW, false);
 }
 
-bool RootSubalgebra::RootsDefineASubalgebra(Vectors<Rational>& theRoots) {
+bool RootSubalgebra::rootsDefineSubalgebra(Vectors<Rational>& theRoots) {
   Vector<Rational> tempRoot;
   for (int i = 0; i < theRoots.size; i ++) {
-    if (!this->IsARoot(theRoots[i])) {
+    if (!this->isARoot(theRoots[i])) {
       return false;
     }
     for (int j = i + 1; j < theRoots.size; j ++) {
       tempRoot = theRoots[i];
       tempRoot += theRoots[j];
-      if (this->IsARoot(tempRoot)) {
+      if (this->isARoot(tempRoot)) {
         if (!theRoots.contains(tempRoot)) {
           return false;
         }
@@ -184,18 +184,18 @@ bool RootSubalgebra::RootsDefineASubalgebra(Vectors<Rational>& theRoots) {
   return true;
 }
 
-bool RootSubalgebra::IsBKhighest(const Vector<Rational>& input) {
+bool RootSubalgebra::isSubalgebraBorelHighest(const Vector<Rational>& input) {
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
-    if (this->IsARootOrZero(input + this->SimpleBasisK[i])) {
+    if (this->isARootOrZero(input + this->SimpleBasisK[i])) {
       return false;
     }
   }
   return true;
 }
 
-bool RootSubalgebra::IsBKlowest(const Vector<Rational>& input) {
+bool RootSubalgebra::isSubalgebraBorelLowest(const Vector<Rational>& input) {
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
-    if (this->IsARootOrZero(input - this->SimpleBasisK[i])) {
+    if (this->isARootOrZero(input - this->SimpleBasisK[i])) {
       return false;
     }
   }
@@ -206,18 +206,18 @@ bool RootSubalgebra::rootIsInCentralizer(const Vector<Rational>& input) {
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
     tempRoot = input + this->SimpleBasisK[i];
-    if (this->IsARoot(tempRoot) || tempRoot.isEqualToZero()) {
+    if (this->isARoot(tempRoot) || tempRoot.isEqualToZero()) {
       return false;
     }
     tempRoot = input - this->SimpleBasisK[i];
-    if (this->IsARoot(tempRoot) || tempRoot.isEqualToZero()) {
+    if (this->isARoot(tempRoot) || tempRoot.isEqualToZero()) {
       return false;
     }
   }
   return true;
 }
 
-void RootSubalgebra::WriteMultTableAndOppositeKmodsToFile(
+void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
   std::fstream &output, List<List<List<int> > >& inMultTable, List<int>& inOpposites
 ) {
   output << "pairing_table_size: " << inMultTable.size << "\n";
@@ -235,7 +235,7 @@ void RootSubalgebra::WriteMultTableAndOppositeKmodsToFile(
   }
 }
 
-void RootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(
+void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites
 ) {
   std::string tempS;
@@ -271,7 +271,7 @@ bool RootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
     found = false;
     for (int k = 0; k < this->SimpleBasisCentralizerRoots.size; k ++) {
       tempRoot = currentRoot - this->SimpleBasisCentralizerRoots[k];
-      if (this->IsARoot(tempRoot) || tempRoot.isEqualToZero()) {
+      if (this->isARoot(tempRoot) || tempRoot.isEqualToZero()) {
         currentRoot = tempRoot;
         found = true;
         if (positiveSimpleRootsSel.selected[k]) {
@@ -286,7 +286,7 @@ bool RootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
   return false;
 }
 
-void RootSubalgebra::GeneratePossibleNilradicalsRecursive(
+void RootSubalgebra::generatePossibleNilradicalsRecursive(
   PauseThread& PauseMutex,
   List<List<List<int> > >& multTable,
   List<Selection>& impliedSelections,
@@ -299,7 +299,7 @@ void RootSubalgebra::GeneratePossibleNilradicalsRecursive(
   while (RecursionDepth > - 1) {
     while (counters[RecursionDepth] < this->Modules.size) {
       if (!impliedSelections[RecursionDepth].selected[counters[RecursionDepth]]) {
-        if (this->IndexIsCompatibleWithPrevious(
+        if (this->indexIsCompatibleWithPrevious(
           counters[RecursionDepth], RecursionDepth, multTable, impliedSelections, oppositeKmods, owner
         )) {
           RecursionDepth ++;
@@ -308,7 +308,7 @@ void RootSubalgebra::GeneratePossibleNilradicalsRecursive(
       }
       counters[RecursionDepth] ++;
     }
-    this->PossibleNilradicalComputation(impliedSelections[RecursionDepth], owner, indexInOwner);
+    this->possibleNilradicalComputation(impliedSelections[RecursionDepth], owner, indexInOwner);
     RecursionDepth --;
     if (RecursionDepth > - 1) {
       counters[RecursionDepth] ++;
@@ -317,7 +317,7 @@ void RootSubalgebra::GeneratePossibleNilradicalsRecursive(
   }
 }
 
-bool RootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel) {
+bool RootSubalgebra::listHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel) {
   for (int j = 0; j < tempList.size; j ++) {
     if (tempList[j] < index) {
       if (!tempSel.selected[tempList[j]]) {
@@ -328,7 +328,7 @@ bool RootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, List<int>&
   return true;
 }
 
-bool RootSubalgebra::IndexIsCompatibleWithPrevious(
+bool RootSubalgebra::indexIsCompatibleWithPrevious(
   int startIndex,
   int RecursionDepth,
   List<List<List<int> > >& multTable,
@@ -356,17 +356,17 @@ bool RootSubalgebra::IndexIsCompatibleWithPrevious(
       }
     }
   }
-  if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(targetSel)) {
+  if (!owner.approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(targetSel)) {
     return false;
   }
   return true;
 }
 
-void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSubalgebras& owner, int indexInOwner) {
+void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSubalgebras& owner, int indexInOwner) {
   this->NumNilradicalsAllowed ++;
   if (owner.flagCountingNilradicalsOnlyNoComputation) {
     owner.numNilradicalsBySA[indexInOwner] ++;
-    this->MakeProgressReportPossibleNilradicalComputation(owner);
+    this->makeProgressReportpossibleNilradicalComputation(owner);
     return;
   }
   //this->ComputeDebugString();
@@ -375,7 +375,7 @@ void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSuba
   }
   if (!this->flagFirstRoundCounting) {
     this->NilradicalKmods = selKmods;
-    if (!this->ConeConditionHolds(owner, indexInOwner, owner.flagComputingLprohibitingWeights)) {
+    if (!this->coneConditionHolds(owner, indexInOwner, owner.flagComputingLprohibitingWeights)) {
       this->NumConeConditionFailures ++;
       owner.NumConeConditionFailures ++;
       if (owner.flagStoringNilradicals) {
@@ -391,9 +391,9 @@ void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSuba
 
       //the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
       //this task is pushed on the end of the to-do list.
-      /* owner.NumConeConditionHoldsBySSpart.theObjects[indexInOwner] ++;
+      /* owner.NumconeConditionHoldsBySSpart.theObjects[indexInOwner] ++;
       if (owner.ReportStringNonNilradicalParabolic == "") {
-        this->ComputeRootsOfK();
+        this->computeRootsOfK();
         Vectors<Rational> tempNilradical; Vectors<Rational> tempOthers; Vectors<Rational> tempK;
         for (int i = 0; i < this->kModules.size; i ++)
           if (this->NilradicalKmods.selected[i])
@@ -418,10 +418,10 @@ void RootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, RootSuba
       }*/
     }
   }
-  this->MakeProgressReportPossibleNilradicalComputation(owner);
+  this->makeProgressReportpossibleNilradicalComputation(owner);
 }
 
-void RootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found) {
+void RootSubalgebra::makeProgressReportGeneratorAutomorphisms(int progress, int outOf, int found) {
   ProgressReport theReport;
   std::stringstream out4, out5;
   out5 << progress + 1 << " out of " << outOf << " checked; ";
@@ -429,8 +429,8 @@ void RootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
   theReport.report(out5.str());
 }
 
-void RootSubalgebra::MakeProgressReportPossibleNilradicalComputation(RootSubalgebras& owner) {
-  MacroRegisterFunctionWithName("RootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
+void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(RootSubalgebras& owner) {
+  MacroRegisterFunctionWithName("RootSubalgebra::makeProgressReportpossibleNilradicalComputation");
   if (!global.theResponse.monitoringAllowed()) {
     return;
   }
@@ -458,7 +458,7 @@ void RootSubalgebra::MakeProgressReportPossibleNilradicalComputation(RootSubalge
   }
 }
 
-void RootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods) {
+void RootSubalgebra::generateKModuleLieBracketTable(List<List<List<int> > >& output, List<int>& oppositeKmods) {
   output.setSize(this->Modules.size);
   oppositeKmods.setSize(this->Modules.size);
   int numTotal = this->Modules.size * this->Modules.size;
@@ -472,7 +472,7 @@ void RootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   for (int i = 0; i < this->Modules.size; i ++) {
     output[i].setSize(this->Modules.size);
     for (int j = 0; j < this->Modules.size; j ++) {
-      this->KmodTimesKmod(i, j, oppositeKmods, output[i][j]);
+      this->KModuleLieBracketKmodule(i, j, oppositeKmods, output[i][j]);
       if (theReport2.tickAndWantReport()) {
         std::stringstream out5;
         out5 << "Computing pairing table: " << i * this->Modules.size + j + 1 << " out of " << numTotal;
@@ -482,19 +482,19 @@ void RootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   }
 }
 
-bool RootSubalgebra::IsARoot(const Vector<Rational>& input) {
+bool RootSubalgebra::isARoot(const Vector<Rational>& input) {
   if (input.size != this->getOwnerLieAlgebra().getRank()) {
     return false;
   }
   return this->getAmbientWeyl().RootSystem.contains(input);
 }
 
-bool RootSubalgebra::IsARootOrZero(const Vector<Rational>& input) {
-  return input.isEqualToZero() || this->IsARoot(input);
+bool RootSubalgebra::isARootOrZero(const Vector<Rational>& input) {
+  return input.isEqualToZero() || this->isARoot(input);
 }
 
-void RootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output) {
-  MacroRegisterFunctionWithName("RootSubalgebra::KmodTimesKmod");
+void RootSubalgebra::KModuleLieBracketKmodule(int index1, int index2, List<int>& oppositeKmods, List<int>& output) {
+  MacroRegisterFunctionWithName("RootSubalgebra::KModuleLieBracketKmodule");
   ElementSemisimpleLieAlgebra<Rational> theLieBracket;
   output.size = 0;
   for (int i = 0; i < this->Modules[index1].size; i ++) {
@@ -521,7 +521,7 @@ void RootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
   }
 }
 
-Vector<Rational> RootSubalgebra::GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const {
+Vector<Rational> RootSubalgebra::getFundamentalCoordinatessOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const {
   MacroRegisterFunctionWithName("RootSubalgebra::GetFundamentalCoordsOverK");
   Vector<Rational> output;
   output.makeZero(this->SimpleBasisK.size);
@@ -532,8 +532,8 @@ Vector<Rational> RootSubalgebra::GetFundamentalCoordsOverKss(const Vector<Ration
   return output;
 }
 
-Vector<Rational> RootSubalgebra::GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const {
-  MacroRegisterFunctionWithName("RootSubalgebra::GetSimpleCoordsOverKss");
+Vector<Rational> RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const {
+  MacroRegisterFunctionWithName("RootSubalgebra::getSimpleCoordinatesOverSubalgebraSemisimplePart");
   Vector<Rational> result;
   result.makeZero(this->SimpleBasisK.size);
   if (this->SimpleBasisK.size == 0) {
@@ -546,8 +546,8 @@ Vector<Rational> RootSubalgebra::GetSimpleCoordsOverKss(const Vector<Rational>& 
   return result;
 }
 
-void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeHighestVectorsHighestWeights");
+void RootSubalgebra::computeHighestVectorsHighestWeights() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeHighestVectorsHighestWeights");
   this->HighestVectors.setExpectedSize(this->getOwnerLieAlgebra().getNumberOfGenerators());
   this->HighestWeightsPrimalSimple.setExpectedSize(this->getOwnerLieAlgebra().getNumberOfGenerators());
   this->HighestWeightsNONPrimalFundamental.setExpectedSize(this->getOwnerLieAlgebra().getNumberOfGenerators());
@@ -557,11 +557,11 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   List<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().RootSystem;
   for (int i = 0; i <ambientRootSystem.size; i ++) {
-    if (this->IsBKhighest(ambientRootSystem[i])) {
+    if (this->isSubalgebraBorelHighest(ambientRootSystem[i])) {
       currentElt.MakeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
       this->HighestVectors.addOnTop(currentElt);
       this->HighestWeightsPrimalSimple.addOnTop(ambientRootSystem[i]);
-      this->HighestWeightsNONPrimalFundamental.addOnTop(this->GetFundamentalCoordsOverKss(ambientRootSystem[i]));
+      this->HighestWeightsNONPrimalFundamental.addOnTop(this->getFundamentalCoordinatessOverSubalgebraSemisimplePart(ambientRootSystem[i]));
     }
   }
   Vectors<Rational> cartanCentralizer;
@@ -577,8 +577,8 @@ void RootSubalgebra::ComputeHighestVectorsHighestWeights() {
 }
 
 bool RootSubalgebra::compareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight) {
-  Vector<Rational> KssPartLeft = this->GetSimpleCoordsOverKss(weightLeft);
-  Vector<Rational> KssPartRight = this->GetSimpleCoordsOverKss(weightRight);
+  Vector<Rational> KssPartLeft = this->getSimpleCoordinatesOverSubalgebraSemisimplePart(weightLeft);
+  Vector<Rational> KssPartRight = this->getSimpleCoordinatesOverSubalgebraSemisimplePart(weightRight);
   if (KssPartLeft>KssPartRight) {
     return true;
   }
@@ -588,8 +588,8 @@ bool RootSubalgebra::compareLeftGreaterThanRight(const Vector<Rational>& weightL
   return weightLeft>weightRight;
 }
 
-void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeModuleFromHighestVector");
+void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeModuleFromHighestVector");
   HashedList<Vector<Rational> > currentWeights;
   Vectors<Rational> zeroSpace;
   Vector<Rational> currentWeight;
@@ -601,7 +601,7 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
     for (int j = 0; j<currentWeights.size; j ++) {
       for (int k = 0; k< this->SimpleBasisK.size; k++) {
         currentWeight = currentWeights[j]-this->SimpleBasisK[k];
-        if (this->IsARoot(currentWeight)) {
+        if (this->isARoot(currentWeight)) {
           currentWeights.addOnTopNoRepetition(currentWeight);
         }
         if (currentWeight.isEqualToZero()) {
@@ -625,9 +625,9 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
   wNONprimalFundamental.setSize(wPrimalSimple.size);
   wNONprimalSimple.setSize(wPrimalSimple.size);
   for (int j = 0; j < wPrimalSimple.size; j ++) {
-    wNONprimalFundamental[j] = this->GetFundamentalCoordsOverKss(wPrimalSimple[j]);
-    wNONprimalSimple[j] = this->GetSimpleCoordsOverKss(wPrimalSimple[j]);
-    if (this->IsBKlowest(wPrimalSimple[j]) || wPrimalSimple.size == 1) {
+    wNONprimalFundamental[j] = this->getFundamentalCoordinatessOverSubalgebraSemisimplePart(wPrimalSimple[j]);
+    wNONprimalSimple[j] = this->getSimpleCoordinatesOverSubalgebraSemisimplePart(wPrimalSimple[j]);
+    if (this->isSubalgebraBorelLowest(wPrimalSimple[j]) || wPrimalSimple.size == 1) {
       this->LowestWeightsPrimalSimple[moduleIndex] = wPrimalSimple[j];
       if (j != wPrimalSimple.size - 1) {
         global.fatal << "Last module weight is not lowest. The simple basis is: "
@@ -651,21 +651,21 @@ void RootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
   }
 }
 
-void RootSubalgebra::ComputeModulesFromHighestVectors() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeModulesFromHighestVectors");
-  this->CheckScalarProdMatrixOrdered();
+void RootSubalgebra::computeModulesFromHighestVectors() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeModulesFromHighestVectors");
+  this->checkScalarProductMatrixOrdered();
   this->WeightsModulesPrimalSimple.setSize(this->getNumberOfModules());
   this->WeightsModulesNONPrimalSimple.setSize(this->getNumberOfModules());
   this->WeightsModulesNONPrimalFundamental.setSize(this->getNumberOfModules());
   this->LowestWeightsPrimalSimple.setSize(this->getNumberOfModules());
   this->Modules.setSize(this->getNumberOfModules());
   for (int i = 0; i < this->getNumberOfModules(); i ++) {
-    this->ComputeModuleFromHighestVector(i);
+    this->computeModuleFromHighestVector(i);
   }
 }
 
-void RootSubalgebra::ComputeModuleDecompo() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeModuleDecompo");
+void RootSubalgebra::computeModuleDecomposition() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeModuleDecomposition");
   this->ModuleDecompoHighestWeights.makeZero();
   Weight<Rational> theM;
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -674,17 +674,17 @@ void RootSubalgebra::ComputeModuleDecompo() {
   }
 }
 
-void RootSubalgebra::ComputeKModules() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeKModules");
-  this->ComputeRootsOfK();
+void RootSubalgebra::computeKModules() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeKModules");
+  this->computeRootsOfK();
   this->scalarProdInvertedMatrixOrdered = this->scalarProdMatrixOrdered;
   if (this->scalarProdInvertedMatrixOrdered.numberOfRows > 0) {
     this->scalarProdInvertedMatrixOrdered.invert();
   }
-  this->ComputeHighestVectorsHighestWeights();
-  this->ComputeModulesFromHighestVectors();
-  this->ComputeModuleDecompo();
-  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
+  this->computeHighestVectorsHighestWeights();
+  this->computeModulesFromHighestVectors();
+  this->computeModuleDecomposition();
+  this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   //Handle the elements of the Cartan.
   int dimFinal = 0;
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -695,7 +695,7 @@ void RootSubalgebra::ComputeKModules() {
   }
 }
 
-int RootSubalgebra::NumRootsInNilradical() {
+int RootSubalgebra::numberOfRootsInNilradical() {
   int result = 0;
   for (int i = 0; i < this->NilradicalKmods.cardinalitySelection; i ++) {
     result += this->Modules[this->NilradicalKmods.elements[i]].size;
@@ -703,7 +703,7 @@ int RootSubalgebra::NumRootsInNilradical() {
   return result;
 }
 
-int RootSubalgebra::GetIndexKmoduleContainingRoot(const Vector<Rational>& input) {
+int RootSubalgebra::getIndexKModuleContainingRoot(const Vector<Rational>& input) {
   for (int i = 0; i < this->WeightsModulesPrimalSimple.size; i ++) {
     if (this->WeightsModulesPrimalSimple[i].contains(input)) {
       return i;
@@ -712,24 +712,24 @@ int RootSubalgebra::GetIndexKmoduleContainingRoot(const Vector<Rational>& input)
   return - 1;
 }
 
-bool RootSubalgebra::ConeConditionHolds(
+bool RootSubalgebra::coneConditionHolds(
   RootSubalgebras& owner,
   int indexInOwner,
   Vectors<Rational>& NilradicalRoots,
   Vectors<Rational>& Ksingular,
-  bool doExtractRelations
+  bool doextractRelations
 ) {
   Matrix<Rational> tempA, tempB;
   if (Vectors<Rational>::conesIntersect(NilradicalRoots, Ksingular, nullptr, nullptr)) {
-    if (doExtractRelations) {
-      this->ExtractRelations(tempA, tempB, NilradicalRoots, owner, indexInOwner, Ksingular);
+    if (doextractRelations) {
+      this->extractRelations(tempA, tempB, NilradicalRoots, owner, indexInOwner, Ksingular);
     }
     return false;
   }
   return true;
 }
 
-bool RootSubalgebra::ConeConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doExtractRelations) {
+bool RootSubalgebra::coneConditionHolds(RootSubalgebras& owner, int indexInOwner, bool doextractRelations) {
   Vectors<Rational> NilradicalRoots;
   Vectors<Rational> Ksingular;
   if (this->Modules.size == 0) {
@@ -750,14 +750,14 @@ bool RootSubalgebra::ConeConditionHolds(RootSubalgebras& owner, int indexInOwner
       Ksingular.addOnTop(this->HighestWeightsPrimalSimple[i]);
     }
   }
-  if (!this->ConeConditionHolds(owner, indexInOwner, NilradicalRoots, Ksingular, doExtractRelations)) {
+  if (!this->coneConditionHolds(owner, indexInOwner, NilradicalRoots, Ksingular, doextractRelations)) {
     return false;
   } else {
     return true;
   }
 }
 
-bool RootSubalgebra::CheckRankInequality() const {
+bool RootSubalgebra::checkRankInequality() const {
   if ((this->theDynkinType.getRank() + this->theCentralizerDynkinType.getRank()) * 2 < this->ownEr->owner->getRank()) {
     global.fatal << "2*(Centralizer rank + rank) < ambient rank, "
     << "which is mathematically impossible. There was a programming error. "
@@ -766,8 +766,8 @@ bool RootSubalgebra::CheckRankInequality() const {
   return true;
 }
 
-bool RootSubalgebra::CheckForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots) {
-  MacroRegisterFunctionWithName("RootSubalgebra::CheckForSmallRelations");
+bool RootSubalgebra::checkForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots) {
+  MacroRegisterFunctionWithName("RootSubalgebra::checkForSmallRelations");
   Vector<Rational> weightSum;
   bool tempBool;
   int tempI;
@@ -810,7 +810,7 @@ bool RootSubalgebra::CheckForSmallRelations(ConeRelation& theRel, Vectors<Ration
   return false;
 }
 
-void RootSubalgebra::MatrixToRelation(
+void RootSubalgebra::matrixToRelation(
   ConeRelation& output,
   Matrix<Rational>& matA,
   Matrix<Rational>& matX,
@@ -848,7 +848,7 @@ void RootSubalgebra::MatrixToRelation(
   }
 }
 
-void RootSubalgebra::ExtractRelations(
+void RootSubalgebra::extractRelations(
   Matrix<Rational>& matA,
   Matrix<Rational>& matX,
   Vectors<Rational>& NilradicalRoots,
@@ -862,21 +862,21 @@ void RootSubalgebra::ExtractRelations(
   ConeRelation theRel; theRel.IndexOwnerRootSubalgebra = indexInOwner;
   if (owner.flagLookingForMinimalRels) {
     theRel.FixRightHandSide(*this, NilradicalRoots);
-    theRel.MakeLookCivilized(*this);
-    owner.theMinRels.AddRelationNoRepetition(theRel, owner);
+    theRel.makeLookCivilized(*this);
+    owner.theMinRels.addRelationNoRepetition(theRel, owner);
   }
-  bool tempBool = this->AttemptTheTripleTrick(theRel, NilradicalRoots);
+  bool tempBool = this->attemptTheTripleTrick(theRel, NilradicalRoots);
   if (tempBool) {
     this->NumRelationsWithStronglyPerpendicularDecomposition ++;
-    theRel.MakeLookCivilized(*this);
-    owner.theGoodRelations.AddRelationNoRepetition(theRel, owner);
+    theRel.makeLookCivilized(*this);
+    owner.theGoodRelations.addRelationNoRepetition(theRel, owner);
   } else {
-    //if (!this->CheckForSmallRelations(theRel, NilradicalRoots))
-    this->MatrixToRelation(theRel, matA, matX, theDimension, NilradicalRoots);
-    this->MakeGeneratingSingularVectors(theRel, NilradicalRoots);
+    //if (!this->checkForSmallRelations(theRel, NilradicalRoots))
+    this->matrixToRelation(theRel, matA, matX, theDimension, NilradicalRoots);
+    this->makeGeneratingSingularVectors(theRel, NilradicalRoots);
     theRel.FixRightHandSide(*this, NilradicalRoots);
-    theRel.MakeLookCivilized(*this);
-    theRel.ComputeDebugString(owner, true, true);
+    theRel.makeLookCivilized(*this);
+    theRel.computeRelationString(owner, true, true);
     if ((false)) {
       if (theRel.theDiagram.toString() == "C^{2}_3") {
         Selection tempSel;
@@ -895,7 +895,7 @@ void RootSubalgebra::ExtractRelations(
             break;
           }
         }
-        if (!theRel.CheckForBugs(*this, NilradicalRoots)) {
+        if (!theRel.checkForBugs(*this, NilradicalRoots)) {
           global.fatal << "Check for bugs failed. " << global.fatal;
         }
       }
@@ -904,20 +904,20 @@ void RootSubalgebra::ExtractRelations(
   }
 }
 
-bool RootSubalgebra::AttemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
+bool RootSubalgebra::attemptTheTripleTrick(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
   Vectors<Rational> tempRoots;
   tempRoots.size = 0;
   for (int i = 0; i < this->Modules.size; i ++) {
     if (!this->NilradicalKmods.selected[i]) {
-      if (this->IsGeneratingSingularVectors(i, NilradicalRoots)) {
+      if (this->isGeneratingSingularVectors(i, NilradicalRoots)) {
         tempRoots.addOnTop(this->HighestWeightsPrimalSimple[i]);
       }
     }
   }
-  return this->AttemptTheTripleTrickWRTSubalgebra(theRel, tempRoots, NilradicalRoots);
+  return this->attemptTheTripleTrickWRTSubalgebra(theRel, tempRoots, NilradicalRoots);
 }
 
-bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
+bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   ConeRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots
 ) {
   Vector<Rational> tempRoot, Accum;
@@ -975,7 +975,7 @@ bool RootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
   return false;
 }
 
-void RootSubalgebra::MakeSureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
+void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rational>& NilradicalRoots) {
   Vector<Rational> alpha1, alpha2, beta1, tempRoot;
   bool madeChange = true;
   while (madeChange) {
@@ -984,8 +984,8 @@ void RootSubalgebra::MakeSureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<R
       for (int j = i + 1; j < theRel.Alphas.size; j ++) {
         beta1 = theRel.Alphas[i];
         beta1 += theRel.Alphas[j];
-        if (this->IsARootOrZero(beta1)) {
-          this->ComputeHighestWeightInTheSameKMod(beta1, tempRoot);
+        if (this->isARootOrZero(beta1)) {
+          this->computeHighestWeightInTheSameKModule(beta1, tempRoot);
           if (NilradicalRoots.contains(beta1)) {
             alpha1 = theRel.Alphas[i];
             alpha2 = theRel.Alphas[j];
@@ -1029,7 +1029,7 @@ void RootSubalgebra::MakeSureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<R
   }
 }
 
-void RootSubalgebra::ComputeEpsCoordsWRTk() {
+void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
   this->kModulesKepsCoords.setSize(this->Modules.size);
   this->kModulesgEpsCoords.setSize(this->Modules.size);
   Vectors<Rational> EpsCoordsWRTk;
@@ -1098,7 +1098,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     *abortKmodule = false;
   }
   if (CurrentRank == this->getAmbientWeyl().cartanSymmetric.numberOfRows) {
-    return this->IsAnIsomorphism(Domain, Range, outputAutomorphisms, additionalDomain, additionalRange);
+    return this->isAnIsomorphism(Domain, Range, outputAutomorphisms, additionalDomain, additionalRange);
   }
   Vectors<Rational> domainRec = Domain;
   Vectors<Rational> rangeRec = Range;
@@ -1120,8 +1120,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   rightSA.ownEr = this->ownEr;
   leftSA.genK = domainRec;
   rightSA.genK=rangeRec;
-  leftSA.ComputeEssentialS();
-  rightSA.ComputeEssentialS();
+  leftSA.computeEssentials();
+  rightSA.computeEssentials();
   if (RecursionDepth!= 0) {
     if (
       leftSA.theDynkinDiagram.toString() != rightSA.theDynkinDiagram.toString() ||
@@ -1195,7 +1195,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   return result;
 }
 
-bool RootSubalgebra::IsAnIsomorphism(
+bool RootSubalgebra::isAnIsomorphism(
   Vectors<Rational>& domain,
   Vectors<Rational>& range,
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
@@ -1235,7 +1235,7 @@ bool RootSubalgebra::IsAnIsomorphism(
   }
   for (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
     this->getAmbientWeyl().RootsOfBorel[i].getCoordinatesInBasis(tempRoots, tempRoot);
-    if (!this->IsARoot(tempRoot)) {
+    if (!this->isARoot(tempRoot)) {
       return false;
     }
   }
@@ -1340,7 +1340,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
     if (useLatex) {
       out << "\n\n\\noindent Pairing table:\n\n\\noindent";
     }
-    out << this->ToStringMultTable(useLatex, useHtml, *this) << "\n";
+    out << this->toStringLieBracketTable(useLatex, useHtml, *this) << "\n";
   }
   out << "<hr>Information about the subalgebra generation algorithm.";
   out << "<br>Heirs rejected due to having symmetric Cartan type outside "
@@ -1353,7 +1353,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   if (this->indexInducingSubalgebra == - 1) {
     out << "<br>This subalgebra is not parabolically induced by anyone";
   } else {
-    out << "<br>Parabolically induced by " << this->ownEr->ToStringAlgebraLink(this->indexInducingSubalgebra);
+    out << "<br>Parabolically induced by " << this->ownEr->toStringAlgebraLink(this->indexInducingSubalgebra);
   }
   out << "<br>Potential Dynkin type extensions: ";
   for (int i = 0; i < this->potentialExtensionDynkinTypes.size; i ++) {
@@ -1362,7 +1362,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   return out.str();
 }
 
-bool RootSubalgebra::IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots) {
+bool RootSubalgebra::isGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots) {
   Vector<Rational>& currentRoot = this->HighestWeightsPrimalSimple[indexKmod];
   if (currentRoot.isEqualToZero()) {
     return false;
@@ -1370,7 +1370,7 @@ bool RootSubalgebra::IsGeneratingSingularVectors(int indexKmod, Vectors<Rational
   Vector<Rational> theSum;
   for (int i = 0; i < NilradicalRoots.size; i ++) {
     theSum = currentRoot + NilradicalRoots[i];
-    if (this->IsARootOrZero(theSum)) {
+    if (this->isARootOrZero(theSum)) {
       if (!NilradicalRoots.contains(theSum)) {
         return false;
       }
@@ -1379,7 +1379,7 @@ bool RootSubalgebra::IsGeneratingSingularVectors(int indexKmod, Vectors<Rational
   return true;
 }
 
-void RootSubalgebra::MakeGeneratingSingularVectors(ConeRelation& theRelation, Vectors<Rational>& nilradicalRoots) {
+void RootSubalgebra::makeGeneratingSingularVectors(ConeRelation& theRelation, Vectors<Rational>& nilradicalRoots) {
   bool isMaximal = false;
   Vector<Rational> tempRoot;
   while (!isMaximal) {
@@ -1388,8 +1388,8 @@ void RootSubalgebra::MakeGeneratingSingularVectors(ConeRelation& theRelation, Ve
       for (int j = 0; j < nilradicalRoots.size; j ++) {
         tempRoot = theRelation.Alphas[i];
         tempRoot += nilradicalRoots[j];
-        if ((this->IsARoot(tempRoot) || tempRoot.isEqualToZero()) &&(!nilradicalRoots.contains(tempRoot))) {
-          this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
+        if ((this->isARoot(tempRoot) || tempRoot.isEqualToZero()) &&(!nilradicalRoots.contains(tempRoot))) {
+          this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
           tempRoot -= theRelation.Alphas[i];
           theRelation.Alphas[i] += tempRoot;
           int tempI = theRelation.Betas.getIndex(tempRoot);
@@ -1439,7 +1439,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
       int x = linComb.FindLCMDenominatorsTruncateToInt();
       linComb *= - x;
       std::string tempS;
-      if (this->LinCombToString(AllRoots[i], x, linComb, tempS)) {
+      if (this->linearCombinationToString(AllRoots[i], x, linComb, tempS)) {
         out << tempS << "\n";
         counter ++;
         if (this->LowestWeightsPrimalSimple.getIndex(AllRoots[i]) != - 1) {
@@ -1453,7 +1453,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   out2 << "\n\n" << tempS;
   if (DoEnumeration) {
     this->TestedRootsAlpha = this->LowestWeightsPrimalSimple;
-    this->DoKRootsEnumeration();
+    this->doKRootsEnumeration();
   }
 //  this->getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
 }
@@ -1464,7 +1464,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   out << this->toString() << "\n\n";
   Vector<Rational> tempRoot;
   tempRoot = this->SimpleBasisK[0];
-  this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
+  this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
   HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().RootSystem;
   for (int l = 0; l < this->SimpleBasisK.size; l ++) {
     Rational tempRat;
@@ -1492,7 +1492,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
           int x = linComb.FindLCMDenominatorsTruncateToInt();
           linComb *= - x;
           std::string tempS;
-          if (this->LinCombToStringDistinguishedIndex(l, AllRoots.theObjects[i], x, linComb, tempS)) {
+          if (this->linearCombinationToStringDistinguishedIndex(l, AllRoots.theObjects[i], x, linComb, tempS)) {
             out << tempS << "\n";
             counter ++;
           }
@@ -1503,7 +1503,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   }
 }
 
-bool RootSubalgebra::LinCombToString(
+bool RootSubalgebra::linearCombinationToString(
   const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
 ) {
   int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
@@ -1561,8 +1561,8 @@ void RootSubalgebra::initForNilradicalGeneration() {
   this->flagFirstRoundCounting = true;
 }
 
-std::string RootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner) {
-  MacroRegisterFunctionWithName("RootSubalgebra::ToStringMultTable");
+std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml, RootSubalgebra& owner) {
+  MacroRegisterFunctionWithName("RootSubalgebra::toStringLieBracketTable");
   std::stringstream out;
   out << "\t";
   if (!(useLaTeX||useHtml)) {
@@ -1688,7 +1688,7 @@ WeylGroupAutomorphisms& RootSubalgebra::getAmbientWeylAutomorphisms() const {
   return this->ownEr->theWeylGroupAutomorphisms;
 }
 
-bool RootSubalgebra::LinCombToStringDistinguishedIndex(
+bool RootSubalgebra::linearCombinationToStringDistinguishedIndex(
   int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
 ) {
   int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
@@ -1749,12 +1749,12 @@ bool RootSubalgebra::operator>(const RootSubalgebra& other) const {
   return false;//<-this might need to be fixed.
 }
 
-void RootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter) {
+void RootSubalgebra::generatePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter) {
   impliedSelections.setSize(this->Modules.size + 1);
   parabolicsCounter = 0;
 }
 
-void RootSubalgebra::GeneratePossibleNilradicals(
+void RootSubalgebra::generatePossibleNilradicals(
   PauseThread& PauseMutex,
   List<Selection>& impliedSelections,
   int& parabolicsCounter,
@@ -1762,11 +1762,11 @@ void RootSubalgebra::GeneratePossibleNilradicals(
   RootSubalgebras& owner,
   int indexInOwner
 ) {
-  this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods);
+  this->generateKModuleLieBracketTable(this->theMultTable, this->theOppositeKmods);
   this->NumTotalSubalgebras = 0;
   Selection emptySel;
   emptySel.initialize(this->SimpleBasisCentralizerRoots.size);
-  owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this);
+  owner.computeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this);
   int numCycles = MathRoutines::twoToTheNth(this->SimpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
   StartingNilradicalsNoRepetition.reserve(numCycles);
@@ -1788,7 +1788,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
         }
       }
       if (owner.flagUsingActionsNormalizerCentralizerNilradical) {
-        owner.RaiseSelectionUntilApproval(tempSel);
+        owner.raiseSelectionUntilApproval(tempSel);
       }
       StartingNilradicalsNoRepetition.addOnTopNoRepetition(tempSel);
     }
@@ -1801,7 +1801,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
         owner.RecursionDepthNilradicalsGeneration = 0;
         owner.CountersNilradicalsGeneration[0] = this->CentralizerRoots.size;
       }
-      this->GeneratePossibleNilradicalsRecursive(
+      this->generatePossibleNilradicalsRecursive(
         PauseMutex, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
       );
     }
@@ -1810,7 +1810,7 @@ void RootSubalgebra::GeneratePossibleNilradicals(
     impliedSelections[0].initialize(this->Modules.size);
     owner.RecursionDepthNilradicalsGeneration = 0;
     owner.CountersNilradicalsGeneration[0] = 0;
-    this->GeneratePossibleNilradicalsRecursive(
+    this->generatePossibleNilradicalsRecursive(
       PauseMutex, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner
     );
   }
@@ -1834,8 +1834,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   theRangeRootSA.ownEr = &inputOwner;
   theDomainRootSA.genK = Domain;
   theRangeRootSA.genK = Range;
-  theDomainRootSA.ComputeEssentialS();
-  theRangeRootSA.ComputeEssentialS();
+  theDomainRootSA.computeEssentials();
+  theRangeRootSA.computeEssentials();
   if (
     theDomainRootSA.theDynkinDiagram.toString() != theRangeRootSA.theDynkinDiagram.toString() ||
     theDomainRootSA.theCentralizerDiagram.toString() != theRangeRootSA.theCentralizerDiagram.toString()
@@ -1900,7 +1900,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
         }
       }
       if (outputAutomorphisms != nullptr) {
-        theDomainRootSA.MakeProgressReportGenAutos(
+        theDomainRootSA.makeProgressReportGeneratorAutomorphisms(
           l + NumAutosCentralizer * j, tempI2 * NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size
         );
       }
@@ -1911,7 +1911,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   return false;
 }
 
-bool RootSubalgebra::GenerateIsomorphismsPreservingBorel(
+bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   RootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms
 ) {
   if (this->theDynkinDiagram.toString() != right.theDynkinDiagram.toString()) {
@@ -1986,7 +1986,7 @@ bool RootSubalgebra::GenerateIsomorphismsPreservingBorel(
             }
           }
           if (outputAutomorphisms != nullptr) {
-            this->MakeProgressReportGenAutos(
+            this->makeProgressReportGeneratorAutomorphisms(
               l + NumAutosCentralizer * (k + NumAutos * (j + i * tempI2)),
               tempI1 * tempI2 * NumAutos * NumAutosCentralizer,
               outputAutomorphisms->ExternalAutomorphisms.size
@@ -2003,7 +2003,7 @@ bool RootSubalgebra::GenerateIsomorphismsPreservingBorel(
   return false;
 }
 
-void RootSubalgebra::DoKRootsEnumeration() {
+void RootSubalgebra::doKRootsEnumeration() {
   this->theKEnumerations.setSize(this->PosRootsKConnectedComponents.size);
   this->theKComponentRanks.setSize(this->PosRootsKConnectedComponents.size);
   Matrix<Rational> tempMat;
@@ -2013,24 +2013,24 @@ void RootSubalgebra::DoKRootsEnumeration() {
     this->theKComponentRanks[i] =
     this->PosRootsKConnectedComponents[i].getRankOfSpanOfElements(&tempMat, &tempSel);
   }
-  this->DoKRootsEnumerationRecursively(0);
+  this->doKRootsEnumerationRecursively(0);
 }
 
-void RootSubalgebra::DoKRootsEnumerationRecursively(int indexEnumeration) {
+void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
   int theRank = this->theKComponentRanks[indexEnumeration];
   int numRuns = MathRoutines::nChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
   this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
   for (int i = 0; i < numRuns; i ++) {
     this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
     if (indexEnumeration < this->PosRootsKConnectedComponents.size - 1) {
-      this->DoKRootsEnumerationRecursively(indexEnumeration + 1);
+      this->doKRootsEnumerationRecursively(indexEnumeration + 1);
     } else {
-      this->KEnumerationsToLinComb();
+      this->subalgebraEnumerationsToLinearCombinations();
     }
   }
 }
 
-void RootSubalgebra::KEnumerationsToLinComb() {
+void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
   int theDimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   Matrix<Rational> tempMat;
   Selection tempSelection;
@@ -2068,7 +2068,7 @@ void RootSubalgebra::KEnumerationsToLinComb() {
       }
       if (foundBadCombination) {
         std::string tempS;
-        this->LinCombToString(TestedRootAlpha, x, linComb, tempS);
+        this->linearCombinationToString(TestedRootAlpha, x, linComb, tempS);
       }
     }
   }
@@ -2091,7 +2091,7 @@ bool RootSubalgebra::checkInitialization() const {
   return true;
 }
 
-bool RootSubalgebra::CheckScalarProdMatrixOrdered() const {
+bool RootSubalgebra::checkScalarProductMatrixOrdered() const {
   Matrix<Rational> theMat;
   this->SimpleBasisK.getGramMatrix(theMat, &this->getAmbientWeyl().cartanSymmetric);
   if (theMat != this->scalarProdMatrixOrdered) {
@@ -2100,8 +2100,8 @@ bool RootSubalgebra::CheckScalarProdMatrixOrdered() const {
   return true;
 }
 
-void RootSubalgebra::ComputePotentialExtensions() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputePotentialExtensions");
+void RootSubalgebra::computePotentialExtensions() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computePotentialExtensions");
   this->ownEr->growDynkinType(
     this->theDynkinType, this->potentialExtensionDynkinTypes, &this->potentialExtensionRootPermutations
   );
@@ -2115,7 +2115,7 @@ bool RootSubalgebras::growDynkinType(
   const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots
 ) const {
   MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
-  input.grow(this->validScales, this->GetOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
+  input.grow(this->validScales, this->getOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
   char theLetter;
   if (!this->owner->theWeyl.theDynkinType.IsSimple(&theLetter)) {
     return true;
@@ -2182,8 +2182,8 @@ bool RootSubalgebras::growDynkinType(
   return true;
 }
 
-void RootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators");
+void RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators");
   if (this->SimpleBasisK.size == 0) {
     return;
   }
@@ -2216,8 +2216,8 @@ void RootSubalgebra::ComputeOuterSAAutosExtendingToAmbientAutosGenerators() {
   }
 }
 
-bool RootSubalgebra::CheckForMaximalDominancecartanSubalgebra() {
-  MacroRegisterFunctionWithName("RootSubalgebra::CheckForMaximalDominancecartanSubalgebra");
+bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
+  MacroRegisterFunctionWithName("RootSubalgebra::checkForMaximalDominanceCartanSubalgebra");
   Vectors<Rational> simpleBasisOriginalOrderCopy;
   for (int i = 0; i < this->outerSAautos.theElements.size; i ++) {
     if (!this->outerSAautos.theElements[i].isIdentity()) {
@@ -2241,8 +2241,8 @@ bool RootSubalgebra::CheckForMaximalDominancecartanSubalgebra() {
   return true;
 }
 
-void RootSubalgebra::ComputeEssentialS() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeEssentialS");
+void RootSubalgebra::computeEssentials() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeEssentials");
   this->SimpleBasisK = this->genK;
   this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
   this->theDynkinDiagram.AmbientRootSystem= this->getAmbientWeyl().RootSystem;
@@ -2255,15 +2255,15 @@ void RootSubalgebra::ComputeEssentialS() {
       << this->SimpleBasisK.toString() << ". " << global.fatal;
     }
   }
-  this->ComputeKModules();
-  this->ComputeCentralizerFromKModulesAndSortKModules();
-  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
-  this->CheckRankInequality();
+  this->computeKModules();
+  this->computeCentralizerFromKModulesAndSortKModules();
+  this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
+  this->checkRankInequality();
   this->NilradicalKmods.initialize(this->Modules.size);
 }
 
-bool RootSubalgebra::ComputeEssentialsIfNew() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeEssentialsIfNew");
+bool RootSubalgebra::computeEssentialsIfNew() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeEssentialsIfNew");
   this->genK = this->SimpleBasisK;
   this->checkInitialization();
   ProgressReport theReport;
@@ -2337,10 +2337,10 @@ bool RootSubalgebra::ComputeEssentialsIfNew() {
   this->theDynkinDiagram.AmbientRootSystem = this->getAmbientWeyl().RootSystem;
   this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
-  this->ComputeKModules();
-  this->ComputeCentralizerFromKModulesAndSortKModules();
-  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
-  this->CheckRankInequality();
+  this->computeKModules();
+  this->computeCentralizerFromKModulesAndSortKModules();
+  this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
+  this->checkRankInequality();
   for (int i = 0; i < this->ownEr->theSubalgebras.size; i ++) {
     if (
       this->ownEr->theSubalgebras[i].theDynkinDiagram == this->theDynkinDiagram &&
@@ -2362,7 +2362,7 @@ bool RootSubalgebra::ComputeEssentialsIfNew() {
   return true;
 }
 
-bool RootSubalgebra::IsEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const {
+bool RootSubalgebra::isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const {
   return
   this->moduleDecompoAmbientAlgebraDimensionsOnly ==
   other.moduleDecompoAmbientAlgebraDimensionsOnly &&
@@ -2370,35 +2370,35 @@ bool RootSubalgebra::IsEquivalentToByDiagramsAndDimensions(const RootSubalgebra&
   this->theCentralizerDynkinType == other.theCentralizerDynkinType;
 }
 
-void RootSubalgebra::GenerateAutomorphismsPreservingBorel(
+void RootSubalgebra::generateAutomorphismsPreservingBorel(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &outputAutomorphisms
 ) {
-  this->ComputeEssentialS();
-  this->GenerateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
+  this->computeEssentials();
+  this->generateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
 }
 
-void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool sort, bool computeEpsCoords) {
-  MacroRegisterFunctionWithName("RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD");
+void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool sort, bool computeEpsCoords) {
+  MacroRegisterFunctionWithName("RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD");
   this->theSubalgebras.size = 0;
-  this->GetOwnerWeyl().ComputeRho(true);
+  this->getOwnerWeyl().ComputeRho(true);
   //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
   RootSubalgebras rootSAsGenerateAll;
   rootSAsGenerateAll.theSubalgebras.setSize(this->GetOwnerSSalgebra().getRank()*2+ 1);
   rootSAsGenerateAll.theSubalgebras[0].genK.size = 0;
   rootSAsGenerateAll.theSubalgebras[0].ownEr = this;
-  rootSAsGenerateAll.theSubalgebras[0].ComputeEssentialS();
-  this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(rootSAsGenerateAll.theSubalgebras, 1);
+  rootSAsGenerateAll.theSubalgebras[0].computeEssentials();
+  this->computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(rootSAsGenerateAll.theSubalgebras, 1);
   if (sort) {
-    this->SortDescendingOrderBySSRank();
+    this->sortDescendingOrderBySSRank();
   }
   if (computeEpsCoords) {
     for (int i = 0; i < this->theSubalgebras.size; i ++) {
-      this->theSubalgebras[i].ComputeEpsCoordsWRTk();
+      this->theSubalgebras[i].computeEpsilonCoordinatesWithRespectToSubalgebra();
     }
   }
 }
 
-bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
+bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   Vectors<Rational>& RootsWithCharacteristic2,
   Selection& theZeroCharacteristics,
   Vectors<Rational>& simpleBasisSA,
@@ -2409,7 +2409,7 @@ bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   PolynomialSubstitution<Rational>& outputSystemToBeSolved,
   Matrix<Rational>& outputSystemColumnVector
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::attemptExtendingHFtoHEFWRTSubalgebra");
   if (theZeroCharacteristics.cardinalitySelection == theZeroCharacteristics.MaxSize) {
     return false;
   }
@@ -2480,10 +2480,10 @@ bool SlTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   )) {
     for (int i = 0; i <rootsInPlay.size; i ++) {
       tempGen.makeGenerator(
-        this->GetOwnerSSAlgebra(), this->GetOwnerSSAlgebra().getGeneratorFromRoot(- rootsInPlay[i])
+        this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorFromRoot(- rootsInPlay[i])
       );
       outputF.addMonomial(tempGen, coeffsF.elements[0][i]);
-      tempGen.makeGenerator(this->GetOwnerSSAlgebra(), this->GetOwnerSSAlgebra().getGeneratorFromRoot(rootsInPlay[i]));
+      tempGen.makeGenerator(this->getOwnerSemisimpleAlgebra(), this->getOwnerSemisimpleAlgebra().getGeneratorFromRoot(rootsInPlay[i]));
       outputE.addMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
@@ -2506,20 +2506,20 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   MonomialP tempM;
   Rational tempRat;
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
-  RootSpacesThatNeedToBeKilled.setExpectedSize(this->GetOwnerWeyl().RootSystem.size);
+  RootSpacesThatNeedToBeKilled.setExpectedSize(this->getOwnerWeyl().RootSystem.size);
   outputSystemToBeSolved.size = 0;
   outputMatrixSystemToBeSolved.initialize(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
-    if (this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
+    if (this->getOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
       global.fatal << "The scalar product of the h element: " << targetH.toString()
       << " and the root in play " << rootsInPlay[i].toString() << " must be 2, but equals instead "
-      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).toString() << global.fatal;
+      << this->getOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).toString() << global.fatal;
     }
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
     for (int j = 0; j < rootsInPlay.size; j ++) {
       tempRoot = rootsInPlay[i] - rootsInPlay[j];
-      if (this->GetOwnerWeyl().IsARoot(tempRoot)) {
+      if (this->getOwnerWeyl().isARoot(tempRoot)) {
         int indexEquation = RootSpacesThatNeedToBeKilled.getIndex(tempRoot);
         if (indexEquation == - 1) {
           RootSpacesThatNeedToBeKilled.addOnTop(tempRoot);
@@ -2530,13 +2530,13 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
         tempM.makeOne();
         tempM.setVariable(i, 1);
         tempM.setVariable(j + halfNumberVariables, 1);
-        Rational tempCoeff = this->GetOwnerSSAlgebra().getConstant(rootsInPlay[i], - rootsInPlay[j]);
+        Rational tempCoeff = this->getOwnerSemisimpleAlgebra().getConstant(rootsInPlay[i], - rootsInPlay[j]);
         outputSystemToBeSolved[indexEquation].addMonomial(tempM, tempCoeff);
       }
     }
   }
   int oldSize = outputSystemToBeSolved.size;
-  outputSystemToBeSolved.setSize(oldSize + this->GetOwnerWeyl().cartanSymmetric.numberOfRows);
+  outputSystemToBeSolved.setSize(oldSize + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
   for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
     outputSystemToBeSolved[i].makeZero();
   }
@@ -2544,15 +2544,15 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
     if (rootsInPlay.size != halfNumberVariables) {
       global.fatal << "Roots in play must be half the number of variables. " << global.fatal;
     }
-    this->GetOwnerSSAlgebra().getConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
-    for (int j = 0; j < this->GetOwnerSSAlgebra().getRank(); j ++) {
+    this->getOwnerSemisimpleAlgebra().getConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
+    for (int j = 0; j < this->getOwnerSemisimpleAlgebra().getRank(); j ++) {
       tempM.makeOne();
       tempM.setVariable(i, 1);
       tempM.setVariable(i + halfNumberVariables, 1);
       outputSystemToBeSolved[j+oldSize].addMonomial(tempM, tempRoot[j]);
     }
   }
-  for (int i = 0; i < this->GetOwnerSSAlgebra().getRank(); i ++) {
+  for (int i = 0; i < this->getOwnerSemisimpleAlgebra().getRank(); i ++) {
     outputSystemToBeSolved[i + oldSize].addConstant(targetH[i] * (- 1));
   }
   outputMatrixSystemToBeSolved.initialize(outputSystemToBeSolved.size, halfNumberVariables);
@@ -2585,10 +2585,10 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   }
 }
 
-void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
+void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   SltwoSubalgebras& output, int indexRootSAinContainer
 ) {
-  MacroRegisterFunctionWithName("RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
+  MacroRegisterFunctionWithName("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1 - 10.4
   int theRelativeDimension = this->SimpleBasisK.size;
   if (theRelativeDimension == 0) {
@@ -2697,10 +2697,10 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
       }
     }
     theSl2.theH.makeCartanGenerator(characteristicH, theLieAlgebra);
-    theSl2.LengthHsquared = theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
+    theSl2.LengthHsquared = theSl2.getOwnerSemisimpleAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.makeZero();
     theSl2.theF.makeZero();
-    if (theSl2.AttemptExtendingHFtoHEFWRTSubalgebra(
+    if (theSl2.attemptExtendingHFtoHEFWRTSubalgebra(
       theSl2.RootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
       reflectedSimpleBasisK,
@@ -2712,8 +2712,8 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
       theSl2.theSystemColumnVector
     )) {
       int indexIsoSl2 = - 1;
-      theSl2.MakeReportPrecomputations(indexRootSAinContainer, *this);
-      if (output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2)) {
+      theSl2.makeReportPrecomputations(indexRootSAinContainer, *this);
+      if (output.containsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2)) {
         output.getElement(indexIsoSl2).IndicesContainingRootSAs.addOnTop(indexRootSAinContainer);
         output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].addOnTop(indexIsoSl2);
       } else {
@@ -2740,18 +2740,18 @@ void RootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
   }
 }
 
-void RootSubalgebras::ComputeAllReductiveRootSAsInit() {
-  this->GetOwnerWeyl().ComputeRho(true);
+void RootSubalgebras::computeAllReductiveRootSAsInit() {
+  this->getOwnerWeyl().ComputeRho(true);
   this->validScales.clear();
   this->validScales.setExpectedSize(this->owner->getRank() * 2);
   for (int i = 0; i < this->owner->getRank(); i ++) {
     this->validScales.addOnTopNoRepetition(2 / this->owner->theWeyl.cartanSymmetric(i, i));
   }
-  this->theWeylGroupAutomorphisms.theWeyl = &this->GetOwnerWeyl();
+  this->theWeylGroupAutomorphisms.theWeyl = &this->getOwnerWeyl();
 }
 
-void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
-  MacroRegisterFunctionWithName("RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder");
+void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
+  MacroRegisterFunctionWithName("RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder");
   Selection parSel;
   parSel.initialize(this->owner->getRank());
   Vectors<Rational> basis, currentBasis;
@@ -2787,14 +2787,14 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
         continue;
       }
       currentSA.genK = currentBasis;
-      currentSA.ComputeEssentialS();
+      currentSA.computeEssentials();
       if (currentBasis.size != 0) {
         if (currentSA.theDynkinType.toString() == "0") {
           global.fatal << "Subalgebra dynkin type computed to be zero while currentBasis is " << currentBasis.toString()
           << " and simple basis k is: " << currentSA.SimpleBasisK.toString() << global.fatal;
         }
       }
-      int theIndex = this->GetIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
+      int theIndex = this->getIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
       if (theIndex == - 1) {
         global.fatal << "Experimental code has failed an internal check on currentSA: " << currentSA.toString() << global.fatal;
       }
@@ -2824,18 +2824,18 @@ void RootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
   this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
 }
 
-void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
-  MacroRegisterFunctionWithName("RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism");
+void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
+  MacroRegisterFunctionWithName("RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism");
   this->initOwnerMustBeNonZero();
-  this->ComputeAllReductiveRootSAsInit();
+  this->computeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
   this->flagPrintGAPinput = this->owner->theWeyl.LoadGAPRootSystem(tempVs);
   ProgressReport theReport2;
   RootSubalgebra currentSA;
   currentSA.ownEr = this;
-  currentSA.ComputeEssentialsIfNew();
-  currentSA.ComputePotentialExtensions();
-  this->theSubalgebras.reserve(this->GetOwnerWeyl().RootsOfBorel.size);
+  currentSA.computeEssentialsIfNew();
+  currentSA.computePotentialExtensions();
+  this->theSubalgebras.reserve(this->getOwnerWeyl().RootsOfBorel.size);
   this->theSubalgebras.addOnTop(currentSA);
   std::string reportString;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
@@ -2868,14 +2868,14 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
       currentSA.SimpleBasisKinOrderOfGeneration = this->theSubalgebras[i].SimpleBasisKinOrderOfGeneration;
       currentSA.SimpleBasisKinOrderOfGeneration.addOnTop(this->theSubalgebras[i].LowestWeightsPrimalSimple[j]);
       currentSA.indexInducingSubalgebra = i;
-      if (!currentSA.ComputeEssentialsIfNew()) {
+      if (!currentSA.computeEssentialsIfNew()) {
         continue;
       }
       if (currentSA.SimpleBasisK.getRankOfSpanOfElements() != currentSA.SimpleBasisK.size) {
         global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
       }
       this->theSubalgebras.addOnTop(currentSA);
-      this->theSubalgebras.lastObject()->ComputePotentialExtensions();
+      this->theSubalgebras.lastObject()->computePotentialExtensions();
     }
   }
   std::stringstream reportStream;
@@ -2884,7 +2884,7 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
     << " subalgebras. Proceeding to sort the subalgebras...";
     theReport2.report(reportStream.str());
   }
-  this->SortDescendingOrderBySSRank();
+  this->sortDescendingOrderBySSRank();
   if (theReport2.tickAndWantReport()) {
     reportStream << "done. ";
     theReport2.report(reportStream.str());
@@ -2894,7 +2894,7 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
       reportStream << "Proceeding to compute the module pairing tables ... ";
       theReport2.report(reportStream.str());
     }
-    this->ComputeKmodMultTables();
+    this->computeKmodMultTables();
     if (theReport2.tickAndWantReport()) {
       reportStream << " done. ";
       theReport2.report(reportStream.str());
@@ -2905,7 +2905,7 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
       reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";
       theReport2.report(reportStream.str());
     }
-    this->ComputeParabolicPseudoParabolicNeitherOrder();
+    this->computeParabolicPseudoParabolicNeitherOrder();
     if (theReport2.tickAndWantReport()) {
       reportStream << " done. ";
       theReport2.report(reportStream.str());
@@ -2913,14 +2913,14 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
   }
 }
 
-void RootSubalgebras::ComputeAllRootSubalgebrasUpToIso(int StartingIndex, int NumToBeProcessed) {
+void RootSubalgebras::computeAllRootSubalgebrasUpToIsomorphism(int StartingIndex, int NumToBeProcessed) {
   static PauseThread localController;
   this->NumSubalgebrasProcessed = 0;
   this->NumConeConditionFailures = 0;
   this->NumSubalgebrasCounted = 0;
   for (int i = StartingIndex; i < NumToBeProcessed + StartingIndex; i ++) {
     this->theSubalgebras[i].flagComputeConeCondition = this->flagComputeConeCondition;
-    this->theSubalgebras[i].GeneratePossibleNilradicals(
+    this->theSubalgebras[i].generatePossibleNilradicals(
       localController,
       this->ImpiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
@@ -2929,14 +2929,14 @@ void RootSubalgebras::ComputeAllRootSubalgebrasUpToIso(int StartingIndex, int Nu
       i
     );
     if (i != NumToBeProcessed+StartingIndex - 1) {
-      this->theSubalgebras[i + 1].GeneratePossibleNilradicalsInit(
+      this->theSubalgebras[i + 1].generatePossibleNilradicalsInit(
         this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
       );
     }
   }
 }
 
-WeylGroupData& RootSubalgebras::GetOwnerWeyl() const {
+WeylGroupData& RootSubalgebras::getOwnerWeyl() const {
   return this->GetOwnerSSalgebra().theWeyl;
 }
 
@@ -2945,7 +2945,7 @@ SemisimpleLieAlgebra& RootSubalgebras::GetOwnerSSalgebra() const {
   return *this->owner;
 }
 
-void RootSubalgebras::ComputeLProhibitingRelations() {
+void RootSubalgebras::computeLProhibitingRelations() {
   static PauseThread localController;
   if (this->flagStoringNilradicals) {
     this->storedNilradicals.setSize(this->theSubalgebras.size);
@@ -2955,7 +2955,7 @@ void RootSubalgebras::ComputeLProhibitingRelations() {
     this->IndexCurrentSANilradicalsGeneration ++
   ) {
     this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition = this->flagComputeConeCondition;
-    this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(
+    this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].generatePossibleNilradicals(
       localController,
       this->ImpiedSelectionsNilradical,
       this->parabolicsCounterNilradicalGeneration,
@@ -2964,15 +2964,15 @@ void RootSubalgebras::ComputeLProhibitingRelations() {
       this->IndexCurrentSANilradicalsGeneration
     );
     if (this->IndexCurrentSANilradicalsGeneration != this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration - 1) {
-      this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration + 1].GeneratePossibleNilradicalsInit(
+      this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration + 1].generatePossibleNilradicalsInit(
         this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
       );
     }
   }
 }
 
-void RootSubalgebras::SortDescendingOrderBySSRank() {
-  MacroRegisterFunctionWithName("RootSubalgebras::SortDescendingOrderBySSRank");
+void RootSubalgebras::sortDescendingOrderBySSRank() {
+  MacroRegisterFunctionWithName("RootSubalgebras::sortDescendingOrderBySSRank");
   //Bubble sort
   RootSubalgebras output;
   List<int> SortingArray;
@@ -3031,7 +3031,7 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   output << "<meta name = \"keywords\" content = \""
   << this->theSubalgebras[0].theDynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
-  if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent()) {
+  if (this->getOwnerWeyl().theDynkinType.HasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
@@ -3042,7 +3042,7 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   << this->owner->toStringHTMLMenuStructureSummary("", true, false, true, true)
   << this->toString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
-  << this->ToStringDynkinTableFormat2LaTeX(theFormat)
+  << this->toStringDynkinTableFormatToLaTeX(theFormat)
   << "</body></html>";
   output.close();
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
@@ -3051,10 +3051,10 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
 }
 
 std::string RootSubalgebras::toString(FormatExpressions* theFormat) {
-  return this->ToStringDynkinTableHTML(theFormat);
+  return this->toStringDynkinTableHTML(theFormat);
 }
 
-void RootSubalgebras::ElementToStringCentralizerIsomorphisms(
+void RootSubalgebras::toStringCentralizerIsomorphisms(
   std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess
 ) {
   std::stringstream out;
@@ -3062,7 +3062,7 @@ void RootSubalgebras::ElementToStringCentralizerIsomorphisms(
   //W'' stands for the graph isomorphisms of C(k_ss) extending to Vector<Rational>
   //system isomorphisms of the entire algebra.
   for (int i = fromIndex; i < NumToProcess; i ++) {
-    this->GenerateKintersectBOuterIsos(this->theSubalgebras[i]);
+    this->generateKintersectBOuterIsos(this->theSubalgebras[i]);
   }
   if (useLatex) {
     out << "\\begin{tabular}{ccccc}"
@@ -3129,7 +3129,7 @@ void RootSubalgebras::ElementToStringCentralizerIsomorphisms(
   output = out.str();
 }
 
-std::string RootSubalgebras::ToStringAlgebraLink(int index) {
+std::string RootSubalgebras::toStringAlgebraLink(int index) {
   std::stringstream out;
   out << "<a href = \"rootSubalgebra_" << index + 1 << ".html\">"
   << this->theSubalgebras[index].theDynkinDiagram.toString() << "</a>";
@@ -3154,7 +3154,7 @@ Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::GetRootIMustBeWeight(
   return this->getOwner()->getWeightOfGenerator((*this)[0].theGeneratorIndex);
 }
 
-std::string RootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theFormat) {
+std::string RootSubalgebras::toStringDynkinTableHTML(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("RootSubalgebras::ToStringDynkinTable");
   (void) theFormat;//taking care of unused parameter in a portable way.
   std::stringstream out;
@@ -3181,7 +3181,7 @@ std::string RootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
       out << "<tr>";
     }
     out << "<td style = \"vertical-align: text-top;\" title =\"" << tooltipSAs << "\">";
-    out << "\n\nType k_{ss}: " << this->ToStringAlgebraLink(i);
+    out << "\n\nType k_{ss}: " << this->toStringAlgebraLink(i);
     out << "<br>";
     if (i == 0) {
       out << "<b>(Full subalgebra)</b>";
@@ -3271,8 +3271,8 @@ std::string RootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   return out.str();
 }
 
-std::string RootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("RootSubalgebras::ToStringDynkinTableFormat2LaTeX");
+std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("RootSubalgebras::toStringDynkinTableFormatToLaTeX");
   std::stringstream out;
   std::string endline = "\n<br>";
   if (theFormat != nullptr) {
@@ -3307,9 +3307,9 @@ std::string RootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   return out.str();
 }
 
-void RootSubalgebras::ComputeKmodMultTables() {
+void RootSubalgebras::computeKmodMultTables() {
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
-    this->theSubalgebras[i].GenerateKmodMultTable(
+    this->theSubalgebras[i].generateKModuleLieBracketTable(
       this->theSubalgebras[i].theMultTable, this->theSubalgebras[i].theOppositeKmods
     );
   }
@@ -3329,11 +3329,11 @@ void RootSubalgebras::initOwnerMustBeNonZero() {
   this->owner->theWeyl.ComputeRho(false);
 }
 
-int RootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA) {
-  MacroRegisterFunctionWithName("RootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions");
+int RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions(const RootSubalgebra& theSA) {
+  MacroRegisterFunctionWithName("RootSubalgebras::getIndexUpToEquivalenceByDiagramsAndDimensions");
   int result = - 1;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
-    if (this->theSubalgebras[i].IsEquivalentToByDiagramsAndDimensions(theSA)) {
+    if (this->theSubalgebras[i].isEquivalentToByDiagramsAndDimensions(theSA)) {
       if (result != - 1) {
         global.fatal << "Programming error: experimental code internal check failed. " << global.fatal;
       }
@@ -3343,8 +3343,8 @@ int RootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const RootSu
   return result;
 }
 
-int RootSubalgebras::GetIndexSubalgebraIsomorphicTo(RootSubalgebra& input) {
-  MacroRegisterFunctionWithName("RootSubalgebras::GetIndexSubalgebraIsomorphicTo");
+int RootSubalgebras::getindexSubalgebraIsomorphicTo(RootSubalgebra& input) {
+  MacroRegisterFunctionWithName("RootSubalgebras::getindexSubalgebraIsomorphicTo");
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
     if (input.SimpleBasisK == this->theSubalgebras[i].SimpleBasisK) {
       return i;
@@ -3353,13 +3353,13 @@ int RootSubalgebras::GetIndexSubalgebraIsomorphicTo(RootSubalgebra& input) {
   return - 1;
 }
 
-void RootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
+void RootSubalgebras::computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
   List<RootSubalgebra>& bufferSAs, int RecursionDepth
 ) {
   this->theSubalgebras.addOnTop(bufferSAs[RecursionDepth - 1]);
   int currentAlgebraIndex = this->theSubalgebras.size - 1;
   if (RecursionDepth >= bufferSAs.size) {
-    bufferSAs.setSize(bufferSAs.size + this->GetOwnerWeyl().cartanSymmetric.numberOfRows);
+    bufferSAs.setSize(bufferSAs.size + this->getOwnerWeyl().cartanSymmetric.numberOfRows);
   }
   bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth - 1].genK;
   bufferSAs[RecursionDepth].ownEr = this;
@@ -3367,18 +3367,18 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomo
   for (int k = 0; k < bufferSAs[RecursionDepth - 1].Modules.size; k ++) {
     if (bufferSAs[RecursionDepth - 1].HighestWeightsPrimalSimple[k].isPositive()) {
       bufferSAs[RecursionDepth].genK.addOnTop(bufferSAs[RecursionDepth - 1].HighestWeightsPrimalSimple[k]);
-      bufferSAs[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
+      bufferSAs[RecursionDepth].computeDynkinDiagramKAndCentralizer();
       std::stringstream out;
       out << "Included root " << k + 1 << " out of " << bufferSAs[RecursionDepth - 1].Modules.size
       << " Total found SAs: " << this->theSubalgebras.size;
       theReport.report(out.str());
-      int indexSA = this->IndexSubalgebra(bufferSAs[RecursionDepth]);
+      int indexSA = this->indexSubalgebra(bufferSAs[RecursionDepth]);
       if (indexSA == - 1) {
-        bufferSAs[RecursionDepth].ComputeEssentialS();
+        bufferSAs[RecursionDepth].computeEssentials();
         this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.addOnTopNoRepetition(
           this->theSubalgebras.size
         );
-        this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSAs, RecursionDepth + 1);
+        this->computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSAs, RecursionDepth + 1);
       } else {
         this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.addOnTopNoRepetition(indexSA);
       }
@@ -3387,7 +3387,7 @@ void RootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomo
   }
 }
 
-void RootSubalgebras::MakeProgressReportAutomorphisms(
+void RootSubalgebras::makeProgressReportAutomorphisms(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &theSubgroup, RootSubalgebra& theRootSA
 ) {
   std::stringstream out4, out1;
@@ -3402,23 +3402,23 @@ void RootSubalgebras::MakeProgressReportAutomorphisms(
   theReport.report(out1.str() + out4.str());
 }
 
-void RootSubalgebras::GenerateActionKintersectBIsos(RootSubalgebra& theRootSA) {
+void RootSubalgebras::generateActionKintersectBIsos(RootSubalgebra& theRootSA) {
   Selection emptySel;
   emptySel.initialize(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA);
+  this->computeNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA);
 }
 
-void RootSubalgebras::GenerateKintersectBOuterIsos(RootSubalgebra& theRootSA) {
+void RootSubalgebras::generateKintersectBOuterIsos(RootSubalgebra& theRootSA) {
   Selection fullSel;
   fullSel.initialize(theRootSA.SimpleBasisCentralizerRoots.size);
   fullSel.incrementSelectionFixedCardinality(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(fullSel, theRootSA);
+  this->computeNormalizerOfCentralizerIntersectNilradical(fullSel, theRootSA);
 }
 
-void RootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
+void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
   Selection& SelectedBasisRoots, RootSubalgebra& theRootSA
 ) {
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA);
+  this->computeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theSubgroup = this->CentralizerIsomorphisms.lastObject();
   this->ActionsNormalizerCentralizerNilradical.setSize(theSubgroup.allElements.size - 1);
   Vector<Rational> tempRoot;
@@ -3428,7 +3428,7 @@ void RootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
     for (int j = 0; j < theRootSA.Modules.size; j ++) {
       tempRoot = theRootSA.HighestWeightsPrimalSimple[j];
       theSubgroup.ActByNonSimpleElement(i + 1, tempRoot);
-      int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
+      int tempI = theRootSA.getIndexKModuleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
     if (global.theResponse.monitoringAllowed()) {
@@ -3439,7 +3439,7 @@ void RootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
   }
 }
 
-void RootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(
+void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   Selection& SelectedBasisRoots, RootSubalgebra& theRootSA
 ) {
   Vectors<Rational> selectedRootsBasisCentralizer;
@@ -3456,15 +3456,15 @@ void RootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(
   this->CentralizerOuterIsomorphisms.setSize(this->CentralizerIsomorphisms.size);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->CentralizerIsomorphisms.lastObject();
   outputSubgroup.AmbientWeyl = &theRootSA.getAmbientWeyl();
-  this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA);
-  theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
+  this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
+  theRootSA.generateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
   outputSubgroup.ComputeSubGroupFromGeneratingReflections(
     &selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, this->UpperLimitNumElementsWeyl, false
   );
   outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
   this->CentralizerOuterIsomorphisms.lastObject().ExternalAutomorphisms = outputSubgroup.ExternalAutomorphisms;
-  this->CentralizerOuterIsomorphisms.lastObject().AmbientWeyl = &this->GetOwnerWeyl();
-  this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA);
+  this->CentralizerOuterIsomorphisms.lastObject().AmbientWeyl = &this->getOwnerWeyl();
+  this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
 }
 
 RootSubalgebras::RootSubalgebras() {
@@ -3496,39 +3496,39 @@ void RootSubalgebras::initForNilradicalGeneration() {
   this->ReportStringNonNilradicalParabolic = "";
   this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration = this->theSubalgebras.size - 1;
   if (this->theSubalgebras.size > 0) {
-    this->theSubalgebras[0].GeneratePossibleNilradicalsInit(
+    this->theSubalgebras[0].generatePossibleNilradicalsInit(
       this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration
     );
-    this->NumConeConditionHoldsBySSpart.initializeFillInObject(this->theSubalgebras.size, 0);
+    this->NumconeConditionHoldsBySSpart.initializeFillInObject(this->theSubalgebras.size, 0);
   }
 }
 
-bool RootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel) {
+bool RootSubalgebras::approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel) {
   if (!this->flagUsingActionsNormalizerCentralizerNilradical) {
     return true;
   }
   for (int i = 0; i < this->ActionsNormalizerCentralizerNilradical.size; i ++) {
-    if (!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
+    if (!this->approveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
       return false;
     }
   }
   return true;
 }
 
-void RootSubalgebras::RaiseSelectionUntilApproval(Selection& targetSel) {
+void RootSubalgebras::raiseSelectionUntilApproval(Selection& targetSel) {
   bool raised = true;
   while (raised) {
     raised = false;
     for (int i = 0; i < this->ActionsNormalizerCentralizerNilradical.size; i ++) {
-      if (!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
-        this->ApplyOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel);
+      if (!this->approveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel)) {
+        this->applyOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel);
         raised = true;
       }
     }
   }
 }
 
-void RootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm) {
+void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm) {
   Vectors<Rational> tempRoots, tempRoots2;
   std::stringstream out;
   std::stringstream out2;
@@ -3536,8 +3536,8 @@ void RootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   int numNonSolvableNonReductive = 0;
   char simpleType;
   int theRank;
-  if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank)) {
-    global.fatal << "This is a programming error: ElementToStringConeConditionNotSatisfying "
+  if (!this->getOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank)) {
+    global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
@@ -3558,10 +3558,10 @@ void RootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   if (!includeMatrixForm) {
     out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
     if (simpleType == 'B') {
-      out << " $ \\mathfrak{g}\\simeq \\mathrm{so(" << this->GetOwnerWeyl().cartanSymmetric.numberOfRows * 2 + 1 << ")}$";
+      out << " $ \\mathfrak{g}\\simeq \\mathrm{so(" << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 + 1 << ")}$";
     }
     if (simpleType == 'C') {
-      out << " $\\mathfrak{g}\\simeq \\mathrm{sp(" << this->GetOwnerWeyl().cartanSymmetric.numberOfRows * 2 << ")}$";
+      out << " $\\mathfrak{g}\\simeq \\mathrm{sp(" << this->getOwnerWeyl().cartanSymmetric.numberOfRows * 2 << ")}$";
     }
     out << "} \\\\\\hline";
   }
@@ -3601,7 +3601,7 @@ void RootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
           for (int k = 0; k < currentNilrad.size; k ++) {
             tempRoots.addListOnTop(currentRootSA.WeightsModulesPrimalSimple[currentNilrad[k]]);
           }
-          this->ElementToStringRootSpaces(tempS, includeMatrixForm, tempRoots);
+          this->toStringRootSpaces(tempS, includeMatrixForm, tempRoots);
           out << tempS << "\n";
           if (numNonReductiveCurrent % 2 == 0) {
             out << "\n\n";
@@ -3627,18 +3627,18 @@ void RootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   output = out2.str();
 }
 
-void RootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input) {
+void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input) {
   std::string tempS; std::stringstream out;
   Vectors<Rational> epsCoords;
   Matrix<int> tempMat;
   char simpleType;
   int theDimension;
-  if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension)) {
-    global.fatal << "This is a programming error: ElementToStringConeConditionNotSatisfying "
+  if (!this->getOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension)) {
+    global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
-    this->GetOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
+    this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension * 2 + 1, 1, 0);
     tempMat.elements[theDimension][theDimension] = 0;
     for (int i = 0; i < epsCoords.size; i ++) {
@@ -3702,7 +3702,7 @@ void RootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     }
   }
   if (simpleType == 'C') {
-    this->GetOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
+    this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension * 2, 1, 0);
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isLong= false;
@@ -3815,7 +3815,7 @@ void RootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   output = out.str();
 }
 
-void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetSel) {
+void RootSubalgebras::applyOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
   tempSel.initialize(targetSel.MaxSize);
   for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
@@ -3824,7 +3824,7 @@ void RootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetS
   targetSel = tempSel;
 }
 
-bool RootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
+bool RootSubalgebras::approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
   tempSel.initialize(targetSel.MaxSize);
   for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
@@ -3841,18 +3841,18 @@ bool RootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
   return true;
 }
 
-int RootSubalgebras::IndexSubalgebra(RootSubalgebra& input) {
+int RootSubalgebras::indexSubalgebra(RootSubalgebra& input) {
   for (int j = 0; j < this->theSubalgebras.size; j ++) {
     RootSubalgebra& right = this->theSubalgebras[j];
     if (
       input.theDynkinDiagram.toString() == right.theDynkinDiagram.toString() &&
       input.theCentralizerDiagram.toString() == right.theCentralizerDiagram.toString()
     ) {
-      if (!this->GetOwnerWeyl().isOfSimpleType('E', 7)) {
+      if (!this->getOwnerWeyl().isOfSimpleType('E', 7)) {
         return j;
       } else {
-        input.ComputeEssentialS();
-        if (input.GenerateIsomorphismsPreservingBorel(right, nullptr)) {
+        input.computeEssentials();
+        if (input.generateIsomorphismsPreservingBorel(right, nullptr)) {
           return j;
         }
       }
@@ -3861,12 +3861,12 @@ int RootSubalgebras::IndexSubalgebra(RootSubalgebra& input) {
   return - 1;
 }
 
-bool RootSubalgebras::IsANewSubalgebra(RootSubalgebra& input) {
-  return this->IndexSubalgebra(input) == - 1;
+bool RootSubalgebras::isNewSubalgebra(RootSubalgebra& input) {
+  return this->indexSubalgebra(input) == - 1;
 }
 
-void RootSubalgebra::ComputeRootsOfK() {
-  MacroRegisterFunctionWithName("RootSubalgebra::ComputeRootsOfK");
+void RootSubalgebra::computeRootsOfK() {
+  MacroRegisterFunctionWithName("RootSubalgebra::computeRootsOfK");
   this->AllRootsK.clear();
   HashedList<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().RootSystem;
   this->AllRootsK.setExpectedSize(ambientRootSystem.size);
@@ -3921,7 +3921,7 @@ void ConeRelation::RelationOneSideToStringCoordForm(
   output = out.str();
 }
 
-void ConeRelation::RelationOneSideToString(
+void ConeRelation::relationOneSideToString(
   std::string& output,
   const std::string& letterType,
   List<Rational>& coeffs,
@@ -4015,13 +4015,13 @@ int ConeRelation::toString(
     global.fatal << "Number of coefficients is wrong. " << global.fatal;
   }
   int LatexLineCounter = 0;
-  this->ComputeConnectedComponents(
+  this->computeConnectedComponents(
     this->Alphas, owners.theSubalgebras[this->IndexOwnerRootSubalgebra],  this->AlphaKComponents
   );
-  this->ComputeConnectedComponents(
+  this->computeConnectedComponents(
     this->Betas, owners.theSubalgebras[this->IndexOwnerRootSubalgebra], this->BetaKComponents
   );
-  this->RelationOneSideToString(
+  this->relationOneSideToString(
     tempS,
     "\\alpha",
     this->AlphaCoeffs,
@@ -4038,7 +4038,7 @@ int ConeRelation::toString(
   if (useLatex) {
     out << " \\\\~ \\end{tabular} & ";
   }
-  this->RelationOneSideToString(
+  this->relationOneSideToString(
     tempS,
     "\\beta",
     this->BetaCoeffs,
@@ -4060,17 +4060,17 @@ int ConeRelation::toString(
   out << tempS;
   if (includeScalarsProductsEachSide) {
     out << " & ";
-    LatexLineCounter += this->RootsToScalarProductString(
+    LatexLineCounter += this->rootsToScalarProductString(
       this->Alphas, this->Alphas, "\\alpha", "\\alpha", tempS, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]
     );
     out << tempS;
-    LatexLineCounter += this->RootsToScalarProductString(
+    LatexLineCounter += this->rootsToScalarProductString(
       this->Betas, this->Betas, "\\beta", "\\beta", tempS, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]
     );
     out << " " << tempS;
   }
   if (includeMixedScalarProducts) {
-    LatexLineCounter += this->RootsToScalarProductString(
+    LatexLineCounter += this->rootsToScalarProductString(
       this->Alphas, this->Betas, "\\alpha", "\\beta", tempS, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]
     );
     out << tempS;
@@ -4080,7 +4080,7 @@ int ConeRelation::toString(
   return MathRoutines::maximum(2, LatexLineCounter);
 }
 
-int ConeRelation::RootsToScalarProductString(
+int ConeRelation::rootsToScalarProductString(
   Vectors<Rational>& inputLeft,
   Vectors<Rational>& inputRight,
   const std::string& letterTypeLeft,
@@ -4108,7 +4108,7 @@ int ConeRelation::RootsToScalarProductString(
   return numLinesLatex;
 }
 
-void ConeRelation::ComputeConnectedComponents(Vectors<Rational>& input, RootSubalgebra& owner, List<List<int> >& output) {
+void ConeRelation::computeConnectedComponents(Vectors<Rational>& input, RootSubalgebra& owner, List<List<int> >& output) {
   output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
@@ -4147,32 +4147,32 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
     if (
       !owner.NilradicalKmods.selected[i] &&
       tempRoots.contains(owner.HighestWeightsPrimalSimple[i]) &&
-      owner.IsGeneratingSingularVectors(i, NilradicalIntersection)
+      owner.isGeneratingSingularVectors(i, NilradicalIntersection)
     ) {
       genSingHW.addOnTop(owner.HighestWeightsPrimalSimple[i]);
     }
   }
-  if (owner.ConeConditionHolds(owners, indexInOwner, NilradicalIntersection, genSingHW, false)) {
+  if (owner.coneConditionHolds(owners, indexInOwner, NilradicalIntersection, genSingHW, false)) {
     return false;
   }
-  if (!owner.AttemptTheTripleTrickWRTSubalgebra(*this, genSingHW, NilradicalIntersection)) {
+  if (!owner.attemptTheTripleTrickWRTSubalgebra(*this, genSingHW, NilradicalIntersection)) {
     return false;
   }
-  this->SortRelation(owner);
-  this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
-  this->ComputeDiagramRelAndK(owner);
+  this->sortRelation(owner);
+  this->fixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
+  this->computeDiagramRelationsAndK(owner);
   return true;
 }
 
-void ConeRelation::ComputeTheDiagramAndDiagramRelAndK(RootSubalgebra& owner) {
+void ConeRelation::computeDiagramAndDiagramRelationsAndK(RootSubalgebra& owner) {
   Vectors<Rational> tempRoots;
   tempRoots = this->Alphas;
   tempRoots.addListOnTop(this->Betas);
   this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
-  this->ComputeDiagramRelAndK(owner);
+  this->computeDiagramRelationsAndK(owner);
 }
 
-void ConeRelation::MakeLookCivilized(RootSubalgebra& owner) {
+void ConeRelation::makeLookCivilized(RootSubalgebra& owner) {
   if (this->Alphas.size == 0 || this->Betas.size == 0) {
     return;
   }
@@ -4184,12 +4184,12 @@ void ConeRelation::MakeLookCivilized(RootSubalgebra& owner) {
     this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' &&
     this->theDiagram.SimpleComponentTypes[0].theRank == 1
   ) {
-    this->ComputeDiagramRelAndK(owner);
+    this->computeDiagramRelationsAndK(owner);
     global.fatal << "Failed to compute diagram relation and k. " << global.fatal;
   }
-  this->SortRelation(owner);
-  this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
-  this->ComputeDiagramRelAndK(owner);
+  this->sortRelation(owner);
+  this->fixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
+  this->computeDiagramRelationsAndK(owner);
 }
 
 void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots) {
@@ -4223,7 +4223,7 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
   }
 }
 
-bool ConeRelation::CheckForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots) {
+bool ConeRelation::checkForBugs(RootSubalgebra& owner, Vectors<Rational>& NilradicalRoots) {
   for (int i = 0; i < this->Alphas.size; i ++) {
     int tempI = owner.HighestWeightsPrimalSimple.getIndex(this->Alphas[i]);
     if (tempI == - 1) {
@@ -4241,7 +4241,7 @@ bool ConeRelation::CheckForBugs(RootSubalgebra& owner, Vectors<Rational>& Nilrad
   return true;
 }
 
-void ConeRelation::GetSumAlphas(Vector<Rational>& output, int theDimension) {
+void ConeRelation::getSumAlphas(Vector<Rational>& output, int theDimension) {
   if (this->AlphaCoeffs.size != this->Alphas.size) {
     global.fatal << "Wrong number of alpha coefficients" << global.fatal;
   }
@@ -4254,7 +4254,7 @@ void ConeRelation::GetSumAlphas(Vector<Rational>& output, int theDimension) {
   }
 }
 
-void ConeRelation::SortRelation(RootSubalgebra& owner) {
+void ConeRelation::sortRelation(RootSubalgebra& owner) {
   this->ComputeKComponents(this->Alphas, this->AlphaKComponents, owner);
   this->ComputeKComponents(this->Betas, this->BetaKComponents, owner);
   //bubble sort
@@ -4294,7 +4294,7 @@ void ConeRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >
   }
 }
 
-void ConeRelation::ComputeDiagramRelAndK(RootSubalgebra& owner) {
+void ConeRelation::computeDiagramRelationsAndK(RootSubalgebra& owner) {
   Vectors<Rational> tempRoots;
   tempRoots.size = 0;
   tempRoots.reserve(owner.getAmbientWeyl().cartanSymmetric.numberOfRows * 2);
@@ -4305,7 +4305,7 @@ void ConeRelation::ComputeDiagramRelAndK(RootSubalgebra& owner) {
   this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
 }
 
-void ConeRelation::FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs) {
+void ConeRelation::fixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs) {
   for (int i = 0; i < theRoots.size; i ++) {
     if (coeffs[i].isEqualToZero()) {
       coeffs.removeIndexSwapWithLast(i);
@@ -4341,25 +4341,16 @@ bool ConeRelation::leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>
   return true;
 }
 
-bool ConeRelation::GenerateAutomorphisms(ConeRelation& right) {
-  /*if (this->DebugString.length() !=right.DebugString.length())
-    return false;
-  for (unsigned int i = 0; i < this->DebugString.length(); i ++) {
-     if (this->DebugString[i] !=right.DebugString[i])
-      return false;
-  }*/
-  if (this->DebugString != right.DebugString) {
-    return false;
-  }
-  return true;
+bool ConeRelation::generateAutomorphisms(ConeRelation& right) {
+  return this->relationString == right.relationString;
 }
 
-void ConeRelations::AddRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners) {
-  input.ComputeDebugString(owners, true, true);
+void ConeRelations::addRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners) {
+  input.computeRelationString(owners, true, true);
   int i = static_cast<signed>(this->getHash(input));
   List<int>& theIndices = this->theHashedArrays[i];
   for (int j = 0; j < theIndices.size; j ++) {
-    if (this->theObjects[theIndices[j]].GenerateAutomorphisms(input)) {
+    if (this->theObjects[theIndices[j]].generateAutomorphisms(input)) {
       return;
     }
   }
@@ -4369,11 +4360,9 @@ void ConeRelations::AddRelationNoRepetition(ConeRelation& input, RootSubalgebras
     }
   }
   this->addOnTop(input);
-  if (this->flagIncludeCoordinateRepresentation) {
-  }
 }
 
-void ConeRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter) {
+void ConeRelations::getLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter) {
   outputHeader.clear();
   outputFooter.clear();
   outputHeader.append("\\begin{tabular}{rcl p{1cm}p{1cm}p{3cm} } \\multicolumn{3}{c}");
@@ -4387,7 +4376,7 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
   std::stringstream out;
   std::string tempS, header, footer;
   Vectors<Rational> tempAlphas, tempBetas;
-  this->GetLatexHeaderAndFooter(header, footer);
+  this->getLatexHeaderAndFooter(header, footer);
   if (useLatex) {
     out << header;
   }

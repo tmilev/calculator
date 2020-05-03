@@ -5790,7 +5790,7 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output) const {
   output(n - 1, n - 1) = 1;
 }
 
-Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char inputType) {
+Rational DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra(char inputType) {
   switch (inputType) {
     case 'A':
     case 'B':
@@ -5803,7 +5803,7 @@ Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char in
     case 'C':
       return 2;
     default:
-      global.fatal << "DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra called with input "
+      global.fatal << "DynkinSimpleType::getDynkinIndexParabolicallyInducingSubalgebra called with input "
       << inputType << ", this is not allowed. " << global.fatal;
       return - 1;
   }
@@ -5815,7 +5815,7 @@ bool DynkinSimpleType::canBeExtendedParabolicallyTo(const DynkinSimpleType& othe
     return false;
   }
   if (
-    this->CartanSymmetricInverseScale / this->GetDynkinIndexParabolicallyInducingSubalgebra(other.theLetter) !=
+    this->CartanSymmetricInverseScale / this->getDynkinIndexParabolicallyInducingSubalgebra(other.theLetter) !=
     other.CartanSymmetricInverseScale
   ) {
     return false;
@@ -6689,7 +6689,7 @@ void WeylGroupData::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vec
   for (int i = 0; i < output.size; i ++) {
     for (int j = i + 1; j < output.size; j ++) {
       tempRoot = output[i] + output[j];
-      if (this->IsARoot(tempRoot)) {
+      if (this->isARoot(tempRoot)) {
         output.addOnTopNoRepetition(tempRoot);
       }
     }
@@ -7394,8 +7394,8 @@ void WeylGroupData::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix
   output.transpose();
 }
 
-void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
-  MacroRegisterFunctionWithName("WeylGroup::GetCoxeterPlane");
+void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
+  MacroRegisterFunctionWithName("WeylGroup::getCoxeterPlane");
   this->ComputeRho(true);
   Vector<Rational> ZeroRoot;
   int theDimension = this->getDimension();
@@ -7404,7 +7404,7 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   }
   ZeroRoot.makeZero(theDimension);
   ElementWeylGroup tempElt;
-  this->GetCoxeterElement(tempElt);
+  this->getCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt, tempMat;
   this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   tempMat = matCoxeterElt;
@@ -7495,7 +7495,7 @@ void WeylGroupData::drawRootSystem(
   Vector<double> tempRoot;
   Vectors<double>& theTwoPlane = output.BasisProjectionPlane;
   if (predefinedProjectionPlane == nullptr) {
-    this->GetCoxeterPlane(theTwoPlane[0], theTwoPlane[1]);
+    this->getCoxeterPlane(theTwoPlane[0], theTwoPlane[1]);
   } else {
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
   }
@@ -7650,7 +7650,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
 
 bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input) {
   ElementWeylGroup tempElt;
-  this->GetCoxeterElement(tempElt);
+  this->getCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt;
   this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   Vector<Rational> tempRoot = input;
@@ -7683,7 +7683,7 @@ bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
 
 bool WeylGroupData::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
   for (int i = 0; i < this->theGroup.theElements.size; i ++) {
-    if (this->IsARoot(theVectors[i] + input)) {
+    if (this->isARoot(theVectors[i] + input)) {
       return true;
     }
   }

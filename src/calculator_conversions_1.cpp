@@ -662,7 +662,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.theSubalgebras.clear();
   theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
-  theSAs.flagComputeModuleDecomposition = true;
+  theSAs.flagcomputeModuleDecompositionsition = true;
   theSAs.flagcomputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theReport.report("Got to here pt 3");

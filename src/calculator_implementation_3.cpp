@@ -293,7 +293,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   }
   Vectors<double> coxPlane;
   coxPlane.setSize(2);
-  this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
+  this->owner->getCoxeterPlane(coxPlane[0], coxPlane[1]);
   DrawingVariables animated, collapsed;
   this->owner->drawRootSystem(animated, true, true);
   this->owner->drawRootSystem(collapsed, true, true);

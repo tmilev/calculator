@@ -5779,7 +5779,7 @@ class DynkinSimpleType {
   Rational GetLongRootLengthSquared() const;
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex) const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
-  static Rational GetDynkinIndexParabolicallyInducingSubalgebra(char inputType);
+  static Rational getDynkinIndexParabolicallyInducingSubalgebra(char inputType);
   bool canBeExtendedParabolicallyTo(const DynkinSimpleType& otherType) const;
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinSimpleType& otherType) const {
     if (*this == otherType) {

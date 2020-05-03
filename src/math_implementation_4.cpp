@@ -1349,7 +1349,7 @@ void WeylGroupData::generateRootSubsystem(Vectors<Rational>& theRoots) {
   for (int i = 0; i < theRoots.size; i ++) {
     for (int j = 0; j < theRoots.size; j ++) {
       tempRoot = theRoots[i] + theRoots[j];
-      if (this->IsARoot(tempRoot)) {
+      if (this->isARoot(tempRoot)) {
         theRoots.addOnTopNoRepetition(tempRoot);
       }
     }

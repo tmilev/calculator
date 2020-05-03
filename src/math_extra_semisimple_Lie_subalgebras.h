@@ -157,7 +157,7 @@ public:
   int NumConeIntersections;
   int NumCasesNoLinfiniteRelationFound;
   int NumBadParabolics;
-  int NumCentralizerConditionFailsConeConditionHolds;
+  int NumCentralizerConditionFailsconeConditionHolds;
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > HighestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;
@@ -387,7 +387,7 @@ public:
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;
-  bool flagComputeModuleDecomposition;
+  bool flagcomputeModuleDecompositionsition;
   bool flagComputeNilradicals;
   bool flagProduceLaTeXtables;
   bool flagAttemptToAdjustCentralizers;
@@ -411,28 +411,28 @@ public:
     List<int>& numExploredHs,
     std::stringstream& reportStream
   );
-  int getDisplayIndexFromActual(int actualIndexSubalgebra) const;
+  int getDisplayIndexFromActual(int actualindexSubalgebra) const;
   std::string toStringSubalgebraNumberWithAmbientLink(
-    int actualIndexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
   void computeFolderNames(FormatExpressions& outputFormat);
   void CheckFileWritePermissions();
   void writeReportToFiles();
-  std::string ToStringAlgebraLink(
-    int actualIndexSubalgebra, FormatExpressions* theFormat
+  std::string toStringAlgebraLink(
+    int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
-  std::string getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra) const;
+  std::string getRelativePhysicalFileNameSubalgebra(int actualindexSubalgebra) const;
   std::string getDisplayFileNameSubalgebraRelative(
-    int actualIndexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
   std::string getDisplayFileNameSubalgebraAbsolute(
-    int actualIndexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
   std::string getRelativePhysicalFileNameFKFTNilradicals(
-    int actualIndexSubalgebra
+    int actualindexSubalgebra
   ) const;
   std::string getDisplayFileNameFKFTNilradicals(
-    int actualIndexSubalgebra, FormatExpressions* theFormat
+    int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
   const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {

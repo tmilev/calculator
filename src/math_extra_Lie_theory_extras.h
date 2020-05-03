@@ -391,7 +391,7 @@ public:
     const Coefficient& theRingUnit,
     const Coefficient& theRingZero
   ) const;
-  static void GetCoordinateFormOfSpanOfElements(
+  static void getCoordinateFormOfSpanOfElements(
     List<ElementUniversalEnvelopingOrdered>& theElements,
     Vectors<Polynomial<Coefficient> >& outputCoordinates,
     ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials

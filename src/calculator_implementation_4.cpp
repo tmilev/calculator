@@ -110,7 +110,7 @@ bool Calculator::getVectorExpressions(const Expression& input, List<Expression>&
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int theGeneratorIndex) {
-  Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(theGeneratorIndex);
+  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(theGeneratorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
     if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
       return true;
@@ -121,7 +121,7 @@ bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int theGeneratorIndex) {
 
 template <class Coefficient>
 bool ModuleSSalgebra<Coefficient>::isNotInLevi(int theGeneratorIndex) {
-  Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(theGeneratorIndex);
+  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(theGeneratorIndex);
   for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
       return true;
@@ -231,7 +231,7 @@ public:
   void LieBracketMeOnTheRight(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& standsOnTheRight) {
     QuasiDifferentialOperator<Coefficient> tempRight;
     tempRight = standsOnTheRight;
-    MathRoutines::LieBracket(*this, tempRight, *this);
+    MathRoutines::lieBracket(*this, tempRight, *this);
   }
   void FourierTransformDiffPartOnly(QuasiDifferentialOperator<Coefficient>& output) const;
   void GetEWAsetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const;
@@ -268,12 +268,12 @@ void QuasiDifferentialOperator<Coefficient>::GetEWAsetMatrixPartsToId(ElementWey
 }
 
 template<class Element>
-void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output) {
+void MathRoutines::lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output) {
   if (&standsOnTheLeft == &output || &standsOnTheRight == &output) {
     Element standsOnTheLeftNew, standsOnTheRightNew;
     standsOnTheLeftNew = standsOnTheLeft;
     standsOnTheRightNew = standsOnTheRight;
-    MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
+    MathRoutines::lieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
     return;
   }
   Element tempE;
@@ -553,8 +553,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       theGeneratorsItry.addOnTop(theGenerator);
     }
   } else {
-    for (int j = 0; j < theSSalgebra.GetNumGenerators(); j ++) {
-      theGenerator.MakeGenerator(j, theSSalgebra);
+    for (int j = 0; j < theSSalgebra.getNumberOfGenerators(); j ++) {
+      theGenerator.makeGenerator(j, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
     }
   }
@@ -635,7 +635,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
         actionOnGenericElt.assignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
-        theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
+        theSSalgebra.orderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
         out << "<td>" << HtmlRoutines::getMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
@@ -648,7 +648,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "<tr><td>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
-    << "}{*}{$" << theSSalgebra.ToStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
+    << "}{*}{$" << theSSalgebra.toStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
     latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
@@ -696,8 +696,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         << theGeneratorsItry[j].toString() << "=" << transformedDO.toString() << ";";
         reportCalculatorCommands << "<br>" << theGeneratorsItry[j].toString() << "=" << diffOpPart.toString() << ";";
       }
-      reportFourierTransformedCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
-      reportCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
+      reportFourierTransformedCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
+      reportCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
         reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].toString();
         reportCalculatorCommands << theGeneratorsItry[j].toString();
@@ -792,7 +792,7 @@ bool Calculator::recursionDepthExceededHandleRoughly(const std::string& addition
   }
   if (!this->flagMaxRecursionErrorEncountered) {
     *this << additionalErrorInfo
-    << "<span style =\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
+    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of " << this->MaxRecursionDeptH
     << " exceeded. </b></span>" << "Aborting computation ASAP. ";
   }
   this->flagAbortComputationASAP = true;
@@ -910,15 +910,15 @@ bool Calculator::innerGetChevGen(
   if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
-  if (theIndex > theSSalg.content->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg.content->GetNumPosRoots()) {
+  if (theIndex > theSSalg.content->getNumberOfPositiveRoots() || theIndex == 0 || theIndex < - theSSalg.content->getNumberOfPositiveRoots()) {
     return output.makeError("Bad Chevalley-Weyl generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex > 0) {
     theIndex += theSSalg.content->getRank() - 1;
   }
-  theIndex += theSSalg.content->GetNumPosRoots();
-  theElt.MakeGenerator(theIndex, *theSSalg.content);
+  theIndex += theSSalg.content->getNumberOfPositiveRoots();
+  theElt.makeGenerator(theIndex, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext context(theCommands);
@@ -951,13 +951,13 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   }
   if (
     theIndex == 0 ||
-    theIndex > theSSalg.content->GetNumPosRoots() ||
-    theIndex < - theSSalg.content->GetNumPosRoots()
+    theIndex > theSSalg.content->getNumberOfPositiveRoots() ||
+    theIndex < - theSSalg.content->getNumberOfPositiveRoots()
   ) {
     return output.makeError("Bad Cartan subalgebra generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->GetRootIndexFromDisplayIndex(theIndex)];
+  Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
   theElt.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
@@ -987,7 +987,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   if (theWeyl.theGroup.getSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra.content->ToStringLieAlgebraName()
+    << theSSalgebra.content->toStringLieAlgebraName()
     << " has " << theWeyl.theGroup.getSize().toString() << ".";
     return output.assignValue(out.str(), theCommands);
   }
@@ -996,7 +996,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   theFormat.polynomialAlphabet[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
-  out << " The algebra: " << theSSalgebra.content->ToStringLieAlgebraName();
+  out << " The algebra: " << theSSalgebra.content->toStringLieAlgebraName();
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
@@ -1061,7 +1061,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   tempSSpointer.content->checkConsistency();
   tempSSpointer.context.checkInitialization();
   SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
-  std::string result = theSSalgebra.ToHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
+  std::string result = theSSalgebra.toHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
   return output.assignValue(result, theCommands);
 }
 
@@ -2465,7 +2465,7 @@ std::string ObjectContainer::toString() {
   if (this->semisimpleLieAlgebras.theValues.size > 0) {
     out << "Lie algebras created (" << this->semisimpleLieAlgebras.theValues.size << " total): ";
     for (int i = 0; i < this->semisimpleLieAlgebras.theValues.size; i ++) {
-      out << this->semisimpleLieAlgebras.theValues[i].ToStringLieAlgebraName();
+      out << this->semisimpleLieAlgebras.theValues[i].toStringLieAlgebraName();
       if (i != this->semisimpleLieAlgebras.theValues.size - 1) {
         out << ", ";
       }
@@ -2475,7 +2475,7 @@ std::string ObjectContainer::toString() {
     out << "<br>Lie semisimple subalgebras computation data structures ("
     << this->theSSSubalgebraS.theValues.size << " total): ";
     for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++) {
-      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->ToStringLieAlgebraName() << " with "
+      out << " Type " << this->theSSSubalgebraS.theValues[i].owner->toStringLieAlgebraName() << " with "
       << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
       if (i != this->theSSSubalgebraS.theValues.size - 1) {
         out << ", ";
@@ -2568,7 +2568,7 @@ JSData Calculator::toJSONPerformance() {
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->TotalNumpatternMatchedPerformed << "";
   if (this->DepthRecursionReached > 0) {
-    moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+    moreDetails << "<br>maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
   << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->NumListsStart))
@@ -3024,9 +3024,9 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight(hwSimple, theSSalg.content);
+  startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString)) {
+  if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
     return output.makeError(reportString, theCommands);
   }
   std::stringstream out;
@@ -3051,9 +3051,9 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight(hwSimple, theSSalg.content);
+  startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
+  if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
     return output.makeError(reportString, theCommands);
   }
   return output.assignValue(resultChar, theCommands);
@@ -3149,7 +3149,7 @@ bool Calculator::convertExpressionsToCommonContext(
       *this << "<hr>Possible programming error: "
       << "calling convertExpressionsToCommonContext "
       << "on expressions without context. "
-      << global.fatal.GetStackTraceEtcErrorMessageHTML();
+      << global.fatal.getStackTraceEtcErrorMessageHTML();
     }
     if (!commonContext.mergeContexts(inputOutputEs[i].getContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "

@@ -250,7 +250,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
     return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   }
   SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
-  if (!ownerSS.IsOfSimpleType('G', 2)) {
+  if (!ownerSS.isOfSimpleType('G', 2)) {
     return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   }
   HomomorphismSemisimpleLieAlgebra theHmm;
@@ -403,7 +403,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
-  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().ToStringLieAlgebraName() << "-module with highest weight in fund coords "
+  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().toStringLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoordS.toString();
   ProgressReport theReport;
   theReport.report(tempStream1.str());
@@ -520,16 +520,16 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.domainAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
   output.rangeAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
-  output.theRange().ComputeChevalleyConstants();
-  output.theDomain().ComputeChevalleyConstants();
+  output.theRange().computeChevalleyConstants();
+  output.theDomain().computeChevalleyConstants();
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
-  g_2.MakeGenerator         (13, output.theRange());
-  g_m2.MakeGenerator        (7,  output.theRange());
-  g_1plusg_3.MakeGenerator  (12, output.theRange());
-  tempElt.MakeGenerator     (14, output.theRange());
+  g_2.makeGenerator         (13, output.theRange());
+  g_m2.makeGenerator        (7,  output.theRange());
+  g_1plusg_3.makeGenerator  (12, output.theRange());
+  tempElt.makeGenerator     (14, output.theRange());
   g_1plusg_3 += tempElt;
-  g_m1plusg_m3.MakeGenerator(6, output.theRange());
-  tempElt.MakeGenerator     (8, output.theRange());
+  g_m1plusg_m3.makeGenerator(6, output.theRange());
+  tempElt.makeGenerator     (8, output.theRange());
   g_m1plusg_m3 += tempElt;
   output.imagesSimpleChevalleyGenerators.setSize(4);
   output.imagesSimpleChevalleyGenerators[0] = g_1plusg_3;
@@ -807,11 +807,11 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   theCasimir.makeCasimir(theg2b3data.theHmm.theDomain());
   WeylGroupData& smallWeyl = theg2b3data.theHmm.theDomain().theWeyl;
   for (int k = 0; k < theHWs.size; k ++) {
-    theCharacter.MakeFromWeight(
+    theCharacter.makeFromWeight(
       theg2b3data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theHWs[k]),
       &theg2b3data.theHmm.theRange()
     );
-    theCharacter.SplitCharOverRedSubalg(nullptr, outputChar, theg2b3data);
+    theCharacter.splitCharacterOverReductiveSubalgebra(nullptr, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
     out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction> simpleCoordinates;
@@ -961,7 +961,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   weightSimpleCoordinates = rangeWeyl.getSimpleCoordinatesFromFundamental(
     theG2B3Data.theWeightFundCoords
   );
-  theG2B3Data.theAmbientChar.MakeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
+  theG2B3Data.theAmbientChar.makeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
   theG2B3Data.theSmallCharFDpart.makeZero();
   CharacterSemisimpleLieAlgebraModule<RationalFunction> tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
@@ -978,7 +978,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.actOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
-    tempMon.MakeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
+    tempMon.makeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
     theG2B3Data.theSmallCharFDpart += tempMon;
   }
   ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, tempElt;
@@ -1009,7 +1009,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFunction charDiff;
-  theG2B3Data.theHmm.theRange().OrderNilradical(
+  theG2B3Data.theHmm.theRange().orderNilradical(
     theMod.parabolicSelectionNonSelectedAreElementsLevi,
     theG2B3Data.flagUseNilWeightGeneratorOrder,
     theG2B3Data.flagAscendingGeneratorOrder
@@ -1099,7 +1099,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;
-  thePartition.setSize(theSSalgebra.GetNumPosRoots());
+  thePartition.setSize(theSSalgebra.getNumberOfPositiveRoots());
   for (int i = 0; i < thePartition.size; i ++) {
     thePartition[i] = 0;
   }
@@ -1228,9 +1228,9 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     currentType.MakeSimpleType(theWeylLetters[i], theRanks[i]);
     SemisimpleLieAlgebra& currentAlg =
     theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
-    currentAlg.ComputeChevalleyConstants();
+    currentAlg.computeChevalleyConstants();
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
-    latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.ToStringLieAlgebraName() << "$}\\\\\\hline\n\n"
+    latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.toStringLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out << "<br>" << " <table><tr><td  border =\"1\" colspan =\"3\">"
     << theWeylLetters[i] << "_{" << theRanks[i] << "}" << "</td></tr> <tr><td>highest weight</td><td>dim</td></tr>";
@@ -1241,7 +1241,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       Vector<Rational>& currentHW = theHws[j];
       out << "<tr><td> " << currentHW.toString() << "</td><td>"
       << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "</td>";
-      reportStream << "Processing " << currentAlg.ToStringLieAlgebraName() << ", index  "
+      reportStream << "Processing " << currentAlg.toStringLieAlgebraName() << ", index  "
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
       << currentHW.toString() << ", dim: " << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
@@ -1474,7 +1474,7 @@ bool Calculator::innerInterpolatePoly(
   Vector<Rational> theArgs, theValues;
   pointsOfInterpoly.GetVectorFromColumn(0, theArgs);
   pointsOfInterpoly.GetVectorFromColumn(1, theValues);
-  interPoly.Interpolate(theArgs, theValues);
+  interPoly.interpolate(theArgs, theValues);
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariableFromString("x");
   return output.assignValueWithContext(interPoly, theContext, theCommands);
@@ -1500,9 +1500,9 @@ bool Calculator::innerPrintZnEnumeration(
   LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
   for (
-    theSel.SetFirstInGradeLevel(gradeLarge);
-    theSel.GetGrading() == gradeLarge;
-    theSel.IncrementReturnFalseIfPastLast()
+    theSel.setFirstInGradeLevel(gradeLarge);
+    theSel.getGrading() == gradeLarge;
+    theSel.incrementReturnFalseIfPastLast()
   ) {
     out2 << theSel.toString() << "<br>";
     counter ++;
@@ -1789,7 +1789,7 @@ bool Calculator::Test::loadTestStrings(
     return false;
   }
   std::string testStrings;
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     WebAPI::calculator::testFileNameVirtual,
     testStrings,
     false,

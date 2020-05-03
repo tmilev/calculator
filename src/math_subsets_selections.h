@@ -50,7 +50,7 @@ public:
   }
   std::string toString() const;
   void incrementSelection();
-  bool IncrementReturnFalseIfPastLast() {
+  bool incrementReturnFalseIfPastLast() {
     this->incrementSelection();
     if (this->cardinalitySelection == 0) {
       return false;
@@ -134,9 +134,9 @@ public:
   int NumCombinationsOfCardinality(int cardinality);
   LargeInteger GetNumTotalCombinations() const;
   int NumSelectionsTotal() {
-    return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
+    return MathRoutines::kToTheNth(MaxMultiplicity, this->Multiplicities.size);
   }
-  bool IncrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast();
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
   bool HasMultiplicitiesZeroAndOneOnly();
@@ -157,7 +157,7 @@ public:
   List<int> MaxMultiplicities;
   void initPart1(int NumElements);
   void clearNoMaxMultiplicitiesChange();
-  bool IncrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast();
   LargeInteger TotalNumSubsets();
   int TotalNumSubsetsMustBeSmalInt();
   int TotalMultiplicity();
@@ -181,7 +181,7 @@ class SelectionOneItem {
   SelectionOneItem(): MaxMultiplicity(0), SelectedMult(- 1) {
    
   }
-  bool IncrementReturnFalseIfPastLast() {
+  bool incrementReturnFalseIfPastLast() {
     if (this->MaxMultiplicity == 0) {
       return false;
     }
@@ -219,9 +219,9 @@ public:
     }
     return result;
   }
-  bool IncrementReturnFalseIfPastLast() {
+  bool incrementReturnFalseIfPastLast() {
     for (int i = this->theElements.size - 1; i >= 0; i --) {
-      if (this->theElements[i].IncrementReturnFalseIfPastLast()) {
+      if (this->theElements[i].incrementReturnFalseIfPastLast()) {
         return true;
       }
     }
@@ -267,7 +267,7 @@ public:
     MathRoutines::nChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
     return result;
   }
-  void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
+  void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
     if (inputDesiredSubsetSize < 0 || inputNumItems < 0) {
       global.fatal << "This is a programming error: requesting to initialize a selection of size "
       << inputDesiredSubsetSize << " out of "
@@ -282,7 +282,7 @@ public:
   std::string toString() const {
     return this->theSelection.toString();
   }
-  bool IncrementReturnFalseIfPastLast() {
+  bool incrementReturnFalseIfPastLast() {
     this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
     for (int i = 0; i < this->DesiredSubsetSize; i ++) {
       if (!this->theSelection.selected[i]) {
@@ -300,19 +300,19 @@ class SelectionPositiveIntegers {
     (void) theFormat;
     return this->theInts.toString();
   }
-  LargeIntegerUnsigned GetGrading() {
+  LargeIntegerUnsigned getGrading() {
     return this->theInts.SumCoords();
   }
   void initialize(int numIntegers) {
     this->theInts.makeZero(numIntegers);
   }
-  void SetFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
+  void setFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
     this->theInts[0] = inputGradingLevel;
     for (int i = 1; i < this->theInts.size; i ++) {
       this->theInts[i] = 0;
     }
   }
-  bool IncrementReturnFalseIfPastLast() {
+  bool incrementReturnFalseIfPastLast() {
     for (int i = this->theInts.size - 2; i >= 0; i --) {
       if (this->theInts[i] > 0) {
         this->theInts[i] --;
@@ -324,7 +324,7 @@ class SelectionPositiveIntegers {
         return true;
       }
     }
-    this->SetFirstInGradeLevel(this->GetGrading() + 1);
+    this->setFirstInGradeLevel(this->getGrading() + 1);
     return true;
   }
 };
@@ -347,10 +347,10 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   bufferMat.initialize(theSelection.cardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMat.elements[i][j].Assign(this->theObjects[theSelection.elements[i]].theObjects[j]);
+      bufferMat.elements[i][j].assign(this->theObjects[theSelection.elements[i]].theObjects[j]);
     }
-    bufferMat.elements[theSelection.cardinalitySelection][j].Assign(ExtraRoot1.theObjects[j]);
-    bufferMat.elements[theSelection.cardinalitySelection + 1][j].Assign(ExtraRoot2.theObjects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot1.theObjects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection + 1][j].assign(ExtraRoot2.theObjects[j]);
   }
   bufferMat.gaussianEliminationByRows(0, NonPivotPoints);
   if (NonPivotPoints.cardinalitySelection != 1) {
@@ -462,9 +462,9 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMatrix.elements[i][j].Assign(this->theObjects[theSelection.elements[i]][j]);
+      bufferMatrix.elements[i][j].assign(this->theObjects[theSelection.elements[i]][j]);
     }
-    bufferMatrix.elements[theSelection.cardinalitySelection][j].Assign(ExtraRoot[j]);
+    bufferMatrix.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot[j]);
   }
   bufferMatrix.gaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.cardinalitySelection != 1) {
@@ -489,7 +489,7 @@ void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
 }
 
 template <class Coefficient>
-int Vectors<Coefficient>::GetRankOfSpanOfElements(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
+int Vectors<Coefficient>::getRankOfSpanOfElements(Matrix<Coefficient>* buffer, Selection* bufferSelection) const {
   if (this->size == 0) {
     return 0;
   }
@@ -543,8 +543,11 @@ void Vector<Coefficient>::operator=(const SelectionWithMultiplicities& other) {
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::LinearAlgebraForVertexComputation(
-  Selection& theSelection, Vector<Coefficient>& output, Matrix<Coefficient>& buffer, Selection& NonPivotPointsBuffer
+bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
+  Selection& theSelection,
+  Vector<Coefficient>& output,
+  Matrix<Coefficient>& buffer,
+  Selection& NonPivotPointsBuffer
 ) {
   if (this->size == 0) {
     return false;

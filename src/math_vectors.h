@@ -144,7 +144,7 @@ public:
     }
     return result;
   }
-  Vector<double> GetVectorDouble() const {
+  Vector<double> getVectorDouble() const {
     Vector<double> result;
     result.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
@@ -640,7 +640,7 @@ template <class Coefficient>
 int Vector<Coefficient>::FindLCMDenominatorsTruncateToInt() {
   int result = 1;
   for (int i = 0; i < this->size; i ++) {
-    result = MathRoutines::lcm(result, this->theObjects[i].denominatorShort);
+    result = MathRoutines::leastCommonMultiple(result, this->theObjects[i].denominatorShort);
     if ((*this)[i].extended != 0) {
       global.fatal
       << "Coefficient is large rational at a "
@@ -704,7 +704,7 @@ class Vectors: public List<Vector<Coefficient> > {
     bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
   ) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  bool LinearAlgebraForVertexComputation(
+  bool linearAlgebraForVertexComputation(
     Selection& theSelection,
     Vector<Coefficient>& output,
     Matrix<Coefficient>& buffer,
@@ -713,7 +713,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void GetVectorsDouble(Vectors<double>& output) const {
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      output[i] = this->theObjects[i].GetVectorDouble();
+      output[i] = this->theObjects[i].getVectorDouble();
     }
   }
   void AssignListListCoefficientType(const List<List<Coefficient> >& input) {
@@ -797,7 +797,7 @@ class Vectors: public List<Vector<Coefficient> > {
   static void SelectABasisInSubspace(
     const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivots
   );
-  int GetRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
+  int getRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
   static bool conesIntersect(
     List<Vector<Rational> >& StrictCone,
     List<Vector<Rational> >& NonStrictCone,
@@ -1068,8 +1068,8 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   Vectors<Coefficient> tempVectors;
   tempVectors = (*this);
   tempVectors.addOnTop(input);
-  return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection) ==
-  tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
+  return this->getRankOfSpanOfElements(&bufferMatrix, &bufferSelection) ==
+  tempVectors.getRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
 }
 
 template <class Coefficient>
@@ -1178,7 +1178,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
     tempRoots.addOnTop(this->theObjects[i]);
-    int newRank = tempRoots.GetRankOfSpanOfElements(bufferMat, bufferSel);
+    int newRank = tempRoots.getRankOfSpanOfElements(bufferMat, bufferSel);
     if (newRank == oldRank) {
       tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);
     } else {

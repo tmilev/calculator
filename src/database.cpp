@@ -1444,7 +1444,7 @@ bool EmailRoutines::sendEmailWithMailGun(
 ) {
   MacroRegisterFunctionWithName("EmailRoutines::sendEmailWithMailGun");
   std::string mailGunKey, hostnameToSendEmailFrom;
-  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1454,7 +1454,7 @@ bool EmailRoutines::sendEmailWithMailGun(
     }
     return false;
   }
-  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, nullptr
   )) {
     hostnameToSendEmailFrom = global.hostNoPort;

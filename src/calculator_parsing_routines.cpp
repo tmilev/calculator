@@ -1124,7 +1124,7 @@ bool Calculator::replaceMatrixXByE() {
   int numRows = theMatElt.dataList.size;
   int numCols = 0;
   for (int i = 0; i < theMatElt.dataList.size; i ++) {
-    numCols = MathRoutines::Maximum(theMatElt.dataList[i].size() - 1, numCols);
+    numCols = MathRoutines::maximum(theMatElt.dataList[i].size() - 1, numCols);
   }
   if (numCols > 0 && numRows > 0) {
     theMat.initialize(numRows, numCols);

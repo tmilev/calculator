@@ -233,21 +233,21 @@ public:
     this->value = x;
     this->sign = 1;
   }
-  void AssignInt(int x);
+  void assignInteger(int x);
   void AssignInt64(int64_t x);
   void AssignUInt64(uint64_t x);
   void AddLargeIntUnsigned(const LargeIntegerUnsigned& x);
   inline void AddInt(int x) {
     LargeInteger tempInt;
-    tempInt.AssignInt(x);
+    tempInt.assignInteger(x);
     *this += (tempInt);
   }
   //bool IsGEQ(LargeInt& x);
   bool CheckForConsistensy();
-  void WriteToFile(std::fstream& output);
+  void writeToFile(std::fstream& output);
   void assignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
-  void ReadFromFile(std::fstream& input);
+  void readFromFile(std::fstream& input);
   void checkConsistency(){}
   void makeZero();
   bool GetDivisors(List<int>& output, bool includeNegative);
@@ -270,11 +270,11 @@ public:
   }
   double GetDoubleValue() const;
   int operator %(int x);
-  inline void AssignFloor(){}
+  inline void assignFloor(){}
   void operator=(const Rational& x);
   void operator=(const LargeInteger& x);
   inline void operator=(int x) {
-    this->AssignInt(x);
+    this->assignInteger(x);
   }
   inline void operator=(const LargeIntegerUnsigned& other) {
     this->value = other;
@@ -384,7 +384,7 @@ public:
     this->operator=(x);
   }
   LargeInteger(int x) {
-    this->AssignInt(x);
+    this->assignInteger(x);
   }
   LargeInteger(int64_t x) {
     this->AssignInt64(x);
@@ -451,7 +451,7 @@ private:
   GlobalStatistics::checkPointerCounters();
 #endif
     this->extended->denominator.AssignShiftedUInt( static_cast<unsigned int>(this->denominatorShort), 0);
-    this->extended->numerator.AssignInt(this->numeratorShort);
+    this->extended->numerator.assignInteger(this->numeratorShort);
     return true;
   }
   inline void FreeExtended() {
@@ -515,7 +515,7 @@ public:
   static Rational zeroStatic();
   static Rational one();
   void AssignFracValue();
-  void AssignFloor() {
+  void assignFloor() {
     Rational tempRat = *this;
     tempRat.AssignFracValue();
     *this -= tempRat;
@@ -540,7 +540,7 @@ public:
   void MultiplyByInt(int x);
   void MultiplyByLargeInt(LargeInteger& x);
   void MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x);
-  void Assign(const Rational& r);
+  void assign(const Rational& r);
   void AssignInteger(int x);
   bool isInteger(LargeInteger* whichInteger = nullptr) const;
   bool isIntegerFittingInInt(int* whichInt) const {
@@ -683,8 +683,8 @@ public:
     this->denominatorShort = 1;
     this->FreeExtended();
   }
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::istream& input);
+  void writeToFile(std::fstream& output);
+  void readFromFile(std::istream& input);
   void DrawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
@@ -727,7 +727,7 @@ public:
   }
   Rational(const Rational& right) {
     this->extended = nullptr;
-    this->Assign(right);
+    this->assign(right);
   }
   Rational(const std::string& input): numeratorShort(0), denominatorShort(0), extended(nullptr) {
     this->assignString(input);
@@ -736,9 +736,9 @@ public:
     this->FreeExtended();
   }
   //the below must be called only with positive arguments!
-  static inline int gcd(int a, int b) {
+  static inline int greatestCommonDivisor(int a, int b) {
     MacroIncrementCounter(Rational::TotalSmallGCDcalls);
-    return MathRoutines::gcd(a, b);
+    return MathRoutines::greatestCommonDivisor(a, b);
   }
   static int gcdSigned(int a, int b) {
     if (a < 0) {
@@ -747,7 +747,7 @@ public:
     if (b < 0) {
       b *= - 1;
     }
-    return Rational::gcd(a, b);
+    return Rational::greatestCommonDivisor(a, b);
   }
   bool checkConsistency() {
     if (this->extended == nullptr) {
@@ -762,7 +762,7 @@ public:
     this->operator=(tempI);
   }
   void operator=(const Rational& right) {
-    this->Assign(right);
+    this->assign(right);
   }
   void operator=(const Polynomial<Rational>& other);
   bool operator==(const int other) const {
@@ -788,7 +788,7 @@ public:
     MacroIncrementCounter(Rational::TotalLargeAdditions);
     this->InitExtendedFromShortIfNeeded();
     Rational tempRat;
-    tempRat.Assign(r);
+    tempRat.assign(r);
     tempRat.InitExtendedFromShortIfNeeded();
     LargeInteger tempI;
     tempI = tempRat.extended->numerator;
@@ -826,13 +826,13 @@ public:
   }
   Rational operator*(int right) const {
     Rational tempRat;
-    tempRat.Assign(*this);
+    tempRat.assign(*this);
     tempRat.MultiplyByInt(right);
     return tempRat;
   }
   Rational operator/(int right) const {
     Rational tempRat;
-    tempRat.Assign(*this);
+    tempRat.assign(*this);
     tempRat.DivideByInteger(right);
     return tempRat;
   }

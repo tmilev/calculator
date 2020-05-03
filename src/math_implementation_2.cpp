@@ -798,7 +798,7 @@ void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
 void LargeIntegerUnsigned::AddNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::TotalLargeAdditions);
   int oldsize = this->theDigits.size;
-  this->theDigits.setSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size) + 1);
+  this->theDigits.setSize(MathRoutines::maximum(this->theDigits.size, x.theDigits.size) + 1);
   for (int i = oldsize; i < this->theDigits.size; i ++) {
     this->theDigits[i] = 0;
   }
@@ -864,7 +864,7 @@ void LargeIntegerUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeInteg
   if (theConst >= this->CarryOverBound || (- theConst) <= (- this->CarryOverBound)) {
     global.fatal << "Digit: " << theConst << " is too large" << global.fatal;
   }
-  int numDigits = MathRoutines::Maximum(other.theDigits.size + 1 + digitShift, this->theDigits.size + 1);
+  int numDigits = MathRoutines::maximum(other.theDigits.size + 1 + digitShift, this->theDigits.size + 1);
   this->PadWithZeroesToAtLeastNDigits(numDigits);
   long long nextDigit = 0;
   for (int j = 0; j < other.theDigits.size; j ++) {
@@ -1184,13 +1184,13 @@ bool LargeInteger::IsEven() const {
   return this->value.IsEven();
 }
 
-void LargeInteger::WriteToFile(std::fstream& output) {
+void LargeInteger::writeToFile(std::fstream& output) {
   std::string tempS;
   this->toString(tempS);
   output << tempS;
 }
 
-void LargeInteger::ReadFromFile(std::fstream& input) {
+void LargeInteger::readFromFile(std::fstream& input) {
   std::string tempS;
   input >> tempS;
   this->assignString(tempS);
@@ -1256,7 +1256,7 @@ bool LargeInteger::isIntegerFittingInInt(int* whichInt) {
 
 void LargeInteger::MultiplyByInt(int x) {
   LargeInteger tempI;
-  tempI.AssignInt(x);
+  tempI.assignInteger(x);
   *this *= tempI;
 }
 
@@ -1334,7 +1334,7 @@ void LargeInteger::AssignInt64(int64_t x) {
   this->value.AssignUInt64(static_cast<uint64_t>(x));
 }
 
-void LargeInteger::AssignInt(int x) {
+void LargeInteger::assignInteger(int x) {
   if (x == 0) {
     this->makeZero();
     return;
@@ -1480,7 +1480,7 @@ int Rational::floorIfSmall() {
   return - 1;
 }
 
-void Rational::WriteToFile(std::fstream& output) {
+void Rational::writeToFile(std::fstream& output) {
   output << this->toString();
 }
 
@@ -1523,7 +1523,7 @@ void Rational::invert() {
   MathRoutines::swap(this->extended->denominator, this->extended->numerator.value);
 }
 
-void Rational::ReadFromFile(std::istream& input) {
+void Rational::readFromFile(std::istream& input) {
   std::string tempS;
   input >> tempS;
   this->assignString(tempS);
@@ -1560,7 +1560,7 @@ Rational operator/(int left, const Rational& right) {
 
 Rational operator-(const Rational& argument) {
   Rational tempRat;
-  tempRat.Assign(argument);
+  tempRat.assign(argument);
   tempRat.minus();
   return tempRat;
 }
@@ -1589,33 +1589,33 @@ void Rational::DivideBy(const Rational& r) {
 
 Rational Rational::operator/(const Rational& right) const {
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat.DivideBy(right);
   return tempRat;
 }
 
 Rational Rational::operator*(const Rational& right) const {
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat.multiplyBy(right);
   return tempRat;
 }
 
 Rational Rational::operator+(const Rational& right) const {
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat += right;
   return tempRat;
 }
 
 Rational Rational::operator-(const Rational& right) const {
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat -= right;
   return tempRat;
 }
 
-void Rational::Assign(const Rational& r) {
+void Rational::assign(const Rational& r) {
   this->numeratorShort = r.numeratorShort;
   this->denominatorShort = r.denominatorShort;
   if (r.extended == nullptr) {
@@ -1692,14 +1692,14 @@ void Rational::AddInteger(int x) {
 
 bool Rational::IsGreaterThan(const Rational& r) const {
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat.Subtract(r);
   return tempRat.isPositive();
 }
 
 void Rational::Subtract(const Rational& r) {
   Rational temp;
-  temp.Assign(r);
+  temp.assign(r);
   temp.minus();
   this->operator+=(temp);
 }
@@ -1777,9 +1777,9 @@ bool Rational::TryToAddQuickly(int OtherNum, int OtherDen) {
   }
   int tempGCD = 0;
   if (N > 0) {
-    tempGCD = Rational::gcd(N, D);
+    tempGCD = Rational::greatestCommonDivisor(N, D);
   } else {
-    tempGCD = Rational::gcd(- N, D);
+    tempGCD = Rational::greatestCommonDivisor(- N, D);
   }
   this->numeratorShort = N / tempGCD;
   this->denominatorShort = D / tempGCD;
@@ -1825,9 +1825,9 @@ bool Rational::TryToMultiplyQuickly(int OtherNum, int OtherDen) {
   } else {
     int tempGCD = 0;
     if (N > 0) {
-      tempGCD = Rational::gcd(N, D);
+      tempGCD = Rational::greatestCommonDivisor(N, D);
     } else {
-      tempGCD = Rational::gcd(- N, D);
+      tempGCD = Rational::greatestCommonDivisor(- N, D);
     }
     this->numeratorShort = N / static_cast<signed int>(tempGCD);
     this->denominatorShort = D / tempGCD;
@@ -2027,9 +2027,9 @@ void Rational::simplify() {
       }
       int tempGCD;
       if (this->numeratorShort > 0) {
-        tempGCD = this->gcd(this->numeratorShort, this->denominatorShort);
+        tempGCD = this->greatestCommonDivisor(this->numeratorShort, this->denominatorShort);
       } else {
-        tempGCD = this->gcd(- this->numeratorShort, this->denominatorShort);
+        tempGCD = this->greatestCommonDivisor(- this->numeratorShort, this->denominatorShort);
       }
       this->numeratorShort /= tempGCD;
       this->denominatorShort /= tempGCD;
@@ -2068,7 +2068,7 @@ bool Rational::isEqualTo(const Rational& b) const {
     return (this->numeratorShort * b.denominatorShort == b.numeratorShort * this->denominatorShort);
   }
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat.Subtract(b);
   return tempRat.isEqualToZero();
 }
@@ -2078,7 +2078,7 @@ bool Rational::IsGreaterThanOrEqualTo(const Rational& right) const {
     return (this->numeratorShort * right.denominatorShort >= right.numeratorShort * this->denominatorShort);
   }
   Rational tempRat;
-  tempRat.Assign(*this);
+  tempRat.assign(*this);
   tempRat.Subtract(right);
   return tempRat.isPositiveOrZero();
 }

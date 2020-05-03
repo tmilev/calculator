@@ -75,7 +75,7 @@ public:
     this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool hasFreeAction(int generatorIndex) const {
-    Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(generatorIndex);
+    Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; i ++) {
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isNegative()) {
         return true;
@@ -84,7 +84,7 @@ public:
     return false;
   }
   bool hasZeroActionFDpart(int generatorIndex) const {
-    Vector<Rational> theWeight = this->getOwner().GetWeightOfGenerator(generatorIndex);
+    Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; i ++) {
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].isPositive()) {
         return true;
@@ -114,7 +114,7 @@ public:
     }
     int result = 0;
     for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++) {
-      result = MathRoutines::Maximum(
+      result = MathRoutines::maximum(
         result, this->theHWFundamentalCoordsBaseField[i].minimalNumberOfVariables()
       );
     }
@@ -181,7 +181,7 @@ public:
     out << "v_{" << this->theHWFundamentalCoordsBaseField.toString(theFormat)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
-    //    return "hwv{}("+ this->getOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","
+    //    return "hwv{}("+ this->getOwner().toStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","
     //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(theFormat) + ")";
   }
   void splitOverLevi(

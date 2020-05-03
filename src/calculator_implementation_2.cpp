@@ -697,7 +697,7 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
     std::stringstream out;
     out << " While simplifying "
     << this->outpuT->toString(&this->owner->formatVisibleStrings)
-    << "<br>Maximum number of algebraic transformations of "
+    << "<br>maximum number of algebraic transformations of "
     << this->owner->MaxAlgTransformationsPerExpression << " exceeded.";
     this->outpuT->makeError(out.str(), *this->owner);
     this->reductionOccurred = true;

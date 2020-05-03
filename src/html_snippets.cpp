@@ -90,7 +90,7 @@ const std::string& HtmlRoutines::getFile(
   }
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::loadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
+  if (FileOperations::loadFiletoStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
     global << Logger::red << "File: "

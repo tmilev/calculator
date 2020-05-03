@@ -41,7 +41,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     return false;
   }
   int NumTrueVariables = matA.numberOfColumns;
-  //tempMatb.Assign(matb);
+  //tempMatb.assign(matb);
   tempMatA.initialize(matA.numberOfRows, NumTrueVariables + matA.numberOfRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.clear();
@@ -50,7 +50,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   matX.makeZero(tempMatA.numberOfColumns);
   for (int j = 0; j < matA.numberOfColumns; j ++) {
     for (int i = 0; i < matA.numberOfRows; i ++) {
-      tempMatA.elements[i][j].Assign(matA.elements[i][j]);
+      tempMatA.elements[i][j].assign(matA.elements[i][j]);
     }
   }
   for (int j = 0; j < matA.numberOfRows; j ++) {
@@ -71,7 +71,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         );
         if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
           EnteringVariable = i;
-          ChangeGradient.Assign(PotentialChangeGradient);
+          ChangeGradient.assign(PotentialChangeGradient);
         }
       }
     }
@@ -85,7 +85,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       if (tempMatA.elements[LeavingVariableRow][EnteringVariable].isEqualToZero()) {
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
-      tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
+      tempRat.assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.invert();
       for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].isEqualTo(1)) {
@@ -94,7 +94,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         }
       }
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
-      tempTotalChange.Assign(MaxMovement);
+      tempTotalChange.assign(MaxMovement);
       tempTotalChange.multiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
       if (!tempTotalChange.isEqualToZero()) {
@@ -110,10 +110,10 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
       for (int i = 0; i < tempMatA.numberOfRows; i ++) {
         if (!tempMatA.elements[i][EnteringVariable].isEqualToZero()&& i != LeavingVariableRow) {
-          tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+          tempRat.assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.multiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
-          tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+          tempRat.assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.minus();
           tempMatA.addTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
@@ -339,13 +339,13 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   folderComputer.theWeyl.theDynkinType = theType;
   std::string prefixFolder = "calculator/";
   out << "<tr><td><a href=\""
-  << folderComputer.ToStringDisplayFolderName(prefixFolder)
-  << folderComputer.ToStringFileNameNoPathStructureConstants()
+  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringFileNameNoPathStructureConstants()
   << "\">"
   << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
   if (theType[0].HasPrecomputedSubalgebras()) {
     out << "<td><a href=\""
-    << folderComputer.ToStringDisplayFolderName(prefixFolder) << folderComputer.ToStringFileNameNoPathSemisimpleSubalgebras()
+    << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
     << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a>";
     out << "</td>\n ";
@@ -353,12 +353,12 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
     out << "<td>Not available</td>\n";
   }
   out << "<td><a href=\""
-  << folderComputer.ToStringDisplayFolderName(prefixFolder)
-  << folderComputer.ToStringFileNameRelativePathSlTwoSubalgebras() << "\">"
+  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringFileNameRelativePathSlTwoSubalgebras() << "\">"
   << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << folderComputer.ToStringDisplayFolderName(prefixFolder)
-  << folderComputer.ToStringFileNameNoPathRootSubalgebras()
+  << folderComputer.toStringDisplayFolderName(prefixFolder)
+  << folderComputer.toStringFileNameNoPathRootSubalgebras()
   << "\">" << theType[0].theLetter
   << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
@@ -449,7 +449,7 @@ bool Calculator::innerPrintSSSubalgebras(
   Expression& output,
   bool doForceRecompute,
   bool doAttemptToSolveSystems,
-  bool doComputePairingTable,
+  bool docomputePairingTable,
   bool doComputeModuleDecomposition,
   bool doComputeNilradicals,
   bool doAdjustCentralizers
@@ -499,7 +499,7 @@ bool Calculator::innerPrintSSSubalgebras(
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
-  theSubalgebras.ComputeStructureWriteFiles(
+  theSubalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     theCommands.theObjectContainer.theAlgebraicClosure,
     theCommands.theObjectContainer.semisimpleLieAlgebras,
@@ -510,13 +510,13 @@ bool Calculator::innerPrintSSSubalgebras(
     doComputeNilradicals,
     doComputeModuleDecomposition,
     doAttemptToSolveSystems,
-    doComputePairingTable,
+    docomputePairingTable,
     doAdjustCentralizers
   );
   return output.assignValue(out.str(), theCommands);
 }
 
-bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
+bool SemisimpleSubalgebras::computeStructureWriteFiles(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
@@ -530,7 +530,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   bool computePairingTable,
   bool adjustCentralizers
 ) {
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeStructureWriteFiles");
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::computeStructureWriteFiles");
   this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
@@ -541,13 +541,13 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
     this->flagComputeNilradicals = computeNilradicals;
     this->flagComputeModuleDecomposition = computeModuleDecomposition;
     this->flagAttemptToSolveSystems = attemptToSolveSystems;
-    this->flagComputePairingTable = computePairingTable;
+    this->flagcomputePairingTable = computePairingTable;
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
     this->CheckFileWritePermissions();
     if (doFullInit) {
-      this->FindTheSSSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
+      this->findTheSemisimpleSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
     }
-    this->WriteReportToFiles();
+    this->writeReportToFiles();
   } else {
     if (outputStream != nullptr) {
       *outputStream << "Files precomputed, serving from HD. ";
@@ -628,7 +628,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
     }
     theOperators.addOnTop(tempElt);
   }
-  ownerSS->GetCommonCentralizer(theOperators, outputElts);
+  ownerSS->getCommonCentralizer(theOperators, outputElts);
   std::stringstream out;
   out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
   for (int i = 0; i < outputElts.size; i ++) {
@@ -888,9 +888,9 @@ void Plot::operator+=(const Plot& other) {
     this->theUpperBoundAxes = other.theUpperBoundAxes;
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
-    this->highBoundY = MathRoutines::Maximum(this->highBoundY, other.highBoundY);
+    this->highBoundY = MathRoutines::maximum(this->highBoundY, other.highBoundY);
     this->lowBoundY = MathRoutines::Minimum(this->lowBoundY,  other.lowBoundY);
-    this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
+    this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
     this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
   this->thePlots.addListOnTop(other.thePlots);
@@ -909,8 +909,8 @@ void Plot::operator+=(const Plot& other) {
     this->flagIncludeCoordinateSystem = false;
   }
   this->boxesThatUpdateMe.addOnTopNoRepetition(other.boxesThatUpdateMe);
-  this->priorityWindow = MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
-  this->priorityViewRectangle = MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
+  this->priorityWindow = MathRoutines::maximum(this->priorityWindow, other.priorityWindow);
+  this->priorityViewRectangle = MathRoutines::maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
 
 bool Plot::operator==(const Plot& other) const {
@@ -1009,7 +1009,7 @@ PlotObject::PlotObject() {
 void PlotObject::computeYBounds() {
   MacroRegisterFunctionWithName("PlotObject::computeYBounds");
   for (int i = 0; i < this->thePointsDouble.size; i ++) {
-    this->yHigh = MathRoutines::Maximum(this->yHigh, this->thePointsDouble[i][1]);
+    this->yHigh = MathRoutines::maximum(this->yHigh, this->thePointsDouble[i][1]);
     this->yLow = MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
   }
 }
@@ -1062,19 +1062,19 @@ void Plot::computeAxesAndBoundingBox() {
   for (int k = 0; k < this->thePlots.size; k ++) {
     this->thePlots[k].computeYBounds();
     this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->theUpperBoundAxes = MathRoutines::maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
-    this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+    this->highBoundY = MathRoutines::maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
       List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
       this->lowBoundY =MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
       this->lowBoundY =MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
-      this->highBoundY =MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
-      this->highBoundY =MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
+      this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
+      this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
     for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
@@ -1082,9 +1082,9 @@ void Plot::computeAxesAndBoundingBox() {
         continue;
       }
       this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
       this->lowBoundY = MathRoutines::Minimum (currentPoint[1], this->lowBoundY);
-      this->highBoundY = MathRoutines::Maximum (currentPoint[1], this->highBoundY);
+      this->highBoundY = MathRoutines::maximum (currentPoint[1], this->highBoundY);
     }
   }
 }
@@ -1098,19 +1098,19 @@ void Plot::computeAxesAndBoundingBox3d() {
   for (int k = 0; k < this->thePlots.size; k ++) {
     this->thePlots[k].computeYBounds();
     this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->theUpperBoundAxes = MathRoutines::maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
-    this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+    this->highBoundY = MathRoutines::maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
       List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
       this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
       this->lowBoundY =MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
       this->lowBoundY =MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
-      this->highBoundY =MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
-      this->highBoundY =MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
+      this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
+      this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
     for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
@@ -1118,9 +1118,9 @@ void Plot::computeAxesAndBoundingBox3d() {
         continue;
       }
       this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
       this->lowBoundY = MathRoutines::Minimum(currentPoint[1], this->lowBoundY);
-      this->highBoundY = MathRoutines::Maximum(currentPoint[1], this->highBoundY);
+      this->highBoundY = MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
   }
 
@@ -2056,7 +2056,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
     return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", theCommands);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> theElt;
-  theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.getSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
+  theElt.makeFromWeight(ownerSSLiealg.content->theWeyl.getSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
   return output.assignValue(theElt, theCommands);
 }
 
@@ -2187,10 +2187,10 @@ bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& in
 }
 
 template <class Coefficient>
-Coefficient ElementUniversalEnveloping<Coefficient>::GetKillingFormProduct(
+Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
   const ElementUniversalEnveloping<Coefficient>& right
 ) const {
-  MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
+  MacroRegisterFunctionWithName("ElementUniversalEnveloping::getKillingFormProduct");
   if (this->isEqualToZero()) {
     return 0;
   }
@@ -2199,15 +2199,15 @@ Coefficient ElementUniversalEnveloping<Coefficient>::GetKillingFormProduct(
   SemisimpleLieAlgebra* theOwner;
   theOwner = &this->getOwner();
   MonomialUniversalEnveloping<Coefficient> baseGen;
-  for (int i = 0; i < theOwner->GetNumGenerators(); i ++) {
-    baseGen.MakeGenerator(i, *theOwner);
+  for (int i = 0; i < theOwner->getNumberOfGenerators(); i ++) {
+    baseGen.makeGenerator(i, *theOwner);
     adadAppliedToMon.makeZero(*theOwner);
     adadAppliedToMon.addMonomial(baseGen, 1);
-    right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
+    right.adjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.simplify();
-    this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
+    this->adjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.simplify();
-    result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.getMonomialCoefficient(baseGen);
   }
   return result;
 }
@@ -2220,13 +2220,13 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
   Coefficient result = 0;
   ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, tempElt;
   ChevalleyGenerator baseGen;
-  for (int i = 0; i < this->GetNumGenerators(); i ++) {
-    baseGen.MakeGenerator(*this, i);
+  for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
+    baseGen.makeGenerator(*this, i);
     adadAppliedToMon.makeZero();
     adadAppliedToMon.addMonomial(baseGen, 1);
-    this->LieBracket(right, adadAppliedToMon, tempElt);
-    this->LieBracket(left, tempElt, adadAppliedToMon);
-    result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
+    this->lieBracket(right, adadAppliedToMon, tempElt);
+    this->lieBracket(left, tempElt, adadAppliedToMon);
+    result += adadAppliedToMon.getMonomialCoefficient(baseGen);
   }
   return result;
 }
@@ -2262,7 +2262,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   if (left.getLieAlgebraElementIfPossible(leftEltSS) && right.getLieAlgebraElementIfPossible(rightEltSS)) {
     return output.assignValue(leftEltSS.getOwner()->getKillingForm(leftEltSS, rightEltSS), theCommands);
   }
-  return output.assignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
+  return output.assignValueWithContext(left.getKillingFormProduct(right), theContext, theCommands);
 }
 
 bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output) {

@@ -572,7 +572,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
     output = inputConverted[2];
     return true;
   }
-  theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
+  theSSalg.orderNilradicalNilWeightAscending(rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
   if (!rightEltETGVM.multiplyOnTheLeft(
     leftE.getValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
@@ -1594,10 +1594,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     theGCD = denominatorPowerS[0];
   }
   for (int i = 0; i < numeratorPowerS.size; i ++) {
-    theGCD = MathRoutines::gcd(theGCD, numeratorPowerS[i]);
+    theGCD = MathRoutines::greatestCommonDivisor(theGCD, numeratorPowerS[i]);
   }
   for (int i = 0; i < denominatorPowerS.size; i ++) {
-    theGCD = MathRoutines::gcd(theGCD, denominatorPowerS[i]);
+    theGCD = MathRoutines::greatestCommonDivisor(theGCD, denominatorPowerS[i]);
   }
   if (theGCD > 0) {
     for (int i = 0; i < numeratorPowerS.size; i ++) {
@@ -2335,7 +2335,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
     return false;
   }
   ElementWeylAlgebra<Rational> resultE = rightConverted.getValue<ElementWeylAlgebra<Rational> >();
-  resultE.LieBracketOnTheLeft(leftConverted.getValue<ElementWeylAlgebra<Rational> >());
+  resultE.lieBracketOnTheLeft(leftConverted.getValue<ElementWeylAlgebra<Rational> >());
   return output.assignValueWithContext(resultE, leftConverted.getContext(), theCommands);
 }
 

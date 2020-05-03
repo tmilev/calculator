@@ -37,7 +37,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
 ) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
-  int theDimensioN = MathRoutines::Maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
+  int theDimensioN = MathRoutines::maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
   tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
   tempSel.MaxMultiplicities.setSize(theDimensioN);
   int theExpectedSize = 1;
@@ -71,13 +71,13 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       buffer.differentialPart.setVariable(k, left.differentialPart(k) + right.differentialPart(k) - multDrop);
     }
     output.addMonomial(buffer, coeffBuff);
-    tempSel.IncrementReturnFalseIfPastLast();
+    tempSel.incrementReturnFalseIfPastLast();
   }
 }
 
 template <class Coefficient>
 void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft) {
-  this->LieBracketOnTheLeft(standsOnTheLeft);
+  this->lieBracketOnTheLeft(standsOnTheLeft);
 }
 
 template <class Coefficient>
@@ -86,13 +86,13 @@ void ElementWeylAlgebra<Coefficient>::LieBracketOnTheRightMakeReport(const Eleme
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::LieBracket(
+void ElementWeylAlgebra<Coefficient>::lieBracket(
   const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output
 ) {
   if (&output == &right || &output == &left) {
     ElementWeylAlgebra leftCopy = left;
     ElementWeylAlgebra rightCopy = right;
-    ElementWeylAlgebra::LieBracket(leftCopy, rightCopy, output);
+    ElementWeylAlgebra::lieBracket(leftCopy, rightCopy, output);
     return;
   }
   output = right;
@@ -104,7 +104,7 @@ void ElementWeylAlgebra<Coefficient>::LieBracket(
 }
 
 template <class Coefficient>
-void ElementWeylAlgebra<Coefficient>::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft) {
+void ElementWeylAlgebra<Coefficient>::lieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft) {
   ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1 = *this;
   tempEl1.multiplyOnTheLeft(standsOnTheLeft);

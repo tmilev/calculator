@@ -39,7 +39,7 @@ bool MonomialP::substitution(
       global.comments << "This may or may not be a programming error. "
       << "I cannot carry out a substitution in a monomial that has exponent "
       << "which is not a small integer: it is " << this->monBody[i]
-      << " instead. " << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
+      << " instead. " << GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML();
       return false;
     }
     tempPoly = theSubstitution[i];
@@ -141,7 +141,7 @@ void Polynomial<Coefficient>::MakeDeterminantFromSquareMatrix(
 }
 
 template <class Coefficient>
-int Polynomial<Coefficient>::TotalDegreeInt() const {
+int Polynomial<Coefficient>::totalDegreeInt() const {
   int result = - 1;
   if (!this->totalDegree().isSmallInteger(&result)) {
     global.fatal
@@ -157,7 +157,7 @@ template <class Coefficient>
 Rational Polynomial<Coefficient>::totalDegree() const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
+    result = MathRoutines::maximum((*this)[i].TotalDegree(), result);
   }
   return result;
 }
@@ -478,12 +478,12 @@ Matrix<Coefficient> Polynomial<Coefficient>::EvaluateUnivariatePoly(
 }
 
 template <class Coefficient>
-int Polynomial<Coefficient>::GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
+int Polynomial<Coefficient>::getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
   int result = - 1;
   for (int i = 0; i < this->size; i ++) {
-    result = MathRoutines::Maximum(
+    result = MathRoutines::maximum(
       result,
-      this->theObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+      this->theObjects[i].getHighestIndexSuchThatHigherIndexVariablesDontParticipate()
     );
   }
   return result;
@@ -606,17 +606,31 @@ bool Polynomial<Coefficient>::isEqualTo(const Polynomial<Coefficient>& p) const 
 }
 
 template <class Coefficient>
+Polynomial<Coefficient> Polynomial<Coefficient>::operator+(const Polynomial<Coefficient>& other) const {
+  Polynomial<Coefficient> copy = *this;
+  copy += other;
+  return copy;
+}
+
+template <class Coefficient>
+Polynomial<Coefficient> Polynomial<Coefficient>::operator-(const Polynomial<Coefficient>& other) const {
+  Polynomial<Coefficient> copy = *this;
+  copy -= other;
+  return copy;
+}
+
+template <class Coefficient>
 void Polynomial<Coefficient>::operator-=(int x) {
   MonomialP tempMon;
   tempMon.makeOne();
-  this->SubtractMonomial(tempMon, x);
+  this->subtractMonomial(tempMon, x);
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator-=(const Coefficient& other) {
   MonomialP tempMon;
   tempMon.makeOne();
-  this->SubtractMonomial(tempMon, other);
+  this->subtractMonomial(tempMon, other);
 }
 
 template <class Coefficient>
@@ -690,9 +704,9 @@ void Polynomial<Coefficient>::operator=(int other) {
 
 template <class Coefficient>
 template <class otherType>
-void Polynomial<Coefficient>::AssignOtherType(const Polynomial<otherType>& other) {
+void Polynomial<Coefficient>::assignOtherType(const Polynomial<otherType>& other) {
   this->NumVars = other.NumVars;
-  this->::LinearCombination<MonomialP, Coefficient>::AssignOtherType(other);
+  this->::LinearCombination<MonomialP, Coefficient>::assignOtherType(other);
 }
 
 template <class Coefficient>
@@ -816,8 +830,8 @@ void Polynomial<Coefficient>::TimesInteger(int a) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::AssignCharPoly(const Matrix<Coefficient>& input) {
-  MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
+void Polynomial<Coefficient>::assignCharacteristicPoly(const Matrix<Coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::assignCharacteristicPoly");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "
@@ -881,7 +895,7 @@ void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
     }
     tempM.makeEi(0, theBasis.size, 1);
     currentFactor.addMonomial(tempM, 1);
-    *this = MathRoutines::lcm(*this, currentFactor);
+    *this = MathRoutines::leastCommonMultiple(*this, currentFactor);
   }
   this->scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
 }
@@ -890,7 +904,7 @@ template <class Coefficient>
 int Polynomial<Coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).numeratorShort);
+    result = MathRoutines::maximum(result, (*this)[i](VariableIndex).numeratorShort);
     if (!(*this)[i](VariableIndex).isSmallInteger()) {
       global.fatal << " This is a programming error: "
       << "GetMaxPowerOfVariableIndex called on a polynomial whose monomials "
@@ -1043,8 +1057,8 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
     if (rightMonomial > leftMonomial) {
       return false;
     }
-    Coefficient leftCoefficient = left.GetMonomialCoefficient(leftMonomial);
-    Coefficient rightCoefficient = right.GetMonomialCoefficient(rightMonomial);
+    Coefficient leftCoefficient = left.getMonomialCoefficient(leftMonomial);
+    Coefficient rightCoefficient = right.getMonomialCoefficient(rightMonomial);
     if (leftCoefficient > rightCoefficient) {
       return true;
     }

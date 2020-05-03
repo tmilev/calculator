@@ -10,13 +10,13 @@ void GlobalStatistics::checkPointerCounters() {
   if (GlobalStatistics::globalPointerCounter > GlobalStatistics::cgiLimitRAMuseNumPointersInList) {
     /////////////////////////////////////////////////
     // *** Deadlock alert: critical section start ***
-    global.MutexParallelComputingCrash.LockMe();
+    global.MutexParallelComputingCrash.lockMe();
     if (GlobalStatistics::flagUngracefulExitInitiated) {
-      global.MutexParallelComputingCrash.UnlockMe();
+      global.MutexParallelComputingCrash.unlockMe();
       return;
     }
     GlobalStatistics::flagUngracefulExitInitiated = true;
-    global.MutexParallelComputingCrash.UnlockMe();
+    global.MutexParallelComputingCrash.unlockMe();
     // *** Deadlock alert: critical section end ***
     /////////////////////////////////////////////////
     global.fatal << "This may or may not be an error: the number of pointers "
@@ -32,7 +32,7 @@ void GlobalStatistics::checkPointerCounters() {
 void MutexRecursiveWrapper::checkConsistency() {
   if (this->flagDeallocated) {
     global << Logger::red << "Use after free of mutex. "
-    << global.fatal.GetStackTraceEtcErrorMessageConsole() << Logger::endL;
+    << global.fatal.getStackTraceEtcErrorMessageConsole() << Logger::endL;
     assert(false);
   }
 }
@@ -48,7 +48,7 @@ GlobalStatistics::globalPointerCounter ++;
 #endif
 }
 
-bool MutexRecursiveWrapper::InitializeIfNeeded() {
+bool MutexRecursiveWrapper::initializeIfNeeded() {
   if (this->flagInitialized) {
     return true;
   }
@@ -73,9 +73,9 @@ bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly() {
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
 
-void MutexRecursiveWrapper::LockMe() {
+void MutexRecursiveWrapper::lockMe() {
   this->checkConsistency();
-  if (!this->InitializeIfNeeded()) {
+  if (!this->initializeIfNeeded()) {
     return;
   }
   try {
@@ -97,9 +97,9 @@ void MutexRecursiveWrapper::LockMe() {
   this->lastLockerThread = ThreadData::getCurrentThreadId();
 }
 
-void MutexRecursiveWrapper::UnlockMe() {
+void MutexRecursiveWrapper::unlockMe() {
   this->checkConsistency();
-  if (!this->InitializeIfNeeded()) {
+  if (!this->initializeIfNeeded()) {
     return;
   }
   this->flagUnsafeFlagForDebuggingIsLocked = false;
@@ -108,38 +108,38 @@ void MutexRecursiveWrapper::UnlockMe() {
 }
 
 void PauseThread::safePointDontCallMeFromDestructors() {
-  this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
-  this->mutexSignalMeWhenReachingSafePoint.LockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
+  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
+  this->mutexLockMeToPauseCallersOfSafePoint.lockMe();
+  this->mutexSignalMeWhenReachingSafePoint.lockMe();
+  this->mutexLockMeToPauseCallersOfSafePoint.unlockMe();
 }
 
 void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
-  this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
+  this->mutexHoldMeWhenReadingOrWritingInternalFlags.lockMe();
   if (this->flagIsPausedWhileRunning) {
-    this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
+    this->mutexHoldMeWhenReadingOrWritingInternalFlags.unlockMe();
     return;
   }
-  this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
-  this->mutexSignalMeWhenReachingSafePoint.LockMe();
+  this->mutexHoldMeWhenReadingOrWritingInternalFlags.unlockMe();
+  this->mutexLockMeToPauseCallersOfSafePoint.lockMe();
+  this->mutexSignalMeWhenReachingSafePoint.lockMe();
   this->flagIsPausedWhileRunning = true;
-  this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
 }
 
 void PauseThread::unlockSafePoint() {
   this->flagIsPausedWhileRunning = false;
-  this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
+  this->mutexLockMeToPauseCallersOfSafePoint.unlockMe();
 }
 
 void PauseThread::initComputation() {
-  this->mutexSignalMeWhenReachingSafePoint.LockMe();
+  this->mutexSignalMeWhenReachingSafePoint.lockMe();
   this->flagIsRunning = true;
 }
 
 void PauseThread::exitComputation() {
   this->flagIsRunning = false;
-  this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
+  this->mutexSignalMeWhenReachingSafePoint.unlockMe();
 }
 
 bool& PauseThread::getFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe() {

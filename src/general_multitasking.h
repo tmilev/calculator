@@ -12,9 +12,9 @@
 // mutexes should be put here.
 // MutexRecursiveWrapper specification:
 // The mutex has two states: locked and unlocked.
-// When the caller calls UnlockMe() this unlocks the mutex if it were locked,
+// When the caller calls unlockMe() this unlocks the mutex if it were locked,
 // otherwise does nothing, and immediately returns.
-// When the caller calls LockMe() there are two cases.
+// When the caller calls lockMe() there are two cases.
 // 1) First, if the mutex is unlocked, the mutex state changes to
 // locked and execution of the caller continues.
 // The preceding two operations are atomic: if the mutex happens to be unlocked,
@@ -40,16 +40,16 @@ private:
   void operator=(const MutexRecursiveWrapper& other);
   MutexRecursiveWrapper(const MutexRecursiveWrapper& other);
 public:
-  bool InitializeIfNeeded();
+  bool initializeIfNeeded();
   std::string mutexName;
   void* theMutexImplementation;
   // note: the mutex implementation is not a named type for system portability.
   bool isLockedUnsafeUseForWINguiOnly();
   // locks the mutex if the mutex is free. If not it suspends calling thread until
   // mutex becomes free and then locks it.
-  void LockMe();
+  void lockMe();
   // unlocks the mutex.
-  void UnlockMe();
+  void unlockMe();
   void checkConsistency();
   void initConstructorCallOnly();
   MutexRecursiveWrapper() {
@@ -68,10 +68,10 @@ public:
   MutexRecursiveWrapper* theMutex;
   MutexLockGuard(MutexRecursiveWrapper& inputMutex) {
     this->theMutex = &inputMutex;
-    this->theMutex->LockMe();
+    this->theMutex->lockMe();
   }
   ~MutexLockGuard() {
-    this->theMutex->UnlockMe();
+    this->theMutex->unlockMe();
     this->theMutex = nullptr;
   }
 };

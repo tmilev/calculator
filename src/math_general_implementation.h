@@ -354,7 +354,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
         if (isSmallerOrEqualTo) {
           tempElt = otherElt;
           tempElt /= PivotElt;
-          tempElt.AssignFloor();
+          tempElt.assignFloor();
           this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
         }
         if (this->elements[ExploringRow][col].isEqualToZero()) {
@@ -367,7 +367,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
       for (int i = 0; i < row; i ++) {
         tempElt = this->elements[i][col];
         tempElt /= PivotElt;
-        tempElt.AssignFloor();
+        tempElt.assignFloor();
         this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
         if (this->elements[i][col].isNegative()) {
           this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
@@ -386,7 +386,7 @@ void Vectors<Coefficient>::chooseABasis() {
   Selection tempSel;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->theObjects[i]);
-    if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
+    if (output.getRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
       output.removeLastObject();
     }
   }
@@ -400,7 +400,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
   if (this->size != 0 && theDim != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
-  int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
+  int currentRank = this->getRankOfSpanOfElements(Buffer, BufferSel);
   if (currentRank == theDim) {
     return;
   }
@@ -408,7 +408,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(int theDim) {
   for (int i = 0; i < theDim && currentRank < theDim; i ++) {
     theVect.makeEi(theDim, i);
     this->addOnTop(theVect);
-    int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
+    int candidateRank = this->getRankOfSpanOfElements(Buffer, BufferSel);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;
     } else {

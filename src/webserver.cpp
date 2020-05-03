@@ -1070,7 +1070,7 @@ int WebWorker::GetIndexIfRunningWorkerId(
   if (indexOther >= 0) {
     this->parent->theWorkers[indexOther].writingReportFile.Lock();
   }
-  bool success = FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  bool success = FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId,
     computationResult,
     true,
@@ -1781,7 +1781,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
   MacroRegisterFunctionWithName("WebAPIResponse::getCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
-  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out
   )) {
     out << "<b style =\"color:red\">Couldn't find the recaptcha key in file: "
@@ -2734,7 +2734,7 @@ void WebServer::initListeningSockets() {
   }
   this->highestSocketNumber = - 1;
   for (int i = 0; i < this->theListeningSockets.size; i ++) {
-    this->highestSocketNumber = MathRoutines::Maximum(
+    this->highestSocketNumber = MathRoutines::maximum(
       this->theListeningSockets[i], this->highestSocketNumber
     );
     if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
@@ -2827,7 +2827,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
-    this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
+    this->currentlyConnectedAddresses.getMonomialCoefficient(incomingAddress) >
     this->MaxNumWorkersPerIPAdress
   );
   if (!purgeIncomingAddress) {
@@ -2876,7 +2876,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 void WebServer::MarkChildNotInUse(int childIndex) {
   WebWorker& worker = this->theWorkers[childIndex];
   worker.flagInUsE = false;
-  this->currentlyConnectedAddresses.SubtractMonomial(
+  this->currentlyConnectedAddresses.subtractMonomial(
     worker.userAddress, 1
   );
   this->workerIds.removeKey(worker.workerId);
@@ -4201,7 +4201,7 @@ bool GlobalVariables::configurationLoad() {
   if (this->configurationFileName == "") {
     this->configurationFileName = "/configuration/configuration.json";
   }
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     this->configurationFileName, global.configurationFileContent, true, &out
   )) {
     global << Logger::yellow << "Failed to read configuration file. " << out.str() << Logger::endL;

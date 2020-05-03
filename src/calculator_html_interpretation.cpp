@@ -415,7 +415,7 @@ JSData WebAPIResponse::clonePageResult() {
   std::string fileNameToBeCloned = HtmlRoutines::convertURLStringToNormal(global.getWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
+  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
     out << "Could not find input file: " << fileNameToBeCloned;
     result[WebAPI::result::error] = out.str();
     return result;
@@ -525,7 +525,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     "/calculator-html/index.html", theInterpretation.htmlRaw, false, &errorStream
   )) {
     out << "<html><body><b>Failed to load the application file. </b>"
@@ -535,7 +535,7 @@ std::string WebAPIResponse::getOnePageJS(bool appendBuildHash) {
   theInterpretation.buildHtmlJavascriptPage(appendBuildHash);
   theInterpretation.jsFileContents.setSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
-    if (!FileOperations::loadFileToStringVirtual(
+    if (!FileOperations::loadFiletoStringVirtual(
       theInterpretation.jsFileNames[i],
       theInterpretation.jsFileContents[i],
       false,
@@ -578,7 +578,7 @@ std::string WebAPIResponse::getApp(bool appendBuildHash) {
   BuilderApplication theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     "/calculator-html/index.html",
     theInterpretation.htmlRaw,
     false,
@@ -673,7 +673,7 @@ bool CourseList::loadFromString(const std::string& input) {
 bool CourseList::load() {
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
-  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
+  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
     "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
   )) {
     commentsOnFailure << "Failed to fetch available courses from /coursesavailable/default.txt. ";
@@ -1898,7 +1898,7 @@ std::string WebAPIResponse::toStringAssignSection() {
   std::string idAddressTextarea = "inputSetTeacher";
   std::string idExtraTextarea = "inputSections";
   std::string idOutput = "idOutputSections";
-  out << "Assign section(s) to teacher(s)<br> ";
+  out << "assign section(s) to teacher(s)<br> ";
   out << "<textarea width =\"500px\" ";
   out << "id =\"" << idAddressTextarea << "\"";
   out << "placeholder =\"email or user list, comma, space or ; separated\">";
@@ -2326,7 +2326,7 @@ std::string WebAPIResponse::toStringUserScores() {
   }
   out << "</tr>\n";
 
-  out << "<tr><td><b>Maximum score</b></td>"
+  out << "<tr><td><b>maximum score</b></td>"
   << "<td>-</td>";
   out
   << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()

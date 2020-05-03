@@ -24,10 +24,10 @@ std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressio
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
+bool FiniteGroup<elementSomeGroup>::computeAllElements(
   bool andWords, int MaxElements
 ) {
-  MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
+  MacroRegisterFunctionWithName("FiniteGroup::computeAllElements");
   this->checkConsistency();
   //double startTimeDebug= global.getElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
@@ -120,7 +120,7 @@ void OrbitIterator<elementGroup, elementRepresentation>::initialize(
 }
 
 template <class elementGroup, class elementRepresentation>
-const elementRepresentation& OrbitIterator<elementGroup, elementRepresentation>::GetCurrentElement() {
+const elementRepresentation& OrbitIterator<elementGroup, elementRepresentation>::getCurrentElement() {
   return (*this->currentLayer)[this->indexCurrentElement];
 }
 
@@ -136,8 +136,8 @@ std::string OrbitIterator<elementGroup, elementRepresentation>::ToStringLayerSiz
 }
 
 template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLast");
+bool OrbitIterator<elementGroup, elementRepresentation>::incrementReturnFalseIfPastLast() {
+  MacroRegisterFunctionWithName("OrbitIterator::incrementReturnFalseIfPastLast");
   if (this->theGroupGeneratingElements.size == 0) {
     return false;
   }
@@ -264,7 +264,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::checkInitialization() {
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::HasElement(const elementSomeGroup& g) {
   if (!this->flagAllElementsAreComputed) {
-    this->ComputeAllElements(false);
+    this->computeAllElements(false);
   }
   return this->theElements.contains(g);
 }
@@ -525,14 +525,14 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
     inputOutputClass.theElements.setSize(0);
     inputOutputClass.theElements.addOnTop(inputOutputClass.representative);
   }
-  while (theOrbitIterator.IncrementReturnFalseIfPastLast()) {
+  while (theOrbitIterator.incrementReturnFalseIfPastLast()) {
     inputOutputClass.size ++;
     if (storeCC) {
-      if (inputOutputClass.theElements.contains(theOrbitIterator.GetCurrentElement())) {
-        global.fatal << " !element " << theOrbitIterator.GetCurrentElement().toString()
+      if (inputOutputClass.theElements.contains(theOrbitIterator.getCurrentElement())) {
+        global.fatal << " !element " << theOrbitIterator.getCurrentElement().toString()
         << " already contained !" << global.fatal;
       }
-      inputOutputClass.theElements.addOnTop(theOrbitIterator.GetCurrentElement());
+      inputOutputClass.theElements.addOnTop(theOrbitIterator.getCurrentElement());
     }
   }
 }
@@ -690,7 +690,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const Li
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassesFromAllElements");
-  this->ComputeAllElements(false, - 1);
+  this->computeAllElements(false, - 1);
   List<bool> Accounted;
   Accounted.initializeFillInObject(this->theElements.size, false);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
@@ -1947,8 +1947,8 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets() {
   if (this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula) {
     return this->CosetRepresentativeEnumerator(this);
   }
-  this->theSubgroup->ComputeAllElements(true);
-  this->theGroup->ComputeAllElements(true);
+  this->theSubgroup->computeAllElements(true);
+  this->theGroup->computeAllElements(true);
   GraphOLD orbitg = GraphOLD(this->theGroup->theElements.size, this->theSubgroup->generators.size);
   for (int i = 0; i < this->theGroup->theElements.size; i ++) {
     for (int j = 0; j < this->theSubgroup->generators.size; j ++) {

@@ -925,7 +925,7 @@ void JSData::reset(char inputType) {
   this->objects.clear();
   this->theInteger.freeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {
-    this->theInteger.getElement().AssignInt(0);
+    this->theInteger.getElement().assignInteger(0);
   }
 }
 

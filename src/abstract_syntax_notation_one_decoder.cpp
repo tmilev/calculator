@@ -1585,7 +1585,7 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's private key.
   // For server's certificate, use TransportLayerSecurity::LoadPEMPrivateKey.
-  if (!FileOperations::loadFileToStringVirtual(input, certificateContent, false, commentsOnFailure)) {
+  if (!FileOperations::loadFiletoStringVirtual(input, certificateContent, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }
@@ -1692,7 +1692,7 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
   }
   this->thePublicKey.theExponent.AssignUnsignedInt(this->thePublicKey.defaultExponent);
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
-  this->CarmichaelTotientOfModulus = MathRoutines::lcm(this->primeOne - 1, this->primeTwo - 1);
+  this->CarmichaelTotientOfModulus = MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
   ElementZmodP inverter;
   inverter.theModulus = this->CarmichaelTotientOfModulus;
   inverter.theValue = 1;
@@ -1852,7 +1852,7 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's certificate.
   // For server's certificate, use TransportLayerSecurity::LoadPEMCertificate.
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     input, certificateContent, false, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

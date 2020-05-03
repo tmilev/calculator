@@ -1936,7 +1936,7 @@ int Expression::getNumberOfColumns() const {
   int theMax = 1;
   for (int i = 1; i < this->size(); i ++) {
     if ((*this)[i].isSequenceNElements()) {
-      theMax = MathRoutines::Maximum((*this)[i].size() - 1, theMax);
+      theMax = MathRoutines::maximum((*this)[i].size() - 1, theMax);
     }
   }
   return theMax;
@@ -2374,7 +2374,7 @@ bool Expression::toStringBuiltIn<SemisimpleLieAlgebra*>(
 ) {
   (void) theFormat;
   out << "SSLieAlg{}("
-  << input.getValue<SemisimpleLieAlgebra*>()->ToStringLieAlgebraName()
+  << input.getValue<SemisimpleLieAlgebra*>()->toStringLieAlgebraName()
   << ")";
   return true;
 }

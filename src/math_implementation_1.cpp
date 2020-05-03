@@ -5,21 +5,21 @@
 #include "math_general.h"
 #include "math_extra_universal_enveloping.h"
 
-void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
+void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   int generatorIndex,
   List<int>& outputIndicesFormatAd0Ad1Ad2etc,
   Rational& outputMultiplyLieBracketsToGetGenerator
 ) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens");
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators");
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
-  if (this->IsGeneratorFromCartan(generatorIndex)) {
-    int simpleIndex = generatorIndex - this->GetNumPosRoots();
+  if (this->isGeneratorFromCartan(generatorIndex)) {
+    int simpleIndex = generatorIndex - this->getNumberOfPositiveRoots();
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
-    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->GetNumPosRoots() - 1 - generatorIndex);
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex);
     outputMultiplyLieBracketsToGetGenerator = this->theWeyl.cartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
   }
-  Vector<Rational> theWeight = this->GetWeightOfGenerator(generatorIndex);
+  Vector<Rational> theWeight = this->getWeightOfGenerator(generatorIndex);
   outputMultiplyLieBracketsToGetGenerator = 1;
   Vector<Rational> genWeight, newWeight;
   while (!theWeight.isEqualToZero()) {
@@ -31,7 +31,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
         theWeight = newWeight;
-        int theIndex = this->GetGeneratorFromRoot(- genWeight);
+        int theIndex = this->getGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
           int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
@@ -432,7 +432,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     theSub[i] = theHWdualCoords[i];
   }
   this->modOutVermaRelations(&theSub, theRingUnit, theRingZero);
-  int numPosRoots = this->owner->theOwner->GetNumPosRoots();
+  int numPosRoots = this->owner->theOwner->getNumberOfPositiveRoots();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
@@ -552,7 +552,7 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
 }
 
 template<class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::ModToMinDegreeFormFDRels(
+void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
   const Vector<Rational>& theHWinSimpleCoords,
   const Coefficient& theRingUnit,
   const Coefficient& theRingZero
@@ -560,7 +560,7 @@ void ElementUniversalEnveloping<Coefficient>::ModToMinDegreeFormFDRels(
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
   bool Found = true;
-  int numPosRoots = this->owner->GetNumPosRoots();
+  int numPosRoots = this->owner->getNumberOfPositiveRoots();
   while (Found) {
     Found = false;
     for (int j = numPosRoots - 1; j >= 0; j --) {
@@ -576,11 +576,11 @@ void ElementUniversalEnveloping<Coefficient>::ModToMinDegreeFormFDRels(
 }
 
 template<class Coefficient>
-bool ElementUniversalEnveloping<Coefficient>::ApplyMinusTransposeAutoOnMe() {
+bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
   MonomialUniversalEnveloping<Coefficient> tempMon;
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
-  int numPosRoots = this->getOwner().GetNumPosRoots();
+  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
   int theRank = this->getOwner().getRank();
   Coefficient theCoeff;
   for (int i = 0; i < this->size; i ++) {
@@ -623,7 +623,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
   output = theRingZero;
   ElementUniversalEnveloping<Coefficient> MTright;
   MTright = right;
-  if (!MTright.ApplyMinusTransposeAutoOnMe()) {
+  if (!MTright.applyMinusTransposeAutoOnMe()) {
     return false;
   }
   ElementUniversalEnveloping<Coefficient> Accum, intermediateAccum, tempElt;
@@ -689,7 +689,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
 }
 
 template <class Coefficient>
-std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
+std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& theRingUnit, const Coefficient& theRingZero
 ) {
   std::stringstream out;
@@ -697,7 +697,7 @@ std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
   theOrbit.reserve(1000);
   ElementUniversalEnveloping<Coefficient> theElt;
   int theDim = this->getOwner().getRank();
-  int numPosRoots = this->getOwner().GetNumPosRoots();
+  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
   theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
@@ -718,7 +718,7 @@ std::string ElementUniversalEnveloping<Coefficient>::IsInProperSubmodule(
 }
 
 template <class Coefficient>
-bool ElementUniversalEnveloping<Coefficient>::ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output) {
+bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(ElementUniversalEnveloping<Rational>& output) {
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational theCoeff;
@@ -768,8 +768,8 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   WeylGroupData& theLargeWeyl = this->theHmm.theRange().theWeyl;
   WeylGroupData& theSmallWeyl = this->theHmm.theDomain().theWeyl;
-  int numB3NegGenerators = this->theHmm.theRange().GetNumPosRoots();
-  int numG2NegGenerators = this->theHmm.theDomain().GetNumPosRoots();
+  int numB3NegGenerators = this->theHmm.theRange().getNumberOfPositiveRoots();
+  int numG2NegGenerators = this->theHmm.theDomain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
     const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
     bool isInNilradical = false;
@@ -781,7 +781,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalLarge.addOnTop(currentWeight);
-      tempElt.MakeGenerator(i, this->theHmm.theRange());
+      tempElt.makeGenerator(i, this->theHmm.theRange());
       this->nilradicalLarge.addOnTop(tempElt);
       this->indicesNilradicalLarge.addOnTop(i);
     }
@@ -797,7 +797,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
     if (isInNilradical) {
       this->weightsNilradicalSmall.addOnTop(currentWeight);
-      tempElt.MakeGenerator(i, this->theHmm.theDomain());
+      tempElt.makeGenerator(i, this->theHmm.theDomain());
       this->nilradicalSmall.addOnTop(tempElt);
       this->indicesNilradicalSmall.addOnTop(i);
     }

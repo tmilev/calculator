@@ -72,7 +72,7 @@ public:
 
   void MakeArbitrarySimple(char letter, int number);
   void ComputeRho();
-  void ComputeAllElements();
+  void computeAllElements();
   void ComputeCC();
   void ComputeClassMap();
   Matrix<Rational>& GetClassMatrix(int cc);
@@ -270,7 +270,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
+void AnotherWeylGroup<scalar, templateVector>::computeAllElements() {
   global.comments << "Getting elements...";
   if (this->RootSystem.size == 0) {
     this->ComputeRho();
@@ -299,7 +299,7 @@ template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   global.comments << "Getting conjugacy classes...";
   if (this->rhoOrbit.size == 0) {
-    this->ComputeAllElements();
+    this->computeAllElements();
   }
   List<bool> Accounted;
   Accounted.initializeFillInObject(this->size(), false);
@@ -586,7 +586,7 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
   SubgroupData<FiniteGroup<ElementWeylGroup>, ElementWeylGroup> HD;
   HD.initFromGroupAndGenerators(G.theGroup, gens);
   FiniteGroup<ElementWeylGroup>& H = *HD.theSubgroup;
-  H.ComputeAllElements(true, - 1);
+  H.computeAllElements(true, - 1);
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);
 

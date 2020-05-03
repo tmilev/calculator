@@ -358,7 +358,7 @@ void Pipe::ReadLoop(List<char>& output) {
   MacroRegisterFunctionWithName("Pipe::ReadLoop");
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
-  safetyFirst.LockMe(); // Prevent threads from locking one another.
+  safetyFirst.lockMe(); // Prevent threads from locking one another.
   this->metaData.lastRead.setSize(0);
   this->metaData.ReadOnceIfFailThenCrash(true);
   int expectedBytes = 0;
@@ -373,7 +373,7 @@ void Pipe::ReadLoop(List<char>& output) {
     this->thePipe.ReadOnceIfFailThenCrash(true);
     output.addListOnTop(this->thePipe.lastRead);
   }
-  safetyFirst.UnlockMe(); // Prevent threads from locking one another.
+  safetyFirst.unlockMe(); // Prevent threads from locking one another.
 }
 
 void Pipe::WriteOnceAfterEmptying(

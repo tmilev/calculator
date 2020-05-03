@@ -290,7 +290,7 @@ public:
 
   static bool innerGetCentralizerChainsSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerComputePairingTablesAndFKFTsubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innercomputePairingTablesAndFKFTsubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerDivideByNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output);

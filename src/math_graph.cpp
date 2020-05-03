@@ -192,7 +192,7 @@ void GraphWeightedLabeledEdges::computeDisplayGroups() {
   }
   this->groupMaxSize = 0;
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
-    this->groupMaxSize =MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
+    this->groupMaxSize =MathRoutines::maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
   }
   this->positionInDisplayGroup.initializeFillInObject(this->numNodes, - 1);
   this->displayGroupIndices.initializeFillInObject(this->numNodes, - 1);

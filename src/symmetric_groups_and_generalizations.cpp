@@ -12,7 +12,7 @@ int Partition::Fulton61z() const {
     if ((j != this->p.size) && (this->p[j - 1] == this->p[j])) {
       samecount ++;
     } else {
-      acc *= MathRoutines::KToTheNth(this->p[j - 1], samecount);
+      acc *= MathRoutines::kToTheNth(this->p[j - 1], samecount);
       acc *= MathRoutines::factorial(samecount);
       samecount = 1;
     }
@@ -1040,7 +1040,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
     int a = this->p*i;
     M.elements[i][a] = (this->s[i])?- 1:1; // ahaha 0 is false
   }
-  out.AssignCharPoly(M);
+  out.assignCharacteristicPoly(M);
 }
 
 

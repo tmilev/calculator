@@ -264,7 +264,7 @@ public:
   LargeInteger (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
   bool areConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
-  bool ComputeAllElements(bool andWords, int MaxElements = 1000000);
+  bool computeAllElements(bool andWords, int MaxElements = 1000000);
   // MaxElements gives an upper bound to the number of elements this function will try to find.
   // Set MaxElements = - 1 for "unlimited" upper bound.
   bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements = 1000000);
@@ -672,8 +672,8 @@ public:
   ~WeylGroupData() {
     this->flagDeallocated = true;
   }
-  bool IsOfSimpleType(char desiredType, int desiredRank) const {
-    return this->theDynkinType.IsOfSimpleType(desiredType, desiredRank);
+  bool isOfSimpleType(char desiredType, int desiredRank) const {
+    return this->theDynkinType.isOfSimpleType(desiredType, desiredRank);
   }
   Matrix<Rational>* GetMatrixFundamentalToSimpleCoords() {
     this->ComputeFundamentalToSimpleMatrices();
@@ -1539,9 +1539,9 @@ public:
     this->nextLayer = &this->privateLayer3;
     this->indexCurrentElement = - 1;
   }
-  const elementRepresentation& GetCurrentElement();
+  const elementRepresentation& getCurrentElement();
   bool incrementReturnFalseIfPastLastFALSE();
-  bool IncrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast();
   void initialize(
     const List<elementGroup>& inputGenerators,
     const elementRepresentation& inputElement,
@@ -1565,10 +1565,10 @@ public:
   bool flagOrbitEnumeratedOnce;
   OrbitIteratorRootActionWeylGroupAutomorphisms();
   void reset();
-  bool IncrementReturnFalseIfPastLast();
-  const Vector<Rational>& GetCurrentElement();
+  bool incrementReturnFalseIfPastLast();
+  const Vector<Rational>& getCurrentElement();
   std::string toString() const;
-  std::string ToStringSize() const;
+  std::string toStringSize() const;
   bool checkConsistency();
   void initialize();
   void initialize(const List<ElementWeylGroupAutomorphisms>& inputGenerators,
@@ -2259,7 +2259,7 @@ public:
   bool operator==(int other) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   void assignMinPoly(const Matrix<Coefficient>& input);
-  void AssignCharPoly(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
+  void assignCharacteristicPoly(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
 };
 
 template <typename Coefficient>
@@ -2286,12 +2286,12 @@ void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) 
       out.data[i] = - p[i];
     }
     out.data[p.size] = 1;
-    *this = MathRoutines::lcm(*this, out);
+    *this = MathRoutines::leastCommonMultiple(*this, out);
   }
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::AssignCharPoly(const Matrix<Coefficient>& input) {
+void UDPolynomial<Coefficient>::assignCharacteristicPoly(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(n + 1);
   this->data[0] = 1;
@@ -2491,7 +2491,7 @@ LargeInteger FiniteGroup<elementSomeGroup>::getSize() {
     this->sizePrivate = this->GetSizeByFormula(*this);
     return sizePrivate;
   }
-  this->ComputeAllElements(false);
+  this->computeAllElements(false);
   return this->sizePrivate;
 }
 

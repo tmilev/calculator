@@ -1570,7 +1570,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
       continue;
     }
     std::string currentCert;
-    if (!FileOperations::loadFileToStringVirtual(
+    if (!FileOperations::loadFiletoStringVirtual(
       "certificates-public/" + theFileNames[i], currentCert, false, commentsOnFailure
     )) {
       continue;

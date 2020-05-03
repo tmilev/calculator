@@ -95,8 +95,8 @@ public:
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
   void toString(std::string& output, RootSubalgebras& owners, bool useLatex);
   void ComputeDebugString(RootSubalgebras& owners);
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input, RootSubalgebras& owner);
+  void writeToFile(std::fstream& output);
+  void readFromFile(std::fstream& input, RootSubalgebras& owner);
   void AddRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners);
   ConeRelations() {
     this->NumAllowedLatexLines = 40;
@@ -187,8 +187,8 @@ public:
   ~RootSubalgebra() {
     this->flagDeallocated = true;
   }
-  WeylGroupData& GetAmbientWeyl() const;
-  WeylGroupAutomorphisms& GetAmbientWeylAutomorphisms() const;
+  WeylGroupData& getAmbientWeyl() const;
+  WeylGroupAutomorphisms& getAmbientWeylAutomorphisms() const;
   SemisimpleLieAlgebra& getOwnerLieAlgebra() const;
   //returns - 1 if the weight/root  is not in g/k
   bool checkInitialization() const;
@@ -196,7 +196,7 @@ public:
   bool CheckScalarProdMatrixOrdered() const;
   Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
   Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
-  inline int GetNumModules() const {
+  inline int getNumberOfModules() const {
     return this->HighestVectors.size;
   }
   int GetIndexKmoduleContainingRoot(const Vector<Rational>& input);
@@ -391,7 +391,7 @@ public:
   SemisimpleLieAlgebra& GetOwnerSSalgebra() const;
   WeylGroupData& GetOwnerWeyl() const;
   bool checkInitialization() const;
-  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots) const;
+  bool growDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots) const;
   void ComputeKmodMultTables();
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel);
   bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel);
@@ -499,7 +499,7 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(
+  void ElementtoStringModuleDecompositionMinimalContainingRegularSAs(
     bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output
   ) const;
   void ComputeModuleDecomposition(
@@ -609,7 +609,7 @@ public:
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
   void toHTML(FormatExpressions* theFormat = nullptr);
   std::string toStringSummary(FormatExpressions* theFormat = nullptr);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
+  void ElementtoStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string toString(FormatExpressions* theFormat = nullptr);
 };
 

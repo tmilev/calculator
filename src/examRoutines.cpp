@@ -409,7 +409,7 @@ bool CalculatorHTML::loadMe(
     return false;
   }
   (void) doLoadDatabase;
-  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
+  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
     this->fileName, this->inputHtml, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -3482,7 +3482,7 @@ void TopicElementParser::loadTopicBundleFile(
     this->bundleStack.addOnTop(input);
     return;
   }
-  if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
+  if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
     errorStream << "Could not open topic bundle file. ";
     input.makeError(errorStream.str());
     this->bundleStack.addOnTop(input);
@@ -3853,7 +3853,7 @@ bool CalculatorHTML::loadAndParseTopicList(std::stringstream& comments) {
     return true;
   }
   if (this->topicListContent == "") {
-    if (!FileOperations::loadFileToStringVirtualCustomizedReadOnly(
+    if (!FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
       this->topicListFileName, this->topicListContent, &comments
     )) {
       comments << "Failed to load the topic list associated with this course. "

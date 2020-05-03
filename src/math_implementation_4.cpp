@@ -25,7 +25,7 @@ GlobalVariables::Crasher::Crasher() {
   this->flagFinishingCrash = false;
 }
 
-void GlobalVariables::Crasher::FirstRun() {
+void GlobalVariables::Crasher::firstRun() {
   if (
     !this->flagCrashInitiated &&
     global.flagRunningBuiltInWebServer
@@ -43,7 +43,7 @@ void GlobalVariables::Crasher::FirstRun() {
 
 GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVariables::Crasher& dummyCrasherSignalsActualCrash) {
   (void) dummyCrasherSignalsActualCrash;
-  this->FirstRun();
+  this->firstRun();
   if (this->flagFinishingCrash) {
     std::cout << "Recursion within the crashing mechanism detected. "
     << "Something is very wrong. "
@@ -69,9 +69,9 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
       this->crashReportFile << "User input:\n" << global.userInputStringIfAvailable << "\n";
     }
   }
-  this->crashReportConsolE << Crasher::GetStackTraceEtcErrorMessageConsole();
-  this->crashReportHtml << Crasher::GetStackTraceEtcErrorMessageHTML();
-  this->crashReportFile << Crasher::GetStackTraceEtcErrorMessageHTML();
+  this->crashReportConsolE << Crasher::getStackTraceEtcErrorMessageConsole();
+  this->crashReportHtml << Crasher::getStackTraceEtcErrorMessageHTML();
+  this->crashReportFile << Crasher::getStackTraceEtcErrorMessageHTML();
   if (!global.flagNotAllocated) {
     if (global.progressReportStrings.size > 0) {
       this->crashReportHtml
@@ -134,7 +134,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   return *this;
 }
 
-std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
+std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
@@ -175,7 +175,7 @@ std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
   return out.str();
 }
 
-std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageConsole() {
+std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
   for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
     if (threadCounter >= global.theThreadData.size) {
@@ -283,9 +283,9 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
   }
   if (!global.fatal.flagCrashInitiated) {
     if (useHTML) {
-      reportStream << global.fatal.GetStackTraceEtcErrorMessageHTML();
+      reportStream << global.fatal.getStackTraceEtcErrorMessageHTML();
     } else {
-      reportStream << global.fatal.GetStackTraceEtcErrorMessageConsole();
+      reportStream << global.fatal.getStackTraceEtcErrorMessageConsole();
     }
     reportStream << global.getElapsedMilliseconds()
     << " ms elapsed. ";
@@ -1251,7 +1251,7 @@ void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
 }
 
 void Permutation::incrementAndGetPermutation(List<int>& output) {
-  this->IncrementReturnFalseIfPastLast();
+  this->incrementReturnFalseIfPastLast();
   this->GetPermutationLthElementIsTheImageofLthIndex(output);
 }
 
@@ -1444,7 +1444,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   std::stringstream out;
   WeylGroupData& LargerWeyl = this->theHmm.theRange().theWeyl;
   WeylGroupData& SmallerWeyl = this->theHmm.theDomain().theWeyl;
-  if (!LargerWeyl.IsOfSimpleType('B', 3)) {
+  if (!LargerWeyl.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
   this->initFromHomomorphism(parabolicSel, this->theHmm);
@@ -1517,7 +1517,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     theSubbedPoly.TranslateArgument(translationsProjectedFinal[i]);
     Accum += theSubbedPoly;
   }
-  Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
+  Accum.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
   out << drawOps.GetHtmlDiv(2);
   out << Accum.toString(false, true);
   return out.str();
@@ -1647,7 +1647,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   WeylGroupData& theWeYl = input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
-  theWeYl.theGroup.ComputeAllElements(false);
+  theWeYl.theGroup.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
   Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
@@ -2129,7 +2129,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
     tempMat.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - theTranslation[j];
   }
   tempMat.GetMatrixIntWithDen(outputMat, outputDen);
-  outputSub.MakeSubFromMatrixIntAndDen(outputMat, outputDen);
+  outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(outputMat, outputDen);
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(

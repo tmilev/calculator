@@ -17,14 +17,14 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   output.reset(theCommands, 2);
   Expression generatorLetterE, generatorIndexE;
   if (
-    input.theGeneratorIndex >= input.owner->GetNumPosRoots() &&
-    input.theGeneratorIndex < input.owner->GetNumPosRoots() + input.owner->getRank()
+    input.theGeneratorIndex >= input.owner->getNumberOfPositiveRoots() &&
+    input.theGeneratorIndex < input.owner->getNumberOfPositiveRoots() + input.owner->getRank()
   ) {
     generatorLetterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   } else {
     generatorLetterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   }
-  generatorIndexE.assignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+  generatorIndexE.assignValue(input.owner->getDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
@@ -238,7 +238,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   outputPointer->checkConsistency();
   output.assignValue(outputPointer, theCommands);
   if (newlyCreated) {
-    outputPointer->ComputeChevalleyConstants();
+    outputPointer->computeChevalleyConstants();
     Expression tempE;
     theCommands.functionWriteToHDOrPrintSSLieAlgebra(
       theCommands, output, tempE, false, false
@@ -466,7 +466,7 @@ bool CalculatorConversions::innerStoreCandidateSA(
   Expression currentE;
   List<std::string> keys;
   List<Expression> values;
-  input.CheckBasicInitialization();
+  input.checkBasicInitialization();
   CalculatorConversions::innerExpressionFromDynkinType(
     theCommands, input.theWeylNonEmbedded->theDynkinType, currentE
   );
@@ -595,7 +595,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   outputSubalgebra.theWeylNonEmbedded->ComputeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
   //some time soon.
-  outputSubalgebra.ComputeHsAndHsScaledToActByTwoFromComponents();
+  outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
   outputSubalgebra.flagSubalgebraPreloadedButNotVerified = true;
   return output.makeError(
     "Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ",
@@ -663,7 +663,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagComputeModuleDecomposition = true;
-  theSAs.flagComputePairingTable = false;
+  theSAs.flagcomputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theReport.report("Got to here pt 3");
   theSAs.millisecondsComputationStart = global.getElapsedMilliseconds();
@@ -686,7 +686,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
       << theSAsE[i].toString() << ". <hr>";
     }
 
-    currentCandidate.CheckFullInitializatioN();
+    currentCandidate.checkFullInitialization();
     if (theSAs.theSubalgebras.contains(currentCandidate.theHs)) {
       theCommands << "<hr>Did not load subalgebra of type "
       << currentCandidate.theWeylNonEmbedded->toString()
@@ -893,17 +893,17 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     ) {
       return theCommands << "<hr>Failed to convert summand "
       << singleChevGenE.toString() << " to Chevalley generator of "
-      << owner.ToStringLieAlgebraName();
+      << owner.toStringLieAlgebraName();
     }
     bool isGood = true;
     if (theLetter == "g") {
-      theChevGen.theGeneratorIndex = owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-      if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.GetNumGenerators()) {
+      theChevGen.theGeneratorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+      if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.getNumberOfGenerators()) {
         isGood = false;
       }
       output.addMonomial(theChevGen, polyForm.coefficients[j]);
     } else if (theLetter == "h") {
-      int theRootIndex = owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
+      int theRootIndex = owner.getRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theRootIndex < 0) {
         isGood = false;
       } else {
@@ -917,7 +917,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     if (!isGood) {
       return theCommands << "<hr>Failed to convert summand "
       << singleChevGenE.toString() << " to Chevalley generator of "
-      << owner.ToStringLieAlgebraName();
+      << owner.toStringLieAlgebraName();
     }
   }
   return true;
@@ -977,20 +977,20 @@ bool CalculatorConversions::innerElementUE(
       ) {
         return theCommands << "<hr>Failed to convert summand "
         << singleChevGenE.toString() << " to Chevalley generator of "
-        << owner.ToStringLieAlgebraName();
+        << owner.toStringLieAlgebraName();
       }
       bool isGood = true;
       bool isHonestElementUE = true;
       if (theLetter == "g") {
-        theChevGen.theGeneratorIndex = owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-        if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.GetNumGenerators()) {
+        theChevGen.theGeneratorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+        if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.getNumberOfGenerators()) {
           isGood = false;
         }
       } else if (theLetter == "h") {
         if (theChevGen.theGeneratorIndex < 1 || theChevGen.theGeneratorIndex>owner.getRank()) {
           isGood = false;
         } else {
-          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.GetNumPosRoots() - 1;
+          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.getNumberOfPositiveRoots() - 1;
         }
       } else {
         isHonestElementUE = false;
@@ -998,7 +998,7 @@ bool CalculatorConversions::innerElementUE(
       if (!isGood) {
         return theCommands << "<hr>Failed to convert summand "
         << singleChevGenE.toString() << " to Chevalley generator of "
-        << owner.ToStringLieAlgebraName();
+        << owner.toStringLieAlgebraName();
       }
       if (isHonestElementUE) {
         currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
@@ -1344,7 +1344,7 @@ bool CalculatorConversions::innerLoadFileIntoString(
     theRelativeFileName = argument.toString();
   }
   std::string outputString;
-  if (!FileOperations::loadFileToStringVirtual(
+  if (!FileOperations::loadFiletoStringVirtual(
     theRelativeFileName, outputString, false, &theCommands.comments
   )) {
     return false;

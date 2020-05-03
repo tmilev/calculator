@@ -827,7 +827,7 @@ bool FileOperations::getFolderFileNamesUnsecure(
   return true;
 }
 
-bool FileOperations::loadFileToStringVirtualCustomizedReadOnly(
+bool FileOperations::loadFiletoStringVirtualCustomizedReadOnly(
   const std::string& theFileName,
   std::string& output,
   std::stringstream* commentsOnFailure
@@ -915,18 +915,18 @@ std::string FileOperations::writeFileReturnHTMLLink(
   return out.str();
 }
 
-bool FileOperations::loadFileToStringVirtual(
+bool FileOperations::loadFiletoStringVirtual(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
-  return FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  return FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     theFileName, output, accessSensitiveFolders, false, commentsOnFailure
   );
 }
 
-bool FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+bool FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
@@ -1355,7 +1355,7 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   if (!FileOperations::fileExistsVirtual(outputCandidate, false, false)) {
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
-    if (FileOperations::loadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
+    if (FileOperations::loadFiletoStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
       if (FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
         theFile, inputCopy, false, true, false, false
@@ -1941,7 +1941,7 @@ void StringRoutines::Differ::computeLongestSubsequenceMatrix() {
       if (this->left[i - 1] == this->right[j - 1]) {
         theMatrix(i, j) = theMatrix(i - 1, j - 1) + 1;
       } else {
-        theMatrix(i, j) = MathRoutines::Maximum(theMatrix(i - 1, j), theMatrix(i, j - 1));
+        theMatrix(i, j) = MathRoutines::maximum(theMatrix(i - 1, j), theMatrix(i, j - 1));
       }
     }
   }
@@ -2401,7 +2401,7 @@ bool MathRoutines::isADigit(const std::string& input, int* whichDigit) {
   return MathRoutines::isADigit(input[0], whichDigit);
 }
 
-int MathRoutines::lcm(int a, int b) {
+int MathRoutines::leastCommonMultiple(int a, int b) {
   if (a < 0) {
     a = - a;
   }
@@ -2419,7 +2419,7 @@ int MathRoutines::twoToTheNth(int n) {
   return result;
 }
 
-int MathRoutines::KToTheNth(int k, int n) {
+int MathRoutines::kToTheNth(int k, int n) {
   int result = 1;
   for (int i = 0; i < n; i ++) {
     result *= k;
@@ -2427,14 +2427,14 @@ int MathRoutines::KToTheNth(int k, int n) {
   return result;
 }
 
-void MathRoutines::KToTheNth(int k, int n, LargeInteger& output) {
+void MathRoutines::kToTheNth(int k, int n, LargeInteger& output) {
   output = 1;
   for (int i = 0; i < n; i ++) {
     output *= k;
   }
 }
 
-Vector<double> MathRoutines::GetVectorDouble(Vector<Rational>& input) {
+Vector<double> MathRoutines::getVectorDouble(Vector<Rational>& input) {
   Vector<double> result;
   result.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
@@ -2910,7 +2910,7 @@ void PartFraction::AssignDenominatorOnly(const PartFraction& p) {
   this->ComputeIndicesNonZeroMults();
 }
 
-void PartFraction::Assign(const PartFraction& p) {
+void PartFraction::assign(const PartFraction& p) {
   this->CopyFromLight(p);
   this->IndicesNonZeroMults = (p.IndicesNonZeroMults);
   this->IsIrrelevant = p.IsIrrelevant;
@@ -2922,7 +2922,7 @@ void PartFraction::AssignNoIndicesNonZeroMults(PartFraction& p) {
   this->CopyFromLight(p);
 }
 
-void PartFraction::WriteToFile(std::fstream& output) const {
+void PartFraction::writeToFile(std::fstream& output) const {
   output << "Fraction_start: " << this->size << "\n";
   for (int j = 0; j < this->size; j ++) {
     output << (*this)[j].Multiplicities.size << " ";
@@ -2932,7 +2932,7 @@ void PartFraction::WriteToFile(std::fstream& output) const {
   }
 }
 
-void PartFraction::ReadFromFile(PartFractions& owner, std::fstream& input) {
+void PartFraction::readFromFile(PartFractions& owner, std::fstream& input) {
   std::string tempS;
   int tempI;
   input >> tempS >> tempI;
@@ -3077,7 +3077,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation(
       int currentIndex = this->IndicesNonZeroMults[i];
       int candidateDesire;
       if (!flagUsingOrlikSolomon) {
-        candidateDesire = (*this)[currentIndex].GetTotalMultiplicity();
+        candidateDesire = (*this)[currentIndex].getTotalMultiplicity();
       } else {
         candidateDesire = currentIndex;
       }
@@ -3138,7 +3138,7 @@ bool PartFraction::DecomposeFromLinRelation(
   }
   if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
   }
-  this->ApplyGeneralizedSzenesVergneFormulA(
+  this->applyGeneralizedSzenesVergneFormula(
     ParticipatingIndices,
     theGreatestElongations,
     theCoefficients,
@@ -3165,7 +3165,7 @@ bool PartFraction::DecomposeFromLinRelation(
   return true;
 }
 
-bool PartFraction::ReduceMeOnce(
+bool PartFraction::reduceMeOnce(
   const Polynomial<LargeInteger>& myCoeff,
   Polynomial<LargeInteger>& outputCoeff,
   Vectors<Rational>& startingVectors
@@ -3192,7 +3192,7 @@ bool PartFraction::ReduceMeOnce(
   return improvedAtLeastOnce;
 }
 
-void PartFraction::GetNElongationPolyWithMonomialContribution(
+void PartFraction::getNElongationPolynomialWithMonomialContribution(
   List<Vector<Rational> >& startingVectors,
   List<int>& theSelectedIndices,
   List<int>& theCoefficients,
@@ -3220,7 +3220,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
   output.multiplyBy(tempM);
 }
 
-void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
+void PartFraction::applyGeneralizedSzenesVergneFormula(
   List<int>& theSelectedIndices,
   List<int>& theGreatestElongations,
   List<int>& theCoefficients,
@@ -3240,7 +3240,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
   int TotalMultiplicity;
   TotalMultiplicity = 0;
   for (int i = 0; i < theSelectedIndices.size; i ++) {
-    int tempI = (*this)[theSelectedIndices[i]].GetMultiplicityLargestElongation() - 1;
+    int tempI = (*this)[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
     TheBigBadIndexingSet.MaxMultiplicities[i] = tempI;
     TotalMultiplicity += tempI;
   }
@@ -3250,7 +3250,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
     TheBigBadIndexingSet.MaxMultiplicities[i] = 0;
     int NumSubsets = TheBigBadIndexingSet.TotalNumSubsetsMustBeSmalInt();
     for (int j = 0; j < NumSubsets; j ++) {
-      tempFrac.Assign(*this);
+      tempFrac.assign(*this);
       tempFrac.RelevanceIsComputed = false;
       int tempN = TheBigBadIndexingSet.TotalMultiplicity() + oldMaxMultiplicity;
       for (int k = 0; k < theSelectedIndices.size; k ++) {
@@ -3261,7 +3261,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
           multiplicityChange = oldMaxMultiplicity + 1;
         }
         tempFrac[theSelectedIndices[k]].AddMultiplicity(- multiplicityChange, theGreatestElongations[k]);
-        this->GetNElongationPolyWithMonomialContribution(
+        this->getNElongationPolynomialWithMonomialContribution(
           startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim
         );
         tempP.raiseToPower(multiplicityChange, 1);
@@ -3283,13 +3283,13 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
       );
       tempFrac.ComputeIndicesNonZeroMults();
       output.addMonomial(tempFrac, ComputationalBufferCoefficient);
-      TheBigBadIndexingSet.IncrementReturnFalseIfPastLast();
+      TheBigBadIndexingSet.incrementReturnFalseIfPastLast();
     }
     TheBigBadIndexingSet.MaxMultiplicities[i] = oldMaxMultiplicity;
   }
 }
 
-void PartFraction::ApplySzenesVergneFormulA(
+void PartFraction::applySzenesVergneFormula(
   List<Vector<Rational> >& startingVectors,
   List<int>& theSelectedIndices,
   List<int>& theElongations,
@@ -3305,7 +3305,7 @@ void PartFraction::ApplySzenesVergneFormulA(
   int theDim = startingVectors[0].size;
   CoefficientBuffer.makeOne();
   for (int i = 0; i < theSelectedIndices.size; i ++) {
-    tempFrac.Assign(*this);
+    tempFrac.assign(*this);
     tempFrac.RelevanceIsComputed = false;
     tempFrac[GainingMultiplicityIndex].AddMultiplicity(1, ElongationGainingMultiplicityIndex);
     OnePartialFractionDenominator& currentFrac = tempFrac[theSelectedIndices[i]];
@@ -3516,7 +3516,7 @@ bool PartFraction::operator==(const PartFraction& right) const {
 }
 
 void PartFraction::operator=(const PartFraction& right) {
-  this->Assign(right);
+  this->assign(right);
 }
 
 int PartFractions::SizeWithoutDebugString() {
@@ -3652,7 +3652,7 @@ bool PartFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rationa
   while (this->IndexLowestNonProcessed< this->size) {
     //this->ComputeDebugString();
 //    if (!this->ShouldIgnore(Indicator)) {
-      tempF.Assign(this->theObjects[this->IndexLowestNonProcessed]);
+      tempF.assign(this->theObjects[this->IndexLowestNonProcessed]);
       //this->ComputeDebugString();
       //tempF.ComputeDebugString();
       if (! (tempF.reduceOnceTotalOrderMethod(*this, Indicator))) {
@@ -3766,7 +3766,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   (void) myIndex;
   (void) Indicator;
   /*PartFraction tempFrac;
-  //tempFrac.Assign(*this);
+  //tempFrac.assign(*this);
   Rational StartCheckSum, theDiff;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
     owner.computeOneCheckSum(StartCheckSum);
@@ -3820,9 +3820,9 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           int tempI = matLinComb.elements[i][0].floorIfSmall();
           thePowersSigned[i] = tempI;
           if (tempI<0)
-            thePowers.MaxMultiplicities[i] = this->theObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation();
+            thePowers.MaxMultiplicities[i] = this->theObjects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
           else
-            thePowers.MaxMultiplicities[i] =MathRoutines::Minimum(tempI, this->theObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation());
+            thePowers.MaxMultiplicities[i] =MathRoutines::Minimum(tempI, this->theObjects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
           tempRoot*=(thePowersSigned[i]*this->theObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
           tempMon-= tempRoot;
@@ -3902,7 +3902,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
     int currentIndexInFraction = this->IndicesNonZeroMults[j];
     int currentElongation = this->theObjects[currentIndexInFraction].GetLargestElongation();
     int MultChange = thePowers.Multiplicities[j];
-    int MaxMultchange = this->theObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
+    int MaxMultchange = this->theObjects[currentIndexInFraction].getMultiplicityLargestElongation();
     Vector<Rational> tempRoot;
     tempRoot = Accum.startingVectors[currentIndexInFraction];
     tempRoot*=(currentElongation);
@@ -4229,7 +4229,7 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
   /*PartFraction tempFrac;
   Polynomial<LargeInt> buffer;
   for (int i = 0; i < this->size; i ++) {
-    tempFrac.Assign(this->theObjects[i]);
+    tempFrac.assign(this->theObjects[i]);
     if (tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this, Indicator, buffer, this->AmbientDimension)) {
       this->theObjects[i].Coefficient.makeZero(this->AmbientDimension);
       this->AddAlreadyReduced(tempFrac, Indicator);
@@ -4284,7 +4284,7 @@ void PartFractions::ComputeDebugStringWithVPfunction() {
   this->toString(this->DebugString, theFormat.flagUseLatex, theFormat);
 }
 
-void PartFractions::WriteToFile(std::fstream& output) {
+void PartFractions::writeToFile(std::fstream& output) {
   output << "Dimension: ";
   output << this->AmbientDimension << "\n";
   output << "Indices_of_roots:\n";
@@ -4298,7 +4298,7 @@ void PartFractions::WriteToFile(std::fstream& output) {
   }
   output << "\n" << "Number_of_fractions: " << this->size() << "\n";
   for (int i = 0; i < this->size(); i ++) {
-    (*this)[i].WriteToFile(output);
+    (*this)[i].writeToFile(output);
   }
 }
 
@@ -4409,7 +4409,7 @@ void OnePartialFractionDenominator::operator=(OnePartialFractionDenominator& rig
 }
 
 unsigned int OnePartialFractionDenominator::hashFunction() const {
-  return static_cast<unsigned>(this->GetTotalMultiplicity());
+  return static_cast<unsigned>(this->getTotalMultiplicity());
 }
 
 void OnePartialFractionDenominator::GetPolyDenominator(
@@ -4440,18 +4440,18 @@ int OnePartialFractionDenominator::GetLargestElongation() {
   return result;
 }
 
-int OnePartialFractionDenominator::GetLCMElongations() {
+int OnePartialFractionDenominator::getLeastCommonMultipleElongations() {
   int result = 1;
   for (int i = 0; i < this->Elongations.size; i ++) {
     if (this->Elongations[i] == 0) {
       global.fatal << "Elongation not allowed to be zero. " << global.fatal;
     }
-    result = MathRoutines::lcm(this->Elongations[i], result);
+    result = MathRoutines::leastCommonMultiple(this->Elongations[i], result);
   }
   return result;
 }
 
-int OnePartialFractionDenominator::GetTotalMultiplicity() const {
+int OnePartialFractionDenominator::getTotalMultiplicity() const {
   int result = 0;
   for (int i = 0; i < this->Elongations.size; i ++) {
     result += this->Multiplicities[i];
@@ -4459,7 +4459,7 @@ int OnePartialFractionDenominator::GetTotalMultiplicity() const {
   return result;
 }
 
-int OnePartialFractionDenominator::IndexLargestElongation() {
+int OnePartialFractionDenominator::indexLargestElongation() {
   int result = 0;
   for (int i = 1; i < this->Elongations.size; i ++) {
     if (this->Elongations[i] > this->Elongations[result]) {
@@ -4516,7 +4516,7 @@ void OnePartialFractionDenominator::computeOneCheckSum(
   }
 }
 
-int OnePartialFractionDenominator::GetMultiplicityLargestElongation() {
+int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
   int result = 0;
   int LargestElongationFound = 0;
   for (int i = 0; i < this->Elongations.size; i ++) {
@@ -4549,7 +4549,7 @@ void OnePartialFractionDenominator::AddMultiplicity(int MultiplicityIncrement, i
   }
 }
 
-void OnePartialFractionDenominator::OneFracToStringBasisChange(
+void OnePartialFractionDenominator::oneFractionToStringBasisChange(
   PartFractions& owner,
   int indexElongation,
   Matrix<LargeInteger>& VarChange,
@@ -4609,7 +4609,7 @@ std::string OnePartialFractionDenominator::toString() {
   std::stringstream out;
   std::string tempS;
   for (int k = 0; k < this->Multiplicities.size; k ++) {
-    //this->OneFracToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension, PolyFormatLocal);
+    //this->oneFractionToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension, PolyFormatLocal);
     out << tempS;
   }
   out << " ";
@@ -4822,11 +4822,11 @@ LargeInteger SelectionWithMaxMultiplicity::GetNumTotalCombinations() const {
   //if (this->MaxMultiplicity == 0)
   //  return 1;
   LargeInteger result;
-  MathRoutines::KToTheNth(this->MaxMultiplicity + 1, this->Multiplicities.size, result);
+  MathRoutines::kToTheNth(this->MaxMultiplicity + 1, this->Multiplicities.size, result);
   return result;
 }
 
-bool SelectionWithMaxMultiplicity::IncrementReturnFalseIfPastLast() {
+bool SelectionWithMaxMultiplicity::incrementReturnFalseIfPastLast() {
   this->IncrementSubset();
   return this->elements.size != 0;
 }
@@ -4921,8 +4921,8 @@ void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
   }
 }
 
-bool SelectionWithDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName("SelectionWithDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast");
+bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast() {
+  MacroRegisterFunctionWithName("SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast");
   for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
     if (this->Multiplicities[i] < this->MaxMultiplicities[i]) {
       if (this->Multiplicities[i] == 0) {
@@ -5076,9 +5076,9 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) 
       continue;
     }
     remainderThis = *this;
-    remainderThis.SubtractMonomial(currentSimpleType, 1);
+    remainderThis.subtractMonomial(currentSimpleType, 1);
     remainderOther = other;
-    remainderOther.SubtractMonomial(other[i], 1);
+    remainderOther.subtractMonomial(other[i], 1);
     if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther)) {
       return true;
     }
@@ -5129,7 +5129,7 @@ bool DynkinType::grow(
   this->GetMinMonomial(minComponent, coeffMinCompo);
   if (coeffMinCompo == 1) {
     DynkinType typeMinusMin = (*this);
-    typeMinusMin.SubtractMonomial(minComponent, 1);
+    typeMinusMin.subtractMonomial(minComponent, 1);
     List<DynkinSimpleType> theSimpleTypes;
     List<List<int> > lastComponentRootInjections;
     minComponent.grow(theSimpleTypes, &lastComponentRootInjections);
@@ -5306,7 +5306,7 @@ void DynkinType::SortTheDynkinTypes() {
   DynkinType finalMe;
   finalMe.makeZero();
   for (int i = 0; i < sortedTypes.size; i ++) {
-    finalMe.addMonomial(sortedTypes[i], this->GetMonomialCoefficient(sortedTypes[i]));
+    finalMe.addMonomial(sortedTypes[i], this->getMonomialCoefficient(sortedTypes[i]));
   }
   *this = finalMe;
 }
@@ -5387,7 +5387,7 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w) {
 
 LargeInteger DynkinType::GetWeylGroupSizeByFormula() const {
   MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
-  this->CheckFlagDeallocated();
+  this->checkFlagDeallocated();
   LargeInteger result = 1;
   LargeInteger tempLI;
   for (int i = 0; i < this->size(); i ++) {
@@ -6435,7 +6435,7 @@ void ElementWeylGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Ra
   this->checkInitialization();
   Matrix<Rational> standardRepMat;
   this->owner->getMatrixStandardRepresentation(*this, standardRepMat);
-  output.AssignCharPoly(standardRepMat);
+  output.assignCharacteristicPoly(standardRepMat);
 }
 
 ElementWeylGroup ElementWeylGroup::inverse() const {
@@ -6482,10 +6482,10 @@ void ElementWeylGroup::MultiplyOnTheRightBySimpleReflection(int reflectionIndex)
 
 void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
   Rational coefficient, tempRat;
-  coefficient.Assign(DualSpaceElement[index]);
+  coefficient.assign(DualSpaceElement[index]);
   coefficient.DivideBy(this->cartanSymmetric.elements[index][index]);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempRat.Assign(coefficient);
+    tempRat.assign(coefficient);
     tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
     DualSpaceElement[i] += (tempRat);
   }
@@ -6852,7 +6852,7 @@ void WeylGroupData::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution
 }
 
 void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
-  this->theGroup.ComputeAllElements(false);
+  this->theGroup.computeAllElements(false);
   output.size = 0;
   output.reserve(this->RootSystem.size / 2);
   for (int i = 0; i < this->RootSystem.size; i ++) {
@@ -7577,8 +7577,8 @@ void WeylGroupData::drawRootSystem(
   highlightGroup.setSize(2);
   highlightLabels.setSize(2);
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    highlightGroup[0] = this->RootsOfBorel[i].GetVectorDouble();
-    highlightGroup[1] = - this->RootsOfBorel[i].GetVectorDouble();
+    highlightGroup[0] = this->RootsOfBorel[i].getVectorDouble();
+    highlightGroup[1] = - this->RootsOfBorel[i].getVectorDouble();
     highlightLabels[0] = this->RootsOfBorel[i].toString();
     highlightLabels[1] = (- this->RootsOfBorel[i]).toString();
     output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
@@ -7608,7 +7608,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
   HashedList<Vector<Rational> > theDominantWeights;
   (void) upperBoundWeights;//portable way to avoid non-used parameter warning.
   double upperBoundDouble = 100000 / (Rational(this->theGroup.getSize())).GetDoubleValue();
-  int upperBoundInt = MathRoutines::Maximum(static_cast<int>(upperBoundDouble), 10000);
+  int upperBoundInt = MathRoutines::maximum(static_cast<int>(upperBoundDouble), 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   this->RaiseToDominantWeight(highestWeightTrue);
@@ -7664,7 +7664,7 @@ Rational WeylGroupData::GetLongestRootLengthSquared() const {
   Rational result;
   result = this->cartanSymmetric(0, 0);
   for (int i = 1; i < this->cartanSymmetric.numberOfRows; i ++) {
-    result = MathRoutines::Maximum(result, this->cartanSymmetric(i, i));
+    result = MathRoutines::maximum(result, this->cartanSymmetric(i, i));
   }
   return result;
 }
@@ -7822,7 +7822,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }
     Layers.lastObject()->addOnTop(i);
-    GraphWidth = MathRoutines::Maximum(GraphWidth, Layers.lastObject()->size);
+    GraphWidth = MathRoutines::maximum(GraphWidth, Layers.lastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
   orbit.reserve(this->allElements.size);
@@ -7961,7 +7961,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       oldLayerElementLength = this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
     }
     Layers.lastObject()->addOnTop(i);
-    GraphWidth =MathRoutines::Maximum(GraphWidth, Layers.lastObject()->size);
+    GraphWidth =MathRoutines::maximum(GraphWidth, Layers.lastObject()->size);
   }
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->AmbientWeyl->rho;
@@ -7993,7 +7993,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives(int UpperLimit) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives");
   this->checkInitialization();
-  this->AmbientWeyl->theGroup.ComputeAllElements(UpperLimit);
+  this->AmbientWeyl->theGroup.computeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size = 0;
   this->RepresentativesQuotientAmbientOrder.reserve(this->AmbientWeyl->theGroup.theElements.size);
@@ -8390,7 +8390,7 @@ void KLpolys::initFromWeyl(WeylGroupData* theWeylGroup) {
 
 bool KLpolys::ComputeKLPolys(WeylGroupData* theWeylGroup) {
   MacroRegisterFunctionWithName("KLpolys::ComputeKLPolys");
-  theWeylGroup->theGroup.ComputeAllElements(- 1);
+  theWeylGroup->theGroup.computeAllElements(- 1);
   this->initFromWeyl(theWeylGroup);
   this->GeneratePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
@@ -8943,7 +8943,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   theCoeffSelection.initFromInts(thePeriods);
   int NumCycles = theCoeffSelection.TotalNumSubsetsMustBeSmalInt();
   output.setSize(NumCycles);
-  for (int i = 0; i < NumCycles; i ++, theCoeffSelection.IncrementReturnFalseIfPastLast()) {
+  for (int i = 0; i < NumCycles; i ++, theCoeffSelection.incrementReturnFalseIfPastLast()) {
     output[i].makeZero(theDim);
     for (int j = 0; j < theCoeffSelection.Multiplicities.size; j ++) {
       output[i] += thePeriodVectors[j] * theCoeffSelection.Multiplicities[j];
@@ -8974,7 +8974,7 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
   << theDirection.ScalarEuclidean(theNormal).toString() << ", ";
   if (!theMovement.isInteger()) {
     global.comments << "the movement is not integral; ";
-    theMovement.AssignFloor();
+    theMovement.assignFloor();
     if (theDirection.ScalarEuclidean(theNormal).isPositive()) {
       theMovement += 1;
     }
@@ -9624,7 +9624,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
   }
   int theTargetDim = 0;
   for (int i = 0; i < theSub.size; i ++) {
-    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].minimalNumberOfVariables());
+    theTargetDim = MathRoutines::maximum(theTargetDim, theSub[i].minimalNumberOfVariables());
   }
   output.initialize(theSub.size, theTargetDim);
   for (int i = 0; i < theSub.size; i ++) {
@@ -10008,7 +10008,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
   for (int k = 0; k < thePF.IndicesNonZeroMults.size; k ++) {
     int currentIndex = thePF.IndicesNonZeroMults[k];
     OnePartialFractionDenominator& currentFrac = thePF[currentIndex];
-    int LCMElongations = currentFrac.GetLCMElongations();
+    int LCMElongations = currentFrac.getLeastCommonMultipleElongations();
     tempS = this->startingVectors[currentIndex].toString();
     while (currentFrac.Elongations.size > 1) {
       for (int i = 0; i < currentFrac.Elongations.size; i ++) {
@@ -10882,7 +10882,7 @@ class ImpreciseDouble {
     temp -= *this;
     return temp.isPositive();
   }
-  void AssignFloor() {
+  void assignFloor() {
     this->theValue = FloatingPoint::Floor(this->theValue);
   }
   void operator/=(const ImpreciseDouble& other) {
@@ -11332,7 +11332,7 @@ std::string PiecewiseQuasipolynomial::toString(bool useLatex, bool useHtml) {
   return out.str();
 }
 
-void PiecewiseQuasipolynomial::DrawMe(
+void PiecewiseQuasipolynomial::drawMe(
   DrawingVariables& theDrawingVars,
   int numLatticePointsPerDim,
   Cone* RestrictingChamber,
@@ -11448,7 +11448,7 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
           if (firstFail) {
             DrawingVariables tempDV;
             global.comments << "<br><b>Point of failure: " << AffineInput.toString() << "</b>";
-            //this->DrawMe(tempDV);
+            //this->drawMe(tempDV);
             this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
@@ -11531,7 +11531,7 @@ void Cone::transformToWeylProjective(ConeComplex& owner) {
 }
 
 void ConeComplex::transformToWeylProjective() {
- /* this->AmbientWeyl.getElement().ComputeAllElements();
+ /* this->AmbientWeyl.getElement().computeAllElements();
   this->log << this->AmbientWeyl.getElement().toString();
   std::string tempS;
   this->toString(tempS);
@@ -12044,7 +12044,7 @@ bool ConeComplex::SplitChamber(
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
-  bool needToRecomputeVertices = (myDyingCone.Normals.GetRankOfSpanOfElements(&bufferMat, &bufferSel) < this->getDimension());
+  bool needToRecomputeVertices = (myDyingCone.Normals.getRankOfSpanOfElements(&bufferMat, &bufferSel) < this->getDimension());
 //  newPlusCone.flagHasSufficientlyManyVertices = true;
 //  newMinusCone.flagHasSufficientlyManyVertices = true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection = myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -12313,7 +12313,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   }
   Matrix<Rational> tempMatX;
   Selection tempSelX;
-  int DesiredRank = this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
+  int DesiredRank = this->Vertices.getRankOfSpanOfElements(&tempMatX, &tempSelX);
   if (DesiredRank > 1) {
     for (int i = 0; i < this->Normals.size; i ++) {
       Vector<Rational>& currentNormal = this->Normals[i];
@@ -12322,7 +12322,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       for (int j = 0; j < this->Vertices.size; j ++) {
         if (currentNormal.ScalarEuclidean(this->Vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->Vertices[j]);
-          int theRank = verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
+          int theRank = verticesOnWall.getRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
@@ -12406,7 +12406,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
   this->Normals.size = 0;
   Matrix<Rational> tempMat;
   Selection tempSel;
-  int rankVerticesSpan = inputVertices.GetRankOfSpanOfElements(&tempMat, &tempSel);
+  int rankVerticesSpan = inputVertices.getRankOfSpanOfElements(&tempMat, &tempSel);
   int theDim = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
@@ -12477,7 +12477,7 @@ bool Cone::CreateFromNormalS(
   Matrix<Rational> tempMat;
   Selection tempSel;
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices) {
-    for (int i = 0; i < theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++) {
+    for (int i = 0; i < theDim && this->Normals.getRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++) {
       Vector<Rational> tempRoot;
       tempRoot.makeEi(theDim, i);
       if (!this->Normals.linearSpanContainsVector(tempRoot, tempMat, tempSel)) {
@@ -12633,7 +12633,7 @@ int RationalFunction::minimalNumberOfVariables() const {
     case RationalFunction::typePoly:
       return this->Numerator.getElementConst().minimalNumberOfVariables();
     case RationalFunction::typeRationalFunction:
-      return MathRoutines::Maximum(
+      return MathRoutines::maximum(
         this->Numerator.getElementConst().minimalNumberOfVariables(), this->Denominator.getElementConst().minimalNumberOfVariables()
       );
     default: //this should never happen! maybe global.fatal << global.fatal here...
@@ -12658,7 +12658,7 @@ bool RationalFunction::getRelations(
   int numStartingGenerators = inputElements.size;
   int numStartingVariables = 0;
   for (int i = 0; i < inputElements.size; i ++) {
-    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].minimalNumberOfVariables());
+    numStartingVariables = MathRoutines::maximum(numStartingVariables, inputElements[0].minimalNumberOfVariables());
   }
   Polynomial<Rational> currentGenerator;
   for (int i = 0; i < numStartingGenerators; i ++) {

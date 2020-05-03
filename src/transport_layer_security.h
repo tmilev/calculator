@@ -225,7 +225,7 @@ public:
   SSLHelloExtension();
   JSData toJSON();
   bool checkInitialization();
-  bool ProcessMe(std::stringstream* commentsOnError);
+  bool processMe(std::stringstream* commentsOnError);
   bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
   bool processServerName(std::stringstream* commentsOnError);
   bool ProcessRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
@@ -407,7 +407,7 @@ public:
   std::string ToBytes() const;
   std::string ToHtml(int id);
   std::string toString() const;
-  std::string ToStringType() const;
+  std::string toStringType() const;
   JSData ToJSONSerialization();
   JSData toJSON();
   void PrepareServerHello1Start(SSLRecord& clientHello);

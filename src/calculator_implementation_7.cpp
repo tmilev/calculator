@@ -11,7 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
+#include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>::splitCharacterOverReductiveSubalgebra(std::string*, CharacterSemisimpleLieAlgebraModule<RationalFunctionOld>&, BranchingData&, GlobalVariables&)'
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
@@ -33,13 +33,13 @@ template <>
 bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
 
 template <class theType>
-bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
+bool MathRoutines::generateVectorSpaceClosedWRTOperation(
   List<theType>& inputOutputElts,
   int upperDimensionBound,
   void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
 ) {
-  MacroRegisterFunctionWithName("MathRoutines::GenerateVectorSpaceClosedWRTOperation");
-  inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  MacroRegisterFunctionWithName("MathRoutines::generateVectorSpaceClosedWRTOperation");
+  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
   ProgressReport theReport1(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport theReport2(20, GlobalVariables::Response::ReportType::gaussianElimination);
@@ -52,7 +52,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
       theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts = inputOutputElts.size;
       theEltsForGaussianElimination.addOnTop(theOpResult);
-      theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
+      theEltsForGaussianElimination[0].gaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
       if (theEltsForGaussianElimination.size > inputOutputElts.size) {
         inputOutputElts.addOnTop(theOpResult);
       }
@@ -67,7 +67,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
       }
     }
   }
-  inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   return true;
 }
 
@@ -142,7 +142,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
     for (int i = 0; i < theLieAlgElts.size; i ++) {
       out << HtmlRoutines::getMathSpanPure(theLieAlgElts[i].toString(&theFormat)) << "<br>";
     }
-    bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
+    bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theLieAlgElts, upperBound);
     if (!success) {
       out << "<br>Did not succeed with generating vector space, "
       << "instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
@@ -167,7 +167,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   for (int i = 0; i < theOps.size; i ++) {
     out << HtmlRoutines::getMathSpanPure(theOps[i].toString(&theFormat)) << "<br>";
   }
-  bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
+  bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theOps, upperBound);
   if (!success) {
     out << "<br>Did not succeed with generating vector space, "
     << "instead got a vector space with basis "
@@ -924,7 +924,7 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   theParSel = leviSelection;
   theParSel.InvertSelection();
   ElementUniversalEnveloping<RationalFunction> theCasimir;
-  theCasimir.MakeCasimirWRTLeviParabolic(*theSSalg, theParSel);
+  theCasimir.makeCasimirWRTLeviParabolic(*theSSalg, theParSel);
   ExpressionContext contextE(theCommands);
   contextE.setAmbientSemisimpleLieAlgebra(*theSSalg);
   return output.assignValueWithContext(theCasimir, contextE, theCommands);
@@ -1604,7 +1604,7 @@ bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
   int theLetter;
   int numVars = 0;
   for (int i = 0; i < theLinPolys.size; i ++) {
-    numVars = MathRoutines::Maximum(theLinPolys[i].minimalNumberOfVariables(), numVars);
+    numVars = MathRoutines::maximum(theLinPolys[i].minimalNumberOfVariables(), numVars);
   }
   homogenousPart.initialize(theLinPolys.size, numVars);
   homogenousPart.makeZero();
@@ -1640,9 +1640,9 @@ Coefficient Polynomial<Coefficient>::GetDiscriminant() {
     << "of degree not equal to 1."
     << global.fatal;
   }
-  Coefficient a = this->GetMonomialCoefficient(MonomialP(0, 2));
-  Coefficient b = this->GetMonomialCoefficient(MonomialP(0, 1));
-  Coefficient c = this->GetMonomialCoefficient(MonomialP(0, 0));
+  Coefficient a = this->getMonomialCoefficient(MonomialP(0, 2));
+  Coefficient b = this->getMonomialCoefficient(MonomialP(0, 1));
+  Coefficient c = this->getMonomialCoefficient(MonomialP(0, 0));
   return b * b - a * c * 4;
 }
 
@@ -2155,8 +2155,8 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
       return false;
     }
     theDiscriminantSqrt.checkConsistency();
-    AlgebraicNumber a = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0, 2));
-    AlgebraicNumber b = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0, 1));
+    AlgebraicNumber a = currentSecondDegreePoly.getMonomialCoefficient(MonomialP(0, 2));
+    AlgebraicNumber b = currentSecondDegreePoly.getMonomialCoefficient(MonomialP(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
@@ -3455,7 +3455,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
     if (floatingResult > tolerance || floatingResult < - tolerance) {
       return output.assignValue(0, theCommands);
     }
-  } while (theSamplingSelector.IncrementReturnFalseIfPastLast());
+  } while (theSamplingSelector.incrementReturnFalseIfPastLast());
   return output.assignValue(1, theCommands);
 }
 
@@ -4069,7 +4069,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
   if (!theCommands.collectCoefficientsPowersVariables(theExpressionE, theVarE, theCFs)) {
     return theCommands << "<hr>Failed to evaluate Calculator::collectCoefficientsPowersVariables";
   }
-  int highestPowerPlus1 = theCFs.GetLargestParticipatingBasisIndex() + 1;
+  int highestPowerPlus1 = theCFs.getLargestParticipatingBasisIndex() + 1;
   List<Expression> theCFsIncludingZeros;
   Expression currentCF;
   for (int i = 0; i < highestPowerPlus1; i ++) {
@@ -4200,20 +4200,20 @@ bool CalculatorFunctions::extractQuadraticCoeffsWRTvariable(
   if (!theCommands.collectCoefficientsPowersVariables(theQuadratic, theVariable, theCoeffs)) {
     return false;
   }
-  if (theCoeffs.GetLargestParticipatingBasisIndex() != 2) {
+  if (theCoeffs.getLargestParticipatingBasisIndex() != 2) {
     return false;
   }
   outputCoeffVarSquared.assignValue(0, theCommands);
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
   if (theCoeffs.theMonomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
   }
   if (theCoeffs.theMonomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
   }
   if (theCoeffs.theMonomials.contains(MonomialVector(2))) {
-    outputCoeffVarSquared = theCoeffs.GetMonomialCoefficient(MonomialVector(2));
+    outputCoeffVarSquared = theCoeffs.getMonomialCoefficient(MonomialVector(2));
   }
   return true;
 }
@@ -4231,16 +4231,16 @@ bool CalculatorFunctions::extractLinearCoeffsWRTvariable(
   }
   Calculator& theCommands = *theLinearExpression.owner;
   theCommands.collectCoefficientsPowersVariables(theLinearExpression, theVariable, theCoeffs);
-  if (theCoeffs.GetLargestParticipatingBasisIndex() > 1) {
+  if (theCoeffs.getLargestParticipatingBasisIndex() > 1) {
     return false;
   }
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
   if (theCoeffs.theMonomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
   }
   if (theCoeffs.theMonomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
   }
   return true;
 }
@@ -5380,7 +5380,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
     &theCommands.theObjectContainer.theSltwoSAs
   );
   tempSas.computeSl2sInitOrbitsForComputationOnDemand();
-  if (!tempSas.RanksAndIndicesFit(theSmallDynkinType)) {
+  if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
     return output.makeError(
       "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.toString(),
       theCommands
@@ -5388,7 +5388,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
   }
   List<DynkinType> largerTypes;
   List<List<int> > imagesSimpleRoots;
-  if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
+  if (!tempSas.growDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
     return output.makeError(
       "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->theWeyl.theDynkinType.toString() + " failed. ",
       theCommands
@@ -5416,7 +5416,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
         }
       }
       out << "</td><td>";
-      Vector<Rational> currentHighestWeight = tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
+      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
         largerTypes[i], imagesSimpleRoots[i], tempCandidate
       );
       out << HtmlRoutines::getMathSpanPure(
@@ -5540,9 +5540,9 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
   }
   SemisimpleSubalgebras& theSSsubalgebras =
   theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
-  theSSsubalgebras.flagComputePairingTable = false;
+  theSSsubalgebras.flagcomputePairingTable = false;
   theSSsubalgebras.flagComputeNilradicals = false;
-  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
+  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
     theCommands.theObjectContainer.theAlgebraicClosure,
     theCommands.theObjectContainer.semisimpleLieAlgebras,
@@ -5619,7 +5619,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theCharPoly;
-  theCharPoly.AssignCharPoly(theMat);
+  theCharPoly.assignCharacteristicPoly(theMat);
   return output.assignValue(theCharPoly.toString(&tempF), theCommands);
 }
 
@@ -6033,7 +6033,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
     outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     thePlot.yLow = MathRoutines::Minimum(YValues[i], thePlot.yLow);
-    thePlot.yHigh = MathRoutines::Maximum(YValues[i], thePlot.yHigh);
+    thePlot.yHigh = MathRoutines::maximum(YValues[i], thePlot.yHigh);
   }
   thePlot.thePlotString = outLatex.str();
   thePlot.thePlotStringWithHtml = outHtml.str();
@@ -6519,7 +6519,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
         fValuesUpper.addOnTop(finalResultDouble);
       }
       yMin = MathRoutines::Minimum(yMin, finalResultDouble);
-      yMax = MathRoutines::Maximum(yMax, finalResultDouble);
+      yMax = MathRoutines::maximum(yMax, finalResultDouble);
     }
   }
   std::stringstream outTex, outHtml;
@@ -6852,17 +6852,17 @@ bool CalculatorFunctions::innerPlotParametricCurve(
 template < >
 SemisimpleSubalgebras& Expression::getValueNonConst() const;
 
-bool CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras(
+bool CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras");
   if (!input.isOfType<SemisimpleSubalgebras>()) {
     return theCommands << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
   }
   SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
-  theSAs.flagComputePairingTable = true;
+  theSAs.flagcomputePairingTable = true;
   theSAs.flagComputeNilradicals = true;
-  theSAs.ComputePairingTablesAndFKFTtypes();
+  theSAs.computePairingTablesAndFKFTtypes();
   output = input;
   std::fstream theFile;
   std::string theFileName;
@@ -7000,7 +7000,7 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
   List<List<Rational> > bufferIndices;
   HashedList<DynkinSimpleType> bufferTypes;
   HashedList<Rational> theIndices;
-  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
+  theType.getDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
   std::stringstream out;
   out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
   << theIndices.toStringCommaDelimited();
@@ -7044,8 +7044,8 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
 
   out << "Attempting to embed "
   << smallSubalgebraPointer.content->theWeyl.theDynkinType.toString()
-  << " in " << ownerSS.ToStringLieAlgebraName();
-  theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
+  << " in " << ownerSS.toStringLieAlgebraName();
+  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
     ownerSS,
     theCommands.theObjectContainer.theAlgebraicClosure,
     theCommands.theObjectContainer.semisimpleLieAlgebras,
@@ -7380,7 +7380,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
   int numFound = 0;
   ProgressReport theReport;
   out << thePartition.ToStringPartitioningVectors();
-  while (thePartition.IncrementReturnFalseIfPastLast()) {
+  while (thePartition.incrementReturnFalseIfPastLast()) {
     out << "<br>" << thePartition.ToStringOnePartition(thePartition.currentPartition);
     numFound ++;
     if (numFound % 1000 == 0) {
@@ -7880,7 +7880,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
   CharacterSemisimpleLieAlgebraModule<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
-  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
+  theHWchar.makeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
   Vectors<RationalFunction> theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.getOwner().getRank()) {
@@ -8074,13 +8074,13 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   const ElementUniversalEnveloping<RationalFunction>& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction> >();
   WeylGroupData& theWeyl = constSSalg.theWeyl;
   Vector<RationalFunction> hwDualCoords;
-  constSSalg.OrderSSalgebraForHWbfComputation();
+  constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunction outputRF;
   if (!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.comments)) {
     return output.makeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
   }
-  constSSalg.OrderStandardAscending();
+  constSSalg.orderStandardAscending();
   return output.assignValueWithContext(outputRF, finalContext, theCommands);
 }
 
@@ -8106,8 +8106,8 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
   CharacterSemisimpleLieAlgebraModule<RationalFunction> startingChar;
   Vector<RationalFunction> simpleWeight;
   simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
-  startingChar.MakeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
-  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data);
+  startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
+  startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
   out << report;
   return output.assignValue(out.str(), theCommands);
 }
@@ -8329,7 +8329,7 @@ bool Expression::evaluatesToDoubleInRange(
       if (i == 0) {
         *outputYmax = currentValue;
       } else {
-        *outputYmax = MathRoutines::Maximum(currentValue, *outputYmax);
+        *outputYmax = MathRoutines::maximum(currentValue, *outputYmax);
       }
     }
   }
@@ -8718,11 +8718,11 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
 
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
 
-  std::string displayFolder = ownerSS.content->ToStringDisplayFolderName("");
+  std::string displayFolder = ownerSS.content->toStringDisplayFolderName("");
 
-  outSltwoMainFile << displayFolder << ownerSS.content->ToStringFileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
+  outSltwoMainFile << displayFolder << ownerSS.content->toStringFileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
   if (
     !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
@@ -9003,7 +9003,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   int numTestedSoFar = 0;
   ProgressReport theReport;
   LargeIntegerUnsigned oneUI = 1;
-  while (thePartition.IncrementReturnFalseIfPastLast()) {
+  while (thePartition.incrementReturnFalseIfPastLast()) {
     LargeIntegerUnsigned theProduct = 1;
     for (int i = 0; i < thePartition.currentPartition.size; i ++) {
       LargeIntegerUnsigned theNumber = static_cast<unsigned>(theInts[i]);
@@ -9187,10 +9187,10 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
+  theChar.makeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeWithMults(report, theDV, 10000);
+  theChar.drawMeWithMultiplicities(report, theDV, 10000);
   out << report << theDV.GetHtmlDiv(theWeyl.getDimension());
   return output.assignValue(out.str(), theCommands);
 }
@@ -9245,7 +9245,7 @@ bool CalculatorFunctions::innerdrawRootSystem(
 }
 
 template <class Coefficient>
-int CharacterSemisimpleLieAlgebraModule<Coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight(
+int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
 ) {
   MacroRegisterFunctionWithName("charSSAlgMod_Coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
@@ -9266,7 +9266,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
   MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::toStringFullCharacterWeightsTable");
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Coefficient> outputChar;
-  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, nullptr)) {
+  if (!this->freudenthalEvaluateMeFullCharacter(outputChar, 10000, nullptr)) {
     out << "Failed to compute the character with highest weight " << this->toString()
     << " I used Fredenthal's formula; likely the computation was too large. ";
     return out.str();
@@ -9288,12 +9288,12 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
       theSimpleRoot.makeEi(this->getOwner()->getRank(), j);
       theSimpleRootFundCoords =
       this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(theSimpleRoot);
-      outputSimpleStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
+      outputSimpleStringCoords[j] = outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
         outputChar[k], theSimpleRootFundCoords
-      ) - outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
+      ) - outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
         outputChar[k], - theSimpleRootFundCoords
       );
-      outputSimpleHalfStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight(
+      outputSimpleHalfStringCoords[j] = outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
         outputChar[k], theSimpleRootFundCoords
       );
     }
@@ -9458,8 +9458,8 @@ public:
     truncatedInput += "...";
     this->DisplayedEstrings.addOnTop(truncatedInput);
   }
-  bool IncrementReturnFalseIfPastLast() {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::IncrementReturnFalseIfPastLast");
+  bool incrementReturnFalseIfPastLast() {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::incrementReturnFalseIfPastLast");
     this->indexInCurrentLayer ++;
     this->indexCurrentChild ++;
     if (this->indexInCurrentLayer >= this->currentLayer.size) {
@@ -9517,7 +9517,7 @@ public:
   void DrawToDV() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ExtractDisplayedExpressions");
     this->initialize();
-    while (this->IncrementReturnFalseIfPastLast()) {
+    while (this->incrementReturnFalseIfPastLast()) {
     }
     this->thePlot.dimension = 2;
     this->thePlot.flagIncludeCoordinateSystem = false;
@@ -9527,7 +9527,7 @@ public:
     }
     this->NodePositionsDouble.setSize(this->NodePositions.size);
     for (int i = 0; i < this->NodePositionsDouble.size; i ++) {
-      this->NodePositionsDouble[i] = MathRoutines::GetVectorDouble(this->NodePositions[i]);
+      this->NodePositionsDouble[i] = MathRoutines::getVectorDouble(this->NodePositions[i]);
     }
     Vector<double> arrowBase, arrowHead;
     for (int i = 0; i < this->DisplayedEstrings.size; i ++) {
@@ -9613,10 +9613,10 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   // Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
+  theChar.makeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeNoMults(report, theDV, 10000);
+  theChar.drawMeNoMultiplicities(report, theDV, 10000);
   out << report << theDV.GetHtmlDiv(theWeyl.getDimension());
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();

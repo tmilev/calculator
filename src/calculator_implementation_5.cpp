@@ -124,7 +124,7 @@ double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   double result = 0;
   for (int i = 0; i < theSides.size; i ++) {
     double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
-    result = MathRoutines::Maximum(result, FloatingPoint::Sqrt(normSquared));
+    result = MathRoutines::maximum(result, FloatingPoint::Sqrt(normSquared));
   }
   return result;
 }
@@ -1456,7 +1456,7 @@ bool CalculatorFunctions::innerFloor(
   }
   Rational theRat;
   if (input[1].isOfType<Rational>(&theRat)) {
-    theRat.AssignFloor();
+    theRat.assignFloor();
     return output.assignValue(theRat, theCommands);
   }
   double theDouble = 0;
@@ -1500,7 +1500,7 @@ bool CalculatorFunctions::innerRound(
   Rational theRat;
   if (input[1].isOfType<Rational>(&theRat)) {
     Rational result = theRat;
-    result.AssignFloor();
+    result.assignFloor();
     if (theRat - result >= Rational(1, 2)) {
       result ++;
     }
@@ -2975,8 +2975,11 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     << " appears not to be prime. " << commentsOnFailure.str();
   }
   std::stringstream out;
-  out << "Converted polynomial: " << polynomial.toStringContentWithFormat() << "<br>";
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
+  polynomial.context.getFormat(result.format);
+  result.format.flagSuppressModP = true;
+  out << "Converted polynomial: \\("
+  << polynomial.content.toString(&result.format) << "\\)<br>";
   if (!result.factor(polynomial.content, &out)) {
     return output.assignValue(out.str(), theCommands);
   }

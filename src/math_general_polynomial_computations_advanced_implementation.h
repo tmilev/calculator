@@ -72,7 +72,7 @@ void GroebnerBasisComputation<Coefficient>::generateOneSymmetricDifferenceCandid
   GroebnerBasisComputation::BasisElement& left,
   GroebnerBasisComputation::BasisElement& right
 ) {
-  int numberOfVariables = MathRoutines::Maximum(
+  int numberOfVariables = MathRoutines::maximum(
     left.leadingMonomial.minimalNumberOfVariables(),
     right.leadingMonomial.minimalNumberOfVariables()
   );
@@ -226,7 +226,7 @@ int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
   int result = 0;
   for (int i = 0; i < this->theBasis.size; i ++) {
     Polynomial<Coefficient>& current = this->theBasis[i].element;
-    MathRoutines::Maximum(current.minimalNumberOfVariables(), result);
+    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
   }
   return result;
 }
@@ -602,7 +602,7 @@ bool GroebnerBasisComputation<Coefficient>::hasImpliedSubstitutions(
         continue;
       }
       theCF = tempP.coefficients[indexTempM];
-      tempP.SubtractMonomial(tempM, theCF);
+      tempP.subtractMonomial(tempM, theCF);
       bool isGood = true;
       for (int k = 0; k < tempP.size(); k ++) {
         if (!(tempP[k](j) == 0)) {
@@ -651,7 +651,7 @@ int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinear
   for (int i = 0; i < input.size; i ++) {
     Rational degExcludingVar = 0;
     for (int j = 0; j < input[i].size(); j ++) {
-      degExcludingVar = MathRoutines::Maximum(input[i][j].TotalDegree() - input[i][j](theVarIndex), degExcludingVar);
+      degExcludingVar = MathRoutines::maximum(input[i][j].TotalDegree() - input[i][j](theVarIndex), degExcludingVar);
     }
     if (degExcludingVar < 2) {
       result ++;
@@ -754,7 +754,7 @@ void GroebnerBasisComputation<Coefficient>::getVariablesToSolveFor(const List<Po
   MacroRegisterFunctionWithName("GroebnerBasisComputation::getVariablesToSolveFor");
   int NumVars = 0;
   for (int i = 0; i < input.size; i ++) {
-    NumVars = MathRoutines::Maximum(NumVars, input[i].minimalNumberOfVariables());
+    NumVars = MathRoutines::maximum(NumVars, input[i].minimalNumberOfVariables());
   }
   output.initialize(NumVars);
   for (int i = 0; i < input.size && output.cardinalitySelection < output.MaxSize; i ++) {
@@ -1129,7 +1129,7 @@ void GroebnerBasisComputation<Coefficient>::solveSerreLikeSystem(List<Polynomial
   int numVars = 0;
   List<Polynomial<Coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++) {
-    numVars = MathRoutines::Maximum(numVars, workingSystem[i].minimalNumberOfVariables());
+    numVars = MathRoutines::maximum(numVars, workingSystem[i].minimalNumberOfVariables());
   }
   this->systemSolution.getElement().initializeFillInObject(numVars, 0);
   this->solutionsFound.getElement().initialize(numVars);
@@ -1224,11 +1224,14 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Polynomial::leastCommonMultiple");
+  if (left.isEqualToZero() || right.isEqualToZero()) {
+    global.fatal << "Least common multiple of zero polynomials is not allowed. " << global.fatal;
+  }
   Polynomial<Coefficient> leftTemp, rightTemp, oneMinusT;
   List<Polynomial<Coefficient> > theBasis;
   leftTemp = left;
   rightTemp = right;
-  int numberOfVariables = MathRoutines::Maximum(
+  int numberOfVariables = MathRoutines::maximum(
     left.minimalNumberOfVariables(), right.minimalNumberOfVariables()
   );
   leftTemp.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
@@ -1276,7 +1279,9 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   }
   if (maximalMonomialNoTIndex == - 1) {
     global.fatal
-    << "Failed to obtain the least common multiple of two polynomials. "
+    << "Failed to obtain the least common multiple of: "
+    << left.toString(&computation.theFormat)
+    << " and " << right.toString(&computation.theFormat) << ". "
     << "The list of polynomials is: ";
     for (int i = 0; i < theBasis.size; i ++) {
       global.fatal << theBasis[i].toString(&computation.theFormat) << ", ";
@@ -1298,6 +1303,9 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisor");
+  if (left.isEqualToZero() || right.isEqualToZero()) {
+    global.fatal << "Greatest common divisor including zeroes not allowed. " << global.fatal;
+  }
   Polynomial<Coefficient> leastCommonMultipleBuffer;
   Polynomial<Coefficient> productBuffer;
   Polynomial<Coefficient> remainderBuffer;

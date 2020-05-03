@@ -2462,7 +2462,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
-    "GenerateVectorSpaceClosedWRTLieBracket",
+    "generateVectorSpaceClosedWithRespectToLieBracket",
     CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket,
     "",
     "Generates a vector space closed with respect to the Lie bracket "
@@ -2480,17 +2480,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
     "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
     "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
-    "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
+    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
+    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
+    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
     "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
     "s_2 = - q_{- 5} - q_{-6};\n"
     "s_1 = q_{20} + q_{19};\n"
     "s_- 1 = - q_{- 19} - q_{- 20};\n"
     "s_-2 = 2q_{6} + 2q_{5};\n"
-    "GenerateVectorSpaceClosedWRTLieBracket(52, s_1, s_2, s_- 1, s_-2);",
+    "generateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
     "CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket",
-    "GenerateVectorSpaceClosedWRTLieBracket",
+    "generateVectorSpaceClosedWithRespectToLieBracket",
     innerStandard
   );
   this->addOperationHandler(
@@ -5216,13 +5216,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ComputeFKFT",
-    CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras,
+    CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras,
     "",
     "Attempts to compute all Fernando-Kac subalgebras according "
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
     "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    "CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras",
+    "CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras",
     "ComputeFKFT",
     innerAdminNoTestExperimental
   );
@@ -5403,7 +5403,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "using the Cantor-Zassenhaus algorithm. "
     "First argument = polynomial. "
     "Second argument = prime number.",
-    "FactorOneVariablePolynomialModPrime{}(x^4+x^3-x+1, 3);\n",
+    "FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);\n",
     "CalculatorFunctions::innerFactorPolynomialModPrime",
     "FactorOneVariablePolynomialModPrime",
     innerStandard

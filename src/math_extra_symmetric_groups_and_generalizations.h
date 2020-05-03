@@ -60,7 +60,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
   basisMatrix.initialize(this->involvedMonomials.size, basis.size);
   for (int j = 0; j < basis.size; j ++) {
     for (int i = 0; i < involvedMonomials.size; i ++) {
-      basisMatrix.elements[i][j] = basis[j].GetMonomialCoefficient(involvedMonomials[i]);
+      basisMatrix.elements[i][j] = basis[j].getMonomialCoefficient(involvedMonomials[i]);
     }
   }
   Matrix<Coefficient> basisMatrixT = basisMatrix;
@@ -78,7 +78,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::DenseVe
   Vector<Coefficient> inDense;
   inDense.setSize(this->involvedMonomials.size);
   for (int i = 0; i < involvedMonomials.size; i ++) {
-    inDense[i] = in.GetMonomialCoefficient(involvedMonomials[i]);
+    inDense[i] = in.getMonomialCoefficient(involvedMonomials[i]);
   }
   out = this->projectionOperator * inDense;
 }
@@ -263,7 +263,7 @@ public:
     for (int i = 0; i < n; i ++) {
       M(i, (*this) * i) = 1;
     }
-    out.AssignCharPoly(M);
+    out.assignCharacteristicPoly(M);
   }
 
   bool HasDifferentConjugacyInvariantsFrom(PermutationR2& other) {
@@ -473,7 +473,7 @@ public:
 
   ElementZ2N operator*(const ElementZ2N right) const {
     ElementZ2N out;
-    out.bits.setSize(MathRoutines::Maximum(this->bits.size, right.bits.size));
+    out.bits.setSize(MathRoutines::maximum(this->bits.size, right.bits.size));
     int i = 0;
     for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++) {
       out.bits[i] = this->bits[i] != right.bits[i];
@@ -1506,7 +1506,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesW
     global.comments << "This needs a rewrite";
   }
   if (!this->flagWordsComputed || !this->flagAllElementsAreComputed) {
-    this->ComputeAllElements(true, - 1);
+    this->computeAllElements(true, - 1);
   }
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for (int i = 0; i < this->theElements.size; i ++) {

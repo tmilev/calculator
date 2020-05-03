@@ -836,7 +836,7 @@ bool WebCrawler::VerifyRecaptcha(
   if (commentsOnFailure == nullptr) {
     commentsOnFailure = &notUsed;
   }
-  if (!FileOperations::loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

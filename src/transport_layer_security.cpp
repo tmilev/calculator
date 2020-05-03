@@ -1097,7 +1097,7 @@ bool SSLHelloExtension::processSignatureAlgorithms(std::stringstream* commentsOn
   return true;
 }
 
-bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
+bool SSLHelloExtension::processMe(std::stringstream* commentsOnError) {
   switch (this->theType) {
   case SSLContent::tokensExtension::renegotiateConnection:
     return this->ProcessRenegotiateConnection(commentsOnError);
@@ -1118,7 +1118,7 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
 bool SSLContent::ProcessExtensions(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("SSLHello::ProcessExtensions");
   for (int i = 0; i < this->extensions.size; i ++) {
-    if (!this->extensions[i].ProcessMe(commentsOnFailure)) {
+    if (!this->extensions[i].processMe(commentsOnFailure)) {
       return false;
     }
   }
@@ -1460,7 +1460,7 @@ JSData SSLRecord::toJSON() {
   MacroRegisterFunctionWithName("SSLRecord::toJSON");
   JSData result;
   result[Serialization::JSLabels::serialization] = this->ToJSONSerialization();
-  result[SSLRecord::JSLabels::type] = this->ToStringType();
+  result[SSLRecord::JSLabels::type] = this->toStringType();
   result[SSLRecord::JSLabels::content] = this->content.toJSON();
   result[SSLRecord::JSLabels::session] = this->owner->session.toJSON();
   return result;
@@ -1592,7 +1592,7 @@ JSData SSLRecord::ToJSONSerialization() {
   return result;
 }
 
-std::string SSLRecord::ToStringType() const {
+std::string SSLRecord::toStringType() const {
   switch (this->theType) {
   case SSLRecord::tokens::alert:
     return "alert";
@@ -1616,7 +1616,7 @@ std::string SSLRecord::toString() const {
   JSData result;
   result["length"] = this->length;
   result["incomingBytes"] = Crypto::convertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
-  result["type"] = this->ToStringType();
+  result["type"] = this->toStringType();
   if (this->theType == SSLRecord::tokens::handshake) {
     result["hello"] = this->content.toJSON();
   }

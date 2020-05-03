@@ -722,7 +722,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
             break;
           }
         }
-        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->GetNumPosRoots() - simpleIndex - 1, theExp);
+        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
       }
       out << "<td>";
       if (isGood) {
@@ -828,8 +828,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
 //  for (int i = 0; i <outerAutossize; i ++)
 //    out << "Generator " << i << ": "
 //    << outerAutossize[i].toString() << "<br>";
-//  groupWithOuterAutos.ComputeAllElements(false, - 1);
-  groupNoOuterAutos.ComputeAllElements(false, - 1);
+//  groupWithOuterAutos.computeAllElements(false, - 1);
+  groupNoOuterAutos.computeAllElements(false, - 1);
   groupNoOuterAutos.computeConjugacyClassesFromAllElements();
   out << "Weyl group matrix realization: " << groupNoOuterAutos.toString();
   Matrix<Rational> conjugatedMat, invertedOuterAuto;
@@ -1363,7 +1363,7 @@ public:
   int sumPartition;
   int MaxNumCachedKostkaNumbers;
   LargeInteger value;
-//  bool IncrementReturnFalseIfPastLast();
+//  bool incrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments = nullptr);
   bool operator==(const KostkaNumber& other) const;
   static Rational ComputeTypeBParabolicSignMultiplicity(
@@ -1387,7 +1387,7 @@ public:
   bool flagFirstComputed;
   bool initialize();
   bool firstIncrement();
-  bool IncrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast();
   SelectionFixedRankDifferentMaxMultiplicities();
   std::string toString();
   std::string toStringFull();
@@ -1490,7 +1490,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
   }
   theSel.rank = *this->tuple.lastObject();
   this->value = 0;
-  while (theSel.IncrementReturnFalseIfPastLast()) {
+  while (theSel.incrementReturnFalseIfPastLast()) {
     KostkaNumber ancestor;
     ancestor.partition = this->partition;
     ancestor.tuple = this->tuple;
@@ -1697,7 +1697,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
     rightKN.tuple.addOnTop(BcomponentSize);
     rightKN.Compute(&KNcache, nullptr);
     result += leftKN.value * rightKN.value;
-  } while (theSelection.IncrementReturnFalseIfPastLast());
+  } while (theSelection.incrementReturnFalseIfPastLast());
   if (comments != nullptr) {
     *comments << result.toString();
   }
@@ -1750,8 +1750,8 @@ bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement() {
   return true;
 }
 
-bool SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast() {
-  MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast");
+bool SelectionFixedRankDifferentMaxMultiplicities::incrementReturnFalseIfPastLast() {
+  MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::incrementReturnFalseIfPastLast");
   if (this->rank < 0) {
     return false;
   }
@@ -1824,7 +1824,7 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   std::stringstream out;
   out << "Max multiplicities: " << theSel.MaxMultiplicities << " rank: "
   << theSel.rank;
-  while (theSel.IncrementReturnFalseIfPastLast()) {
+  while (theSel.incrementReturnFalseIfPastLast()) {
     out << "<br>" << theSel.toString();
   }
   return output.assignValue(out.str(), theCommands);

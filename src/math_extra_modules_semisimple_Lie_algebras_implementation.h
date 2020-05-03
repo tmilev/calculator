@@ -31,8 +31,8 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
     newLeft.generatorsIndices.size --;
     newLeft.Powers.size --;
   }
-  int theIndexMinus = 2 * this->getOwner().GetNumPosRoots() + this->getOwner().getRank() - theIndex - 1;
-  int theSimpleIndex = theIndex - this->getOwner().GetNumPosRoots() - this->getOwner().getRank();
+  int theIndexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - theIndex - 1;
+  int theSimpleIndex = theIndex - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
   Accum.Powers.reserve(oldRight.Powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
@@ -84,7 +84,7 @@ template<class Coefficient>
 void ModuleSSalgebra<Coefficient>::applyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon) {
   for (int i = 0; i < theMon.generatorsIndices.size; i ++) {
     theMon.generatorsIndices[i] =
-    this->getOwner().GetNumPosRoots() * 2 + this->getOwner().getRank() - theMon.generatorsIndices[i] - 1;
+    this->getOwner().getNumberOfPositiveRoots() * 2 + this->getOwner().getRank() - theMon.generatorsIndices[i] - 1;
   }
   theMon.Powers.reverseElements();
   theMon.generatorsIndices.reverseElements();
@@ -153,7 +153,7 @@ void ModuleSSalgebra<Coefficient>::substitution(const PolynomialSubstitution<Rat
 template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex(int generatorIndex) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::getActionGeneratorIndex");
-  int numGenerators = this->getOwner().GetNumGenerators();
+  int numGenerators = this->getOwner().getNumberOfGenerators();
   if (generatorIndex < 0 || generatorIndex >= numGenerators) {
     global.fatal << "Bad generator index: " << generatorIndex << ". " << global.fatal;
   }
@@ -171,16 +171,16 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
     this->actionsGeneratorsMaT[generatorIndex].makeZero();
     return this->actionsGeneratorsMaT[generatorIndex];
   }
-  if (this->getOwner().IsASimpleGenerator(generatorIndex)) {
+  if (this->getOwner().isSimpleGenerator(generatorIndex)) {
     return this->getActionSimpleGeneratorIndex(generatorIndex);
   }
   MatrixTensor<Coefficient>& output = this->actionsGeneratorsMaT[generatorIndex];
-  if (this->getOwner().IsGeneratorFromCartan(generatorIndex)) {
+  if (this->getOwner().isGeneratorFromCartan(generatorIndex)) {
     output.makeZero();
     MonomialMatrix theMon;
     Vector<Coefficient> weightH;
     Coefficient tempCF, hwCFshift;
-    weightH.makeEi(this->getOwner().getRank(), generatorIndex - this->getOwner().GetNumPosRoots());
+    weightH.makeEi(this->getOwner().getRank(), generatorIndex - this->getOwner().getNumberOfPositiveRoots());
     hwCFshift = this->getOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
     hwCFshift -= this->getOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
     for (int i = 0; i < this->theGeneratingWordsNonReduced.size; i ++) {
@@ -196,12 +196,12 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
   }
   List<int> adActions;
   Rational theCoeff;
-  this->getOwner().GetChevalleyGeneratorAsLieBracketsSimpleGens(generatorIndex, adActions, theCoeff);
+  this->getOwner().getChevalleyGeneratorAsLieBracketsSimpleGenerators(generatorIndex, adActions, theCoeff);
   MatrixTensor<Coefficient> tempO;
   output = this->getActionGeneratorIndex(*adActions.lastObject());
   for (int i = adActions.size - 2; i >= 0; i --) {
     tempO = this->getActionGeneratorIndex(adActions[i]);
-    output.LieBracketOnTheLeft(tempO);
+    output.lieBracketOnTheLeft(tempO);
   }
   Coefficient tempCF;
   tempCF = theCoeff;
@@ -246,14 +246,14 @@ void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElt(
 }
 
 template <class Coefficient>
-bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
+bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEncodeHighestWeight(
   std::string* report,
   CharacterSemisimpleLieAlgebraModule& output,
   const Selection& splittingParSel,
   const Selection& ParSelFDInducingPart,
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputWeylSub
 ) {
-  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
+  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEncodeHighestWeight");
   this->checkNonZeroOwner();
   std::stringstream out;
   std::string tempS;
@@ -356,14 +356,14 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::SplitOverLeviMonsEncodeHI
       tempMon.weightFundamentalCoordS = theWeyL.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff = tempMults[i];
       bufferCoeff *= highestCoeff;
-      remainingCharDominantLevi.SubtractMonomial(tempMon, bufferCoeff);
+      remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
     }
   }
   out << "<br>Character w.r.t Levi part: " << HtmlRoutines::getMathMouseHover(output.toString());
   if (report != nullptr) {
     DrawingVariables theDV;
     std::string tempS;
-    this->DrawMeNoMults(tempS, theDV, 10000);
+    this->drawMeNoMultiplicities(tempS, theDV, 10000);
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, "
     << "a yellow line is drawn if the corresponding weights are "
@@ -411,7 +411,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
   MemorySaving<CharacterSemisimpleLieAlgebraModule<Coefficient> > buffer;
   CharacterSemisimpleLieAlgebraModule<Coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.getElement() : *outputChar;
-  this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight(
+  this->theChaR.splitOverLeviMonomialsEncodeHighestWeight(
     report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi, subWeyl
   );
   std::stringstream out;
@@ -442,7 +442,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   theFinalEigenSpace.makeEiBasis(this->getDimension());
   for (int i = 0; i < splittingParSelectedInLevi.cardinalitySelection; i ++) {
     int theGenIndex = splittingParSelectedInLevi.elements[i] +
-    this->getOwner().getRank() + this->getOwner().GetNumPosRoots();
+    this->getOwner().getRank() + this->getOwner().getNumberOfPositiveRoots();
     MatrixTensor<Coefficient>& currentOp = this->getActionGeneratorIndex(theGenIndex);
     Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
@@ -510,7 +510,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
 
 template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGeneratorIndex(int generatorIndex) {
-  Vector<Rational> genWeight = this->getOwner().GetWeightOfGenerator(generatorIndex);
+  Vector<Rational> genWeight = this->getOwner().getWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > currentPair;
   MatrixTensor<Coefficient>& outputMat = this->actionsGeneratorsMaT[generatorIndex];
@@ -530,11 +530,11 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
       for (int j = 0; j < currentWordList.size; j ++) {
         theScalarProds.setSize(otherWordList.size);
         for (int k = 0; k < otherWordList.size; k ++) {
-          if (generatorIndex > this->getOwner().GetNumPosRoots()) {
+          if (generatorIndex > this->getOwner().getNumberOfPositiveRoots()) {
             currentPair.Object1 = currentWordList[j];
             this->applyTAA(currentPair.Object1);
             currentPair.Object2 = otherWordList[k];
-            currentPair.Object2.MultiplyByGeneratorPowerOnTheLeft(this->getOwner().GetOppositeGeneratorIndex(generatorIndex), 1);
+            currentPair.Object2.MultiplyByGeneratorPowerOnTheLeft(this->getOwner().getOppositeGeneratorIndex(generatorIndex), 1);
           } else {
             currentPair.Object1 = currentWordList[j];
             currentPair.Object1.MultiplyByGeneratorPowerOnTheLeft(generatorIndex, 1);
@@ -609,7 +609,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->theHWFDpartSimpleCoordS = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
   this->theHWFDpartDualCoords = theWeyl.GetDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
   this->theHWSimpleCoordSBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
-  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
+  this->theChaR.makeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
 
   unsigned long long startingNumRationalOperations =
   Rational::TotalLargeAdditions +
@@ -656,9 +656,9 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
         theIndex ++;
       }
       currentNonReducedElement.multiplyByGeneratorPowerOnTheRight(
-        this->getOwner().GetGeneratorFromDisplayIndex(theIndex), theRingUnit
+        this->getOwner().getGeneratorFromDisplayIndex(theIndex), theRingUnit
       );
-      tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().GetGeneratorFromDisplayIndex(theIndex), 1);
+      tempMonInt.multiplyByGeneratorPowerOnTheRight(this->getOwner().getGeneratorFromDisplayIndex(theIndex), 1);
     }
     Vector<Rational>& hwCurrent = *this->thePaths[i].Waypoints.lastObject();
     int theIndex = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
@@ -720,11 +720,11 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     for (int k = 0; k < 2; k ++) {
       for (int j = 0; j < this->getOwner().getRank(); j ++) {
         if (this->parabolicSelectionSelectedAreElementsLevi.selected[j]) {
-          int theIndex = this->getOwner().GetNumPosRoots() - j - 1;
+          int theIndex = this->getOwner().getNumberOfPositiveRoots() - j - 1;
           if (k == 1) {
-            theIndex = this->getOwner().GetNumPosRoots() + this->getOwner().getRank() + j;
+            theIndex = this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() + j;
           }
-          tempSSElt.MakeGenerator(theIndex, this->getOwner());
+          tempSSElt.makeGenerator(theIndex, this->getOwner());
           if (outputReport != nullptr) {
             out2 << "<hr>Simple generator: " << tempSSElt.toString(&global.theDefaultFormat.getElement());
           }
@@ -750,7 +750,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
               ;
             }*/
           if (k == 1) {
-            this->getActionGeneratorIndex(this->getOwner().GetNumPosRoots() + j);
+            this->getActionGeneratorIndex(this->getOwner().getNumberOfPositiveRoots() + j);
           }
         }
       }
@@ -774,9 +774,9 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   Vector<Rational> targetWeight;
   this->theBilinearFormsAtEachWeightLevel.setSize(this->theGeneratingWordsGrouppedByWeight.size);
   this->theBilinearFormsInverted.setSize(this->theGeneratingWordsGrouppedByWeight.size);
-  this->ComputedGeneratorActions.initialize(this->getOwner().GetNumGenerators());
-  this->actionsGeneratorS.setSize(this->getOwner().GetNumGenerators());
-  this->actionsGeneratorsMaT.setSize(this->getOwner().GetNumGenerators());
+  this->ComputedGeneratorActions.initialize(this->getOwner().getNumberOfGenerators());
+  this->actionsGeneratorS.setSize(this->getOwner().getNumberOfGenerators());
+  this->actionsGeneratorsMaT.setSize(this->getOwner().getNumberOfGenerators());
   int numScalarProducts = 0;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
@@ -825,19 +825,19 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
   bool ascending
 ) {
   SemisimpleLieAlgebra& ownerSS = this->getOwner();
-  ownerSS.OrderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
+  ownerSS.orderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
   ElementUniversalEnveloping<ResultType> theElt;
   output.setSize(0);
-  output.reserve(ownerSS.GetNumPosRoots());
+  output.reserve(ownerSS.getNumberOfPositiveRoots());
 
-  int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.getRank();
+  int theBeginning = useNegativeNilradical ? 0: ownerSS.getNumberOfPositiveRoots() +ownerSS.getRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators == nullptr) {
     outputListOfGenerators = &tempList.getElement();
   }
   outputListOfGenerators->setSize(0);
-  outputListOfGenerators->reserve(ownerSS.GetNumPosRoots());
-  for (int i = theBeginning; i < theBeginning+ownerSS.GetNumPosRoots(); i ++) {
+  outputListOfGenerators->reserve(ownerSS.getNumberOfPositiveRoots());
+  for (int i = theBeginning; i < theBeginning+ownerSS.getNumberOfPositiveRoots(); i ++) {
     if (this->isNotInLevi(i)) {
       outputListOfGenerators->addOnTop(i);
     }
@@ -864,16 +864,16 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
   MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::TestConsistency");
   ProgressReport theReport;
   MatrixTensor<Coefficient> left, right, output, otherOutput, tempMat, diffMat;
-  for (int i = 0; i < this->getOwner().GetNumGenerators(); i ++) {
-    for (int j = 0; j < this->getOwner().GetNumGenerators(); j ++) {
+  for (int i = 0; i < this->getOwner().getNumberOfGenerators(); i ++) {
+    for (int j = 0; j < this->getOwner().getNumberOfGenerators(); j ++) {
       left = this->getActionGeneratorIndex(i);
       right = this->getActionGeneratorIndex(j);
       output = right;
-      output.LieBracketOnTheLeft(left);
+      output.lieBracketOnTheLeft(left);
       ElementSemisimpleLieAlgebra<Rational> leftGen, rightGen, outputGen;
-      leftGen.MakeGenerator(i, *this->theAlgebras, this->indexAlgebra);
-      rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
-      this->getOwner().LieBracket(leftGen, rightGen, outputGen);
+      leftGen.makeGenerator(i, *this->theAlgebras, this->indexAlgebra);
+      rightGen.makeGenerator(j, *this->theAlgebras, this->indexAlgebra);
+      this->getOwner().lieBracket(leftGen, rightGen, outputGen);
       otherOutput.makeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
         tempMat = this->getActionGeneratorIndex(outputGen[k].theGeneratorIndex);
@@ -895,19 +895,19 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
       } else {
         std::stringstream tempStream;
         tempStream << "tested index " << i + 1
-        << " out of " << this->getOwner().GetNumGenerators()
-        << ", " << j + 1 << " out of " << this->getOwner().GetNumGenerators();
+        << " out of " << this->getOwner().getNumberOfGenerators()
+        << ", " << j + 1 << " out of " << this->getOwner().getNumberOfGenerators();
         theReport.report(tempStream.str());
       }
     }
   }
-  for (int i = 0; i < this->getOwner().GetNumPosRoots(); i ++) {
+  for (int i = 0; i < this->getOwner().getNumberOfPositiveRoots(); i ++) {
     left = this->getActionGeneratorIndex(i);
-    right = this->getActionGeneratorIndex(this->getOwner().GetNumGenerators() - 1 - i);
+    right = this->getActionGeneratorIndex(this->getOwner().getNumberOfGenerators() - 1 - i);
     left.transpose();
     left -= right;
     left = this->getActionGeneratorIndex(i);
-    right.LieBracketOnTheLeft(left);
+    right.lieBracketOnTheLeft(left);
   }
   global.comments << "Consistency check passed successfully!";
 }
@@ -1234,7 +1234,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: "
-  << theAlgebrA.ToStringLieAlgebraName() << ".";
+  << theAlgebrA.toStringLieAlgebraName() << ".";
   out << "<br>Parabolic selection: "
   << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
@@ -1287,7 +1287,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
   for (int i = 0; i < this->actionsGeneratorsMaT.size; i ++) {
     if (this->ComputedGeneratorActions.selected[i]) {
-      tempSSElt.MakeGenerator(i, theAlgebrA);
+      tempSSElt.makeGenerator(i, theAlgebrA);
       out << "<tr>";
       out << "<td>"
       << HtmlRoutines::getMathMouseHover(tempSSElt.toString(theFormat))
@@ -1308,7 +1308,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   }
   out << "</table>";
   DrawingVariables theDV;
-  this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theDV);
+  this->theCharOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
   << theDV.GetHtmlDiv(theWeyl.getDimension());
 

@@ -2514,7 +2514,7 @@ public:
     Expression& output,
     bool doForceRecompute,
     bool doAttemptToSolveSystems,
-    bool doComputePairingTable,
+    bool docomputePairingTable,
     bool doComputeModuleDecomposition,
     bool doComputeNilradicals,
     bool doAdjustCentralizers
@@ -3133,7 +3133,7 @@ bool Calculator::getTypeWeight(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
-    << ambientSSalgebra->ToStringLieAlgebraName()
+    << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
   int algebraIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
@@ -3227,7 +3227,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
-    << ambientSSalgebra->ToStringLieAlgebraName()
+    << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. "
     << global.fatal;
   }

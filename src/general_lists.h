@@ -209,10 +209,10 @@ public:
     output = p;
     return true;
   }
-  static int lcm(int a, int b);
-  template <typename integral>
-  static integral gcd(integral a, integral b) {
-    integral temp;
+  static int leastCommonMultiple(int a, int b);
+  template <typename Integral>
+  static Integral greatestCommonDivisor(Integral a, Integral b) {
+    Integral temp;
     while (!(b == 0)) {
       temp = a % b;
       a = b;
@@ -220,11 +220,11 @@ public:
     }
     return a;
   }
-  template <typename integral>
-  static integral lcm(integral a, integral b) {
-    integral result;
+  template <typename Integral>
+  static Integral leastCommonMultiple(Integral a, Integral b) {
+    Integral result;
     result = a;
-    result /= MathRoutines::gcd(a, b);
+    result /= MathRoutines::greatestCommonDivisor(a, b);
     result *= b;
     return result;
   }
@@ -235,14 +235,14 @@ public:
   static bool isHexDigit(char digitCandidate);
   static bool isADigit(char theChar, int* whichDigit = nullptr);
   template <class theType>
-  static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
-    return MathRoutines::GenerateVectorSpaceClosedWRTOperation(
-      inputOutputElts, upperDimensionBound, theType::LieBracket
+  static bool generateVectorSpaceClosedWithRespectToLieBracket(List<theType>& inputOutputElts, int upperDimensionBound) {
+    return MathRoutines::generateVectorSpaceClosedWRTOperation(
+      inputOutputElts, upperDimensionBound, theType::lieBracket
     );
   }
-  static Vector<double> GetVectorDouble(Vector<Rational>& input);
+  static Vector<double> getVectorDouble(Vector<Rational>& input);
   template <class theType>
-  static bool GenerateVectorSpaceClosedWRTOperation(
+  static bool generateVectorSpaceClosedWRTOperation(
     List<theType>& inputOutputElts,
     int upperDimensionBound,
     void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
@@ -260,8 +260,8 @@ public:
   }
   // The MS compiler refuses to compile the following, hence the above line.
   // static const double Pi = (double)3.141592653589793238462643383279;
-  static int KToTheNth(int k, int n);
-  static void KToTheNth(int k, int n, LargeInteger& output);
+  static int kToTheNth(int k, int n);
+  static void kToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
   static int binomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
@@ -272,7 +272,7 @@ public:
     const Coefficient& theRingUnit
   );
   template <typename Coefficient>
-  inline static Coefficient Maximum(const Coefficient& a, const Coefficient& b) {
+  inline static Coefficient maximum(const Coefficient& a, const Coefficient& b) {
     if (a > b) {
       return a;
     } else {
@@ -334,7 +334,7 @@ public:
     return static_cast<unsigned int>(x);
   }
   template <class Element>
-  static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
+  static void lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>
   static number ComplexConjugate(number x) {
     return x.GetComplexConjugate();
@@ -1329,7 +1329,7 @@ public:
     int maxHashSize = 0;
     int numNonZeroHashes = 0;
     for (int i = 0; i < this->theHashedArrays.size; i ++) {
-      maxHashSize = MathRoutines::Maximum(maxHashSize, this->theHashedArrays[i].size);
+      maxHashSize = MathRoutines::maximum(maxHashSize, this->theHashedArrays[i].size);
       if (this->theHashedArrays[i].size > 0) {
         numNonZeroHashes ++;
       }

@@ -1127,11 +1127,11 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   }
   do {
     //if (left.toString() == "s_{4}")
-    //  global.Comments << "<br>" << theIterator.GetCurrentElement().toString() << "=?=" << right.toString();
-    if (theIterator.GetCurrentElement() == right) {
+    //  global.Comments << "<br>" << theIterator.getCurrentElement().toString() << "=?=" << right.toString();
+    if (theIterator.getCurrentElement() == right) {
       return true;
     }
-  } while (theIterator.IncrementReturnFalseIfPastLast());
+  } while (theIterator.incrementReturnFalseIfPastLast());
   return false;
 }
 
@@ -1140,7 +1140,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   RootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeFromDynkinType(this->theDynkinType);
-//  theSSlieAlg.ComputeChevalleyConstants(global);
+//  theSSlieAlg.computeChevalleyConstants(global);
   theRootSAs.owner = &theSSlieAlg;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
@@ -1197,13 +1197,13 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   SubgroupDataRootReflections theSG;
   do {
     extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
-    if (currentBasisExtendedParabolic.GetRankOfSpanOfElements() == currentBasisExtendedParabolic.size) {
+    if (currentBasisExtendedParabolic.getRankOfSpanOfElements() == currentBasisExtendedParabolic.size) {
       theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
       theSG.flagIsExtendedParabolic = true;
       theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
       outputSubgroups.addOnTop(theSG);
     }
-  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
+  } while (parSelrootsAreInLevi.incrementReturnFalseIfPastLast());
   for (int i = 0; i < outputSubgroups.size; i ++) {
     outputSubgroups[i].ComputeCCSizesRepresentativesPreimages();
   }

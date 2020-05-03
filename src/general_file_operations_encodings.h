@@ -39,7 +39,7 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static bool loadFileToStringVirtualCustomizedReadOnly(
+  static bool loadFiletoStringVirtualCustomizedReadOnly(
     const std::string& fileName,
     std::string& output,
     std::stringstream* commentsOnFailure
@@ -65,7 +65,7 @@ public:
   static std::string writeFileReturnHTMLLink(
     const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
   );
-  static bool loadFileToStringVirtual(
+  static bool loadFiletoStringVirtual(
     const std::string& fileName,
     std::string& output,
     bool accessSensitiveFolders,
@@ -90,7 +90,7 @@ public:
   // 256 bit secure one-time use token (= filename of the actual report).
   // The available tokens are only relayed to the party that initiated the computation.
   // They available tokens can only be browsed with an ssh admin connection.
-  static bool loadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  static bool loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     const std::string& fileName,
     std::string& output,
     bool accessSensitiveFolders,

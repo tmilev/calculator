@@ -49,7 +49,7 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
     resultVectorSel.computeIndicesFromSelection();
     tempM.MakeEij(this->getIndexFromRadicalSelection(resultVectorSel), this->getIndexFromRadicalSelection(vectorActedOnSel));
     outputOp.addMonomial(tempM, theCoeff);
-  } while (vectorActedOnSel.IncrementReturnFalseIfPastLast());
+  } while (vectorActedOnSel.incrementReturnFalseIfPastLast());
 }
 
 void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
@@ -70,7 +70,7 @@ void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
       out << "\\sqrt{" << theRad.toString() << "}";
     }
     this->displayNamesBasisElements[this->getIndexFromRadicalSelection(theSel)] = out.str();
-  } while (theSel.IncrementReturnFalseIfPastLast());
+  } while (theSel.incrementReturnFalseIfPastLast());
 }
 
 bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Selection& theSel) {
@@ -149,7 +149,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
     << "rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current "
     << "implementation of algberaic extensions of the rationals. "
-    << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
+    << GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML();
     return (false);
   }
   this->latestBasis.setSize(MathRoutines::twoToTheNth(radicalsNew.size));
@@ -178,7 +178,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
         this->getIndexFromRadicalSelection(smallerFieldSel)
       ), 1
     );
-  } while (smallerFieldSel.IncrementReturnFalseIfPastLast());
+  } while (smallerFieldSel.incrementReturnFalseIfPastLast());
   this->theQuadraticRadicals = radicalsNew;
   largerFieldSel.initialize(radicalsNew.size);
   do {
@@ -186,7 +186,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
       largerFieldSel,
       this->latestBasis[this->getIndexFromRadicalSelection(largerFieldSel)]
     );
-  } while (largerFieldSel.IncrementReturnFalseIfPastLast());
+  } while (largerFieldSel.incrementReturnFalseIfPastLast());
   this->injectOldBases(&currentInjection);
   this->appendAdditiveEiBasis();
   this->computeDisplayStringsFromRadicals();
@@ -219,7 +219,7 @@ void AlgebraicClosureRationals::appendAdditiveEiBasis() {
   this->basisInjections.setSize(this->basisInjections.size + 1);
   this->basisInjections.lastObject()->setSize(this->latestBasis.size);
   for (int i = 0; i < this->latestBasis.size; i ++) {
-    (*this->basisInjections.lastObject())[i].MaKeEi(i);
+    (*this->basisInjections.lastObject())[i].makeEi(i);
   }
 }
 
@@ -241,7 +241,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       theSel.theInts.makeEi(DimensionOverRationals, indexToSkipFirst);
     }
   }
-  for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast()) {
+  for (theSel.incrementReturnFalseIfPastLast(); ; theSel.incrementReturnFalseIfPastLast()) {
     attemptsSoFar ++;
     if (attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone) {
       if (commentsOnFailure != nullptr) {
@@ -268,7 +268,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
-        this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()
+        this->theGeneratingElementPowersBasis.getRankOfSpanOfElements()
       ) {
         this->theGeneratingElementPowersBasis.setSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
@@ -331,7 +331,7 @@ bool AlgebraicClosureRationals::reduceMe(
     << global.fatal;
   }
   smallestFactor = factorization.reduced[0];
-  if (smallestFactor.TotalDegreeInt() == theDim) {
+  if (smallestFactor.totalDegreeInt() == theDim) {
     return true;
   }
   MatrixTensor<Rational> generatorPowers, generatorPowersInverse;
@@ -375,7 +375,7 @@ bool AlgebraicClosureRationals::reduceMe(
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
     termInLastColumn.MakeEij(i, smallestFactorDegree - 1);
-    Rational coefficientLastColumn = - smallestFactor.GetMonomialCoefficient(MonomialP(0, i));
+    Rational coefficientLastColumn = - smallestFactor.getMonomialCoefficient(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
@@ -419,7 +419,7 @@ void AlgebraicClosureRationals::getAdditionTo(
   }
   if (input.owner == nullptr) {
     if (input.element.size() > 0) {
-      output.MaKeEi(0, input.element.coefficients[0]);
+      output.makeEi(0, input.element.coefficients[0]);
     }
     return;
   }
@@ -489,7 +489,7 @@ bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicC
   Rational fracPart = input;
   fracPart.AssignFracValue();
   Rational halfIntegerPart = input * 2;
-  halfIntegerPart.AssignFloor();
+  halfIntegerPart.assignFloor();
   LargeInteger halfIntegerPartTimesTwo;
   if (!halfIntegerPart.isInteger(&halfIntegerPartTimesTwo)) {
     global.fatal << "something went wrong: floor function returns non-integer" << global.fatal;
@@ -632,14 +632,14 @@ void AlgebraicClosureRationals::reset() {
   this->theGeneratingElementPowersBasis[0].makeEi(1, 0);
   this->basisInjections.setSize(1);
   this->basisInjections[0].setSize(1);
-  this->basisInjections[0][0].MaKeEi(0);
+  this->basisInjections[0][0].makeEi(0);
   this->theQuadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
   this->GeneratingElementTensorForm.MakeId(1);
   this->GeneratingElementMatForm.MakeIdMatrix(1);
   this->GeneratingElemenT.owner = this;
-  this->GeneratingElemenT.element.MaKeEi(0);
+  this->GeneratingElemenT.element.makeEi(0);
 }
 
 bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
@@ -728,7 +728,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
   MatrixTensor<Rational> theGenMat;
-  int degreeMinPoly = minPoly.TotalDegreeInt();
+  int degreeMinPoly = minPoly.totalDegreeInt();
   int startingDimension = this->latestBasis.size;
   if (
     degreeMinPoly * startingDimension > 10000 ||
@@ -767,7 +767,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   minusMinimalPolynomialMinusMaximalMonomial.getIndexLeadingMonomial(
     &leadingMonomial, &leadingCoefficientModified, monomialOrder
   );
-  minusMinimalPolynomialMinusMaximalMonomial.SubtractMonomial(leadingMonomial, leadingCoefficientModified);
+  minusMinimalPolynomialMinusMaximalMonomial.subtractMonomial(leadingMonomial, leadingCoefficientModified);
   minusMinimalPolynomialMinusMaximalMonomial /= leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoeffMatForm;
@@ -783,7 +783,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       }
       theGenMat.addMonomial(
         MonomialMatrix(
-          currentMon.TotalDegreeInt() * startingDimension + relRowIndex,
+          currentMon.totalDegreeInt() * startingDimension + relRowIndex,
           startingDimension * (degreeMinPoly - 1) + relColIndex
         ),
         currentCoeffMatForm.coefficients[j]
@@ -812,7 +812,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   }
   this->appendAdditiveEiBasis();
   outputRoot.owner = this;
-  outputRoot.element.MaKeEi(startingDimension);
+  outputRoot.element.makeEi(startingDimension);
   outputRoot.basisIndex = this->basisInjections.size - 1;
   this->flagIsQuadraticRadicalExtensionRationals = false;
   if (!this->reduceMe(commentsOnFailure)) {
@@ -875,7 +875,7 @@ void AlgebraicNumber::invert() {
   theInverted.GetMatrix(tempMat2, this->owner->latestBasis.size);
   tempMat2.invert();
   theInverted = tempMat2;
-  this->element.MaKeEi(0);
+  this->element.makeEi(0);
   theInverted.actOnVectorColumn(this->element);
   this->basisIndex = this->owner->basisInjections.size - 1;
 }
@@ -1002,7 +1002,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     if (this->element.isEqualToZero()) {
       return;
     }
-    Rational tempRat = this->element.GetMonomialCoefficient(MonomialVector(0));
+    Rational tempRat = this->element.getMonomialCoefficient(MonomialVector(0));
     *this = other;
     *this *= tempRat;
     return;
@@ -1020,11 +1020,11 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   MatrixTensor<Rational> leftMat, rightMat;
   this->owner->getMultiplicationBy(*this, leftMat);
   this->owner->getMultiplicationBy(other, rightMat);
-  leftMat.CheckConsistencyGrandMaster();
-  rightMat.CheckConsistencyGrandMaster();
+  leftMat.checkConsistencyGrandMaster();
+  rightMat.checkConsistencyGrandMaster();
   leftMat *= rightMat;
   this->basisIndex = this->owner->basisInjections.size - 1;
-  this->element.MaKeEi(0);
+  this->element.makeEi(0);
   leftMat.actOnVectorColumn(this->element);
 }
 
@@ -1060,7 +1060,7 @@ AlgebraicNumber AlgebraicNumber::one() {
 void AlgebraicNumber::assignRational(const Rational& input, AlgebraicClosureRationals& inputOwner) {
   this->basisIndex = 0;
   this->owner = &inputOwner;
-  this->element.MaKeEi(0, input);
+  this->element.makeEi(0, input);
 }
 
 AlgebraicNumber AlgebraicNumber::zero() {
@@ -1211,7 +1211,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   }
   this->owner = &inputOwner;
   this->basisIndex = this->owner->basisInjections.size - 1;
-  this->element.MaKeEi(this->owner->getIndexFromRadicalSelection(FactorSel));
+  this->element.makeEi(this->owner->getIndexFromRadicalSelection(FactorSel));
   this->element *= squareRootRationalPart;
   this->checkConsistency();
   return true;
@@ -1463,7 +1463,7 @@ void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
 
 void AlgebraicNumber::operator=(const Rational& other) {
   this->owner = nullptr;
-  this->element.MaKeEi(0, other);
+  this->element.makeEi(0, other);
   this->basisIndex = 0;
 }
 

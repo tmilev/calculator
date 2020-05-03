@@ -8,6 +8,8 @@
 bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
+  this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     if (commentsOnFailure != nullptr) {
@@ -27,6 +29,15 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
     return false;
   }
   if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
+    return false;
+  }
+  if (this->current.totalDegree() > this->maximumTotalDegree) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The degree of the input is larger than the "
+      << "maximum allowed for the Cantor-Zassenhaus algorithm: "
+      << this->maximumTotalDegree << ". ";
+    }
     return false;
   }
   this->one.makeOne(this->current.coefficients[0].theModulus);
@@ -55,25 +66,55 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   return this->oneFactorGo(commentsOnFailure);
 }
 
+const int PolynomialFactorizationCantorZassenhaus::maximumTotalDegree = 64;
+
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
-  std::stringstream *commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
   PolynomialModuloPolynomial<ElementZmodP> x;
   x.modulus = this->output->current;
   x.value.makeDegreeOne(1, 0, this->one, this->one.zero());
   PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
   oneQuotientRing.modulus = this->current;
-  LargeInteger modulus = one.theModulus;
-  this->degree = this->output->current.TotalDegreeInt();
-  this->degreeUnknownFactor = this->degree / 2;
-  LargeInteger power = modulus;
-  power.raiseToPower(this->degreeUnknownFactor);
-  power -= 1;
-  power /= 2;
-  MathRoutines::raiseToPower(x, power, oneQuotientRing);
-  if (commentsOnFailure != 0) {
-    global.comments << "Power x^{" << power << "} is: " << x.toString();
+  oneQuotientRing.value.makeConstant(this->one);
+  LargeInteger modulus = this->one.theModulus;
+  int degree = this->current.totalDegreeInt();
+  PolynomialModuloPolynomial<ElementZmodP> xPower;
+  std::stringstream commentsGeneral;
+  HashedList<PolynomialModuloPolynomial<ElementZmodP> > powers;
+  powers.addOnTop(xPower);
+  for (int i = 0; i < degree; i ++) {
+    xPower = x;
+    LargeInteger power = modulus;
+
+    power.raiseToPower(i + 1);
+    power -= 1;
+    power /= 2;
+    MathRoutines::raiseToPower(xPower, power, oneQuotientRing);
+    powers.addOnTop(xPower);
+    commentsGeneral << "\\(x^{\\frac{" << modulus << "^{" << i + 1 << "} - 1}{2}} \\)=\\( "
+    << xPower.toString(&this->output->format) << "\\)";
+    Polynomial<ElementZmodP> gcd, gcdWithPlusOne, gcdWithMinusOne;
+    xPower.value.greatestCommonDivisor(xPower.value, xPower.modulus, gcd, this->one, commentsOnFailure);
+    Polynomial<ElementZmodP> valuePlusOne = xPower.value + oneQuotientRing.value;
+    Polynomial<ElementZmodP> valueMinusOne = xPower.value - oneQuotientRing.value;
+    if (!valuePlusOne.isEqualToZero()) {
+      xPower.value.greatestCommonDivisor(valuePlusOne, xPower.modulus, gcdWithPlusOne, this->one, commentsOnFailure);
+    }
+    if (!valueMinusOne.isEqualToZero()) {
+      xPower.value.greatestCommonDivisor(valueMinusOne, xPower.modulus, gcdWithMinusOne, this->one, commentsOnFailure);
+    }
+    commentsGeneral
+    << ", gcd: " << gcd.toString(&this->output->format)
+    << ", gcdWithPlusOne: " << gcdWithPlusOne.toString(&this->output->format)
+    << ", gcdWithMinusOne: " << gcdWithMinusOne.toString(&this->output->format)
+    << "<br>";
   }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << commentsGeneral.str();
+  }
+
   return false;
 }
 
@@ -182,7 +223,7 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::Interpolate(
+void Polynomial<Coefficient>::interpolate(
   const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints
 ) {
   Polynomial<Coefficient> theLagrangeInterpolator, accumulator;
@@ -322,13 +363,13 @@ bool PolynomialFactorizationKronecker::oneFactor(
       continue;
     }
     Polynomial<Rational> incoming;
-    incoming.Interpolate(
+    incoming.interpolate(
       PointsOfInterpolationLeft,
       theValuesAtPointsLeft
     );
     if (this->output->accountNonReducedFactor(incoming)) {
       return true;
     }
-  } while (divisorSelection.IncrementReturnFalseIfPastLast());
+  } while (divisorSelection.incrementReturnFalseIfPastLast());
   return this->output->accountReducedFactor(this->current);
 }

@@ -345,6 +345,7 @@ public:
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
+  static const int maximumTotalDegree;
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
   Polynomial<ElementZmodP> current;
   bool oneFactor(

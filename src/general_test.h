@@ -8,5 +8,4 @@
 
 int mainTest(List<std::string>& inputStrings);
 
-
 #endif

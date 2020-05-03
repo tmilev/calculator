@@ -54,7 +54,7 @@ public:
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  void MakeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex) {
+  void makeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex) {
     this->owner = &inputOwner;
     this->theGeneratorIndex = inputGeneratorIndex;
   }
@@ -112,7 +112,7 @@ public:
   int minimalNumberOfVariables() {
     int result = 0;
     for (int i = 0; i < this->Powers.size; i ++) {
-      result = MathRoutines::Maximum(result, this->Powers[i].minimalNumberOfVariables());
+      result = MathRoutines::maximum(result, this->Powers[i].minimalNumberOfVariables());
     }
     return result;
   }
@@ -335,7 +335,7 @@ public:
   void trimTrailingZeroes();
   bool operator>(const MonomialP& other) const;
   bool isDivisibleBy(const MonomialP& other) const;
-  int TotalDegreeInt() const {
+  int totalDegreeInt() const {
     int result = - 1;
     if (!this->TotalDegree().isSmallInteger(&result)) {
       global.fatal
@@ -1107,8 +1107,8 @@ public:
       }
     }
   }
-  void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input);
+  void writeToFile(std::fstream& output);
+  bool readFromFile(std::fstream& input);
   void operator/=(const Coefficient& input) {
     for (int j = 0; j < this->numberOfRows; j ++) {
       for (int i = 0; i < this->numberOfColumns; i ++) {
@@ -1128,12 +1128,12 @@ public:
   }
   void LieBracketWith(Matrix<Coefficient>& right) {
     Matrix<Coefficient> tempMat;
-    this->LieBracket(*this, right, tempMat);
+    this->lieBracket(*this, right, tempMat);
     *this = tempMat;
   }
-  static void LieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
+  static void lieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
     if (left.numberOfColumns != left.numberOfRows || right.numberOfColumns != right.numberOfRows || left.numberOfColumns != right.numberOfColumns) {
-      global.fatal << "In LieBracket: bad dimensions of matrices. " << global.fatal;
+      global.fatal << "In lieBracket: bad dimensions of matrices. " << global.fatal;
     }
     Matrix<Coefficient> tempPlus, tempMinus;
     tempPlus = (right);
@@ -1246,7 +1246,7 @@ public:
   }
   // The following are for compatibility with the FiniteGroup class
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Coefficient>& out) {
-    out.AssignCharPoly(*this);
+    out.assignCharacteristicPoly(*this);
   }
   bool HasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
     Polynomial<Coefficient> p, q;
@@ -1295,14 +1295,14 @@ bool Vectors<Coefficient>::conesIntersect(
   matb.makeZero(); matb.elements[theDimension][0].makeOne();
   for (int i = 0; i < StrictCone.size; i ++) {
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][i].Assign(StrictCone[i][k]);
+      matA.elements[k][i].assign(StrictCone[i][k]);
     }
     matA.elements[theDimension][i].makeOne();
   }
   for (int i = 0; i < NonStrictCone.size; i ++) {
     int currentCol = i + StrictCone.size;
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][currentCol].Assign(NonStrictCone[i][k]);
+      matA.elements[k][currentCol].assign(NonStrictCone[i][k]);
       matA.elements[k][currentCol].minus();
     }
     matA.elements[theDimension][currentCol].makeZero();
@@ -1348,8 +1348,8 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
     return;
   }
   Element** newElements = nullptr;
-  int newActualNumCols = MathRoutines::Maximum(this->ActualNumCols, c);
-  int newActualNumRows = MathRoutines::Maximum(this->ActualNumRows, r);
+  int newActualNumCols = MathRoutines::maximum(this->ActualNumCols, c);
+  int newActualNumRows = MathRoutines::maximum(this->ActualNumRows, r);
   if (r > this->ActualNumRows || c > this->ActualNumCols) {
     newElements  = new Element * [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
@@ -1774,7 +1774,7 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows(
       for (int j = 0; j < this->numberOfRows; j ++) {
         if (i != j) {
           if (!this->elements[j][i].isEqualToZero()) {
-            tempElement.Assign(this->elements[j][i]);
+            tempElement.assign(this->elements[j][i]);
             this->SubtractRows(j, i, 0, tempElement);
           }
         }
@@ -1905,7 +1905,7 @@ class MonomialWeylAlgebra {
     return this->hashFunction(*this);
   }
   int minimalNumberOfVariables() const {
-    return MathRoutines::Maximum(
+    return MathRoutines::maximum(
       this->polynomialPart.minimalNumberOfVariables(),
       this->differentialPart.minimalNumberOfVariables()
     );
@@ -2012,8 +2012,8 @@ public:
     theSortedMons.quickSortDescending(theOrder, &this->coefficients);
     this->theMonomials = theSortedMons;
   }
-  void GetVectorMonsAscending(Vector<Coefficient>& result);
-  void GetVectorMonsDescending(Vector<Coefficient>& result);
+  void getVectorMonomialsAscending(Vector<Coefficient>& result);
+  void getVectorMonomialsDescending(Vector<Coefficient>& result);
   void popMonomial(int index) {
     this->theMonomials.removeIndexSwapWithLast(index);
     this->coefficients.removeIndexSwapWithLast(index);
@@ -2031,7 +2031,7 @@ public:
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
-  Coefficient GetCoefficientsSum() const {
+  Coefficient getCoefficientsSum() const {
     Coefficient result = 0;
     for (int i = 0; i < this->coefficients.size; i ++) {
       result += this->coefficients[i];
@@ -2041,7 +2041,7 @@ public:
   void addMonomial(
     const templateMonomial& inputMon, const Coefficient& inputCoeff
   ) {
-    this->CleanupMonIndex(
+    this->cleanupMonomialIndex(
       this->addMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff)
     );
   }
@@ -2105,7 +2105,7 @@ public:
     }
     return result;
   }
-  bool CleanupMonIndex(int theIndex) {
+  bool cleanupMonomialIndex(int theIndex) {
     if (theIndex == - 1) {
       return false;
     }
@@ -2139,14 +2139,14 @@ public:
     List<LinearCombinationTemplate>* carbonCopyList = nullptr
   );
   template <class LinearCombinationTemplate>
-  static void IntersectVectorSpaces(
+  static void intersectVectorSpaces(
     const List<LinearCombinationTemplate>& vectorSpace1,
     const List<LinearCombinationTemplate>& vectorSpace2,
     List<LinearCombinationTemplate>& outputIntersection,
     HashedList<templateMonomial>* seedMonomials = nullptr
   );
   template <class LinearCombinationTemplate>
-  static int GetRankIntersectionVectorSpaces(
+  static int getRankIntersectionVectorSpaces(
     List<LinearCombinationTemplate>& vectorSpace1,
     List<LinearCombinationTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = nullptr
@@ -2154,31 +2154,31 @@ public:
     List<LinearCombinationTemplate> listCopy = vectorSpace1;
     listCopy.addListOnTop(vectorSpace2);
     return vectorSpace1.size + vectorSpace2.size -
-    LinearCombination<templateMonomial, Coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
+    LinearCombination<templateMonomial, Coefficient>::getRankOfSpanOfElements(listCopy, seedMonomials);
   }
   template <class LinearCombinationTemplate>
-  static bool VectorSpacesIntersectionIsNonTrivial(
+  static bool vectorSpacesIntersectionIsNonTrivial(
     List<LinearCombinationTemplate>& vectorSpace1,
     List<LinearCombinationTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    return 0 != LinearCombination<templateMonomial, Coefficient>::GetRankIntersectionVectorSpaces(
+    return 0 != LinearCombination<templateMonomial, Coefficient>::getRankIntersectionVectorSpaces(
       vectorSpace1, vectorSpace2, seedMonomials
     );
   }
   template <class LinearCombinationTemplate>
-  static bool LinSpanContains(
+  static bool linearSpanContains(
     const List<LinearCombinationTemplate>& theList,
     const LinearCombinationTemplate& input,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;
-    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     int startSpanSize = listCopy.size;
     listCopy.addOnTop(input);
-    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     return listCopy.size == startSpanSize;
@@ -2190,7 +2190,7 @@ public:
     Vector<Coefficient>& outputFirstLinearCombination,
     HashedList<templateMonomial>* seedMonomials = nullptr
   );
-  bool HasRationalCoeffs(LinearCombination<templateMonomial, Rational>*
+  bool hasRationalCoefficients(LinearCombination<templateMonomial, Rational>*
     outputConversionToRationals = nullptr
   ) {
     Rational tempRat;
@@ -2211,16 +2211,16 @@ public:
     return true;
   }
   template <class LinearCombinationTemplate>
-  static int GetRankOfSpanOfElements(
+  static int getRankOfSpanOfElements(
     List<LinearCombinationTemplate>& theList,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;
-    LinearCombination<templateMonomial, Coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
   template <class LinearCombinationTemplate>
-  static void GaussianEliminationByRowsDeleteZeroRows(
+  static void gaussianEliminationByRowsDeleteZeroRows(
     List<LinearCombinationTemplate >& theList,
     bool *IvemadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr
@@ -2237,9 +2237,9 @@ public:
   int subtractMonomialNoCoefficientCleanUpReturnIndex(
     const templateMonomial& inputMon, const Coefficient& inputCoeff
   );
-  void CleanUpZeroCoeffs() {
+  void cleanUpZeroCoefficients() {
     for (int i = 0; i < this->size; i ++) {
-      if (this->CleanupMonIndex(i)) {
+      if (this->cleanupMonomialIndex(i)) {
         i --;
       }
     }
@@ -2259,10 +2259,10 @@ public:
       this->coefficients[i] = newCoeff;
     }
   }
-  void SubtractMonomial(const templateMonomial& inputMon, const Coefficient& inputCoeff) {
-    this->CleanupMonIndex(this->subtractMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff));
+  void subtractMonomial(const templateMonomial& inputMon, const Coefficient& inputCoeff) {
+    this->cleanupMonomialIndex(this->subtractMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff));
   }
-  Coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
+  Coefficient getMonomialCoefficient(const templateMonomial& inputMon) const {
     int theIndex = this->theMonomials.getIndex(inputMon);
     if (theIndex == - 1) {
       if (this->coefficients.size > 0) {
@@ -2299,7 +2299,7 @@ public:
     }
     return false;
   }
-  void CheckFlagDeallocated() const {
+  void checkFlagDeallocated() const {
     if (
       this->theMonomials.flagDeallocated ||
       this->coefficients.flagDeallocated ||
@@ -2308,7 +2308,7 @@ public:
       global.fatal << "Use after free of monomial collection. " << global.fatal;
     }
   }
-  void CheckConsistencyGrandMaster() const {
+  void checkConsistencyGrandMaster() const {
     this->checkConsistency();
     this->theMonomials.GrandMasterConsistencyCheck();
     for (int i = 0; i < this->size(); i ++) {
@@ -2316,8 +2316,8 @@ public:
     }
   }
   void checkConsistency() const {
-    this->CheckFlagDeallocated();
-    this->CheckNumCoeffsConsistency();
+    this->checkFlagDeallocated();
+    this->checkNumberOfCoefficientsConsistency();
   }
   // Returns the number by which the linear combination was multiplied.
   Coefficient scaleNormalizeLeadingMonomial(const typename List<templateMonomial>::Comparator* monomialOrder) {
@@ -2340,7 +2340,7 @@ public:
     bool addPlusToFront,
     FormatExpressions* theFormat = nullptr
   );
-  void CheckNumCoeffsConsistency() const {
+  void checkNumberOfCoefficientsConsistency() const {
     if (this->coefficients.size != this->theMonomials.size) {
       global.fatal << "This is a programming error: a monomial collection has "
       << this->theMonomials.size << " monomials but "
@@ -2348,7 +2348,6 @@ public:
     }
   }
   bool isEqualToZero() const;
-  int FindMaxPowerOfVariableIndex(int VariableIndex);
   void makeZero() {
     this->theMonomials.clear();
     this->coefficients.setSize(0);
@@ -2356,7 +2355,7 @@ public:
   int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].minimalNumberOfVariables());
+      result = MathRoutines::maximum(result, (*this)[i].minimalNumberOfVariables());
     }
     return result;
   }
@@ -2366,8 +2365,8 @@ public:
     this->theMonomials.setExpectedSize(theSize);
     this->coefficients.setExpectedSize(theSize);
   }
-  bool HasGEQMonomial(templateMonomial& m, int& WhichIndex);
-  void WriteToFile(std::fstream& output);
+  bool hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex);
+  void writeToFile(std::fstream& output);
   void clearDenominators(Rational& output) {
     output.makeOne();
     Rational tempRat;
@@ -2379,7 +2378,7 @@ public:
       }
     }
   }
-  bool ReadFromFile(std::fstream& input);
+  bool readFromFile(std::fstream& input);
   bool operator!=(const LinearCombination<templateMonomial, Coefficient>& other) const {
     return !(*this == other);
   }
@@ -2421,10 +2420,10 @@ public:
   void operator-=(const Coefficient& other) {
     templateMonomial tempM;
     tempM.makeOne();
-    this->SubtractMonomial(tempM, other);
+    this->subtractMonomial(tempM, other);
   }
   template <class OtherType>
-  void AssignOtherType(const LinearCombination<templateMonomial, Coefficient>& other) {
+  void assignOtherType(const LinearCombination<templateMonomial, Coefficient>& other) {
     this->::HashedList<templateMonomial>::operator=(other);
     this->coefficients.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
@@ -2516,16 +2515,16 @@ class MonomialVector {
 template <class Coefficient>
 class VectorSparse : public LinearCombination<MonomialVector, Coefficient> {
   public:
-  void MaKeEi(int NonZeroIndex, const Coefficient& theCoeff = 1) {
+  void makeEi(int NonZeroIndex, const Coefficient& theCoeff = 1) {
     this->makeZero();
     MonomialVector theMon;
     theMon.makeEi(NonZeroIndex);
     this->addMonomial(theMon, theCoeff);
   }
-  int GetLargestParticipatingBasisIndex() {
+  int getLargestParticipatingBasisIndex() {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].theIndex);
+      result = MathRoutines::maximum(result, (*this)[i].theIndex);
     }
     return result;
   }
@@ -2629,10 +2628,10 @@ public:
     return input.hashFunction();
   }
   //////////////////////////////////////////////
-  void AssignFloor() const {
+  void assignFloor() const {
   }
   void assignMinPoly(const Matrix<Coefficient>& input);
-  void AssignCharPoly(const Matrix<Coefficient>& input);
+  void assignCharacteristicPoly(const Matrix<Coefficient>& input);
   void AssignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
     this->makeZero();
     this->addMonomial(r, theCoeff);
@@ -2665,7 +2664,7 @@ public:
   bool differential(
     Vector<Polynomial<Coefficient> >& output, std::stringstream* comments
   ) const;
-  void Interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
+  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
@@ -2737,12 +2736,12 @@ public:
   void SetDynamicSubtype(int newNumVars) {
     this->setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
   }
-  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate();
+  int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
   void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<Coefficient>& output);
   bool substitution(const List<Polynomial<Coefficient> >& TheSubstitution);
   Rational totalDegree() const;
-  int TotalDegreeInt() const;
+  int totalDegreeInt() const;
   bool isEqualToOne() const;
   bool IsMonomialCoeffOne() const;
   bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const;
@@ -2774,6 +2773,8 @@ public:
     const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
   bool isEqualTo(const Polynomial<Coefficient>& p) const;
+  Polynomial<Coefficient> operator+(const Polynomial<Coefficient>& other) const;
+  Polynomial<Coefficient> operator-(const Polynomial<Coefficient>& other) const;
   void operator-=(int x);
   void operator-=(const Coefficient& other);
   void operator-=(const Polynomial<Coefficient>& other);
@@ -2791,7 +2792,7 @@ public:
   void operator=(const Coefficient& other);
   void operator=(int other);
   template <class otherType>
-  void AssignOtherType(const Polynomial<otherType>& other);
+  void assignOtherType(const Polynomial<otherType>& other);
   static bool greatestCommonDivisor(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
@@ -2891,6 +2892,7 @@ public:
   Coefficient constantFactor;
   List<Polynomial<Coefficient> > reduced;
   List<Polynomial<Coefficient> > nonReduced;
+  FormatExpressions format;
   bool factor(
     const Polynomial<Coefficient>& input,
     std::stringstream* commentsOnFailure
@@ -2917,8 +2919,8 @@ class PolynomialFactorizationKronecker {
 template <class Coefficient>
 class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   public:
-  // one of the main purposes of this class is to be used for carrying out substitutions.
-  // the general format of the substitution is:
+  // This class is used for carrying out substitutions.
+  // The substitution format is:
   // the i^th element denotes the image of x_i,
   // For example, if polynomials is the array
   // x_1+x_2 (poly in 3 variables)
@@ -2926,7 +2928,7 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   // this mens that it can be applied to polynomials in two variables
   // like this: x_1-> x_1+x_2
   // x_2-> (x_1x_3+2)
-  // to produce a polynomial in three variables
+  // to produce a polynomial in three variables.
   void makeIdentitySubstitution(int numVars, const Coefficient& theRingUnit = 1);
   void makeIdentityLikeInjectionSubstitution(
     int numStartingVars,
@@ -2941,16 +2943,14 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
   // The first row denotes the constant term in the substitution of the respective variable.
   // An element in the x-th row and y-th column
   // is defined as element [x][y].
-  void MakeExponentSubstitution(Matrix<LargeInteger>& theSub);
-  void PrintPolys(std::string& output);
+  void makeExponentSubstitution(Matrix<LargeInteger>& theSub);
   void addConstant(Coefficient& theConst);
   void multiplyByConstant(Coefficient& r);
-  void DivideByConstant(Coefficient& r);
-  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
+  int getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
     int result = - 1;
     for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(
-        result, this->theObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+      result = MathRoutines::maximum(
+        result, this->theObjects[i].getHighestIndexSuchThatHigherIndexVariablesDontParticipate()
       );
     }
     return result;
@@ -2966,20 +2966,10 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     return tempS;
   }
   bool operator==(const PolynomialSubstitution& right);
-  void MakeOneParameterSubFromDirection(Vector<Rational>& direction) {
-    MonomialP tempM;
-    tempM.makeOne();
-    tempM.setVariable(0, 1);
-    this->setSize(direction.size);
-    for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].makeZero();
-      this->theObjects[i].addMonomial(tempM, direction[i]);
-    }
-  }
-  void MakeSubFromMatrixIntAndDen(Matrix<LargeInteger>& theMat, LargeIntegerUnsigned& Den) {
+  void makeSubstitutionFromMatrixIntegerAndDenominator(Matrix<LargeInteger>& theMat, LargeIntegerUnsigned& Den) {
     Matrix<Rational> tempMat;
     tempMat.AssignMatrixIntWithDen(theMat, Den);
-    this->MakeLinearSubConstTermsLastRow(tempMat);
+    this->makeLinearSubstitutionConstantTermsLastRow(tempMat);
   }
   void toString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
     std::stringstream out;
@@ -2998,61 +2988,7 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
     out << ": ";
     output = out.str();
   }
-  void ComputeB(Polynomial<Rational>& output, int cutOffIndex, int theDimension) {
-    PolynomialSubstitution EpsForm;
-    Polynomial<Rational> tempP;
-    EpsForm.setSize(theDimension);
-    EpsForm.theObjects[0] = this->theObjects[0];
-    for (int i = 1; i < theDimension; i ++) {
-      EpsForm.theObjects[i] = this->theObjects[i];
-      tempP = this->theObjects[i - 1];
-      tempP *= - 1;
-      EpsForm.theObjects[i] += tempP;
-    }
-    EpsForm.theObjects[3] += this->theObjects[4];
-    for (int j = cutOffIndex + 1; j < theDimension; j ++) {
-      if (!EpsForm.theObjects[j].IsGreaterThanZeroLexicographicOrder()) {
-        EpsForm.theObjects[j] *= - 1;
-      }
-    }
-    output.makeZero();
-    for (int i = 0; i < theDimension; i ++) {
-      output += EpsForm.theObjects[i];
-    }
-  }
-  void MakeLinearSubConstTermsLastRow(Matrix<Coefficient>& theMat);
-  void MakeConstantShiftCoordinatesAreAdded(Vector<Rational>& shiftPerVariable);
-  void MakeLinearSubbedVarsCorrespondToMatRows(Matrix<Rational>& theMat, Vector<Rational>& theConstants);
-  void ComputeDiscreteIntegrationUpTo(int d);
-  void MakeLinearSubOnLastVariable(int NumVars, Polynomial<Rational>& LastVarSub) {
-    this->setSize(NumVars);
-    for (int i = 0; i < NumVars - 1; i ++) {
-      this->theObjects[i].makeDegreeOne(NumVars, i, 1);
-    }
-    this->theObjects[NumVars - 1] = LastVarSub;
-  }
-  void MakeSubNVarForOtherChamber(Vector<Rational>& direction, Vector<Rational>& normal, Rational& Correction) {
-    this->setSize(direction.size);
-    Polynomial<Rational> TempPoly;
-    TempPoly.makePolynomialFromDirectionAndNormal(direction, normal, Correction);
-    for (int i = 0; i < direction.size; i ++) {
-      Polynomial<Rational> TempPoly2;
-      TempPoly2 = TempPoly;
-      TempPoly2 *= direction[i];
-      TempPoly2 *= - 1;
-      this->theObjects[i].makeDegreeOne(direction.size, i, 1);
-      this->theObjects[i] += TempPoly2;
-    }
-  }
-  void MakeSubAddExtraVarForIntegration(Vector<Rational>& direction) {
-    this->setSize(direction.size);
-    for (int i = 0; i < direction.size; i ++) {
-      Rational tempRat;
-      tempRat.Assign(direction[i]);
-      tempRat.minus();
-      this->theObjects[i].makeDegreeOne(direction.size + 1, i, direction.size, 1, tempRat);
-    }
-  }
+  void makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& theMat);
 };
 
 template<class Coefficient>
@@ -3447,13 +3383,13 @@ bool LinearCombination<templateMonomial, Coefficient>::isSmallInteger(int* which
 }
 
 template <class templateMonomial, class Coefficient>
-void LinearCombination<templateMonomial, Coefficient>::GetVectorMonsAscending(Vector<Coefficient>& result) {
+void LinearCombination<templateMonomial, Coefficient>::getVectorMonomialsAscending(Vector<Coefficient>& result) {
   this->quickSortAscending();
   result = this->coefficients;
 }
 
 template <class templateMonomial, class Coefficient>
-void LinearCombination<templateMonomial, Coefficient>::GetVectorMonsDescending(Vector<Coefficient>& result) {
+void LinearCombination<templateMonomial, Coefficient>::getVectorMonomialsDescending(Vector<Coefficient>& result) {
   this->quickSortDescending();
   result = this->coefficients;
 }
@@ -3510,7 +3446,7 @@ void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoeff(
     if (inputcf != nullptr) {
       tempCF *= *inputcf;
     }
-    this->SubtractMonomial(other[i], tempCF);
+    this->subtractMonomial(other[i], tempCF);
   }
 }
 
@@ -3538,7 +3474,7 @@ void LinearCombination<templateMonomial, Coefficient>::operator+=(
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::HasGEQMonomial(templateMonomial& m, int& WhichIndex) {
+bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex) {
   for (int i = 0; i < this->size; i ++) {
     if (this->theObjects[i].IsGEQpartialOrder(m)) {
       WhichIndex = i;
@@ -3572,7 +3508,7 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
       break;
     }
     listCopy[i].GetMinMonomial(currentMon, CFminMon);
-    CFinRemainder = remainderFromInput.GetMonomialCoefficient(currentMon);
+    CFinRemainder = remainderFromInput.getMonomialCoefficient(currentMon);
     outputFirstLinearCombination[i] = CFinRemainder;
     outputFirstLinearCombination[i] /= CFminMon;
     remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];
@@ -3765,19 +3701,6 @@ void ElementMonomialAlgebra<templateMonomial, Coefficient>::raiseToPower(
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::PrintPolys(std::string& output) {
-  std::stringstream out;
-  FormatExpressions PolyFormatLocal;
-  for (int i = 0; i < this->size; i ++) {
-    std::string tempS;
-    out << i << ". ";
-    this->theObjects[i]->StringPrintOutAppend(tempS, PolyFormatLocal);
-    out << tempS << "\r\n";
-  }
-  output = out.str();
-}
-
-template <class Coefficient>
 void PolynomialSubstitution<Coefficient>::makeIdentitySubstitution(int numVars, const Coefficient& theRingUnit) {
   this->makeIdentityLikeInjectionSubstitution(numVars, numVars, theRingUnit);
 }
@@ -3797,7 +3720,7 @@ void PolynomialSubstitution<Coefficient>::makeIdentityLikeInjectionSubstitution(
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::MakeExponentSubstitution(Matrix<LargeInteger>& theSub) {
+void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeInteger>& theSub) {
   Polynomial<Coefficient> tempP;
   MonomialP tempM;
   tempM.makeOne();
@@ -3820,12 +3743,12 @@ public:
   ListLight<int> Multiplicities;
   ListLight<int> Elongations;
   void AddMultiplicity(int MultiplicityIncrement, int Elongation);
-  int IndexLargestElongation();
+  int indexLargestElongation();
   int GetLargestElongation();
   void GetPolyDenominator(Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent);
-  int GetMultiplicityLargestElongation();
-  int GetLCMElongations();
-  int GetTotalMultiplicity() const;
+  int getMultiplicityLargestElongation();
+  int getLeastCommonMultipleElongations();
+  int getTotalMultiplicity() const;
   void invert();
   void initialize();
   static Vector<Rational> GetCheckSumRoot(int NumVars);
@@ -3837,7 +3760,7 @@ public:
   void operator=(OnePartialFractionDenominator& right);
   bool operator==(OnePartialFractionDenominator& right);
   std::string toString();
-  void OneFracToStringBasisChange(
+  void oneFractionToStringBasisChange(
     PartFractions& owner,
     int indexElongation,
     Matrix<LargeInteger>& VarChange,
@@ -4049,7 +3972,7 @@ public:
   void MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
   bool IsElementCartan() const;
   void makeCartanGenerator(const Vector<Coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
-  void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
+  void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void ElementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces(
     const Vector<Coefficient>& input,
@@ -4285,8 +4208,8 @@ bool Vectors<Coefficient>::GetNormalSeparatingCones(
   matb.makeZero();
   for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[i][k].Assign(coneStrictlyPositiveCoeffs.theObjects[i].theObjects[k]);
-      matA.elements[i][k + theDimension].Assign(matA.elements[i][k]);
+      matA.elements[i][k].assign(coneStrictlyPositiveCoeffs.theObjects[i].theObjects[k]);
+      matA.elements[i][k + theDimension].assign(matA.elements[i][k]);
       matA.elements[i][k + theDimension].minus();
     }
     matb.elements[i][0].makeOne();
@@ -4295,8 +4218,8 @@ bool Vectors<Coefficient>::GetNormalSeparatingCones(
   for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
     int currentRow = i + coneStrictlyPositiveCoeffs.size;
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[currentRow][k].Assign(coneNonNegativeCoeffs.theObjects[i].theObjects[k]);
-      matA.elements[currentRow][k + theDimension].Assign(matA.elements[currentRow][k]);
+      matA.elements[currentRow][k].assign(coneNonNegativeCoeffs.theObjects[i].theObjects[k]);
+      matA.elements[currentRow][k + theDimension].assign(matA.elements[currentRow][k]);
       matA.elements[currentRow][k + theDimension].minus();
     }
     matA.elements[currentRow][2 * theDimension + currentRow].makeOne();
@@ -4361,12 +4284,12 @@ void Matrix<Coefficient>::GetMaxMovementAndLeavingVariableRow(
   maxMovement.makeZero();
   for (int i = 0; i < tempMatA.numberOfRows; i ++) {
     Rational tempRat;
-    tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+    tempRat.assign(tempMatA.elements[i][EnteringVariable]);
     if (tempRat.isPositive()) {
       tempRat.invert();
       tempRat.multiplyBy(inputVectorX[BaseVariables.elements[i]]);
       if (maxMovement.IsGreaterThan(tempRat) || (LeavingVariableRow == - 1)) {
-        maxMovement.Assign(tempRat);
+        maxMovement.assign(tempRat);
         LeavingVariableRow = i;
       }
     }
@@ -5107,8 +5030,8 @@ public:
     this->Den = other.Den;
     this->basisRationalForm = other.basisRationalForm;
   }
-  void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input);
+  void writeToFile(std::fstream& output);
+  bool readFromFile(std::fstream& input);
   void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
   void MakeFromRoots(const Vectors<Rational>& input);
@@ -5254,13 +5177,13 @@ public:
   void ComputeOneCheckSuM(
     PartFractions& owner, Rational& output, int theDimension
   ) const;
-  bool ReduceMeOnce(
+  bool reduceMeOnce(
     const Polynomial<LargeInteger>& myCoeff,
     Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
   void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
-  void ApplySzenesVergneFormulA(
+  void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
     List<int>& theElongations,
@@ -5268,7 +5191,7 @@ public:
     int ElongationGainingMultiplicityIndex,
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output
   );
-  void ApplyGeneralizedSzenesVergneFormulA(
+  void applyGeneralizedSzenesVergneFormula(
     List<int>& theSelectedIndices,
     List<int>& theGreatestElongations,
     List<int>& theCoefficients,
@@ -5315,7 +5238,7 @@ public:
     Polynomial<LargeInteger>& AminusNbetaPoly,
     Polynomial<LargeInteger>& outputCommonCoeff
   );
-  void Assign(const PartFraction& p);
+  void assign(const PartFraction& p);
   void AssignDenominatorOnly(const PartFraction& p);
   void AssignNoIndicesNonZeroMults(PartFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
@@ -5340,7 +5263,7 @@ public:
     LargeInteger& inputCoeff
   );
   void GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
-  void GetNElongationPolyWithMonomialContribution(
+  void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
     List<int>& theCoefficients,
@@ -5363,8 +5286,8 @@ public:
   void operator=(const PartFraction& right);
   bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
   std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
-  void ReadFromFile(PartFractions& owner, std::fstream& input);
-  void WriteToFile(std::fstream& output) const;
+  void readFromFile(PartFractions& owner, std::fstream& input);
+  void writeToFile(std::fstream& output) const;
   int SizeWithoutDebugString() const;
 };
 
@@ -5538,14 +5461,14 @@ class ConeLatticeAndShift {
     this->theLattice = other.theLattice;
     this->theShift = other.theShift;
   }
-  void WriteToFile(std::fstream& output);
+  void writeToFile(std::fstream& output);
   void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
     Vector<Rational>& theLPToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend,
     Matrix<Rational>& theProjectionLatticeLevel
   );
-  bool ReadFromFile(std::fstream& input);
+  bool readFromFile(std::fstream& input);
   std::string toString(FormatExpressions& theFormat);
   int GetDimProjectivized() {
     return this->theProjectivizedCone.getDimension();
@@ -5641,8 +5564,8 @@ public:
     this->flagChambersHaveTooFewVertices = false;
     this->flagIsRefined = false;
   }
-  void WriteToFile(std::fstream& output, int UpperLimit = - 1);
-  bool ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes = - 1);
+  void writeToFile(std::fstream& output, int UpperLimit = - 1);
+  bool readFromFile(std::fstream& input, int UpperLimitDebugPurposes = - 1);
   void operator=(const ConeComplex& other) {
     this->::HashedList<Cone>::operator=(other);
     this->splittingNormals = other.splittingNormals;
@@ -5766,8 +5689,8 @@ public:
   bool VerifyFileComputedContributions();
   void WriteToFileComputedContributions(std::fstream& output);
   int ReadFromFileComputedContributions(std::fstream& input);
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input);
+  void writeToFile(std::fstream& output);
+  void readFromFile(std::fstream& input);
   void ResetRelevanceIsComputed() {
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
@@ -5891,7 +5814,7 @@ public:
     List<Rational>* outputFirstCoRootLengthsSquared = nullptr
   ) const;
   void GetTypesWithMults(List<DynkinSimpleType>& output) const;
-  bool IsOfSimpleType(char inputType, int inputRank) const {
+  bool isOfSimpleType(char inputType, int inputRank) const {
     char currentType;
     int currentRank;
     if (!this->IsSimple(&currentType, &currentRank)) {
@@ -5920,7 +5843,7 @@ public:
     List<List<int> >* outputPermutationRoots
   ) const;
   bool HasPrecomputedSubalgebras() const;
-  std::string ToStringVirtualNameFolder() const;
+  std::string toStringVirtualNameFolder() const;
   bool containsType(char theTypeLetter) const;
   void getDynkinTypeWithDefaultScales(DynkinType& output) const;
   static void GetPrecomputedDynkinTypes(List<DynkinType>& output);
@@ -5975,13 +5898,13 @@ public:
   void GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output) const;
   int GetCoxeterEdgeWeight(int v, int w);
   std::string GetWeylGroupName(FormatExpressions* theFormat = nullptr) const;
-  static void GetDynkinIndicesSl2SubalgebrasSimpleType(
+  static void getDynkinIndicesSl2SubalgebrasSimpleType(
     const DynkinSimpleType& theType,
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices
   );
-  void GetDynkinIndicesSl2Subalgebras(
+  void getDynkinIndicesSl2Subalgebras(
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices
@@ -6077,7 +6000,7 @@ public:
   std::string ToStringOnePartition(const List<int>& currentPartition);
   std::string ToStringAllPartitions(bool useHtml);
   bool initialize(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot);
-  bool IncrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast();
 };
 
 template <class Coefficient>
@@ -6107,8 +6030,8 @@ public:
   bool ActOnPolynomial(Polynomial<Rational>& thePoly) const;
   void setNumberOfVariables(int newNumVars);
   void multiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
-  static void LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);
-  void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
+  static void lieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);
+  void lieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft);
   void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight);
   void lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
@@ -6241,7 +6164,7 @@ class PiecewiseQuasipolynomial {
   List<QuasiPolynomial> theQPs;
   int NumVariables;
   std::string toString(bool useLatex, bool useHtml);
-  void DrawMe(
+  void drawMe(
     DrawingVariables& theDrawingVars,
     int numLatticePointsPerDim,
     Cone* RestrictingChamber = nullptr,
@@ -6397,22 +6320,22 @@ public:
   int GetMinNumRows() const {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].vIndex);
+      result = MathRoutines::maximum(result, (*this)[i].vIndex);
     }
     return result + 1;
   }
   int GetMinNumCols() const {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].dualIndex);
+      result = MathRoutines::maximum(result, (*this)[i].dualIndex);
     }
     return result + 1;
   }
   int GetMinNumColsNumRows() const {
     int result = - 1;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].dualIndex);
-      result = MathRoutines::Maximum(result, (*this)[i].vIndex);
+      result = MathRoutines::maximum(result, (*this)[i].dualIndex);
+      result = MathRoutines::maximum(result, (*this)[i].vIndex);
     }
     return result + 1;
   }
@@ -6520,8 +6443,8 @@ public:
       this->addMonomial(thisCopy[i], tempCF);
     }
   }
-  void LieBracketOnTheLeft(const MatrixTensor<Coefficient>& standsOnTheLeft) {
-    MacroRegisterFunctionWithName("MatrixTensor<Coefficient>::LieBracketOnTheLeft");
+  void lieBracketOnTheLeft(const MatrixTensor<Coefficient>& standsOnTheLeft) {
+    MacroRegisterFunctionWithName("MatrixTensor<Coefficient>::lieBracketOnTheLeft");
     MatrixTensor<Coefficient> output;
     MonomialMatrix theMon;
     output.makeZero();
@@ -6551,7 +6474,7 @@ public:
     return tempMat.toString(theFormat);
   }
   void GetMatrix(Matrix<Coefficient>& output, int theDim) const {
-    theDim = MathRoutines::Maximum(theDim, this->GetMinNumColsNumRows());
+    theDim = MathRoutines::maximum(theDim, this->GetMinNumColsNumRows());
     output.initialize(theDim, theDim);
     output.makeZero();
     for (int i = 0; i < this->size(); i ++) {
@@ -6693,7 +6616,7 @@ template <class Coefficient>
 void MatrixTensor<Coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(
   List<VectorSparse<Coefficient> >& output, int MinNumRows
 ) {
-  MinNumRows = MathRoutines::Maximum(MinNumRows, this->GetMinNumRows());
+  MinNumRows = MathRoutines::maximum(MinNumRows, this->GetMinNumRows());
   output.setSize(MinNumRows);
   for (int i = 0; i < output.size; i ++) {
     output[i].makeZero();
@@ -6710,7 +6633,7 @@ void MatrixTensor<Coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<Coe
   List<VectorSparse<Coefficient> > theRows, theCarbonCopyRows;
   int numRows = this->GetMinNumRows();
   if (carbonCopyMat != 0) {
-    numRows = MathRoutines::Maximum(numRows, carbonCopyMat->GetMinNumRows());
+    numRows = MathRoutines::maximum(numRows, carbonCopyMat->GetMinNumRows());
     carbonCopyMat->GetVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numRows);
   }
   this->GetVectorsSparseFromRowsIncludeZeroRows(theRows, numRows);
@@ -7164,7 +7087,7 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<templateM
 }
 
 template <class Coefficient>
-void PolynomialSubstitution<Coefficient>::MakeLinearSubConstTermsLastRow(Matrix<Coefficient>& theMat) {
+void PolynomialSubstitution<Coefficient>::makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& theMat) {
   this->setSize(theMat.numberOfColumns);
   MonomialP tempM;
   for (int i = 0; i < this->size; i ++) {
@@ -7319,7 +7242,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       }
     }
   }
-  theMod.getOwner().OrderStandardAscending();
+  theMod.getOwner().orderStandardAscending();
 }
 
 template<class Coefficient>
@@ -7425,10 +7348,10 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
+void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
   this->makeZero();
   ChevalleyGenerator tempGenerator;
-  tempGenerator.MakeGenerator(inputOwner, generatorIndex);
+  tempGenerator.makeGenerator(inputOwner, generatorIndex);
   this->addMonomial(tempGenerator, 1);
 }
 

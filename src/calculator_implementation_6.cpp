@@ -2669,15 +2669,15 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);
-  Rational coefficientY = thePoly.GetMonomialCoefficient(ySquared);
-  Rational coefficientXcubed = - thePoly.GetMonomialCoefficient(xCubed);
+  Rational coefficientY = thePoly.getMonomialCoefficient(ySquared);
+  Rational coefficientXcubed = - thePoly.getMonomialCoefficient(xCubed);
   if (coefficientY == 0) {
     return theCommands << "Did not find square term in your curve.";
   }
   if (coefficientXcubed == 0) {
     return theCommands << "Did not find cube term in your curve.";
   }
-  Rational coefficientXlinear = - thePoly.GetMonomialCoefficient(xLinear);
+  Rational coefficientXlinear = - thePoly.getMonomialCoefficient(xLinear);
   Rational constCoefficient = - thePoly.GetConstantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
   if (
@@ -2733,8 +2733,8 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
     theReport.report(reportStream.str());
     SemisimpleLieAlgebra theAlgebra;
     theAlgebra.theWeyl.MakeFromDynkinType(theTypes[i]);
-    theAlgebra.ComputeChevalleyConstants();
-    theAlgebra.ToHTMLCalculator(true, true, false);
+    theAlgebra.computeChevalleyConstants();
+    theAlgebra.toHTMLCalculator(true, true, false);
     SltwoSubalgebras theSl2s(theAlgebra);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
     theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
@@ -2744,7 +2744,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
         SemisimpleSubalgebras theSubalgebras;
         MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
         ListReferences<SltwoSubalgebras> sl2Conainer;
-        if (!theSubalgebras.ComputeStructureWriteFiles(
+        if (!theSubalgebras.computeStructureWriteFiles(
           theAlgebra,
           theCommands.theObjectContainer.theAlgebraicClosure,
           subalgebrasContainer,

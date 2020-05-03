@@ -86,7 +86,9 @@ HEADERS += \
     database_fallback_json.h \
     calculator_problem_storage.h \
     calculator_problem_storage.h \
-    crypto_public_domain.h
+    crypto_public_domain.h \
+    math_rational_function.h \
+    math_rational_function_implementation.h
 
 
 SOURCES += \

@@ -4,6 +4,7 @@
 #define vpfHeaderLieTheoryMiscellaneous
 
 #include "math_extra_semisimple_Lie_algebras.h"
+#include "math_rational_function.h"
 // #include "math_extra_universal_enveloping.h"
 
 // the following data is isolated in a struct because it is

@@ -8,6 +8,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_drawing_variables.h"
 #include "string_constants.h"
+#include "math_rational_function.h"
 #include <dirent.h>
 
 // The below gives upper limit to the amount of pointers

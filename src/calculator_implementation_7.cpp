@@ -9191,7 +9191,7 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   DrawingVariables theDV;
   std::string report;
   theChar.drawMeWithMultiplicities(report, theDV, 10000);
-  out << report << theDV.GetHtmlDiv(theWeyl.getDimension());
+  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -9240,7 +9240,7 @@ bool CalculatorFunctions::innerdrawRootSystem(
     theDV.flagFillUserDefinedProjection = true;
     theDV.FillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << theDV.GetHtmlDiv(theWeyl.getDimension());
+  out << theDV.getHTMLDiv(theWeyl.getDimension());
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -9617,7 +9617,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   DrawingVariables theDV;
   std::string report;
   theChar.drawMeNoMultiplicities(report, theDV, 10000);
-  out << report << theDV.GetHtmlDiv(theWeyl.getDimension());
+  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();
   return output.assignValue(out.str(), theCommands);

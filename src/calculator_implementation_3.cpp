@@ -307,9 +307,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << animated.GetHtmlDiv(this->owner->getDimension());
+  out << animated.getHTMLDiv(this->owner->getDimension());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << collapsed.GetHtmlDiv(this->owner->getDimension());
+  out << collapsed.getHTMLDiv(this->owner->getDimension());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";

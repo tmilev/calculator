@@ -376,7 +376,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
       tempStream << output.coefficients[i].toString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
-    out << "<hr>" << theDV.GetHtmlDiv(theWeyL.getDimension());
+    out << "<hr>" << theDV.getHTMLDiv(theWeyL.getDimension());
     *report = out.str();
   }
   return true;
@@ -1310,7 +1310,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   DrawingVariables theDV;
   this->theCharOverH.drawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
-  << theDV.GetHtmlDiv(theWeyl.getDimension());
+  << theDV.getHTMLDiv(theWeyl.getDimension());
 
   bool isBad = false;
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {

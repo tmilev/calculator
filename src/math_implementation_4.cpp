@@ -1518,7 +1518,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
     Accum += theSubbedPoly;
   }
   Accum.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
-  out << drawOps.GetHtmlDiv(2);
+  out << drawOps.getHTMLDiv(2);
   out << Accum.toString(false, true);
   return out.str();
 }

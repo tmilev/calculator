@@ -183,7 +183,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
     << "A basis of the plane was computed as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
-    << theDV.GetHtmlDiv(theWeyl.getDimension());
+    << theDV.getHTMLDiv(theWeyl.getDimension());
     out << theWeyl.ToStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
     << this->toString(&global.theDefaultFormat.getElement());

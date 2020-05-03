@@ -5357,7 +5357,7 @@ std::string CandidateSSSubalgebra::toStringDrawWeights(FormatExpressions* theFor
     theDV.drawCircleAtVectorBufferRational(basisToDrawCirclesAt[i], "red", 4);
   }
   theDV.theBuffer.BasisProjectionPlane.makeEiBasis(thePrimalRank);
-  out << theDV.GetHtmlDiv(thePrimalRank);
+  out << theDV.getHTMLDiv(thePrimalRank);
   return out.str();
 }
 

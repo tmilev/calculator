@@ -662,7 +662,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.GetHtmlDiv(WeylFDSmall.AmbientWeyl->getDimension());
+    out << "<hr>" << theDV1.getHTMLDiv(WeylFDSmall.AmbientWeyl->getDimension());
     *report = out.str();
   }
   return true;

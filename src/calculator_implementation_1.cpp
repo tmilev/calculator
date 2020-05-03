@@ -2445,12 +2445,12 @@ Expression ExpressionHistoryEnumerator::GetExpression(
     return result;
   }
   if (currentNode.children.size == 1) {
-    result = this->GetExpression(currentNode.GetChild(0), outputRuleNames);
+    result = this->GetExpression(currentNode.getChild(0), outputRuleNames);
     return result;
   }
   result.reset(*this->owner);
   for (int i = 0; i < currentNode.children.size; i ++) {
-    Expression currentE = this->GetExpression(currentNode.GetChild(i), outputRuleNames);
+    Expression currentE = this->GetExpression(currentNode.getChild(i), outputRuleNames);
     result.addChildOnTop(currentE);
   }
   return result;

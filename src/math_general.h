@@ -1245,13 +1245,13 @@ public:
     }
   }
   // The following are for compatibility with the FiniteGroup class
-  void GetCharacteristicPolyStandardRepresentation(Polynomial<Coefficient>& out) {
+  void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& out) {
     out.assignCharacteristicPoly(*this);
   }
-  bool HasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
+  bool hasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
     Polynomial<Coefficient> p, q;
-    this->GetCharacteristicPolyStandardRepresentation(p);
-    other.GetCharacteristicPolyStandardRepresentation(q);
+    this->getCharacteristicPolynomialStandardRepresentation(p);
+    other.getCharacteristicPolynomialStandardRepresentation(q);
     return !(p == q);
   }
   bool operator>(const Matrix<Coefficient>& right) const {

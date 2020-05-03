@@ -651,7 +651,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     << "}{*}{$" << theSSalgebra.toStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
-    latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString()
+    << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.getDimension() << " \\end{array}$";
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
       currentTime = global.getElapsedSeconds();

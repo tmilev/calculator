@@ -1117,7 +1117,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   const elementSomeGroup& left, const elementSomeGroup& right
 ) {
   MacroRegisterFunctionWithName("WeylGroup::AreConjugate_OLD_Deprecated_Version_By_Todor");
-  if (left.HasDifferentConjugacyInvariantsFrom(right)) {
+  if (left.hasDifferentConjugacyInvariantsFrom(right)) {
     return false;
   }
   OrbitIteratorWeylGroup theIterator;

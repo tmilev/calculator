@@ -880,7 +880,7 @@ void WeylGroupData::RaiseToDominantWeight(
   }
   if (raisingElt != nullptr) {
     raisingElt->generatorsLastAppliedFirst.reverseElements();
-    raisingElt->MakeCanonical();
+    raisingElt->makeCanonical();
   }
 }
 
@@ -960,7 +960,7 @@ bool WeylGroupData::generateOrbit(
           theGen.MakeSimpleReflection(j);
           currentElt.generatorsLastAppliedFirst[0] = theGen;
           currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
-          currentElt.MakeCanonical();
+          currentElt.makeCanonical();
           outputSubset->addOnTop(currentElt);
         }
       }

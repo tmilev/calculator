@@ -22,24 +22,24 @@ public:
     }
     return true;
   }
-  void AddChild(const data& inputData);
-  void RemoveAllChildren();
-  const TreeNode<data>& GetChild(int i) const;
-  std::string ToStringHTML(int indentation) const;
+  void addChild(const data& inputData);
+  void removeAllChildren();
+  const TreeNode<data>& getChild(int i) const;
+  std::string toStringHTML(int indentation) const;
 };
 
 template <typename data>
 class Tree {
 public:
   ListReferences<TreeNode<data> > theNodes;
-  void ResetAddRoot(const data& inputData);
+  void resetAddRoot(const data& inputData);
   void reset();
   std::string toString() const;
 };
 
 
 template <typename data>
-void TreeNode<data>::AddChild(const data& inputData) {
+void TreeNode<data>::addChild(const data& inputData) {
   int newNodeIndex = this->owner->theNodes.size;
   this->owner->theNodes.setSize(this->owner->theNodes.size + 1);
   this->owner->theNodes[newNodeIndex].children.setSize(0);
@@ -51,26 +51,26 @@ void TreeNode<data>::AddChild(const data& inputData) {
 }
 
 template <typename data>
-void TreeNode<data>::RemoveAllChildren() {
+void TreeNode<data>::removeAllChildren() {
   for (int i = 0; i < this->children.size; i ++) {
     TreeNode<data>& currentNode = this->owner->theNodes[this->children[i]];
     if (currentNode.myIndex == - 1) {
       global.fatal << "Faulty index in tree node: " << this->children[i] << global.fatal;
     }
     currentNode.myIndex = - 1;
-    currentNode.RemoveAllChildren();
+    currentNode.removeAllChildren();
   }
   this->children.setSize(0);
 }
 
 template <typename data>
-const TreeNode<data>& TreeNode<data>::GetChild(int i) const {
+const TreeNode<data>& TreeNode<data>::getChild(int i) const {
   this->checkInitialization();
   return this->owner->theNodes[this->children[i]];
 }
 
 template <typename data>
-std::string TreeNode<data>::ToStringHTML(int indentation) const {
+std::string TreeNode<data>::toStringHTML(int indentation) const {
   std::stringstream out;
   for (int i = 0; i < indentation; i ++) {
     out << "&nbsp;";
@@ -82,13 +82,13 @@ std::string TreeNode<data>::ToStringHTML(int indentation) const {
   }
   indentation += 2;
   for (int i = 0; i < this->children.size; i ++) {
-    out << "<br>" << this->GetChild(i).ToStringHTML(indentation);
+    out << "<br>" << this->getChild(i).toStringHTML(indentation);
   }
   return out.str();
 }
 
 template <typename data>
-void Tree<data>::ResetAddRoot(const data& inputData) {
+void Tree<data>::resetAddRoot(const data& inputData) {
   this->reset();
   this->theNodes.setSize(1);
   this->theNodes[0].owner = this;
@@ -110,7 +110,7 @@ std::string Tree<data>::toString() const {
   }
   std::stringstream out;
   out << "Tree with " << this->theNodes.size << " elements. <br>";
-  out << this->theNodes[0].ToStringHTML(0);
+  out << this->theNodes[0].toStringHTML(0);
   return out.str();
 }
 #endif

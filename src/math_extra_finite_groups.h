@@ -97,11 +97,11 @@ public:
 // static void conjugationAction(const elementSomeGroup& conjugator,
 //                               const elementSomeGroup& conjugated,
 //                                     elementSomeGroup& out);
-// bool HasDifferentConjugacyInvariantsFrom(const elementSomeGroup& other) const;
+// bool hasDifferentConjugacyInvariantsFrom(const elementSomeGroup& other) const;
 // //the purpose of this is to test if it is possible for two elements to be conjugate
 // //return true if there is an easy way to tell if they are not conjugate
 // //return false otherwise
-// void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
+// void getCharacteristicPolynomialStandardRepresentation(Polynomial<Rational>& out) const;
 // bool operator== (const elementSomeGroup& right) const;
 // bool operator>(const elementSomeGroup& right) const;
 // //group elements are not in general comparable, but do something consistent
@@ -296,13 +296,13 @@ public:
   void makeIdentity(elementSomeGroup& x);
   bool isIdentity(elementSomeGroup& x);
   void ComputeGeneratorCommutationRelations();
-  void VerifyCCSizesAndRepresentativesFormula();
+  void verifyCCSizesAndRepresentativesFormula();
   void VerifyWords();
   void VerifyArithmetic();
   std::string PrettyPrintGeneratorCommutationRelations(bool andPrint = false);
   std::string PrettyPrintCharacterTable(bool andPrint = false);
   std::string PrettyPrintCCRepsSizes(bool andPrint = false);
-  JSData RepresentationDataIntoJS();
+  JSData representationDataIntoJS();
 
   // these methods are refugees from the WeylGroup class
   int MultiplyElements(int left, int right) const;
@@ -457,7 +457,7 @@ public:
   void MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl);
   void MakeRootReflection(const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl);
-  void MakeCanonical();
+  void makeCanonical();
   // This is actually a very reasonable API call to have
   void makeIdentity(WeylGroupData& inputWeyl);
   // but for consistency with the other group element type, we must also have
@@ -476,11 +476,11 @@ public:
     result *= other;
     return result;
   }
-  void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult) const;
+  void getCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult) const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup inverse() const;
-  bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup& right) const;
-  void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const;
+  bool hasDifferentConjugacyInvariantsFrom(const ElementWeylGroup& right) const;
+  void getCharacteristicPolynomialStandardRepresentation(Polynomial<Rational>& output) const;
   bool operator==(const ElementWeylGroup& other) const {
     if (this->owner != other.owner) {
       return false;
@@ -488,7 +488,7 @@ public:
     return this->generatorsLastAppliedFirst == other.generatorsLastAppliedFirst;
   }
   void MakeFromReadableReflections(
-    WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
+    WeylGroupData& input, bool dontmakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
   );
   bool operator>(const ElementWeylGroup& other) const;
 };
@@ -636,7 +636,7 @@ public:
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
   bool checkConsistency() const;
-  static bool GetWordByFormulaImplementation(
+  static bool getWordByFormulaImplementation(
     FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
   );
   void GetSignCharacter(Vector<Rational>& out);
@@ -819,7 +819,7 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
+  static LargeInteger getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
   static LargeInteger SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool isARoot(const Vector<Rational>& input) const {
     return this->RootSystem.contains(input);
@@ -1202,7 +1202,7 @@ public:
     GroupRepresentation<someGroup, Coefficient>& right, GroupRepresentation<someGroup, Coefficient>& left
   );
 
-  bool VerifyRepresentation();
+  bool verifyRepresentation();
 
   bool VerifyRepresentationExpensive() {
     List<Matrix<Coefficient> > repms;
@@ -1222,7 +1222,7 @@ public:
     global.comments << "Expensive verification complete, this is indeed a representation\n";
     return true;
   }
-  std::string DescribeAsDirectSum();
+  std::string describeAsDirectSum();
   void operator*= (const GroupRepresentation<someGroup, Coefficient>& other);
 
   JSData JSOut();
@@ -1860,7 +1860,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].getTrace() << '\n'
     << out.generatorS[i].toStringPlainText() << '\n';
   }
-  if (!out.VerifyRepresentation()) {
+  if (!out.verifyRepresentation()) {
     if (!in.VerifyRepresentationExpensive()) {
       global.comments << "Well, we weren't given a proper representation either.";
     }
@@ -2439,7 +2439,7 @@ bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
   ConjugacyClass theClass;
   theClass.representative = theRepresentative;
   Polynomial<Rational> theCharPoly;
-  theClass.representative.GetCharacteristicPolyStandardRepresentation(theCharPoly);
+  theClass.representative.getCharacteristicPolynomialStandardRepresentation(theCharPoly);
   if (this->CCsStandardRepCharPolys.contains(theCharPoly)) {
     const List<int>& indicesPossibleConjugates =
     this->CCsStandardRepCharPolys.GetHashArray(this->CCsStandardRepCharPolys.getHash(theCharPoly));
@@ -2450,7 +2450,7 @@ bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
           return false;
         }
       } else {
-        if (!theClass.representative.HasDifferentConjugacyInvariantsFrom(otherRepresentative)) {
+        if (!theClass.representative.hasDifferentConjugacyInvariantsFrom(otherRepresentative)) {
           return false;
         }
       }

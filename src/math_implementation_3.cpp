@@ -6273,7 +6273,7 @@ ElementWeylGroup ElementWeylGroup::operator^(
   for (int i = right.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     out.generatorsLastAppliedFirst.addOnTop(right.generatorsLastAppliedFirst[i]);
   }
-  out.MakeCanonical();
+  out.makeCanonical();
   return out;
 }
 
@@ -6296,7 +6296,7 @@ void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
     return;
   }
   this->generatorsLastAppliedFirst.addListOnTop(other.generatorsLastAppliedFirst);
-  this->MakeCanonical();
+  this->makeCanonical();
 }
 
 Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const {
@@ -6319,7 +6319,7 @@ void ElementWeylGroup::makeIdentity(const ElementWeylGroup& initializeFrom) {
 }
 
 bool ElementWeylGroup::isIdentity() {
-  this->MakeCanonical();
+  this->makeCanonical();
   return this->generatorsLastAppliedFirst.size == 0;
 }
 
@@ -6353,8 +6353,8 @@ void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, W
   }
 }
 
-void ElementWeylGroup::MakeCanonical() {
-  MacroRegisterFunctionWithName("ElementWeylGroup::MakeCanonical");
+void ElementWeylGroup::makeCanonical() {
+  MacroRegisterFunctionWithName("ElementWeylGroup::makeCanonical");
   this->checkInitialization();
   if (this->owner->rho.size == 0) {
     this->owner->ComputeRho(false);
@@ -6364,10 +6364,10 @@ void ElementWeylGroup::MakeCanonical() {
   this->MakeFromRhoImage(theVector, *this->owner);
 }
 
-bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
+bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
   const ElementWeylGroup& right
 ) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
+  MacroRegisterFunctionWithName("ElementWeylGroup::hasDifferentConjugacyInvariantsFrom");
   if ((this->generatorsLastAppliedFirst.size % 2) != (right.generatorsLastAppliedFirst.size % 2)) {
     return true;
   }
@@ -6377,14 +6377,14 @@ bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
   }
   this->checkInitialization();
   Polynomial<Rational> leftCharPoly, rightCharPoly;
-  this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
-  right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
+  this->getCharacteristicPolynomialStandardRepresentation(leftCharPoly);
+  right.getCharacteristicPolynomialStandardRepresentation(rightCharPoly);
   if (leftCharPoly != rightCharPoly) {
     return true;
   }
   VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
-  this->GetCycleStructure(leftCycleStructure);
-  right.GetCycleStructure(rightCycleStructure);
+  this->getCycleStructure(leftCycleStructure);
+  right.getCycleStructure(rightCycleStructure);
   if (leftCycleStructure != rightCycleStructure) {
     return true;
   }
@@ -6392,10 +6392,10 @@ bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
 }
 
 std::string ElementWeylGroup::ToStringInvariants(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
   (void) theFormat;
   VectorSparse<Rational> theCycleStructure;
-  this->GetCycleStructure(theCycleStructure);
+  this->getCycleStructure(theCycleStructure);
   FormatExpressions cycleLetterFormat;
   cycleLetterFormat.polyDefaultLetter = "c";
   std::stringstream out;
@@ -6403,10 +6403,10 @@ std::string ElementWeylGroup::ToStringInvariants(FormatExpressions* theFormat) c
   return out.str();
 }
 
-void ElementWeylGroup::GetCycleStructure(
+void ElementWeylGroup::getCycleStructure(
   VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
 ) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
   this->checkInitialization();
   outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
   List<bool> Explored;
@@ -6430,8 +6430,8 @@ void ElementWeylGroup::GetCycleStructure(
   }
 }
 
-void ElementWeylGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const {
-  MacroRegisterFunctionWithName("ElementWeylGroup::GetCharacteristicPolyStandardRepresentation");
+void ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation(Polynomial<Rational>& output) const {
+  MacroRegisterFunctionWithName("ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation");
   this->checkInitialization();
   Matrix<Rational> standardRepMat;
   this->owner->getMatrixStandardRepresentation(*this, standardRepMat);
@@ -6441,7 +6441,7 @@ void ElementWeylGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Ra
 ElementWeylGroup ElementWeylGroup::inverse() const {
   ElementWeylGroup out = *this;
   out.generatorsLastAppliedFirst.reverseElements();
-  out.MakeCanonical();
+  out.makeCanonical();
   return out;
 }
 
@@ -6569,8 +6569,8 @@ void WeylGroupData::reset() {
 
   this->theGroup.initialize();
   this->theGroup.specificDataPointer = this;
-  this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
-  this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
+  this->theGroup.GetWordByFormula = this->getWordByFormulaImplementation;
+  this->theGroup.GetSizeByFormula = this->getSizeByFormulaImplementation;
   this->theGroup.computeConjugacyClassSizesAndRepresentativesByFormula = nullptr;
   this->theGroup.areConjugateByFormula = nullptr;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
@@ -6594,7 +6594,7 @@ void WeylGroupData::ActOnAffineHyperplaneByGroupElement(
   }
 }
 
-bool WeylGroupData::GetWordByFormulaImplementation(
+bool WeylGroupData::getWordByFormulaImplementation(
   FiniteGroup<ElementWeylGroup>& G, const ElementWeylGroup& g, List<int>& out
 ) {
   (void) G;// avoid unused parameter warning, portable.
@@ -7231,7 +7231,7 @@ void WeylGroupData::getEpsilonCoordinates(const List<Vector<Rational> >& input, 
   }
 }
 
-LargeInteger WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
+LargeInteger WeylGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
   WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
   W->checkConsistency();
   return W->theDynkinType.GetWeylGroupSizeByFormula();

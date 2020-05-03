@@ -1359,7 +1359,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   std::string inputStringFormat;
   ElementHyperoctahedralGroupR2 theElement;
   if (input.isOfType<std::string>(&inputStringFormat)) {
-    theElement.MakeFromString(inputStringFormat);
+    theElement.makeFromString(inputStringFormat);
     return output.assignValue(theElement, theCommands);
   }
   if (input.children.size < 3) {
@@ -1382,7 +1382,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
       << " had integers that were too large. ";
     }
   }
-  theElement.h.AddCycle(oneCycle);
+  theElement.h.addCycle(oneCycle);
   for (int i = 2; i < input.children.size; i ++) {
     if (input[i].isEqualToOne()) {
       theElement.k.ToggleBit(i - 2);

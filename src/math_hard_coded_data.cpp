@@ -4,7 +4,7 @@
 #include "json.h"
 
 void ElementWeylGroup::MakeFromReadableReflections(
-  WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
+  WeylGroupData& input, bool dontmakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
 ) {
   this->owner = &input;
   Vector<Rational> theReflections;
@@ -19,8 +19,8 @@ void ElementWeylGroup::MakeFromReadableReflections(
       global.fatal << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].toString() << global.fatal;
     }
   }
-  if (!dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK) {
-    this->MakeCanonical();
+  if (!dontmakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK) {
+    this->makeCanonical();
   }
 }
 

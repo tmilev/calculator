@@ -66,7 +66,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckRepIsMu
       tempMat.multiplyOnTheLeft(tempList[j]);
       tempElt = this->ownerGroup->theElements[j];
       tempElt *= this->ownerGroup->theElements[i];
-      tempElt.MakeCanonical();
+      tempElt.makeCanonical();
       int targetIndex = this->ownerGroup->theElements.getIndex(tempElt);
       if (!(tempMat == this->theElementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
@@ -321,7 +321,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     Partition::GetPartitions(thePartitions,theRank + 1);
     for (int i = 0; i < thePartitions.size; i ++) {
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
-      thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
+      thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
       irrep.ownerGroup = &G;
       irrep.identifyingString = thePartitions[i].toString();
       irrep.ComputeCharacter();
@@ -330,13 +330,13 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   } else if ((letters.size == 1) && (letters[0] == 'B')) {
     int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.MakeHyperoctahedralGroup(theRank);
-    HOG.AllSpechtModules();
+    HOG.makeHyperoctahedralGroup(theRank);
+    HOG.allSpechtModules();
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> phi;
     phi.preimageGroup = &G;
     phi.generatorImages.setSize(G.generators.size);
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
-      phi.generatorImages[i].h.AddTransposition(i, i + 1);
+      phi.generatorImages[i].h.addTransposition(i, i + 1);
     }
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
       phi.generatorImages.lastObject()->k.ToggleBit(i);
@@ -357,12 +357,12 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
     int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.MakeHyperoctahedralGroup(theRank + 1);
+    HOG.makeHyperoctahedralGroup(theRank + 1);
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> inclusionMap;
     inclusionMap.preimageGroup = &G;
     inclusionMap.generatorImages.setSize(G.generators.size);
     for (int i = 0; i < inclusionMap.generatorImages.size - 1; i ++) {
-      inclusionMap.generatorImages[i].h.AddTransposition(i, i + 1);
+      inclusionMap.generatorImages[i].h.addTransposition(i, i + 1);
       inclusionMap.generatorImages[i].k.ToggleBit(i);
       inclusionMap.generatorImages[i].k.ToggleBit(i + 1);
     }
@@ -1570,7 +1570,7 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   for (int i = 0; i < partitionsParabolics.size; i ++) {
     std::stringstream parStream;
     parStream << "P_{";
-    parStream << partitionsParabolics[i].ToStringForArticles("(", ")")
+    parStream << partitionsParabolics[i].toStringForArticles("(", ")")
     << ", ";
     int typeBsize = rank - partitionsParabolics[i].n;
     if (typeBsize == 0) {
@@ -1633,9 +1633,9 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   for (int i = 0; i < partitionPairs.size; i ++) {
     std::stringstream Vstream;
     Vstream << "V_{"
-    << partitionPairs[i].Object1.ToStringForArticles("[", "]")
+    << partitionPairs[i].Object1.toStringForArticles("[", "]")
     << ", "
-    << partitionPairs[i].Object2.ToStringForArticles("[", "]")
+    << partitionPairs[i].Object2.toStringForArticles("[", "]")
     << "}";
     out << "<tr><td>";
     out << Vstream.str();
@@ -2236,7 +2236,7 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(
   std::stringstream out;
   out << "User has requested the test of Specht modules of S_"
   << theSymmetricGroupRank << ". ";
-  Partition::TestAllSpechtModules(theSymmetricGroupRank);
+  Partition::testAllSpechtModules(theSymmetricGroupRank);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -2303,8 +2303,8 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     }
   }
   Partition partitionLeft, partitionRight;
-  partitionLeft.FromListInt(inputLeft);
-  partitionRight.FromListInt(inputRight);
+  partitionLeft.fromListInt(inputLeft);
+  partitionRight.fromListInt(inputRight);
   //std::stringstream out;
   //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
   //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
@@ -2321,14 +2321,14 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     theCommands.theObjectContainer.theHyperOctahedralGroups.setSize(
       theCommands.theObjectContainer.theHyperOctahedralGroups.size + 1
     );
-    theCommands.theObjectContainer.theHyperOctahedralGroups[index].MakeHyperoctahedralGroup(
+    theCommands.theObjectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
       partitionLeft.n + partitionRight.n
     );
   }
   //<-may be broken if copying of groups doesn't work!!!!!!!!
   HyperoctahedralGroupData& HD = theCommands.theObjectContainer.theHyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
-  HD.SpechtModuleOfPartititons(partitionLeft, partitionRight, R);
+  HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;
   R.ComputeCharacter();
   return output.assignValue(R, theCommands);
@@ -2360,11 +2360,11 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
     return theCommands << "The coordinates of vector " << inputInt << " have sum that is too large. ";
   }
   Partition p;
-  p.FromListInt(inputInt);
+  p.fromListInt(inputInt);
   std::stringstream out;
   out << "Partition is " << p.toString();
   List<Matrix<Rational> > gens;
-  p.SpechtModuleMatricesOfTranspositionsjjplusone(gens);
+  p.spechtModuleMatricesOfTranspositionsjjplusone(gens);
   for (int i = 0; i < gens.size; i ++) {
     out << i << "\n" << gens[i].toStringPlainText() << "\n";
   }
@@ -2383,8 +2383,8 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpec
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
   HyperoctahedralGroupData G;
-  G.MakeHyperoctahedralGroup(theRank);
-  G.AllSpechtModules();
+  G.makeHyperoctahedralGroup(theRank);
+  G.allSpechtModules();
   return output.assignValue(G.theGroup->PrettyPrintCharacterTable(), theCommands);
 }
 
@@ -2400,7 +2400,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutation
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
   HyperoctahedralGroupData G;
-  G.MakeHyperoctahedralGroup(theRank);
+  G.makeHyperoctahedralGroup(theRank);
   return output.assignValue(G.theGroup->PrettyPrintGeneratorCommutationRelations(), theCommands);
 }
 
@@ -2435,7 +2435,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
       return output.makeError("Bad reflection index", theCommands);
     }
   }
-  theElt.MakeCanonical();
+  theElt.makeCanonical();
   return output.assignValue(theElt, theCommands);
 }
 

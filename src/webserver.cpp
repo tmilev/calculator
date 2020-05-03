@@ -442,7 +442,7 @@ JSData WebWorker::GetDatabaseJSON() {
       global.getWebInput(WebAPI::databaseParameters::labels), false
     );
     if (operation == WebAPI::databaseParameters::fetch) {
-      result = Database::get().ToJSONDatabaseFetch(labels);
+      result = Database::get().toJSONDatabaseFetch(labels);
     } else {
       result[WebAPI::result::error] = "Uknown database operation: " + operation + ". ";
     }
@@ -470,7 +470,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     return commentsStream.str();
   }
   commentsStream << "Parsed input string: " << inputParsed.toString(nullptr) << "\n";
-  if (Database::get().DeleteOneEntry(inputParsed, &commentsStream)) {
+  if (Database::get().deleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
   if (!global.flagDatabaseCompiled) {
@@ -649,7 +649,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   }
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
-    global.flagLoggedIn = Database().get().theUser.LoginViaGoogleTokenCreateNewAccountIfNeeded(
+    global.flagLoggedIn = Database().get().theUser.loginViaGoogleTokenCreateNewAccountIfNeeded(
       theUser, &argumentProcessingFailureComments, nullptr, tokenIsGood
     );
     if (tokenIsGood && !global.flagLoggedIn && comments != nullptr) {
@@ -660,7 +660,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.enteredPassword != "" ||
     theUser.enteredActivationToken != ""
   ) {
-    global.flagLoggedIn = Database().get().theUser.LoginViaDatabase(
+    global.flagLoggedIn = Database().get().theUser.loginViaDatabase(
       theUser, &argumentProcessingFailureComments
     );
   }
@@ -1582,7 +1582,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, claimedEmail);
   JSData userInfo;
   QuerySet emailInfo;
-  if (!Database::get().FindOne(findEmail, emailInfo.value, &out)) {
+  if (!Database::get().findOne(findEmail, emailInfo.value, &out)) {
     out << "\n<b style =\"color:red\">"
     << "Failed to fetch email activation token for email: "
     << claimedEmail << " </b>";
@@ -1599,7 +1599,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   emailInfo.value[DatabaseStrings::labelActivationToken] = "";
-  if (!Database::get().UpdateOne(findEmail, emailInfo, &out)) {
+  if (!Database::get().updateOne(findEmail, emailInfo, &out)) {
     out << "\n<b style =\"color:red\">"
     << "Could not reset the activation token (database is down?). "
     << "</b>";
@@ -1611,7 +1611,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     DatabaseStrings::labelUsername,
     global.userDefault.username
   );
-  if (!Database::get().UpdateOne(
+  if (!Database::get().updateOne(
     findUser, userInfo, &out
   )) {
     out << "\n<b style =\"color:red\">Could not store your email (database is down?). </b>";

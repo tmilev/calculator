@@ -67,7 +67,7 @@ public:
     return this->DebugString == right.DebugString;
   }
   unsigned int hashFunction() const {
-    int tempI = ::MathRoutines::Minimum(static_cast<int>(this->DebugString.length()), ::someRandomPrimesSize);
+    int tempI = ::MathRoutines::minimum(static_cast<int>(this->DebugString.length()), ::someRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
       result += static_cast<unsigned>(
@@ -544,7 +544,7 @@ public:
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
   unsigned int hashFunction() const {
-    int tempI = MathRoutines::Minimum(someRandomPrimesSize, this->hCharacteristic.size);
+    int tempI = MathRoutines::minimum(someRandomPrimesSize, this->hCharacteristic.size);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
       result += static_cast<unsigned>(this->hCharacteristic[i].numeratorShort) * someRandomPrimes[i];

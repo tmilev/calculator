@@ -32,7 +32,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processDatabaseJSON();
   } else if (
     global.flagLoggedIn &&
-    global.requestType == "databaseDeleteOneEntry"
+    global.requestType == "databasedeleteOneEntry"
   ) {
     return this->processDatabaseDeleteEntry();
   } else if (
@@ -283,7 +283,7 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
   if (newEmail != "") {
     JSData notUsed;
     QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
-    if (Database::get().FindOne(
+    if (Database::get().findOne(
       queryEmailTaken, notUsed, nullptr
     )) {
       result[WebAPI::result::error] = "It appears the email is already taken. ";
@@ -312,7 +312,7 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
   JSData setQuery;
   QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  if (!Database::get().UpdateOne(
+  if (!Database::get().updateOne(
     findQuery, setQuery, &commentsOnFailure
   )) {
     result[WebAPI::result::error] = "Failed to set activationToken: " +commentsOnFailure.str();
@@ -379,7 +379,7 @@ bool WebAPIResponse::processActivateAccount() {
 bool WebAPIResponse::processLogout() {
   MacroRegisterFunctionWithName("WebAPIResponse::processLogout");
   this->owner->setHeaderOKNoContentLength("");
-  Database::get().theUser.LogoutViaDatabase();
+  Database::get().theUser.logoutViaDatabase();
   return this->processLoginUserInfo("Coming from logout");
 }
 

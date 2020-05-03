@@ -1143,7 +1143,7 @@ void ElementVermaModuleOrdered<Coefficient>::multiplyOnTheLeft(
 template <class Coefficient>
 std::string ElementVermaModuleOrdered<Coefficient>::toString(const FormatExpressions& theFormat) const {
   std::stringstream out;
-  std::string tempS = MathRoutines::ElementToStringBrackets(this->theElT, theFormat);
+  std::string tempS = MathRoutines::toStringBrackets(this->theElT, theFormat);
   if (tempS.size() > 1) {
     out << "(";
   }
@@ -1711,7 +1711,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::makeZero(
 
 template <class Coefficient>
 unsigned int MonomialUniversalEnvelopingOrdered<Coefficient>::hashFunction() const {
-  int top = MathRoutines::Minimum(someRandomPrimesSize, this->generatorsIndices.size);
+  int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
   unsigned int result = 0;
   for (int i = 0; i < top; i ++) {
     result += someRandomPrimes[i] * this->generatorsIndices.theObjects[i];
@@ -1760,7 +1760,7 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
   std::stringstream out;
   std::string tempS;
   if (this->generatorsIndices.size > 0) {
-    tempS = MathRoutines::ElementToStringBrackets(this->Coefficient, PolyFormatLocal);
+    tempS = MathRoutines::toStringBrackets(this->Coefficient, PolyFormatLocal);
     if (tempS == "1") {
       tempS = "";
     }

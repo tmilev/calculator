@@ -1208,7 +1208,7 @@ int AffineCone::GetDimension() {
 }
 
 unsigned int AffineCone::hashFunction() const {
-  int tempMin = MathRoutines::Minimum(this->theWalls.size, ::someRandomPrimesSize);
+  int tempMin = MathRoutines::minimum(this->theWalls.size, ::someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
     result += this->theWalls[i].hashFunction() * ::someRandomPrimes[i];

@@ -254,7 +254,7 @@ public:
   }
   unsigned int hashFunction() const {
     unsigned int result = 0;
-    int theSize = MathRoutines::Minimum(this->size, someRandomPrimesSize);
+    int theSize = MathRoutines::minimum(this->size, someRandomPrimesSize);
     for (int i = 0; i < theSize; i ++) {
       result += this->theObjects[i].hashFunction() * ::someRandomPrimes[i];
     }

@@ -314,12 +314,12 @@ bool CalculatorHTML::storeProblemWeights(
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
   QueryExact weightFinder;
   weightFinder.collection = DatabaseStrings::tableProblemWeights;
-  weightFinder.SetLabelValue(
+  weightFinder.setLabelValue(
     DatabaseStrings::labelProblemWeightsSchema,
     global.userDefault.problemWeightSchema
   );
   QuerySet updateQuery = this->toQuerySetProblemWeights(toStore);
-  if (!Database::get().UpdateOne(weightFinder, updateQuery, commentsOnFailure)) {
+  if (!Database::get().updateOne(weightFinder, updateQuery, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to update weight schema. ";
       global << Logger::red
@@ -338,9 +338,9 @@ bool CalculatorHTML::storeProblemDeadlines(
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
   QueryExact deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
-  deadlineSchema.SetLabelValue(DatabaseStrings::labelDeadlinesSchema, global.userDefault.deadlineSchema);
+  deadlineSchema.setLabelValue(DatabaseStrings::labelDeadlinesSchema, global.userDefault.deadlineSchema);
   QuerySet updateQuery = this->toJSONDeadlines(toStore);
-  if (!Database::get().UpdateOne(deadlineSchema, updateQuery, commentsOnFailure)) {
+  if (!Database::get().updateOne(deadlineSchema, updateQuery, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to update deadline schema. ";
     }

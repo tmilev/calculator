@@ -927,7 +927,7 @@ bool WebAPIResponse::processForgotLogin() {
   }
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
-    Database::get().theUser.LogoutViaDatabase();
+    Database::get().theUser.logoutViaDatabase();
   }
   UserCalculator theUser;
   theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
@@ -977,7 +977,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     result["error"] = "Database not available (cannot sign up). ";
     return result;
   }
-  Database::get().theUser.LogoutViaDatabase();
+  Database::get().theUser.logoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::convertURLStringToNormal(global.getWebInput("desiredUsername"), false);
   theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);

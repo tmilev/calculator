@@ -561,7 +561,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   return true;
 }
 
-bool MathRoutines::IsPrime(int theInt) {
+bool MathRoutines::isPrime(int theInt) {
   if (theInt <= 1) {
     return false;
   }
@@ -688,7 +688,7 @@ bool Calculator::innerGroebner(
         theCommands
       );
     }
-    if (!MathRoutines::IsPrime(theMod)) {
+    if (!MathRoutines::isPrime(theMod)) {
       return output.makeError("Error: modulus not prime. ", theCommands);
     }
   }
@@ -889,9 +889,9 @@ void Plot::operator+=(const Plot& other) {
   }
   if (other.priorityViewRectangle == this->priorityViewRectangle) {
     this->highBoundY = MathRoutines::maximum(this->highBoundY, other.highBoundY);
-    this->lowBoundY = MathRoutines::Minimum(this->lowBoundY,  other.lowBoundY);
+    this->lowBoundY = MathRoutines::minimum(this->lowBoundY,  other.lowBoundY);
     this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
-    this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
+    this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
   this->thePlots.addListOnTop(other.thePlots);
   if (other.priorityWindow > this->priorityWindow) {
@@ -1010,7 +1010,7 @@ void PlotObject::computeYBounds() {
   MacroRegisterFunctionWithName("PlotObject::computeYBounds");
   for (int i = 0; i < this->thePointsDouble.size; i ++) {
     this->yHigh = MathRoutines::maximum(this->yHigh, this->thePointsDouble[i][1]);
-    this->yLow = MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
+    this->yLow = MathRoutines::minimum(this->yLow, this->thePointsDouble[i][1]);
   }
 }
 
@@ -1061,18 +1061,18 @@ void Plot::computeAxesAndBoundingBox() {
   this->highBoundY = 1.1;
   for (int k = 0; k < this->thePlots.size; k ++) {
     this->thePlots[k].computeYBounds();
-    this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theLowerBoundAxes = MathRoutines::minimum(this->thePlots[k].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes = MathRoutines::maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
-    this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->lowBoundY = MathRoutines::minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
       List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[1][0]);
       this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
       this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
-      this->lowBoundY =MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
-      this->lowBoundY =MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
+      this->lowBoundY =MathRoutines::minimum  (currentLine[0][1], this->lowBoundY);
+      this->lowBoundY =MathRoutines::minimum  (currentLine[1][1], this->lowBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
@@ -1081,9 +1081,9 @@ void Plot::computeAxesAndBoundingBox() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, currentPoint[0]);
       this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY = MathRoutines::Minimum (currentPoint[1], this->lowBoundY);
+      this->lowBoundY = MathRoutines::minimum (currentPoint[1], this->lowBoundY);
       this->highBoundY = MathRoutines::maximum (currentPoint[1], this->highBoundY);
     }
   }
@@ -1097,18 +1097,18 @@ void Plot::computeAxesAndBoundingBox3d() {
   this->highBoundY = 1.1;
   for (int k = 0; k < this->thePlots.size; k ++) {
     this->thePlots[k].computeYBounds();
-    this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theLowerBoundAxes = MathRoutines::minimum(this->thePlots[k].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes = MathRoutines::maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
-    this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->lowBoundY = MathRoutines::minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j = 0; j < this->thePlots[k].theLines.size; j ++) {
       List<Vector<double> > currentLine = this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes =MathRoutines::minimum(this->theLowerBoundAxes, currentLine[1][0]);
       this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[0][0]);
       this->theUpperBoundAxes =MathRoutines::maximum(this->theUpperBoundAxes, currentLine[1][0]);
-      this->lowBoundY =MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
-      this->lowBoundY =MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
+      this->lowBoundY =MathRoutines::minimum  (currentLine[0][1], this->lowBoundY);
+      this->lowBoundY =MathRoutines::minimum  (currentLine[1][1], this->lowBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY =MathRoutines::maximum (currentLine[1][1], this->highBoundY);
     }*/
@@ -1117,9 +1117,9 @@ void Plot::computeAxesAndBoundingBox3d() {
       if (!this->isOKVector(currentPoint)) {
         continue;
       }
-      this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theLowerBoundAxes = MathRoutines::minimum(this->theLowerBoundAxes, currentPoint[0]);
       this->theUpperBoundAxes = MathRoutines::maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY = MathRoutines::Minimum(currentPoint[1], this->lowBoundY);
+      this->lowBoundY = MathRoutines::minimum(currentPoint[1], this->lowBoundY);
       this->highBoundY = MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
   }

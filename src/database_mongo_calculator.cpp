@@ -24,7 +24,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   }
   List<JSData> outputList;
   std::stringstream commentsOnFailure;
-  if (!Database::get().FindFromString(
+  if (!Database::get().findFromString(
     inputCollection, inputQuery, outputList, - 1, nullptr, &commentsOnFailure
   )) {
     return output.assignValue(commentsOnFailure.str(), theCommands);

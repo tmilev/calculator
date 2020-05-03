@@ -9,7 +9,7 @@
 #include "string_constants.h"
 #include "general_strings.h"
 
-QueryResultOptions Database::GetStandardProjectors(const std::string& collectionName) {
+QueryResultOptions Database::getStandardProjectors(const std::string& collectionName) {
   QueryResultOptions result;
   if (collectionName == DatabaseStrings::tableUsers) {
     result.fieldsProjectedAway.addOnTop(DatabaseStrings::labelProblemDataJSON);
@@ -129,7 +129,7 @@ public:
   std::string updateQuery;
   std::string optionsQuery;
   std::string collectionName;
-  bool flagFindOneOnly;
+  bool flagfindOneOnly;
   MongoQuery();
   ~MongoQuery();
   bool FindMultiple(
@@ -138,17 +138,17 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive
   );
-  bool FindOne(
+  bool findOne(
     JSData& output,
     const JSData& inputOptions,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive
   );
-  bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
+  bool updateOneWithOptions(std::stringstream* commentsOnFailure);
   bool RemoveOne(std::stringstream* commentsOnFailure);
-  bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
+  bool updateOne(std::stringstream* commentsOnFailure, bool doUpsert);
   bool InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure);
-  bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
+  bool updateOneNoOptions(std::stringstream* commentsOnFailure);
   std::string toStringDebug();
   // Abbreviation to get the default database.
   Database::Mongo& getDB() {
@@ -168,7 +168,7 @@ MongoQuery::MongoQuery() {
   this->updateResult = nullptr;
   this->maxOutputItems = - 1;
   this->totalItems = - 1;
-  this->flagFindOneOnly = false;
+  this->flagfindOneOnly = false;
 }
 
 MongoQuery::~MongoQuery() {
@@ -287,8 +287,8 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   return true;
 }
 
-bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) {
-  MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
+bool MongoQuery::updateOne(std::stringstream* commentsOnFailure, bool doUpsert) {
+  MacroRegisterFunctionWithName("MongoQuery::updateOne");
   if (!Database::get().mongoDB.initialize()) {
     return false;
   }
@@ -348,15 +348,15 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   return true;
 }
 
-bool MongoQuery::UpdateOneNoOptions(std::stringstream* commentsOnFailure) {
-  return this->UpdateOne(commentsOnFailure, false);
+bool MongoQuery::updateOneNoOptions(std::stringstream* commentsOnFailure) {
+  return this->updateOne(commentsOnFailure, false);
 }
 
-bool MongoQuery::UpdateOneWithOptions(std::stringstream* commentsOnFailure) {
-  return this->UpdateOne(commentsOnFailure, true);
+bool MongoQuery::updateOneWithOptions(std::stringstream* commentsOnFailure) {
+  return this->updateOne(commentsOnFailure, true);
 }
 
-bool MongoQuery::FindOne(
+bool MongoQuery::findOne(
   JSData& output,
   const JSData& inputOptions,
   std::stringstream* commentsOnFailure,
@@ -452,7 +452,7 @@ bool MongoQuery::FindMultiple(
       outputString.addOnTop(current);
     }
     this->totalItems ++;
-    if (this->flagFindOneOnly) {
+    if (this->flagfindOneOnly) {
       break;
     }
   }
@@ -463,7 +463,7 @@ bool MongoQuery::FindMultiple(
       global << Logger::red << "Mongo/JSData error: failed to parse JSON. " << Logger::endL;
       return false;
     }
-    if (!Database::ConvertJSONMongoToJSON(encoded, output[i], commentsOnFailure)) {
+    if (!Database::convertJSONMongoToJSON(encoded, output[i], commentsOnFailure)) {
       global << Logger::red << "Mongo/JSData error: failed to convert mongo JSON to JSON. " << Logger::endL;
       return false;
     }
@@ -484,8 +484,8 @@ std::string Database::Mongo::ConvertErrorToString(void* bson_error_t_pointer) {
   return out.str();
 }
 
-bool Database::Mongo::DeleteDatabase(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("Database::Mongo::DeleteDatabase");
+bool Database::Mongo::deleteDatabase(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("Database::Mongo::deleteDatabase");
   if (DatabaseStrings::theDatabaseName != "calculatortest") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The only database allowed to be deleted is calculatortest. ";
@@ -512,13 +512,13 @@ bool Database::Mongo::DeleteDatabase(std::stringstream* commentsOnFailure) {
 #endif
 }
 
-void Database::Mongo::CreateHashIndex(
+void Database::Mongo::createHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
   (void) collectionName;
   (void) theKey;
   #ifdef MACRO_use_MongoDB
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex");
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::createHashIndex");
   MongoQuery query;
   std::stringstream theCommand;
   theCommand << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
@@ -538,7 +538,7 @@ void Database::Mongo::CreateHashIndex(
   #endif
 }
 
-bool Database::FindFromString(
+bool Database::findFromString(
   const std::string& collectionName,
   const std::string& findQuery,
   List<JSData>& output,
@@ -546,14 +546,14 @@ bool Database::FindFromString(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FindFromString");
+  MacroRegisterFunctionWithName("Database::findFromString");
 #ifdef MACRO_use_MongoDB
   JSData theData;
   //global << Logger::blue << "Query input: " << findQuery << Logger::endL;
   if (!theData.readstring(findQuery, commentsOnFailure)) {
     return false;
   }
-  return Database::get().FindFromJSON(
+  return Database::get().findFromJSON(
     collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure
   );
 #else
@@ -591,7 +591,7 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
-bool Database::FindFromJSONWithProjection(
+bool Database::findFromJSONWithProjection(
   const std::string& collectionName,
   const JSData& findQuery,
   List<JSData>& output,
@@ -602,7 +602,7 @@ bool Database::FindFromJSONWithProjection(
 ) {
   QueryResultOptions options;
   options.MakeProjection(fieldsToProjectTo);
-  return Database::FindFromJSONWithOptions(
+  return Database::findFromJSONWithOptions(
     collectionName,
     findQuery,
     output,
@@ -613,7 +613,7 @@ bool Database::FindFromJSONWithProjection(
   );
 }
 
-bool Database::FindFromJSON(
+bool Database::findFromJSON(
   const std::string& collectionName,
   const JSData& findQuery,
   List<JSData>& output,
@@ -622,7 +622,7 @@ bool Database::FindFromJSON(
   std::stringstream* commentsOnFailure
 ) {
   QueryResultOptions options;
-  return Database::FindFromJSONWithOptions(
+  return Database::findFromJSONWithOptions(
     collectionName,
     findQuery,
     output,
@@ -633,7 +633,7 @@ bool Database::FindFromJSON(
   );
 }
 
-bool Database::FindFromJSONWithOptions(
+bool Database::findFromJSONWithOptions(
   const std::string& collectionName,
   const JSData& findQuery,
   List<JSData>& output,
@@ -643,10 +643,10 @@ bool Database::FindFromJSONWithOptions(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("Database::FindFromJSONWithOptions");
+  MacroRegisterFunctionWithName("Database::findFromJSONWithOptions");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Database::FindFromJSONWithOptions fail. " << DatabaseStrings::errorDatabaseDisableD;
+      *commentsOnFailure << "Database::findFromJSONWithOptions fail. " << DatabaseStrings::errorDatabaseDisableD;
     }
     return false;
   }
@@ -674,18 +674,18 @@ bool Database::FindFromJSONWithOptions(
   (void) maxOutputItems;
   (void) totalItems;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "FindFromJSONWithOptions: project compiled without mongoDB support. ";
+    *commentsOnFailure << "findFromJSONWithOptions: project compiled without mongoDB support. ";
   }
   return false;
 #endif
 }
 
-bool Database::Mongo::FindOneFromSome(
+bool Database::Mongo::findOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FindOneFromSome");
+  MacroRegisterFunctionWithName("Database::findOneFromSome");
   #ifdef MACRO_use_MongoDB
   MongoQuery query;
   if (!Database::Mongo::GetOrFindQuery(findOrQueries, query.findQuery, commentsOnFailure)) {
@@ -706,7 +706,7 @@ bool Database::Mongo::FindOneFromSome(
     }
   }
   JSData emptyOptions;
-  return query.FindOne(output,emptyOptions, commentsOnFailure, nullptr);
+  return query.findOne(output,emptyOptions, commentsOnFailure, nullptr);
   #else
   (void) output;
   (void) findOrQueries;
@@ -737,7 +737,7 @@ bool Database::Mongo::GetOrFindQuery(
   return true;
 }
 
-bool Database::Mongo::FindOneWithOptions(
+bool Database::Mongo::findOneWithOptions(
   const QueryExact& query,
   const QueryResultOptions& options,
   JSData& output,
@@ -766,7 +766,7 @@ bool Database::Mongo::FindOneWithOptions(
   (void) output;
   (void) commentsGeneralNonSensitive;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::Mongo::FindOneWithOptions failed. No mongoDB support. ";
+    *commentsOnFailure << "Database::Mongo::findOneWithOptions failed. No mongoDB support. ";
   }
   return false;
 #endif
@@ -851,8 +851,8 @@ bool Database::isDeleteable(
   return Database::isDeleteable(theLabels, outputPattern, commentsOnFailure);
 }
 
-bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("Database::DeleteOneEntry");
+bool Database::deleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("Database::deleteOneEntry");
   if (!global.userDefaultHasAdminRights()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only logged-in admins can delete DB entries.";
@@ -893,20 +893,20 @@ bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* comment
   );
   std::string tableName = theLabels[0];
   if (theLabels.size == 0) {
-    return this->DeleteOneEntryById(findQuery, commentsOnFailure);
+    return this->deleteOneEntryById(findQuery, commentsOnFailure);
   }
-  return Database::DeleteOneEntryUnsetUnsecure(
+  return Database::deleteOneEntryUnsetUnsecure(
     findQuery, theLabels, commentsOnFailure
   );
 }
 
-bool Database::DeleteOneEntryById(
+bool Database::deleteOneEntryById(
   const QueryExact& findQuery, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::DeleteOneEntryById");
+  MacroRegisterFunctionWithName("Database::deleteOneEntryById");
 #ifdef MACRO_use_MongoDB
   JSData foundItem;
-  if (!this->FindOne(findQuery, foundItem, commentsOnFailure)) {
+  if (!this->findOne(findQuery, foundItem, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query: "
       << findQuery.toJSON().toString(nullptr) << " returned no hits in table: "
@@ -928,19 +928,19 @@ bool Database::DeleteOneEntryById(
 #else
   (void) findQuery;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "DeleteOneEntryById: project compiled without mongoDB support. ";
+    *commentsOnFailure << "deleteOneEntryById: project compiled without mongoDB support. ";
   }
   return false;
 #endif
 
 }
 
-bool Database::DeleteOneEntryUnsetUnsecure(
+bool Database::deleteOneEntryUnsetUnsecure(
   const QueryExact& findQuery,
   List<std::string>& selector,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::DeleteOneEntryUnsetUnsecure");
+  MacroRegisterFunctionWithName("Database::deleteOneEntryUnsetUnsecure");
 #ifdef MACRO_use_MongoDB
 
   std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
@@ -948,7 +948,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   QueryResultOptions options;
   options.fieldsToProjectTo.addListOnTop(selector);
   options.fieldsToProjectTo.addOnTop(selectorString);
-  bool didFindItem = Database::get().FindOneWithOptions(
+  bool didFindItem = Database::get().findOneWithOptions(
     findQuery,
     options,
     foundItem,
@@ -980,61 +980,61 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
   query.updateQuery = updateQueryStream.str();
-  return query.UpdateOneNoOptions(commentsOnFailure);
+  return query.updateOneNoOptions(commentsOnFailure);
 #else
   (void) findQuery;
   (void) selector;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "DeleteOneEntryUnsetUnsecure: project compiled without mongoDB support. ";
+    *commentsOnFailure << "deleteOneEntryUnsetUnsecure: project compiled without mongoDB support. ";
   }
   return false;
 #endif
 }
 
-bool Database::Mongo::UpdateOneFromQueryString(
+bool Database::Mongo::updateOneFromQueryString(
   const std::string& collectionName,
   const std::string& findQuery,
   const std::string& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::UpdateOneFromQueryString");
+  MacroRegisterFunctionWithName("Database::updateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   query.updateQuery = updateQuery;
-  return query.UpdateOneWithOptions(commentsOnFailure);
+  return query.updateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
   (void) findQuery;
   (void) updateQuery;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "UpdateOneFromQueryString failed: DB not compiled.";
+    *commentsOnFailure << "updateOneFromQueryString failed: DB not compiled.";
   }
   return false;
 #endif
 }
 
-bool Database::UpdateOneFromSome(
+bool Database::updateOneFromSome(
   const List<QueryExact>& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDatabaseCompiled) {
-    return this->mongoDB.UpdateOneFromSome(findOrQueries, updateQuery, commentsOnFailure);
+    return this->mongoDB.updateOneFromSome(findOrQueries, updateQuery, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::UpdateOneFromSome not implemented yet. ";
+    *commentsOnFailure << "Database::updateOneFromSome not implemented yet. ";
   }
   return false;
 }
 
-bool Database::Mongo::UpdateOneFromSome(
+bool Database::Mongo::updateOneFromSome(
   const List<QueryExact>& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::UpdateOneFromSomeJSON");
+  MacroRegisterFunctionWithName("Database::updateOneFromSomeJSON");
   std::string queryString;
   if (!this->GetOrFindQuery(findOrQueries, queryString, commentsOnFailure)) {
     return false;
@@ -1052,7 +1052,7 @@ bool Database::Mongo::UpdateOneFromSome(
     }
     return false;
   }
-  return this->UpdateOneFromQueryString(
+  return this->updateOneFromQueryString(
     findOrQueries[0].collection,
     queryString,
     setJSON.toString(nullptr),
@@ -1080,7 +1080,7 @@ std::string QuerySet::toStringDebug() const {
 
 bool QuerySet::ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const {
   JSData data;
-  if (!this->ToJSONMongo(data, commentsOnFailure)) {
+  if (!this->toJSONMongo(data, commentsOnFailure)) {
     return false;
   }
   output.reset(JSData::token::token::tokenObject);
@@ -1088,11 +1088,11 @@ bool QuerySet::ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailu
   return true;
 }
 
-bool QuerySet::ToJSONMongo(
+bool QuerySet::toJSONMongo(
   JSData& output, std::stringstream* commentsOnFailure
 ) const {
   JSData converted;
-  if (!Database::ConvertJSONToJSONMongo(this->value, converted, commentsOnFailure)) {
+  if (!Database::convertJSONToJSONMongo(this->value, converted, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to convert: "
       << this->value.toString(nullptr) << " to JSON. ";
@@ -1118,17 +1118,17 @@ bool QuerySet::ToJSONMongo(
   return true;
 }
 
-bool Database::Mongo::UpdateOne(
+bool Database::Mongo::updateOne(
   const QueryExact& findQuery,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
+  MacroRegisterFunctionWithName("Database::updateOneFromJSON");
   JSData updateQueryJSON;
   if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
   }
-  if (!Database::Mongo::UpdateOneFromQueryString(
+  if (!Database::Mongo::updateOneFromQueryString(
     findQuery.collection,
     findQuery.toJSON().toString(nullptr),
     updateQueryJSON.toString(nullptr),
@@ -1144,15 +1144,15 @@ bool Database::Mongo::UpdateOne(
   return true;
 }
 
-bool Database::User::LoadUserInfo(
+bool Database::User::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::LoadUserInfo");
+  MacroRegisterFunctionWithName("Database::loadUserInformation");
   if (output.username == "" && output.email == "") {
     return false;
   }
   JSData userEntry;
-  if (!this->owner->FindOneFromSome(
+  if (!this->owner->findOneFromSome(
     output.getFindMeFromUserNameQuery(),
     userEntry,
     commentsOnFailure
@@ -1162,10 +1162,10 @@ bool Database::User::LoadUserInfo(
   return output.loadFromJSON(userEntry);
 }
 
-bool Database::FetchCollectionNames(
+bool Database::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FetchCollectionNames");
+  MacroRegisterFunctionWithName("Database::fetchCollectionNames");
   if (!Database::get().initializeWorker()) {
     return false;
   }
@@ -1176,12 +1176,12 @@ bool Database::FetchCollectionNames(
     return false;
   }
   if (global.flagDatabaseCompiled) {
-    return Database::get().mongoDB.FetchCollectionNames(output, commentsOnFailure);
+    return Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   }
-  return this->theFallBack.FetchCollectionNames(output, commentsOnFailure);
+  return this->theFallBack.fetchCollectionNames(output, commentsOnFailure);
 }
 
-bool Database::Mongo::FetchCollectionNames(
+bool Database::Mongo::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
 #ifdef MACRO_use_MongoDB
@@ -1230,7 +1230,7 @@ bool Database::FetchTable(
   JSData findQuery;
   findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
-  Database::get().FindFromJSON(
+  Database::get().findFromJSON(
     tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
   );
   HashedList<std::string, MathRoutines::hashString> theLabels;
@@ -1254,8 +1254,8 @@ bool Database::FetchTable(
   return true;
 }
 
-JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
-  MacroRegisterFunctionWithName("Database::ToJSONDatabaseFetch");
+JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
+  MacroRegisterFunctionWithName("Database::toJSONDatabaseFetch");
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
@@ -1272,16 +1272,16 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
     return result;
   }
   if (labelStrings.size == 0) {
-    return this->ToJSONDatabaseCollection("");
+    return this->toJSONDatabaseCollection("");
   }
   if (labelStrings.size == 1) {
-    return this->ToJSONDatabaseCollection(labelStrings[0]);
+    return this->toJSONDatabaseCollection(labelStrings[0]);
   }
-  return Database::ToJSONFetchItem(labelStrings);
+  return Database::toJSONFetchItem(labelStrings);
 }
 
-JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
-  MacroRegisterFunctionWithName("Database::ToJSONFetchItem");
+JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
+  MacroRegisterFunctionWithName("Database::toJSONFetchItem");
   JSData result;
   if (labelStrings.size < 1) {
     result["error"] = "No collection specified. ";
@@ -1307,7 +1307,7 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
-  if (!Database::FindFromJSONWithOptions(
+  if (!Database::findFromJSONWithOptions(
     currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer
   )) {
     result["error"] = out.str();
@@ -1324,8 +1324,8 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   return result;
 }
 
-JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
-  MacroRegisterFunctionWithName("Database::ToJSONDatabaseCollection");
+JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
+  MacroRegisterFunctionWithName("Database::toJSONDatabaseCollection");
   JSData result;
   std::stringstream out;
   result["currentTable"] = currentTable;
@@ -1334,7 +1334,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
       result[WebAPI::result::comments] = "Requested table empty, returning list of tables. ";
     }
     List<std::string> theCollectionNames;
-    if (Database::FetchCollectionNames(theCollectionNames, &out)) {
+    if (Database::fetchCollectionNames(theCollectionNames, &out)) {
       JSData collectionNames;
       collectionNames.theType = JSData::token::tokenArray;
       collectionNames.theList.setSize(theCollectionNames.size);
@@ -1349,7 +1349,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   }
   JSData findQuery;
   QueryResultOptions projector;
-  projector = Database::GetStandardProjectors(currentTable);
+  projector = Database::getStandardProjectors(currentTable);
   findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;
@@ -1359,14 +1359,14 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
-  if (!Database::FindFromJSONWithOptions(
+  if (!Database::findFromJSONWithOptions(
     currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer
   )) {
     result["error"] = out.str();
     return result;
   }
   if (rowsJSON.size == 0) {
-    result = Database::ToJSONDatabaseCollection("");
+    result = Database::toJSONDatabaseCollection("");
     if (flagDebuggingAdmin) {
       std::stringstream moreComments;
       moreComments << "First query returned 0 rows, fetching all tables instead. ";
@@ -1384,12 +1384,12 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   return result;
 }
 
-std::string Database::ToHtmlDatabaseCollection(const std::string& currentTable) {
+std::string Database::toHtmlDatabaseCollection(const std::string& currentTable) {
   MacroRegisterFunctionWithName("Database::ToStringDatabaseCollection");
   std::stringstream out;
   if (currentTable == "") {
     List<std::string> theCollectionNames;
-    if (this->FetchCollectionNames(theCollectionNames, &out)) {
+    if (this->fetchCollectionNames(theCollectionNames, &out)) {
       out << "There are " << theCollectionNames.size << " collections. ";
       for (int i = 0; i < theCollectionNames.size; i ++) {
         out << "<br>";

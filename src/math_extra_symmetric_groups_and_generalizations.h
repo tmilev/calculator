@@ -475,7 +475,7 @@ public:
     ElementZ2N out;
     out.bits.setSize(MathRoutines::maximum(this->bits.size, right.bits.size));
     int i = 0;
-    for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++) {
+    for (; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++) {
       out.bits[i] = this->bits[i] != right.bits[i];
     }
     for (; i < this->bits.size; i ++) {
@@ -510,7 +510,7 @@ public:
 
   bool operator== (const ElementZ2N& right) const {
     int i = 0;
-    for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++) {
+    for (; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++) {
       if (this->bits[i] != right.bits[i]) {
         return false;
       }
@@ -543,7 +543,7 @@ public:
 
   bool operator>(const ElementZ2N other) const {
     int i;
-    int m = MathRoutines::Minimum(this->bits.size, other.bits.size);
+    int m = MathRoutines::minimum(this->bits.size, other.bits.size);
     for (i = 0; i < m; i ++) {
       if (this->bits[i] && !other.bits[i]) {
         return true;
@@ -1468,7 +1468,7 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<Coef
     this->computeConjugacyClassSizesAndRepresentatives(NULL);
   coefficient acc = 0;
   for (int i = 0; i < this->conjugacyClasses.size; i ++)
-    acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasses[i].size;
+    acc += MathRoutines::complexConjugate(X1[i]) * X2[i] * this->conjugacyClasses[i].size;
   return  acc / this->getSize();
 }
 */

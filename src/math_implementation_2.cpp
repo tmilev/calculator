@@ -648,7 +648,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
   int MaxNumIntegersPerCarryOverBound = 11;
   List<LargeIntegerUnsigned> bufferPowersOfBase;
   int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->theDigits.size;
-  int sizeBufferPowersOfBase = MathRoutines::Minimum(initialNumDigitsEstimate, 10000);
+  int sizeBufferPowersOfBase = MathRoutines::minimum(initialNumDigitsEstimate, 10000);
   bufferPowersOfBase.setSize(sizeBufferPowersOfBase);
   LargeIntegerUnsigned currentPower;
   LargeIntegerUnsigned Remainder = *this;
@@ -1140,7 +1140,7 @@ void LargeIntegerUnsigned::operator=(unsigned int x) {
 }
 
 unsigned int LargeIntegerUnsigned::hashFunction() const {
-  int numCycles = MathRoutines::Minimum(this->theDigits.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(this->theDigits.size, someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++) {
     result += static_cast<unsigned>(this->theDigits[i]) * someRandomPrimes[i];

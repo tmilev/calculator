@@ -225,7 +225,7 @@ public:
   // The input of the following function is supposed to be an honest element of the
   // Universal enveloping,
   // i.e. inputElt is not allowed to have non-small integer exponents.
-  bool getActionGenVermaModuleAsDiffOperator(
+  bool getActionGeneralizedVermaModuleAsDifferentialOperator(
     ElementSemisimpleLieAlgebra<Rational>& inputElt,
     QuasiDifferentialOperator<Rational>& output,
     bool useNilWeight,

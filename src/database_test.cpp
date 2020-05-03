@@ -4,20 +4,20 @@
 #include "string_constants.h"
 
 Database::Test::Test() {
-  this->SetUp();
+  this->setUp();
 }
 
 Database::Test::~Test() {
-  this->TearDown();
+  this->tearDown();
 }
 
-void Database::Test::SetUp() {
+void Database::Test::setUp() {
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::theDatabaseName = "calculatortest";
   Database::FallBack::databaseFilename = "test/test_database.json";
 }
 
-void Database::Test::TearDown() {
+void Database::Test::tearDown() {
   global.flagServerForkedIntoWorker = false;
   DatabaseStrings::theDatabaseName = "calculator";
 }
@@ -25,27 +25,27 @@ void Database::Test::TearDown() {
 bool Database::Test::all() {
   MacroRegisterFunctionWithName("Database::Test::all");
   Database::Test tester;
-  tester.DeleteDatabase();
-  tester.AdminAccountCreation();
+  tester.deleteDatabase();
+  tester.adminAccountCreation();
   return true;
 }
 
-bool Database::Test::DeleteDatabase() {
+bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;
-  if (!Database::get().DeleteDatabase(&commentsOnFailure)) {
+  if (!Database::get().deleteDatabase(&commentsOnFailure)) {
     global << Logger::red << "Failed to delete database: " << commentsOnFailure.str() << Logger::endL;
   }
   return true;
 }
 
-bool Database::Test::AdminAccountCreation() {
-  MacroRegisterFunctionWithName("Database::Test::AdminAccountCreation");
+bool Database::Test::adminAccountCreation() {
+  MacroRegisterFunctionWithName("Database::Test::adminAccountCreation");
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = "111";
   std::stringstream commentsOnFailure;
 
-  if (!Database::get().theUser.LoginViaDatabase(userData, &commentsOnFailure)) {
+  if (!Database::get().theUser.loginViaDatabase(userData, &commentsOnFailure)) {
     global.fatal << "Failed to login as administrator on an empty database. " << global.fatal;
   }
   return true;

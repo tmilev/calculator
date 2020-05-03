@@ -228,7 +228,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
     this->flagFunctionEvaluationFailed = true;
     return;
   }
-  double minSide = MathRoutines::Minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
+  double minSide = MathRoutines::minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
   currentPlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   Vectors<double>& theSegment = currentPlot.thePointsDouble;

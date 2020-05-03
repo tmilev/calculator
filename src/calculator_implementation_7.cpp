@@ -1357,10 +1357,10 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Vector<Polynomial<Rational> > thePolysRational;
   ExpressionContext theContext(theCommands);
   bool useArguments =
-  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystem")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
+  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystem")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments) {
     if (!theCommands.getVectorFromFunctionArguments(
@@ -6032,7 +6032,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
-    thePlot.yLow = MathRoutines::Minimum(YValues[i], thePlot.yLow);
+    thePlot.yLow = MathRoutines::minimum(YValues[i], thePlot.yLow);
     thePlot.yHigh = MathRoutines::maximum(YValues[i], thePlot.yHigh);
   }
   thePlot.thePlotString = outLatex.str();
@@ -6518,7 +6518,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
       } else {
         fValuesUpper.addOnTop(finalResultDouble);
       }
-      yMin = MathRoutines::Minimum(yMin, finalResultDouble);
+      yMin = MathRoutines::minimum(yMin, finalResultDouble);
       yMax = MathRoutines::maximum(yMax, finalResultDouble);
     }
   }
@@ -8322,7 +8322,7 @@ bool Expression::evaluatesToDoubleInRange(
       if (i == 0) {
         *outputYmin = currentValue;
       } else {
-        *outputYmin = MathRoutines::Minimum(currentValue, *outputYmin);
+        *outputYmin = MathRoutines::minimum(currentValue, *outputYmin);
       }
     }
     if (outputYmax != nullptr) {
@@ -9479,7 +9479,7 @@ public:
   }
   Rational GetStringWidthTruncated(int theIndex) {
     return this->charWidth *
-    MathRoutines::Minimum(
+    MathRoutines::minimum(
       this->maxNumCharsInString,
       static_cast<signed>(this->DisplayedEstrings[theIndex].size())
     );

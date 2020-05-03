@@ -517,7 +517,7 @@ private:
       return 0;
     }
     unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
-    int numCycles = MathRoutines::Minimum(this->children.size, someRandomPrimesSize);
+    int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
       result += (*this)[i].hashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
     }

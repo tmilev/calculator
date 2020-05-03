@@ -255,7 +255,7 @@ public:
   static inline double E() {
     return 2.718281828459;
   }
-  static inline double Pi() {
+  static inline double pi() {
     return 3.141592653589793238462643383279;
   }
   // The MS compiler refuses to compile the following, hence the above line.
@@ -264,7 +264,7 @@ public:
   static void kToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
   static int binomialCoefficientMultivariate(int N, List<int>& theChoices);
-  static bool IsPrime(int theInt);
+  static bool isPrime(int theInt);
   template <class Coefficient, typename theIntegerType>
   static void raiseToPower(
     Coefficient& theElement,
@@ -290,7 +290,7 @@ public:
     b = temp;
   }
   template <class Element>
-  inline static Element Minimum(const Element& a, const Element& b) {
+  inline static Element minimum(const Element& a, const Element& b) {
     if (a > b) {
       return b;
     } else {
@@ -298,7 +298,7 @@ public:
     }
   }
   template<class Element>
-  static std::string ElementToStringBrackets(const Element& input) {
+  static std::string toStringBrackets(const Element& input) {
     if (!input.needsParenthesisForMultiplication()) {
       return input.toString();
     }
@@ -309,7 +309,7 @@ public:
     return result;
   }
   template<class Element>
-  static std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
+  static std::string toStringBrackets(const Element& input, FormatExpressions* theFormat) {
     if (!input.needsParenthesisForMultiplication()) {
       return input.toString(theFormat);
     }
@@ -336,13 +336,13 @@ public:
   template <class Element>
   static void lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>
-  static number ComplexConjugate(number x) {
+  static number complexConjugate(number x) {
     return x.GetComplexConjugate();
   }
-  static int ComplexConjugate(int x) {
+  static int complexConjugate(int x) {
     return x;
   }
-  static double ComplexConjugate(double x) {
+  static double complexConjugate(double x) {
     return x;
   }
   static bool isInteger(Rational x);
@@ -357,8 +357,8 @@ public:
       return 0;
     }
   }
-  static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
-  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);
+  static bool parseListIntegers(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
+  static void parseListIntegersNoFailure(const std::string& input, List<int>& result);
 };
 
 class DrawElementInputOutput {
@@ -410,163 +410,6 @@ public:
     this->theCounter = nullptr;
   }
 };
-
-// The below class is to be used together with List.
-// The purpose of the class is to save up RAM memory use.
-// This is the "light" version it is to be used for storage purposes only.
-// To use it as a normal List simply copy it to a buffer List and there
-// use the full functionality of List.
-// Then copy the buffer List back to the light version to store to RAM.
-template <class Object>
-class ListLight {
-private:
-  ListLight(const ListLight<Object>& right);
-public:
-  int size;
-  Object* theObjects;
-  void AddObjectOnTopLight(const Object& o);
-  void CopyFromHeavy(const List<Object>& from);
-  void CopyFromLight(const ListLight<Object>& from);
-  void PopIndexSwapWithLastLight(int index);
-  int SizeWithoutObjects() const;
-  int IndexInList(const Object& o) {
-    for (int i = 0; i < this->size; i ++) {
-      if (this->theObjects[i] == o) {
-        return i;
-      }
-    }
-    return - 1;
-  }
-  bool contains(const Object& o) {
-    return this->IndexInList(o) != - 1;
-  }
-  void setSize(int theSize);
-  void initializeFillInObject(int theSize, const Object& o) {
-    this->setSize(theSize);
-    for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i] = o;
-    }
-  }
-  Object& operator[](int i) const {
-    return this->theObjects[i];
-  }
-  void operator=(const ListLight<Object>& right);
-  void operator=(const List<Object>& right) {
-    this->setSize(right.size);
-    for (int i = 0; i < right.size; i ++) {
-      this->theObjects[i] = right[i];
-    }
-  }
-  bool operator== (const ListLight<Object>& right) const {
-    if (this->size != right.size) {
-      return false;
-    }
-    for (int i = 0; i < this->size; i ++) {
-      if (!(this->theObjects[i] == right[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  Object* lastObject() const {
-    return &this->theObjects[this->size - 1];
-  }
-  ListLight();
-  ~ListLight();
-};
-
-template <class Object>
-void ListLight<Object>::AddObjectOnTopLight(const Object& o) {
-  this->setSize(this->size + 1);
-  this->theObjects[this->size - 1] = o;
-}
-
-template <class Object>
-void ListLight<Object>::PopIndexSwapWithLastLight(int index) {
-  this->theObjects[index] = this->theObjects[this->size - 1];
-  this->setSize(this->size - 1);
-}
-
-template <class Object>
-void ListLight<Object>::operator=(const ListLight<Object>& right) {
-  this->CopyFromLight(right);
-}
-
-template <class Object>
-void ListLight<Object>::setSize(int theSize) {
-  if (theSize == this->size) {
-    return;
-  }
-  if (theSize < 0) {
-    theSize = 0;
-  }
-  if (theSize == 0) {
-#ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter -= this->size;
-  GlobalStatistics::checkPointerCounters();
-#endif
-    this->size = 0;
-    delete [] this->theObjects;
-    this->theObjects = 0;
-    return;
-  }
-  Object* newArray = new Object[theSize];
-#ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter += theSize;
-  GlobalStatistics::checkPointerCounters();
-#endif
-  int copyUpTo = this->size;
-  if (this->size > theSize) {
-    copyUpTo = theSize;
-  }
-  for (int i = 0; i < copyUpTo; i ++) {
-    newArray[i] = this->theObjects[i];
-  }
-  delete [] this->theObjects;
-#ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter -= this->size;
-  GlobalStatistics::checkPointerCounters();
-#endif
-  this->theObjects = newArray;
-  this->size = theSize;
-}
-
-template <class Object>
-ListLight<Object>::ListLight() {
-  this->size = 0;
-  this->theObjects = 0;
-}
-
-template <class Object>
-ListLight<Object>::~ListLight() {
-  delete [] this->theObjects;
-#ifdef AllocationLimitsSafeguard
-  GlobalStatistics::globalPointerCounter -= this->size;
-  GlobalStatistics::checkPointerCounters();
-#endif
-  this->theObjects = 0;
-}
-
-template <class Object>
-void ListLight<Object>::CopyFromHeavy(const List<Object>& from) {
-  this->setSize(from.size);
-  for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i] = from.theObjects[i];
-  }
-}
-
-template <class Object>
-void ListLight<Object>::CopyFromLight(const ListLight<Object>& from) {
-  this->setSize(from.size);
-  for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i] = from.theObjects[i];
-  }
-}
-
-template <class Object>
-int ListLight<Object>::SizeWithoutObjects() const {
-  return sizeof(Object*) * this->size + sizeof(int);
-}
 
 template <class Object>
 std::ostream& operator<<(std::ostream& output, const List<Object>& theList) {
@@ -678,10 +521,6 @@ public:
     this->initConstructorCallOnly();
     *this = other;
   }
-  List(const ListLight<Object>& other) {
-    this->initConstructorCallOnly();
-    this->assignLight(other);
-  }
   List<Object> sliceCopy(int StartingIndex, int SizeOfSlice) const;
   void sliceInPlace(int StartingIndex, int SizeOfSlice);
   void slice(int StartingIndex, int SizeOfSlice, List<Object>& output) const;
@@ -708,7 +547,6 @@ public:
       this->reserve(this->getNewSizeRelativeToExpectedSize(theSize));
     }
   }
-  void assignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease) {
     int newSize = this->size + theIncrease;
     if (newSize < 0) {
@@ -1106,12 +944,12 @@ public:
   void Rotate(int r) {
     std::rotate(this->theObjects, this->theObjects + r, this->theObjects + (this->size - 1));
   }
-  int SizeWithoutObjects() const;
+  int sizeWithoutObjects() const;
   Object* lastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void releaseMemory();
 
   unsigned int hashFunction() const {
-    int numCycles = MathRoutines::Minimum(someRandomPrimesSize, this->size);
+    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->size);
     unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
       result += someRandomPrimes[i] * MathRoutines::hashFunction(theObjects[i]);
@@ -1288,7 +1126,6 @@ private:
   void AddObjectOnBottom(const Object& o);
   void addListOnTop(List<Object>& theList);
   Object PopIndexShiftDown(int index);
-  void assignLight(const ListLight<Object>& from);
   void reverseElements();
   void shiftUpExpandOnTop(int StartingIndex);
 
@@ -1957,7 +1794,7 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
 }
 
 template <class Object>
-int List<Object>::SizeWithoutObjects() const {
+int List<Object>::sizeWithoutObjects() const {
   return sizeof(this->actualSize) + sizeof(this->size) + sizeof(this->theObjects);
 }
 
@@ -2088,14 +1925,6 @@ bool List<Object>::hasCommonElementWith(List<Object>& right) {
     }
   }
   return false;
-}
-
-template <class Object>
-void List<Object>::assignLight(const ListLight<Object>& From) {
-  this->setSize(From.size);
-  for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i] = From.theObjects[i];
-  }
 }
 
 template <class Object>

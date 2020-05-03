@@ -451,7 +451,7 @@ void Vectors<Coefficient>::SelectABasisInSubspace(
     reportTask.report(reportStream.str());
   }
   Matrix<Coefficient> theMat;
-  int MaxNumRows = MathRoutines::Minimum(input.size, theDim);
+  int MaxNumRows = MathRoutines::minimum(input.size, theDim);
   theMat.initialize(MaxNumRows, theDim);
   int currentRow = 0;
   for (int i = 0; i < input.size; i ++) {
@@ -519,7 +519,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   ///////////////////
   int tempI;
   int NumFoundPivots = 0;
-  int MaxRankMat = MathRoutines::Minimum(this->numberOfRows, this->numberOfColumns);
+  int MaxRankMat = MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
   Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->initialize(this->numberOfColumns);

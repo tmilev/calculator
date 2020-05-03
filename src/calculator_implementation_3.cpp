@@ -1254,7 +1254,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       hwPath.generateOrbit(
         tempList,
         theStrings,
-        MathRoutines::Minimum(1000, currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW).numeratorShort),
+        MathRoutines::minimum(1000, currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW).numeratorShort),
         nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size

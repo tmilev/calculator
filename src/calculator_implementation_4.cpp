@@ -223,25 +223,25 @@ template <class Coefficient>
 class QuasiDifferentialOperator : public LinearCombination<QuasiDifferentialMononomial, Coefficient> {
 public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void GenerateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
+  void generateBasisLieAlgebra(List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
   void operator*=(const QuasiDifferentialOperator<Coefficient>& standsOnTheRight);
   void operator=(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& other) {
     this->LinearCombination<QuasiDifferentialMononomial, Coefficient>::operator=(other);
   }
-  void LieBracketMeOnTheRight(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& standsOnTheRight) {
+  void lieBracketMeOnTheRight(const LinearCombination<QuasiDifferentialMononomial, Coefficient>& standsOnTheRight) {
     QuasiDifferentialOperator<Coefficient> tempRight;
     tempRight = standsOnTheRight;
     MathRoutines::lieBracket(*this, tempRight, *this);
   }
-  void FourierTransformDiffPartOnly(QuasiDifferentialOperator<Coefficient>& output) const;
-  void GetEWAsetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const;
+  void fourierTransformDifferentialPartOnly(QuasiDifferentialOperator<Coefficient>& output) const;
+  void getElementWeylAlgebraSetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const;
 };
 
 template <class Coefficient>
-void QuasiDifferentialOperator<Coefficient>::FourierTransformDiffPartOnly(QuasiDifferentialOperator<Coefficient>& output) const {
+void QuasiDifferentialOperator<Coefficient>::fourierTransformDifferentialPartOnly(QuasiDifferentialOperator<Coefficient>& output) const {
   if (&output == this) {
     QuasiDifferentialOperator<Coefficient> thisCopy;
-    thisCopy.FourierTransformDiffPartOnly(output);
+    thisCopy.fourierTransformDifferentialPartOnly(output);
     return;
   }
   output.makeZero();
@@ -260,7 +260,7 @@ void QuasiDifferentialOperator<Coefficient>::FourierTransformDiffPartOnly(QuasiD
 }
 
 template <class Coefficient>
-void QuasiDifferentialOperator<Coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const {
+void QuasiDifferentialOperator<Coefficient>::getElementWeylAlgebraSetMatrixPartsToId(ElementWeylAlgebra<Coefficient>& output) const {
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     output.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
@@ -285,10 +285,10 @@ void MathRoutines::lieBracket(const Element& standsOnTheLeft, const Element& sta
 }
 
 template <class Coefficient>
-void QuasiDifferentialOperator<Coefficient>::GenerateBasisLieAlgebra(
+void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
   List<QuasiDifferentialOperator<Coefficient> >& theElts, FormatExpressions* theFormat
 ) {
-  MacroRegisterFunctionWithName("QuasiDifferentialOperator<Coefficient>::GenerateBasisLieAlgebra");
+  MacroRegisterFunctionWithName("QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra");
   ProgressReport theReport;
   HashedList<QuasiDifferentialMononomial> bufferMons;
   List< LinearCombination<QuasiDifferentialMononomial, Coefficient> > theEltsConverted;
@@ -307,7 +307,7 @@ void QuasiDifferentialOperator<Coefficient>::GenerateBasisLieAlgebra(
         << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
         << tempQDO.toString(theFormat) << "<br> with element <br>"
         << theEltsConverted[j].toString(theFormat) << " to get <br>";
-        tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
+        tempQDO.lieBracketMeOnTheRight(theEltsConverted[j]);
         theReport.report(report.str());
         report << tempQDO.toString(theFormat);
         theReport.report(report.str());
@@ -411,13 +411,13 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
 }
 
 template <class Coefficient>
-bool ModuleSSalgebra<Coefficient>::getActionGenVermaModuleAsDiffOperator(
+bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferentialOperator(
   ElementSemisimpleLieAlgebra<Rational>& inputElt,
   QuasiDifferentialOperator<Rational>& output,
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::getActionGenVermaModuleAsDiffOperator");
+  MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::getActionGeneralizedVermaModuleAsDifferentialOperator");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   List<int> indicesNilrad;
   this->getElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
@@ -657,7 +657,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       currentTime = global.getElapsedSeconds();
       currentAdditions = Rational::TotalAdditions();
       currentMultiplications = Rational::TotalMultiplications();
-      theMod.getActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
+      theMod.getActionGeneralizedVermaModuleAsDifferentialOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
       totalAdditions += Rational::TotalAdditions() - currentAdditions;
       totalMultiplications += Rational::TotalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
@@ -690,7 +690,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
 
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
+        theQDOs[j].getElementWeylAlgebraSetMatrixPartsToId(diffOpPart);
         diffOpPart.FourierTransform(transformedDO);
         reportFourierTransformedCalculatorCommands << "<br>"
         << theGeneratorsItry[j].toString() << "=" << transformedDO.toString() << ";";

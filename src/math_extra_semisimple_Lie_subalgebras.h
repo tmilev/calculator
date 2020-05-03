@@ -279,7 +279,7 @@ public:
     const Vector<Rational>& theElementWeight,
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
   );
-  bool computeKsl2TripleSetUpAndSolveSystem(
+  bool computeKsl2TriplesetUpAndSolveSystem(
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
     const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF

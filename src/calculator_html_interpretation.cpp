@@ -1305,7 +1305,7 @@ std::string WebAPIResponse::addTeachersSections() {
     );
     QuerySet setQuery;
     setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!Database::get().UpdateOne(findQuery, setQuery, &out)) {
+    if (!Database::get().updateOne(findQuery, setQuery, &out)) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     } else {
       out << "<span style =\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
@@ -1347,7 +1347,7 @@ std::string WebAPIResponse::addUserEmails(const std::string& hostWebAddressWithP
   bool doSendEmails = global.requestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = Database::get().theUser.AddUsersFromEmails(
+  bool createdUsers = Database::get().theUser.addUsersFromEmails(
     inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
   );
   if (createdUsers) {
@@ -1613,7 +1613,7 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
   columnsToRetain.addOnTop(DatabaseStrings::labelInstructor);
   columnsToRetain.addOnTop(DatabaseStrings::labelSection);
   columnsToRetain.addOnTop(DatabaseStrings::labelSemester);
-  if (!Database::FindFromJSONWithProjection(
+  if (!Database::findFromJSONWithProjection(
     DatabaseStrings::tableUsers,
     findStudents,
     students,
@@ -1625,7 +1625,7 @@ JSData WebAPIResponse::getAccountsPageJSON(const std::string& hostWebAddressWith
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output;
   }
-  if (!Database::FindFromJSONWithProjection(
+  if (!Database::findFromJSONWithProjection(
     DatabaseStrings::tableUsers,
     findAdmins,
     admins,
@@ -1665,7 +1665,7 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
-  if (!Database::get().FindFromJSON(
+  if (!Database::get().findFromJSON(
     DatabaseStrings::tableUsers,
     findStudents,
     students,
@@ -1676,7 +1676,7 @@ std::string WebAPIResponse::getAccountsPageBody(const std::string& hostWebAddres
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
-  if (!Database::get().FindFromJSON(
+  if (!Database::get().findFromJSON(
     DatabaseStrings::tableUsers,
     findAdmins,
     admins,
@@ -1937,7 +1937,7 @@ int ProblemData::getExpectedNumberOfAnswers(
     fields.addOnTop(DatabaseStrings::labelProblemFileName);
     fields.addOnTop(DatabaseStrings::labelProblemTotalQuestions);
 
-    if (Database::FindFromJSONWithProjection(
+    if (Database::findFromJSONWithProjection(
       DatabaseStrings::tableProblemInformation,
       findProblemInfo,
       result,
@@ -2003,7 +2003,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  Database::get().UpdateOne(
+  Database::get().updateOne(
     findEntry, newDBentry, &commentsOnFailure
   );
   return this->knownNumberOfAnswersFromHD;

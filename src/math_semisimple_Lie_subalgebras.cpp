@@ -3049,12 +3049,12 @@ void CandidateSSSubalgebra::computeKsl2TriplesGetOppositeElementsAll(
   }
 }
 
-bool CandidateSSSubalgebra::computeKsl2TripleSetUpAndSolveSystem(
+bool CandidateSSSubalgebra::computeKsl2TriplesetUpAndSolveSystem(
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
   const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF
 ) {
-  MacroRegisterFunctionWithName("CandidateSSSubalgebra::computeKsl2TripleSetUpAndSolveSystem");
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::computeKsl2TriplesetUpAndSolveSystem");
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > Ecopy, theH, theF, tempElt;
   Ecopy = theE;
   this->getAmbientSemisimpleLieAlgebra().getGenericElementCartan(theH, 0);
@@ -3090,11 +3090,11 @@ void CandidateSSSubalgebra::computeKsl2Triples() {
           this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i][0]],
           FmustBeAlinCombiOf
         );
-        if (this->computeKsl2TripleSetUpAndSolveSystem(this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k])) {
+        if (this->computeKsl2TriplesetUpAndSolveSystem(this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k])) {
           continue;
         }
         this->computeKsl2TriplesGetOppositeElementsAll(this->WeightsModulesPrimal[i][k], FmustBeAlinCombiOf);
-        this->computeKsl2TripleSetUpAndSolveSystem(this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k]);
+        this->computeKsl2TriplesetUpAndSolveSystem(this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k]);
       }
     }
   }
@@ -3553,7 +3553,7 @@ void Vector<Coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
         scalarThis = this->ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
         scalarOther = currentModifier.ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
         if (scalarOther * scalarThis < 0) {
-          theScale = MathRoutines::Minimum(theScale, - (scalarThis / scalarOther) / 2);
+          theScale = MathRoutines::minimum(theScale, - (scalarThis / scalarOther) / 2);
         }
       }
     }
@@ -5314,7 +5314,7 @@ std::string CandidateSSSubalgebra::toStringDrawWeights(FormatExpressions* theFor
         if (minDist == 0) {
           minDist = tempRat;
         } else if (tempRat != 0) {
-          minDist = MathRoutines::Minimum(tempRat, minDist);
+          minDist = MathRoutines::minimum(tempRat, minDist);
         }
       }
       for (int k = j + 1; k < cornerWeights.size; k ++) {
@@ -6414,7 +6414,7 @@ std::string CandidateSSSubalgebra::toStringSystemPart2(FormatExpressions* theFor
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::toStringSystem");
   std::stringstream out;
   out << "<br><b>For the calculator: </b><br>\n" << this->toStringLoadUnknown() << ";"
-  << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
+  << "<br>findOneSolutionSerreLikePolynomialSystem{}( ";
   for (int i = 0; i < this->theSystemToSolve.size; i ++) {
     out << this->theSystemToSolve[i].toString();
     if (i != this->theSystemToSolve.size - 1) {

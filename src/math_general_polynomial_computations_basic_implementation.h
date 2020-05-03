@@ -496,7 +496,7 @@ void Polynomial<Coefficient>::ScaleToPositiveMonomialExponents(MonomialP& output
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
       const MonomialP& currentMonomial = (*this)[j];
-      Rational currentScale = MathRoutines::Minimum(outputScale(i), currentMonomial(i));
+      Rational currentScale = MathRoutines::minimum(outputScale(i), currentMonomial(i));
       outputScale.setVariable(i, currentScale);
     }
   }

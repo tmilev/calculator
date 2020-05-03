@@ -2772,7 +2772,7 @@ bool MonomialP::isDivisibleBy(const MonomialP& other) const {
       return false;
     }
   }
-  int upperLimit = MathRoutines::Minimum(this->monBody.size, other.monBody.size);
+  int upperLimit = MathRoutines::minimum(this->monBody.size, other.monBody.size);
   for (int i = 0; i < upperLimit; i ++) {
     if (this->monBody[i] < other.monBody[i]) {
       return false;
@@ -2792,7 +2792,7 @@ bool MonomialP::operator==(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(this->minimalNumberOfVariables(), other.minimalNumberOfVariables()) - 1;
+  int highestIndex = MathRoutines::minimum(this->minimalNumberOfVariables(), other.minimalNumberOfVariables()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monBody[i] != other.monBody[i]) {
       return false;
@@ -2847,7 +2847,7 @@ bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(
+  int highestIndex = MathRoutines::minimum(
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
   ) - 1;
   for (int i = highestIndex; i >= 0; i --) {
@@ -2877,7 +2877,7 @@ List<MonomialP>::Comparator& MonomialP::orderDegreeThenLeftLargerWins() {
 }
 
 bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
-  int commonSize = MathRoutines::Minimum(
+  int commonSize = MathRoutines::minimum(
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
   );
   for (int i = 0; i < commonSize; i ++) {

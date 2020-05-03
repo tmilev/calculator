@@ -1757,7 +1757,7 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
 
 unsigned int MathRoutines::hashListUnsignedChars(const List<unsigned char> &input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::Minimum(input.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
   for (int i = 0; i < numCycles; i ++) {
     result += someRandomPrimes[i] * static_cast<unsigned>(input[i]);
   }
@@ -1766,7 +1766,7 @@ unsigned int MathRoutines::hashListUnsignedChars(const List<unsigned char> &inpu
 
 unsigned int MathRoutines::hashListStrings(const List<std::string>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::Minimum(input.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
   for (int i = 0; i < numCycles; i ++) {
     result += someRandomPrimes[i] * MathRoutines::hashString(input[i]);
   }
@@ -1775,7 +1775,7 @@ unsigned int MathRoutines::hashListStrings(const List<std::string>& input) {
 
 unsigned int MathRoutines::hashListDoubles(const List<double>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::Minimum(input.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
   for (int i = 0; i < numCycles; i ++) {
     result += someRandomPrimes[i] * MathRoutines::HashDouble(input[i]);
   }
@@ -1784,7 +1784,7 @@ unsigned int MathRoutines::hashListDoubles(const List<double>& input) {
 
 unsigned int MathRoutines::hashListInts(const List<int>& input) {
   unsigned int result = 0;
-  int numCycles = MathRoutines::Minimum(input.size, someRandomPrimesSize);
+  int numCycles = MathRoutines::minimum(input.size, someRandomPrimesSize);
   for (int i = 0; i < numCycles; i ++) {
     result += someRandomPrimes[i] * MathRoutines::IntUnsignIdentity(input[i]);
   }
@@ -2641,7 +2641,7 @@ void Selection::operator=(const Selection& right) {
 }
 
 unsigned int Selection::hashFunction() const {
-  int tempMin = MathRoutines::Minimum(someRandomPrimesSize, this->MaxSize);
+  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->MaxSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
     if (this->selected[i]) {
@@ -2830,7 +2830,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
     if (currentIndex == this->LastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
-    tempRoot = owner.startingVectors[currentIndex] * this->theObjects[currentIndex].GetLargestElongation();
+    tempRoot = owner.startingVectors[currentIndex] * this->denominator[currentIndex].GetLargestElongation();
     tempRoots.addOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = tempRoots.getLinearDependence(tempMat);
@@ -2871,7 +2871,7 @@ bool PartFraction::ReduceOnceGeneralMethod(
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
     tempRoot = owner.startingVectors[currentIndex];
-    tempRoot *= (this->theObjects[currentIndex].GetLargestElongation());
+    tempRoot *= this->denominator[currentIndex].GetLargestElongation();
     bufferVectors.addOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = bufferVectors.getLinearDependence(tempMat);
@@ -2899,19 +2899,19 @@ bool PartFraction::ReduceOnceGeneralMethod(
 
 int PartFraction::SizeWithoutDebugString() const {
   int Accum = 0;
-  Accum += this->::ListLight<OnePartialFractionDenominator>::SizeWithoutObjects();
-  Accum += this->size * static_cast<int>(sizeof(OnePartialFractionDenominator));
-  Accum += this->IndicesNonZeroMults.SizeWithoutObjects();
+  Accum += this->denominator.sizeWithoutObjects();
+  Accum += this->denominator.size * static_cast<int>(sizeof(OnePartialFractionDenominator));
+  Accum += this->IndicesNonZeroMults.sizeWithoutObjects();
   return Accum;
 }
 
-void PartFraction::AssignDenominatorOnly(const PartFraction& p) {
-  this->CopyFromLight(p);
+void PartFraction::assignDenominatorOnly(const PartFraction& p) {
+  this->denominator = p.denominator;
   this->ComputeIndicesNonZeroMults();
 }
 
 void PartFraction::assign(const PartFraction& p) {
-  this->CopyFromLight(p);
+  this->denominator = p.denominator;
   this->IndicesNonZeroMults = (p.IndicesNonZeroMults);
   this->IsIrrelevant = p.IsIrrelevant;
   this->RelevanceIsComputed = p.RelevanceIsComputed;
@@ -2919,15 +2919,15 @@ void PartFraction::assign(const PartFraction& p) {
 }
 
 void PartFraction::AssignNoIndicesNonZeroMults(PartFraction& p) {
-  this->CopyFromLight(p);
+  this->denominator = p.denominator;
 }
 
 void PartFraction::writeToFile(std::fstream& output) const {
-  output << "Fraction_start: " << this->size << "\n";
-  for (int j = 0; j < this->size; j ++) {
-    output << (*this)[j].Multiplicities.size << " ";
-    for (int i = 0; i < (*this)[j].Multiplicities.size; i ++) {
-      output << (*this)[j].Multiplicities[i] << " " << (*this)[j].Elongations[i] << " ";
+  output << "Fraction_start: " << this->denominator.size << "\n";
+  for (int j = 0; j < this->denominator.size; j ++) {
+    output << this->denominator[j].Multiplicities.size << " ";
+    for (int i = 0; i < this->denominator[j].Multiplicities.size; i ++) {
+      output << this->denominator[j].Multiplicities[i] << " " << this->denominator[j].Elongations[i] << " ";
     }
   }
 }
@@ -2940,12 +2940,12 @@ void PartFraction::readFromFile(PartFractions& owner, std::fstream& input) {
     global.fatal << "Failed to read partial fraction from file. " << global.fatal;
   }
   this->initialize(tempI);
-  for (int j = 0; j < this->size; j ++) {
+  for (int j = 0; j < this->denominator.size; j ++) {
     input >> tempI;
-    (*this)[j].Multiplicities.setSize(tempI);
-    (*this)[j].Elongations.setSize(tempI);
-    for (int i = 0; i < (*this)[j].Multiplicities.size; i ++) {
-      input >> (*this)[j].Multiplicities[i] >> (*this)[j].Elongations[i];
+    this->denominator[j].Multiplicities.setSize(tempI);
+    this->denominator[j].Elongations.setSize(tempI);
+    for (int i = 0; i < this->denominator[j].Multiplicities.size; i ++) {
+      input >> this->denominator[j].Multiplicities[i] >> this->denominator[j].Elongations[i];
     }
   }
   this->ComputeIndicesNonZeroMults();
@@ -2957,7 +2957,7 @@ void PartFraction::ComputeOneCheckSuM(PartFractions& owner, Rational& output, in
   Vector<Rational> CheckSumRoot = OnePartialFractionDenominator::GetCheckSumRoot(owner.AmbientDimension);
   Rational tempRat;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    this->theObjects[this->IndicesNonZeroMults[i]].computeOneCheckSum(
+    this->denominator[this->IndicesNonZeroMults[i]].computeOneCheckSum(
       tempRat, owner.startingVectors[this->IndicesNonZeroMults[i]], theDimension
     );
     output.multiplyBy(tempRat);
@@ -2970,8 +2970,8 @@ std::string PartFraction::toString(
   std::stringstream out;
   std::string tempS, stringPoly;
   NumLinesUsed = 0;
-  for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i].toString();
+  for (int i = 0; i < this->denominator.size; i ++) {
+    this->denominator[i].toString();
     out << tempS;
   }
   tempS = out.str();
@@ -3018,8 +3018,8 @@ void PartFraction::PrepareFraction(
   Polynomial<LargeInteger>& outputCommonCoeff
 ) {
   output.AssignNoIndicesNonZeroMults(*this);
-  int powerDropA = this->theObjects[indexA].Multiplicities[0];
-  int powerDropB = this->theObjects[indexB].Multiplicities[0];
+  int powerDropA = this->denominator[indexA].Multiplicities[0];
+  int powerDropB = this->denominator[indexB].Multiplicities[0];
   if (indexAisNullified) {
     powerDropB = 0;
   } else {
@@ -3040,7 +3040,7 @@ int PartFraction::GetNumProportionalVectorsClassicalRootSystems(PartFractions& o
     int tempI = owner.IndicesRedundantShortRoots.elements[i];
     int tempI2 = owner.getIndexDoubleOfARoot(owner.startingVectors[tempI]);
     if (tempI2 != - 1) {
-      if (this->theObjects[tempI2].Multiplicities.size > 0) {
+      if (this->denominator[tempI2].Multiplicities.size > 0) {
         result ++;
       }
     }
@@ -3052,7 +3052,7 @@ int PartFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& own
   int result = owner.startingVectors.size;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     int tempI = this->IndicesNonZeroMults[i];
-    if ((*this)[tempI].Multiplicities.size > 0) {
+    if (this->denominator[tempI].Multiplicities.size > 0) {
       if (tempI >= minIndex && tempI < result) {
         result = tempI;
       }
@@ -3068,7 +3068,7 @@ bool PartFraction::CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndic
 }
 
 int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation(
-  bool flagUsingOrlikSolomon,  Matrix<Rational> & theLinearRelation
+  bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
 ) {
   int DesireToSelectAsGainingMultiplicity = - 1;
   int result = - 1;
@@ -3077,7 +3077,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation(
       int currentIndex = this->IndicesNonZeroMults[i];
       int candidateDesire;
       if (!flagUsingOrlikSolomon) {
-        candidateDesire = (*this)[currentIndex].getTotalMultiplicity();
+        candidateDesire = this->denominator[currentIndex].getTotalMultiplicity();
       } else {
         candidateDesire = currentIndex;
       }
@@ -3112,7 +3112,7 @@ bool PartFraction::DecomposeFromLinRelation(
   theGreatestElongations.size = 0;
   GainingMultiplicityIndexInLinRelation = this->ComputeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, theLinearRelation);
   GainingMultiplicityIndex = this->IndicesNonZeroMults[GainingMultiplicityIndexInLinRelation];
-  int tempI = this->theObjects[GainingMultiplicityIndex].GetLargestElongation();
+  int tempI = this->denominator[GainingMultiplicityIndex].GetLargestElongation();
   theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].MultiplyByInt(tempI);
   //theLinearRelation.ComputeDebugString();
   theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -3129,7 +3129,7 @@ bool PartFraction::DecomposeFromLinRelation(
     if (i != GainingMultiplicityIndexInLinRelation && !theLinearRelation.elements[i][0].isEqualToZero()) {
       int tempI = this->IndicesNonZeroMults[i];
       ParticipatingIndices.addOnTop(tempI);
-      theGreatestElongations.addOnTop((*this)[tempI].GetLargestElongation());
+      theGreatestElongations.addOnTop(this->denominator[tempI].GetLargestElongation());
       theCoefficients.addOnTop(theLinearRelation.elements[i][0].numeratorShort);
     }
   }
@@ -3177,8 +3177,8 @@ bool PartFraction::reduceMeOnce(
   while (hasImprovement) {
     hasImprovement = false;
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-      for (int j = 0; j < this->theObjects[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
-        this->theObjects[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
+      for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
+        this->denominator[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
         outputCoeff.DivideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
         if (remainderDivision.isEqualToZero()) {
           this->DecreasePowerOneFrac(IndicesNonZeroMults[i], 1);
@@ -3240,7 +3240,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
   int TotalMultiplicity;
   TotalMultiplicity = 0;
   for (int i = 0; i < theSelectedIndices.size; i ++) {
-    int tempI = (*this)[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
+    int tempI = this->denominator[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
     TheBigBadIndexingSet.MaxMultiplicities[i] = tempI;
     TotalMultiplicity += tempI;
   }
@@ -3260,7 +3260,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
         } else {
           multiplicityChange = oldMaxMultiplicity + 1;
         }
-        tempFrac[theSelectedIndices[k]].AddMultiplicity(- multiplicityChange, theGreatestElongations[k]);
+        tempFrac.denominator[theSelectedIndices[k]].AddMultiplicity(- multiplicityChange, theGreatestElongations[k]);
         this->getNElongationPolynomialWithMonomialContribution(
           startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim
         );
@@ -3277,7 +3277,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
         ComputationalBufferCoefficient *= tempInt;
         tempN -= tempI;
       }
-      tempFrac[GainingMultiplicityIndex].AddMultiplicity(
+      tempFrac.denominator[GainingMultiplicityIndex].AddMultiplicity(
         TheBigBadIndexingSet.TotalMultiplicity() + oldMaxMultiplicity + 1,
         ElongationGainingMultiplicityIndex
       );
@@ -3307,13 +3307,13 @@ void PartFraction::applySzenesVergneFormula(
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     tempFrac.assign(*this);
     tempFrac.RelevanceIsComputed = false;
-    tempFrac[GainingMultiplicityIndex].AddMultiplicity(1, ElongationGainingMultiplicityIndex);
-    OnePartialFractionDenominator& currentFrac = tempFrac[theSelectedIndices[i]];
+    tempFrac.denominator[GainingMultiplicityIndex].AddMultiplicity(1, ElongationGainingMultiplicityIndex);
+    OnePartialFractionDenominator& currentFrac = tempFrac.denominator[theSelectedIndices[i]];
     int LargestElongation = currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(- 1, LargestElongation);
     tempM.makeOne();
     for (int j = 0; j < i; j ++) {
-      int tempElongation = (*this)[theSelectedIndices[j]].GetLargestElongation();
+      int tempElongation = this->denominator[theSelectedIndices[j]].GetLargestElongation();
       for (int k = 0; k < theDim; k ++) {
         Rational incomingPower = startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
         tempM.multiplyByVariable(k, incomingPower);
@@ -3339,8 +3339,8 @@ void PartFraction::decomposeAMinusNB(
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> AminusNbetaPoly, commonPoly;
   this->GetAlphaMinusNBetaPoly(owner, indexA, indexB, n, AminusNbetaPoly);
-  int powerA = (*this)[indexA].Multiplicities[0];
-  int powerB = (*this)[indexB].Multiplicities[0];
+  int powerA = this->denominator[indexA].Multiplicities[0];
+  int powerB = this->denominator[indexB].Multiplicities[0];
   output.makeZero();
   this->PrepareFraction(indexA, indexB, indexAminusNB, true, tempFrac, AminusNbetaPoly, commonPoly);
   for (int i = powerB; i >= 1; i --) {
@@ -3349,8 +3349,8 @@ void PartFraction::decomposeAMinusNB(
     output.addMonomial(tempFrac, commonPoly);
     commonPoly /= tempInt;
     if (i > 1) {
-      tempFrac[indexAminusNB].AddMultiplicity(1, 1);
-      tempFrac[indexB].AddMultiplicity(- 1, 1);
+      tempFrac.denominator[indexAminusNB].AddMultiplicity(1, 1);
+      tempFrac.denominator[indexB].AddMultiplicity(- 1, 1);
       commonPoly *= AminusNbetaPoly;
     }
   }
@@ -3361,22 +3361,22 @@ void PartFraction::decomposeAMinusNB(
     output.addMonomial(tempFrac, commonPoly);
     commonPoly /= tempInt;
     if (i > 1) {
-      tempFrac[indexAminusNB].AddMultiplicity(1, 1);
-      tempFrac[indexA].AddMultiplicity(- 1, 1);
+      tempFrac.denominator[indexAminusNB].AddMultiplicity(1, 1);
+      tempFrac.denominator[indexA].AddMultiplicity(- 1, 1);
     }
   }
 }
 
 bool PartFraction::DecreasePowerOneFrac(int index, int increment) {
-  this->theObjects[index].AddMultiplicity(- increment, 1);
+  this->denominator[index].AddMultiplicity(- increment, 1);
   this->ComputeIndicesNonZeroMults();
   return true;
 }
 
 void PartFraction::ComputeIndicesNonZeroMults() {
   this->IndicesNonZeroMults.size = 0;
-  for (int i = 0; i < this->size; i ++) {
-    if ((*this)[i].Multiplicities.size > 0) {
+  for (int i = 0; i < this->denominator.size; i ++) {
+    if (this->denominator[i].Multiplicities.size > 0) {
       this->IndicesNonZeroMults.addOnTop(i);
     }
   }
@@ -3485,10 +3485,10 @@ PartFraction::PartFraction() {
 void PartFraction::initialize(int numRoots) {
   this->IndicesNonZeroMults.reserve(numRoots);
   this->IndicesNonZeroMults.size = 0;
-  this->setSize(numRoots);
-  for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i].Elongations.setSize(0);
-    this->theObjects[i].Multiplicities.setSize(0);
+  this->denominator.setSize(numRoots);
+  for (int i = 0; i < this->denominator.size; i ++) {
+    this->denominator[i].Elongations.setSize(0);
+    this->denominator[i].Multiplicities.setSize(0);
   }
 }
 
@@ -3497,18 +3497,18 @@ PartFraction::~PartFraction() {
 
 unsigned int PartFraction::hashFunction() const {
   unsigned int result = 0;
-  for (int i = 0; i < this->size; i ++) {
-    result += someRandomPrimes[i] * this->theObjects[i].hashFunction();
+  for (int i = 0; i < this->denominator.size; i ++) {
+    result += someRandomPrimes[i] * this->denominator[i].hashFunction();
   }
   return result;
 }
 
 bool PartFraction::operator==(const PartFraction& right) const {
-  if (this->size != right.size) {
+  if (this->denominator.size != right.denominator.size) {
     return false;
   }
-  for (int i = 0; i < this->size; i ++) {
-    if (!(this->theObjects[i] == right[i])) {
+  for (int i = 0; i < this->denominator.size; i ++) {
+    if (!(this->denominator[i] == right.denominator[i])) {
       return false;
     }
   }
@@ -3521,7 +3521,7 @@ void PartFraction::operator=(const PartFraction& right) {
 
 int PartFractions::SizeWithoutDebugString() {
   int Accum = 0;
-  Accum += this->theMonomials.SizeWithoutObjects();
+  Accum += this->theMonomials.sizeWithoutObjects();
   for (int i = 0; i < this->size(); i ++) {
     Accum += (*this)[i].SizeWithoutDebugString();
   }
@@ -3704,11 +3704,11 @@ bool PartFraction::initFromRoots(PartFractions& owner, Vectors<Rational>& input)
   owner.startingVectors = input;
   this->initialize(owner.startingVectors.size);
   for (int i = 0; i < owner.startingVectors.size; i ++) {
-    this->theObjects[i].initialize();
+    this->denominator[i].initialize();
   }
   for (int i = 0; i < input.size; i ++) {
     int index = owner.getIndex(input[i]);
-    this->theObjects[index].AddMultiplicity(1, 1);
+    this->denominator[index].AddMultiplicity(1, 1);
   }
   this->ComputeIndicesNonZeroMults();
   for (int i = 0; i < input.size; i ++) {
@@ -3806,7 +3806,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
     if (this->flagAnErrorHasOccurredTimeToPanic) {
 
     }
-    tempFrac.AssignDenominatorOnly(*this);
+    tempFrac.assignDenominatorOnly(*this);
     tempFrac.Coefficient.makeZero(this->Coefficient.NumVars);
     tempFrac.Coefficient.addMonomial(this->Coefficient[k], this->Coefficient.theCoeffs[k]);
     if (tempMat.RowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb)) {
@@ -3822,7 +3822,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           if (tempI<0)
             thePowers.MaxMultiplicities[i] = this->theObjects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
           else
-            thePowers.MaxMultiplicities[i] =MathRoutines::Minimum(tempI, this->theObjects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
+            thePowers.MaxMultiplicities[i] =MathRoutines::minimum(tempI, this->theObjects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
           tempRoot*=(thePowersSigned[i]*this->theObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
           tempMon-= tempRoot;
@@ -3842,13 +3842,13 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
         Rational tempDiff;
         if (this->flagAnErrorHasOccurredTimeToPanic) {
           tempFracs.initFromOtherPartFractions(owner);
-          tempFrac.AssignDenominatorOnly(*this);
+          tempFrac.assignDenominatorOnly(*this);
           tempFrac.Coefficient.makeZero(owner.AmbientDimension);
           tempFrac.Coefficient.addMonomial(this->Coefficient[k], 1);
           tempFrac.computeOneCheckSum(owner, tempDiff, owner.AmbientDimension);
         }
         for (int l = 0; l < numSummands; l ++) {
-          tempFrac.AssignDenominatorOnly(*this);
+          tempFrac.assignDenominatorOnly(*this);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             thePowers.ComputeDebugString();
           tempFrac.ReduceMonomialByMonomialModifyOneMonomial
@@ -4404,8 +4404,8 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
 }
 
 void OnePartialFractionDenominator::operator=(OnePartialFractionDenominator& right) {
-  this->Multiplicities.CopyFromLight(right.Multiplicities);
-  this->Elongations.CopyFromLight(right.Elongations);
+  this->Multiplicities = right.Multiplicities;
+  this->Elongations = right.Elongations;
 }
 
 unsigned int OnePartialFractionDenominator::hashFunction() const {
@@ -4532,11 +4532,11 @@ void OnePartialFractionDenominator::AddMultiplicity(int MultiplicityIncrement, i
   if (MultiplicityIncrement == 0) {
     return;
   }
-  int ElongationIndex = this->Elongations.IndexInList(Elongation);
+  int ElongationIndex = this->Elongations.getIndex(Elongation);
   if (ElongationIndex == - 1) {
-    this->Elongations.AddObjectOnTopLight(Elongation);
+    this->Elongations.addOnTop(Elongation);
     int tempI = 0;
-    this->Multiplicities.AddObjectOnTopLight(tempI);
+    this->Multiplicities.addOnTop(tempI);
     ElongationIndex = this->Multiplicities.size - 1;
   }
   this->Multiplicities[ElongationIndex] += MultiplicityIncrement;
@@ -4544,8 +4544,8 @@ void OnePartialFractionDenominator::AddMultiplicity(int MultiplicityIncrement, i
     global.fatal << "Multiplicity is supposed to be positive. " << global.fatal;
   }
   if (this->Multiplicities[ElongationIndex] == 0) {
-    this->Multiplicities.PopIndexSwapWithLastLight(ElongationIndex);
-    this->Elongations.PopIndexSwapWithLastLight(ElongationIndex);
+    this->Multiplicities.popIndexSwapWithLast(ElongationIndex);
+    this->Elongations.popIndexSwapWithLast(ElongationIndex);
   }
 }
 
@@ -6459,7 +6459,7 @@ std::string ElementWeylGroup::toString(FormatExpressions* theFormat) const {
 }
 
 unsigned int ElementWeylGroup::hashFunction() const {
-  int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::someRandomPrimesSize);
+  int top = MathRoutines::minimum(this->generatorsLastAppliedFirst.size, ::someRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < top; i ++) {
     result += this->generatorsLastAppliedFirst[i].hashFunction() * ::someRandomPrimes[i];
@@ -7413,8 +7413,8 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
     tempMat.multiplyOnTheLeft(matCoxeterElt);
   }
   Complex<double> theEigenValue;
-  theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
-  theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::pi() / coxeterNumber);
+  theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
@@ -7628,7 +7628,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
   }
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights = static_cast<int>((Rational(this->theGroup.getSize())).GetDoubleValue() * theDominantWeights.size);
-  estimatedNumWeights = MathRoutines::Minimum(10000, estimatedNumWeights);
+  estimatedNumWeights = MathRoutines::minimum(10000, estimatedNumWeights);
   finalWeights.reserve(estimatedNumWeights);
   finalWeights.setHashSize(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
@@ -8785,7 +8785,7 @@ void Vector<Coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<Coe
           if (theScale == 0) {
             theScale = theScalarProdInverted;
           } else if (theScalarProdInverted != 0) {
-            theScale = MathRoutines::Minimum(theScale, theScalarProdInverted);
+            theScale = MathRoutines::minimum(theScale, theScalarProdInverted);
           }
         }
       }
@@ -9039,7 +9039,7 @@ void Lattice::GetDualLattice(Lattice& output) const {
   output.Reduce();
 }
 
-bool Lattice::FindOnePreimageInLatticeOf(
+bool Lattice::findOnePreimageInLatticeOf(
   const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
 ) {
   Vectors<Rational> thisBasis;
@@ -9312,7 +9312,7 @@ void PartFraction::GetRootsFromDenominator(PartFractions& owner, Vectors<Rationa
   output.setSize(this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     output[i] = owner.startingVectors[this->IndicesNonZeroMults[i]];
-    OnePartialFractionDenominator& current = this->theObjects[this->IndicesNonZeroMults[i]];
+    OnePartialFractionDenominator& current = this->denominator[this->IndicesNonZeroMults[i]];
     if (current.Elongations.size != 1) {
       global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
@@ -9329,7 +9329,7 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
     this->MakePolynomialFromOneNormal(
       normals[i],
       theMon,
-      this->theObjects[this->IndicesNonZeroMults[i]].Multiplicities[0],
+      this->denominator[this->IndicesNonZeroMults[i]].Multiplicities[0],
       tempP
     );
     outputPolyPart *= tempP;
@@ -9991,7 +9991,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
   bool found = false;
   for (int k = 0; k < (*this)[theIndex].IndicesNonZeroMults.size; k ++) {
     int currentIndex = (*this)[theIndex].IndicesNonZeroMults[k];
-    const OnePartialFractionDenominator& currentFrac = (*this)[theIndex][currentIndex];
+    const OnePartialFractionDenominator& currentFrac = (*this)[theIndex].denominator[currentIndex];
     if (currentFrac.Elongations.size > 1) {
       found = true;
       break;
@@ -10007,7 +10007,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
   this->popMonomial(theIndex, thePF, currentCoeff);
   for (int k = 0; k < thePF.IndicesNonZeroMults.size; k ++) {
     int currentIndex = thePF.IndicesNonZeroMults[k];
-    OnePartialFractionDenominator& currentFrac = thePF[currentIndex];
+    OnePartialFractionDenominator& currentFrac = thePF.denominator[currentIndex];
     int LCMElongations = currentFrac.getLeastCommonMultipleElongations();
     tempS = this->startingVectors[currentIndex].toString();
     while (currentFrac.Elongations.size > 1) {
@@ -10223,8 +10223,8 @@ void DrawOperations::makeMeAStandardBasis(int theDim) {
   if (theDim > 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i = 0; i < theDim; i ++) {
-      this->ProjectionsEiVectors[i][0] = FloatingPoint::Sin(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
-      this->ProjectionsEiVectors[i][1] = FloatingPoint::Cos(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
+      this->ProjectionsEiVectors[i][0] = FloatingPoint::Sin(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
+      this->ProjectionsEiVectors[i][1] = FloatingPoint::Cos(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
     }
   } else if (theDim == 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
@@ -10658,9 +10658,9 @@ double DrawOperations::getAngleFromXandY(double x, double y) {
     result = FloatingPoint::Arctan(y / x);
   } else {
     if (y > 0) {
-      result = MathRoutines::Pi() / 2;
+      result = MathRoutines::pi() / 2;
     } else {
-      result = MathRoutines::Pi() / (- 2);
+      result = MathRoutines::pi() / (- 2);
     }
   }
   return result;
@@ -10754,11 +10754,11 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double newAngle = getAngleFromXandY(newX, newY);
   double AngleChange = - newAngle + oldAngle;
   double epsilon = 0.000000000001;
-  while (AngleChange > MathRoutines::Pi() / 2 + epsilon) {
-    AngleChange -= MathRoutines::Pi();
+  while (AngleChange > MathRoutines::pi() / 2 + epsilon) {
+    AngleChange -= MathRoutines::pi();
   }
-  while (AngleChange <= MathRoutines::Pi() / (- 2) - epsilon) {
-    AngleChange += MathRoutines::Pi();
+  while (AngleChange <= MathRoutines::pi() / (- 2) - epsilon) {
+    AngleChange += MathRoutines::pi();
   }
   out << "\nold angle: " << oldAngle;
   out << "\nnew angle:  " << newAngle;

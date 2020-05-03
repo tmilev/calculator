@@ -293,7 +293,7 @@ bool LittelmannPath::MinimaAreIntegral() {
   }
   for (int i = 1; i < this->Waypoints.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
-      theMinima[j] = MathRoutines::Minimum(theWeyl.GetScalarProdSimpleRoot(
+      theMinima[j] = MathRoutines::minimum(theWeyl.GetScalarProdSimpleRoot(
         this->Waypoints[i], j) * 2 / theWeyl.cartanSymmetric.elements[j][j], theMinima[j]
       );
     }
@@ -314,7 +314,7 @@ void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weight
   this->simplify();
 }
 
-std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
+std::string LittelmannPath::ElementtoStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
   std::stringstream out;
   for (int i = input.size - 1; i >= 0; i --) {
     int displayIndex = input[i];

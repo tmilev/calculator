@@ -1102,7 +1102,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringCalculatorInputFromSy
   const List<Polynomial<Coefficient> >& inputSystem
 ) {
   std::stringstream out;
-  out << "FindOneSolutionSerreLikePolynomialSystem";
+  out << "findOneSolutionSerreLikePolynomialSystem";
   if (this->flagTryDirectlySolutionOverAlgebraicClosure) {
     out << "Algebraic";
   }

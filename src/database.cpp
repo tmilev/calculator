@@ -33,28 +33,28 @@ bool Database::User::setPassword(
   return result;
 }
 
-bool Database::User::UserExists(
+bool Database::User::userExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
   if (!global.flagDatabaseCompiled) {
     comments << "No database available.";
     return false;
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::userExists");
   if (!global.flagLoggedIn) {
     return false;
   }
   JSData theUserQuery;
   theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
   List<JSData> theUsers;
-  this->owner->FindFromJSON(
+  this->owner->findFromJSON(
     DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, nullptr, &comments
   );
   return theUsers.size > 0;
 }
 
-bool Database::User::UserDefaultHasInstructorRights() {
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
+bool Database::User::userDefaultHasInstructorRights() {
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::userDefaultHasInstructorRights");
   if (global.userDefaultHasAdminRights())
     return true;
   if (!global.flagDatabaseCompiled) {
@@ -69,11 +69,11 @@ bool Database::User::UserDefaultHasInstructorRights() {
     global.userDefault.userRole == UserCalculator::Roles::teacher;
 }
 
-bool Database::User::LogoutViaDatabase() {
+bool Database::User::logoutViaDatabase() {
   if (!global.flagDatabaseCompiled) {
     return true;
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::logoutViaDatabase");
   if (!global.flagLoggedIn) {
     return true;
   }
@@ -122,7 +122,7 @@ bool QueryExact::isEmpty() const {
 JSData QueryExact::toJSON() const {
   JSData result;
   JSData encodedKeys;
-  if (!Database::ConvertJSONToJSONMongo(this->value, encodedKeys)) {
+  if (!Database::convertJSONToJSONMongo(this->value, encodedKeys)) {
     global << Logger::red
     << "Failed to convert find query to mongoDB encoding. " << Logger::endL;
     result.theType = JSData::token::tokenNull;
@@ -138,7 +138,7 @@ std::string QueryExact::getLabelFromNestedLabels(
 ) {
   std::stringstream out;
   for (int i = 0; i < nestedLabels.size; i ++) {
-    std::string currentKey = Database::ConvertStringToMongoKeyString(
+    std::string currentKey = Database::convertStringToMongoKeyString(
       nestedLabels[i]
     );
     out << currentKey;
@@ -159,34 +159,34 @@ std::string QueryExact::getCollectionAndLabel() const {
   return out.str();
 }
 
-void QueryExact::SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue) {
+void QueryExact::setLabelsValue(const List<std::string>& labels, const std::string& desiredValue) {
   this->value = desiredValue;
   this->nestedLabels = labels;
 }
 
-void QueryExact::SetLabelValue(const std::string& label, const std::string& desiredValue) {
+void QueryExact::setLabelValue(const std::string& label, const std::string& desiredValue) {
   this->value = desiredValue;
   this->nestedLabels.setSize(1);
   this->nestedLabels[0] = label;
 }
 
-bool Database::ConvertJSONToJSONMongo(
+bool Database::convertJSONToJSONMongo(
   const JSData& input, JSData& output, std::stringstream* commentsOnFailure
 ) {
-  return Database::ConvertJSONToJSONEncodeKeys(
+  return Database::convertJSONToJSONEncodeKeys(
     input, output, 0, true, commentsOnFailure
   );
 }
 
-bool Database::ConvertJSONMongoToJSON(
+bool Database::convertJSONMongoToJSON(
   const JSData& input, JSData& output, std::stringstream* commentsOnFailure
 ) {
-  return Database::ConvertJSONToJSONEncodeKeys(
+  return Database::convertJSONToJSONEncodeKeys(
     input, output, 0, false, commentsOnFailure
   );
 }
 
-bool Database::ConvertJSONToJSONEncodeKeys(
+bool Database::convertJSONToJSONEncodeKeys(
   const JSData& input,
   JSData& output,
   int recursionDepth,
@@ -205,7 +205,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
   if (input.theType == JSData::token::tokenArray) {
     for (int i = 0; i < input.theList.size; i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONEncodeKeys(
+      if (!Database::convertJSONToJSONEncodeKeys(
         input.theList[i],
         nextItem,
         recursionDepth + 1,
@@ -221,7 +221,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
   if (input.theType == JSData::token::tokenObject) {
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONEncodeKeys(
+      if (!Database::convertJSONToJSONEncodeKeys(
         input.objects.theValues[i],
         nextItem,
         recursionDepth + 1,
@@ -232,7 +232,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
       }
       std::string theKey;
       if (encodeOverDecode) {
-        theKey = Database::ConvertStringToMongoKeyString(
+        theKey = Database::convertStringToMongoKeyString(
           input.objects.theKeys[i]
         );
       } else {
@@ -246,7 +246,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
   return true;
 }
 
-std::string Database::ConvertStringToMongoKeyString(
+std::string Database::convertStringToMongoKeyString(
   const std::string& input
 ) {
   std::stringstream out;
@@ -265,43 +265,43 @@ std::string Database::ConvertStringToMongoKeyString(
   return out.str();
 }
 
-bool Database::FindOneWithOptions(
+bool Database::findOneWithOptions(
   const QueryExact &query,
   const QueryResultOptions &options,
   JSData &output,
   std::stringstream *commentsOnFailure,
   std::stringstream *commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("Database::FindOneWithOptions");
+  MacroRegisterFunctionWithName("Database::findOneWithOptions");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Database::FindOneWithOptions failed. "
+      *commentsOnFailure << "Database::findOneWithOptions failed. "
       << DatabaseStrings::errorDatabaseDisableD;
     }
     return false;
   }
   (void) commentsGeneralNonSensitive;
   if (global.flagDatabaseCompiled) {
-    return Database::get().mongoDB.FindOneWithOptions(
+    return Database::get().mongoDB.findOneWithOptions(
       query, options, output, commentsOnFailure, commentsGeneralNonSensitive
     );
   }
   (void) output;
   (void) options;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::FindOneWithOptions: project compiled without mongoDB support. ";
+    *commentsOnFailure << "Database::findOneWithOptions: project compiled without mongoDB support. ";
   }
   return false;
 }
 
-bool Database::FindOne(
+bool Database::findOne(
   const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure
 ) {
   QueryResultOptions emptyOptions;
-  return this->FindOneWithOptions(query,emptyOptions, output, commentsOnFailure, nullptr);
+  return this->findOneWithOptions(query,emptyOptions, output, commentsOnFailure, nullptr);
 }
 
-bool Database::UpdateOne(
+bool Database::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
@@ -313,50 +313,50 @@ bool Database::UpdateOne(
     return false;
   }
   if (global.flagDatabaseCompiled) {
-    return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
+    return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return this->theFallBack.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
+    return this->theFallBack.updateOne(findQuery, dataToMerge, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::UpdateOne fail: no DB compiled and fallback is disabled. ";
+    *commentsOnFailure << "Database::updateOne fail: no DB compiled and fallback is disabled. ";
   }
   return false;
 }
 
-bool Database::FindOneFromSome(
+bool Database::findOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDatabaseCompiled) {
-    return this->mongoDB.FindOneFromSome(findOrQueries, output, commentsOnFailure);
+    return this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return this->theFallBack.FindOneFromSome(findOrQueries, output, commentsOnFailure);
+    return this->theFallBack.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Database::FindOneFromSome failed. "
+      *commentsOnFailure << "Database::findOneFromSome failed. "
       << DatabaseStrings::errorDatabaseDisableD;
     }
     return false;
   }
 }
 
-bool Database::DeleteDatabase(std::stringstream* commentsOnFailure) {
+bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   if (global.flagDatabaseCompiled) {
-    return this->mongoDB.DeleteDatabase(commentsOnFailure);
+    return this->mongoDB.deleteDatabase(commentsOnFailure);
   } else {
-    return this->theFallBack.DeleteDatabase(commentsOnFailure);
+    return this->theFallBack.deleteDatabase(commentsOnFailure);
   }
 }
 
-void Database::CreateHashIndex(
+void Database::createHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
-  MacroRegisterFunctionWithName("Database::CreateHashIndex");
+  MacroRegisterFunctionWithName("Database::createHashIndex");
   if (global.flagDatabaseCompiled) {
-    this->mongoDB.CreateHashIndex(collectionName, theKey);
+    this->mongoDB.createHashIndex(collectionName, theKey);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    this->theFallBack.CreateHashIndex(collectionName, theKey);
+    this->theFallBack.createHashIndex(collectionName, theKey);
   }
 }
 
@@ -368,13 +368,13 @@ bool Database::initializeWorker() {
   if (global.flagDatabaseCompiled) {
     this->mongoDB.initialize();
   }
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelProblemDataJSON + "." + DatabaseStrings::labelProblemFileName);
-  this->CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemFileName);
-  this->CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
+  this->createHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
+  this->createHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
+  this->createHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
+  this->createHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
+  this->createHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelProblemDataJSON + "." + DatabaseStrings::labelProblemFileName);
+  this->createHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemFileName);
+  this->createHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
   this->flagInitializedWorker = true;
   return true;
 }
@@ -632,14 +632,14 @@ bool UserCalculator::loadFromDatabase(std::stringstream* commentsOnFailure, std:
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
   double startTime = global.getElapsedSeconds();
-  if (!Database::get().theUser.LoadUserInfo(*this, commentsOnFailure)) {
+  if (!Database::get().theUser.loadUserInformation(*this, commentsOnFailure)) {
     return false;
   }
   this->computeCourseInformation();
   if (this->deadlineSchema != "") {
     QueryExact findDeadlines(DatabaseStrings::tableDeadlines, DatabaseStrings::labelDeadlinesSchema, this->deadlineSchema);
     JSData outDeadlinesQuery;
-    if (Database::get().FindOne(
+    if (Database::get().findOne(
       findDeadlines,
       outDeadlinesQuery,
       commentsGeneral
@@ -650,7 +650,7 @@ bool UserCalculator::loadFromDatabase(std::stringstream* commentsOnFailure, std:
   if (this->problemWeightSchema != "") {
     QueryExact findProblemWeights(DatabaseStrings::tableProblemWeights, DatabaseStrings::labelProblemWeightsSchema, this->problemWeightSchema);
     JSData outProblemWeightsQuery;
-    if (Database::get().FindOne(
+    if (Database::get().findOne(
       findProblemWeights, outProblemWeightsQuery, commentsGeneral
     )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeight];
@@ -878,7 +878,7 @@ bool UserCalculator::resetAuthenticationToken(std::stringstream* commentsOnFailu
   QuerySet setUser;
   setUser.value[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser.value[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  Database::get().UpdateOne(findUser, setUser, commentsOnFailure);
+  Database::get().updateOne(findUser, setUser, commentsOnFailure);
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
 }
@@ -899,7 +899,7 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
   );
   QuerySet setUser;
   setUser.value[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
-  return Database::get().UpdateOne(
+  return Database::get().updateOne(
     findUser, setUser, commentsOnFailure
   );
 }
@@ -947,27 +947,27 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
   return this->selectedRowFieldsUnsafe[theIndex];
 }
 
-bool Database::User::SendActivationEmail(
+bool Database::User::sendActivationEmail(
   const std::string& emailList,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
+  MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
   List<std::string> theEmails;
   StringRoutines::stringSplitDefaultDelimiters(emailList, theEmails);
-  return Database::User::SendActivationEmail(
+  return Database::User::sendActivationEmail(
     theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
 }
 
-bool Database::User::SendActivationEmail(
+bool Database::User::sendActivationEmail(
   const List<std::string>& theEmails,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
+  MacroRegisterFunctionWithName("DatabaseRoutines::sendActivationEmail");
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < theEmails.size; i ++) {
@@ -1137,7 +1137,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(const JSData& theData, std
 bool UserCalculator::exists(std::stringstream* comments) {
   MacroRegisterFunctionWithName("UserCalculator::exists");
   JSData notUsed;
-  return Database::get().FindOneFromSome(
+  return Database::get().findOneFromSome(
     this->getFindMeFromUserNameQuery(), notUsed, comments
   );
 }
@@ -1152,7 +1152,7 @@ bool UserCalculator::computeAndStoreActivationToken(std::stringstream* commentsO
   QueryExact findUserQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   QuerySet updateUser;
   updateUser.value[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!Database::get().UpdateOne(
+  if (!Database::get().updateOne(
     findUserQuery, updateUser, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1189,7 +1189,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   );
   QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email);
   JSData emailStat;
-  Database::get().FindOne(
+  Database::get().findOne(
     findEmail, emailStat, commentsOnFailure
   );
   std::string lastEmailTime, emailCountForThisEmail;
@@ -1223,9 +1223,9 @@ bool UserCalculator::computeAndStoreActivationStats(
   QuerySet updateUser;
   updateUser.value[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.toString();
   if (this->userId != "") {
-    findQueryInUsers.SetLabelValue(DatabaseStrings::labelUserId, this->userId);
+    findQueryInUsers.setLabelValue(DatabaseStrings::labelUserId, this->userId);
   } else if (this->username != "") {
-    findQueryInUsers.SetLabelValue(DatabaseStrings::labelUsername, this->username);
+    findQueryInUsers.setLabelValue(DatabaseStrings::labelUsername, this->username);
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -1233,7 +1233,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     }
     return false;
   }
-  if (!Database::get().UpdateOne(
+  if (!Database::get().updateOne(
     findQueryInUsers, updateUser, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1246,7 +1246,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   emailStatQuery.value[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.toString();
   emailStatQuery.value[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery.value[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
-  if (!Database::get().UpdateOne(
+  if (!Database::get().updateOne(
     findEmail, emailStatQuery, commentsOnFailure
   )) {
     return false;
@@ -1291,12 +1291,12 @@ bool UserCalculator::storeProblemData(
   QuerySet update;
   update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.storeJSON();
-  return Database::get().UpdateOneFromSome(
+  return Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure
   );
 }
 
-bool Database::User::AddUsersFromEmails(
+bool Database::User::addUsersFromEmails(
   const std::string& emailList,
   const std::string& userPasswords,
   std::string& userRole,
@@ -1305,7 +1305,7 @@ bool Database::User::AddUsersFromEmails(
   int& outputNumNewUsers,
   int& outputNumUpdatedUsers
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+  MacroRegisterFunctionWithName("DatabaseRoutines::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000; //100 seconds
   global.millisecondsReplyAfterComputation = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
@@ -1345,7 +1345,7 @@ bool Database::User::AddUsersFromEmails(
     List<QueryExact> findUser;
     findUser.addOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, currentUser.username));
     findUser.addOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, currentUser.email));
-    if (!this->owner->FindOneFromSome(
+    if (!this->owner->findOneFromSome(
       findUser, currentUserData.value, &comments
     )) {
       if (!currentUser.exists(&comments)) {
@@ -1358,14 +1358,14 @@ bool Database::User::AddUsersFromEmails(
         }
       }
       if (isEmail) {
-        this->owner->UpdateOneFromSome(findUser, currentUserData, &comments);
+        this->owner->updateOneFromSome(findUser, currentUserData, &comments);
       }
     } else {
       outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
       QuerySet setUser;
       setUser.value = currentUser.toJSON();
-      if (!this->owner->UpdateOneFromSome(
+      if (!this->owner->updateOneFromSome(
         findUser, setUser, &comments
       )) {
         result = false;
@@ -1387,7 +1387,7 @@ bool Database::User::AddUsersFromEmails(
       }
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      this->owner->UpdateOneFromSome(findUser, activatedJSON, &comments);
+      this->owner->updateOneFromSome(findUser, activatedJSON, &comments);
       if (currentUser.email != "") {
         currentUser.computeAndStoreActivationStats(&comments, &comments);
       }
@@ -1401,7 +1401,7 @@ bool Database::User::AddUsersFromEmails(
     if (global.userDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
-    if (!Database::User::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
+    if (!Database::User::sendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
       result = false;
     }
   }
@@ -1576,7 +1576,7 @@ EmailRoutines::EmailRoutines() {
   this->smtpWithPort = "smtp.gmail.com:587";
 }
 
-bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
+bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   UserCalculatorData& theUseR,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -1586,9 +1586,9 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) theUseR;
   (void) commentsGeneral;
   if (!global.flagDatabaseCompiled) {
-    return Database::User::LoginNoDatabaseSupport(theUseR, commentsGeneral);
+    return Database::User::loginNoDatabaseSupport(theUseR, commentsGeneral);
   }
-  MacroRegisterFunctionWithName("Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded");
+  MacroRegisterFunctionWithName("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   if (userWrapper.enteredGoogleToken == "") {
@@ -1642,7 +1642,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   return true;
 }
 
-bool Database::User::LoginNoDatabaseSupport(
+bool Database::User::loginNoDatabaseSupport(
   UserCalculatorData& theUser, std::stringstream* commentsGeneral
 ) {
   if (global.flagDatabaseCompiled) {
@@ -1676,14 +1676,14 @@ bool Database::User::LoginNoDatabaseSupport(
   return true;
 }
 
-bool Database::User::LoginViaDatabase(
+bool Database::User::loginViaDatabase(
   UserCalculatorData& theUseR,
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return Database::User::LoginNoDatabaseSupport(theUseR, commentsOnFailure);
+    return Database::User::loginNoDatabaseSupport(theUseR, commentsOnFailure);
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::loginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   if (userWrapper.authenticate(commentsOnFailure)) {
@@ -1780,7 +1780,7 @@ bool UserCalculator::storeToDatabase(bool doSetPassword, std::stringstream* comm
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->toJSON();
-  return Database::get().UpdateOne(
+  return Database::get().updateOne(
     findUser, setUser, commentsOnFailure
   );
 }

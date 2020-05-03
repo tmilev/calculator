@@ -325,7 +325,7 @@ Coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(
 ) {
   Coefficient acc = 0;
   for (int i = 0; i < X1.size; i ++) {
-    acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasses[i].size;
+    acc += MathRoutines::complexConjugate(X1[i]) * X2[i] * this->conjugacyClasses[i].size;
     if (this->conjugacyClasses[i].size == 0) {
       global.fatal << "Error: conjugacy class size is zero." << global.fatal;
     }
@@ -789,7 +789,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   }
   Vector<Coefficient> currentRoot;
   ElementWeylGroupAutomorphisms currentElt;
-  int numElementsToReserve = MathRoutines::Minimum(UpperLimitNumElements, 1000000);
+  int numElementsToReserve = MathRoutines::minimum(UpperLimitNumElements, 1000000);
   output.setExpectedSize(numElementsToReserve);
   ProgressReport theReport(3000, GlobalVariables::Response::ReportType::general);
   SimpleReflectionOrOuterAutomorphism theGen;
@@ -929,7 +929,7 @@ bool WeylGroupData::generateOrbit(
   output.setExpectedSize(expectedOrbitSize);
   if (outputSubset != nullptr) {
     if (UpperLimitNumElements > 0) {
-      expectedOrbitSize = MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
+      expectedOrbitSize = MathRoutines::minimum(UpperLimitNumElements, expectedOrbitSize);
     }
     currentElt.makeIdentity(*this);
     outputSubset->setExpectedSize(expectedOrbitSize);
@@ -1462,7 +1462,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunc
     }
     for (int j = 0; j < outputMat.numberOfRows; j ++) {
       for (int k = 0; k < outputMat.numberOfColumns; k ++) {
-        outputMat(j, k) += this->classFunctionMatrices[cci](j, k) * MathRoutines::ComplexConjugate(inputChar[cci]);
+        outputMat(j, k) += this->classFunctionMatrices[cci](j, k) * MathRoutines::complexConjugate(inputChar[cci]);
       }
     }
   }

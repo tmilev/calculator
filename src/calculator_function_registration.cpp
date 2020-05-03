@@ -4985,7 +4985,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "FindOneSolutionSerreLikePolynomialSystem",
+    "findOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
     "",
     "Attempts to heuristically solve a system "
@@ -5010,7 +5010,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Therefore a solution over the complex numbers "
     "exists. However, no such solution was found. <br>"
     "Outcome 4. A solution was found and is presented to the user.",
-    "FindOneSolutionSerreLikePolynomialSystem{}("
+    "findOneSolutionSerreLikePolynomialSystem{}("
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -5032,17 +5032,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystem",
+    "findOneSolutionSerreLikePolynomialSystem",
     innerStandard
   );
   this->addOperationHandler(
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
+    "findOneSolutionSerreLikePolynomialSystemUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit,
     "",
-    "Same as FindOneSolutionSerreLikePolynomialSystem "
+    "Same as findOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
     "to the number of polynomial computations that can be carried out. ",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
+    "findOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -5064,32 +5064,32 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
+    "findOneSolutionSerreLikePolynomialSystemUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
+    "findOneSolutionSerreLikePolynomialSystemAlgebraic",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic,
     "",
-    "Same as FindOneSolutionSerreLikePolynomialSystem "
+    "Same as findOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
+    "findOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
+    "findOneSolutionSerreLikePolynomialSystemAlgebraic",
     innerStandard
   );
   this->addOperationHandler(
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit,
     "",
-    "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic "
+    "Same as findOneSolutionSerreLikePolynomialSystemAlgebraic "
     "but the first argument gives upper limits to the number of "
     "polynomial computations that can be carried out.",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
+    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
     "(10000, x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
@@ -8438,7 +8438,7 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
   MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
   this->atomsNotInterpretedAsFunctions.setExpectedSize(30);
 
-  this->addKnownDoubleConstant("\\pi", MathRoutines::Pi());
+  this->addKnownDoubleConstant("\\pi", MathRoutines::pi());
   this->addKnownDoubleConstant("e", MathRoutines::E());
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("\\int");
   this->atomsNotInterpretedAsFunctions.addOnTopNoRepetitionMustBeNew("i");

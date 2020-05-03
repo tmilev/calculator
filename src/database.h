@@ -15,8 +15,8 @@ class QueryExact {
   QueryExact();
   QueryExact(const std::string& desiredCollection, const std::string& label, const std::string& desiredValue);
   QueryExact(const std::string& desiredCollection, const List<std::string>& desiredLabels, const std::string& desiredValue);
-  void SetLabelValue(const std::string& label, const std::string& desiredValue);
-  void SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
+  void setLabelValue(const std::string& label, const std::string& desiredValue);
+  void setLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
   std::string getCollectionAndLabel() const;
   std::string getLabel() const;
   static std::string getLabelFromNestedLabels(const List<std::string>& nestedLabels);
@@ -30,7 +30,7 @@ public:
   JSData value;
   QuerySet();
   QuerySet(const JSData& inputValue);
-  bool ToJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
+  bool toJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   bool ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   std::string toStringDebug() const;
 };
@@ -59,18 +59,18 @@ public:
   bool initializeServer();
   bool initializeWorker();
   bool checkInitialization();
-  void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
+  void createHashIndex(const std::string& collectionName, const std::string& theKey);
 
   class User {
   public:
     Database *owner;
-    bool LogoutViaDatabase();
-    bool LoginViaDatabase(
+    bool logoutViaDatabase();
+    bool loginViaDatabase(
       UserCalculatorData& theUseR,
       std::stringstream* commentsOnFailure
     );
-    bool LoginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
-    bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
+    bool loginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
+    bool loginViaGoogleTokenCreateNewAccountIfNeeded(
       UserCalculatorData& theUseR,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneral,
@@ -82,25 +82,25 @@ public:
       std::string& outputAuthenticationToken,
       std::stringstream& comments
     );
-    bool UserExists(const std::string& inputUsername, std::stringstream& comments);
-    bool UserDefaultHasInstructorRights();
+    bool userExists(const std::string& inputUsername, std::stringstream& comments);
+    bool userDefaultHasInstructorRights();
 
     //TODO(tmilev): refactor down to database-only operations.
-    static bool SendActivationEmail(
+    static bool sendActivationEmail(
       const std::string& emailList,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneral,
       std::stringstream* commentsGeneralSensitive
     );
     //TODO(tmilev): refactor down to database-only operations.
-    static bool SendActivationEmail(
+    static bool sendActivationEmail(
       const List<std::string>& theEmails,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneral,
       std::stringstream* commentsGeneralSensitive
     );
     //TODO(tmilev): refactor down to database-only operations.
-    bool AddUsersFromEmails(
+    bool addUsersFromEmails(
       const std::string& emailList,
       const std::string& userPasswords,
       std::string& userRole,
@@ -109,7 +109,7 @@ public:
       int& outputNumNewUsers,
       int& outputNumUpdatedUsers
     );
-    bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
+    bool loadUserInformation(UserCalculatorData& output, std::stringstream* commentsOnFailure);
     User();
   };
   User theUser;
@@ -135,13 +135,13 @@ public:
       std::string collectionAndLabel();
     };
     MapReferences<std::string, Database::FallBack::Index, MathRoutines::hashString> indices;
-    bool DeleteDatabase(std::stringstream* commentsOnFailure);
-    bool UpdateOne(
+    bool deleteDatabase(std::stringstream* commentsOnFailure);
+    bool updateOne(
       const QueryExact& findQuery,
       const QuerySet &updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
-    bool FindOne(
+    bool findOne(
       const QueryExact& query,
       JSData& output,
       std::stringstream* commentsOnFailure
@@ -150,33 +150,32 @@ public:
     // When the element isn't found but otherwise there were
     // no problems with the query, true will be returned with
     // output set to [].
-    bool FindIndexOneNoLocksMinusOneNotFound(
+    bool findIndexOneNoLocksMinusOneNotFound(
       const QueryExact& query,
       int& output,
       std::stringstream* commentsOnNotFound
     );
-    bool UpdateOneNoLocks(
+    bool updateOneNoLocks(
       const QueryExact& findQuery,
       const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
-    bool FetchCollectionNames(
+    bool fetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
-    bool CheckDatabaseRead();
-    void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
-    bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
-    bool StoreDatabase(std::stringstream* commentsOnFailure);
-    bool ReadDatabase(std::stringstream* commentsOnFailure);
-    bool ReadAndIndexDatabase(std::stringstream* commentsOnFailure);
-    void IndexOneRecord(const JSData& entry, int32_t row, const std::string& collection);
+    void createHashIndex(const std::string& collectionName, const std::string& theKey);
+    bool hasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
+    bool storeDatabase(std::stringstream* commentsOnFailure);
+    bool readDatabase(std::stringstream* commentsOnFailure);
+    bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
+    void indexOneRecord(const JSData& entry, int32_t row, const std::string& collection);
     void initialize();
-    bool FindOneFromSome(
+    bool findOneFromSome(
       const List<QueryExact>& findOrQueries,
       JSData& output,
       std::stringstream* commentsOnFailure
     );
-    std::string ToStringIndices() const;
+    std::string toStringIndices() const;
     FallBack();
   };
   FallBack theFallBack;
@@ -195,19 +194,19 @@ public:
     std::string ConvertErrorToString(void* bson_error_t_pointer);
     bool initialize();
     void shutdown();
-    bool DeleteDatabase(std::stringstream *commentsOnFailure);
-    void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
-    bool FetchCollectionNames(
+    bool deleteDatabase(std::stringstream *commentsOnFailure);
+    void createHashIndex(const std::string& collectionName, const std::string& theKey);
+    bool fetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
-    static bool FindOneWithOptions(
+    static bool findOneWithOptions(
       const QueryExact& query,
       const QueryResultOptions& options,
       JSData& output,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneralNonSensitive = nullptr
     );
-    static bool FindOneFromSome(
+    static bool findOneFromSome(
       const List<QueryExact>& findOrQueries,
       JSData& output,
       std::stringstream* commentsOnFailure
@@ -217,17 +216,17 @@ public:
       std::string& output,
       std::stringstream* commentsOnFailure = nullptr
     );
-    bool UpdateOneFromSome(
+    bool updateOneFromSome(
       const List<QueryExact>& findOrQueries,
       const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
-    bool UpdateOne(
+    bool updateOne(
       const QueryExact& findQuery,
       const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
-    bool UpdateOneFromQueryString(
+    bool updateOneFromQueryString(
       const std::string& collectionName,
       const std::string& findQuery,
       const std::string& updateQuery,
@@ -237,7 +236,7 @@ public:
     ~Mongo();
   };
   Mongo mongoDB;
-  static bool FindFromString(
+  static bool findFromString(
     const std::string& collectionName,
     const std::string& findQuery,
     List<JSData>& output,
@@ -245,7 +244,7 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool FindFromJSON(
+  bool findFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
     List<JSData>& output,
@@ -253,7 +252,7 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool FindFromJSONWithProjection(
+  static bool findFromJSONWithProjection(
     const std::string& collectionName,
     const JSData& findQuery,
     List<JSData>& output,
@@ -262,7 +261,7 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool FindFromJSONWithOptions(
+  static bool findFromJSONWithOptions(
     const std::string& collectionName,
     const JSData& findQuery,
     List<JSData>& output,
@@ -272,34 +271,34 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  bool FindOneWithOptions(
+  bool findOneWithOptions(
     const QueryExact& query,
     const QueryResultOptions& options,
     JSData& output,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  bool FindOne(
+  bool findOne(
     const QueryExact& query,
     JSData& output,
     std::stringstream* commentsOnFailure
   );
-  bool FindOneFromSome(
+  bool findOneFromSome(
     const List<QueryExact>& alternatives,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool UpdateOne(
+  bool updateOne(
     const QueryExact& findQuery,
     const QuerySet &dataToMerge,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool UpdateOneFromSome(
+  bool updateOneFromSome(
     const List<QueryExact>& findOrQueries,
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
+  bool fetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
   static bool FetchTable(
     const std::string& tableName,
     List<std::string>& outputLabels,
@@ -307,20 +306,20 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
-  bool DeleteOneEntryById(
+  bool deleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  bool deleteOneEntryById(
     const QueryExact& findQuery,
     std::stringstream* commentsOnFailure
   );
-  static bool DeleteOneEntryUnsetUnsecure(
+  static bool deleteOneEntryUnsetUnsecure(
     const QueryExact& findQuery,
     List<std::string>& selector,
     std::stringstream* commentsOnFailure
   );
-  std::string ToHtmlDatabaseCollection(const std::string& currentTable);
-  static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
-  JSData ToJSONDatabaseCollection(const std::string& currentTable);
-  JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
+  std::string toHtmlDatabaseCollection(const std::string& currentTable);
+  static JSData toJSONFetchItem(const List<std::string>& labelStrings);
+  JSData toJSONDatabaseCollection(const std::string& currentTable);
+  JSData toJSONDatabaseFetch(const std::string& incomingLabels);
   static bool getLabels(
     const JSData& fieldEntries,
     List<std::string>& theLabels,
@@ -337,33 +336,33 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
-  static QueryResultOptions GetStandardProjectors(const std::string& collectionName);
-  static std::string ConvertStringToMongoKeyString(const std::string& input);
-  static bool ConvertJSONMongoToJSON(
+  static QueryResultOptions getStandardProjectors(const std::string& collectionName);
+  static std::string convertStringToMongoKeyString(const std::string& input);
+  static bool convertJSONMongoToJSON(
     const JSData& input,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool ConvertJSONToJSONMongo(
+  static bool convertJSONToJSONMongo(
     const JSData& input,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool ConvertJSONToJSONEncodeKeys(
+  static bool convertJSONToJSONEncodeKeys(
     const JSData& input,
     JSData& output,
     int recursionDepth,
     bool encodeOverDecode,
     std::stringstream* commentsOnFailure
   );
-  bool DeleteDatabase(std::stringstream* commentsOnFailure);
+  bool deleteDatabase(std::stringstream* commentsOnFailure);
   class Test {
   public:
-    void SetUp();
+    void setUp();
     static bool all();
-    bool DeleteDatabase();
-    bool AdminAccountCreation();
-    void TearDown();
+    bool deleteDatabase();
+    bool adminAccountCreation();
+    void tearDown();
     Test();
     ~Test();
   };

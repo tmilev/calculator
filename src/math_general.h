@@ -128,7 +128,7 @@ public:
   void multiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const Coefficient& thePower);
   void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const Coefficient& thePower);
   unsigned int hashFunction() const {
-    int top = MathRoutines::Minimum(someRandomPrimesSize, this->generatorsIndices.size);
+    int top = MathRoutines::minimum(someRandomPrimesSize, this->generatorsIndices.size);
     unsigned int result = 0;
     for (int i = 0; i < top; i ++) {
       result += someRandomPrimes[i] * this->generatorsIndices[i] +
@@ -320,7 +320,7 @@ public:
   // Two such different representation may differ by extra entries filled in with zeroes.
   static unsigned int hashFunction(const MonomialP& input) {
     unsigned int result = 0;
-    int numCycles = MathRoutines::Minimum(input.monBody.size, someRandomPrimesSize);
+    int numCycles = MathRoutines::minimum(input.monBody.size, someRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
       result += input.monBody[i].hashFunction();
     }
@@ -1364,8 +1364,8 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
 #endif
     }
   }
-  int firstInvalidRow = MathRoutines::Minimum(this->numberOfRows, r);
-  int firstInvalidCol = MathRoutines::Minimum(this->numberOfColumns, c);
+  int firstInvalidRow = MathRoutines::minimum(this->numberOfRows, r);
+  int firstInvalidCol = MathRoutines::minimum(this->numberOfColumns, c);
   if (PReserveValues && newElements != nullptr) {
     for (int j = 0; j < firstInvalidRow; j ++) {
       for (int i = 0; i < firstInvalidCol; i ++) {
@@ -3740,8 +3740,8 @@ class PartFractions;
 
 class OnePartialFractionDenominator {
 public:
-  ListLight<int> Multiplicities;
-  ListLight<int> Elongations;
+  List<int> Multiplicities;
+  List<int> Elongations;
   void AddMultiplicity(int MultiplicityIncrement, int Elongation);
   int indexLargestElongation();
   int GetLargestElongation();
@@ -4947,7 +4947,7 @@ public:
     return this->basis.numberOfRows;
   }
   void intersectWith(const Lattice& other);
-  bool FindOnePreimageInLatticeOf(
+  bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
   void IntersectWithPreimageOfLattice(
@@ -5102,7 +5102,7 @@ public:
   }
 };
 
-class PartFraction: ListLight<OnePartialFractionDenominator> {
+class PartFraction {
 private:
   void findPivot();
   void findInitialPivot();
@@ -5117,6 +5117,7 @@ public:
   bool IsIrrelevant;
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
+  List<OnePartialFractionDenominator> denominator;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
     (void) input;
     global.fatal << " Not implemented, please fix. " << global.fatal;
@@ -5239,7 +5240,7 @@ public:
     Polynomial<LargeInteger>& outputCommonCoeff
   );
   void assign(const PartFraction& p);
-  void AssignDenominatorOnly(const PartFraction& p);
+  void assignDenominatorOnly(const PartFraction& p);
   void AssignNoIndicesNonZeroMults(PartFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
   int ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
@@ -6091,7 +6092,7 @@ public:
     }
   }
   bool IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString);
-  std::string ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
+  std::string ElementtoStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string ElementToStringOperatorSequenceStartingOnMe(List<int>& input);
   bool generateOrbit(
     List<LittelmannPath>& output,
@@ -6801,7 +6802,7 @@ public:
     this->theMons.addOnTop(other);
   }
   unsigned int hashFunction() const {
-    int numCycles = MathRoutines::Minimum(someRandomPrimesSize, this->theMons.size);
+    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->theMons.size);
     unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
       result += someRandomPrimes[i] * this->theMons[i].hashFunction();

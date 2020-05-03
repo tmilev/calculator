@@ -885,14 +885,14 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
   }
 }
 
-void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int>& result) {
-  bool success = MathRoutines::ParseListInt(input, result, nullptr);
+void MathRoutines::parseListIntegersNoFailure(const std::string& input, List<int>& result) {
+  bool success = MathRoutines::parseListIntegers(input, result, nullptr);
   if (!success) {
     global.fatal << "Failed to parse list int with a function that does not allow failure. " << global.fatal;
   }
 }
 
-bool MathRoutines::ParseListInt(
+bool MathRoutines::parseListIntegers(
   const std::string& input, List<int>& result, std::stringstream* commentsOnFailure
 ) {
   List<char> delimiters;

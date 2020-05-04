@@ -931,7 +931,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::getElementUniversalEnvelop
       tempMon.raiseToPower(theDegree);
       Accum *= tempMon;
     } else {
-      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator()) {
+      if (this->owner->theOrder[this->generatorsIndices[i]].isCoefficientOneChevalleyGenerator()) {
         tempMon.MakeOneGeneratorCoeffOne(theIndex, inputOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
         tempMon[0].Powers[0] = this->Powers[i];
         Accum *= tempMon;
@@ -1070,10 +1070,10 @@ void ElementUniversalEnveloping<Coefficient>::raiseToPower(int thePower) {
 template<class Coefficient>
 void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
   List<ElementVermaModuleOrdered>& theElements,
-  Vectors<RationalFunction>& outputCoordinates,
+  Vectors<RationalFunction<Rational> >& outputCoordinates,
   List<ElementVermaModuleOrdered>& outputTheBasis,
-  const RationalFunction& RFOne,
-  const RationalFunction& RFZero
+  const RationalFunction<Rational>& RFOne,
+  const RationalFunction<Rational>& RFZero
 ) {
   List<ElementUniversalEnvelopingOrdered<Coefficient> > theEltsUEform;
   theEltsUEform.setSize(theElements.size);

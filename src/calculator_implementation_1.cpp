@@ -10,6 +10,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
 #include "math_extra_tree.h"
+#include "math_rational_function_implementation.h"
 
 #include <cmath>
 #include <cfloat>
@@ -2245,10 +2246,10 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
     return false;
   }
   ExpressionContext theContext = leftE.getContext();
-  ElementUniversalEnveloping<RationalFunction> left, right;
+  ElementUniversalEnveloping<RationalFunction<Rational> > left, right;
   if (
-    !leftE.isOfType<ElementUniversalEnveloping<RationalFunction> >(&left) ||
-    !rightE.isOfType<ElementUniversalEnveloping<RationalFunction> >(&right)
+    !leftE.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >(&left) ||
+    !rightE.isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > >(&right)
   ) {
     return false;
   }

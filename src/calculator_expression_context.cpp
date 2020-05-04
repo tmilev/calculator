@@ -4,6 +4,7 @@
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_Weyl_algebras_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
+#include "math_rational_function_implementation.h"
 
 ExpressionContext::ExpressionContext(Calculator& inputOwner) {
   this->initialize(inputOwner);
@@ -547,8 +548,8 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   if (this->isOfType<AlgebraicNumber>()) {
     return this->setChild(1, inputOutputMinContext.toExpression());
   }
-  if (this->isOfType<ElementUniversalEnveloping<RationalFunction> > ()) {
-    ElementUniversalEnveloping<RationalFunction> newUE = this->getValue<ElementUniversalEnveloping<RationalFunction> >();
+  if (this->isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > > ()) {
+    ElementUniversalEnveloping<RationalFunction<Rational> > newUE = this->getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
     newUE.substitution(subPolyPart);
@@ -585,16 +586,16 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     }
     return this->assignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
   }
-  if (this->isOfType<RationalFunction>()) {
-    RationalFunction newRF = this->getValue<RationalFunction>();
+  if (this->isOfType<RationalFunction<Rational> >()) {
+    RationalFunction<Rational>  newRF = this->getValue<RationalFunction<Rational> >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
     newRF.substitution(subPolyPart);
     return this->assignValueWithContext(newRF, inputOutputMinContext, *this->owner);
   }
-  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    ElementTensorsGeneralizedVermas<RationalFunction> newETGV;
-    newETGV = this->getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
+    ElementTensorsGeneralizedVermas<RationalFunction<Rational> > newETGV;
+    newETGV = this->getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
     newETGV.substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
@@ -609,8 +610,8 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     }
     return this->assignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
   }
-  if (this->isMatrixOfType<RationalFunction>()) {
-    Matrix<RationalFunction> newMat;
+  if (this->isMatrixOfType<RationalFunction<Rational> >()) {
+    Matrix<RationalFunction<Rational> > newMat;
     this->owner->functionGetMatrix(*this, newMat, &newContext);
     PolynomialSubstitution<Rational> subPolyPart;
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);

@@ -249,7 +249,7 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string toStringFull(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
-    RationalFunction& inputRF,
+    RationalFunction<Rational>& inputRF,
     List<Polynomial<AlgebraicNumber> >& outputNumerators,
     List<Polynomial<AlgebraicNumber> >& outputDenominators,
     std::stringstream* reportStream = nullptr

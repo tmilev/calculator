@@ -9,6 +9,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "string_constants.h"
+#include "math_rational_function_implementation.h"
 
 #include <cmath>
 #include <cfloat>
@@ -133,16 +134,16 @@ bool ModuleSSalgebra<Coefficient>::isNotInLevi(int theGeneratorIndex) {
 template <class Coefficient>
 void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
-  ElementUniversalEnveloping<RationalFunction>& output,
+  ElementUniversalEnveloping<RationalFunction<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
   List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
   this->getElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
-  RationalFunction tempRF;
+  RationalFunction<Rational> tempRF;
   output.makeZero(*this->theAlgebras, this->indexAlgebra);
-  MonomialUniversalEnveloping<RationalFunction> tempMon;
+  MonomialUniversalEnveloping<RationalFunction<Rational> > tempMon;
   tempMon.makeConstant(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
@@ -429,7 +430,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   result.simplify();
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
-  MatrixTensor<RationalFunction> tempMat1;
+  MatrixTensor<RationalFunction<Rational> > tempMat1;
 
   int varShift = this->minimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
@@ -451,7 +452,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
       tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
       tempMT.makeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.coefficients[k].expressionType == RationalFunction::typeRationalFunction) {
+        if (tempMat1.coefficients[k].expressionType == RationalFunction<Rational>::typeRationalFunction) {
           return false;
         }
         tempMat1.coefficients[k].getNumerator(tempP1);
@@ -567,9 +568,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.toString()
   << "} Differential operators corresponding to actions"
   << " of simple positive generators for the " << selInducing.toString() << "-parabolic subalgebra.}\\\\<br>";
-  List<ModuleSSalgebra<RationalFunction > > theMods;
+  List<ModuleSSalgebra<RationalFunction<Rational> > > theMods;
   theMods.setSize(theHws.size);
-  Vector<RationalFunction> tempV;
+  Vector<RationalFunction<Rational> > tempV;
   int numStartingVars = hwContext.numberOfVariables();
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   long long totalAdditions = 0;
@@ -578,7 +579,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   long long currentMultiplications = 0;
   double totalTime = 0, currentTime = 0;
   for (int i = 0; i < theHws.size; i ++) {
-    ModuleSSalgebra<RationalFunction>& theMod = theMods[i];
+    ModuleSSalgebra<RationalFunction<Rational> >& theMod = theMods[i];
     tempV = theHws[i];
     if (!theMod.makeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
       return output.makeError("Failed to create module.", theCommands);
@@ -733,7 +734,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
 bool Calculator::innerHWVCommon(
   Calculator& theCommands,
   Expression& output,
-  Vector<RationalFunction>& highestWeightFundCoords,
+  Vector<RationalFunction<Rational> >& highestWeightFundCoords,
   Selection& selectionParSel,
   ExpressionContext& hwContext,
   SemisimpleLieAlgebra* owner,
@@ -741,17 +742,17 @@ bool Calculator::innerHWVCommon(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
-  RationalFunction RFOne, RFZero;
+  RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
   std::string report;
-  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
+  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > theElt;
   //= theElementData.theElementTensorGenVermas.getElement();
-  ListReferences<ModuleSSalgebra<RationalFunction> >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule = - 1;
 
   for (int i = 0; i < theMods.size; i ++) {
-    ModuleSSalgebra<RationalFunction>& currentMod = theMods[i];
+    ModuleSSalgebra<RationalFunction<Rational> >& currentMod = theMods[i];
     if (
       highestWeightFundCoords == currentMod.theHWFundamentalCoordsBaseField &&
       selectionParSel == currentMod.parabolicSelectionNonSelectedAreElementsLevi &&
@@ -766,7 +767,7 @@ bool Calculator::innerHWVCommon(
     theMods.setSize(theMods.size + 1);
     theMods.lastObject().reset();
   }
-  ModuleSSalgebra<RationalFunction>& theMod = theMods[indexOfModule];
+  ModuleSSalgebra<RationalFunction<Rational> >& theMod = theMods[indexOfModule];
   if (!theMod.flagIsInitialized) {
     bool isGood = theMod.makeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
@@ -784,7 +785,7 @@ bool Calculator::innerHWVCommon(
     global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
-  return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction> >(theElt, hwContext, theCommands);
+  return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(theElt, hwContext, theCommands);
 }
 
 bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
@@ -920,7 +921,7 @@ bool Calculator::innerGetChevGen(
   }
   theIndex += theSSalg.content->getNumberOfPositiveRoots();
   theElt.makeGenerator(theIndex, *theSSalg.content);
-  ElementUniversalEnveloping<RationalFunction> theUE;
+  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext context(theCommands);
   int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
@@ -960,7 +961,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
   theElt.makeCartanGenerator(theH, *theSSalg.content);
-  ElementUniversalEnveloping<RationalFunction> theUE;
+  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
   ExpressionContext theContext(theCommands);
   int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
@@ -1392,10 +1393,10 @@ bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& 
   output = input;
   output.setChildAtomValue(0, theCommands.opDefine());
   ////
-  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >().isHWV()) {
-      MonomialGeneralizedVerma<RationalFunction>& theElt =
-      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
+  if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
+    if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().isHWV()) {
+      MonomialGeneralizedVerma<RationalFunction<Rational> >& theElt =
+      withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()[0].theMons[0];
       theElt.getOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }

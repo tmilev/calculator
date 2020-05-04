@@ -5,20 +5,19 @@
 
 #include "math_general.h"
 
+template <class Coefficient>
 class RationalFunction {
 private:
-  void addSameTypes(const RationalFunction& other);
-  void addHonestRationalFunction(const RationalFunction& other);
+  void addSameTypes(const RationalFunction<Rational>& other);
+  void addHonestRationalFunction(const RationalFunction<Rational>& other);
   void reduceRationalFunctionToPolynomial();
   void ReducePolynomialToRational();
   bool convertToType(int theType);
 public:
-  friend std::ostream& operator<< (std::ostream& output, const RationalFunction& theRF) {
+  friend std::ostream& operator<<(std::ostream& output, const RationalFunction<Rational>& theRF) {
     output << theRF.toString();
     return output;
   }
-  friend std::istream& operator>> (std::istream& input, RationalFunction& theRF);
-
   MemorySaving<Polynomial<Rational> > Numerator;
   MemorySaving<Polynomial<Rational> > Denominator;
   Rational ratValue;
@@ -37,7 +36,7 @@ public:
   static RationalFunction zeroStatic();
   int minimalNumberOfVariables() const;
   bool substitution(const PolynomialSubstitution<Rational>& theSub);
-  RationalFunction(const RationalFunction& other);
+  RationalFunction(const RationalFunction<Rational>& other);
   RationalFunction();
   RationalFunction(int other);
   RationalFunction(const Rational& other);
@@ -46,10 +45,10 @@ public:
   void reduceMemory();
   void operator=(const Polynomial<Rational>& other);
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const RationalFunction& input);
+  static unsigned int hashFunction(const RationalFunction<Rational>& input);
   void operator=(int other);
   void operator=(const Rational& other);
-  void operator=(const RationalFunction& other);
+  void operator=(const RationalFunction<Rational>& other);
   bool checkConsistency() const;
   void setNumberOfVariables(int GoalNumVars);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
@@ -57,12 +56,12 @@ public:
   void getNumerator(Polynomial<Rational>& output) const;
   bool isNegative();
   void getDenominator(Polynomial<Rational>& output) const;
-  void clearDenominators(RationalFunction& outputWasMultipliedBy);
+  void clearDenominators(RationalFunction<Rational>& outputWasMultipliedBy);
   void operator+=(const Polynomial<Rational>& other);
-  void operator+=(const RationalFunction& other);
+  void operator+=(const RationalFunction<Rational>& other);
   bool operator==(int other) const;
   bool operator!=(int other);
-  bool operator==(const RationalFunction& other) const;
+  bool operator==(const RationalFunction<Rational>& other) const;
   void simplify();
   // Scales the numerator and denominator simultaneously
   // so all coefficients are integers,
@@ -76,14 +75,14 @@ public:
   // Returns the number by which the element was multiplied.
   Rational scaleToIntegral();
   void operator+=(int theConstant);
-  void operator*=(const RationalFunction& other);
+  void operator*=(const RationalFunction<Rational>& other);
   void operator*=(const Polynomial<Rational>& other);
   void operator*=(const MonomialP& other);
   void operator*=(const Rational& other);
   void operator*=(int other);
-  bool operator<(const RationalFunction& other) const;
-  bool operator<=(const RationalFunction& other) const;
-  bool operator>(const RationalFunction& other) const;
+  bool operator<(const RationalFunction<Rational>& other) const;
+  bool operator<=(const RationalFunction<Rational>& other) const;
+  bool operator>(const RationalFunction<Rational>& other) const;
   void multiplyByConstant(const Rational& theConst);
   void invert();
   void makeOne();
@@ -106,7 +105,7 @@ public:
   bool isEqualToOne() const {
     return this->expressionType == this->typeRational && this->ratValue.isEqualToOne();
   }
-  bool isEqualTo(const RationalFunction& other) const;
+  bool isEqualTo(const RationalFunction<Rational>& other) const;
   static bool getRelations(
     const List<Polynomial<Rational> >& inputElements,
     List<Polynomial<Rational> >& outputGeneratorLabels,
@@ -119,7 +118,7 @@ public:
     Polynomial<Rational>& output
   );
   static RationalFunction scaleNormalizeIndex(
-    List<RationalFunction>& input, int indexNonZeroElement
+    List<RationalFunction<Rational> >& input, int indexNonZeroElement
   );
   static void gcd(
     const Polynomial<Rational>& left,
@@ -135,18 +134,23 @@ public:
     *this -= static_cast<Rational>(other);
   }
   void operator-=(const Rational& other);
-  void operator-=(const RationalFunction& other);
+  void operator-=(const RationalFunction<Rational>& other);
   void operator/=(int other);
   void operator/=(const Polynomial<Rational>& other);
-  void operator/=(const RationalFunction& other);
+  void operator/=(const RationalFunction<Rational>& other);
   void minus();
   class Test {
   public:
     static bool all();
     static bool scaleNormalizeIndex();
-    static RationalFunction fromString(const std::string& input);
+    static RationalFunction<Rational> fromString(const std::string& input);
     static bool fromStringTest();
   };
 };
+
+template<>
+bool RationalFunction<Rational>::Test::fromStringTest();
+template<>
+bool RationalFunction<Rational>::Test::scaleNormalizeIndex();
 
 #endif

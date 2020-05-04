@@ -850,10 +850,10 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   this->WeylFDSmall.ComputeRootSubsystem();
 }
 
-std::string BranchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
-  Vector<RationalFunction> weightDifference;
+std::string BranchingData::getStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
+  Vector<RationalFunction<Rational> > weightDifference;
   std::stringstream formulaStream1;
-  HashedList<Vector<RationalFunction> > accountedDiffs;
+  HashedList<Vector<RationalFunction<Rational> > > accountedDiffs;
   accountedDiffs.setExpectedSize(this->g2Weights.size);
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {

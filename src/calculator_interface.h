@@ -993,19 +993,19 @@ public:
   MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
-  ListReferences<ModuleSSalgebra<RationalFunction> > theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
-  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
+  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > theTensorElts;
   HashedListReferences<Polynomial<Rational> > polynomialsRational;
   HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
   HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
   HashedListReferences<PolynomialModuloPolynomial<ElementZmodP> > polynomialQuotientsModular;
 
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
-  HashedListReferences<ElementUniversalEnveloping<RationalFunction> > theUEs;
-  HashedListReferences<RationalFunction> theRFs;
+  HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > theUEs;
+  HashedListReferences<RationalFunction<Rational> > theRFs;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
@@ -2358,7 +2358,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunction>& theHWs,
+    Vectors<RationalFunction<Rational> >& theHWs,
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
@@ -2369,7 +2369,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunction>& outputHWs,
+    Vectors<RationalFunction<Rational> >& outputHWs,
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
@@ -2444,7 +2444,7 @@ public:
   static bool innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHWVCommon(Calculator& theCommands,
     Expression& output,
-    Vector<RationalFunction>& highestWeightFundCoords,
+    Vector<RationalFunction<Rational> >& highestWeightFundCoords,
     Selection& selectionParSel,
     ExpressionContext& hwContext,
     SemisimpleLieAlgebra* owner,
@@ -2673,7 +2673,7 @@ public:
   static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, SlTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction& output);
+  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction<Rational>& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialModuloInteger(Calculator& theCommands, const Expression& input, Expression& output);
   template <class Coefficient>
@@ -2711,7 +2711,7 @@ public:
   );
   static bool innerExpressionFromRF(
     Calculator& theCommands,
-    const RationalFunction& input,
+    const RationalFunction<Rational>& input,
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
@@ -2745,7 +2745,7 @@ public:
   );
   static bool innerExpressionFromUE(
     Calculator& theCommands,
-    const ElementUniversalEnveloping<RationalFunction>& input,
+    const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
@@ -2785,8 +2785,9 @@ public:
   static bool innerExpressionFromChevalleyGenerator(
     Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
   );
-  static bool innerExpressionFromMonomialUE(Calculator& theCommands,
-    const MonomialUniversalEnveloping<RationalFunction>& input,
+  static bool innerExpressionFromMonomialUE(
+    Calculator& theCommands,
+    const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );

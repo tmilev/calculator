@@ -58,7 +58,7 @@ void Test::run() {
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();
     ElementZmodP::Test::all();
-    RationalFunction::Test::all();
+    RationalFunction<Rational>::Test::all();
   }
   if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();

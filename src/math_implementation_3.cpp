@@ -2683,14 +2683,14 @@ FormatExpressions::getMonomialOrder<MonomialWeylAlgebra>() {
 }
 
 template<>
-List<MonomialUniversalEnveloping<RationalFunction> >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<RationalFunction> >() {
+List<MonomialUniversalEnveloping<RationalFunction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<RationalFunction<Rational> > >() {
   return nullptr;
 }
 
 template<>
-List<MonomialGeneralizedVerma<RationalFunction> >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialGeneralizedVerma<RationalFunction> >() {
+List<MonomialGeneralizedVerma<RationalFunction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialGeneralizedVerma<RationalFunction<Rational> > >() {
   return nullptr;
 }
 
@@ -2713,8 +2713,8 @@ FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<Rational> >() {
 }
 
 template<>
-List<MonomialTensorGeneralizedVermas<RationalFunction> >::Comparator*
-FormatExpressions::getMonomialOrder<MonomialTensorGeneralizedVermas<RationalFunction> >() {
+List<MonomialTensorGeneralizedVermas<RationalFunction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<MonomialTensorGeneralizedVermas<RationalFunction<Rational> > >() {
   return nullptr;
 }
 
@@ -10959,63 +10959,6 @@ void DrawOperations::operator+=(const DrawOperations& other) {
   //this->GraphicsUnit.addListOnTop(other.GraphicsUnit);
 }
 
-void RationalFunction::operator/=(const Polynomial<Rational>& other) {
-  RationalFunction tempRF;
-  tempRF = other;
-  tempRF.invert();
-  *this *= tempRF;
-  if (!this->checkConsistency()) {
-    global.fatal << "Bad rational function." << global.fatal;
-  }
-}
-
-void RationalFunction::reduceRationalFunctionToPolynomial() {
-  if (this->expressionType != this->typeRationalFunction) {
-    return;
-  }
-  if (this->Denominator.getElement().isConstant()) {
-    this->Numerator.getElement() /= this->Denominator.getElement().coefficients[0];
-    this->Denominator.freeMemory();
-    this->expressionType = this->typePoly;
-  }
-  if (this->Numerator.getElement().isEqualToZero()) {
-    this->makeZero();
-  }
-}
-
-bool RationalFunction::substitution(const PolynomialSubstitution<Rational>& theSub) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::substitution");
-  if (theSub.size < 1) {
-    return false;
-  }
-  switch(this->expressionType) {
-    case RationalFunction::typeRational:
-      return true;
-    case RationalFunction::typePoly:
-      if (!this->Numerator.getElement().substitution(theSub)) {
-        return false;
-      }
-      this->simplify();
-      return true;
-    case RationalFunction::typeRationalFunction:
-      if (!this->Numerator.getElement().substitution(theSub)) {
-        return false;
-      }
-      if (!this->Denominator.getElement().substitution(theSub)) {
-        return false;
-      }
-      if (this->Denominator.getElement().isEqualToZero()) {
-        return false;
-      }
-      this->simplify();
-      return true;
-    default:
-      global.fatal << "Default case not allowed. " << global.fatal;
-      break;
-  }
-  return false;
-}
-
 void Selection::operator=(const Vector<Rational>& other) {
   this->initialize(other.size);
   for (int i = 0; i <other.size; i ++) {
@@ -12625,74 +12568,6 @@ std::string ConeComplex::toString(bool useHtml) {
     out << this->theObjects[i].toString(&theFormat) << "\n\n\n";
   }
   return out.str();
-}
-
-int RationalFunction::minimalNumberOfVariables() const {
-  switch (this->expressionType) {
-    case RationalFunction::typeRational:
-      return 0;
-    case RationalFunction::typePoly:
-      return this->Numerator.getElementConst().minimalNumberOfVariables();
-    case RationalFunction::typeRationalFunction:
-      return MathRoutines::maximum(
-        this->Numerator.getElementConst().minimalNumberOfVariables(), this->Denominator.getElementConst().minimalNumberOfVariables()
-      );
-    default: //this should never happen! maybe global.fatal << global.fatal here...
-      return - 1;
-  }
-}
-
-bool RationalFunction::getRelations(
-  const List<Polynomial<Rational> >& inputElements,
-  List<Polynomial<Rational> >& outputGeneratorLabels,
-  List<Polynomial<Rational> >& outputRelations,
-  std::stringstream& comments
-) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::GetRelationsGetRelations");
-  outputGeneratorLabels.setSize(inputElements.size);
-  outputRelations.setSize(0);
-  if (inputElements.size == 0) {
-    return true;
-  }
-  List<Polynomial<Rational> > theGroebnerBasis;
-  theGroebnerBasis = inputElements;
-  int numStartingGenerators = inputElements.size;
-  int numStartingVariables = 0;
-  for (int i = 0; i < inputElements.size; i ++) {
-    numStartingVariables = MathRoutines::maximum(numStartingVariables, inputElements[0].minimalNumberOfVariables());
-  }
-  Polynomial<Rational> currentGenerator;
-  for (int i = 0; i < numStartingGenerators; i ++) {
-    Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
-    currentPoly.setNumberOfVariablesSubstituteDeletedByOne(numStartingVariables + numStartingGenerators);
-    currentGenerator.makeDegreeOne(numStartingVariables + numStartingGenerators, i + numStartingVariables, 1);
-    outputGeneratorLabels[i] = currentGenerator;
-    currentPoly -= currentGenerator;
-  }
-  GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.monomialOrder.setComparison(
-    MonomialP::greaterThan_leftLargerWins
-  );
-  if (!theComputation.transformToReducedGroebnerBasis(theGroebnerBasis)) {
-    comments << "Failed to find Groebner basis";
-    return false;
-  }
-  outputRelations.reserve(theGroebnerBasis.size);
-  outputRelations.setSize(0);
-  for (int i = 0; i < theGroebnerBasis.size; i ++) {
-    Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
-    bool bad = false;
-    for (int j = 0; j < numStartingVariables; j ++) {
-      if (currentPoly.GetMaxPowerOfVariableIndex(j) > 0) {
-        bad = true;
-        break;
-      }
-    }
-    if (!bad) {
-      outputRelations.addOnTop(currentPoly);
-    }
-  }
-  return true;
 }
 
 bool ConeComplex::findMaxLFOverConeProjective(

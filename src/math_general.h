@@ -3845,7 +3845,7 @@ public:
     return (*this)[0].owner;
   }
   bool getCoordinatesInBasis(
-    const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output
+    const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunction<Rational> >& output
   ) const {
     Vector<Rational> tempVect;
     if (!this->getCoordinatesInBasis(theBasis, tempVect)) {
@@ -3868,10 +3868,10 @@ public:
     const ElementSemisimpleLieAlgebra& theElt,
     ElementSemisimpleLieAlgebra& output,
     SemisimpleLieAlgebra& owner,
-    const RationalFunction& theRingUnit,
-    const RationalFunction& theRingZero
+    const RationalFunction<Rational>& theRingUnit,
+    const RationalFunction<Rational>& theRingZero
   );
-  bool IsACoeffOneChevalleyGenerator();
+  bool isCoefficientOneChevalleyGenerator();
   bool isProportionalTo(const ElementSemisimpleLieAlgebra& other) const {
     Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);

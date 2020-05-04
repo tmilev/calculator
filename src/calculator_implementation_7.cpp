@@ -19,6 +19,7 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 #include <vector>
+#include "math_rational_function_implementation.h"
 
 template <>
 bool Expression::convertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
@@ -30,7 +31,7 @@ bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
 template <>
 bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const;
 template <>
-bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
+bool Expression::convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(Expression& output) const;
 
 template <class theType>
 bool MathRoutines::generateVectorSpaceClosedWRTOperation(
@@ -128,7 +129,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
 
   ExpressionContext context(theCommands);
   if (!theCommands.getVectorFromFunctionArguments(inputModded, theOps, &context)) {
-    Vector<ElementUniversalEnveloping<RationalFunction> > theLieAlgElts;
+    Vector<ElementUniversalEnveloping<RationalFunction<Rational> > > theLieAlgElts;
     context.initialize(theCommands);
     if (!theCommands.getVectorFromFunctionArguments(inputModded, theLieAlgElts, &context)) {
       return theCommands << "<hr>Failed to extract elements of Weyl algebra and "
@@ -923,7 +924,7 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   Selection theParSel;
   theParSel = leviSelection;
   theParSel.InvertSelection();
-  ElementUniversalEnveloping<RationalFunction> theCasimir;
+  ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
   theCasimir.makeCasimirWRTLeviParabolic(*theSSalg, theParSel);
   ExpressionContext contextE(theCommands);
   contextE.setAmbientSemisimpleLieAlgebra(*theSSalg);
@@ -1648,13 +1649,13 @@ Coefficient Polynomial<Coefficient>::GetDiscriminant() {
 
 class IntegralRFComputation {
 public:
-  RationalFunction theRF;
+  RationalFunction<Rational> theRF;
   Polynomial<Rational> theDen, theNum;
   Polynomial<Rational> quotientRat, remainderRat;
   List<Polynomial<Rational> > theFactors;
   Polynomial<AlgebraicNumber> thePolyThatMustVanish;
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
-  RationalFunction transformedRF;
+  RationalFunction<Rational> transformedRF;
   FormatExpressions currentFormaT;
   Expression integrationSetE;
   ExpressionContext context;
@@ -2241,14 +2242,14 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   IntegralRFComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::functionRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.isOfType<RationalFunction>();
+    isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
   }
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction>();
+  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
   if (theComputation.theRF.minimalNumberOfVariables() > 1) {
     return theCommands << "The input rational function is of "
     << theComputation.theRF.minimalNumberOfVariables() << " variables and "
@@ -2273,14 +2274,14 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   IntegralRFComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::innerRationalFunctioN(theCommands, input, theComputation.inpuTE);
   if (isGood) {
-    isGood = theComputation.inpuTE.isOfType<RationalFunction>();
+    isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
   }
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
     << input.toString() << " to rational function. ";
   }
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction>();
+  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
   if (theComputation.theRF.minimalNumberOfVariables() > 1) {
     return theCommands << "The input rational function is of "
     << theComputation.theRF.minimalNumberOfVariables() << " variables and "
@@ -2665,7 +2666,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
   }
   if (theArgument.isOperationGiven(theCommands.opArcTan())) {
     Polynomial<Rational> onePlusXsquared;
-    RationalFunction oneOverOnePlusXsquared;
+    RationalFunction<Rational> oneOverOnePlusXsquared;
     onePlusXsquared.makeMonomial(0, 2);
     onePlusXsquared += Rational::one();
     oneOverOnePlusXsquared.makeOne();
@@ -2678,7 +2679,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Expression denE;
     ExpressionContext context(theCommands);
     context.makeOneVariableFromString("x");
-    RationalFunction oneMinusXsquared;
+    RationalFunction<Rational> oneMinusXsquared;
     oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
@@ -2689,7 +2690,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Expression denE;
     ExpressionContext context;
     context.makeOneVariableFromString("x");
-    RationalFunction oneMinusXsquared;
+    RationalFunction<Rational> oneMinusXsquared;
     oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
@@ -3667,16 +3668,16 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   if (input.size() != 2) {
     return false;
   }
-  if (!input[0].isOfType<RationalFunction>()) {
+  if (!input[0].isOfType<RationalFunction<Rational> >()) {
     return false;
   }
-  if (input[0].getValue<RationalFunction>().minimalNumberOfVariables() > 1) {
+  if (input[0].getValue<RationalFunction<Rational> >().minimalNumberOfVariables() > 1) {
     return false;
   }
   Expression ResultRationalForm;
   ExpressionContext finalContext(theCommands);
   finalContext.makeOneVariable(input[1]);
-  ResultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction>(), finalContext, theCommands);
+  ResultRationalForm.assignValueWithContext(input[0].getValue<RationalFunction<Rational> >(), finalContext, theCommands);
   return CalculatorConversions::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
 
@@ -3684,7 +3685,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
-  Matrix<RationalFunction> theMatrix, outputMat, extendedMatrix;
+  Matrix<RationalFunction<Rational> > theMatrix, outputMat, extendedMatrix;
   Expression converted;
   if (!CalculatorConversions::innerMatrixRationalFunction(
     theCommands, input, converted
@@ -3707,7 +3708,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
 
-  RationalFunction tempElement;
+  RationalFunction<Rational> tempElement;
   FormatExpressions theFormat;
   theContext.getFormat(theFormat);
   theFormat.flagUseLatex = true;
@@ -3950,7 +3951,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
       theFormat.polynomialAlphabet.addOnTop(currentStr);
     }
   }
-  if (!RationalFunction::getRelations(inputVector, theGens, theRels, theCommands.comments)) {
+  if (!RationalFunction<Rational>::getRelations(inputVector, theGens, theRels, theCommands.comments)) {
     return theCommands << "Failed to extract relations. ";
   }
   std::stringstream out;
@@ -4007,11 +4008,11 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
     theCommands, theFunctionE, theComputation.inpuTE
   )) {
     return theCommands
-    << "<hr>Call of function CalculatorConversions::innerRationalFunction "
+    << "<hr>Call of function CalculatorConversions::innerRationalFunction<Rational> "
     << "failed, input was: "
     << theFunctionE.toString();
   }
-  if (!theComputation.inpuTE.isOfType<RationalFunction>()) {
+  if (!theComputation.inpuTE.isOfType<RationalFunction<Rational> >()) {
     return theCommands
     << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
@@ -4035,7 +4036,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
     }
   }
   theComputation.integrationSetE = integrationSetE;
-  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction>();
+  theComputation.theRF = theComputation.inpuTE.getValue<RationalFunction<Rational> >();
   theComputation.theRF.getDenominator(theComputation.theDen);
   theComputation.theRF.getNumerator(theComputation.theNum);
   if (theComputation.theDen.totalDegree() < 1) {
@@ -5657,7 +5658,7 @@ bool CalculatorFunctions::innerTrace(
     }
     return output.assignValue(theMat.getTrace(), theCommands);
   }
-  Matrix<RationalFunction> theMatRF;
+  Matrix<RationalFunction<Rational> > theMatRF;
   if (theCommands.functionGetMatrix(input[1], theMatRF)) {
     if (!theMatRF.IsSquare()) {
       return output.makeError(
@@ -7068,8 +7069,8 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
-  Vector<RationalFunction> theWeight;
-  if (!theCommands.getVector<RationalFunction>(
+  Vector<RationalFunction<Rational> > theWeight;
+  if (!theCommands.getVector<RationalFunction<Rational> >(
     input[2],
     theWeight,
     &theSSowner.context,
@@ -7081,16 +7082,16 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
       theCommands
     );
   }
-  RationalFunction rfOne;
+  RationalFunction<Rational> rfOne;
   rfOne.makeOne();
-  Vector<RationalFunction> theWeightInSimpleCoords;
+  Vector<RationalFunction<Rational> > theWeightInSimpleCoords;
   FormatExpressions theFormat;
   theSSowner.context.getFormat(theFormat);
   theWeightInSimpleCoords = theSSowner.content->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Weyl dim formula input: simple coords: "
   << theWeightInSimpleCoords.toString(&theFormat)
   << ", fundamental coords: " << theWeight.toString(&theFormat);
-  RationalFunction tempRF = theSSowner.content->theWeyl.weylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  RationalFunction<Rational> tempRF = theSSowner.content->theWeyl.weylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   return output.assignValueWithContext(tempRF, theSSowner.context, theCommands);
 }
 
@@ -7117,13 +7118,13 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   )) {
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
-  Vector<RationalFunction> theWeightFundCoords;
+  Vector<RationalFunction<Rational> > theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   WeylGroupData& theWeyl = ownerSS.theWeyl;
   int theDim = ownerSS.getRank();
   ExpressionContext finalContext(theCommands);
-  if (!theCommands.getVector<RationalFunction>(
+  if (!theCommands.getVector<RationalFunction<Rational> >(
     weightNode,
     theWeightFundCoords,
     &finalContext,
@@ -7143,7 +7144,7 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   << theWeyl.getSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
   << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
   << "<br>The parabolic subalgebra I should split over: " << splittingParSel.toString() << ".";
-  ModuleSSalgebra<RationalFunction> theMod;
+  ModuleSSalgebra<RationalFunction<Rational> > theMod;
   Selection selInducing = inducingParSel;
   Selection selSplittingParSel = splittingParSel;
   theMod.makeFromHW(ownerSS, theWeightFundCoords, selInducing, 1, 0, nullptr, false);
@@ -7167,7 +7168,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
       theCommands
     );
   }
-  if (!theCommands.getVectorFromFunctionArguments<RationalFunction>(
+  if (!theCommands.getVectorFromFunctionArguments<RationalFunction<Rational> >(
     input,
     theG2B3Data.theWeightFundCoords,
     &outputContext,
@@ -7221,7 +7222,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   MacroRegisterFunctionWithName("CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   Selection parabolicSel;
-  Vector<RationalFunction> theHWfundcoords, tempRoot, theHWsimplecoords;
+  Vector<RationalFunction<Rational> > theHWfundcoords, tempRoot, theHWsimplecoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgPointer;
   if (!theCommands.getTypeHighestWeightParabolic(
     theCommands,
@@ -7444,7 +7445,7 @@ bool CalculatorFunctions::innerDeterminant(
       );
     }
   }
-  Matrix<RationalFunction> matRF;
+  Matrix<RationalFunction<Rational> > matRF;
   ExpressionContext context(theCommands);
   if (!theCommands.functionGetMatrix(
       argument,
@@ -7478,7 +7479,7 @@ bool CalculatorFunctions::innerDeterminant(
     << " rows. To lift the restriction edit function located in file "
     << __FILE__ << ", line " << __LINE__ << ". ";
   }
-  RationalFunction theDet = matRF.getDeterminant();
+  RationalFunction<Rational> theDet = matRF.getDeterminant();
   return output.assignValueWithContext(theDet, context, theCommands);
 }
 
@@ -7487,11 +7488,11 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
 ) {
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDecomposeCharGenVerma");
-  Vector<RationalFunction> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
+  Vector<RationalFunction<Rational> > theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
   WithContext<SemisimpleLieAlgebra*> theSSlieAlg;
   output.reset(theCommands);
-  if (!theCommands.getTypeHighestWeightParabolic<RationalFunction>(
+  if (!theCommands.getTypeHighestWeightParabolic<RationalFunction<Rational> >(
     theCommands,
     input,
     output,
@@ -7531,7 +7532,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
-  Vector<RationalFunction> currentHW;
+  Vector<RationalFunction<Rational> > currentHW;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
   for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
@@ -7550,8 +7551,8 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel = parSel;
   invertedParSel.InvertSelection();
-  CharacterSemisimpleLieAlgebraModule<RationalFunction> theChar, currentChar;
-  Weight<RationalFunction> theMon;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theChar, currentChar;
+  Weight<RationalFunction<Rational> > theMon;
   theChar.makeZero();
   FormatExpressions formatChars;
   formatChars.FDrepLetter = "L";
@@ -7603,7 +7604,7 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintGenVermaModule");
   Selection selectionParSel;
-  Vector<RationalFunction> theHWfundcoords;
+  Vector<RationalFunction<Rational> > theHWfundcoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!theCommands.getTypeHighestWeightParabolic(
     theCommands,
@@ -7634,9 +7635,9 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
   if (output.isError()) {
     return true;
   }
-  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
-  theElt = output.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
-  ModuleSSalgebra<RationalFunction>& theModule = *theElt[0].theMons[0].owner;
+  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > theElt;
+  theElt = output.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
+  ModuleSSalgebra<RationalFunction<Rational> >& theModule = *theElt[0].theMons[0].owner;
   return output.assignValue(theModule.toString(), theCommands);
 }
 
@@ -7683,7 +7684,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   if (!levelNode.isSmallInteger(&desiredHeight)) {
     return output.makeError("second argument of " + input.toString() + " must be a small integer", theCommands);
   }
-  RationalFunction RFOne, RFZero;
+  RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
   Selection selInducing;
@@ -7735,7 +7736,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
 
 bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& input, Expression& output) {
   Selection selectionParSel;
-  Vector<RationalFunction> theHWfundcoords;
+  Vector<RationalFunction<Rational> > theHWfundcoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!theCommands.getTypeHighestWeightParabolic(
     theCommands,
@@ -7783,9 +7784,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   int theRank = theSSalgebra.content->getRank();
-  Vector<RationalFunction> highestWeightFundCoords;
+  Vector<RationalFunction<Rational> > highestWeightFundCoords;
   ExpressionContext hwContext(theCommands);
-  if (!theCommands.getVector<RationalFunction>(
+  if (!theCommands.getVector<RationalFunction<Rational> >(
     genVemaWeightNode,
     highestWeightFundCoords,
     &hwContext,
@@ -7809,10 +7810,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << fdWeightNode.toString() << ".";
   }
   int theNumVars = hwContext.numberOfVariables();
-  RationalFunction RFOne, RFZero;
+  RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
-  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
+  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > theElt;
   //= theElementData.theElementTensorGenVermas.getElement();
   Selection selParSel1, selFD;
   Expression hwvFD, hwvGenVerma;
@@ -7849,7 +7850,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     output = hwvGenVerma;
     return true;
   }
-  Vector<RationalFunction> theFDhwRF;
+  Vector<RationalFunction<Rational> > theFDhwRF;
   theFDhwRF = theFDhw;
   if (!theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra.content)) {
     return false;
@@ -7860,13 +7861,13 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   std::stringstream out;
   out << "hwv par sel: " << hwvGenVerma.toString() << "hwv fd: " << hwvFD.toString();
-  const ElementTensorsGeneralizedVermas<RationalFunction>& theHWgenVerma =
-  hwvGenVerma.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
-  const ElementTensorsGeneralizedVermas<RationalFunction>& theHWfd =
-  hwvFD.getValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  const ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& theHWgenVerma =
+  hwvGenVerma.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
+  const ElementTensorsGeneralizedVermas<RationalFunction<Rational> >& theHWfd =
+  hwvFD.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
 
-  ModuleSSalgebra<RationalFunction>& theGenMod = theHWgenVerma[0].theMons[0].getOwner();
-  ModuleSSalgebra<RationalFunction>& theFDMod = theHWfd[0].theMons[0].getOwner();
+  ModuleSSalgebra<RationalFunction<Rational> >& theGenMod = theHWgenVerma[0].theMons[0].getOwner();
+  ModuleSSalgebra<RationalFunction<Rational> >& theFDMod = theHWfd[0].theMons[0].getOwner();
   if (
     theGenMod.owner != theFDMod.owner ||
     theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
@@ -7878,11 +7879,11 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
     << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << global.fatal;
   }
-  ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
-  CharacterSemisimpleLieAlgebraModule<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
+  ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir, theCasimirMinusChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.makeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
-  List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
-  Vectors<RationalFunction> theEigenVectorWeightsFund;
+  List<ElementUniversalEnveloping<RationalFunction<Rational> > > theLeviEigenVectors;
+  Vectors<RationalFunction<Rational> > theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.getOwner().getRank()) {
     global.fatal << "This is a programming error: module has parabolic selection with max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
@@ -7898,9 +7899,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     &theFDLeviSplit
   );
   theFDMod.getFDchar(theFDChaR);
-  List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
+  List<ElementUniversalEnveloping<RationalFunction<Rational> > > theCentralCharacters;
   theCasimir.makeCasimir(*theSSalgebra.content);
-  Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords;
+  Vector<RationalFunction<Rational> > currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength = 60;
   tempFormat.flagUseLatex = true;
@@ -7921,9 +7922,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   tempFormat.chevalleyGgeneratorLetter = "\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter = "\\bar{h}";
   theFDLeviSplitShifteD.makeZero();
-  Weight<RationalFunction> tempMon;
+  Weight<RationalFunction<Rational> > tempMon;
   tempMon.owner = theSSalgebra.content;
-  ElementUniversalEnveloping<RationalFunction> currentChar;
+  ElementUniversalEnveloping<RationalFunction<Rational> > currentChar;
   for (int i = 0; i < theLeviEigenVectors.size; i ++) {
     tempMon.weightFundamentalCoordS = theEigenVectorWeightsFund[i];
     tempMon.weightFundamentalCoordS += theGenMod.theHWFundamentalCoordsBaseField;
@@ -7939,7 +7940,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
-  ElementTensorsGeneralizedVermas<RationalFunction> tempElt, tempElt2;
+  ElementTensorsGeneralizedVermas<RationalFunction<Rational> > tempElt, tempElt2;
   theFDMod.highestWeightVectorNotation = "v";
   theGenMod.highestWeightVectorNotation = "w";
   out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
@@ -7959,7 +7960,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
-    Vector<RationalFunction> currentWeightSimpleCoords =
+    Vector<RationalFunction<Rational> > currentWeightSimpleCoords =
     theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.makeHWV(theFDMod, RFOne);
     tempElt.multiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
@@ -7971,7 +7972,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream << "\\begin{array}{l}";
     bool found = false;
     for (int j = 0; j < theCentralCharacters.size; j ++) {
-      Vector<RationalFunction> otherWeightSimpleCoords =
+      Vector<RationalFunction<Rational> > otherWeightSimpleCoords =
       theSSalgebra.content->theWeyl.getSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).isPositive()) {
         theCasimirMinusChar = theCasimir;
@@ -7990,7 +7991,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream << "(" << startingEltString << ")";
     tempStream << "\\end{array}";
     tempStream2 << " $(" << startingEltString << ")$ ";
-    RationalFunction scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
+    RationalFunction<Rational> scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
     Rational tempRat;
     if (!scale.isConstant(&tempRat)) {
       global.fatal << "Unexpected: scale not rational" << global.fatal;
@@ -8045,8 +8046,8 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   }
   SemisimpleLieAlgebra& constSSalg = theCommands.theObjectContainer.semisimpleLieAlgebras.theValues[algebraIndex];
   const Expression& weightExpression = input[3];
-  Vector<RationalFunction> weight;
-  if (!theCommands.getVector<RationalFunction>(
+  Vector<RationalFunction<Rational> > weight;
+  if (!theCommands.getVector<RationalFunction<Rational> >(
     weightExpression,
     weight,
     &finalContext,
@@ -8064,19 +8065,19 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     );
   }
   Expression leftConverted, rightConverted;
-  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFunction> >(leftConverted)) {
+  if (!leftMerged.convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(leftConverted)) {
     return false;
   }
-  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFunction> >(rightConverted)) {
+  if (!rightMerged.convertInternally<ElementUniversalEnveloping<RationalFunction<Rational> > >(rightConverted)) {
     return false;
   }
-  const ElementUniversalEnveloping<RationalFunction>& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction> >();
-  const ElementUniversalEnveloping<RationalFunction>& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction> >();
+  const ElementUniversalEnveloping<RationalFunction<Rational> >& leftUE = leftConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
+  const ElementUniversalEnveloping<RationalFunction<Rational> >& rightUE = rightConverted.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
   WeylGroupData& theWeyl = constSSalg.theWeyl;
-  Vector<RationalFunction> hwDualCoords;
+  Vector<RationalFunction<Rational> > hwDualCoords;
   constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.GetDualCoordinatesFromFundamental(weight);
-  RationalFunction outputRF;
+  RationalFunction<Rational> outputRF;
   if (!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.comments)) {
     return output.makeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
   }
@@ -8102,9 +8103,9 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.toString() << "<br>Parabolic selection: "
   << theG2B3Data.selInducing.toString();
   std::string report;
-  CharacterSemisimpleLieAlgebraModule<RationalFunction> tempChar;
-  CharacterSemisimpleLieAlgebraModule<RationalFunction> startingChar;
-  Vector<RationalFunction> simpleWeight;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > tempChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > startingChar;
+  Vector<RationalFunction<Rational> > simpleWeight;
   simpleWeight = theG2B3Data.theHmm.theRange().theWeyl.getSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords);
   startingChar.makeFromWeight(simpleWeight, &theG2B3Data.theHmm.theRange());
   startingChar.splitCharacterOverReductiveSubalgebra(&report, tempChar, theG2B3Data);
@@ -8149,7 +8150,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2(
   if (output.isError()) {
     return true;
   }
-  Vectors<RationalFunction> theHWs;
+  Vectors<RationalFunction<Rational> > theHWs;
   theHWs.addOnTop(theG2B3Data.theWeightFundCoords);
   return theCommands.innerPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, context);
 }
@@ -8159,16 +8160,15 @@ bool Calculator::innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, cons
   return CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
 }
 
-bool Calculator::innerPrintB3G2branchingTableCommon(
-  Calculator& theCommands,
+bool Calculator::innerPrintB3G2branchingTableCommon(Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  Vectors<RationalFunction>& outputHWs,
+  Vectors<RationalFunction<Rational> >& outputHWs,
   BranchingData& theG2B3Data,
   ExpressionContext& theContext
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCommon");
-  Vector<RationalFunction> theHWrf;
+  Vector<RationalFunction<Rational> > theHWrf;
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight = 0;
   if (!CalculatorFunctions::innerPrintB3G2branchingTableInit(
@@ -8220,10 +8220,10 @@ bool Calculator::innerSplitFDpartB3overG2old(
   <<  theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega")
   << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
-    Vector<RationalFunction>& currentWeightSimpleB3coords = theG2B3Data.outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentWeightFundB3coords = theG2B3Data.outputWeightsFundCoordS[i];
-    Vector<RationalFunction>& currentG2Weight = theG2B3Data.g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
+    Vector<RationalFunction<Rational> >& currentWeightSimpleB3coords = theG2B3Data.outputWeightsSimpleCoords[i];
+    Vector<RationalFunction<Rational> >& currentWeightFundB3coords = theG2B3Data.outputWeightsFundCoordS[i];
+    Vector<RationalFunction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
+    Vector<RationalFunction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ToStringLetterFormat("\\omega")
     << " $ & $" << theG2B3Data.leviEigenSpace[i].ToStringLetterFormat("m")
     << " $ & $ " << currentG2Weight.ToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
@@ -8240,7 +8240,7 @@ bool Calculator::innerSplitFDpartB3overG2old(
   out << "<br>Ready for LaTeX consumption: ";
   out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
   out << "<table border =\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
-  Vector<RationalFunction> weightDifference;
+  Vector<RationalFunction<Rational> > weightDifference;
   std::stringstream formulaStream1;
   for (int k = 0; k < theG2B3Data.g2Weights.size; k ++) {
     out << "<tr><td>" << theG2B3Data.g2Weights[k].toString() << "</td><td>";

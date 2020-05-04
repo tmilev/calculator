@@ -1583,16 +1583,16 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "isAlgebraicRadical",
+    "IsAlgebraicRadical",
     CalculatorFunctions::innerIsAlgebraicRadical,
     "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
-    "isAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
-    "isAlgebraicRadical(\\sqrt{x}); "
-    "isAlgebraicRadical(\\sqrt{\\pi + e + 1})",
+    "IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
+    "IsAlgebraicRadical(\\sqrt{x}); "
+    "IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
     "CalculatorFunctions::innerIsAlgebraicRadical",
-    "isAlgebraicRadical",
+    "IsAlgebraicRadical",
     innerStandard
   );
   this->addOperationHandler(
@@ -2462,7 +2462,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
-    "generateVectorSpaceClosedWithRespectToLieBracket",
+    "GenerateVectorSpaceClosedWithRespectToLieBracket",
     CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket,
     "",
     "Generates a vector space closed with respect to the Lie bracket "
@@ -2480,17 +2480,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
     "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
     "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
-    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
-    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
-    "generateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWithRespectToLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
     "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
     "s_2 = - q_{- 5} - q_{-6};\n"
     "s_1 = q_{20} + q_{19};\n"
     "s_- 1 = - q_{- 19} - q_{- 20};\n"
     "s_-2 = 2q_{6} + 2q_{5};\n"
-    "generateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
+    "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
     "CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket",
-    "generateVectorSpaceClosedWithRespectToLieBracket",
+    "GenerateVectorSpaceClosedWithRespectToLieBracket",
     innerStandard
   );
   this->addOperationHandler(
@@ -5068,28 +5068,28 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "findOneSolutionSerreLikePolynomialSystemAlgebraic",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic,
     "",
     "Same as findOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
-    "findOneSolutionSerreLikePolynomialSystemAlgebraic"
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic",
-    "findOneSolutionSerreLikePolynomialSystemAlgebraic",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     innerStandard
   );
   this->addOperationHandler(
-    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit,
     "",
-    "Same as findOneSolutionSerreLikePolynomialSystemAlgebraic "
+    "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic "
     "but the first argument gives upper limits to the number of "
     "polynomial computations that can be carried out.",
-    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
     "(10000, x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit",
-    "findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
@@ -8568,12 +8568,12 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<Polynomial<AlgebraicNumber>                                              >();
   this->addOneBuiltInHandler<PolynomialModuloPolynomial<ElementZmodP>                                 >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
-  this->addOneBuiltInHandler<RationalFunction                                                         >();
+  this->addOneBuiltInHandler<RationalFunction<Rational>                                               >();
   this->addOneBuiltInHandler<Weight<Polynomial<Rational> >                                            >();
   this->addOneBuiltInHandler<SemisimpleLieAlgebra*                                                    >();
-  this->addOneBuiltInHandler<ElementUniversalEnveloping<RationalFunction>                             >();
+  this->addOneBuiltInHandler<ElementUniversalEnveloping<RationalFunction<Rational> >                  >();
   this->addOneBuiltInHandler<MatrixTensor<Rational>                                                   >();
-  this->addOneBuiltInHandler<ElementTensorsGeneralizedVermas<RationalFunction>                        >();
+  this->addOneBuiltInHandler<ElementTensorsGeneralizedVermas<RationalFunction<Rational> >             >();
   this->addOneBuiltInHandler<Plot                                                                     >();
   this->addOneBuiltInHandler<WeylGroupData                                                            >();
   this->addOneBuiltInHandler<ElementWeylGroup                                                         >();

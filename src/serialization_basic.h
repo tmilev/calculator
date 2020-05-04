@@ -71,7 +71,7 @@ public:
       this->outputMarkers = theOutputMarkers;
       this->outputPointer = nullptr;
       int notUsed = output.size;
-      Serialization::WriteNByteUnsigned(this->numberOfBytes, input, output, notUsed);
+      Serialization::writeNByteUnsigned(this->numberOfBytes, input, output, notUsed);
       if (this->outputMarkers == nullptr) {
         return;
       }
@@ -135,7 +135,7 @@ public:
       this->markerOffset = - 1;
       this->offset = output.size;
       int theSize = output.size;
-      Serialization::WriteNByteUnsigned(numberOfBytes, 0, output, theSize);
+      Serialization::writeNByteUnsigned(numberOfBytes, 0, output, theSize);
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
         this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));
@@ -144,7 +144,7 @@ public:
     }
     ~LengthWriterNBytes() {
       int totalLength = this->outputPointer->size - this->offset - numberOfBytes;
-      Serialization::WriteNByteUnsigned(
+      Serialization::writeNByteUnsigned(
         this->numberOfBytes,
         static_cast<unsigned int>(totalLength),
         *this->outputPointer,
@@ -170,106 +170,108 @@ public:
   typedef LengthWriterNBytesTemplated<2> LengthWriterTwoBytes;
   typedef LengthWriterNBytesTemplated<3> LengthWriterThreeBytes;
 
-  static bool ReadTwoByteInt(
+  static bool readTwoByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
-  static bool ReadThreeByteInt(
+  static bool readThreeByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
-  static bool ReadFourByteInt(
+  static bool readFourByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
-  static bool ReadNByteInt(int numBytes,
+  static bool readNByteInt(int numBytes,
     const List<unsigned char>& input,
     int& inputOutputOffset,
     int& result,
     std::stringstream* commentsOnFailure
   );
-  static void WriteBytesAnnotated(
+  static void writeBytesAnnotated(
     const List<unsigned char>& input,
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations,
     const std::string& label
   );
-  static bool ReadTwoByteLengthFollowedByBytesDontOutputOffset(
+  static bool readTwoByteLengthFollowedByBytesDontOutputOffset(
     const List<unsigned char>& input,
     int Offset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static bool ReadTwoByteLengthFollowedByBytes(
+  static bool readTwoByteLengthFollowedByBytes(
     const List<unsigned char>& input,
     int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static bool ReadBytesFixedLength(
+  static bool readBytesFixedLength(
     const List<unsigned char>& input,
     int desiredNumberOfBytes,
     int& inputOutputOffset,
     List<unsigned char>& output,
     std::stringstream* commentsOnError
   );
-  static bool ReadOneByteLengthFollowedByBytes(
+  static bool readOneByteLengthFollowedByBytes(
     const List<unsigned char>& input,
     int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static bool ReadNByteLengthFollowedByBytes(int numBytesLength,
+  static bool readNByteLengthFollowedByBytes(
+    int numBytesLength,
     const List<unsigned char>& input,
     int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static void WriteNByteUnsigned(// how many bytes are used to record the length
+  static void writeNByteUnsigned(// how many bytes are used to record the length
     int byteCountOfLength,
     unsigned int input,
     List<unsigned char>& output,
     int& inputOutputOffset
   );
-  static void WriteTwoByteInt(
+  static void writeTwoByteInt(
     int input,
     List<unsigned char>& output
   );
-  static void WriteThreeByteInt(
+  static void writeThreeByteInt(
     int input,
     List<unsigned char>& output
   );
-  static void WriteTwoByteUnsignedAnnotated(
+  static void writeTwoByteUnsignedAnnotated(
     unsigned int input,
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations,
     const std::string &label
   );
-  static void WriteTwoByteUnsigned(
+  static void writeTwoByteUnsigned(
     unsigned int input,
     List<unsigned char>& output
   );
-  static void WriteThreeByteUnsigned(
+  static void writeThreeByteUnsigned(
     unsigned int input,
     List<unsigned char>& output
   );
-  static void WriteFourByteUnsigned(
+  static void writeFourByteUnsigned(
     unsigned int input,
     List<unsigned char>& output
   );
-  static void WriteOneByteLengthFollowedByBytes(
+  static void writeOneByteLengthFollowedByBytes(
     const List<unsigned char>& input,
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations,
     const std::string& label
   );
-  static void WriteTwoByteLengthFollowedByBytes(const List<unsigned char>& input,
+  static void writeTwoByteLengthFollowedByBytes(
+    const List<unsigned char>& input,
     List<unsigned char>& output,
     List<Marker>* annotations,
     const std::string &label
   );
-  static void WriteNByteLengthFollowedByBytes(// how many bytes are used to record the length
+  static void writeNByteLengthFollowedByBytes(// how many bytes are used to record the length
     int byteCountOfLength,
     const List<unsigned char>& input,
     List<unsigned char>& output,
@@ -277,7 +279,7 @@ public:
     const std::string &label
   );
   static std::string convertListUnsignedCharsToHex(const List<unsigned char>& input);
-  static std::string ConvertListUnsignedCharsToString(const List<unsigned char>& input);
+  static std::string convertListUnsignedCharsToString(const List<unsigned char>& input);
 };
 
 #endif // SERIALIZATION_BASIC_ALREADY_DEFINED

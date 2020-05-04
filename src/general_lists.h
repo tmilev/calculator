@@ -362,7 +362,7 @@ public:
   static void parseListIntegersNoFailure(const std::string& input, List<int>& result);
 };
 
-class DrawElementInputOutput {
+class drawElementInputOutput {
 public:
   int TopLeftCornerX;
   int TopLeftCornerY;
@@ -1261,10 +1261,9 @@ public:
   bool addOnTopNoRepetitionMustBeNew(const Object& o) {
     if (this->getIndex(o) != - 1) {
       std::stringstream crashStream;
-      crashStream << "This is a programming error: the programmer requested to add the object "
-      << o << " without repetition "
-      << "to the hashed list with a function that does not allow repetition, "
-      << "but the hashed list already contains the object. ";
+      crashStream << "Request to add object "
+      << o << " does not allow repetition, "
+      << "but the object is already in the list. ";
       fatalCrash(crashStream.str());
     }
     this->addOnTop(o);
@@ -1292,9 +1291,9 @@ public:
   void setObjectAtIndex(int index, const Object& theObject) {
     if (index < 0 || index >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "This is a programming error. You are attempting to pop out index "
+      commentsOnCrash << "Attempt to pop out index "
       << index << " out of hashed array "
-      << " of size " << this->size << ". ";
+      << "of size " << this->size << ". ";
       fatalCrash(commentsOnCrash.str());
     }
     int hashIndexPop = this->getHash(this->theObjects[index]);
@@ -1306,9 +1305,9 @@ public:
   void removeIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "This is a programming error. You are attempting to pop out index "
+      commentsOnCrash << "Attemp to pop out index "
       << index << " out of hashed array "
-      << " of size " << this->size << ". ";
+      << "of size " << this->size << ". ";
       fatalCrash(commentsOnCrash.str());
     }
     Object* oPop = &this->theObjects[index];

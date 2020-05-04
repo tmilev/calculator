@@ -1558,12 +1558,12 @@ bool CalculatorFunctions::outerCombineFractionsCommutative(
 }
 
 template<class Coefficient>
-void Polynomial<Coefficient>::GetPolyWithPolyCoeff(
+void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
+  MacroRegisterFunctionWithName("Polynomial::getPolynomialWithPolynomialCoefficient");
   if (theNonCoefficientVariables.MaxSize != this->minimalNumberOfVariables()) {
-    global.fatal << "GetPolyWithPolyCoeff called with selection which has "
+    global.fatal << "getPolynomialWithPolynomialCoefficient called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
   output.makeZero();
@@ -1586,13 +1586,13 @@ void Polynomial<Coefficient>::GetPolyWithPolyCoeff(
 }
 
 template<class Coefficient>
-void Polynomial<Coefficient>::GetPolyUnivariateWithPolyCoeffs(
+void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients(
   int theVar, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   Selection theVars;
   theVars.initialize(this->minimalNumberOfVariables());
   theVars.addSelectionAppendNewIndex(theVar);
-  this->GetPolyWithPolyCoeff(theVars, output);
+  this->getPolynomialWithPolynomialCoefficient(theVars, output);
 }
 
 template <class Coefficient>
@@ -1613,7 +1613,7 @@ bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
   constTerms.makeZero();
   for (int i = 0; i < theLinPolys.size; i ++) {
     for (int j = 0; j < theLinPolys[i].size(); j ++) {
-      if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter)) {
+      if (theLinPolys[i][j].isLinearNoConstantTerm(&theLetter)) {
         homogenousPart(i, theLetter) = theLinPolys[i].coefficients[j];
       } else if (theLinPolys[i][j].isConstant()) {
         constTerms(i, 0) = theLinPolys[i].coefficients[j];
@@ -2040,8 +2040,8 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   this->context.getFormat(this->currentFormaT);
   if (
     this->theRF.minimalNumberOfVariables() < 1 ||
-    this->theRF.expressionType == this->theRF.typeRational ||
-    this->theRF.expressionType == this->theRF.typePoly
+    this->theRF.expressionType == this->theRF.typeConstant ||
+    this->theRF.expressionType == this->theRF.typePolynomial
   ) {
     this->printoutPFsHtml << this->theRF.toString(&this->currentFormaT)
     << " is already split into partial fractions. ";
@@ -2087,7 +2087,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   }
   List<MonomialP>::Comparator monomialOrder = MonomialP::orderDefault();
   this->currentFormaT.flagUseFrac = true;
-  this->theNum.DivideBy(
+  this->theNum.divideBy(
     this->theDen,
     this->quotientRat,
     this->remainderRat,
@@ -2182,7 +2182,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   this->printoutPFsHtml << "<br><br>" << HtmlRoutines::getMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, - 1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
-  thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
+  thePolyThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(0, univariateThatMustDie);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
   << HtmlRoutines::getMathSpanPure(univariateThatMustDie.toString(&this->currentFormaT));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
@@ -5786,7 +5786,7 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
     *this *= other;
     return;
   }
-  this->CheckEqualModuli(other);
+  this->checkEqualModuli(other);
   this->theValue *= other.theValue;
   this->theValue %= this->theModulus;
 }
@@ -8370,7 +8370,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     }
   }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH >this->owner->MaxRecursionDeptH) {
+  if (this->owner->RecursionDeptH >this->owner->maximumRecursionDepth) {
     return *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble."
     << " This may be a programming error. ";
   }

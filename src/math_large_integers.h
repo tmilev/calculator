@@ -573,7 +573,7 @@ public:
     this->FreeExtended();
     this->simplify();
   }
-  void DivideBy(const Rational& r);
+  void divideBy(const Rational& r);
   void DivideByInteger(int x) {
     int tempDen; signed char tempSign;
     if (x < 0) {
@@ -685,7 +685,7 @@ public:
   }
   void writeToFile(std::fstream& output);
   void readFromFile(std::istream& input);
-  void DrawElement(DrawElementInputOutput& theDrawData);
+  void drawElement(drawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
       this->minus();
@@ -805,7 +805,7 @@ public:
     this->multiplyBy(right);
   }
   void operator/=(const Rational& right) {
-    this->DivideBy(right);
+    this->divideBy(right);
   }
   void operator+=(int right) {
     this->AddInteger(right);

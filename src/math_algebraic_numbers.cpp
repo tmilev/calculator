@@ -355,7 +355,7 @@ bool AlgebraicClosureRationals::reduceMe(
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.makeMonomial(0, i, 1);
-    zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
+    zToTheNth.divideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).isSmallInteger(&theIndex);
@@ -1567,16 +1567,22 @@ ElementZmodP ElementZmodP::zeroStatic() {
   return result;
 }
 
-ElementZmodP ElementZmodP::zero() {
+ElementZmodP ElementZmodP::zero() const {
   ElementZmodP result;
   result.theModulus = this->theModulus;
+  if (this->theModulus == 0) {
+    global.fatal << "Extracting constant one from non-initialized element not allowed. " << global.fatal;
+  }
   return result;
 }
 
-ElementZmodP ElementZmodP::one() {
+ElementZmodP ElementZmodP::one() const {
   ElementZmodP result;
   result.theModulus = this->theModulus;
   result.theValue = 1;
+  if (this->theModulus == 0) {
+    global.fatal << "Extracting zero constant from non-initialized element not allowed. " << global.fatal;
+  }
   return result;
 }
 
@@ -1616,6 +1622,19 @@ bool ElementZmodP::invert() {
   return result;
 }
 
+void ElementZmodP::makeZero() {
+  this->theValue = 0;
+  this->checkIamInitialized();
+}
+
+ElementZmodP ElementZmodP::getNumerator() const {
+  return *this;
+}
+
+ElementZmodP ElementZmodP::getDenominator() const {
+  return this->one();
+}
+
 void ElementZmodP::makeOne(const LargeIntegerUnsigned& newModulo) {
   this->theModulus = newModulo;
   this->theValue = 1;
@@ -1627,7 +1646,7 @@ void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
   this->theValue --;
 }
 
-void ElementZmodP::CheckEqualModuli(const ElementZmodP& other) {
+void ElementZmodP::checkEqualModuli(const ElementZmodP& other) {
   if (this->theModulus != other.theModulus) {
     global.fatal << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
@@ -1706,7 +1725,7 @@ void ElementZmodP::operator+=(const ElementZmodP& other) {
     *this += other;
     return;
   }
-  this->CheckEqualModuli(other);
+  this->checkEqualModuli(other);
   this->theValue += other.theValue;
   this->theValue %= this->theModulus;
 }
@@ -1717,7 +1736,7 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
     *this += other;
     return;
   }
-  this->CheckEqualModuli(other);
+  this->checkEqualModuli(other);
   ElementZmodP otherTimesMinusOne = other;
   otherTimesMinusOne *= -1;
   *this += otherTimesMinusOne;
@@ -1768,7 +1787,7 @@ bool ElementZmodP::operator/=(const LargeInteger& other) {
 
 bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->checkIamInitialized();
-  this->CheckEqualModuli(other);
+  this->checkEqualModuli(other);
   if (other.isEqualToZero()) {
     global.fatal << "Division by zero in ElementZmodP." << global.fatal;
   }

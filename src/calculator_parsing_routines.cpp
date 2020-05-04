@@ -50,7 +50,7 @@ void Calculator::reset() {
   this->MaxAlgTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
   this->MaxCachedExpressionPerRuleStack = 100000;
-  this->MaxRecursionDeptH = 10000;
+  this->maximumRecursionDepth = 10000;
   this->RecursionDeptH = 0;
   this->NumErrors = 0;
   this->NumListsStart               = - 1;
@@ -201,6 +201,7 @@ void Calculator::initialize() {
   this->addOperationBuiltInType("PolynomialModuloInteger");
   this->addOperationBuiltInType("PolynomialModuloPolynomialModuloInteger");
   this->addOperationBuiltInType("RationalFunction");
+  this->addOperationBuiltInType("RationalFunctionModuloInteger");
   this->addOperationBuiltInType("string");
   this->addOperationBuiltInType("ElementUEoverRF");
   this->addOperationBuiltInType("ElementTensorGVM");

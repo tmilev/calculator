@@ -881,7 +881,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLengt
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
-  Serialization::WriteNByteUnsigned(
+  Serialization::writeNByteUnsigned(
     numBytes,
     static_cast<unsigned int>(input),
     output,

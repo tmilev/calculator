@@ -11,6 +11,7 @@
 #include "crypto.h"
 #include "math_extra_elliptic_curves_implementation.h"
 #include <cmath>
+#include "math_rational_function_implementation.h"
 
 Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");
@@ -68,6 +69,12 @@ template < >
 int Expression::getTypeOperation<RationalFunction<Rational> >() const {
   this->checkInitialization();
   return this->owner->opRationalFunction();
+}
+
+template < >
+int Expression::getTypeOperation<RationalFunction<ElementZmodP> >() const {
+  this->checkInitialization();
+  return this->owner->opRationalFunctionModuloInteger();
 }
 
 template < >
@@ -309,7 +316,8 @@ SemisimpleSubalgebras
   this->checkInitialization();
   inputValue.checkInitialization();
   if (!this->owner->theObjectContainer.theSSSubalgebraS.contains(inputValue.owner->theWeyl.theDynkinType)) {
-    global.fatal << "Semisimple subalgebras must be allocated directly in the object container. " << global.fatal;
+    global.fatal << "Semisimple subalgebras must be "
+    << "allocated directly in the object container. " << global.fatal;
   }
   return this->owner->theObjectContainer.theSSSubalgebraS.getIndex(inputValue.owner->theWeyl.theDynkinType);
 }
@@ -378,7 +386,16 @@ int Expression::addObjectReturnIndex(const
 RationalFunction<Rational>
 & inputValue) const {
   this->checkInitialization();
-  return this->owner->theObjectContainer.theRFs
+  return this->owner->theObjectContainer.rationalFunctions
+  .addNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::addObjectReturnIndex(const
+RationalFunction<ElementZmodP>
+& inputValue) const {
+  this->checkInitialization();
+  return this->owner->theObjectContainer.rationalFunctionsModular
   .addNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -723,7 +740,16 @@ RationalFunction<Rational>& Expression::getValueNonConst() const {
     global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theRFs.getElement(this->getLastChild().theData);
+  return this->owner->theObjectContainer.rationalFunctions.getElement(this->getLastChild().theData);
+}
+
+template < >
+RationalFunction<ElementZmodP>& Expression::getValueNonConst() const {
+  if (!this->isOfType<RationalFunction<ElementZmodP> >()) {
+    global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
+    << "The expression equals " << this->toString() << "." << global.fatal;
+  }
+  return this->owner->theObjectContainer.rationalFunctionsModular.getElement(this->getLastChild().theData);
 }
 
 template < >
@@ -2346,6 +2372,29 @@ bool Expression::toStringBuiltIn<RationalFunction<Rational> >(
   format.flagUseFrac = true;
   out << "MakeRationalFunction{}("
   << input.getValue<RationalFunction<Rational> >().toString(&format) << ")";
+  if (showContext) {
+    out << "[" << input.getContext().toString() << "]";
+  }
+  return true;
+}
+
+template<>
+bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
+  (void) theFormat;
+  FormatExpressions format;
+  input.getContext().getFormat(format);
+  format.flagSuppressModP = true;
+  format.flagUseFrac = true;
+  const RationalFunction<ElementZmodP>& data = input.getValue<RationalFunction<ElementZmodP> >();
+  if (!data.isEqualToZero()) {
+    format.suffixLinearCombination = data.constantValue.toStringModP();
+  }
+  out << data.toString(&format);
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -4407,7 +4456,7 @@ std::string Expression::toString(
     theFormat->flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
-    if (this->owner->RecursionDeptH + 1 > this->owner->MaxRecursionDeptH) {
+    if (this->owner->RecursionDeptH + 1 > this->owner->maximumRecursionDepth) {
       return "(...)";
     }
   } else {
@@ -4426,7 +4475,7 @@ std::string Expression::toString(
   }
   int notationIndex = owner->theObjectContainer.expressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
-    return owner->theObjectContainer.ExpressionNotation[notationIndex];
+    return owner->theObjectContainer.expressionNotation[notationIndex];
   }
   std::stringstream out;
   if (
@@ -4468,7 +4517,7 @@ std::string Expression::lispify() const {
     return "Error: not initialized";
   }
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
+  if (this->owner->RecursionDeptH > this->owner->maximumRecursionDepth) {
     return "(error: max recursion depth ...)";
   }
   std::stringstream dataStream;

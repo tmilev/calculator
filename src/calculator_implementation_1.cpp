@@ -1919,7 +1919,7 @@ void Expression::substituteRecursivelyInChildren(const Expression& toBeSubbed, c
 bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (*theCounter.theCounter == theCommands.MaxRecursionDeptH - 2) {
+  if (*theCounter.theCounter == theCommands.maximumRecursionDepth - 2) {
     return output.assignValue(std::string("..."), theCommands);
   }
   std::string currentString;

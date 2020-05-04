@@ -27,7 +27,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
   RationalFunction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
   tempRF = this->AmbientWeyl->RootScalarCartanRoot(theWeight, tempVect);
-  if (tempRF.expressionType != tempRF.typeRational) {
+  if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
@@ -46,7 +46,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
     << "Whether or not this is a mistake, I am crashing. " << global.fatal;
     return false;
   }
-  return !tempRF.ratValue.isNegative();
+  return !tempRF.constantValue.isNegative();
 }
 
 template <>
@@ -65,7 +65,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction<Rational> >(
   RationalFunction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
   tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
-  if (tempRF.expressionType != tempRF.typeRational) {
+  if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
@@ -85,7 +85,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction<Rational> >(
     << global.fatal;
     return false;
   }
-  return !tempRF.ratValue.isNegative();
+  return !tempRF.constantValue.isNegative();
 }
 
 template <>
@@ -1728,8 +1728,8 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   }
   int letterDiff = 0, letterPol = 0;
   if (
-    !inputPolForm[0].IsOneLetterFirstDegree(&letterDiff) ||
-    !inputPolForm[1].IsOneLetterFirstDegree(&letterPol) ||
+    !inputPolForm[0].isOneLetterFirstDegree(&letterDiff) ||
+    !inputPolForm[1].isOneLetterFirstDegree(&letterPol) ||
     letterDiff == letterPol
   ) {
     return theCommands

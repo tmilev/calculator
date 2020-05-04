@@ -469,7 +469,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
       exponentContribution *= oneIndexContribution;
-      theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialP::orderDefault());
+      theCoeff.divideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialP::orderDefault());
       if (!tempP1.isEqualToZero()) {
         global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
@@ -789,12 +789,12 @@ bool Calculator::innerHWVCommon(
 }
 
 bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
-  if (this->RecursionDeptH <= this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH <= this->maximumRecursionDepth) {
     return false;
   }
   if (!this->flagMaxRecursionErrorEncountered) {
     *this << additionalErrorInfo
-    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of " << this->MaxRecursionDeptH
+    << "<span style =\"color:#FF0000\"><b> maximum recursion depth of " << this->maximumRecursionDepth
     << " exceeded. </b></span>" << "Aborting computation ASAP. ";
   }
   this->flagAbortComputationASAP = true;
@@ -1090,7 +1090,7 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
     return false;
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
+  if (this->owner->RecursionDeptH > this->owner->maximumRecursionDepth) {
     global.fatal << "This is a programming error: "
     << "function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
@@ -1124,7 +1124,7 @@ bool Expression::hasBoundVariables() const {
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::hasBoundVariables");
-  if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH) {
+  if (this->owner->RecursionDeptH>this->owner->maximumRecursionDepth) {
     global.fatal << "This is a programming error: function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
   if (this->isListOfTwoAtomsStartingWith(this->owner->opBind())) {
@@ -1189,7 +1189,7 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   const Expression& input, List<Expression>& output, int theOp
 ) {
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH > this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH > this->maximumRecursionDepth) {
     return false;
   }
   bool result = false;
@@ -1388,7 +1388,7 @@ bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& 
   const Expression& theNotation = input[1];
   theCommands << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
-  theCommands.theObjectContainer.ExpressionNotation.addOnTop(theNotation.toString());
+  theCommands.theObjectContainer.expressionNotation.addOnTop(theNotation.toString());
   theCommands.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
   output.setChildAtomValue(0, theCommands.opDefine());
@@ -2865,7 +2865,7 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
   }
   // HashedListReferences<std::string, MathRoutines::hashString> theStrings;
-  // HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
+  // HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   // HashedListReferences<Expression> expressionWithNotation;
   // HashedListReferences<LittelmannPath> theLSpaths;
   // HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -2905,13 +2905,14 @@ void ObjectContainer::reset() {
   this->polynomialsModular.clear();
   this->theWeylAlgebraElements.clear();
   this->theUEs.clear();
-  this->theRFs.clear();
+  this->rationalFunctions.clear();
+  this->rationalFunctionsModular.clear();
   this->theRationals.clear();
   this->theCharsSSLieAlgFD.clear();
   this->theDoubles.clear();
   this->theDoubles.addOnTop(std::nan(""));
   this->theStrings.clear();
-  this->ExpressionNotation.clear();
+  this->expressionNotation.clear();
   this->expressionWithNotation.clear();
   this->theLSpaths.clear();
   //this->theMatRats.clear();

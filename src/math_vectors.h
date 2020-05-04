@@ -1253,7 +1253,7 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& 
   this->affinePoint.setSize(input.size - 1);
   this->affinePoint[tempI] = input[input.size - 1];
   this->affinePoint[tempI].minus();
-  this->affinePoint[tempI].DivideBy(input[tempI]);
+  this->affinePoint[tempI].divideBy(input[tempI]);
   this->normal = input;
   this->normal.setSize(input.size - 1);
   return true;

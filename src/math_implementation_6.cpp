@@ -153,7 +153,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   if (lowestTerm == 0) {
     Polynomial<Rational> x1, tempP;
     x1.makeMonomial(0, 1, 1);
-    myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
+    myCopy.divideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
     bool result = myCopy.findOneVariableRationalRoots(tempList);
     output.addOnTop(0);
@@ -184,7 +184,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
         divisor.makeDegreeOne(1, 0, 1, - tempV[0]);
-        myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
+        myCopy.divideBy(divisor, myCopy, tempP, monomialOrder);
         output.addOnTop(tempV[0]);
         List<Rational> tempList;
         bool result = myCopy.findOneVariableRationalRoots(tempList);

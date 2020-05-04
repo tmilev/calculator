@@ -2164,10 +2164,10 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
   return output.assignValue(1, theCommands);
 }
 
-bool CalculatorFunctions::innerIsProductLinearOrConstTermsIn(
+bool CalculatorFunctions::innerIsProductLinearOrConstantTermsIn(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductLinearOrConstTermsIn");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsProductLinearOrConstantTermsIn");
   if (input.size() < 3) {
     return false;
   }

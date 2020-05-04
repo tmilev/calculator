@@ -276,9 +276,9 @@ public:
   }
   void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit);
   void substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods);
-  void setNumberOfVariables(int GoalNumVars) {
+  void setNumberOfVariables(int goalNumVars) {
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].setNumberOfVariables(GoalNumVars);
+      this->theObjects[i].setNumberOfVariables(goalNumVars);
     }
   }
   SemisimpleLieAlgebra& getOwnerSemisimple() const {

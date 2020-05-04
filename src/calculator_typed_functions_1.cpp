@@ -9,6 +9,7 @@
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::makeOne(int)
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
+#include "math_rational_function_implementation.h"
 
 template <>
 bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const;
@@ -624,10 +625,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
   return output.assignValueWithContext(simplified, output.getContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
+bool CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial");
   if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction<Rational> >(theCommands, input, output)) {
     return false;
   }
@@ -845,6 +846,38 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP(
   }
   left += right;
   return output.assignValueWithContext(left, inputContextsMerged[1].getContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger");
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression inputContextsMerged;
+  if (!input.mergeContextsMyArumentsAndConvertThem<Polynomial<ElementZmodP> >(
+    inputContextsMerged, &theCommands.comments
+  )) {
+    return false;
+  }
+  Polynomial<ElementZmodP> left = inputContextsMerged[1].getValue<Polynomial<ElementZmodP> >();
+  Polynomial<ElementZmodP> right = inputContextsMerged[2].getValue<Polynomial<ElementZmodP> >();
+  if (right.isEqualToZero()) {
+    return output.makeError("Division by zero.", theCommands);
+  }
+  if (!left.isEqualToZero()) {
+    if (left.coefficients[0].theModulus != right.coefficients[0].theModulus) {
+      return theCommands << "Attempt to multiply polynomials with different moduli. ";
+    }
+  }
+  RationalFunction<ElementZmodP> result;
+  global.comments << "DEBUG: here I am: left: " << left.toString() << "<br>";
+  global.comments << "DEBUG: here I am: right: " << right.toString() << "<br>";
+  result = left;
+  global.comments << "DEBUG: got to here.<br>";
+  result /= right;
+  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPByPolynomialModP(

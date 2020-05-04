@@ -337,9 +337,9 @@ bool Calculator::expressionMatchesPattern(
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.toStringHtml();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (this->RecursionDeptH>this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH>this->maximumRecursionDepth) {
     std::stringstream out;
-    out << "Max recursion depth of " << this->MaxRecursionDeptH << " exceeded whlie trying to match expression pattern "
+    out << "Max recursion depth of " << this->maximumRecursionDepth << " exceeded whlie trying to match expression pattern "
     << thePattern.toString() << " onto expression " << input.toString();
     this->evaluationErrors.addOnTop(out.str());
     return false;
@@ -515,7 +515,7 @@ bool Calculator::accountRule(
 ) {
   MacroRegisterFunctionWithName("Calculator::accountRule");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH > this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH > this->maximumRecursionDepth) {
     return false;
   }
   if (ruleE.isCalculatorStatusChanger()) {
@@ -1003,11 +1003,11 @@ Expression* Calculator::patternMatch(
 ) {
   MacroRegisterFunctionWithName("Calculator::patternMatch");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH >= this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH >= this->maximumRecursionDepth) {
     std::stringstream out;
     out << "Error: while trying to evaluate expression, "
     << "the maximum recursion depth of "
-    << this->MaxRecursionDeptH << " was exceeded";
+    << this->maximumRecursionDepth << " was exceeded";
     theExpression.makeError(out.str(), *this);
     return nullptr;
   }

@@ -872,7 +872,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringImpliedSubstitutions(
   for (int i = 0; i < this->theImpliedSubS.size; i ++) {
     for (int j = 0; j < this->theImpliedSubS[i].size; j ++) {
       int letterIndex = - 1;
-      if (this->theImpliedSubS[i][j].IsOneLetterFirstDegree(&letterIndex)) {
+      if (this->theImpliedSubS[i][j].isOneLetterFirstDegree(&letterIndex)) {
         if (letterIndex == j) {
           continue;
         }
@@ -1316,7 +1316,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   }
   productBuffer = left;
   productBuffer *= right;
-  productBuffer.DivideBy(
+  productBuffer.divideBy(
     leastCommonMultipleBuffer,
     output,
     remainderBuffer,
@@ -1380,7 +1380,7 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountNonReducedFac
   MacroRegisterFunctionWithName("PolynomialFactorization::accountNonReducedFactor");
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
-  this->current.DivideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
+  this->current.divideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
   if (!remainder.isEqualToZero()) {
     return false;
   }
@@ -1404,7 +1404,7 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
-  this->current.DivideBy(
+  this->current.divideBy(
     incoming, quotient, remainder, &MonomialP::orderDefault()
   );
   if (!remainder.isEqualToZero()) {

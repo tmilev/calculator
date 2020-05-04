@@ -92,7 +92,13 @@ public:
   static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerMatrixNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
@@ -194,8 +200,8 @@ template <class Coefficient>
 bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH) {
-    return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
+  if (theCommands.RecursionDeptH > theCommands.maximumRecursionDepth) {
+    return theCommands << "Max recursion depth of " << theCommands.maximumRecursionDepth
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   }
   if (input.isOfType<Polynomial<Coefficient> >()) {

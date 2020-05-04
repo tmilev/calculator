@@ -1577,7 +1577,7 @@ void Rational::MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x) {
   this->simplify();
 }
 
-void Rational::DivideBy(const Rational& r) {
+void Rational::divideBy(const Rational& r) {
   if (this == &r) {
     this->makeOne();
     return;
@@ -1590,7 +1590,7 @@ void Rational::DivideBy(const Rational& r) {
 Rational Rational::operator/(const Rational& right) const {
   Rational tempRat;
   tempRat.assign(*this);
-  tempRat.DivideBy(right);
+  tempRat.divideBy(right);
   return tempRat;
 }
 

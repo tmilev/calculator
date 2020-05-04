@@ -1673,7 +1673,7 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   basepoint.ScalarEuclidean(normal, tempRat);
   if (!tempRat2.isEqualToZero()) {
     tempRat3 = tempRat;
-    tempRat3.DivideBy(tempRat2);
+    tempRat3.divideBy(tempRat2);
     output *= tempRat3;
   } else {
     output.makeZero(input.size);
@@ -3180,7 +3180,7 @@ bool PartFraction::reduceMeOnce(
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
       for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
         this->denominator[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
-        outputCoeff.DivideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
+        outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
         if (remainderDivision.isEqualToZero()) {
           this->DecreasePowerOneFrac(IndicesNonZeroMults[i], 1);
           outputCoeff = quotient;
@@ -6484,7 +6484,7 @@ void ElementWeylGroup::MultiplyOnTheRightBySimpleReflection(int reflectionIndex)
 void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
   Rational coefficient, tempRat;
   coefficient.assign(DualSpaceElement[index]);
-  coefficient.DivideBy(this->cartanSymmetric.elements[index][index]);
+  coefficient.divideBy(this->cartanSymmetric.elements[index][index]);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
     tempRat.assign(coefficient);
     tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
@@ -6513,7 +6513,7 @@ void WeylGroupData::reflectSimple(
     tempRat.multiplyBy(this->cartanSymmetric.elements[index][i] * (- 2));
     alphaShift += tempRat;
   }
-  alphaShift.DivideBy(this->cartanSymmetric.elements[index][index]);
+  alphaShift.divideBy(this->cartanSymmetric.elements[index][index]);
   if (rhoAction) {
     if (useMinusRho) {
       alphaShift.AddInteger(1);
@@ -9630,7 +9630,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
   output.initialize(theSub.size, theTargetDim);
   for (int i = 0; i < theSub.size; i ++) {
     Polynomial<Rational>& currentPoly = theSub[i];
-    if (!currentPoly.IsLinear()) {
+    if (!currentPoly.isLinear()) {
       return false;
     }
     for (int j = 0; j < theTargetDim; j ++) {
@@ -9803,13 +9803,13 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
 }
 
 bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output) {
-  if (!inputLPoly.IsLinear()) {
+  if (!inputLPoly.isLinear()) {
     return false;
   }
   output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
-    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
+    if (inputLPoly[i].::MonomialP::isOneLetterFirstDegree(&theIndex)) {
       output[theIndex] = inputLPoly.coefficients[i];
     } else {
       *output.lastObject() = inputLPoly.coefficients[i];

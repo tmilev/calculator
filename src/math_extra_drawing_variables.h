@@ -250,7 +250,7 @@ public:
   int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
 
   std::string getHTMLDiv(int theDimension);
-  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
+  void drawString(drawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);
   void drawLineDirectly(

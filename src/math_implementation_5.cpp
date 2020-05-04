@@ -390,7 +390,7 @@ void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& i
 }
 
 void DrawingVariables::drawString(
-  DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle
+  drawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle
 ) {
   theDrawData.outputHeight = 0; theDrawData.outputWidth = 0;
   if (input == "") {

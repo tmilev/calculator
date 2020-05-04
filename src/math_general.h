@@ -354,16 +354,16 @@ public:
   void multiplyBy(const MonomialP& other) {
     this->operator*=(other);
   }
-  void DivideBy(const MonomialP& other) {
+  void divideBy(const MonomialP& other) {
     this->operator/=(other);
   }
-  bool IsLinear() const {
-    return this->isConstant() || this->IsLinearNoConstantTerm();
+  bool isLinear() const {
+    return this->isConstant() || this->isLinearNoConstantTerm();
   }
-  bool IsLinearNoConstantTerm(int* whichLetter = nullptr) const {
-    return this->IsOneLetterFirstDegree(whichLetter);
+  bool isLinearNoConstantTerm(int* whichLetter = nullptr) const {
+    return this->isOneLetterFirstDegree(whichLetter);
   }
-  bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const {
+  bool isOneLetterFirstDegree(int* whichLetter = nullptr) const {
     Rational whichDegree;
     if (!this->IsOneLetterNonConstant(whichLetter, &whichDegree)) {
       return false;
@@ -792,10 +792,10 @@ public:
       theCarbonCopy->switchRows(row1, row2);
     }
   }
-  void setNumberOfVariables(int GoalNumVars) {
+  void setNumberOfVariables(int goalNumVars) {
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        this->elements[i][j].setNumberOfVariables(GoalNumVars);
+        this->elements[i][j].setNumberOfVariables(goalNumVars);
       }
     }
   }
@@ -2707,20 +2707,19 @@ public:
     this->addMonomial(theConstMon, theConst);
   }
   void makeOne();
-  void GetPolyWithPolyCoeff(
+  void getPolynomialWithPolynomialCoefficient(
     Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
   ) const;
-  void GetPolyUnivariateWithPolyCoeffs(
+  void getPolynomialUnivariateWithPolynomialCoefficients(
     int theVar,
     Polynomial<Polynomial<Coefficient> >& output
   ) const;
-  void TimesInteger(int a);
   // Multivariable polynomial division with remainder.
   // Can be done using the multi-divisor polynomial division algorithm
   // in GroebnerBasisComputation by passing a single basis element.
   // However, since that data structure is somewhat heavy,
   // we provide an alternative independent implementation here.
-  void DivideBy(
+  void divideBy(
     const Polynomial<Coefficient>& inputDivisor,
     Polynomial<Coefficient>& outputQuotient,
     Polynomial<Coefficient>& outputRemainder,
@@ -2731,45 +2730,40 @@ public:
     tempMon.makeOne();
     this->addMonomial(tempMon, theConst);
   }
-  void ShiftVariableIndicesToTheRight(int VarIndexShift);
+  void shiftVariableIndicesToTheRight(int VarIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
-  void SetDynamicSubtype(int newNumVars) {
-    this->setNumberOfVariablesSubstituteDeletedByOne(newNumVars);
-  }
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
-  void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
-  void DecreaseNumVariables(int increment, Polynomial<Coefficient>& output);
+  void scaleToPositiveMonomialExponents(MonomialP& outputScale);
   bool substitution(const List<Polynomial<Coefficient> >& TheSubstitution);
   Rational totalDegree() const;
   int totalDegreeInt() const;
   bool isEqualToOne() const;
-  bool IsMonomialCoeffOne() const;
-  bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const;
+  bool isMonomialCoefficientOne() const;
+  bool isOneLetterFirstDegree(int* whichLetter = nullptr) const;
   bool isConstant(Coefficient* whichConstant = nullptr) const;
   bool isNegative() const;
-  bool IsLinearNoConstantTerm();
-  bool IsLinear();
-  bool IsLinearGetRootConstantTermLastCoordinate(Vector<Coefficient>& outputRoot);
+  bool isLinearNoConstantTerm();
+  bool isLinear();
+  bool isLinearGetRootConstantTermLastCoordinate(Vector<Coefficient>& outputRoot);
   void raiseToPower(int d, const Coefficient& one);
-  bool GetRootFromLinPolyConstTermLastVariable(Vector<Coefficient>& outputRoot);
-  Matrix<Coefficient> EvaluateUnivariatePoly(const Matrix<Coefficient>& input);//<-for univariate polynomials only
+  bool getRootFromLinearPolynomialConstantTermLastVariable(Vector<Coefficient>& outputRoot);
+  Matrix<Coefficient> evaluateUnivariatePolynomial(const Matrix<Coefficient>& input);//<-for univariate polynomials only
   Coefficient evaluate(const Vector<Coefficient>& input);
   bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& TimesMeEqualsOther, const Coefficient& theRingUnit
   ) const;
-  void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
+  void drawElement(drawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
 
   // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<Coefficient> >& output, int UpToPower);
-  int GetMaxPowerOfVariableIndex(int VariableIndex);
+  int getMaximumPowerOfVariableIndex(int VariableIndex);
   bool operator<=(const Coefficient& other) const;
   bool operator<(const Coefficient& other) const;
   bool operator>(const Polynomial<Coefficient>& other) const;
   bool operator<=(const Polynomial<Coefficient>& other) const;
-  bool IsGreaterThanZeroLexicographicOrder();
-  static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic(
+  static bool isGEQCompareByTopMonomialTotalDegThenLexicographic(
     const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
-  static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest(
+  static bool isGEQCompareByTopMonomialLexicographicLastVarStrongest(
     const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
   bool isEqualTo(const Polynomial<Coefficient>& p) const;
@@ -6562,12 +6556,12 @@ class MonomialGeneralizedVerma {
     }
     return false;
   }
-  void setNumberOfVariables(int GoalNumVars) {
+  void setNumberOfVariables(int goalNumVars) {
     if (this->owner->size <= this->indexInOwner) {
       global.fatal << "Crash in setNumberOfVariables: bad number of variables. " << global.fatal;
     }
-    this->theMonCoeffOne.setNumberOfVariables(GoalNumVars);
-    this->owner->theObjects[this->indexInOwner].setNumberOfVariables(GoalNumVars);
+    this->theMonCoeffOne.setNumberOfVariables(goalNumVars);
+    this->owner->theObjects[this->indexInOwner].setNumberOfVariables(goalNumVars);
   }
   void substitution(
     const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
@@ -6668,9 +6662,9 @@ public:
   static unsigned int hashFunction(const MonomialTensorGeneralizedVermas<Coefficient>& input) {
     return input.hashFunction();
   }
-  void setNumberOfVariables(int GoalNumVars) {
+  void setNumberOfVariables(int goalNumVars) {
     for (int i = 0; i < this->theMons.size; i ++) {
-      this->theMons[i].setNumberOfVariables(GoalNumVars);
+      this->theMons[i].setNumberOfVariables(goalNumVars);
     }
   }
   void substitution(

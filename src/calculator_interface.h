@@ -1005,12 +1005,13 @@ public:
 
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunction<Rational> > > theUEs;
-  HashedListReferences<RationalFunction<Rational> > theRFs;
+  HashedListReferences<RationalFunction<Rational> > rationalFunctions;
+  HashedListReferences<RationalFunction<ElementZmodP> > rationalFunctionsModular;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
-  HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
+  HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -1195,7 +1196,7 @@ public:
   List<double> knownDoubleConstantValues;
 
   List<Expression> buffer1, buffer2;
-  int MaxRecursionDeptH;
+  int maximumRecursionDepth;
   int RecursionDeptH;
   int DepthRecursionReached;
   int MaxAlgTransformationsPerExpression;
@@ -1802,6 +1803,9 @@ public:
   }
   int opRationalFunction() {
     return this->operations.getIndexNoFail("RationalFunction");
+  }
+  int opRationalFunctionModuloInteger() {
+    return this->operations.getIndexNoFail("RationalFunctionModuloInteger");
   }
   int opDifferentiate() {
     return this->operations.getIndexNoFail("Differentiate");

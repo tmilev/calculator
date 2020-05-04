@@ -30,7 +30,7 @@ bool MonomialP::substitution(
     }
     int theExponent = 0;
     if (!this->monBody[i].isSmallInteger(&theExponent) || this->monBody[i] < 0) {
-      if (theSubstitution[i].IsMonomialCoeffOne()) {
+      if (theSubstitution[i].isMonomialCoefficientOne()) {
         MonomialP tempMon = theSubstitution[i][0];
         tempMon.raiseToPower(this->monBody[i]);
         output *= tempMon;
@@ -301,7 +301,7 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) {
+void Polynomial<Coefficient>::shiftVariableIndicesToTheRight(int VarIndexShift) {
   if (VarIndexShift < 0) {
     global.fatal << "This is a programming error. "
     << "Requesting negative variable shift (more precisely, "
@@ -335,7 +335,7 @@ bool Polynomial<Coefficient>::isEqualToOne() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsMonomialCoeffOne() const {
+bool Polynomial<Coefficient>::isMonomialCoefficientOne() const {
   if (this->size() != 1) {
     return false;
   }
@@ -343,11 +343,11 @@ bool Polynomial<Coefficient>::IsMonomialCoeffOne() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsOneLetterFirstDegree(int* whichLetter) const {
+bool Polynomial<Coefficient>::isOneLetterFirstDegree(int* whichLetter) const {
   if (this->size() != 1) {
     return false;
   }
-  return (*this)[0].IsOneLetterFirstDegree(whichLetter);
+  return (*this)[0].isOneLetterFirstDegree(whichLetter);
 }
 
 template <class Coefficient>
@@ -378,9 +378,9 @@ bool Polynomial<Coefficient>::isNegative() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsLinearNoConstantTerm() {
+bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
   for (int i = 0; i < this->size; i ++) {
-    if (!this->theObjects[i].IsLinearNoConstantTerm()) {
+    if (!this->theObjects[i].isLinearNoConstantTerm()) {
       return false;
     }
   }
@@ -388,9 +388,9 @@ bool Polynomial<Coefficient>::IsLinearNoConstantTerm() {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsLinear() {
+bool Polynomial<Coefficient>::isLinear() {
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].IsLinear()) {
+    if (!(*this)[i].isLinear()) {
       return false;
     }
   }
@@ -398,14 +398,14 @@ bool Polynomial<Coefficient>::IsLinear() {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsLinearGetRootConstantTermLastCoordinate(Vector<Coefficient>& outputRoot) {
+bool Polynomial<Coefficient>::isLinearGetRootConstantTermLastCoordinate(Vector<Coefficient>& outputRoot) {
   outputRoot.makeZero(this->minimalNumberOfVariables() + 1);
   int index;
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].isConstant()) {
       *outputRoot.lastObject() = this->coefficients[i];
     } else {
-      if ((*this)[i].IsOneLetterFirstDegree(&index)) {
+      if ((*this)[i].isOneLetterFirstDegree(&index)) {
         outputRoot[index] = this->coefficients[i];
       } else {
         return false;
@@ -433,16 +433,16 @@ void Polynomial<Coefficient>::raiseToPower(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::GetRootFromLinPolyConstTermLastVariable(Vector<Coefficient>& outputRoot) {
-  return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot);
+bool Polynomial<Coefficient>::getRootFromLinearPolynomialConstantTermLastVariable(Vector<Coefficient>& outputRoot) {
+  return this->isLinearGetRootConstantTermLastCoordinate(outputRoot);
 }
 
 template <class Coefficient>
-Matrix<Coefficient> Polynomial<Coefficient>::EvaluateUnivariatePoly(
+Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
   const Matrix<Coefficient>& input
 ) {
   // for univariate polynomials only
-  MacroRegisterFunctionWithName("Polynomial::EvaluateUnivariatePoly");
+  MacroRegisterFunctionWithName("Polynomial::evaluateUnivariatePolynomial");
   Matrix<Coefficient> output, tempElt, idMat;
   idMat.MakeIdMatrix(input.numberOfColumns);
   output.MakeZeroMatrix(input.numberOfColumns);
@@ -490,7 +490,7 @@ int Polynomial<Coefficient>::getHighestIndexSuchThatHigherIndexVariablesDontPart
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
+void Polynomial<Coefficient>::scaleToPositiveMonomialExponents(MonomialP& outputScale) {
   int numVars = this->minimalNumberOfVariables();
   outputScale.makeOne();
   for (int i = 0; i < numVars; i ++) {
@@ -571,7 +571,7 @@ bool Polynomial<Coefficient>::operator>(const Polynomial<Coefficient>& other) co
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsGEQcompareByTopMonomialTotalDegThenLexicographic(
+bool Polynomial<Coefficient>::isGEQCompareByTopMonomialTotalDegThenLexicographic(
   const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
 ) {
   if (left.isEqualToZero()) {
@@ -586,7 +586,7 @@ bool Polynomial<Coefficient>::IsGEQcompareByTopMonomialTotalDegThenLexicographic
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::IsGEQcompareByTopMonomialLexicographicLastVarStrongest(
+bool Polynomial<Coefficient>::isGEQCompareByTopMonomialLexicographicLastVarStrongest(
   const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
 ) {
   if (left.isEqualToZero()) {
@@ -652,7 +652,7 @@ template <class Coefficient>
 Polynomial<Coefficient> Polynomial<Coefficient>::operator%(const Polynomial<Coefficient>& other) {
   Polynomial<Coefficient> temp;
   Polynomial<Coefficient> result;
-  this->DivideBy(other, temp, result, &MonomialP::orderDefault());
+  this->divideBy(other, temp, result, &MonomialP::orderDefault());
   return result;
 }
 
@@ -660,7 +660,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::operator/=(const Polynomial<Coefficient>& other) {
   Polynomial<Coefficient> tempMe = *this;
   Polynomial<Coefficient> tempRemainder;
-  tempMe.DivideBy(other, *this, tempRemainder, &MonomialP::orderDefault());
+  tempMe.divideBy(other, *this, tempRemainder, &MonomialP::orderDefault());
 }
 
 template <class Coefficient>
@@ -742,13 +742,13 @@ bool Polynomial<Coefficient>::isProportionalTo(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::DivideBy(
+void Polynomial<Coefficient>::divideBy(
   const Polynomial<Coefficient>& inputDivisor,
   Polynomial<Coefficient>& outputQuotient,
   Polynomial<Coefficient>& outputRemainder,
   typename List<MonomialP>::Comparator* monomialOrder
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::DivideBy");
+  MacroRegisterFunctionWithName("Polynomial::divideBy");
   if (monomialOrder == nullptr) {
     global.fatal << "Non-initialized monomial pointer not allowed. " << global.fatal;
   }
@@ -765,7 +765,7 @@ void Polynomial<Coefficient>::DivideBy(
     &outputQuotient == &inputDivisor
   ) {
     Polynomial<Coefficient> newQuotient, newRemainder;
-    this->DivideBy(inputDivisor, newQuotient, newRemainder, monomialOrder);
+    this->divideBy(inputDivisor, newQuotient, newRemainder, monomialOrder);
     outputQuotient = newQuotient;
     outputRemainder = newRemainder;
     return;
@@ -773,8 +773,8 @@ void Polynomial<Coefficient>::DivideBy(
   outputRemainder = *this;
   MonomialP scaleRemainder, scaleInput;
   Polynomial<Coefficient> divisorShiftedExponents = inputDivisor;
-  outputRemainder.ScaleToPositiveMonomialExponents(scaleRemainder);
-  divisorShiftedExponents.ScaleToPositiveMonomialExponents(scaleInput);
+  outputRemainder.scaleToPositiveMonomialExponents(scaleRemainder);
+  divisorShiftedExponents.scaleToPositiveMonomialExponents(scaleInput);
   MonomialP remainderLeadingMonomial;
   Coefficient remainderLeadingCoefficient;
   int remainderLeadingIndex = outputRemainder.getIndexLeadingMonomial(
@@ -820,13 +820,6 @@ void Polynomial<Coefficient>::DivideBy(
   outputQuotient.multiplyBy(scaleInput);
   outputQuotient.multiplyBy(scaleRemainder);
   outputRemainder.multiplyBy(scaleRemainder);
-}
-
-template <class Coefficient>
-void Polynomial<Coefficient>::TimesInteger(int a) {
-  Rational r;
-  r.AssignInteger(a);
-  this->TimesRational(r);
 }
 
 template <class Coefficient>
@@ -901,13 +894,13 @@ void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
 }
 
 template <class Coefficient>
-int Polynomial<Coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
+int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::maximum(result, (*this)[i](VariableIndex).numeratorShort);
     if (!(*this)[i](VariableIndex).isSmallInteger()) {
       global.fatal << " This is a programming error: "
-      << "GetMaxPowerOfVariableIndex called on a polynomial whose monomials "
+      << "getMaximumPowerOfVariableIndex called on a polynomial whose monomials "
       << "have degrees that are not small integers. "
       << "This needs to be fixed! " << global.fatal;
     }
@@ -1395,7 +1388,7 @@ bool PolynomialModuloPolynomial<Coefficient>::isEqualToZero() const {
 template<class Coefficient>
 void PolynomialModuloPolynomial<Coefficient>::reduce() {
   Polynomial<Coefficient> unusedQuotient;
-  this->value.DivideBy(
+  this->value.divideBy(
     this->modulus,
     unusedQuotient,
     this->value,

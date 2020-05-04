@@ -2016,7 +2016,7 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
       currentCLS.theProjectivizedCone = this->projectivizedChambeR[i];
       currentCLS.theShift.makeZero(theAffineDim);
       currentCLS.theLattice = ZnLattice;
-      bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax);
+      bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].getRootFromLinearPolynomialConstantTermLastVariable(theLPtoMax);
       if (!tempBool) {
         global.fatal << "This should not happen. " << global.fatal;
       }

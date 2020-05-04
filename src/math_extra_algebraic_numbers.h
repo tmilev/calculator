@@ -292,11 +292,19 @@ public:
   static ElementZmodP scaleNormalizeIndex(
     List<ElementZmodP>& toBeScaled, int indexNonZeroElement
   );
+  // Required by RationalFunction.
+  // Returns a copy of the number.
+  ElementZmodP getNumerator() const;
+  // Required by RationalFunction.
+  // Returns one.
+  ElementZmodP getDenominator() const;
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntegerUnsigned& other);
+  void makeZero();
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
-  void CheckEqualModuli(const ElementZmodP& other);
+  void checkEqualModuli(const ElementZmodP& other);
+
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
@@ -328,9 +336,9 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
-  ElementZmodP zero();
+  ElementZmodP zero() const;
   static ElementZmodP zeroStatic();
-  ElementZmodP one();
+  ElementZmodP one() const;
   bool operator>(const ElementZmodP& other) const;
   class Test {
   public:

@@ -5504,7 +5504,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "IsProductLinearOrConstantTermsIn",
-    CalculatorFunctions::innerIsProductLinearOrConstTermsIn,
+    CalculatorFunctions::innerIsProductLinearOrConstantTermsIn,
     "",
     "Returns true if the expression is a product of linear or constant terms. "
     "Although this is subject to change, at the moment "
@@ -5515,7 +5515,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsProductLinearOrConstantTermsIn(x, (x- 1)(x + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x + 1)(x \\pi + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x +y)(x \\pi + 1));\n",
-    "CalculatorFunctions::innerIsProductLinearOrConstTermsIn",
+    "CalculatorFunctions::innerIsProductLinearOrConstantTermsIn",
     "IsProductLinearOrConstantTermsIn",
     innerStandard
   );
@@ -7276,24 +7276,36 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
+    CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial,
     this->opRational(),
     this->opPolynomialRational(),
     "Divides rational by polynomial (to get a rational function).",
     "z = Polynomial{}(x^2+y^2);\n1/z",
-    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly",
+    "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
     "DivideRationalByPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
+    CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialRational(),
     "Divides polynomial by polynomial (to get a rational function). ",
     "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
-    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly",
+    "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
+    "DividePolynomialByPolynomial",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "/",
+    CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger,
+    this->opPolynomialModuloInteger(),
+    this->opPolynomialModuloInteger(),
+    "Divides polynomial by polynomial (to get a rational function). ",
+    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
+    "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
+    "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
     "DividePolynomialByPolynomial",
     innerStandard
   );
@@ -8569,6 +8581,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneBuiltInHandler<PolynomialModuloPolynomial<ElementZmodP>                                 >();
   this->addOneBuiltInHandler<AlgebraicNumber                                                          >();
   this->addOneBuiltInHandler<RationalFunction<Rational>                                               >();
+  this->addOneBuiltInHandler<RationalFunction<ElementZmodP>                                           >();
   this->addOneBuiltInHandler<Weight<Polynomial<Rational> >                                            >();
   this->addOneBuiltInHandler<SemisimpleLieAlgebra*                                                    >();
   this->addOneBuiltInHandler<ElementUniversalEnveloping<RationalFunction<Rational> >                  >();

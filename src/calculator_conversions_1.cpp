@@ -876,7 +876,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   for (int j = 0; j < polyForm.size(); j ++) {
     const MonomialP& currentMon = polyForm[j];
     int theGenIndex = 0;
-    if (!currentMon.IsOneLetterFirstDegree(&theGenIndex)) {
+    if (!currentMon.isOneLetterFirstDegree(&theGenIndex)) {
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
       << input.toString() << ".<hr>";
     }
@@ -1089,7 +1089,7 @@ bool CalculatorConversions::innerExpressionFromRF(
   Polynomial<Rational> numP, denP;
   input.getNumerator(numP);
 
-  if (input.isConstant() || input.expressionType == input.typePoly) {
+  if (input.isConstant() || input.expressionType == input.typePolynomial) {
     return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numP, output, inputContext);
   }
   Expression numE, denE;
@@ -1153,7 +1153,7 @@ bool CalculatorConversions::functionRationalFunction(
       );
     }
     if (input.startsWith(theCommands.opDivide())) {
-      return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
+      return CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
         theCommands, intermediate, output
       );
     }

@@ -417,7 +417,7 @@ int ithfactor(int i, List<int> f) {
 }
 
 template <typename Coefficient>
-struct DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::DivideBy(const UDPolynomial<Coefficient>& divisor) const {
+struct DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::divideBy(const UDPolynomial<Coefficient>& divisor) const {
   struct DivisionResult<UDPolynomial<Coefficient> > out;
   out.remainder = *this;
   if (data.size < divisor.data.size) {
@@ -440,13 +440,13 @@ struct DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::Div
 
 template <typename Coefficient>
 UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator/(const UDPolynomial<Coefficient>& divisor) const {
-  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->DivideBy(divisor);
+  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->divideBy(divisor);
   return tmp.quotient;
 }
 
 template <typename Coefficient>
 UDPolynomial<Coefficient> UDPolynomial<Coefficient>::operator%(const UDPolynomial<Coefficient>& divisor) const {
-  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->DivideBy(divisor);
+  struct DivisionResult<UDPolynomial<Coefficient> > tmp = this->divideBy(divisor);
   return tmp.remainder;
 }
 

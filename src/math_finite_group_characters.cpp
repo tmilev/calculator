@@ -29,7 +29,7 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
 void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const {
   MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
   int rank = this->getDimension();
-  output.MakeIdMatrix(rank);
+  output.MakeIdentityMatrix(rank);
   for (int j = 0; j < rank; j ++) {
     output(indexSimpleRoot, j) -= (this->cartanSymmetric(indexSimpleRoot, j) / cartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
   }
@@ -117,8 +117,8 @@ void MatrixInBasisFast(Matrix<Coefficient>& out, const Matrix<Coefficient>& in, 
   Matrix<Coefficient> M = BM;
   Matrix<Coefficient> inT = in;
   inT.transpose();
-  M.MultiplyOnTheRight(inT);
-  out.MakeZeroMatrix(d);
+  M.multiplyOnTheRight(inT);
+  out.makeZeroMatrix(d);
   for (int i = 0; i < d; i ++) {
     int jj = 0;
     for (int j = 0; j < d; j ++) {
@@ -330,7 +330,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
       global.comments << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
-      splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
+      splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb = tempVectors;
     }
@@ -604,7 +604,7 @@ void intersection(
     }
   }
   List<Vector<Coefficient> > Vperp;
-  MV.GetZeroEigenSpaceModifyMe(Vperp);
+  MV.getZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<Coefficient> MW;
   MW.initialize(W.size, d);
@@ -614,7 +614,7 @@ void intersection(
     }
   }
   List<Vector<Coefficient> > Wperp;
-  MW.GetZeroEigenSpaceModifyMe(Wperp);
+  MW.getZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<Coefficient> M;
   M.initialize(Vperp.size + Wperp.size,d);
@@ -629,7 +629,7 @@ void intersection(
       M.elements[i][j] = Wperp[i - Vperp.size][j];
     }
   }
-  M.GetZeroEigenSpaceModifyMe(output);
+  M.getZeroEigenSpaceModifyMe(output);
 }
 
 template <typename Coefficient>
@@ -764,7 +764,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
     if (p(r) == 0) {
       Matrix<Rational> M2 = M;
       List<Vector<Rational> > V;
-      M2.GetEigenspaceModifyMe(r, V);
+      M2.getEigenspaceModifyMe(r, V);
       found += V.size;
       spaces.addOnTop(V);
       if (found == M.numberOfColumns) {
@@ -780,7 +780,7 @@ Vector<Coefficient> putInBasis(const Vector<Coefficient>& v, const List<Vector<C
   Vector<Coefficient> w;
   w.makeZero(B.size);
   Matrix<Coefficient> M;
-  M.MakeZeroMatrix(B.size);
+  M.makeZeroMatrix(B.size);
   for (int i = 0; i < B.size; i ++) {
     for (int j = 0; j < v.size; j ++) {
       w[i] += B[i][j] * v[j];
@@ -909,7 +909,7 @@ ElementMonomialAlgebra<ElementWeylGroup, Rational> FromClassFunction(
 template <typename Coefficient>
 Matrix<Coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& X) {
   Matrix<Coefficient> M;
-  M.MakeZeroMatrix(X.G->N);
+  M.makeZeroMatrix(X.G->N);
   for (int i1 = 0; i1 < X.G->ccCount; i1 ++) {
     for (int i2 = 0; i2 < X.G->ccSizes[i1]; i2 ++) {
       int i = X.G->conjugacyClasses[i1][i2];

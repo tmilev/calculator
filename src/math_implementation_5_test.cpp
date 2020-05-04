@@ -5,10 +5,10 @@
 #include "calculator.h"
 
 bool MonomialP::Test::all() {
-  return MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition();
+  return MonomialP::Test::testMonomialOrdersSatisfyTheDefinition();
 }
 
-bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
+bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinitionOne(
   const MonomialP& mustBeSmaller,
   const MonomialP& mustBeLarger,
   List<MonomialP>::Comparator& order
@@ -24,7 +24,7 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
   return true;
 }
 
-bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
+bool MonomialP::Test::testMonomialOrdersSatisfyTheDefinition() {
   MonomialP xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
   one.makeOne();
   xOne.makeEi(0, 1);
@@ -52,7 +52,7 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
     for (int j = 0; j < elementsIncreasingOrder.size; j ++) {
       for (int k = 0; k < elementsIncreasingOrder[i].size; k ++) {
         for (int l = k + 1; l < elementsIncreasingOrder[i].size; l ++) {
-          MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
+          MonomialP::Test::testMonomialOrdersSatisfyTheDefinitionOne(
             elementsIncreasingOrder[j][k], elementsIncreasingOrder[j][l], allOrders[i]
           );
         }

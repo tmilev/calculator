@@ -143,7 +143,7 @@ public:
   double getAngleFromXandY(double x, double y);
   void scaleToUnitLength(Vector<double>& theRoot) {
     double theLength = this->theBilinearForm.scalarProduct(theRoot, theRoot);
-    theLength = FloatingPoint::Sqrt(theLength);
+    theLength = FloatingPoint::sqrtFloating(theLength);
     theRoot /= theLength;
   }
   void rotateOutOfPlane(

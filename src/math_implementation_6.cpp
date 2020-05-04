@@ -31,12 +31,12 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
     return false;
   }
-  if (this->current.totalDegree() > this->maximumTotalDegree) {
+  if (this->current.totalDegree() > this->maximumtotalDegree) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The degree of the input is larger than the "
       << "maximum allowed for the Cantor-Zassenhaus algorithm: "
-      << this->maximumTotalDegree << ". ";
+      << this->maximumtotalDegree << ". ";
     }
     return false;
   }
@@ -66,7 +66,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   return this->oneFactorGo(commentsOnFailure);
 }
 
-const int PolynomialFactorizationCantorZassenhaus::maximumTotalDegree = 64;
+const int PolynomialFactorizationCantorZassenhaus::maximumtotalDegree = 64;
 
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   std::stringstream* commentsOnFailure
@@ -149,7 +149,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   myCopy = *this;
   myCopy.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Rational lowestTerm, highestCoefficient;
-  this->GetConstantTerm(lowestTerm);
+  this->getConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
     Polynomial<Rational> x1, tempP;
     x1.makeMonomial(0, 1, 1);

@@ -514,7 +514,7 @@ bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputTheLin
   if (nonPivotPoints.cardinalitySelection == 0) {
     return false;
   }
-  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
+  tempMat.nonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
   return true;
 }
 

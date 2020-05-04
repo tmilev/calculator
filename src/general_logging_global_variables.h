@@ -233,7 +233,7 @@ public:
 
   bool flagRequestComingLocally;
   // internal infrastructure flags
-  bool flagServerForkedIntoWorker;
+  bool flagServerforkedIntoWorker;
   bool flagNotAllocated;
 
   // Used for cryptographic purposes.

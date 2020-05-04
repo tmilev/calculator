@@ -276,7 +276,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
       theWeyl.theDynkinType.getEpsilonMatrix(tempM);
       tempM2 = tempM;
       tempM2.transpose();
-      tempM2.MultiplyOnTheRight(tempM);
+      tempM2.multiplyOnTheRight(tempM);
       tempM2 *= 2 / tempSimpleType.GetEpsilonRealizationLongRootLengthSquared();
       if (!(tempM2 == theWeyl.cartanSymmetric)) {
         global.fatal << "This is a (non-critical) programming error: "

@@ -436,7 +436,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     theReport.report(tempStream3.str());
     Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
-    currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
+    currentOpMat.getZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
     tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
     theReport.report(tempStream3.str());
     if (i == 0) {
@@ -1472,8 +1472,8 @@ bool Calculator::innerInterpolatePoly(
   }
   Polynomial<Rational> interPoly;
   Vector<Rational> theArgs, theValues;
-  pointsOfInterpoly.GetVectorFromColumn(0, theArgs);
-  pointsOfInterpoly.GetVectorFromColumn(1, theValues);
+  pointsOfInterpoly.getVectorFromColumn(0, theArgs);
+  pointsOfInterpoly.getVectorFromColumn(1, theValues);
   interPoly.interpolate(theArgs, theValues);
   ExpressionContext theContext(theCommands);
   theContext.makeOneVariableFromString("x");

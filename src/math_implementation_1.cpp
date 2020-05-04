@@ -82,7 +82,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
   if (this->basisRationalForm.numberOfRows == 0) {
     outputGenerator.makeZero(inputLine.size);
   } else {
-    this->basisRationalForm.GetVectorFromRow(0, outputGenerator);
+    this->basisRationalForm.getVectorFromRow(0, outputGenerator);
   }
 }
 
@@ -441,7 +441,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
       return false;
     }
     ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[IndexCurrentGenerator];
-    if (!currentElt.GetCartanPart().isEqualToZero() || currentElt.size() > 1) {
+    if (!currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1) {
       return false;
     }
     int thePower = 0;

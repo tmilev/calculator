@@ -464,7 +464,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
     exponentContribution.makeOne();
     theCoeff = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
-      currentMon.Powers[j].GetConstantTerm(currentShift);
+      currentMon.Powers[j].getConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo(
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
@@ -547,10 +547,10 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     for (int j = 0; j < theSSalgebra.getRank(); j ++) {
       Vector<Rational> ei;
       ei.makeEi(theSSalgebra.getRank(), j);
-      theGenerator.MakeGGenerator(ei, theSSalgebra);
+      theGenerator.makeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
       ei.minus();
-      theGenerator.MakeGGenerator(ei, theSSalgebra);
+      theGenerator.makeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
     }
   } else {
@@ -1791,7 +1791,7 @@ bool Expression::makeAtom(int input, Calculator& newBoss) {
 
 bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss) {
   Matrix<Expression> theMat;
-  theMat.MakeIdMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
+  theMat.MakeIdentityMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);
 }
 

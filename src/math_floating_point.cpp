@@ -4,15 +4,15 @@
 #include "math_general.h"
 #include <math.h>
 
-double FloatingPoint::Sqrt(double argument) {
+double FloatingPoint::sqrtFloating(double argument) {
   return ::sqrt(argument);
 }
 
-double FloatingPoint::Sin(double argument) {
+double FloatingPoint::sinFloating(double argument) {
   return ::sin(argument);
 }
 
-std::string FloatingPoint::DoubleToString(double input) {
+std::string FloatingPoint::doubleToString(double input) {
   std::stringstream out;
   out.precision(8);
   out << std::fixed << input;
@@ -41,35 +41,35 @@ std::string FloatingPoint::DoubleToString(double input) {
   return result;
 }
 
-double FloatingPoint::Cos(double argument) {
+double FloatingPoint::cosFloating(double argument) {
   return cos(argument);
 }
 
-double FloatingPoint::Abs(double argument) {
+double FloatingPoint::absFloating(double argument) {
   return argument >= 0 ? argument : - argument;
 }
 
-double FloatingPoint::Log(double argument) {
+double FloatingPoint::logFloating(double argument) {
   return log(argument);
 }
 
-double FloatingPoint::Arctan(double argument) {
+double FloatingPoint::arctan(double argument) {
   return atan(argument);
 }
 
-double FloatingPoint::Arccos(double argument) {
+double FloatingPoint::arccos(double argument) {
   return acos(argument);
 }
 
-double FloatingPoint::Arcsin(double argument) {
+double FloatingPoint::arcsin(double argument) {
   return asin(argument);
 }
 
-double FloatingPoint::Floor(double argument) {
+double FloatingPoint::floorFloating(double argument) {
   return floor(argument);
 }
 
-double FloatingPoint::Power(double base, double exponent) {
+double FloatingPoint::power(double base, double exponent) {
   return pow(base, exponent);
 }
 

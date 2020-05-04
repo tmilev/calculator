@@ -45,7 +45,7 @@ public:
   RationalFunction();
   RationalFunction(int other);
   RationalFunction(const Rational& other);
-  Rational RationalValue() const;
+  Rational rationalValue() const;
   void raiseToPower(int thePower);
   void reduceMemory();
   void operator=(const Polynomial<Coefficient>& other);

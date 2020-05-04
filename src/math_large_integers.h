@@ -499,7 +499,7 @@ public:
     List<int>& denominatorMultiplicities
   );
   const Rational& GetComplexConjugate() const;
-  Rational RationalValue() {
+  Rational rationalValue() {
     return *this;
   }
   void Subtract(const Rational& r);

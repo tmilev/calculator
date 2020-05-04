@@ -70,9 +70,9 @@ class AlgebraicNumber {
   }
   bool isRational(Rational* whichRational = nullptr) const;
   bool isNegative() const {
-    Rational theRationalValue;
-    if (this->isRational(&theRationalValue)) {
-      return theRationalValue.isNegative();
+    Rational therationalValue;
+    if (this->isRational(&therationalValue)) {
+      return therationalValue.isNegative();
     }
     return false;
   }
@@ -353,7 +353,7 @@ public:
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
-  static const int maximumTotalDegree;
+  static const int maximumtotalDegree;
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
   Polynomial<ElementZmodP> current;
   bool oneFactor(

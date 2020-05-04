@@ -140,7 +140,7 @@ public:
     Vector<Rational> result;
     result.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      result[i] = (*this)[i].RationalValue();
+      result[i] = (*this)[i].rationalValue();
     }
     return result;
   }
@@ -1106,8 +1106,8 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];
     }
   }
-  bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
-  bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(
+  bufferMatGaussianEliminationCC.MakeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
+  bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit
   );
   Vector<Coefficient> tempRoot, theCombination;
@@ -1126,7 +1126,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
     if (col >= theDim) {
       break;
     }
-    bufferMatGaussianElimination.GetVectorFromRow(i, tempRoot);
+    bufferMatGaussianElimination.getVectorFromRow(i, tempRoot);
     output[i] = this->theObjects[col];
     output[i] /= bufferMatGaussianElimination.elements[i][col];
     tempRoot *= output[i];
@@ -1135,7 +1135,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   if (!theCombination.isEqualToZero()) {
     return false;
   }
-  bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output);
+  bufferMatGaussianEliminationCC.actMultiplyVectorRowOnTheRight(output);
   return true;
 }
 
@@ -1332,7 +1332,7 @@ public:
   bool WallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate);
   // The below function returns true if the system of homogeneous linear inequalities Ax<=b
   // has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-  //  bool SystemLinearInequalitiesHasSolution
+  //  bool systemLinearInequalitiesHasSolution
   //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
   bool SplitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output);
 };

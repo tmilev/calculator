@@ -412,8 +412,8 @@ public:
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* owner;
   List<SimpleReflectionOrOuterAutomorphism> generatorsLastAppliedFirst;
   bool flagDeallocated;
-  void MultiplyOnTheRightBySimpleRootInner(int simpleRootIndex);
-  void MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
+  void multiplyOnTheRightBySimpleRootInner(int simpleRootIndex);
+  void multiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
   static unsigned int hashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
   unsigned int hashFunction() const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -449,7 +449,7 @@ public:
   bool checkConsistency() const;
   bool checkInitialization() const;
   int Sign() const;
-  void MultiplyOnTheRightBySimpleReflection(int reflectionIndex);
+  void multiplyOnTheRightBySimpleReflection(int reflectionIndex);
   static void conjugationAction(
     const ElementWeylGroup& conjugateWith, const ElementWeylGroup& conjugateOn, ElementWeylGroup& output
   );
@@ -511,7 +511,7 @@ public:
   void actOn(Vector<Coefficient>& inputOutput) const;
   void MakeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl);
-  void MultiplyOnTheRightByOuterAuto(int outerAutoIndex);
+  void multiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroupAutomorphisms& input);
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -566,7 +566,7 @@ class WeylGroupData {
     }
     Vectors<Rational> fundamentalBasis;
     this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
-    this->FundamentalToSimpleCoords.AssignVectorsToRows(fundamentalBasis);
+    this->FundamentalToSimpleCoords.assignVectorsToRows(fundamentalBasis);
     this->FundamentalToSimpleCoords.transpose();
     this->SimpleToFundamentalCoords = this->FundamentalToSimpleCoords;
     this->SimpleToFundamentalCoords.invert();
@@ -1839,9 +1839,9 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     elementSomeGroup g = this->theGroup->generators[i];
 
     if (in.generatorS.size == 0) {
-      out.generatorS[i].MakeZeroMatrix(1 * this->cosets.size);
+      out.generatorS[i].makeZeroMatrix(1 * this->cosets.size);
     } else {
-      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].numberOfRows * this->cosets.size);
+      out.generatorS[i].makeZeroMatrix(in.generatorS[0].numberOfRows * this->cosets.size);
     }
     for (int ci = 0; ci < cosets.size; ci ++) {
       elementSomeGroup k = g * cosets[ci].representative;
@@ -1852,7 +1852,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
       elementSomeGroup hk = cki * k;
       Matrix<Coefficient> ikblock;
       in.GetMatrixOfElement(hk, ikblock);
-      out.generatorS[i].AssignBlock(ikblock, kcsi * ikblock.numberOfRows, ci * ikblock.numberOfColumns);
+      out.generatorS[i].assignBlock(ikblock, kcsi * ikblock.numberOfRows, ci * ikblock.numberOfColumns);
     }
   }
   out.ownerGroup = this->theGroup;

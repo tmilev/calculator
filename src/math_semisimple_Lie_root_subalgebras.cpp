@@ -7,7 +7,7 @@
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
   int theDim = this->getAmbientWeyl().getDimension();
-  output.MakeIdMatrix(theDim);
+  output.MakeIdentityMatrix(theDim);
   Matrix<Rational> tempMat;
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
     this->getAmbientWeyl().GetMatrixReflection(this->SimpleBasisK[i], tempMat);
@@ -51,8 +51,8 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.SumCoords().numeratorShort, coxeterNumber);
   }
   Complex<double> theEigenValue;
-  theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::pi() / coxeterNumber);
-  theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::pi() / coxeterNumber);
+  theEigenValue.Re = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
+  theEigenValue.Im = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
@@ -64,7 +64,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     }
   }
   List<Vector<Complex<double> > > theEigenSpaceList;
-  eigenMat.GetZeroEigenSpace(theEigenSpaceList);
+  eigenMat.getZeroEigenSpace(theEigenSpaceList);
   Vectors<Complex<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
@@ -505,7 +505,7 @@ void RootSubalgebra::KModuleLieBracketKmodule(int index1, int index2, List<int>&
       if (theLieBracket.isEqualToZero()) {
         continue;
       }
-      if (theLieBracket.IsElementCartan()) {
+      if (theLieBracket.isElementCartan()) {
         oppositeKmods[index1] = index2;
         oppositeKmods[index2] = index1;
         continue;
@@ -558,7 +558,7 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   List<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().RootSystem;
   for (int i = 0; i <ambientRootSystem.size; i ++) {
     if (this->isSubalgebraBorelHighest(ambientRootSystem[i])) {
-      currentElt.MakeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
+      currentElt.makeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
       this->HighestVectors.addOnTop(currentElt);
       this->HighestWeightsPrimalSimple.addOnTop(ambientRootSystem[i]);
       this->HighestWeightsNONPrimalFundamental.addOnTop(this->getFundamentalCoordinatessOverSubalgebraSemisimplePart(ambientRootSystem[i]));
@@ -571,7 +571,7 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   for (int i = 0; i <cartanCentralizer.size; i ++) {
     currentElt.makeCartanGenerator(cartanCentralizer[i], this->getOwnerLieAlgebra());
     this->HighestVectors.addOnTop(currentElt);
-    this->HighestWeightsPrimalSimple.addOnTop(currentElt.GetRootIMustBeWeight());
+    this->HighestWeightsPrimalSimple.addOnTop(currentElt.getRootIMustBeWeight());
     this->HighestWeightsNONPrimalFundamental.addOnTop(zeroRoot);
   }
 }
@@ -596,7 +596,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   currentWeights.setExpectedSize(this->getAmbientWeyl().RootSystem.size);
   currentWeights.addOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
   if (this->HighestWeightsPrimalSimple[moduleIndex].isEqualToZero()) {
-    zeroSpace.addOnTop(this->HighestVectors[moduleIndex].GetCartanPart());
+    zeroSpace.addOnTop(this->HighestVectors[moduleIndex].getCartanPart());
   } else {
     for (int j = 0; j<currentWeights.size; j ++) {
       for (int k = 0; k< this->SimpleBasisK.size; k++) {
@@ -643,7 +643,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   for (int i = 0; i < wPrimalSimple.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt = theMod[i];
     if (!wPrimalSimple[i].isEqualToZero()) {
-      currentElt.MakeGGenerator(wPrimalSimple[i], this->getOwnerLieAlgebra());
+      currentElt.makeGGenerator(wPrimalSimple[i], this->getOwnerLieAlgebra());
       continue;
     }
     currentElt.makeCartanGenerator(zeroSpace[indexInZeroSpace], this->getOwnerLieAlgebra());
@@ -823,7 +823,7 @@ void RootSubalgebra::matrixToRelation(
   output.Betas.size = 0;
   Vector<Rational> tempRoot;
   tempRoot.setSize(theDimension);
-  matX.ScaleToIntegralForMinRationalHeightNoSignChange();
+  matX.scaleToIntegralForMinimalRationalHeightNoSignChange();
   if (matA.numberOfColumns != matX.numberOfRows) {
     global.fatal << "Right matrix has different number of columns from "
     << "the number of rows of the left one. " << global.fatal;
@@ -1865,7 +1865,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI2= permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
   int NumAutosCentralizer = tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
-  permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
+  permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   Matrix<Rational> tempMat;
   Selection tempSel;
   for (int i = 0; i <Domain.size; i ++) {
@@ -1960,8 +1960,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   NumAutos = tempAutos.TotalNumSubsetsMustBeSmalInt();
   int tempI2 = permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
   int NumAutosCentralizer = tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
-  permComponents.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
-  permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
+  permComponents.getPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
+  permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i = 0; i < tempI1; i ++) {
     for (int j = 0; j < tempI2; j ++) {
       for (int k = 0; k < NumAutos; k++) {
@@ -2190,20 +2190,20 @@ void RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomo
   List<MatrixTensor<Rational> > outerAutos;
   this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(outerAutos);
   Matrix<Rational> simpleBasisMatrixTimesCartanSymm;
-  simpleBasisMatrixTimesCartanSymm.AssignVectorsToRows(this->SimpleBasisK);
+  simpleBasisMatrixTimesCartanSymm.assignVectorsToRows(this->SimpleBasisK);
   simpleBasisMatrixTimesCartanSymm *= this->getAmbientWeyl().cartanSymmetric;
   Vectors<Rational> basisOrthogonalRoots;
-  simpleBasisMatrixTimesCartanSymm.GetZeroEigenSpaceModifyMe(basisOrthogonalRoots);
+  simpleBasisMatrixTimesCartanSymm.getZeroEigenSpaceModifyMe(basisOrthogonalRoots);
   Vectors<Rational> imagesWeightBasis, weightBasis = this->SimpleBasisK;
   weightBasis.addListOnTop(basisOrthogonalRoots);
   Matrix<Rational> basisMatrixInverted, resultingOperator;
-  basisMatrixInverted.AssignVectorsToColumns(weightBasis);
+  basisMatrixInverted.assignVectorsToColumns(weightBasis);
   basisMatrixInverted.invert();
   this->outerSAautos.theGenerators.setSize(outerAutos.size);
   for (int i = 0; i < outerAutos.size; i ++) {
-    outerAutos[i].ActOnVectorROWSOnTheLeft(this->SimpleBasisK, imagesWeightBasis);
+    outerAutos[i].actOnVectorROWSOnTheLeft(this->SimpleBasisK, imagesWeightBasis);
     imagesWeightBasis.addListOnTop(basisOrthogonalRoots);
-    resultingOperator.AssignVectorsToColumns(imagesWeightBasis);
+    resultingOperator.assignVectorsToColumns(imagesWeightBasis);
     resultingOperator *= basisMatrixInverted;
     this->outerSAautos.theGenerators[i] = resultingOperator;
   }
@@ -2286,7 +2286,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     List<Matrix<Rational> >& extensionCartanSymmetrics =
     this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     for (int i = 0; i <extensionRootPermutations.size && goodPermutation == - 1; i ++) {
-      this->scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
+      this->scalarProdMatrixOrdered.makeZeroMatrix(this->SimpleBasisK.size);
       for (int j = 0; j < this->SimpleBasisK.size; j ++) {
         for (int k = 0; k < this->SimpleBasisK.size; k ++) {
           this->scalarProdMatrixOrdered(
@@ -2475,7 +2475,7 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   outputF.makeZero();
   outputE.makeZero();
   ChevalleyGenerator tempGen;
-  if (Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+  if (Matrix<Rational>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     tempMat, tempMatColumn, tempMatResult
   )) {
     for (int i = 0; i <rootsInPlay.size; i ++) {
@@ -3137,13 +3137,13 @@ std::string RootSubalgebras::toStringAlgebraLink(int index) {
 }
 
 template<class Coefficient>
-Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::GetRootIMustBeWeight() const {
+Vector<Rational> ElementSemisimpleLieAlgebra<Coefficient>::getRootIMustBeWeight() const {
   if (this->isEqualToZero()) {
-    global.fatal << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight on a zero element is forbidden." << global.fatal;
+    global.fatal << "Calling ElementSemisimpleLieAlgebra::getRootIMustBeWeight on a zero element is forbidden." << global.fatal;
   }
   if (this->size() > 1) {
-    if (!this->IsElementCartan()) {
-      global.fatal << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight "
+    if (!this->isElementCartan()) {
+      global.fatal << "Calling ElementSemisimpleLieAlgebra::getRootIMustBeWeight "
       << "on a non-weight element is forbidden. The element is: "
       << this->toString() << global.fatal;
     }
@@ -3639,7 +3639,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (simpleType == 'B') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.MakeIdMatrix(theDimension * 2 + 1, 1, 0);
+    tempMat.MakeIdentityMatrix(theDimension * 2 + 1, 1, 0);
     tempMat.elements[theDimension][theDimension] = 0;
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isShort = false;
@@ -3703,7 +3703,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (simpleType == 'C') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.MakeIdMatrix(theDimension * 2, 1, 0);
+    tempMat.MakeIdentityMatrix(theDimension * 2, 1, 0);
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isLong= false;
       int firstIndex = - 1;

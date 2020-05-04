@@ -124,7 +124,7 @@ double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   double result = 0;
   for (int i = 0; i < theSides.size; i ++) {
     double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
-    result = MathRoutines::maximum(result, FloatingPoint::Sqrt(normSquared));
+    result = MathRoutines::maximum(result, FloatingPoint::sqrtFloating(normSquared));
   }
   return result;
 }
@@ -371,7 +371,7 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
     thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
   }
   Matrix<double> theMatrix;
-  theMatrix.AssignVectorsToRows(thePoints);
+  theMatrix.assignVectorsToRows(thePoints);
   return output.assignMatrix(theMatrix, theCommands);
 }
 
@@ -1554,7 +1554,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   }
   theSegment.thePlotType = "segmentPath";
   theSegment.dimension = theMat.numberOfColumns;
-  theMat.GetVectorsFromRows(theSegment.thePointsDouble);
+  theMat.getVectorsFromRows(theSegment.thePointsDouble);
   if (input.size() >= 4) {
     if (!input[3].evaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
@@ -1818,7 +1818,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   LargeInteger argDen = theArg.getDenominator();
   double doubleBase = baseInt.GetDoubleValue();
   double doubleArgNum = argNum.GetDoubleValue();
-  if (FloatingPoint::Log(doubleArgNum) / FloatingPoint::Log(doubleBase) > 1000) {
+  if (FloatingPoint::logFloating(doubleArgNum) / FloatingPoint::logFloating(doubleBase) > 1000) {
     return false;
   }
   int intPart = 0;
@@ -1931,7 +1931,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     theDoubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
-    std::string theDoubleString = FloatingPoint::DoubleToString(theDoubleValue);
+    std::string theDoubleString = FloatingPoint::doubleToString(theDoubleValue);
     if (theDoubleString.size() > 0) {
       if (theDoubleString[0] == '-') {
         out << "(" << theDoubleString << ")";

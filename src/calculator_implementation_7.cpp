@@ -967,14 +967,14 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
     if (input[1].isOperationGiven(theCommands.opE())) {
       return output.assignValue(Rational(1), theCommands);
     }
-    return output.assignValue(FloatingPoint::Log(theArgument), theCommands);
+    return output.assignValue(FloatingPoint::logFloating(theArgument), theCommands);
   }
   theArgument *= - 1;
   Expression iE, ipiE, piE, lnPart;
   iE.makeSqrt(theCommands, Rational(- 1), 2);
   piE.makeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
-  lnPart.assignValue(FloatingPoint::Log(theArgument), theCommands);
+  lnPart.assignValue(FloatingPoint::logFloating(theArgument), theCommands);
   return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
 }
 
@@ -1022,7 +1022,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
   if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.assignValue(FloatingPoint::Arctan(theArgument), theCommands);
+  return output.assignValue(FloatingPoint::arctan(theArgument), theCommands);
 }
 
 bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1038,7 +1038,7 @@ bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression&
   if (!argument.evaluatesToDouble(&doubleArgument)) {
     return false;
   }
-  return output.assignValue(FloatingPoint::Arccos(doubleArgument), theCommands);
+  return output.assignValue(FloatingPoint::arccos(doubleArgument), theCommands);
 }
 
 bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1053,7 +1053,7 @@ bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression&
   if (!input[1].evaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.assignValue(FloatingPoint::Arcsin(theArgument), theCommands);
+  return output.assignValue(FloatingPoint::arcsin(theArgument), theCommands);
 }
 
 bool CalculatorFunctions::innerAbs(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1118,7 +1118,7 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
   if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.assignValue(FloatingPoint::Sin(theArgument), theCommands);
+  return output.assignValue(FloatingPoint::sinFloating(theArgument), theCommands);
 }
 
 bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1155,7 +1155,7 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
   if (!argument.evaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.assignValue(FloatingPoint::Cos(theArgument), theCommands );
+  return output.assignValue(FloatingPoint::cosFloating(theArgument), theCommands );
 }
 
 bool CalculatorFunctions::innerTan(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1596,12 +1596,12 @@ void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::GetLinearSystemFromLinearPolys(
+bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
   const List<Polynomial<Coefficient> >& theLinPolys,
   Matrix<Coefficient>& homogenousPart,
   Matrix<Coefficient>& constTerms
 ) {
-  MacroRegisterFunctionWithName("Polynomial::GetLinearSystemFromLinearPolys");
+  MacroRegisterFunctionWithName("Polynomial::getLinearSystemFromLinearPolynomials");
   int theLetter;
   int numVars = 0;
   for (int i = 0; i < theLinPolys.size; i ++) {
@@ -2190,7 +2190,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   << "\\[" << univariateThatMustDie.toString(&this->currentFormaT) << "\\]";
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
-  Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.coefficients, theSystemHomogeneous, theConstTerms);
+  Polynomial<AlgebraicNumber>::getLinearSystemFromLinearPolynomials(univariateThatMustDie.coefficients, theSystemHomogeneous, theConstTerms);
   theSystemHomogeneousForLaTeX = theSystemHomogeneous;
   theConstTermsForLaTeX = theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
@@ -3703,7 +3703,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     << "The matrix is not square.";
     return output.makeError(out.str(), theCommands);
   }
-  outputMat.MakeIdMatrix(theMatrix.numberOfRows);
+  outputMat.MakeIdentityMatrix(theMatrix.numberOfRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
@@ -3724,7 +3724,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
 
   for (int i = 0; i < theMatrix.numberOfColumns; i ++) {
-    tempI = theMatrix.FindPivot(i, NumFoundPivots);
+    tempI = theMatrix.findPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
         theMatrix.switchRows(NumFoundPivots, tempI);
@@ -3744,8 +3744,8 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
         << tempElement.toString(&theFormat) << "$. \\\\";
       }
-      theMatrix.RowTimesScalar(NumFoundPivots, tempElement);
-      outputMat.RowTimesScalar(NumFoundPivots, tempElement);
+      theMatrix.rowTimesScalar(NumFoundPivots, tempElement);
+      outputMat.rowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         extendedMatrix = theMatrix;
         extendedMatrix.appendMatrixOnTheRight(outputMat);
@@ -3827,7 +3827,7 @@ bool Calculator::innerInvertMatrixVerbose(
   if (mat.numberOfRows != mat.numberOfColumns || mat.numberOfColumns < 1) {
     return output.makeError("The matrix is not square", theCommands);
   }
-  outputMat.MakeIdMatrix(mat.numberOfRows);
+  outputMat.MakeIdentityMatrix(mat.numberOfRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out;
@@ -3841,7 +3841,7 @@ bool Calculator::innerInvertMatrixVerbose(
   tempMat.appendMatrixOnTheRight(outputMat);
   out << "<br>" << HtmlRoutines::getMathSpanPure(tempMat.toString(&theFormat));
   for (int i = 0; i < mat.numberOfColumns; i ++) {
-    tempI = mat.FindPivot(i, NumFoundPivots);
+    tempI = mat.findPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
         mat.switchRows(NumFoundPivots, tempI);
@@ -3859,8 +3859,8 @@ bool Calculator::innerInvertMatrixVerbose(
         out << "<br> multiply row " << NumFoundPivots + 1
         << " by " << tempElement << ": ";
       }
-      mat.RowTimesScalar(NumFoundPivots, tempElement);
-      outputMat.RowTimesScalar(NumFoundPivots, tempElement);
+      mat.rowTimesScalar(NumFoundPivots, tempElement);
+      outputMat.rowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         tempMat = mat;
         tempMat.appendMatrixOnTheRight(outputMat);
@@ -5650,7 +5650,7 @@ bool CalculatorFunctions::innerTrace(
   }
   Matrix<Rational> theMat;
   if (theCommands.functionGetMatrix(input[1], theMat)) {
-    if (!theMat.IsSquare()) {
+    if (!theMat.isSquare()) {
       return output.makeError(
         "Error: attempting to get trace of non-square matrix. ",
         theCommands
@@ -5660,7 +5660,7 @@ bool CalculatorFunctions::innerTrace(
   }
   Matrix<RationalFunction<Rational> > theMatRF;
   if (theCommands.functionGetMatrix(input[1], theMatRF)) {
-    if (!theMatRF.IsSquare()) {
+    if (!theMatRF.isSquare()) {
       return output.makeError(
         "Error: attempting to get trace of non-square matrix. ",
         theCommands
@@ -5672,7 +5672,7 @@ bool CalculatorFunctions::innerTrace(
   if (!theCommands.getMatrixExpressionsFromArguments(input[1], theMatExp)) {
     return false;
   }
-  if (!theMat.IsSquare()) {
+  if (!theMat.isSquare()) {
     return output.makeError(
       "Error: attempting to get trace of non-square matrix. ",
       theCommands
@@ -8422,7 +8422,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = (FloatingPoint::Log(rightD)) / (FloatingPoint::Log(leftD));
+        *whichDouble = (FloatingPoint::logFloating(rightD)) / (FloatingPoint::logFloating(leftD));
       }
       return true;
     }
@@ -8449,7 +8449,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (leftD == 0.0 && rightD > 0) {
         *whichDouble = 0;
       } else {
-        *whichDouble = FloatingPoint::Power(leftD, rightD);
+        *whichDouble = FloatingPoint::power(leftD, rightD);
       }
       if (signChange) {
         *whichDouble *= - 1;
@@ -8479,7 +8479,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (rightD == 0.0 && leftD > 0) {
         *whichDouble = 0;
       } else {
-        *whichDouble = FloatingPoint::Power(rightD, 1 / leftD);
+        *whichDouble = FloatingPoint::power(rightD, 1 / leftD);
       }
       if (signChange) {
         *whichDouble *= - 1;
@@ -8524,7 +8524,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Sqrt(argumentD);
+        *whichDouble = FloatingPoint::sqrtFloating(argumentD);
       }
     }
     if (this->startsWith(theCommands.opAbsoluteValue())) {
@@ -8541,7 +8541,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Arccos(argumentD);
+        *whichDouble = FloatingPoint::arccos(argumentD);
       }
     }
     if (this->startsWith(theCommands.opArcSin())) {
@@ -8549,40 +8549,40 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Arcsin(argumentD);
+        *whichDouble = FloatingPoint::arcsin(argumentD);
       }
     }
     if (this->startsWith(theCommands.opSin())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Sin(argumentD);
+        *whichDouble = FloatingPoint::sinFloating(argumentD);
       }
     }
     if (this->startsWith(theCommands.opCos())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Cos(argumentD);
+        *whichDouble = FloatingPoint::cosFloating(argumentD);
       }
     }
     if (this->startsWith(theCommands.opTan())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::Cos(argumentD);
+        double denominator = FloatingPoint::cosFloating(argumentD);
         if (denominator == 0.0) {
           return false;
         }
-        *whichDouble = FloatingPoint::Sin(argumentD) / denominator;
+        *whichDouble = FloatingPoint::sinFloating(argumentD) / denominator;
       }
     }
     if (this->startsWith(theCommands.opCot())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::Sin(argumentD);
+        double denominator = FloatingPoint::sinFloating(argumentD);
         if (denominator == 0.0) {
           return false;
         }
-        *whichDouble = FloatingPoint::Cos(argumentD) / denominator;
+        *whichDouble = FloatingPoint::cosFloating(argumentD) / denominator;
       }
     }
     if (this->startsWith(theCommands.opCsc())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::Sin(argumentD);
+        double denominator = FloatingPoint::sinFloating(argumentD);
         if (denominator == 0.0) {
           return false;
         }
@@ -8591,7 +8591,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     }
     if (this->startsWith(theCommands.opSec())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::Cos(argumentD);
+        double denominator = FloatingPoint::cosFloating(argumentD);
         if (denominator == 0.0) {
           return false;
         }
@@ -8600,7 +8600,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     }
     if (this->startsWith(theCommands.opArcTan())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Arctan(argumentD);
+        *whichDouble = FloatingPoint::arctan(argumentD);
       }
     }
     if (this->startsWith(theCommands.opLog())) {
@@ -8608,7 +8608,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::Log(argumentD);
+        *whichDouble = FloatingPoint::logFloating(argumentD);
       }
     }
     return true;

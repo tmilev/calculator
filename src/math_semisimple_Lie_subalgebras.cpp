@@ -799,7 +799,7 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions *theFormat) {
   << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
   for (int i = 0; i < this->theOrbiTs.size; i ++) {
-    out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().toString() << "</td>";
+    out << "<tr><td>" << this->theSl2s[i].theH.getCartanPart().toString() << "</td>";
     if (this->theOrbiTs[i].orbitSize != - 1) {
       out << "<td>" << this->theOrbiTs[i].orbitSize;
       if (this->theOrbiTs[i].flagOrbitIsBuffered == 0)
@@ -893,7 +893,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand() {
   for (int i = 0; i < this->theSl2s.size; i ++) {
     this->theOrbitHelementLengths.addOnTop(this->theSl2s[i].LengthHsquared);
     this->theOrbitDynkinIndices.addOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
-    this->theOrbiTs[i].initialize(theGens, this->theSl2s[i].theH.GetCartanPart());
+    this->theOrbiTs[i].initialize(theGens, this->theSl2s[i].theH.getCartanPart());
   }
 }
 
@@ -1488,7 +1488,7 @@ void SemisimpleSubalgebras::getHCandidates(
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->theSl2s[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
         reportStreamX << " The h element "
-        << this->theSl2s[j].theH.GetCartanPart().toString() << " of length "
+        << this->theSl2s[j].theH.getCartanPart().toString() << " of length "
         << this->theOrbitHelementLengths[j].toString()
         << " generating orbit number " << j + 1 << " out of "
         << this->theSl2s.size << " does not have the required length of "
@@ -1500,7 +1500,7 @@ void SemisimpleSubalgebras::getHCandidates(
       continue;
     }
     if (baseRank == 0) {
-      outputHCandidatesScaledToActByTwo.addOnTop(this->theSl2s[j].theH.GetCartanPart());
+      outputHCandidatesScaledToActByTwo.addOnTop(this->theSl2s[j].theH.getCartanPart());
       // Orbit of not generated because that is the very first H element selected.
       continue;
     }
@@ -2516,7 +2516,7 @@ bool CandidateSSSubalgebra::computeSystemPart2(bool AttemptToChooseCentalizer, b
     theCentralizerCartanElts.setSize(this->theUnknownCartanCentralizerBasis.size);
     for (int i = 0; i < this->theUnknownCartanCentralizerBasis.size; i ++) {
       this->getGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
-      theCentralizerCartanElts[i] = this->theUnknownCartanCentralizerBasis[i].GetCartanPart();
+      theCentralizerCartanElts[i] = this->theUnknownCartanCentralizerBasis[i].getCartanPart();
     }
     theCentralizerCartanElts.getGramMatrix(theCentralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric);
     Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
@@ -2656,7 +2656,7 @@ void LinearCombination<templateMonomial, Coefficient>::intersectVectorSpaces(
   LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
   Matrix<Coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
-  theLinCombiMat.MakeIdMatrix(theVspaces.size +vectorSpace2eliminated.size);
+  theLinCombiMat.MakeIdentityMatrix(theVspaces.size +vectorSpace2eliminated.size);
   theVspaces.addListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
   LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
@@ -2747,9 +2747,9 @@ void CandidateSSSubalgebra::computePrimalModuleDecomposition() {
   }
   //please note: part of primalSubalgebraModules have already been computed.
   for (int i = 0; i < this->ModulesIsotypicallyMerged.size; i ++) {
-    if (this->ModulesIsotypicallyMerged[i][0].IsElementCartan()) {
+    if (this->ModulesIsotypicallyMerged[i][0].isElementCartan()) {
       for (int j = 0; j < this->ModulesIsotypicallyMerged[i].size; j ++) {
-        if (!this->ModulesIsotypicallyMerged[i][j].IsElementCartan()) {
+        if (!this->ModulesIsotypicallyMerged[i][j].isElementCartan()) {
           global.fatal << "<br>This is a programming or mathematical error. Module " << this->ModulesIsotypicallyMerged[i].toString()
           << " has elements of the ambient Cartan and elements outside of the ambient Cartan, which is not allowed. "
           << "<br>Here is a detailed subalgebra printout. " << global.fatal;
@@ -3981,15 +3981,15 @@ void CandidateSSSubalgebra::computePrimalModuleDecompositionHWVsOnly(HashedList<
     adIncludingCartanActions = commonAd;
     for (int j = 0; j < allHs.size; j ++) {
       tempAd = theAdsOfHs[j];
-      temp.MakeIdMatrix(this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators());
+      temp.MakeIdentityMatrix(this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators());
       temp *= inputHws[i][j];
       tempAd -= temp;
       adIncludingCartanActions.appendMatrixToTheBottom(tempAd);
     }
-    adIncludingCartanActions.GetZeroEigenSpace(outputV);
+    adIncludingCartanActions.getZeroEigenSpace(outputV);
     for (int j = 0; j < outputV.size; j ++) {
       outputV[j].ScaleNormalizeFirstNonZero();
-      tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->getAmbientSemisimpleLieAlgebra());
+      tempElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->getAmbientSemisimpleLieAlgebra());
       this->HighestVectorsNonSorted.addOnTop(tempElt);
     }
   }
@@ -4786,14 +4786,14 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->IndicesContainingRootSAs.size = 0;
   Vectors<Rational> tempRoots;
   tempRoots = MinimalContainingRegularSubalgebra.SimpleBasisK;
-  this->getOwnerSemisimpleAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->getOwnerSemisimpleAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.getCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.AmbientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   theDiagram.AmbientRootSystem = this->getOwnerWeyl().RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(tempRoots);
   this->IndicesContainingRootSAs.addOnTop(indexMinimalContainingRegularSA);
   tempRoots.makeEiBasis(theDimension);
-  this->getOwnerSemisimpleAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->getOwnerSemisimpleAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.AmbientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   tempDiagram.AmbientRootSystem = this->getOwnerWeyl().RootSystem;
@@ -4802,7 +4802,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->hCharacteristic.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     this->hCharacteristic[i] = this->getOwnerSemisimpleAlgebra().theWeyl.RootScalarCartanRoot(
-      this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]
+      this->theH.getCartanPart(), this->preferredAmbientSimpleBasis[i]
     );
   }
   //this->hCharacteristic.ComputeDebugString();
@@ -4967,7 +4967,7 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
     for (int i = 0; i < this->BadHCharacteristics.size; i ++) {
       bool isGoodInItsbadness = false;
       for (int j = 0; j < this->size; j ++) {
-        if (this->BadHCharacteristics[i] == (*this)[j].theH.GetCartanPart()) {
+        if (this->BadHCharacteristics[i] == (*this)[j].theH.getCartanPart()) {
           isGoodInItsbadness = true;
           break;
         }
@@ -5033,8 +5033,8 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
       out << "</td>";
       out << "<td style =\"white-space: nowrap\">";
     }
-    out << theSl2.theH.GetCartanPart().toString();
-    if (!this->getOwnerWeyl().isDominantWeight(theSl2.theH.GetCartanPart())) {
+    out << theSl2.theH.getCartanPart().toString();
+    if (!this->getOwnerWeyl().isDominantWeight(theSl2.theH.getCartanPart())) {
       out << "<b>Something has gone very wrong! The h is not dual to a dominant weight. This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }
@@ -6854,7 +6854,7 @@ bool CandidateSSSubalgebra::isDirectSummandOf(const CandidateSSSubalgebra& other
           conjugationCandidates.addListOnTop(currentComponent);
         }
       }
-      theOuterAutos.theElements[k].ActOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
+      theOuterAutos.theElements[k].actOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
       if (this->hasHsScaledByTwoConjugateTo(conjugationCandidates)) {
         return true;
       }
@@ -7045,7 +7045,7 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
   theHWsNonSorted.setSize(this->HighestVectorsNonSorted.size);
   for (int i = 0; i < this->HighestVectorsNonSorted.size; i ++) {
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt = this->HighestVectorsNonSorted[i];
-    currentElt.ElementToVectorNegativeRootSpacesFirst(theHWsNonSorted[i]);
+    currentElt.elementToVectorNegativeRootSpacesFirst(theHWsNonSorted[i]);
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
   Vector<Rational> tempV;
@@ -7053,7 +7053,7 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
   for (int i = 0; i < this->getAmbientSemisimpleLieAlgebra().getRank(); i ++) {
     tempV.makeEi(this->getAmbientSemisimpleLieAlgebra().getRank(), i);
     tempElt.makeCartanGenerator(tempV, this->getAmbientSemisimpleLieAlgebra());
-    tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
+    tempElt.elementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
   Vectors<AlgebraicNumber> outputCartanCentralizer;
   Vector<AlgebraicNumber> theCentralizerH;
@@ -7061,8 +7061,8 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
   this->CartanOfCentralizer.setSize(outputCartanCentralizer.size);
   AlgebraicNumber theFirstNonZeroCoeff;
   for (int i = 0; i < this->CartanOfCentralizer.size; i ++) {
-    tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owner);
-    theCentralizerH = tempElt.GetCartanPart();
+    tempElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owner);
+    theCentralizerH = tempElt.getCartanPart();
     theFirstNonZeroCoeff = theCentralizerH[theCentralizerH.getIndexFirstNonZeroCoordinate()];
     if (!theFirstNonZeroCoeff.isRational()) {
       theCentralizerH /= theFirstNonZeroCoeff;
@@ -7076,7 +7076,7 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
   this->CartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->theWeyl.cartanSymmetric);
-  this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
+  this->BilinearFormSimplePrimal.directSumWith(centralizerPart);
   bilinearFormInverted = this->BilinearFormSimplePrimal;
   bilinearFormInverted.invert();
   diagMat.initialize(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
@@ -7102,10 +7102,10 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
   this->BilinearFormFundPrimal *= matFundCoordsSimple;
 /*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
-    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
+    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->theHs[i]);
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++)
-    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
+    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->CartanOfCentralizer[i-this->getRank()]);
 */
 }

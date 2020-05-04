@@ -446,7 +446,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     MatrixTensor<Coefficient>& currentOp = this->getActionGeneratorIndex(theGenIndex);
     Matrix<Coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->getDimension());
-    currentOpMat.GetZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
+    currentOpMat.getZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1 = theFinalEigenSpace;
     tempSpace2 = eigenSpacesPerSimpleGenerator[i];
     theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
@@ -534,10 +534,10 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
             currentPair.Object1 = currentWordList[j];
             this->applyTAA(currentPair.Object1);
             currentPair.Object2 = otherWordList[k];
-            currentPair.Object2.MultiplyByGeneratorPowerOnTheLeft(this->getOwner().getOppositeGeneratorIndex(generatorIndex), 1);
+            currentPair.Object2.multiplyByGeneratorPowerOnTheLeft(this->getOwner().getOppositeGeneratorIndex(generatorIndex), 1);
           } else {
             currentPair.Object1 = currentWordList[j];
-            currentPair.Object1.MultiplyByGeneratorPowerOnTheLeft(generatorIndex, 1);
+            currentPair.Object1.multiplyByGeneratorPowerOnTheLeft(generatorIndex, 1);
             this->applyTAA(currentPair.Object1);
             currentPair.Object2 = otherWordList[k];
           }
@@ -802,7 +802,7 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
     Matrix<Coefficient> tempMat;
     tempMat = currentBF;
     Coefficient tempRat;
-    tempMat.ComputeDeterminantOverwriteMatrix(tempRat, theRingUnit, theRingZero);
+    tempMat.computeDeterminantOverwriteMatrix(tempRat, theRingUnit, theRingZero);
     if (!tempRat.isEqualToZero()) {
       this->theBilinearFormsInverted[l] = currentBF;
       this->theBilinearFormsInverted[l].invert();

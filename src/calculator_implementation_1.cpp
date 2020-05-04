@@ -67,7 +67,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     for (int i = 0; i < tempMatA.numberOfColumns; i ++) {
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
-        Matrix<Rational>::ComputePotentialChangeGradient(
+        Matrix<Rational>::computePotentialChangeGradient(
           tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
         );
         if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
@@ -79,7 +79,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     if (EnteringVariable != - 1) {
       int LeavingVariableRow;
       Rational MaxMovement;
-      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(
+      Matrix<Rational>::getMaxMovementAndLeavingVariableRow(
         MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables
       );
       Rational tempRat, tempTotalChange;
@@ -94,7 +94,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           << global.fatal;
         }
       }
-      tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
+      tempMatA.rowTimesScalar(LeavingVariableRow, tempRat);
       tempTotalChange.assign(MaxMovement);
       tempTotalChange.multiplyBy(ChangeGradient);
       matX[EnteringVariable] += MaxMovement;
@@ -1031,7 +1031,7 @@ std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
     out << "<br>";
   }
   out << "\\psplot[linecolor =\\fcColorGraph, plotpoints =1000]{"
-  << FloatingPoint::DoubleToString(inputLowerBound) << "}{" << FloatingPoint::DoubleToString(inputUpperBound) << "}{";
+  << FloatingPoint::doubleToString(inputLowerBound) << "}{" << FloatingPoint::doubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -1795,15 +1795,15 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   << "\\psaxes[ticks = none, labels = none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit =1cm, yunit =1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes - 0.4) << ", "
-  << FloatingPoint::DoubleToString(lowBoundY - 0.4) << ")("
-  << FloatingPoint::DoubleToString(theUpperBoundAxes + 0.4)
-  << "," << FloatingPoint::DoubleToString(highBoundY + 0.5) << ")\n\n";
+  resultStream << "\\begin{pspicture}(" << FloatingPoint::doubleToString(theLowerBoundAxes - 0.4) << ", "
+  << FloatingPoint::doubleToString(lowBoundY - 0.4) << ")("
+  << FloatingPoint::doubleToString(theUpperBoundAxes + 0.4)
+  << "," << FloatingPoint::doubleToString(highBoundY + 0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\fcAxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes - 0.15)
-  << "}{" << FloatingPoint::DoubleToString(lowBoundY - 0.15) << "}{"
-  << FloatingPoint::DoubleToString(theUpperBoundAxes + 0.15) << "}{"
-  << FloatingPoint::DoubleToString(highBoundY + 0.15) << "}" << lineSeparator;
+  resultStream << " \\fcAxesStandard{" << FloatingPoint::doubleToString(theLowerBoundAxes - 0.15)
+  << "}{" << FloatingPoint::doubleToString(lowBoundY - 0.15) << "}{"
+  << FloatingPoint::doubleToString(theUpperBoundAxes + 0.15) << "}{"
+  << FloatingPoint::doubleToString(highBoundY + 0.15) << "}" << lineSeparator;
   for (int i = 0; i < this->thePlots.size; i ++) {
     if (useHtml) {
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
@@ -2001,7 +2001,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     theDoubleValue = input.getValue<double>();
   }
   if (hasDoubleValue) {
-    out << " " << FloatingPoint::DoubleToString(theDoubleValue);
+    out << " " << FloatingPoint::doubleToString(theDoubleValue);
     return output.assignValue(out.str(), theCommands);
   }
   Expression currentE;
@@ -2085,8 +2085,8 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     << coneStrictMatForm.numberOfColumns << " which is not allowed. ";
     return output.makeError(out.str(), theCommands);
   }
-  coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
-  coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
+  coneNonStrictMatForm.getVectorsFromRows(coneNonStrictGens);
+  coneStrictMatForm.getVectorsFromRows(coneStrictGens);
   out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
   for (int i = 0; i < coneStrictGens.size; i ++) {
     out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].toString() << ";";

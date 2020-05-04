@@ -1252,10 +1252,10 @@ void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
 
 void Permutation::incrementAndGetPermutation(List<int>& output) {
   this->incrementReturnFalseIfPastLast();
-  this->GetPermutationLthElementIsTheImageofLthIndex(output);
+  this->getPermutationLthElementIsTheImageofLthIndex(output);
 }
 
-void Permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
+void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
   int numElements = this->Multiplicities.size;
   output.setSize(numElements);
   for (int i = 0; i < numElements; i ++) {
@@ -1490,7 +1490,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vector<Rational> tMpRt;
   tMpRt = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.MaxSize; i ++) {
-    tempMat.GetVectorFromRow(i, tempRoot);
+    tempMat.getVectorFromRow(i, tempRoot);
     tempVertices.addOnTop(tempRoot);
     if (this->ParabolicSelectionSmallerAlgebra.selected[i]) {
       tempVertices.addOnTop(- tempRoot);
@@ -1671,7 +1671,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   //this->preferredBasiS[0] ="(1,0)";
   //this->preferredBasiS[1] ="(0,1)";
   ////////////////////////////////////////
-  this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
+  this->preferredBasisChangE.assignVectorsToRows(this->preferredBasiS);
   this->preferredBasisChangE.transpose();
   this->preferredBasisChangeInversE = this->preferredBasisChangE;
   this->preferredBasisChangeInversE.invert();
@@ -1708,7 +1708,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   ParabolicEvaluationRootImage = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
   this->ParabolicSelectionSmallerAlgebra.initialize(input.theDomain().getRank());
   for (int i = 0; i < input.theDomain().getRank(); i ++) {
-    DualCartanEmbedding.GetVectorFromColumn(i, tempRoot);
+    DualCartanEmbedding.getVectorFromColumn(i, tempRoot);
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).isPositive()) {
       this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
     }
@@ -1755,7 +1755,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
     currentLO *= - 1;
     //tempList.addOnTopNoRepetition(this->theLinearOperators.theObjects[i]);
-    currentLOExtended.MakeIdMatrix(currentLO.numberOfRows);
+    currentLOExtended.MakeIdentityMatrix(currentLO.numberOfRows);
     currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
       for (int j = 0; j < currentLO.numberOfColumns; j ++) {
@@ -1815,14 +1815,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
   theWeYl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdMatrix(input.theDomain().getRank());
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, Rational(0));
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdentityMatrix(input.theDomain().getRank());
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat = theWeYl.cartanSymmetric;
   tempMat.invert();
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    tempMat.GetVectorFromRow(i, tempRoot);
+    tempMat.getVectorFromRow(i, tempRoot);
     if (ParabolicEvaluationRootImage[i].isEqualToZero()) {
       WallsWeylChamberLargerAlgebra.setSize(WallsWeylChamberLargerAlgebra.size + 1);
       *WallsWeylChamberLargerAlgebra.lastObject() = tempRoot;
@@ -1853,10 +1853,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
-    input.theDomain().theWeyl.cartanSymmetric.GetVectorFromRow(i, tempRoot);
+    input.theDomain().theWeyl.cartanSymmetric.getVectorFromRow(i, tempRoot);
     if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
-      tempMat.GetVectorFromRow(i, *tempRoots.lastObject());
+      tempMat.getVectorFromRow(i, *tempRoots.lastObject());
     }
   }
   this->preferredBasisChangeInversE.actOnVectorsColumn(tempRoots);
@@ -2128,7 +2128,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
     }
     tempMat.elements[dimLargerAlgebra + dimSmallerAlgebra][j] = - theTranslation[j];
   }
-  tempMat.GetMatrixIntWithDen(outputMat, outputDen);
+  tempMat.getMatrixIntegerWithDenominator(outputMat, outputDen);
   outputSub.makeSubstitutionFromMatrixIntegerAndDenominator(outputMat, outputDen);
 }
 

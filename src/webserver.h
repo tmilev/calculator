@@ -76,56 +76,53 @@ public:
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
   JSData processComputationIndicatorJSData();
-  int GetIndexIfRunningWorkerId(JSData& outputComputationStatus);
-  int ProcessFolderOrFile();
-  int ProcessFolder();
-  int ProcessFile();
-  int ProcessFileDoesntExist();
-  int ProcessFileCantOpen();
-  int ProcessFileTooLarge(long fileSize);
+  int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
+  int processFolderOrFile();
+  int processFolder();
+  int processFile();
+  int processFileDoesntExist();
+  int processFileCantOpen();
+  int processFileTooLarge(long fileSize);
 
-  JSData SetEmail(const std::string& input);
-  bool DoSetEmail(
+  JSData setEmail(const std::string& input);
+  bool doSetEmail(
     UserCalculatorData& inputOutputUser,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive,
     std::stringstream* commentsGeneralSensitive
   );
-  int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
-  int ProcessLoginNeededOverUnsecureConnection();
-  bool ProcessRedirectAwayFromWWW();
-  int ProcessUnknown();
+  int processgetAuthenticationToken(const std::string& reasonForNoAuthentication);
+  int processLoginNeededOverUnsecureConnection();
+  bool processRedirectAwayFromWWW();
+  int processUnknown();
   bool runInitialize();
   int run();
   bool runOnce();
   bool failReceiveReturnFalse();
   bool checkConsistency();
 
-  bool IsFileServedRaw();
-
-  static bool IsAllowedAsRequestCookie(const std::string& input);
-  bool LoginProcedure(
+  bool loginProcedure(
     std::stringstream& argumentProcessingFailureComments,
     std::stringstream* comments
   );
-  bool CorrectRequestsBEFORELoginReturnFalseIfModified();
-  bool CorrectRequestsAFTERLoginReturnFalseIfModified();
-  bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
+  bool correctRequestsBEFORELoginReturnFalseIfModified();
+  bool correctRequestsAFTERLoginReturnFalseIfModified();
+  bool redirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
 
-  bool ExtractArgumentsFromMessage(
+  bool extractArgumentsFromMessage(
     const std::string& input,
     std::stringstream& argumentProcessingFailureComments,
     int recursionDepth = 0
   );
-  bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
+  bool extractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
   void writeAfterTimeoutShowIndicator(const std::string& message);
   void writeAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
   ///////
-  void PauseIfRequested();
+  void pauseIfRequested();
   // writes json to body, sanitizes.
   bool writeToBodyJSON(const JSData& result);
   bool writeToBody(const std::string& bytesToAppend);
-  void WriteAfterTimeoutString(
+  void writeAfterTimeoutString(
     const std::string& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
@@ -135,73 +132,71 @@ public:
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  void WriteAfterTimeoutPartTwo(
+  void writeAfterTimeoutPartTwo(
     JSData& result,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  void WriteAfterTimeoutCarbonCopy(
+  void writeAfterTimeoutCarbonCopy(
     const JSData& input,
     const std::string& fileNameCarbonCopy
   );
-  void GetIndicatorOnTimeout(JSData &output, const std::string& message);
+  void getIndicatorOnTimeout(JSData &output, const std::string& message);
   void queueStringForSendingNoHeader(const std::string& stringToSend, bool mustSendAll = false);
   void queueBytesForSendingNoHeader(const List<char>& bytesToSend, bool mustSendAll = false);
-  bool ShouldDisplayLoginPage();
-  void WrapUpConnection();
-  void ResetMutexProcesses();
+  bool shouldDisplayLoginPage();
+  void wrapUpConnection();
+  void resetMutexProcesses();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void resetConnection();
   void release();
-  void ReleaseKeepInUseFlag();
+  void releaseKeepInUseFlag();
   bool ensureAllBytesSent();
   void sendPending();
-  void SendAllBytesNoHeaderS();
-  std::string MIMETypeFromFileExtension(const std::string& fileExtension);
-  std::string HeaderFromFileExtension(const std::string& fileExtension);
+  void sendAllBytesNoHeaders();
+  std::string mimeTypeFromFileExtension(const std::string& fileExtension);
+  std::string headerFromFileExtension(const std::string& fileExtension);
 
-  std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
-  JSData GetClonePageResult();
-  std::string GetModifyProblemReport();
-  JSData GetSignUpRequestResult();
-  std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
-  std::string GetBrowseProblems();
-  JSData GetDatabaseJSON();
-  std::string GetDatabaseDeleteOneItem();
-  std::string GetAddUserEmails();
-  std::string GetHtmlHiddenInputs(
+  std::string getChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
+  JSData getClonePageResult();
+  JSData getSignUpRequestResult();
+  std::string getAuthenticationToken(const std::string& reasonForNoAuthentication = "");
+  JSData getDatabaseJSON();
+  std::string getDatabaseDeleteOneItem();
+  std::string getAddUserEmails();
+  std::string getHtmlHiddenInputs(
     bool includeUserName, bool includeAuthenticationToken
   );
   void setHeaderOKNoContentLength(
     const std::string& extraHeader,
     const std::string& contentType = "application/json"
   );
-  void SetHeader(
+  void setHeader(
     const std::string& httpResponseNoTermination,
     const std::string& remainingHeaderNoTermination
   );
 
-  std::string GetHeaderConnectionClose();
-  std::string GetHeaderConnectionKeepAlive();
-  std::string GetHeaderSetCookie();
-  bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
+  std::string getHeaderConnectionClose();
+  std::string getHeaderConnectionKeepAlive();
+  std::string getHeaderSetCookie();
+  bool isFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();
-  bool IamActive();
-  bool ReceiveAll();
-  void AttemptUnknownRequestErrorCorrection();
-  bool RequireSSL();
+  bool isActive();
+  bool receiveAll();
+  void attemptUnknownRequestErrorCorrection();
+  bool requireSSL();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
-  std::string ToStringAddressRequest() const;
-  std::string ToStringStatus() const;
-  std::string ToStringMessageShort() const;
-  std::string ToStringMessageFull() const;
-  void ParseMessageHead();
-  void ExtractHostInfo();
-  void ExtractAddressParts();
-  void SanitizeVirtualFileName();
-  int ServeClient();
+  std::string toStringAddressRequest() const;
+  std::string toStringStatus() const;
+  std::string toStringMessageShort() const;
+  std::string toStringMessageFull() const;
+  void parseMessageHead();
+  void extractHostInfo();
+  void extractAddressParts();
+  void sanitizeVirtualFileName();
+  int serveClient();
 };
 
 class WebServer {
@@ -261,7 +256,7 @@ public:
   static void checkFreecalcSetup();
   static void analyzeMainArguments(int argC, char** argv);
   static bool analyzeMainArgumentsTimeString(const std::string& timeLimitString);
-  void InitializeBuildFlags();
+  void initializeBuildFlags();
   void initializeMainAll();
   void initializeMainHashes();
   void initializeMainRequests();
@@ -269,15 +264,15 @@ public:
   void initializeMainFoldersInstructorSpecific();
   void initializeMainMIMETypes();
 
-  void MarkChildNotInUse(int childIndex);
-  bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
+  void markChildNotInUse(int childIndex);
+  bool requiresLogin(const std::string& inputRequest, const std::string& inputAddress);
   void releaseWorkerSideResources();
-  void ReleaseActiveWorker();
-  void ReleaseSocketsNonActiveWorkers();
-  void ReleaseNonActiveWorkers();
-  void ReleaseEverything();
-  bool CreateNewActiveWorker();
-  bool EmergencyRemoval_LastCreatedWorker();
+  void releaseActiveWorker();
+  void releaseSocketsNonActiveWorkers();
+  void releaseNonActiveWorkers();
+  void releaseEverything();
+  bool createNewActiveWorker();
+  bool emergencyRemoval_LastCreatedWorker();
   bool checkConsistency();
   int daemon();
   int run();
@@ -286,18 +281,18 @@ public:
   // unique [with probability ~1] process id and
   // unique [with probability ~1] non-openSSL random bytes
   // for the child and parent processes.
-  bool CreateProcessMutex();
-  void ComputeActiveWorkerId();
-  int Fork();
+  bool createProcessMutex();
+  void computeActiveWorkerId();
+  int forkProcess();
   void initializeRandomBytes();
   void writeVersionJSFile();
   WebWorker& getActiveWorker();
-  static void WorkerTimerPing(int64_t pingTime);
+  static void workerTimerPing(int64_t pingTime);
   static void release(int& theDescriptor);
   static void wrapUp();
   static void fperror_sigaction[[noreturn]](int signal);
-  void ReapChildren();
-  static void Signal_SIGCHLD_handler(int s);
+  void reapChildren();
+  static void signal_SIGCHLD_handler(int s);
   bool initPrepareWebServerALL();
   void initializeSignals();
   bool initBindToPorts();
@@ -305,23 +300,23 @@ public:
   void initPortsITry();
   void initListeningSockets();
   void initSSL();
-  bool SSLServerSideHandShake(std::stringstream* commentsOnFailure);
-  static void TerminateProcessId(int processId);
-  void TerminateChildSystemCall(int i);
-  void ProcessOneChildMessage(int childIndex, int& outputNumInUse);
+  bool sslServerSideHandShake(std::stringstream* commentsOnFailure);
+  static void terminateProcessId(int processId);
+  void terminateChildSystemCall(int i);
+  void processOneChildMessage(int childIndex, int& outputNumInUse);
   void recycleChildrenIfPossible();
-  void RecycleOneChild(int childIndex, int& numberInUse);
-  void HandleTooManyConnections(const std::string& incomingUserAddress);
+  void recycleOneChild(int childIndex, int& numberInUse);
+  void handleTooManyConnections(const std::string& incomingUserAddress);
   void handleTooManyWorkers(int& numInUse);
-  void StopKillAll();
-  bool RestartIsNeeded();
+  void stopKillAll();
+  bool restartIsNeeded();
   void initDates();
-  std::string ToStringWorkerToWorker();
-  std::string ToStringLastErrorDescription();
-  std::string ToStringStatusActive();
-  std::string ToStringStatusAll();
-  std::string ToStringStatusForLogFile();
-  std::string ToStringConnectionSummary();
+  std::string toStringWorkerToWorker();
+  std::string toStringLastErrorDescription();
+  std::string toStringStatusActive();
+  std::string toStringStatusAll();
+  std::string toStringStatusForLogFile();
+  std::string toStringConnectionSummary();
   static void turnProcessMonitoringOn();
   static void turnProcessMonitoringOff();
   static int main(int argc, char** argv);

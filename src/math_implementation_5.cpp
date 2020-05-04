@@ -47,7 +47,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   Vectors<Rational> startBasis, imageBasis;
   startBasis.makeEiBasis(this->AmbientWeyl->getDimension());
   this->actByElement(input, startBasis, imageBasis);
-  outputMatrix.AssignVectorsToRows(imageBasis);
+  outputMatrix.assignVectorsToRows(imageBasis);
   outputMatrix.transpose();
 }
 
@@ -107,7 +107,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
-        currentElement.MultiplyOnTheRightBySimpleRootInner(j);
+        currentElement.multiplyOnTheRightBySimpleRootInner(j);
         this->allElements.addOnTop(currentElement);
       }
     }
@@ -116,7 +116,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
-        currentElement.MultiplyOnTheRightByOuterAutomorphism(j);
+        currentElement.multiplyOnTheRightByOuterAutomorphism(j);
         this->allElements.addOnTop(currentElement);
       }
     }
@@ -424,12 +424,12 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   /*if (this->theWeyl.WeylLetter == 'D' && theDimension ==4)
     theAutoIndex =2;
 */
-  mapOnRootSpaces.AssignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
+  mapOnRootSpaces.assignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
   mapOnRootSpaces.transpose();
 //  mapOnRootSpaces.ComputeDebugString();
 //  Matrix<Rational>  theDet =mapOnRootSpaces;
 //  Rational tempRat;
-//  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
+//  theDet.computeDeterminantOverwriteMatrix(tempRat);
   Selection NonExplored;
   int numRoots = this->theWeyl.RootSystem.size;
   NonExplored.initialize(numRoots);
@@ -450,9 +450,9 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
     Range[numRoots + i] = tempElt;
     for (int i = 0; i < 2; i ++, domainRoot.minus(), rangeRoot.minus()) {
       int theIndex = this->theWeyl.RootSystem.getIndex(rangeRoot);
-      tempElt.MakeGGenerator(rangeRoot, *this);
+      tempElt.makeGGenerator(rangeRoot, *this);
       Range[theIndex] = tempElt;
-      tempElt.MakeGGenerator(domainRoot, *this);
+      tempElt.makeGGenerator(domainRoot, *this);
       Domain[theIndex] = tempElt;
       NonExplored.RemoveSelection(theIndex);
     }
@@ -488,16 +488,16 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   vectorsRight.setSize(Range.size);
   if (!useNegativeRootsFirst) {
     for (int i = 0; i < Range.size; i ++) {
-      Range[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+      Range[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      Domain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   } else {
     for (int i = 0; i < Range.size; i ++) {
-      Range[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
-      Domain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+      Range[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
+      Domain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     }
   }
-  outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  outputAuto.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
 bool SemisimpleLieAlgebra::isInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight) {
@@ -553,7 +553,7 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
                 Explored.theObjects[index] = true;
                 numExplored++;
                 this->EmbeddingsRootSpaces.theObjects[index] = this->EmbeddingsRootSpaces.theObjects[i];
-                this->EmbeddingsRootSpaces.theObjects[index].LieBracketWith(this->EmbeddingsRootSpaces.theObjects[j]);
+                this->EmbeddingsRootSpaces.theObjects[index].lieBracketWith(this->EmbeddingsRootSpaces.theObjects[j]);
               }
             }
           }
@@ -652,11 +652,11 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   vectorsLeft.setSize(tempDomain.size);
   vectorsRight.setSize(tempDomain.size);
   for (int i = 0; i < tempRange.size; i ++) {
-    tempDomain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
-    tempRange[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
+    tempDomain[i].elementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+    tempRange[i].elementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
   }
   Matrix<Rational> tempMat;
-  tempMat.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
+  tempMat.makeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
   Vector<Rational> imageRoot;
   this->domainAllChevalleyGenerators.setSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
@@ -664,9 +664,9 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
     this->domainAllChevalleyGenerators[i].makeGenerator(i, this->theDomain());
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
-    this->domainAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoot);
+    this->domainAllChevalleyGenerators[i].elementToVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.actOnVectorColumn(tempRoot, imageRoot);
-    this->imagesAllChevalleyGenerators[i].AssignVectorNegRootSpacesCartanPosRootSpaces(imageRoot, this->theRange());
+    this->imagesAllChevalleyGenerators[i].assignVectorNegRootSpacesCartanPosRootSpaces(imageRoot, this->theRange());
   }
   return true;
 }
@@ -686,7 +686,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& 
   output.makeZero(theSmallDimension);
   for (int i = 0; i < theSmallDimension; i ++) {
     output[i] = this->theRange().theWeyl.RootScalarCartanRoot(
-      this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size + i].GetCartanPart(), input
+      this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size + i].getCartanPart(), input
     );
   }
   invertedSmallCartan.actOnVectorColumn(output, output);
@@ -743,7 +743,7 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   for (int i = 0; i < this->theDomain().getRank(); i ++) {
     domainElt.makeCartanGenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
     this->applyHomomorphism(domainElt, imageElt);
-    output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
+    output.assignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.getCartanPart());
   }
 }
 
@@ -836,13 +836,13 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   for (int i = 0; i < theRootSystem.size; i ++) {
     for (int j = 0; j < rankSA; j ++) {
       ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numPosRootsDomain];
-      theScalarProducts[j] = this->theRange().theWeyl.RootScalarCartanRoot(currentH.GetCartanPart(), theRootSystem[i]);
+      theScalarProducts[j] = this->theRange().theWeyl.RootScalarCartanRoot(currentH.getCartanPart(), theRootSystem[i]);
     }
     tempMat.actOnVectorColumn(theScalarProducts, output[i]);
   }
   this->ImagesCartanDomain.setSize(rankSA);
   for (int i = 0; i < rankSA; i ++) {
-    this->ImagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numPosRootsDomain].GetCartanPart();
+    this->ImagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numPosRootsDomain].getCartanPart();
   }
 }
 
@@ -852,12 +852,12 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
   Vector<Rational> tempRoot;
   tempRoots.setSize(this->imagesAllChevalleyGenerators.size);
   for (int i = 0; i < tempRoots.size; i ++) {
-    this->imagesAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoots[i]);
+    this->imagesAllChevalleyGenerators[i].elementToVectorNegativeRootSpacesFirst(tempRoots[i]);
   }
   for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++) {
     for (int j = 0; j < this->imagesAllChevalleyGenerators.size; j ++) {
       this->theRange().lieBracket(this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], tempElt);
-      tempElt.ElementToVectorNegativeRootSpacesFirst(tempRoot);
+      tempElt.elementToVectorNegativeRootSpacesFirst(tempRoot);
       if (!tempRoots.linearSpanContainsVector(tempRoot)) {
         return false;
       }
@@ -866,7 +866,7 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
   return true;
 }
 
-void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other) const {
+void ChevalleyGenerator::checkConsistencyWithOther(const ChevalleyGenerator& other) const {
   if (this->owner != other.owner) {
     global.fatal << "Attempt to compare Chevalley generators of different Lie algebras. " << global.fatal;
   }
@@ -1210,7 +1210,7 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
     theCoeffs[this->theOwner->getGeneratorFromRootIndex(theIndex)] = input.coefficients[i];
   }
   int numPosRoots = this->theOwner->getNumberOfPositiveRoots();
-  Vector<Rational> tempH = input.GetCartanPart();
+  Vector<Rational> tempH = input.getCartanPart();
   for (int i = 0; i < this->theOwner->getRank(); i ++) {
     theCoeffs[numPosRoots + i] = tempH[i];
   }
@@ -1262,16 +1262,6 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) 
 }
 
 template <class Coefficient>
-bool ElementSemisimpleLieAlgebra<Coefficient>::MustUseBracketsWhenDisplayingMeRaisedToPower() {
-  if (this->size == 1) {
-    if (this->coefficients[0] == 1) {
-      return false;
-    }
-  }
-  return true;
-}
-
-template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::isCoefficientOneChevalleyGenerator() {
   if (this->size == 1) {
     return this->coefficients[0] == 1;
@@ -1315,7 +1305,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   theRootForm.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = theElements[i];
-    currentElt.ElementToVectorNegativeRootSpacesFirst(theRootForm[i]);
+    currentElt.elementToVectorNegativeRootSpacesFirst(theRootForm[i]);
   }
 //  int theRank = 0; int numRoots = 0;
 //  if (theElements.size > 0)
@@ -1326,7 +1316,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   outputTheBasis.setSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputTheBasis[i];
-    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(
+    currentElt.assignVectorNegRootSpacesCartanPosRootSpaces(
       theRootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
     );
   }
@@ -1493,7 +1483,7 @@ void SlTwoInSlN::ExtractHighestWeightVectorsFromVector(
       tempMat = highestWeightVector;
       tempMat.multiplyOnTheLeft(currentProjector);
       if (!tempMat.isEqualToZero()) {
-        tempMat.FindFirstNonZeroElementSearchEntireRow(tempRat);
+        tempMat.findFirstNonZeroElementSearchEntireRow(tempRat);
         tempMat /= tempRat;
         outputTheHWVectors.addOnTop(tempMat);
       }
@@ -1591,11 +1581,11 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     currentOffset += this->thePartition[i];
   }
   out << newLine << beginMath << "h =" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
-  << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
+  << this->theH.toStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "e =" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
-  << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
+  << this->theE.toStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "f =" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
-  << this->theF.ElementToStringWithBlocks(this->thePartition) << endMath;
+  << this->theF.toStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
   tempMat.initialize(this->theDimension, this->theDimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
@@ -1768,7 +1758,7 @@ Rational MonomialP::operator()(int i) const {
   return this->monBody[i];
 }
 
-bool MonomialP::HasPositiveOrZeroExponents() const {
+bool MonomialP::hasPositiveOrZeroExponents() const {
   for (int i = 0; i < this->monBody.size; i ++) {
     if (this->monBody[i].isNegative()) {
       return false;
@@ -1777,7 +1767,7 @@ bool MonomialP::HasPositiveOrZeroExponents() const {
   return true;
 }
 
-void MonomialP::ExponentMeBy(const Rational& theExp) {
+void MonomialP::exponentMeBy(const Rational& theExp) {
   for (int i = 0; i < this->monBody.size; i ++) {
     this->monBody[i] *= theExp;
   }
@@ -1828,10 +1818,10 @@ bool MonomialP::greaterThan_totalDegree_rightSmallerWins(
   if (left == right) {
     return false;
   }
-  if (left.TotalDegree() > right.TotalDegree()) {
+  if (left.totalDegree() > right.totalDegree()) {
     return true;
   }
-  if (left.TotalDegree() < right.TotalDegree()) {
+  if (left.totalDegree() < right.totalDegree()) {
     return false;
   }
   return !MonomialP::greaterThan_rightLargerWins(left, right);
@@ -1841,10 +1831,10 @@ bool MonomialP::greaterThan_totalDegree_rightSmallerWins(
 bool MonomialP::greaterThan_totalDegree_leftLargerWins(
   const MonomialP& left, const MonomialP& right
 ) {
-  if (left.TotalDegree() > right.TotalDegree()) {
+  if (left.totalDegree() > right.totalDegree()) {
     return true;
   }
-  if (left.TotalDegree() < right.TotalDegree()) {
+  if (left.totalDegree() < right.totalDegree()) {
     return false;
   }
   return left.greaterThan_leftLargerWins(right);
@@ -1937,7 +1927,7 @@ void MonomialP::trimTrailingZeroes() {
   }
 }
 
-bool MonomialP::hasSmallIntegralPositivePowers(int* whichTotalDegree) const {
+bool MonomialP::hasSmallIntegralPositivePowers(int* whichtotalDegree) const {
   for (int i = 0; i < this->monBody.size; i ++) {
     if (!this->monBody[i].isIntegerFittingInInt(nullptr)) {
       return false;
@@ -1946,7 +1936,7 @@ bool MonomialP::hasSmallIntegralPositivePowers(int* whichTotalDegree) const {
       return false;
     }
   }
-  return this->TotalDegree().isIntegerFittingInInt(whichTotalDegree);
+  return this->totalDegree().isIntegerFittingInInt(whichtotalDegree);
 }
 
 void MonomialP::raiseToPower(const Rational& thePower) {

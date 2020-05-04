@@ -1379,13 +1379,13 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetMatrixEle
 ) {
   this->checkInitialization();
   if (this->ownerGroup->generators.size == 0) {//here be trivial weyl group
-    output.MakeIdMatrix(1);
+    output.MakeIdentityMatrix(1);
     return;
   }
   this->ownerGroup->CheckInitializationConjugacyClasses();
-  output.MakeIdMatrix(this->getDimension());
+  output.MakeIdentityMatrix(this->getDimension());
   for (int i = 0; i < input.generatorsLastAppliedFirst.size; i ++) {
-    output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
+    output.multiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
   }
 }
 
@@ -1414,7 +1414,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunc
 ) {
   this->checkInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
-  outputMat.MakeZeroMatrix(this->getDimension());
+  outputMat.makeZeroMatrix(this->getDimension());
   int numClasses = this->ownerGroup->ConjugacyClassCount();
   ProgressReport theReport;
   for (int cci = 0; cci < numClasses; cci ++) {
@@ -1438,7 +1438,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunc
         );
       } else {
         auto& currentCC = this->ownerGroup->conjugacyClasses[cci];
-        this->classFunctionMatrices[cci].MakeZeroMatrix(this->getDimension());
+        this->classFunctionMatrices[cci].makeZeroMatrix(this->getDimension());
         for (int i = 0; i < currentCC.theElements.size; i ++) {
           if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]]) {
             this->ComputeAllElementImages();
@@ -1473,7 +1473,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ClassFunctio
   ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat
 ) {
   int theDim = this->generatorS[0].numberOfRows;
-  outputMat.MakeZeroMatrix(theDim);
+  outputMat.makeZeroMatrix(theDim);
   if (classFunctionMatrices.size == 0) {
     classFunctionMatrices.setSize(this->ownerGroup->ConjugacyClassCount());
   }
@@ -1482,7 +1482,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ClassFunctio
       continue;
     }
     if (classFunctionMatrices[cci].numberOfColumns == 0) {
-      classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].numberOfColumns);
+      classFunctionMatrices[cci].makeZeroMatrix(this->generatorS[0].numberOfColumns);
       for (int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size; icci ++) {
         this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci].theElements[icci]);
       }
@@ -2228,7 +2228,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
         << " computing its zero eigenspace... ";
         Report3.report(reportStream.str());
       }
-      splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
+      splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
 
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
 
@@ -2274,7 +2274,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
     virtualChar.makeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
     this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
-    bool tempB = splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(theSubRepsBasis);
+    bool tempB = splittingOperatorMatrix.getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(theSubRepsBasis);
     if (!tempB) {
       global.fatal << "<br>This is a mathematical or programming mistake: "
       << "splittingOperatorMatrix should have small integral values, which it doesn't!" << global.fatal;

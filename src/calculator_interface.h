@@ -604,7 +604,7 @@ private:
   Expression operator*(const Expression& other);
   Expression operator/(const Expression& other);
   void operator*=(const Expression& other);
-  // Rational GetConstantTerm() const;
+  // Rational getConstantTerm() const;
   bool isEqualToMathematically(const Expression& other) const;
   bool operator==(int other) const;
   bool operator==(const Expression& other) const;
@@ -1252,7 +1252,7 @@ public:
 
   // bool flagReplaceInputBoxesByValues;
 
-  bool flagForkingprocessAllowed;
+  bool flagforkingprocessAllowed;
 
   double LastLogEvaluationTime;
   ///////////////////////////////////////////////////////////////////////////

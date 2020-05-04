@@ -274,11 +274,11 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
     commonAd.appendMatrixToTheBottom(tempAd);
   }
   Vectors<Coefficient> outputV;
-  commonAd.GetZeroEigenSpace(outputV);
+  commonAd.getZeroEigenSpace(outputV);
   outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
     ElementSemisimpleLieAlgebra<Coefficient>& currentElt = outputCentralizingElements[i];
-    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
+    currentElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
   }
 }
 
@@ -323,7 +323,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::actOnMe(
 }
 
 template <class Coefficient>
-Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::GetCartanPart() const {
+Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() const {
   Vector<Coefficient> result;
   if (this->isEqualToZero()) {
     result.makeZero(0);
@@ -349,7 +349,7 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::GetCartanPart() co
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const {
+void ElementSemisimpleLieAlgebra<Coefficient>::elementToVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const {
   if (this->isEqualToZero()) {
     output.makeZero(0);
     return;
@@ -361,14 +361,14 @@ void ElementSemisimpleLieAlgebra<Coefficient>::ElementToVectorNegativeRootSpaces
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::MakeGGenerator(
+void ElementSemisimpleLieAlgebra<Coefficient>::makeGGenerator(
   const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner
 ) {
   this->makeGenerator(inputOwner.getGeneratorFromRoot(theRoot), inputOwner);
 }
 
 template <class Coefficient>
-void ElementSemisimpleLieAlgebra<Coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(
+void ElementSemisimpleLieAlgebra<Coefficient>::assignVectorNegRootSpacesCartanPosRootSpaces(
   const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   //Changing RootSystem order invalidates this function!
@@ -383,7 +383,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::AssignVectorNegRootSpacesCartanPo
 }
 
 template<class Coefficient>
-bool ElementSemisimpleLieAlgebra<Coefficient>::IsElementCartan() const {
+bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
   if (this->size() == 0) {
     return true;
   }

@@ -175,9 +175,9 @@ void WebServerMonitor::Restart() {
   global << "Terminating server children with command: " << killServerChildrenCommand.str() << Logger::endL;
   global.externalCommandNoOutput(killServerChildrenCommand.str(), true);
   global << Logger::red << "Terminating server with pid: " << this->pidServer << Logger::endL;
-  WebServer::TerminateProcessId(this->pidServer);
+  WebServer::terminateProcessId(this->pidServer);
   global << Logger::red << "Restarting monitor. " << this->pidServer << Logger::endL;
-  global.server().StopKillAll();
+  global.server().stopKillAll();
 }
 
 WebCrawler::WebCrawler() {
@@ -959,9 +959,9 @@ bool WebAPIResponse::processForgotLogin() {
   << "Your email is on record. "
   << "</b>";
   if (!global.userDefaultHasAdminRights()) {
-    this->owner->DoSetEmail(theUser, &out, &out, nullptr);
+    this->owner->doSetEmail(theUser, &out, &out, nullptr);
   } else {
-    this->owner->DoSetEmail(theUser, &out, &out, &out);
+    this->owner->doSetEmail(theUser, &out, &out, &out);
   }
   out << "<br>Response time: " << global.getElapsedSeconds() << " second(s); "
   << global.getElapsedSeconds() << " second(s) spent creating account. ";
@@ -969,8 +969,8 @@ bool WebAPIResponse::processForgotLogin() {
   return global.theResponse.writeResponse(result, false);
 }
 
-JSData WebWorker::GetSignUpRequestResult() {
-  MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
+JSData WebWorker::getSignUpRequestResult() {
+  MacroRegisterFunctionWithName("WebWorker::getSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
   if (!global.flagDatabaseCompiled) {
@@ -1034,7 +1034,7 @@ JSData WebWorker::GetSignUpRequestResult() {
   }
   //int fixThis;
   //adminOutputStream = &generalCommentsStream;
-  this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
+  this->doSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
   result[WebAPI::result::comments] = generalCommentsStream.str();
   result[WebAPI::result::resultHtml] = outputStream.str();

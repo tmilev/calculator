@@ -9,14 +9,14 @@ void WebServer::initializeRandomBytes() {
   Crypto::Random::initializeRandomBytes();
 }
 
-bool WebServer::CreateProcessMutex() {
+bool WebServer::createProcessMutex() {
   WebWorker& worker = this->getActiveWorker();
-  if (!worker.PauseWorker.CreateMe(this->ToStringWorkerToWorker() + "pause mutex", true)) {
+  if (!worker.PauseWorker.CreateMe(this->toStringWorkerToWorker() + "pause mutex", true)) {
     global << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
     return false;
   }
-  if (!worker.writingReportFile.CreateMe(this->ToStringWorkerToWorker() + "output file mutex", true)) {
+  if (!worker.writingReportFile.CreateMe(this->toStringWorkerToWorker() + "output file mutex", true)) {
     global << "Failed to create process mutex: "
     << worker.writingReportFile.name << "\n";
     return false;
@@ -24,7 +24,7 @@ bool WebServer::CreateProcessMutex() {
   return true;
 }
 
-void WebServer::ComputeActiveWorkerId() {
+void WebServer::computeActiveWorkerId() {
   List<unsigned char> incomingId;
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
   WebWorker& worker = this->getActiveWorker();
@@ -40,24 +40,24 @@ void WebServer::ComputeActiveWorkerId() {
   }
 }
 
-int WebServer::Fork() {
-  if (!this->CreateProcessMutex()) {
+int WebServer::forkProcess() {
+  if (!this->createProcessMutex()) {
     return - 1;
   }
-  this->ComputeActiveWorkerId();
+  this->computeActiveWorkerId();
   // timer taken at server level:
-  int64_t millisecondsAtFork = global.getElapsedMilliseconds();
+  int64_t millisecondsAtfork = global.getElapsedMilliseconds();
   int result = fork();
   // We need to make sure that the child retains no information
   // about the server's random bytes, and similarly the server
   // has no information on the child's random bytes.
   //
-  // 1. The parent acquires additional entropy from millisecondsAtFork.
+  // 1. The parent acquires additional entropy from millisecondsAtfork.
   // Since this one-way overwrites its random bytes, the parent can no
   // longer derive the previous state of its random bytes.
   //
   // 2. The child loses 256 bits of entropy from the parent, and then
-  // acquires additional entropy from millisecondsAtFork.
+  // acquires additional entropy from millisecondsAtfork.
   // This one-way overwrites the random bytes, so the child has no information
   // about the previous state of its random bytes.
   //
@@ -68,7 +68,7 @@ int WebServer::Fork() {
   if (result > 0) {
     // Parent process.
     // Forget previous random bytes, and gain a little extra entropy:
-    Crypto::Random::acquireAdditionalRandomness(millisecondsAtFork);
+    Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
   } else if (result == 0) {
     global.logs.logType = GlobalVariables::LogData::type::worker;
 
@@ -76,7 +76,7 @@ int WebServer::Fork() {
     // lose 256 bits of entropy from the server:
     global.randomBytesCurrent.setSize(static_cast<signed>(global.maximumExtractedRandomBytes));
     // Forget previous random bytes, and gain a little extra entropy:
-    Crypto::Random::acquireAdditionalRandomness(millisecondsAtFork);
+    Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
 
     // Set death signal of the parent trigger death signal of the child.
     // If the parent process was killed before the prctl executed,

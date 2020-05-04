@@ -86,7 +86,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
   this->ownerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdMatrix(this->getDimension());
+  this->theElementImageS[0].MakeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
@@ -125,7 +125,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllEl
   auto ElementsExplored = this->ownerGroup->theElements;
   ElementsExplored.clear();
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdMatrix(this->getDimension());
+  this->theElementImageS[0].MakeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
@@ -274,7 +274,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
 }
 
 template <class Element>
-bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<Element> >& output) const {
+bool Matrix<Element>::getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(List<Vectors<Element> >& output) const {
   int upperLimitComputations = 100000;
   output.setSize(0);
   int found = 0;
@@ -289,7 +289,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
     if (theMinPoly.evaluate(theEigenValueCandidate) == 0) {
       tempMat = *this;
       output.setSize(output.size + 1);
-      tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
+      tempMat.getEigenspaceModifyMe(theEigenValueCandidate[0], *output.lastObject());
       if (output.lastObject()->size == 0) {
         global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
@@ -446,7 +446,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     if (theCommands.functionGetMatrix(
       input[2], theHWsMatForm, nullptr, theSSalgebra->getRank()
     )) {
-      theHWsMatForm.GetVectorsFromRows(theHWs);
+      theHWsMatForm.getVectorsFromRows(theHWs);
       isGood = true;
     }
   }
@@ -722,7 +722,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
             break;
           }
         }
-        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
+        standardElt.multiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->getNumberOfPositiveRoots() - simpleIndex - 1, theExp);
       }
       out << "<td>";
       if (isGood) {
@@ -926,7 +926,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   //charMat.initialize(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
   //for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++)
   //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.toString();
-  //  charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
+  //  charMat.assignVectorToRowKeepOtherRowsIntactNoInitialization(i, theGroupData.irreps[i].GetCharacter().data);
   //}
   //out << HtmlRoutines::getMathSpanPure(charMat.toString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
@@ -2424,7 +2424,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
     if (!input[i].isSmallInteger(& tmp)) {
       return false;
     }
-    theElt.MultiplyOnTheRightBySimpleReflection(tmp - 1);
+    theElt.multiplyOnTheRightBySimpleReflection(tmp - 1);
   }
   theElt.owner = &thePointer.content->theWeyl;
   for (int i = 0; i < theElt.generatorsLastAppliedFirst.size; i ++) {

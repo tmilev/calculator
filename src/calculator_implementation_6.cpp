@@ -2108,8 +2108,8 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
       }
     }
     if (
-      FloatingPoint::Abs(left1 - right1) > precision ||
-      FloatingPoint::Abs(left2 - right2) > precision
+      FloatingPoint::absFloating(left1 - right1) > precision ||
+      FloatingPoint::absFloating(left2 - right2) > precision
     ) {
       return output.assignValue(0, theCommands);
     }
@@ -2678,7 +2678,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return theCommands << "Did not find cube term in your curve.";
   }
   Rational coefficientXlinear = - thePoly.getMonomialCoefficient(xLinear);
-  Rational constCoefficient = - thePoly.GetConstantTerm();
+  Rational constCoefficient = - thePoly.getConstantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
   if (
     !coefficientXlinear.isInteger(&curveConstants.linearCoefficient) ||

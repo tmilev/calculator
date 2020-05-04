@@ -445,7 +445,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     }
   }
   Matrix<Rational> form; // so inefficient
-  form.MakeZeroMatrix(G.ConjugacyClassCount());
+  form.makeZeroMatrix(G.ConjugacyClassCount());
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
     form.elements[i][i] = G.conjugacyClasses[i].size;
   }
@@ -511,7 +511,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   for (int i = 0; i < spaces.size; i ++) {
     Rational x = chars[i].InnerProduct(chars[i]);
     int x2 = x.getDenominator().GetUnsignedIntValueTruncated();
-    x2 = static_cast<int>(FloatingPoint::Sqrt(x2));
+    x2 = static_cast<int>(FloatingPoint::sqrtFloating(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {
       chars[i] *= - 1;
@@ -547,7 +547,7 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
     invl[i] = G.invert(G.theElements.getIndex(G.conjugacyClasses[cci].theElements[i]));
   }
   Matrix<int> M;
-  M.MakeZeroMatrix(G.ConjugacyClassCount());
+  M.makeZeroMatrix(G.ConjugacyClassCount());
   for (int t = 0; t < G.ConjugacyClassCount(); t ++)
     for (int xi = 0; xi < invl.size; xi ++) {
       int yi = G.MultiplyElements(invl[xi], G.theElements.getIndex(G.conjugacyClasses[t].representative));

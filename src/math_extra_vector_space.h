@@ -70,7 +70,7 @@ template <typename Coefficient>
 void Basis<Coefficient>::computeGramMatrix() {
   int r = basis.numberOfRows;
   int d = basis.numberOfColumns;
-  gramMatrix.MakeZeroMatrix(r);
+  gramMatrix.makeZeroMatrix(r);
   for (int i = 0; i < r; i ++) {
     for (int j = 0; j < r; j ++) {
       for (int k = 0; k < d; k ++) {
@@ -86,7 +86,7 @@ template <typename Coefficient>
 Vector<Coefficient> Basis<Coefficient>::putInBasis(const Vector<Coefficient>& input) {
   if (false) {
     Vectors<Coefficient> theBasisVectorForm;
-    this->basis.GetVectorsFromRows(theBasisVectorForm);
+    this->basis.getVectorsFromRows(theBasisVectorForm);
     Vector<Coefficient> output;
     input.getCoordinatesInBasis(theBasisVectorForm, output);
     return output;
@@ -115,7 +115,7 @@ bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
 template <typename Coefficient>
 bool VectorSpace<Coefficient>::AddVectorDestructively(Vector<Coefficient>& v) {
   if (fastbasis.numberOfRows == 0) {
-    this->fastbasis.MakeZeroMatrix(v.size);
+    this->fastbasis.makeZeroMatrix(v.size);
     this->degree = v.size;
     int nzi = 0;
     for (; nzi < degree; nzi ++) {
@@ -263,11 +263,11 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpac
 
   Matrix<Rational> MV = this->fastbasis;
   List<Vector<Coefficient> > Vperp;
-  MV.GetZeroEigenSpaceModifyMe(Vperp);
+  MV.getZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<Coefficient> MW = other.fastbasis;
   List<Vector<Coefficient> > Wperp;
-  MW.GetZeroEigenSpaceModifyMe(Wperp);
+  MW.getZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<Coefficient> M;
   M.initialize(Vperp.size + Wperp.size, this->degree);
@@ -283,7 +283,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(const VectorSpac
     }
   }
   List<Vector<Coefficient> > outvecs;
-  M.GetZeroEigenSpaceModifyMe(outvecs);
+  M.getZeroEigenSpaceModifyMe(outvecs);
   output.rank = outvecs.size;
   if (outvecs.size == 0) {
     return output;
@@ -331,11 +331,11 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::orthogonalComplement(
   }
   Matrix<Coefficient> M = this->fastbasis;
   if (form) {
-    M.MultiplyOnTheRight(*form); // i can never tell which one is right or left :/
+    M.multiplyOnTheRight(*form); // i can never tell which one is right or left :/
   }
   List<Vector<Coefficient> > VVs;
   // this is where 'nullspace' and 'kernel' are conceptually different
-  M.GetZeroEigenSpaceModifyMe(VVs);
+  M.getZeroEigenSpaceModifyMe(VVs);
   // this appears common enough to warrant a better method
   for (int i = 0; i < VVs.size; i ++) {
     V.AddVectorDestructively(VVs[i]);
@@ -368,10 +368,10 @@ Vector<Coefficient> VectorSpace<Coefficient>::GetBasisVector(int i) const {
   }
   Vector<Coefficient> out;
   if (basis.basis.numberOfRows > i) {
-    basis.basis.GetVectorFromRow(i, out);
+    basis.basis.getVectorFromRow(i, out);
     return out;
   }
-  fastbasis.GetVectorFromRow(i, out);
+  fastbasis.getVectorFromRow(i, out);
   return out;
 }
 
@@ -381,7 +381,7 @@ Vector<Coefficient> VectorSpace<Coefficient>::GetCanonicalBasisVector(int i) con
     global.fatal << "Vector index too large. " << global.fatal;
   }
   Vector<Coefficient> out;
-  fastbasis.GetVectorFromRow(i, out);
+  fastbasis.getVectorFromRow(i, out);
   return out;
 }
 #endif

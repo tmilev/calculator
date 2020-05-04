@@ -474,7 +474,7 @@ bool CalculatorConversions::innerStoreCandidateSA(
   keys.addOnTop("DynkinType");
   values.addOnTop(currentE);
   Matrix<Rational> conversionMat;
-  conversionMat.AssignVectorsToRows(input.theHsScaledToActByTwo);
+  conversionMat.assignVectorsToRows(input.theHsScaledToActByTwo);
   currentE.assignMatrix(conversionMat, theCommands, nullptr, false);
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentE);
@@ -559,7 +559,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
       currentComponent.setSize(theRanks[i]);
       for (int k = 0; k < theRanks[i]; k ++) {
         counter ++;
-        theHs.GetVectorFromRow(counter, currentComponent[k]);
+        theHs.getVectorFromRow(counter, currentComponent[k]);
       }
     }
   }

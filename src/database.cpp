@@ -975,7 +975,7 @@ bool Database::User::sendActivationEmail(
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
-    global.server().getActiveWorker().DoSetEmail(
+    global.server().getActiveWorker().doSetEmail(
       currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
     );
   }

@@ -338,7 +338,7 @@ void ElementWeylAlgebra<Coefficient>::FourierTransform(ElementWeylAlgebra<Coeffi
   MonomialWeylAlgebra theMon;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).isInteger(&totalDeg)) {
+    if (!(currentMon.polynomialPart.totalDegree() + currentMon.differentialPart.totalDegree()).isInteger(&totalDeg)) {
       global.fatal << "This is a programming error: calling Fourier transoform "
       << "on differential operator with non-integral exponents. " << global.fatal;
     }

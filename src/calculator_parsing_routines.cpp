@@ -77,7 +77,7 @@ void Calculator::reset() {
   this->flagDisplayFullExpressionTree = false;
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
-  this->flagForkingprocessAllowed = true;
+  this->flagforkingprocessAllowed = true;
   this->flagNoApproximationS = false;
   this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;

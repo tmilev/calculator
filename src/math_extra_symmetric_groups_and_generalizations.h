@@ -259,7 +259,7 @@ public:
   void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& out) {
     Matrix<Coefficient> M;
     int n = this->largestOccurringNumber() + 1;
-    M.MakeZeroMatrix(n);
+    M.makeZeroMatrix(n);
     for (int i = 0; i < n; i ++) {
       M(i, (*this) * i) = 1;
     }

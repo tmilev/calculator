@@ -259,7 +259,7 @@ bool MonomialUniversalEnveloping<Coefficient>::switchConsecutiveIndicesIfTheyCom
   }
   this->generatorsIndices.swapTwoIndices(theLeftIndex, theLeftIndex + 1);
   this->Powers.swapTwoIndices(theLeftIndex, theLeftIndex + 1);
-  this->SimplifyEqualConsecutiveGenerators(theLeftIndex - 1);
+  this->simplifyEqualConsecutiveGenerators(theLeftIndex - 1);
   return true;
 }
 
@@ -585,7 +585,7 @@ void MonomialUniversalEnveloping<Coefficient>::substitution(const PolynomialSubs
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     this->Powers[i].substitution(theSub);
   }
-  this->SimplifyEqualConsecutiveGenerators(0);
+  this->simplifyEqualConsecutiveGenerators(0);
 }
 
 template <class Coefficient>
@@ -1887,7 +1887,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
 ) {
   this->makeZero(theOwner);
   Vector<Rational> ElementRootForm;
-  input.ElementToVectorNegativeRootSpacesFirst(ElementRootForm);
+  input.elementToVectorNegativeRootSpacesFirst(ElementRootForm);
   theOwner.ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(ElementRootForm);
   MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
   tempMon.makeZero(theRingZero, theOwner);
@@ -2018,7 +2018,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelations(
         return;
       }
       Coefficient theSubbedH = theRingZero;
-      Vector<Rational> currentH = this->owner->theOrder[IndexCurrentGenerator].GetCartanPart();
+      Vector<Rational> currentH = this->owner->theOrder[IndexCurrentGenerator].getCartanPart();
       for (int j = 0; j < currentH.size; j ++) {
         theSubbedH += (*subHiGoesToIthElement)[j] * currentH[j];
       }

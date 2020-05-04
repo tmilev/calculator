@@ -50,12 +50,12 @@ bool MonomialP::substitution(
 }
 
 template<class Coefficient>
-bool Polynomial<Coefficient>::IsOneVariableNonConstPoly(int* whichVariable) const {
+bool Polynomial<Coefficient>::isOneVariableNonConstantPolynomial(int* whichVariable) const {
   int tempInt;
   if (whichVariable == nullptr) {
     whichVariable = &tempInt;
   }
-  if (!this->IsOneVariablePoly(whichVariable)) {
+  if (!this->isOneVariablePolynomial(whichVariable)) {
     return false;
   }
   return *whichVariable != - 1;
@@ -76,14 +76,14 @@ Polynomial<Coefficient> Polynomial<Coefficient>::zero() {
 }
 
 template<class Coefficient>
-Rational Polynomial<Coefficient>::RationalValue() {
+Rational Polynomial<Coefficient>::rationalValue() {
   Rational result;
-  this->GetConstantTerm(result, 0);
+  this->getConstantTerm(result, 0);
   return result;
 }
 
 template<class Coefficient>
-bool Polynomial<Coefficient>::IsOneVariablePoly(int* whichVariable) const {
+bool Polynomial<Coefficient>::isOneVariablePolynomial(int* whichVariable) const {
   int tempInt;
   if (whichVariable == nullptr) {
     whichVariable = &tempInt;
@@ -114,9 +114,9 @@ void Polynomial<Coefficient>::MakeDeterminantFromSquareMatrix(
   }
   Permutation thePerm;
   thePerm.initPermutation(theMat.numberOfRows);
-  int numCycles = thePerm.GetNumPermutations();
+  int numCycles = thePerm.getNumberOfPermutations();
   List<int> permutationIndices;
-  thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
+  thePerm.getPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<Coefficient> result, theMonomial;
   result.makeZero();
   result.setExpectedSize(numCycles);
@@ -157,7 +157,7 @@ template <class Coefficient>
 Rational Polynomial<Coefficient>::totalDegree() const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result = MathRoutines::maximum((*this)[i].TotalDegree(), result);
+    result = MathRoutines::maximum((*this)[i].totalDegree(), result);
   }
   return result;
 }
@@ -286,16 +286,16 @@ void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int new
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
-  int* whichTotalDegree
+  int* whichtotalDegree
 ) const {
-  int whichTotalDegreeContainer = 0;
+  int whichtotalDegreeContainer = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->theMonomials[i].hasSmallIntegralPositivePowers(&whichTotalDegreeContainer)) {
+    if (!this->theMonomials[i].hasSmallIntegralPositivePowers(&whichtotalDegreeContainer)) {
       return false;
     }
   }
-  if (whichTotalDegree != nullptr) {
-    *whichTotalDegree = whichTotalDegreeContainer;
+  if (whichtotalDegree != nullptr) {
+    *whichtotalDegree = whichtotalDegreeContainer;
   }
   return true;
 }
@@ -444,8 +444,8 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
   // for univariate polynomials only
   MacroRegisterFunctionWithName("Polynomial::evaluateUnivariatePolynomial");
   Matrix<Coefficient> output, tempElt, idMat;
-  idMat.MakeIdMatrix(input.numberOfColumns);
-  output.MakeZeroMatrix(input.numberOfColumns);
+  idMat.MakeIdentityMatrix(input.numberOfColumns);
+  output.makeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
@@ -798,7 +798,7 @@ void Polynomial<Coefficient>::divideBy(
   while (monomialOrder->greaterThanOrEqualTo(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
     quotientMonomial = remainderLeadingMonomial;
     quotientMonomial /= leadingMonomialShiftedDivisor;
-    if (!quotientMonomial.HasPositiveOrZeroExponents()) {
+    if (!quotientMonomial.hasPositiveOrZeroExponents()) {
       break;
     }
     Coefficient quotientCoefficient = remainderLeadingCoefficient;
@@ -909,7 +909,7 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::GetConstantTerm(Coefficient& output, const Coefficient& theRingZero) const {
+void Polynomial<Coefficient>::getConstantTerm(Coefficient& output, const Coefficient& theRingZero) const {
   MonomialP tempM;
   tempM.makeOne();
   int i = this->theMonomials.getIndex(tempM);

@@ -2606,7 +2606,7 @@ bool Expression::toStringBuiltIn<double>(
   FormatExpressions* theFormat
 ) {
   (void) theFormat;
-  std::string currentString = FloatingPoint::DoubleToString(input.getValue<double>());
+  std::string currentString = FloatingPoint::doubleToString(input.getValue<double>());
   if (currentString.size() > 0) {
     if (currentString[0] == '-') {
       currentString = currentString.substr(1);

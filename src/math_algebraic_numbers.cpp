@@ -299,7 +299,7 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   this->getAdditionTo(*outputImageGenerator, outputImageGenerator->element);
   MatrixTensor<Rational> reverseMap;
 
-  reverseMap.AssignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
+  reverseMap.assignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
   reverseMap.invert();
   reverseMap.actOnVectorColumn(outputImageGenerator->element);
   outputImageGenerator->basisIndex = this->basisInjections.size - 3;
@@ -335,7 +335,7 @@ bool AlgebraicClosureRationals::reduceMe(
     return true;
   }
   MatrixTensor<Rational> generatorPowers, generatorPowersInverse;
-  generatorPowers.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
+  generatorPowers.assignVectorsToColumns(this->theGeneratingElementPowersBasis);
   generatorPowersInverse = generatorPowers;
   generatorPowersInverse.invert();
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
@@ -637,7 +637,7 @@ void AlgebraicClosureRationals::reset() {
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
   this->GeneratingElementTensorForm.MakeId(1);
-  this->GeneratingElementMatForm.MakeIdMatrix(1);
+  this->GeneratingElementMatForm.MakeIdentityMatrix(1);
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.element.makeEi(0);
 }
@@ -667,7 +667,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
   minPoly /= minPoly.GetLeadingCoefficient(monomialOrder);
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
-  minPoly.GetConstantTerm(theConstTermShifted);
+  minPoly.getConstantTerm(theConstTermShifted);
   theConstTermShifted -= theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
   theConstTermShifted *= - 1;
   if (!outputRoot.assignRationalQuadraticRadical(
@@ -696,7 +696,7 @@ void AlgebraicClosureRationals::convertPolyDependingOneVariableToPolyDependingOn
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
   int indexVar = - 1;
-  if (!input.IsOneVariableNonConstPoly(&indexVar)) {
+  if (!input.isOneVariableNonConstantPolynomial(&indexVar)) {
     global.fatal << "This is a programming error: "
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
@@ -1125,7 +1125,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
         return false;
       } else {
         if (outputWhichDouble != nullptr) {
-          currentMultiplicand *= FloatingPoint::Sqrt(
+          currentMultiplicand *= FloatingPoint::sqrtFloating(
             this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue()
           );
         }

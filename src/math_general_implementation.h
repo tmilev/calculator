@@ -3,10 +3,10 @@
 #include "math_general.h"
 
 template <class Coefficient>
-void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
+void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   Coefficient& output, const Coefficient& theRingOne, const Coefficient& theRingZero
 ) {
-  MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
+  MacroRegisterFunctionWithName("Matrix::computeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::gaussianElimination);
@@ -18,7 +18,7 @@ void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
   }
   int dim = this->numberOfColumns;
   for (int i = 0; i < dim; i ++) {
-    tempI = this->FindPivot(i, i);
+    tempI = this->findPivot(i, i);
     if (tempI == - 1) {
       output = theRingZero;
       return;
@@ -30,7 +30,7 @@ void Matrix<Coefficient>::ComputeDeterminantOverwriteMatrix(
     tempRat = this->elements[i][i];
     output *= tempRat;
     tempRat.invert();
-    this->RowTimesScalar(i, tempRat);
+    this->rowTimesScalar(i, tempRat);
     if (doReport) {
       if (theReport.tickAndWantReport()) {
         std::stringstream reportStream;
@@ -307,13 +307,13 @@ void MatrixTensor<Coefficient>::operator*=(
 }
 
 template <class Coefficient>
-void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
+void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   Matrix<Coefficient>* otherMatrix,
   const Coefficient& theRingMinusUnit,
   const Coefficient& theRingUnit,
   bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right)
 ) {
-  MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
+  MacroRegisterFunctionWithName("Matrix_Element::gaussianEliminationEuclideanDomain");
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   if (otherMatrix == this) {
     global.fatal << "This is a programming error: the Carbon copy in the Gaussian elimination "
@@ -334,7 +334,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
     if (foundPivotRow != - 1) {
       this->switchRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
       if (this->elements[row][col].isNegative()) {
-        this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
+        this->rowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       }
       int ExploringRow = row + 1;
       while (ExploringRow < this->numberOfRows) {
@@ -347,7 +347,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
         Coefficient& PivotElt = this->elements[row][col];
         Coefficient& otherElt = this->elements[ExploringRow][col];
         if (otherElt.isNegative()) {
-          this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
+          this->rowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
         }
         bool isSmallerOrEqualTo = comparisonGEQFunction == 0 ? PivotElt <= otherElt :
         comparisonGEQFunction(otherElt, PivotElt);
@@ -355,7 +355,7 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
           tempElt = otherElt;
           tempElt /= PivotElt;
           tempElt.assignFloor();
-          this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
+          this->subtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
         }
         if (this->elements[ExploringRow][col].isEqualToZero()) {
           ExploringRow ++;
@@ -368,9 +368,9 @@ void Matrix<Coefficient>::GaussianEliminationEuclideanDomain(
         tempElt = this->elements[i][col];
         tempElt /= PivotElt;
         tempElt.assignFloor();
-        this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
+        this->subtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
         if (this->elements[i][col].isNegative()) {
-          this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
+          this->addTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
         }
       }
       row ++;
@@ -469,7 +469,7 @@ void Vectors<Coefficient>::SelectABasisInSubspace(
   }
   output.setSize(outputSelectedPivotColumns.cardinalitySelection);
   for (int i = 0; i < output.size; i ++) {
-    theMat.GetVectorFromRow(i, output[i]);
+    theMat.getVectorFromRow(i, output[i]);
   }
   if (reportProgress.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -548,7 +548,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       }
       break;
     }
-    tempI = this->FindPivot(i, NumFoundPivots);
+    tempI = this->findPivot(i, NumFoundPivots);
     if (tempI == - 1) {
       if (outputNonPivotColumns != nullptr) {
         outputNonPivotColumns->addSelectionAppendNewIndex(i);
@@ -589,9 +589,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
     tempElement = this->elements[NumFoundPivots][i];
     tempElement.invert();
-    this->RowTimesScalar(NumFoundPivots, tempElement);
+    this->rowTimesScalar(NumFoundPivots, tempElement);
     if (carbonCopyMat != 0) {
-      carbonCopyMat->RowTimesScalar(NumFoundPivots, tempElement);
+      carbonCopyMat->rowTimesScalar(NumFoundPivots, tempElement);
     }
     for (int j = 0; j < this->numberOfRows; j ++) {
       if (j != NumFoundPivots) {

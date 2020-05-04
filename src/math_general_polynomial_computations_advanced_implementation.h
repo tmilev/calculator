@@ -287,7 +287,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   const Coefficient& leadingCoefficientBasis = this->theBasis[index].leadingCoefficient;
   MonomialP quotientMonomial = leadingMonomial;
   quotientMonomial /= leadingMonomialBasis;
-  if (!quotientMonomial.HasPositiveOrZeroExponents()) {
+  if (!quotientMonomial.hasPositiveOrZeroExponents()) {
     global.fatal << "This is a programming error: the pivot monomial "
     << "in the polynomial division algorithm has negative exponent(s). "
     << "This is not allowed. " << global.fatal;
@@ -621,7 +621,7 @@ bool GroebnerBasisComputation<Coefficient>::hasImpliedSubstitutions(
       return true;
     }
     int oneVarIndex;
-    if (tempP.IsOneVariableNonConstPoly(&oneVarIndex)) {
+    if (tempP.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
       if (this->flagUsingAlgebraicClosuRe && this->theAlgebraicClosurE != 0) {
         if (this->getOneVariablePolynomialSolution(tempP, theCF)) {
           outputSub.makeIdentitySubstitution(numVars);
@@ -651,7 +651,7 @@ int GroebnerBasisComputation<Coefficient>::getNumberOfEquationsThatWouldBeLinear
   for (int i = 0; i < input.size; i ++) {
     Rational degExcludingVar = 0;
     for (int j = 0; j < input[i].size(); j ++) {
-      degExcludingVar = MathRoutines::maximum(input[i][j].TotalDegree() - input[i][j](theVarIndex), degExcludingVar);
+      degExcludingVar = MathRoutines::maximum(input[i][j].totalDegree() - input[i][j](theVarIndex), degExcludingVar);
     }
     if (degExcludingVar < 2) {
       result ++;
@@ -1260,7 +1260,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
     return false;
   }
   int maximalMonomialNoTIndex = - 1;
-  Rational maximalTotalDegree;
+  Rational maximaltotalDegree;
   MonomialP currentLeading;
   for (int i = theBasis.size - 1; i >= 0; i --) {
     theBasis[i].getIndexLeadingMonomial(
@@ -1268,11 +1268,11 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
     );
     if (currentLeading(numberOfVariables) == 0) {
       if (maximalMonomialNoTIndex == - 1) {
-        maximalTotalDegree = currentLeading.TotalDegree();
+        maximaltotalDegree = currentLeading.totalDegree();
         maximalMonomialNoTIndex = i;
       }
-      if (maximalTotalDegree < currentLeading.TotalDegree()) {
-        maximalTotalDegree = currentLeading.TotalDegree();
+      if (maximaltotalDegree < currentLeading.totalDegree()) {
+        maximaltotalDegree = currentLeading.totalDegree();
         maximalMonomialNoTIndex = i;
       }
     }

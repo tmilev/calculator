@@ -167,14 +167,14 @@ void RationalFunction<Coefficient>::operator+=(int theConstant) {
 }
 
 template<class Coefficient>
-Rational RationalFunction<Coefficient>::RationalValue() const {
+Rational RationalFunction<Coefficient>::rationalValue() const {
   switch(this->expressionType) {
     case RationalFunction::typeConstant:
       return this->constantValue;
     case RationalFunction::typeError:
       return 0;
     default:
-      return this->numerator.getElementConst().GetConstantTerm();
+      return this->numerator.getElementConst().getConstantTerm();
   }
 }
 

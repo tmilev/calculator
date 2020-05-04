@@ -41,7 +41,6 @@ void RationalFunction<Coefficient>::invert() {
     this->constantValue.invert();
     return;
   }
-  global.comments << "DEBUG: got to here: constant value: " << this->constantValue << "<br>";
   if (this->expressionType == this->typePolynomial) {
     this->convertToType(this->typeRationalFunction);
   }
@@ -359,7 +358,6 @@ void RationalFunction<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(i
 
 template<class Coefficient>
 void RationalFunction<Coefficient>::operator=(const RationalFunction<Rational>& other) {
-  global.comments << "DEBUG: operator = with input: " << other.toString() << "<br>";
   this->expressionType = other.expressionType;
   switch (this->expressionType) {
     case RationalFunction::typeConstant:
@@ -908,8 +906,6 @@ void RationalFunction<Coefficient>::reduceMemory() {
 
 template<class Coefficient>
 void RationalFunction<Coefficient>::operator=(const Polynomial<Coefficient>& other) {
-  global.comments << "DEBUG: operator = between rational function and poly with input: "
-  << other.toString() << "<br>";
   this->expressionType = this->typePolynomial;
   this->numerator.getElement() = other;
   if (!other.isEqualToZero()) {

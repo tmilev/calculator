@@ -872,10 +872,7 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
     }
   }
   RationalFunction<ElementZmodP> result;
-  global.comments << "DEBUG: here I am: left: " << left.toString() << "<br>";
-  global.comments << "DEBUG: here I am: right: " << right.toString() << "<br>";
   result = left;
-  global.comments << "DEBUG: got to here.<br>";
   result /= right;
   return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), theCommands);
 }

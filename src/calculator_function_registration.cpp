@@ -1197,13 +1197,13 @@ void Calculator::initPredefinedInnerFunctions() {
     innerInvisibleNoTest
   );
   this->addOperationHandler(
-    "FormatCPPDirectory",
-    CalculatorFunctions::innerFormatCPPDirectory,
+    "formatCPPDirectory",
+    CalculatorFunctions::innerformatCPPDirectory,
     "",
     "Format cpp directory. ",
-    "FormatCPPDirectory{}(\"src/\")",
-    "Calculator::innerFormatCPPDirectory",
-    "FormatCPPDirectory",
+    "formatCPPDirectory{}(\"src/\")",
+    "Calculator::innerformatCPPDirectory",
+    "formatCPPDirectory",
     innerInvisibleNoTest
   );
 

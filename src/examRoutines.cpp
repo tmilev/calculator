@@ -644,7 +644,7 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
 }
 
 std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinksFromFileName");
+  MacroRegisterFunctionWithName("CalculatorHTML::toStringLinksFromFileName");
   std::stringstream out;
   out << this->toStringLinkFromFileName(theFileName);
   out << this->toStringProblemScoreFull(theFileName);

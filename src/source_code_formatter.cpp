@@ -25,8 +25,8 @@ bool CodeFormatter::initializeFileNames(
   return true;
 }
 
-std::string CodeFormatter::ToStringLinks() {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::ToStringLinks");
+std::string CodeFormatter::toStringLinks() {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::toStringLinks");
   std::stringstream out;
   out
   << "<a href = '"
@@ -41,8 +41,8 @@ std::string CodeFormatter::ToStringLinks() {
   return out.str();
 }
 
-bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPDirectory");
+bool CodeFormatter::formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPDirectory");
   std::string directory = inputDirectory;
   if (directory == "") {
     if (comments != nullptr) {
@@ -67,58 +67,58 @@ bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::s
   }
   for (int i = 0; i < newFileNames.size; i ++) {
     CodeFormatter theFormatter;
-    if (!theFormatter.FormatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
+    if (!theFormatter.formatCPPSourceCode(oldFileNames[i], newFileNames[i], comments)) {
       return false;
     }
   }
   return true;
 }
 
-bool CodeFormatter::FormatCPPSourceCode(
+bool CodeFormatter::formatCPPSourceCode(
   const std::string& inputFileName,
   const std::string& inputOutputFileNameEmptyForAuto,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPSourceCode");
+  MacroRegisterFunctionWithName("SourceCodeFormatter::formatCPPSourceCode");
   if (!this->initializeFileNames(inputFileName, inputOutputFileNameEmptyForAuto, comments)) {
     return false;
   }
-  if (!this->ExtractCodeElements(comments)) {
+  if (!this->extractCodeElements(comments)) {
     return false;
   }
-  if (!this->ApplyFormattingRules(comments)) {
+  if (!this->applyFormattingRules(comments)) {
     return false;
   }
-  if (!this->WriteFormatedCode(comments)) {
+  if (!this->writeFormatedCode(comments)) {
     return false;
   }
   if (comments != nullptr) {
-    (*comments) << this->ToStringLinks();
+    (*comments) << this->toStringLinks();
   }
   return true;
 }
 
-void CodeFormatter::AddCurrentWord() {
-  this->AddWordToOriginals(this->currentWord);
+void CodeFormatter::addCurrentWord() {
+  this->addWordToOriginals(this->currentWord);
   this->currentWord = "";
 }
 
-bool CodeFormatter::AddWordToTarget(const std::string& incomingString, List<CodeElement>& output) {
+bool CodeFormatter::addWordToTarget(const std::string& incomingString, List<CodeElement>& output) {
   if (incomingString == "") {
     return true;
   }
   CodeElement incoming;
-  this->SetContentComputeType(incomingString, incoming);
+  this->setContentComputeType(incomingString, incoming);
   output.addOnTop(incoming);
   return true;
 }
 
-bool CodeFormatter::AddWordToTransformed(const std::string& incomingString) {
-  return this->AddWordToTarget(incomingString, this->transformedElements);
+bool CodeFormatter::addWordToTransformed(const std::string& incomingString) {
+  return this->addWordToTarget(incomingString, this->transformedElements);
 }
 
-bool CodeFormatter::AddWordToOriginals(const std::string& incomingString) {
-  return this->AddWordToTarget(incomingString, this->originalElements);
+bool CodeFormatter::addWordToOriginals(const std::string& incomingString) {
+  return this->addWordToTarget(incomingString, this->originalElements);
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
@@ -128,9 +128,9 @@ bool CodeFormatter::isSeparatorCharacter(char input) {
 
 bool CodeFormatter::processSeparatorCharacters() {
   if (this->isSeparatorCharacter(this->currentChar)) {
-    this->AddCurrentWord();
+    this->addCurrentWord();
     this->currentWord = this->currentChar;
-    this->AddCurrentWord();
+    this->addCurrentWord();
     return true;
   }
   this->currentWord += this->currentChar;
@@ -145,7 +145,7 @@ bool CodeFormatter::processCharacterInQuotes() {
   if (this->currentChar == '"') {
     if (!this->flagPreviousIsStandaloneBackSlash) {
       this->flagInQuotes = false;
-      this->AddCurrentWord();
+      this->addCurrentWord();
       return true;
     }
   }
@@ -157,7 +157,7 @@ bool CodeFormatter::processCharacterInQuotes() {
   return true;
 }
 
-void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement& output) {
+void CodeFormatter::setContentComputeType(const std::string& input, CodeElement& output) {
   output.content = input;
   if (this->builtInTypes.contains(input)) {
     output.type = this->builtInTypes.getValueNoFail(input);
@@ -166,8 +166,8 @@ void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement&
   }
 }
 
-bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
+bool CodeFormatter::extractCodeElements(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::extractCodeElements");
   (void) comments;
   this->originalElements.setExpectedSize(static_cast<signed>(this->inputCode.size()));
   this->flagInQuotes = false;
@@ -181,11 +181,11 @@ bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
       continue;
     }
   }
-  this->AddCurrentWord();
+  this->addCurrentWord();
   return true;
 }
 
-bool CodeFormatter::DecreaseStack(int numberToPop) {
+bool CodeFormatter::decreaseStack(int numberToPop) {
   this->transformedElements.setSize(this->transformedElements.size - numberToPop);
   return true;
 }
@@ -204,7 +204,7 @@ std::string CodeElement::toString() {
   return out.str();
 }
 
-std::string CodeFormatter::ToStringTransformed6() {
+std::string CodeFormatter::toStringTransformed6() {
   std::stringstream out;
   int lastIndex = this->transformedElements.size - 1;
   CodeElement& last = this->transformedElements[lastIndex];
@@ -243,29 +243,29 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
   ) {
     secondToLast.content = secondToLast.content + last.content;
     secondToLast.type = "whiteSpace";
-    return this->DecreaseStack(1);
+    return this->decreaseStack(1);
   }
   if (secondToLast.content == "\\" && last.content == "\\") {
     secondToLast.content = "\\\\";
     secondToLast.type = "commentOneLine";
-    return this->DecreaseStack(1);
+    return this->decreaseStack(1);
   }
   if (secondToLast.type == "commentOneLine" && last.content != "\n") {
     secondToLast.content += last.content;
-    return this->DecreaseStack(1);
+    return this->decreaseStack(1);
   }
   if (last.content == "\n" && secondToLast.content == ")" && this->currentLineLength > this->maximumDesiredLineLength) {
     //if (comments != 0) {
-    //  *comments << "<hr>Rule 0.<br>" << this->ToStringTransformed6();
+    //  *comments << "<hr>Rule 0.<br>" << this->toStringTransformed6();
     //}
-    this->SetContentComputeType("\n", secondToLast);
+    this->setContentComputeType("\n", secondToLast);
     this->previousLineIndent = this->currentLineIndent;
     last.type = "whiteSpace";
     last.content.resize(static_cast<unsigned>(this->currentLineIndent));
     for (unsigned i = 0; i < static_cast<unsigned>(this->currentLineIndent); i ++) {
       last.content[i] = ' ';
     }
-    return this->AddWordToTransformed(")");
+    return this->addWordToTransformed(")");
   }
   if (
     this->previousLineLength > this->maximumDesiredLineLength &&
@@ -276,22 +276,22 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
     last.content == "\n"
   ) {
     //if (comments != 0) {
-    //  *comments << "<hr>Rule 1.<br>" << this->ToStringTransformed6();
+    //  *comments << "<hr>Rule 1.<br>" << this->toStringTransformed6();
     //}
-    this->SetContentComputeType("\n", fourthToLast);
+    this->setContentComputeType("\n", fourthToLast);
     this->previousLineIndent = this->currentLineIndent;
     thirdToLast.type = "whiteSpace";
     thirdToLast.content.resize(static_cast<unsigned>(this->currentLineIndent));
     for (unsigned i = 0; i < static_cast<unsigned>(this->currentLineIndent); i ++) {
       thirdToLast.content[i] = ' ';
     }
-    this->SetContentComputeType(")", secondToLast);
-    this->SetContentComputeType(" ", last);
-    this->AddWordToTransformed("{");
+    this->setContentComputeType(")", secondToLast);
+    this->setContentComputeType(" ", last);
+    this->addWordToTransformed("{");
     this->previousLineLength = static_cast<int>(thirdToLast.content.size() + 3);
     this->currentLineLength = 0;
     this->currentLineIndent = 0;
-    return this->AddWordToTransformed("\n");
+    return this->addWordToTransformed("\n");
   }
   if (
     thirdToLast.content.size() > 1 &&
@@ -299,15 +299,15 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
     last.content == "("
   ) {
     //if (comments != 0) {
-    //  *comments << "<hr>Rule 3.<br>" << this->ToStringTransformed6();
+    //  *comments << "<hr>Rule 3.<br>" << this->toStringTransformed6();
     //}
-    this->SetContentComputeType("(", secondToLast);
-    this->SetContentComputeType("\n", last);
+    this->setContentComputeType("(", secondToLast);
+    this->setContentComputeType("\n", last);
     this->previousLineLength = this->currentLineLength;
     this->currentLineLength = 2;
     this->currentLineIndent = 0;
-    this->AddWordToTransformed(" ");
-    return this->AddWordToTransformed(" ");
+    this->addWordToTransformed(" ");
+    return this->addWordToTransformed(" ");
   }
   if (
     (fourthToLast.content == ")" || fourthToLast.content == "else") &&
@@ -317,7 +317,7 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
   ) {
     thirdToLast.content = " {";
     thirdToLast.type = "openCurlyBrace";
-    this->SetContentComputeType("\n", secondToLast);
+    this->setContentComputeType("\n", secondToLast);
     last.content += " ";
     return true;
   }
@@ -328,8 +328,8 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
   ) {
     secondToLast.content = " {";
     secondToLast.type = "openCurlyBrace";
-    this->SetContentComputeType("\n", last);
-    return this->AddWordToTransformed(" ");
+    this->setContentComputeType("\n", last);
+    return this->addWordToTransformed(" ");
   }
   if (
     fifthToLast.content == ")" &&
@@ -339,9 +339,9 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
     last.content == "{"
   ) {
     thirdToLast.content = "const ";
-    this->SetContentComputeType("{", secondToLast);
-    this->SetContentComputeType("\n", last);
-    this->AddWordToTransformed(" ");
+    this->setContentComputeType("{", secondToLast);
+    this->setContentComputeType("\n", last);
+    this->addWordToTransformed(" ");
     return true;
   }
   if (
@@ -353,21 +353,21 @@ bool CodeFormatter::applyOneRule(std::stringstream* comments) {
     last.content == "{"
   ) {
     fourthToLast.content = "const ";
-    this->SetContentComputeType("{", thirdToLast);
+    this->setContentComputeType("{", thirdToLast);
     last.content = secondToLast.content + " ";
     last.type = "whiteSpace";
-    this->SetContentComputeType("\n", secondToLast);
+    this->setContentComputeType("\n", secondToLast);
     return true;
   }
   if (secondToLast.content == ")" && last.content == "const") {
-    this->SetContentComputeType(" ", last);
-    this->AddWordToTransformed("const");
+    this->setContentComputeType(" ", last);
+    this->addWordToTransformed("const");
     return true;
   }
   return false;
 }
 
-bool CodeFormatter::ComputeState(int maximumElementsToProcess) {
+bool CodeFormatter::computeState(int maximumElementsToProcess) {
   int lineLength = 0;
   int tooManyElementCounter = 0;
   for (int i = this->transformedElements.size - 1; i >= 0; i --) {
@@ -386,7 +386,7 @@ bool CodeFormatter::ComputeState(int maximumElementsToProcess) {
   return true;
 }
 
-bool CodeFormatter::AddAndAccount(const CodeElement& incoming) {
+bool CodeFormatter::addAndAccount(const CodeElement& incoming) {
   this->transformedElements.addOnTop(incoming);
   if (incoming.content == "\n") {
     this->previousLineIndent = this->currentLineIndent;
@@ -404,18 +404,18 @@ bool CodeFormatter::AddAndAccount(const CodeElement& incoming) {
   return true;
 }
 
-bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyFormattingRules");
+bool CodeFormatter::applyFormattingRules(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::applyFormattingRules");
   this->transformedElements.setExpectedSize(this->originalElements.size);
   CodeElement empty;
   this->transformedElements.initializeFillInObject(6, empty);
   for (int i = 0; i < this->originalElements.size; i ++) {
     CodeElement& currentElement = this->originalElements[i];
-    this->AddAndAccount(currentElement);
+    this->addAndAccount(currentElement);
     int tooManyRulesCounter = 0;
     int maximumRules = 200;
     while (this->applyOneRule(comments)) {
-      this->ComputeState(200);
+      this->computeState(200);
       tooManyRulesCounter ++;
       if (tooManyRulesCounter > maximumRules) {
         if (comments != nullptr) {
@@ -448,8 +448,8 @@ CodeFormatter::CodeFormatter() {
   this->builtInTypes.setKeyValue("\t", "whiteSpace");
 }
 
-bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
-  MacroRegisterFunctionWithName("SourceCodeFormatter::WriteFormatedCode");
+bool CodeFormatter::writeFormatedCode(std::stringstream* comments) {
+  MacroRegisterFunctionWithName("SourceCodeFormatter::writeFormatedCode");
   std::fstream fileOut;
   if (!FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     fileOut, this->outputFileName, false, true, false

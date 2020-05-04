@@ -2398,11 +2398,11 @@ bool CalculatorFunctions::innerFormatCPPSourceCode(
   }
   std::stringstream report;
   CodeFormatter formatter;
-  formatter.FormatCPPSourceCode(fileName, "", &report);
+  formatter.formatCPPSourceCode(fileName, "", &report);
   return output.assignValue(report.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerFormatCPPDirectory(
+bool CalculatorFunctions::innerformatCPPDirectory(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   if (!global.userDefaultHasAdminRights()) {
@@ -2413,7 +2413,7 @@ bool CalculatorFunctions::innerFormatCPPDirectory(
     return false;
   }
   std::stringstream report;
-  CodeFormatter::FormatCPPDirectory(fileName, &report);
+  CodeFormatter::formatCPPDirectory(fileName, &report);
   return output.assignValue(report.str(), theCommands);
 }
 
@@ -2564,7 +2564,7 @@ bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& theCommands, con
   const Expression& theDOvar = input[1];
   const Expression& theArgument = input[2];
   //////////////////////
-  //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
+  // d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
   if (!theArgument.startsWith(theCommands.opThePower(), 3)) {
     return false;
   }

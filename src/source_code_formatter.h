@@ -34,13 +34,13 @@ public:
   int currentLineIndent;
   int currentLineLength;
   CodeFormatter();
-  void AddCurrentWord();
-  bool AddWordToTarget(const std::string& incomingString, List<CodeElement>& output);
-  bool AddWordToOriginals(const std::string& incomingString);
-  bool AddWordToTransformed(const std::string& incomingString);
-  void SetContentComputeType(const std::string& input, CodeElement& output);
-  static bool FormatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
-  bool FormatCPPSourceCode(
+  void addCurrentWord();
+  bool addWordToTarget(const std::string& incomingString, List<CodeElement>& output);
+  bool addWordToOriginals(const std::string& incomingString);
+  bool addWordToTransformed(const std::string& incomingString);
+  void setContentComputeType(const std::string& input, CodeElement& output);
+  static bool formatCPPDirectory(const std::string& inputDirectory, std::stringstream* comments);
+  bool formatCPPSourceCode(
     const std::string& inputFileName,
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
@@ -48,19 +48,19 @@ public:
   bool processCharacterInQuotes();
   bool isSeparatorCharacter(char input);
   bool processSeparatorCharacters();
-  bool ExtractCodeElements(std::stringstream* comments);
-  bool WriteFormatedCode(std::stringstream* comments);
-  bool ApplyFormattingRules(std::stringstream* comments);
+  bool extractCodeElements(std::stringstream* comments);
+  bool writeFormatedCode(std::stringstream* comments);
+  bool applyFormattingRules(std::stringstream* comments);
   bool applyOneRule(std::stringstream* comments);
-  std::string ToStringTransformed6();
-  bool ComputeState(int maximumElementsToProcess);
-  bool AddAndAccount(const CodeElement& incoming);
-  bool DecreaseStack(int numberToPop);
+  std::string toStringTransformed6();
+  bool computeState(int maximumElementsToProcess);
+  bool addAndAccount(const CodeElement& incoming);
+  bool decreaseStack(int numberToPop);
   bool initializeFileNames(
     const std::string& fileName,
     const std::string& inputOutputFileNameEmptyForAuto,
     std::stringstream* comments
   );
-  std::string ToStringLinks();
+  std::string toStringLinks();
 };
 #endif

@@ -555,7 +555,7 @@ public:
   static bool innerFormatCPPSourceCode(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool innerFormatCPPDirectory(
+  static bool innerformatCPPDirectory(
     Calculator& theCommands, const Expression& input, Expression& output
   );
 };

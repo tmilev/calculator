@@ -1397,7 +1397,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
       return theCommands << "Failed to extract a small integer from the first argument "
       << upperLimitRat.toString(&theComputation.theFormat) << ". ";
     }
-    thePolysRational.PopIndexShiftDown(0);
+    thePolysRational.popIndexShiftDown(0);
   }
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic = thePolysRational;
@@ -1787,11 +1787,11 @@ bool IntegralRFComputation::IntegrateRF() {
       }
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.GetLeadingCoefficient(monomialOrder);
+      currentCoefficient = denRescaled.getLeadingCoefficient(monomialOrder);
       currentCoefficient.invert();
       denRescaled *= currentCoefficient;
       MathRoutines::raiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.GetLeadingCoefficient(monomialOrder);
+      numScale = numRescaled.getLeadingCoefficient(monomialOrder);
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.assignValueWithContext(numRescaled, this->context, *this->owner);
@@ -2195,9 +2195,9 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   theConstTermsForLaTeX = theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
-  << HtmlRoutines::getMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
+  << HtmlRoutines::getMathSpanPure(theSystemHomogeneous.toStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
-  << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
+  << "\\[" << theSystemHomogeneous.toStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML = true;
   theSystemHomogeneous.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
   this->currentFormaT.flagUseHTML = false;
@@ -2357,7 +2357,7 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   if (!theArgument.isBuiltInType()) {
     return false;
   }
-  if (!theEWAE.MergeContexts(theEWAE, theArgument)) {
+  if (!theEWAE.mergeContexts(theEWAE, theArgument)) {
     return false;
   }
   Polynomial<Rational> theArgumentPoly;
@@ -3703,7 +3703,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     << "The matrix is not square.";
     return output.makeError(out.str(), theCommands);
   }
-  outputMat.MakeIdentityMatrix(theMatrix.numberOfRows);
+  outputMat.makeIdentityMatrix(theMatrix.numberOfRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
@@ -3827,7 +3827,7 @@ bool Calculator::innerInvertMatrixVerbose(
   if (mat.numberOfRows != mat.numberOfColumns || mat.numberOfColumns < 1) {
     return output.makeError("The matrix is not square", theCommands);
   }
-  outputMat.MakeIdentityMatrix(mat.numberOfRows);
+  outputMat.makeIdentityMatrix(mat.numberOfRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out;
@@ -5421,7 +5421,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
         largerTypes[i], imagesSimpleRoots[i], tempCandidate
       );
       out << HtmlRoutines::getMathSpanPure(
-        currentHighestWeight.ToStringLetterFormat("\\omega")
+        currentHighestWeight.toStringLetterFormat("\\omega")
       );
       out << "</td></tr>";
     }
@@ -6968,8 +6968,8 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const
   Matrix<Rational> outputMat, outputCoMat;
   theType.getCartanSymmetric(outputMat);
   theType.getCoCartanSymmetric(outputCoMat);
-  out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputMat.ToStringLatex(), 10000)
-  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputCoMat.ToStringLatex(), 10000);
+  out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputMat.toStringLatex(), 10000)
+  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathMouseHover(outputCoMat.toStringLatex(), 10000);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -7308,7 +7308,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
       : theHWsimplecoords.toString(&theFormat))
       << "</td>";
       tempRoot = theSSalgebra.theWeyl.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
-      std::string theFundString = tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+      std::string theFundString = tempRoot.toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
       out << "<td>" << (useJavascript ? HtmlRoutines::getMathSpanPure(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
@@ -7586,7 +7586,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     currentHW += theSub.GetRho();
     theWeyl.actOn(indexInWeyl, currentHW);
     currentHW -= theSub.GetRho();
-    out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
+    out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::getMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
@@ -7933,9 +7933,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentChar = theCasimir;
     currentChar.modOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.addOnTop(currentChar);
-    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
+    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.toStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.toString(&tempFormat) << "</td></tr>";
-    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
+    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.toStringLetterFormat("\\psi", &tempFormat) << "$"
     << "&$p_{" << i + 1 << "}=$ $" << currentChar.toString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
@@ -7999,10 +7999,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWsimplecoords = theGenMod.theHWSimpleCoordSBaseField;
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
-    << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).toStringLetterFormat("\\psi")
     << "</td><td>" << HtmlRoutines::getMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
     latexReport2
-    << "$" << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "$" << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).toStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.toString();
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
@@ -8035,7 +8035,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   }
   Expression leftMerged = input[1];
   Expression rightMerged = input[2];
-  if (!Expression::MergeContexts(leftMerged, rightMerged)) {
+  if (!Expression::mergeContexts(leftMerged, rightMerged)) {
     return theCommands << "Could not get elements of universal enveloping algebra from inputs: " << input[1].toString()
     << " and " << input[2].toString();
   }
@@ -8217,19 +8217,19 @@ bool Calculator::innerSplitFDpartB3overG2old(
   std::stringstream readyForLatexConsumptionTable1;
 
   readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  <<  theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega")
+  <<  theG2B3Data.theWeightFundCoords.toStringLetterFormat("\\omega")
   << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction<Rational> >& currentWeightSimpleB3coords = theG2B3Data.outputWeightsSimpleCoords[i];
     Vector<RationalFunction<Rational> >& currentWeightFundB3coords = theG2B3Data.outputWeightsFundCoordS[i];
     Vector<RationalFunction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFunction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
-    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ToStringLetterFormat("\\omega")
-    << " $ & $" << theG2B3Data.leviEigenSpace[i].ToStringLetterFormat("m")
-    << " $ & $ " << currentG2Weight.ToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
+    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.toStringLetterFormat("\\omega")
+    << " $ & $" << theG2B3Data.leviEigenSpace[i].toStringLetterFormat("m")
+    << " $ & $ " << currentG2Weight.toStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
     out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
     << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
-    << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
+    << "</td><td>" << currentG2Weight.toStringLetterFormat("\\alpha") << "</td><td> "
     << theG2B3Data.theHmm.theDomain().theWeyl.getFundamentalCoordinatesFromSimple(currentG2Weight).toString()
     << "</td><td> " << currentG2DualWeight.toString() << "</td>";
     out << "<td>" << HtmlRoutines::getMathSpanPure(theG2B3Data.theChars[i].toString()) << "</td>";

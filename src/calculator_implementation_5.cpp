@@ -987,7 +987,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
   if (!input.isListStartingWithAtom(
-    theCommands.operations.getIndexNoFail("Sort")
+    theCommands.operations.getIndexNoFail("sort")
   )) {
     return false;
   }

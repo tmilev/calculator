@@ -53,13 +53,13 @@ bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::strin
     return false;
   }
   Cone tempCone;
-  bool result = tempCone.CreateFromVertices(theArguments);
-  if (tempCone.IsTheEntireSpace()) {
+  bool result = tempCone.createFromVertices(theArguments);
+  if (tempCone.isTheEntireSpace()) {
     outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
   }
   for (int i = 0; i < tempCone.Vertices.size; i ++) {
-    if (tempCone.IsInCone(tempCone.Vertices[i]) && tempCone.IsInCone(- tempCone.Vertices[i])) {
+    if (tempCone.isInCone(tempCone.Vertices[i]) && tempCone.isInCone(- tempCone.Vertices[i])) {
       std::stringstream out;
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
       << tempCone.Vertices[i].toString() << " as well as its opposite vector "
@@ -72,10 +72,10 @@ bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::strin
   return result;
 }
 
-void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator) {
+void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator) {
   Vectors<Rational> tempRoots;
   tempRoots.addOnTop(inputLine);
-  this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
+  this->intersectWithLinearSubspaceSpannedBy(tempRoots);
   if (this->basisRationalForm.numberOfRows > 1) {
     global.fatal << "This should not be possible. " << global.fatal;
   }

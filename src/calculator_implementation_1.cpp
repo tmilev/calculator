@@ -185,7 +185,7 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
   }
   Expression left = input[1];
   Expression right = input[2];
-  if (!input.MergeContexts(left, right)) {
+  if (!input.mergeContexts(left, right)) {
     return false;
   }
   Polynomial<Coefficient> leftPolynomial, rightPolynomial;
@@ -837,7 +837,7 @@ bool Calculator::innerDeterminantPolynomial(
     << "polynomial entries. ";
   }
   Polynomial<Rational> outputPoly;
-  outputPoly.MakeDeterminantFromSquareMatrix(matPol);
+  outputPoly.makeDeterminantFromSquareMatrix(matPol);
   return output.assignValueWithContext(outputPoly, context, theCommands);
 }
 
@@ -2112,7 +2112,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
       << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << global.fatal;
     }
-    out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
+    out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.toStringLetterFormat("v");
   } else {
     out << "<br>Cones have empty intersection.";
     out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.toString() << ". Indeed, ";
@@ -2242,7 +2242,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   if (!leftE.isBuiltInType() || !rightE.isBuiltInType()) {
     return false;
   }
-  if (!Expression::MergeContexts(leftE, rightE)) {
+  if (!Expression::mergeContexts(leftE, rightE)) {
     return false;
   }
   ExpressionContext theContext = leftE.getContext();
@@ -2383,7 +2383,7 @@ public:
   // List<List<std::string> > rulesDisplayNames;
   HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
   MapList<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
-  bool ComputeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
+  bool computeRecursively(int incomingRecursionDepth, std::stringstream* commentsOnFailure);
   bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
   bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
   void initializeComputation();
@@ -2396,9 +2396,9 @@ public:
     }
     return true;
   }
-  std::string ToStringExpressionHistoryMerged();
+  std::string toStringExpressionHistoryMerged();
   std::string toStringDebug();
-  Expression GetExpression(
+  Expression getExpression(
     const TreeNode<HistorySubExpression>& currentNode,
     List<std::string>& outputRuleNames
   );
@@ -2421,10 +2421,10 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesDisplayNamesMap.setKeyValue("AssociativeRule", "");
 }
 
-Expression ExpressionHistoryEnumerator::GetExpression(
+Expression ExpressionHistoryEnumerator::getExpression(
   const TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames
 ) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::GetExpression");
+  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::getExpression");
   Expression result;
   if (
     currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() &&
@@ -2446,12 +2446,12 @@ Expression ExpressionHistoryEnumerator::GetExpression(
     return result;
   }
   if (currentNode.children.size == 1) {
-    result = this->GetExpression(currentNode.getChild(0), outputRuleNames);
+    result = this->getExpression(currentNode.getChild(0), outputRuleNames);
     return result;
   }
   result.reset(*this->owner);
   for (int i = 0; i < currentNode.children.size; i ++) {
-    Expression currentE = this->GetExpression(currentNode.getChild(i), outputRuleNames);
+    Expression currentE = this->getExpression(currentNode.getChild(i), outputRuleNames);
     result.addChildOnTop(currentE);
   }
   return result;
@@ -2463,10 +2463,10 @@ ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
   this->recursionDepth = 0;
 }
 
-bool ExpressionHistoryEnumerator::ComputeRecursively(
+bool ExpressionHistoryEnumerator::computeRecursively(
   int incomingRecursionDepth, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ComputeRecursively");
+  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::computeRecursively");
   this->recursionDepth = incomingRecursionDepth;
   if (recursionDepth > this->maximumRecursionDepth) {
     if (commentsOnFailure != nullptr) {
@@ -2539,7 +2539,7 @@ bool ExpressionHistoryEnumerator::processChildrenTransformations(
     }
     childrenEnumerators[i].owner = this->owner;
     childrenEnumerators[i].theHistory = current[2];
-    if (!childrenEnumerators[i].ComputeRecursively(
+    if (!childrenEnumerators[i].computeRecursively(
       this->recursionDepth + 1, commentsOnFailure
     )) {
       return false;
@@ -2617,7 +2617,7 @@ std::string ExpressionHistoryEnumerator::toStringDebug() {
   return out.str();
 }
 
-std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
+std::string ExpressionHistoryEnumerator::toStringExpressionHistoryMerged() {
   std::stringstream out;
   out << "\\(\\begin{array}{ll|l}";
   std::string prevEstring = "";
@@ -2686,8 +2686,8 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   );
   std::stringstream out;
   history.owner = &theCommands;
-  history.ComputeRecursively(0, &out);
-  out << history.ToStringExpressionHistoryMerged();
+  history.computeRecursively(0, &out);
+  out << history.toStringExpressionHistoryMerged();
   if (doDebug) {
     out << "<hr>" << history.toStringDebug();
   }

@@ -73,7 +73,7 @@ double FloatingPoint::power(double base, double exponent) {
   return pow(base, exponent);
 }
 
-unsigned int MathRoutines::HashDouble(const double& input) {
+unsigned int MathRoutines::hashDouble(const double& input) {
   if (std::isnan(input)) {
     return 5;
   }

@@ -412,7 +412,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
         if (i < this->CCsStandardRepCharPolys.size) {
           out << "Characteristic poly standard representation: "
           << this->CCsStandardRepCharPolys[i].toString(&charPolyFormat);
-          const List<int>& currentHashList = this->CCsStandardRepCharPolys.GetHashArray(
+          const List<int>& currentHashList = this->CCsStandardRepCharPolys.getHashArray(
             this->CCsStandardRepCharPolys.getHash(this->CCsStandardRepCharPolys[i])
           );
           int numClassesSameCharPoly = 0;
@@ -1345,22 +1345,22 @@ unsigned int GroupRepresentation<somegroup, Coefficient>::hashFunction() const {
 }
 
 template <typename somegroup, typename Coefficient>
-Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetMatrixElement(int groupElementIndex) {
+Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(int groupElementIndex) {
   Matrix<Coefficient>& theMat = this->theElementImageS[groupElementIndex];
   if (this->theElementIsComputed[groupElementIndex]) {
     return theMat;
   }
   const ElementWeylGroup& theElt = this->ownerGroup->theElements[groupElementIndex];
   this->theElementIsComputed[groupElementIndex] = true;
-  this->GetMatrixElement(theElt, theMat);
+  this->getMatrixElement(theElt, theMat);
   return theMat;
 }
 
 template <typename somegroup, typename Coefficient>
 template <typename elementSomeGroup>
-Matrix<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetMatrixElement(const elementSomeGroup& input) {
+Matrix<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(const elementSomeGroup& input) {
   Matrix<Coefficient> result;
-  this->GetMatrixElement(input, result);
+  this->getMatrixElement(input, result);
   return result;
 }
 
@@ -1374,23 +1374,23 @@ int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getDimension(
 
 template <typename somegroup, typename Coefficient>
 template <typename elementSomeGroup>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetMatrixElement(
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(
   const elementSomeGroup& input, Matrix<Coefficient>& output
 ) {
   this->checkInitialization();
   if (this->ownerGroup->generators.size == 0) {//here be trivial weyl group
-    output.MakeIdentityMatrix(1);
+    output.makeIdentityMatrix(1);
     return;
   }
   this->ownerGroup->CheckInitializationConjugacyClasses();
-  output.MakeIdentityMatrix(this->getDimension());
+  output.makeIdentityMatrix(this->getDimension());
   for (int i = 0; i < input.generatorsLastAppliedFirst.size; i ++) {
     output.multiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
   }
 }
 
 template <typename somegroup, typename Coefficient>
-std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetName() const {
+std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getName() const {
   std::string name;
   for (int i = 0; i < this->names.size; i ++) {
     name.append(this->names[i]);
@@ -1409,7 +1409,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator>(
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunctionMatrix(
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunctionMatrix(
   ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat
 ) {
   this->checkInitialization();
@@ -1441,7 +1441,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunc
         this->classFunctionMatrices[cci].makeZeroMatrix(this->getDimension());
         for (int i = 0; i < currentCC.theElements.size; i ++) {
           if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]]) {
-            this->ComputeAllElementImages();
+            this->computeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
           if (theReport.tickAndWantReport()) {
@@ -1469,7 +1469,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetClassFunc
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ClassFunctionMatrix(
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctionMatrix(
   ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat
 ) {
   int theDim = this->generatorS[0].numberOfRows;
@@ -1484,7 +1484,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ClassFunctio
     if (classFunctionMatrices[cci].numberOfColumns == 0) {
       classFunctionMatrices[cci].makeZeroMatrix(this->generatorS[0].numberOfColumns);
       for (int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size; icci ++) {
-        this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci].theElements[icci]);
+        this->classFunctionMatrices[cci] += this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].theElements[icci]);
       }
     }
     for (int i = 0; i < outputMat.numberOfRows; i ++) {
@@ -1508,7 +1508,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
   }
   int theRank = this->ownerGroup->generators.size;
   LargeIntegerUnsigned theLCM, theDen;
-  this->GetLargestDenominatorSimpleGens(theLCM, theDen);
+  this->getLargestDenominatorSimpleGenerators(theLCM, theDen);
   out << "\n<br>\n LCM denominators simple generators: " << theLCM.toString() << ", largest denominator: " << theDen.toString();
   out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
@@ -2012,7 +2012,7 @@ void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& p
 ) {
   this->irreps_grcam.BSInsertDontDup(p);
-  auto p_gr = p.MakeOtherGroupRepresentationClass();
+  auto p_gr = p.makeOtherGroupRepresentationClass();
   this->AddIrreducibleRepresentation(p_gr);
 }
 
@@ -2020,7 +2020,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(
   GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& p
 ) {
-  p.ComputeCharacter();
+  p.computeCharacter();
   this->irreps.BSInsertDontDup(p);
   this->characterTable.BSInsertDontDup(p.theCharacteR);
 }
@@ -2096,7 +2096,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
       newRep = appendOnlyIrrepsList[j];//we are initializing by the sign or natural rep.
       newRep *= appendOnlyIrrepsList[i];
-      bool tempB = newRep.DecomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
+      bool tempB = newRep.decomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
       if (!tempB) {
         global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.toString() << ". " << global.fatal;
       }
@@ -2126,7 +2126,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::SpreadVector(
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::spreadVector(
   const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace
 ) {
   this->checkInitialization();
@@ -2146,10 +2146,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::SpreadVector
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetLargestDenominatorSimpleGens(
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getLargestDenominatorSimpleGenerators(
   LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen
 ) const {
-  MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::GetLargestDenominatorSimpleGens");
+  MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::getLargestDenominatorSimpleGenerators");
   outputLCM = 1;
   outputDen = 1;
   for (int gi = 0; gi < this->generatorS.size; gi ++) {
@@ -2166,17 +2166,17 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetLargestDe
 
 
 template <typename somegroup, typename Coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTodorsVersionRecursive(
+bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTodorsVersionRecursive(
   VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
   List<GroupRepresentation<somegroup, Coefficient> >& appendOnlyIrrepsList,
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >* appendOnlyGRCAMSList
 ) {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersionRecursive");
+  MacroRegisterFunctionWithName("WeylGroupRepresentation::decomposeTodorsVersionRecursive");
   this->checkInitialization();
 
   this->ownerGroup->CheckInitializationFDrepComputation();
-  this->GetCharacter();
-  Coefficient SumOfNumComponentsSquared = this->GetNumberOfComponents();
+  this->getCharacter();
+  Coefficient SumOfNumComponentsSquared = this->getNumberOfComponents();
   if (SumOfNumComponentsSquared == 0) {
     global.fatal << "This is a programming error: a module has character " << this->theCharacteR.toString()
     << " of zero length, which is impossible. " << "Here is a printout of the module. "
@@ -2186,7 +2186,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
     int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
     if (i == - 1) {
       this->ownerGroup->AddIrreducibleRepresentation(*this);
-      appendOnlyIrrepsList.addOnTop(this->MakeOtherGroupRepresentationClass());
+      appendOnlyIrrepsList.addOnTop(this->makeOtherGroupRepresentationClass());
       if (appendOnlyGRCAMSList) {
         appendOnlyGRCAMSList->addOnTop(*this);
       }
@@ -2204,14 +2204,14 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
     std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.toString();
     LargeIntegerUnsigned largestDen, lcmDen;
-    this->GetLargestDenominatorSimpleGens(lcmDen, largestDen);
+    this->getLargestDenominatorSimpleGenerators(lcmDen, largestDen);
     reportStream << "\n<br>\n Largest denominator is " << largestDen.toString()
     << ", denominator lcm is: " << lcmDen.toString();
     Report1.report(reportStream.str());
   }
   //chop off already known pieces:
   for (int i = 0; i < appendOnlyIrrepsList.size; i ++) {
-    Coefficient NumIrrepsOfType = this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i].GetCharacter());
+    Coefficient NumIrrepsOfType = this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i].getCharacter());
     if (NumIrrepsOfType != 0) {
       this->ownerGroup->CheckInitializationFDrepComputation();
       {
@@ -2221,7 +2221,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
         reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacteR;
         Report2.report(reportStream.str());
       }
-      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix);
+      this->getClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix);
       {
         std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.toString() << "\n <br>\n"
@@ -2253,7 +2253,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
       }
       if (remainingCharacter.isEqualToZero()) {
         if (remainingVectorSpace.size != 0) {
-          global.fatal << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.toString()
+          global.fatal << "Remaining character is zero but "
+          << "remaining space is " << remainingVectorSpace.toString()
           << ". Starting char: " << this->theCharacteR.toString() << global.fatal;
         }
       }
@@ -2261,8 +2262,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
   }
   if ((remainingVectorSpace.size < this->getDimension()) && (remainingVectorSpace.size > 0)) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reducedRep;
-    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep);
-    return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
+    this->restrictRepresentation(remainingVectorSpace, remainingCharacter, reducedRep);
+    return reducedRep.decomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
   }
   if (remainingVectorSpace.size == 0) {
     return true;
@@ -2273,19 +2274,20 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
   for (int cfi = NumClasses - 1; cfi >= 0; cfi --) {
     virtualChar.makeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
-    this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
+    this->getClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
     bool tempB = splittingOperatorMatrix.getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(theSubRepsBasis);
     if (!tempB) {
       global.fatal << "<br>This is a mathematical or programming mistake: "
-      << "splittingOperatorMatrix should have small integral values, which it doesn't!" << global.fatal;
+      << "splittingOperatorMatrix should have "
+      << "small integral values, which it doesn't!" << global.fatal;
     }
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> newRep;
     if (theSubRepsBasis.size > 1) {
       //we found splitting, so let us recursively decompose:
       for (int i = 0; i < theSubRepsBasis.size; i ++) {
         remainingCharacter.makeZero(*this->ownerGroup);
-        this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
-        if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList)) {
+        this->restrictRepresentation(theSubRepsBasis[i], remainingCharacter, newRep);
+        if (!newRep.decomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList)) {
           return false;
         }
       }
@@ -2306,7 +2308,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
 }
 
 template <typename somegroup, typename Coefficient>
-GroupRepresentation<somegroup, Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::MakeOtherGroupRepresentationClass() const {
+GroupRepresentation<somegroup, Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::makeOtherGroupRepresentationClass() const {
   GroupRepresentation<somegroup, Coefficient> out;
   out.flagCharacterIsComputed = this->flagCharacterIsComputed;
   out.generatorS = this->generatorS;
@@ -2360,11 +2362,11 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     }
     GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> tspace = sr * nspace;
     tspace.flagCharacterIsComputed = false;
-    List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > spaces = tspace.DecomposeThomasVersion();
+    List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > spaces = tspace.decomposeThomasVersion();
     for (int spi = 0; spi < spaces.size; spi ++) {
-      if (spaces[spi].GetNumberOfComponents() == 1) {
-        if (!this->theGroup.characterTable.contains(spaces[spi].GetCharacter())) {
-          this->theGroup.characterTable.addOnTop(spaces[spi].GetCharacter());
+      if (spaces[spi].getNumberOfComponents() == 1) {
+        if (!this->theGroup.characterTable.contains(spaces[spi].getCharacter())) {
+          this->theGroup.characterTable.addOnTop(spaces[spi].getCharacter());
           this->irreps_grcam.addOnTop(spaces[spi]);
           newspaces.addOnTop(spaces[spi]);
         }
@@ -2377,12 +2379,12 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     }
     for (int spi = 0; spi < incompletely_digested.size; spi ++) {
       for (int ci = 0; ci < this->theGroup.characterTable.size; ci ++) {
-        if (incompletely_digested[spi].GetCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0) {
-          List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
+        if (incompletely_digested[spi].getCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0) {
+          List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].decomposeThomasVersion();
           incompletely_digested.removeIndexShiftDown(spi);
           for (int shi = 0; shi < shards.size; shi ++) {
-            if (shards[shi].GetNumberOfComponents() == 1) {
-              if (!this->theGroup.characterTable.contains(shards[shi].GetCharacter())) {
+            if (shards[shi].getNumberOfComponents() == 1) {
+              if (!this->theGroup.characterTable.contains(shards[shi].getCharacter())) {
                 this->irreps_grcam.addOnTop(spaces[spi]);
                 this->characterTable.addOnTop(this->irreps_grcam.lastObject()->theCharacteR);
                 newspaces.addOnTop(spaces[spi]);
@@ -2400,7 +2402,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   this->irreps.setSize(0);
   this->characterTable.setSize(0);
   for (int i = 0; i < irreps_grcam.size; i ++) {
-    this->irreps.addOnTop(this->irreps_grcam[i].MakeOtherGroupRepresentationClass());
+    this->irreps.addOnTop(this->irreps_grcam[i].makeOtherGroupRepresentationClass());
     this->characterTable.addOnTop(&(this->irreps[i].theCharacteR));
   }
   this->theGroup.flagCharTableIsComputed = true;
@@ -2421,23 +2423,23 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations() {
 }
 
 template <typename somegroup, typename Coefficient>
-const ClassFunction<somegroup, Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetCharacter() {
+const ClassFunction<somegroup, Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getCharacter() {
   if (this->flagCharacterIsComputed) {
     return this->theCharacteR;
   }
   this->theCharacteR.G = this->ownerGroup;
   this->theCharacteR.data.setSize(this->ownerGroup->ConjugacyClassCount());
   for (int cci = 0; cci < this->ownerGroup->ConjugacyClassCount(); cci ++) {
-    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).getTrace();
+    this->theCharacteR.data[cci] = this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).getTrace();
   }
   this->flagCharacterIsComputed = true;
   return this->theCharacteR;
 }
 
 template <typename somegroup, typename Coefficient>
-Coefficient GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::GetNumberOfComponents() {
+Coefficient GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getNumberOfComponents() {
   ClassFunction<somegroup, Coefficient> X;
-  X = GetCharacter();
+  X = getCharacter();
   return X.Norm();
 }
 

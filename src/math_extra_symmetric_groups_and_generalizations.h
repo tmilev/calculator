@@ -1417,7 +1417,7 @@ somestream& PermutationR2::intoStream(somestream& out) const {
 
 template <typename Object>
 void PermutationR2::actOnList(List<Object>& in) const {
-  in.PermuteIndices(this->cycles);
+  in.permuteIndices(this->cycles);
 }
 
 template <typename Coefficient>
@@ -1625,7 +1625,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
 template <typename elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPrint) {
   for (int i = 0; i < this->irreps.size; i ++) {
-    this->irreps[i].ComputeCharacter();
+    this->irreps[i].computeCharacter();
   }
   std::stringstream out;
   out << this->getSize() << " elements.  Representatives and sizes are ";
@@ -2013,11 +2013,11 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
 
 template <typename somegroup, typename Coefficient>
 std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
-  this->ComputeCharacter();
+  this->computeCharacter();
   std::stringstream out;
   bool firstone = true;
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
-    this->ownerGroup->irreps[i].ComputeCharacter();
+    this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
     x = this->theCharacteR.InnerProduct(this->ownerGroup->irreps[i].theCharacteR);
     if (x != 0) {

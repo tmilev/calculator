@@ -741,7 +741,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
   }
   output = input[1];
   Expression rightCopy = input[2];
-  if (!output.MergeContexts(output, rightCopy)) {
+  if (!output.mergeContexts(output, rightCopy)) {
     return false;
   }
   if (!output.isOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.isOfType<LittelmannPath>()) {
@@ -1021,7 +1021,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.MakeIdentityMatrix(baseRat.numberOfRows);
+    idMat.makeIdentityMatrix(baseRat.numberOfRows);
     MathRoutines::raiseToPower(baseRat, largePower, idMat);
     return output.assignMatrix(baseRat, theCommands);
   }
@@ -1047,7 +1047,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersByLargeIntegerIfPossib
       largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.MakeIdentityMatrix(baseAlg.numberOfRows);
+    idMat.makeIdentityMatrix(baseAlg.numberOfRows);
     MathRoutines::raiseToPower(baseAlg, largePower, idMat);
     return output.assignMatrix(baseAlg, theCommands);
   }  
@@ -1089,7 +1089,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<Rational> idMat;
-    idMat.MakeIdentityMatrix(baseRat.numberOfRows);
+    idMat.makeIdentityMatrix(baseRat.numberOfRows);
     MathRoutines::raiseToPower(baseRat, thePower, idMat);
     return output.assignMatrix(baseRat, theCommands);
   }
@@ -1108,7 +1108,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       thePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
-    idMat.MakeIdentityMatrix(baseAlg.numberOfRows);
+    idMat.makeIdentityMatrix(baseAlg.numberOfRows);
     MathRoutines::raiseToPower(baseAlg, thePower, idMat);
     return output.assignMatrix(baseAlg, theCommands);
   }
@@ -1136,7 +1136,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixNumbersBySmallInteger(
       << "negative powers not implemented yet. ";
     }
     Matrix<RationalFunction<Rational> > idMat;
-    idMat.MakeIdentityMatrix(baseRF.numberOfRows);
+    idMat.makeIdentityMatrix(baseRF.numberOfRows);
     MathRoutines::raiseToPower(baseRF, thePower, idMat);
     return output.assignMatrix(baseRF, theCommands, &theContext);
   }
@@ -1522,7 +1522,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
     << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
-  idMatE.MakeIdentityMatrix(theMat.numberOfRows, theCommands.expressionOne(), theCommands.expressionZero());
+  idMatE.makeIdentityMatrix(theMat.numberOfRows, theCommands.expressionOne(), theCommands.expressionZero());
   MathRoutines::raiseToPower(theMat, thePower, idMatE);
   return output.assignMatrixExpressions(theMat, theCommands, true, true);
 }
@@ -2146,7 +2146,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   ) {
     return false;
   }
-  if (!leftE.MergeContexts(leftE, rightE)) {
+  if (!leftE.mergeContexts(leftE, rightE)) {
     return theCommands << "Failed to convert "
     << leftE.toString() << " and " << rightE.toString()
     << " to common context. ";
@@ -2596,7 +2596,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
   ) {
     return false;
   }
-  if (!leftE.MergeContexts(leftE, rightE)) {
+  if (!leftE.mergeContexts(leftE, rightE)) {
     return false;
   }
   Matrix<RationalFunction<Rational> > leftMat, rightMat;
@@ -2827,7 +2827,7 @@ bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
       << left.content.coefficients[0].theModulus;
     }
   }
-  ElementZmodP rightLeadingCoefficient = right.content.GetLeadingCoefficient(&MonomialP::orderDefault());
+  ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialP::orderDefault());
   if (!rightLeadingCoefficient.invert()) {
     return theCommands
     << "Leading coefficient of quotient "

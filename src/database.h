@@ -31,7 +31,7 @@ public:
   QuerySet();
   QuerySet(const JSData& inputValue);
   bool toJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
-  bool ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const;
+  bool toJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const;
   std::string toStringDebug() const;
 };
 
@@ -40,7 +40,7 @@ public:
   List<std::string> fieldsToProjectTo;
   List<std::string> fieldsProjectedAway;
   JSData toJSON() const;
-  void MakeProjection(const List<std::string>& fields);
+  void makeProjection(const List<std::string>& fields);
 
 };
 

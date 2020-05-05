@@ -163,7 +163,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   if (this->isConstant()) {
     return true;
   }
-  highestCoefficient = this->GetLeadingCoefficient(monomialOrder);
+  highestCoefficient = this->getLeadingCoefficient(monomialOrder);
   if (!highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()) {
     return false;
   }

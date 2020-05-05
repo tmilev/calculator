@@ -559,9 +559,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       if (useHtmlInReport) {
         *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
         if (formatAsLinearSystem) {
-          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1);
         } else {
-          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->ToStringLatex(theFormat), - 1);
+          *humanReadableReport << HtmlRoutines::getMathSpanPure(this->toStringLatex(theFormat), - 1);
         }
         *humanReadableReport << "</td><td style =\"border-bottom:1pt solid black;\">Selected pivot column "
         << i + 1 << ". ";
@@ -570,9 +570,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         }
       } else {
         if (formatAsLinearSystem) {
-          *humanReadableReport << "$" << this->ToStringSystemLatex(carbonCopyMat, theFormat) << "$";
+          *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat) << "$";
         } else {
-          *humanReadableReport << "$" << this->ToStringLatex(theFormat) << "$";
+          *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$";
         }
         *humanReadableReport << "& Selected pivot column " << i + 1 << ". ";
         if (NumFoundPivots != tempI) {
@@ -624,18 +624,18 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->toStringSystemLatex(carbonCopyMat, theFormat), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->ToStringLatex(theFormat))
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::getMathSpanPure(this->toStringLatex(theFormat))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       }
     } else {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "$" << this->ToStringSystemLatex(carbonCopyMat, theFormat)
+        *humanReadableReport << "$" << this->toStringSystemLatex(carbonCopyMat, theFormat)
         << "$& Final result.\\\\\n";
       } else {
-        *humanReadableReport << "$" << this->ToStringLatex(theFormat) << "$& Final result.\\\\\n";
+        *humanReadableReport << "$" << this->toStringLatex(theFormat) << "$& Final result.\\\\\n";
       }
       *humanReadableReport << "\\end{longtable}";
     }

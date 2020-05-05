@@ -1165,7 +1165,7 @@ public:
     out.generatorS.setSize(this->preimageGroup->generators.size);
     for (int i = 0; i < this->preimageGroup->generators.size; i ++) {
       elementSecondGroup ki = (*this)(this->preimageGroup->generators[i]);
-      M2.GetMatrixOfElement(ki, out.generatorS[i]);
+      M2.getMatrixOfElement(ki, out.generatorS[i]);
     }
     return out;
   }
@@ -1188,27 +1188,27 @@ public:
   bool checkInitialization() const;
 
   template <typename elementSomeGroup>
-  bool GetMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out);
+  bool getMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out);
 
-  void ComputeCharacter() const;
-  ClassFunction<someGroup, Coefficient> GetCharacter() {
-    this->ComputeCharacter();
+  void computeCharacter() const;
+  ClassFunction<someGroup, Coefficient> getCharacter() {
+    this->computeCharacter();
     return this->theCharacteR;
   }
 
   bool operator>(const GroupRepresentation& right) const;
 
-  void MakeTensorRepresentation(
+  void makeTensorRepresentation(
     GroupRepresentation<someGroup, Coefficient>& right, GroupRepresentation<someGroup, Coefficient>& left
   );
 
   bool verifyRepresentation();
 
-  bool VerifyRepresentationExpensive() {
+  bool verifyRepresentationExpensive() {
     List<Matrix<Coefficient> > repms;
     repms.setSize(this->ownerGroup->theElements.size);
     for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
-      this->GetMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
+      this->getMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
     }
     for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
       for (int j = 0; j < this->ownerGroup->theElements.size; j ++) {
@@ -1243,7 +1243,7 @@ public:
     return true;
     // if it ever becomes useful to compare element matrices...
     /*for (int i = 0; i < this->ownerGroup.)
-    right.GetMatrixOfElement(this->ownerGroup.generators[i], M)
+    right.getMatrixOfElement(this->ownerGroup.generators[i], M)
     if (M != this->generatorS[i])
       return false;*/
   }
@@ -1274,7 +1274,7 @@ public:
 
 template <typename someGroup, typename Coefficient>
 template <typename elementSomeGroup>
-bool GroupRepresentation<someGroup, Coefficient>::GetMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out) {
+bool GroupRepresentation<someGroup, Coefficient>::getMatrixOfElement(const elementSomeGroup& g, Matrix<Coefficient>& out) {
   out.makeIdentity(this->generatorS[0]);
   List<int> word;
   if (!this->ownerGroup->getWord(g, word)) {
@@ -1295,7 +1295,7 @@ bool GroupRepresentation<someGroup, Coefficient>::checkInitialization() const {
 }
 
 template <typename someGroup, typename Coefficient>
-void GroupRepresentation<someGroup, Coefficient>::ComputeCharacter() const {
+void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
   if (this->flagCharacterIsComputed) {
     return;
   }
@@ -1309,7 +1309,7 @@ void GroupRepresentation<someGroup, Coefficient>::ComputeCharacter() const {
     Matrix<Coefficient> M;
     M.makeIdentity(this->generatorS[0]);
     List<int> ccirWord;
-    // this->GetMatrixOfElement(this->ownerGroup->conjugacyClasses[cci].representative);
+    // this->getMatrixOfElement(this->ownerGroup->conjugacyClasses[cci].representative);
     this->ownerGroup->getWord(this->ownerGroup->conjugacyClasses[cci].representative, ccirWord);
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generatorS[ccirWord[i]];
@@ -1325,16 +1325,16 @@ void GroupRepresentation<someGroup, Coefficient>::ComputeCharacter() const {
 template <typename someGroup, typename Coefficient>
 bool GroupRepresentation<someGroup, Coefficient>::operator>(const GroupRepresentation<someGroup, Coefficient>& right) const {
   if (!this->flagCharacterIsComputed) {
-    this->ComputeCharacter();
+    this->computeCharacter();
   }
   if (!right.flagCharacterIsComputed) {
-    right.ComputeCharacter();
+    right.computeCharacter();
   }
   return this->theCharacteR > right.theCharacteR;
 }
 
 template <typename someGroup, typename Coefficient>
-void GroupRepresentation<someGroup, Coefficient>::MakeTensorRepresentation(
+void GroupRepresentation<someGroup, Coefficient>::makeTensorRepresentation(
   GroupRepresentation<someGroup, Coefficient>& right, GroupRepresentation<someGroup, Coefficient>& left
 ) {
   ownerGroup = right.ownerGroup;
@@ -1348,7 +1348,7 @@ template <typename someGroup, typename Coefficient>
 template <typename somestream>
 somestream& GroupRepresentation<someGroup, Coefficient>::intoStream(somestream& out) const {
   if (!this->flagCharacterIsComputed) {
-    //this->ComputeCharacter();
+    //this->computeCharacter();
     out << "Representation of the character not computed yet.";
     return out;
   }
@@ -1409,49 +1409,49 @@ public:
   GroupRepresentationCarriesAllMatrices() {
     this->reset();
   }
-  GroupRepresentation<somegroup, Coefficient> MakeOtherGroupRepresentationClass() const;
+  GroupRepresentation<somegroup, Coefficient> makeOtherGroupRepresentationClass() const;
   // Note: The group representation types compute the hash value from the character,
   // in which the order of the conjugacy classes determines the value
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
   unsigned int hashFunction() const;
   bool checkInitialization() const;
-  bool CheckAllSimpleGensAreOK() const;
+  bool checkAllSimpleGeneratorsAreOK() const;
   static unsigned int hashFunction(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& input) {
     return input.hashFunction();
   }
-  void ComputeAllElementImages();
-  const ClassFunction<somegroup, Coefficient>& GetCharacter();
+  void computeAllElementImages();
+  const ClassFunction<somegroup, Coefficient>& getCharacter();
   VectorSpace<Coefficient> FindDecentBasis() const;
   void multiplyBy(
     const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
   ) const;
-  void GetLargestDenominatorSimpleGens(LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen) const;
+  void getLargestDenominatorSimpleGenerators(LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen) const;
 
   void reset();
   void initialize(somegroup& inputOwner);
-  void CheckRepIsMultiplicativelyClosed();
-  void GetClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat);
-  void ClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat);
+  void checkRepresentationIsMultiplicativelyClosed();
+  void getClassFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputChar, Matrix<Coefficient>& outputMat);
+  void classFunctionMatrix(ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat);
   int getDimension() const;
-  void Restrict(
-    const Vectors<Coefficient>& VectorSpaceBasisSubrep,
+  void restrictRepresentation(
+    const Vectors<Coefficient>& vectorSpaceBasisSubrep,
     const ClassFunction<somegroup, Rational>& remainingCharacter,
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
   );
-  bool DecomposeTodorsVersionRecursive(
+  bool decomposeTodorsVersionRecursive(
     VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
     List<GroupRepresentation<somegroup, Coefficient> >& appendOnlyIrrepList,
     List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >* appendOnlyGRCAMSList = 0
   );
-  bool DecomposeTodorsVersion(
+  bool decomposeTodorsVersion(
     VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
     List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >* appendOnlyIrrepsList = 0
   );
-  List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > DecomposeThomasVersion();
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> Reduced() const;
-  Coefficient GetNumberOfComponents();
+  List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > decomposeThomasVersion();
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reduced() const;
+  Coefficient getNumberOfComponents();
   void operator*= (const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other);
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> operator*(
     const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
@@ -1463,19 +1463,19 @@ public:
   bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const {
     return this->ownerGroup == other.ownerGroup && this->theCharacteR == other.theCharacteR;
   }
-  void SpreadVector(const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace);
-  std::string GetName() const;
+  void spreadVector(const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace);
+  std::string getName() const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  Matrix<Coefficient>& GetMatrixElement(int groupElementIndex);
+  Matrix<Coefficient>& getMatrixElement(int groupElementIndex);
   template <typename elementSomeGroup>
-  void GetMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output);
+  void getMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output);
   template <typename elementSomeGroup>
-  Matrix<Coefficient> GetMatrixElement(const elementSomeGroup& input);
-  void SetElementImage(int elementIndex, const Matrix<Coefficient>& input) {
+  Matrix<Coefficient> getMatrixElement(const elementSomeGroup& input);
+  void setElementImage(int elementIndex, const Matrix<Coefficient>& input) {
     this->theElementImageS[elementIndex] = input;
     this->theElementIsComputed[elementIndex] = true;
   }
-  void SetGenerator(int generatorIndex, const Matrix<Coefficient>& input) {
+  void setGenerator(int generatorIndex, const Matrix<Coefficient>& input) {
     this->generatorS[generatorIndex] = input;
   }
   bool operator>(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const;
@@ -1802,11 +1802,11 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     }
     global.comments << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
     global.comments << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
-    in.GetMatrixOfElement(g, sr.generatorS[i]);
+    in.getMatrixOfElement(g, sr.generatorS[i]);
     global.comments << " which is assigned matrix\n" << sr.generatorS[i].toStringPlainText() << '\n';
   }
   GroupRepresentation<someGroup, Coefficient> out;
-  out.MakeTensorRepresentation(qr,sr);
+  out.makeTensorRepresentation(qr,sr);
   global.comments << "Subgroup representation: " << sr.toString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     global.comments << this->theGroup->generators[i] << ' ' << sr.generatorS[i].getTrace() << '\n'
@@ -1851,17 +1851,17 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
       cki.invert();
       elementSomeGroup hk = cki * k;
       Matrix<Coefficient> ikblock;
-      in.GetMatrixOfElement(hk, ikblock);
+      in.getMatrixOfElement(hk, ikblock);
       out.generatorS[i].assignBlock(ikblock, kcsi * ikblock.numberOfRows, ci * ikblock.numberOfColumns);
     }
   }
   out.ownerGroup = this->theGroup;
-  for (int i = 0; i <out.generatorS.size; i ++) {
+  for (int i = 0; i < out.generatorS.size; i ++) {
     global.comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].getTrace() << '\n'
     << out.generatorS[i].toStringPlainText() << '\n';
   }
   if (!out.verifyRepresentation()) {
-    if (!in.VerifyRepresentationExpensive()) {
+    if (!in.verifyRepresentationExpensive()) {
       global.comments << "Well, we weren't given a proper representation either.";
     }
     FiniteGroup<Matrix<Coefficient> > ingroup;
@@ -1908,7 +1908,7 @@ public:
   Selection simpleRootsInLeviParabolic;
   void initializeGenerators();
   void MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots);
-  void MakeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
+  void makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
   LargeInteger SizeByFormulaOrNeg1() const {
     return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
@@ -2010,7 +2010,7 @@ public:
     const Coefficient& theRingUnit = 1
   );
   void FindQuotientRepresentatives(int UpperLimit);
-  void GetMatrixOfElement(
+  void getMatrixOfElement(
     const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input,
     Matrix<Rational>& outputMatrix
   ) const;
@@ -2442,7 +2442,7 @@ bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
   theClass.representative.getCharacteristicPolynomialStandardRepresentation(theCharPoly);
   if (this->CCsStandardRepCharPolys.contains(theCharPoly)) {
     const List<int>& indicesPossibleConjugates =
-    this->CCsStandardRepCharPolys.GetHashArray(this->CCsStandardRepCharPolys.getHash(theCharPoly));
+    this->CCsStandardRepCharPolys.getHashArray(this->CCsStandardRepCharPolys.getHash(theCharPoly));
     for (int i = 0; i < indicesPossibleConjugates.size; i ++) {
       elementSomeGroup& otherRepresentative = this->conjugacyClasses[indicesPossibleConjugates[i]].representative;
       if (!dontAddIfSameInvariants) {

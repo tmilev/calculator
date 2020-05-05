@@ -367,7 +367,7 @@ bool AlgebraicClosureRationals::reduceMe(
   }
   List<MatrixTensor<Rational> > newBasis;
   MatrixTensor<Rational> generatorProjected;
-  Rational leadingCoefficient = smallestFactor.GetLeadingCoefficient(nullptr);
+  Rational leadingCoefficient = smallestFactor.getLeadingCoefficient(nullptr);
   for (int i = 0; i < smallestFactorDegree; i ++) {
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
@@ -637,7 +637,7 @@ void AlgebraicClosureRationals::reset() {
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
   this->GeneratingElementTensorForm.MakeId(1);
-  this->GeneratingElementMatForm.MakeIdentityMatrix(1);
+  this->GeneratingElementMatForm.makeIdentityMatrix(1);
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.element.makeEi(0);
 }
@@ -664,8 +664,8 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
     }
   }
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
-  minPoly /= minPoly.GetLeadingCoefficient(monomialOrder);
-  minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
+  minPoly /= minPoly.getLeadingCoefficient(monomialOrder);
+  minPoly.getCoefficientInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
   minPoly.getConstantTerm(theConstTermShifted);
   theConstTermShifted -= theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
@@ -723,7 +723,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   Polynomial<AlgebraicNumber> minPoly;
   this->convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
-  AlgebraicNumber leadingCoefficient = minPoly.GetLeadingCoefficient(monomialOrder);
+  AlgebraicNumber leadingCoefficient = minPoly.getLeadingCoefficient(monomialOrder);
   minPoly /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
@@ -1794,7 +1794,7 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
   LargeInteger theInverted, otherValue, theMod;
   theMod = this->theModulus;
   otherValue = other.theValue;
-  if (!MathRoutines::InvertXModN(otherValue, theMod, theInverted)) {
+  if (!MathRoutines::invertXModN(otherValue, theMod, theInverted)) {
     return false;
   }
   *this *= theInverted;

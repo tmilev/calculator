@@ -55,8 +55,8 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
     theTableLateXStream << tempRoot.toString() << "&";
     theHtmlStream << "<tr><td>" << tempRoot.toString() << "</td>";
     this->theWeyl.getEpsilonCoordinates(tempRoot, tempRoot2);
-    theTableLateXStream << tempRoot2.ToStringLetterFormat("\\varepsilon") << "&";
-    theHtmlStream << "<td>" << tempRoot2.ToStringLetterFormat("e") << "</td>";
+    theTableLateXStream << tempRoot2.toStringLetterFormat("\\varepsilon") << "&";
+    theHtmlStream << "<td>" << tempRoot2.toStringLetterFormat("e") << "</td>";
     tempElt1.makeGenerator(i, *this);
     tempS = tempElt1.toString(theFormat);
     theTableLateXStream << tempS;
@@ -198,7 +198,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
         tempRoot = this->getWeightOfGenerator(i);
         theWeyl.getEpsilonCoordinates(tempRoot, tempRoot2);
         out << "$" << tempElt1.toString(&theFormat) << "$&$" << tempRoot.toString() << "$";
-        out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
+        out << "&$" << tempRoot2.toStringLetterFormat("\\varepsilon") << "$";
         out << "\\\\\n";
       }
       out << "\\end{longtable}" << "<hr>";
@@ -212,7 +212,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). "
   << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
-  << HtmlRoutines::getMathSpanPure(theWeyl.coCartanSymmetric.ToStringLatex());
+  << HtmlRoutines::getMathSpanPure(theWeyl.coCartanSymmetric.toStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.cartanSymmetric.getDeterminant().toString();
   /*  Rational theRatio;
     for (int j = 0; j < theWeyl.getDimension(); j ++) {
@@ -238,7 +238,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   out << "<hr> Half sum of positive roots: " << theWeyl.rho.toString();
   Vector<Rational> tempRoot;
   theWeyl.getEpsilonCoordinates(theWeyl.rho, tempRoot);
-  out << "= " << HtmlRoutines::getMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
+  out << "= " << HtmlRoutines::getMathSpanPure(tempRoot.toStringLetterFormat("\\varepsilon"));
   out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 "
   << "<br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";

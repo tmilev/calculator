@@ -934,7 +934,7 @@ bool SemisimpleSubalgebras::loadState(
       return false;
     }
     bool isGood = true;
-    if (!currentSA.theHs.ContainsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation)) {
+    if (!currentSA.theHs.containsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation)) {
       isGood = false;
     } else {
       currentSA.theHsScaledToActByTwoInOrderOfCreation = this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation;
@@ -1186,7 +1186,7 @@ void CandidateSSSubalgebra::setUpInjectionHs(
 
 void CandidateSSSubalgebra::computeHsAndHsScaledToActByTwoFromComponents() {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeHsScaledToActByTwo");
-  this->theHsScaledToActByTwo.AssignListList(this->cartanSubalgebrasByComponentScaledToActByTwo);
+  this->theHsScaledToActByTwo.assignListList(this->cartanSubalgebrasByComponentScaledToActByTwo);
   this->theHs.setSize(this->theHsScaledToActByTwo.size);
   Matrix<Rational> cartanInComponentOrder;
   this->theWeylNonEmbedded->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
@@ -2520,7 +2520,7 @@ bool CandidateSSSubalgebra::computeSystemPart2(bool AttemptToChooseCentalizer, b
     }
     theCentralizerCartanElts.getGramMatrix(theCentralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric);
     Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
-    theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
+    theDeterminant.makeDeterminantFromSquareMatrix(theCentralizerCartanVars);
     theDetMultiplier.makeMonomial(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
     theDeterminant *= theDetMultiplier;
     theDeterminant += - Rational(1);
@@ -2656,7 +2656,7 @@ void LinearCombination<templateMonomial, Coefficient>::intersectVectorSpaces(
   LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
   Matrix<Coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
-  theLinCombiMat.MakeIdentityMatrix(theVspaces.size +vectorSpace2eliminated.size);
+  theLinCombiMat.makeIdentityMatrix(theVspaces.size +vectorSpace2eliminated.size);
   theVspaces.addListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
   LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
@@ -3282,7 +3282,7 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
     this->theNilradSubsel.initSelectionFixedCardinality(i);
     for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       if (this->isCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
-        this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+        this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
         if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
@@ -3293,8 +3293,8 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
             this->ConeStrongIntersection[this->theNilradSubsel.elements[k]] = betterIntersection[k];
             this->ConeRelativelyStrongIntersection.addOnTop(betterIntersection[k]);
           }
-          this->theNilradical.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
-          this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+          this->theNilradical.subSelection(this->theNilradSubsel, this->theNilradicalSubset);
+          this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
           this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
           this->theNonFKhwVectorsStrongRelativeToSubsetWeights.setSize(0);
           for (int k = 0; k < this->theNonFKhwsStronglyTwoSided.size; k ++) {
@@ -3399,8 +3399,8 @@ void NilradicalCandidate::reset() {
 
 void NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset() {
   MacroRegisterFunctionWithName("NilradicalCandidate::computeTheTwoConesRelativeToNilradicalSubset");
-  this->theNilradical.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
-  this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+  this->theNilradical.subSelection(this->theNilradSubsel, this->theNilradicalSubset);
+  this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
   this->theNonFKhwVectorsStrongRelativeToSubset.setSize(0);
   this->theNonFKhwVectorsStrongRelativeToSubsetWeights.setSize(0);
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
@@ -3503,7 +3503,7 @@ void CandidateSSSubalgebra::enumerateAllNilradicals() {
   }
 }
 
-void Cone::GetLinesContainedInCone(Vectors<Rational>& output) {
+void Cone::getLinesContainedInCone(Vectors<Rational>& output) {
   output.setSize(0);
   for (int i = 0; i < this->Vertices.size; i ++) {
     for (int j = i + 1; j < this->Vertices.size; j ++) {
@@ -3528,7 +3528,7 @@ void Vector<Coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
   }
   Vector<Rational> oldThis =*this;
   Cone theCone;
-  theCone.CreateFromVertices(NonStrictConeNonPositiveScalar);
+  theCone.createFromVertices(NonStrictConeNonPositiveScalar);
   Coefficient scalarThis;
   Coefficient scalarOther;
   Coefficient theScale;
@@ -3620,9 +3620,9 @@ std::string CandidateSSSubalgebra::toStringNilradicalSelection(const List<int>& 
     }
   }
   std::stringstream out;
-  out << "included modules: " << included.ToStringLetterFormat("V")
-  << ", excluded modules: " << excluded.ToStringLetterFormat("V")
-  << ", undecided modulues: " << undecided.ToStringLetterFormat("V");
+  out << "included modules: " << included.toStringLetterFormat("V")
+  << ", excluded modules: " << excluded.toStringLetterFormat("V")
+  << ", undecided modulues: " << undecided.toStringLetterFormat("V");
   return out.str();
 }
 
@@ -3981,7 +3981,7 @@ void CandidateSSSubalgebra::computePrimalModuleDecompositionHWVsOnly(HashedList<
     adIncludingCartanActions = commonAd;
     for (int j = 0; j < allHs.size; j ++) {
       tempAd = theAdsOfHs[j];
-      temp.MakeIdentityMatrix(this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators());
+      temp.makeIdentityMatrix(this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators());
       temp *= inputHws[i][j];
       tempAd -= temp;
       adIncludingCartanActions.appendMatrixToTheBottom(tempAd);
@@ -4676,12 +4676,12 @@ bool SltwoSubalgebras::checkConsistency() const {
 }
 
 void SltwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
-  this->GrandMasterConsistencyCheck();
+  this->grandMasterConsistencyCheck();
   this->checkConsistency();
   for (int i = 0; i < this->size; i ++) {
     (*this).getElement(i).computeModuleDecompositionsitionAmbientLieAlgebra();
   }
-  this->GrandMasterConsistencyCheck();
+  this->grandMasterConsistencyCheck();
 }
 
 bool SltwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex) {
@@ -5185,7 +5185,7 @@ std::string CandidateSSSubalgebra::toStringDrawWeightsHelper(int indexModule, co
     out << "<table style =\\\"border:1px solid #000;\\\">";
     out << "<tr><td colspan =\\\"3\\\">"
     << "<span class =\\\"math\\\">"
-    << "V_{" << this->HighestWeightsPrimal[indexModule].ToStringLetterFormat("\\\\omega", &charFormat) << "}"
+    << "V_{" << this->HighestWeightsPrimal[indexModule].toStringLetterFormat("\\\\omega", &charFormat) << "}"
     << " </span></td></tr>"
     << "<tr>"
     << "<td style =\\\"text-align: center;\\\">basis</td>"
@@ -5213,12 +5213,12 @@ std::string CandidateSSSubalgebra::toStringDrawWeightsHelper(int indexModule, co
 
       out << "<td style =\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
       out << "<span class =\\\"math\\\">"
-      << this->WeightsModulesNONprimal[indexModule][j].ToStringLetterFormat("\\\\omega", &charFormat) << "</span>";
+      << this->WeightsModulesNONprimal[indexModule][j].toStringLetterFormat("\\\\omega", &charFormat) << "</span>";
       out << closeTag << "</td>";
 
       out << "<td style =\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
       out << "<span class =\\\"math\\\">"
-      << this->WeightsModulesPrimal[indexModule][j].ToStringLetterFormat("\\\\omega", &charFormat) << "</span>";
+      << this->WeightsModulesPrimal[indexModule][j].toStringLetterFormat("\\\\omega", &charFormat) << "</span>";
       out << closeTag << "</td>";
       out << "</tr>";
     }
@@ -5402,7 +5402,7 @@ std::string CandidateSSSubalgebra::toStringModuleDecompositionLaTeX(FormatExpres
       if (this->Modules[i][j].size > 1) {
         out << "\\multirow{" << this->Modules[i][j].size << "}{*}";
       }
-      out << "{$V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "}$} ";
+      out << "{$V_{" << this->HighestWeightsPrimal[i].toStringLetterFormat("\\omega", &tempCharFormat) << "}$} ";
       out << "&";
       for (int k = 0; k < this->Modules[i][j].size; k ++) {
         if (k > 0) {
@@ -5410,7 +5410,7 @@ std::string CandidateSSSubalgebra::toStringModuleDecompositionLaTeX(FormatExpres
         }
         out << "$" << this->Modules[i][j][k].toString(theFormat) << "$";
         out << "&";
-        out << "$" << this->WeightsModulesPrimal[i][k].ToStringLetterFormat("\\omega", &tempCharFormat) << "$" << "& ";
+        out << "$" << this->WeightsModulesPrimal[i][k].toStringLetterFormat("\\omega", &tempCharFormat) << "$" << "& ";
         bool OpsAreGood = false;
         if (i < this->ModulesSl2opposite.size) {
           if (j < this->ModulesSl2opposite[i].size) {
@@ -5474,7 +5474,7 @@ std::string CandidateSSSubalgebra::toStringModuleDecomposition(FormatExpressions
         out << "<td>";
       }
       std::stringstream tempStream;
-      tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
+      tempStream << "V_{" << this->HighestWeightsPrimal[i].toStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover) {
         out << HtmlRoutines::getMathMouseHover(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       } else {
@@ -5546,7 +5546,7 @@ std::string CandidateSSSubalgebra::toStringModuleDecomposition(FormatExpressions
     out << "<td>";
     for (int j = 0; j < this->WeightsModulesNONprimal[i].size; j ++) {
       out << "\\("
-      << this->WeightsModulesNONprimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat)
+      << this->WeightsModulesNONprimal[i][j].toStringLetterFormat("\\omega", &tempCharFormat)
       << "\\)";
       if (j != this->WeightsModulesNONprimal[i].size - 1) {
         out << "<br>";
@@ -5561,7 +5561,7 @@ std::string CandidateSSSubalgebra::toStringModuleDecomposition(FormatExpressions
     out << "<td>";
     for (int j = 0; j < this->WeightsModulesPrimal[i].size; j ++) {
       out << "\\("
-      << this->WeightsModulesPrimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat)
+      << this->WeightsModulesPrimal[i][j].toStringLetterFormat("\\omega", &tempCharFormat)
       << "\\)";
       if (j != this->WeightsModulesPrimal[i].size - 1) {
         out << "<br>";
@@ -5617,8 +5617,8 @@ std::string CandidateSSSubalgebra::toStringModuleDecomposition(FormatExpressions
   for (int i = 0; i < this->centralizerSubalgebraModules.size; i ++) {
     centralizerV[this->centralizerSubalgebraModules[i]] += 1;
   }
-  out << "<br>Semisimple subalgebra: " << semisimpleSAv.ToStringLetterFormat("W");
-  out << "<br>Centralizer extension: " << centralizerV.ToStringLetterFormat("W");
+  out << "<br>Semisimple subalgebra: " << semisimpleSAv.toStringLetterFormat("W");
+  out << "<br>Centralizer extension: " << centralizerV.toStringLetterFormat("W");
   return out.str();
 }
 
@@ -5647,7 +5647,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* theFormat) const {
   out << this->FKnilradicalLog;
   Vector<Rational> currentNilrad;
   currentNilrad = this->theNilradicalSelection;
-  out << currentNilrad.ToStringLetterFormat("W");
+  out << currentNilrad.toStringLetterFormat("W");
   if (this->flagNilradicalConesIntersect) {
     out << ". Cones intersect. ";
   } else {
@@ -5660,7 +5660,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* theFormat) const {
   out << "<br> Highest weight cone:<br> " << this->toStringTableElementWithWeights(this->theNonFKhwVectors, this->theNonFKhws);
   if (this->flagNilradicalConesIntersect) {
     out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.toString();
-    out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
+    out << "<br>Cone intersection: " << this->ConeIntersection.toStringLetterFormat("w");
     out << "<br> ";
     FormatExpressions tempFormat;
     tempFormat.vectorSpaceEiBasisNames.setSize(this->ConeIntersection.size);
@@ -5670,14 +5670,14 @@ std::string NilradicalCandidate::toString(FormatExpressions* theFormat) const {
     for (int j = 0; j < this->theNonFKhws.size; j ++) {
       tempFormat.vectorSpaceEiBasisNames[j + this->theNilradicalWeights.size] = this->theNonFKhws[j].toString();
     }
-    out << this->ConeIntersection.ToStringLetterFormat("w", &tempFormat);
+    out << this->ConeIntersection.toStringLetterFormat("w", &tempFormat);
     if (this->flagNilradicalConesStronglyIntersect) {
       for (int j = 0; j < this->theNonFKhwsStronglyTwoSided.size; j ++) {
         tempFormat.vectorSpaceEiBasisNames[j + this->theNilradicalWeights.size] = this->theNonFKhwsStronglyTwoSided[j].toString();
       }
       out << "<br>In addition, the nilradical cones intersect strongly "
       << "at weight " << this->getConeStrongIntersectionWeight().toString();
-      out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
+      out << "<br>" << this->ConeStrongIntersection.toStringLetterFormat("w", &tempFormat);
       out << "<br>The involved nilradical elements: " << "<br><table><tr>";
       for (int i = 0; i < this->theNilradicalWeights.size; i ++) {
         if (this->ConeStrongIntersection[i] != 0) {
@@ -5711,7 +5711,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* theFormat) const {
       out << "<br>The nilradical subset:" << this->toStringTableElementWithWeights(this->theNilradicalSubset, this->theNilradicalSubsetWeights);
       out << "<br>The highest weight cone consisting of elements commuting with the nilradical subset: "
       << this->toStringTableElementWithWeights(this->theNonFKhwVectorsStrongRelativeToSubset, this->theNonFKhwVectorsStrongRelativeToSubsetWeights);
-      out << "<br>Relation: " << this->ConeRelativelyStrongIntersection.ToStringLetterFormat("w", &tempFormat);
+      out << "<br>Relation: " << this->ConeRelativelyStrongIntersection.toStringLetterFormat("w", &tempFormat);
     }
     if (this->flagLinfiniteRelFound) {
       out << "<br><b>L-infinite relation exists!</b>";
@@ -5731,7 +5731,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* theFormat) const {
     << "<br>Levi roots containing parabolic: " << this->leviRootsAmbienT.toString()
     << "<br>Levi components containing parabolic: "
     << this->theLeviDiagramAmbienT.toString();
-    out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
+    out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.toStringLetterFormat("u");
   }
   return out.str();
 }
@@ -5758,9 +5758,9 @@ void NilradicalCandidate::getModGeneratedByNonHighestWeightVectorAndNilradElemen
       }
     }
   }
-  outputLeft.PopIndexShiftDown(0);
-  outputRight.PopIndexShiftDown(0);
-  outputBrackets.PopIndexShiftDown(0);
+  outputLeft.popIndexShiftDown(0);
+  outputRight.popIndexShiftDown(0);
+  outputBrackets.popIndexShiftDown(0);
 }
 
 std::string CandidateSSSubalgebra::toStringNilradicalsSummary(FormatExpressions* theFormat) const {
@@ -5818,7 +5818,7 @@ std::string CandidateSSSubalgebra::toStringNilradicals(FormatExpressions* theFor
   out << this->toStringNilradicalsSummary(theFormat);
   Vector<Rational> primalBase;
   primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
-  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
+  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.toStringLetterFormat("W");
   if (this->owner->flagProduceLaTeXtables) {
     Vector<Rational> currentNilradVector;
     out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
@@ -5835,7 +5835,7 @@ std::string CandidateSSSubalgebra::toStringNilradicals(FormatExpressions* theFor
         currentNilradVector[this->primalSubalgebraModules[j]] -= 1;
       }
       out << "\\\\\\hline<br>\n";
-      out << "$" << currentNilradVector.ToStringLetterFormat("W") << "$ &";
+      out << "$" << currentNilradVector.toStringLetterFormat("W") << "$ &";
       if (currentNilrad.flagNilradicalConesIntersect) {
         out << "yes";
       } else {
@@ -5856,7 +5856,7 @@ std::string CandidateSSSubalgebra::toStringNilradicals(FormatExpressions* theFor
           Rational theCF = currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size + j];
           theCF.minus();
           out << "$"
-          << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).ToStringLetterFormat("\\omega", &tempFormat)
+          << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).toStringLetterFormat("\\omega", &tempFormat)
           << "$";
           out << " & ";
           if (j != currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size - 1) {
@@ -5867,7 +5867,7 @@ std::string CandidateSSSubalgebra::toStringNilradicals(FormatExpressions* theFor
         }
         for (int j = 0; j < currentNilrad.theNilradicalSubsetWeights.size; j ++) {
           Rational theCF = currentNilrad.ConeRelativelyStrongIntersection[j];
-          out << "$" << (currentNilrad.theNilradicalSubsetWeights[j] * theCF).ToStringLetterFormat("\\omega", &tempFormat) << "$";
+          out << "$" << (currentNilrad.theNilradicalSubsetWeights[j] * theCF).toStringLetterFormat("\\omega", &tempFormat) << "$";
           out << " & ";
           if (j != currentNilrad.theNilradicalSubsetWeights.size - 1) {
             out << "+&";
@@ -5927,7 +5927,7 @@ std::string CandidateSSSubalgebra::toStringNilradicals(FormatExpressions* theFor
       }
 
   //    for (int j = 0; j < currentNilrad.theNonFKhws.size; j ++)
-  //    { out << " $" << currentNilrad.theNonFKhws[j].ToStringLetterFormat("\\omega", &tempFormat) << "$";
+  //    { out << " $" << currentNilrad.theNonFKhws[j].toStringLetterFormat("\\omega", &tempFormat) << "$";
   //      if (j != currentNilrad.theNonFKhws.size- 1)
   //        out << ", ";
   //    }
@@ -6080,7 +6080,7 @@ std::string CandidateSSSubalgebra::toStringPairingTable(FormatExpressions* theFo
     tempV.makeEi(this->NilradicalPairingTable.size, this->subalgebraModules[i]);
     theSAvector += tempV;
   }
-  out << theSAvector.ToStringLetterFormat("V");
+  out << theSAvector.toStringLetterFormat("V");
   out << "<br><table><tr><td>Modules</td>";
   FormatExpressions tempCharFormat;
   if (!this->charFormaT.isZeroPointer()) {
@@ -6671,7 +6671,7 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
     out << "</tr><tr><td>weight</td>";
     for (int i = 0; i < this->HighestWeightsNONprimalNonSorted.size; i ++) {
       out << "<td>\\("
-      << this->HighestWeightsNONprimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst)
+      << this->HighestWeightsNONprimalNonSorted[i].toStringLetterFormat("\\omega", &charFormatNonConst)
       << "\\)</td>";
     }
     out << "</tr>";
@@ -6679,7 +6679,7 @@ std::string CandidateSSSubalgebra::toString(FormatExpressions* theFormat) const 
       out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). </td>";
       for (int i = 0; i < this->HighestWeightsPrimalNonSorted.size; i ++) {
         out << "<td>\\("
-        << this->HighestWeightsPrimalNonSorted[i].ToStringLetterFormat("\\omega", &charFormatNonConst)
+        << this->HighestWeightsPrimalNonSorted[i].toStringLetterFormat("\\omega", &charFormatNonConst)
         << "\\)</td>";
       }
       out << "</tr>";

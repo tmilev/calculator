@@ -1223,9 +1223,9 @@ void HyperoctahedralGroup::spechtModuleOfPartititons(const Partition &positive, 
     repRank = 1;
   for (int i = 0; i < this->N; i ++)
     if (i < positive.n)
-      pxmr.generatorS[cur+ i].MakeIdentityMatrix(repRank);
+      pxmr.generatorS[cur+ i].makeIdentityMatrix(repRank);
     else {
-      pxmr.generatorS[cur+ i].MakeIdentityMatrix(repRank);
+      pxmr.generatorS[cur+ i].makeIdentityMatrix(repRank);
       pxmr.generatorS[cur+ i] *= - 1;
     }
   if (!pxmr.verifyRepresentation())
@@ -1269,9 +1269,9 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   }
   for (int i = 0; i < this->N; i ++) {
     if (i < positive.n) {
-      pxmr.generatorS[cur + i].MakeIdentityMatrix(repRank);
+      pxmr.generatorS[cur + i].makeIdentityMatrix(repRank);
     } else {
-      pxmr.generatorS[cur + i].MakeIdentityMatrix(repRank);
+      pxmr.generatorS[cur + i].makeIdentityMatrix(repRank);
       pxmr.generatorS[cur + i] *= - 1;
     }
   }
@@ -1330,11 +1330,11 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   pxmr.generatorS.setSize(PxM.generators.size);
   Matrix<Rational> hid, kid;
   if (pozm.size == 0)
-    hid.MakeIdentityMatrix(1);
+    hid.makeIdentityMatrix(1);
   else
     hid.makeIdentity(pozm[0]);
   if (negm.size == 0)
-    kid.MakeIdentityMatrix(1);
+    kid.makeIdentityMatrix(1);
   else
     kid.makeIdentity(negm[0]);
   int i = 0;

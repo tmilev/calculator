@@ -343,7 +343,7 @@ private:
   bool hasNonEmptyContext() const;
   ExpressionContext getContext() const;
   bool getContext(ExpressionContext& output) const;
-  static bool MergeContexts(Expression& leftE, Expression& rightE);
+  static bool mergeContexts(Expression& leftE, Expression& rightE);
   bool mergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
   template <class theType>
   bool mergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const;
@@ -1009,7 +1009,7 @@ public:
   HashedListReferences<RationalFunction<ElementZmodP> > rationalFunctionsModular;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> > theCharsSSLieAlgFD;
-  HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
+  HashedListReferences<double, MathRoutines::hashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
   HashedListReferences<std::string, MathRoutines::hashString> expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
@@ -1081,7 +1081,7 @@ public:
 
 class Calculator {
   template<typename anyType>
-  friend Calculator& operator << (Calculator& output, const anyType& any) {
+  friend Calculator& operator<<(Calculator& output, const anyType& any) {
     output.comments << any;
     return output;
   }

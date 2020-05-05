@@ -41,7 +41,7 @@ Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAuto
   return result;
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetMatrixOfElement(
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getMatrixOfElement(
   const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input, Matrix<Rational>& outputMatrix
 ) const {
   Vectors<Rational> startBasis, imageBasis;
@@ -1148,7 +1148,7 @@ std::string VectorPartition::ToStringPartitioningVectors() {
 std::string VectorPartition::ToStringOnePartition(const List<int>& currentPartition) {
   Vector<Rational> theV;
   theV = currentPartition;
-  return theV.ToStringLetterFormat("e");
+  return theV.toStringLetterFormat("e");
 }
 
 std::string VectorPartition::ToStringAllPartitions(bool useHtml) {
@@ -1610,7 +1610,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
         if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
           Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
           this->theHighestWeightVectors.addOnTop(currentHighest);
-          this->theGmodKModules.ExpandOnTop(1);
+          this->theGmodKModules.expandOnTop(1);
           List<Matrix<Rational> >& currentMod = *this->theGmodKModules.lastObject();
           currentMod.size = 0;
           for (
@@ -1973,7 +1973,7 @@ void MonomialP::setSize(int variableCount) {
   }
 }
 
-bool Cone::IsInCone(const Vector<Rational>& point) const {
+bool Cone::isInCone(const Vector<Rational>& point) const {
   if (this->flagIsTheZeroCone) {
     return point.isEqualToZero();
   }

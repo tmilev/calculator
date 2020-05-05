@@ -569,7 +569,7 @@ bool Database::findFromString(
 #endif
 }
 
-void QueryResultOptions::MakeProjection(const List<std::string>& fields) {
+void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
@@ -601,7 +601,7 @@ bool Database::findFromJSONWithProjection(
   std::stringstream* commentsOnFailure
 ) {
   QueryResultOptions options;
-  options.MakeProjection(fieldsToProjectTo);
+  options.makeProjection(fieldsToProjectTo);
   return Database::findFromJSONWithOptions(
     collectionName,
     findQuery,
@@ -1046,7 +1046,7 @@ bool Database::Mongo::updateOneFromSome(
     return false;
   }
   JSData setJSON;
-  if (!updateQuery.ToJSONSetMongo(setJSON, commentsOnFailure)) {
+  if (!updateQuery.toJSONSetMongo(setJSON, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to extract set mongo json. ";
     }
@@ -1071,14 +1071,14 @@ QuerySet::QuerySet(const JSData& inputValue) {
 std::string QuerySet::toStringDebug() const {
   std::stringstream out;
   JSData jsonSetMongo;
-  if (!this->ToJSONSetMongo(jsonSetMongo, &out)) {
+  if (!this->toJSONSetMongo(jsonSetMongo, &out)) {
     return out.str();
   }
   out << jsonSetMongo.toString(nullptr);
   return out.str();
 }
 
-bool QuerySet::ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const {
+bool QuerySet::toJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const {
   JSData data;
   if (!this->toJSONMongo(data, commentsOnFailure)) {
     return false;
@@ -1125,7 +1125,7 @@ bool Database::Mongo::updateOne(
 ) {
   MacroRegisterFunctionWithName("Database::updateOneFromJSON");
   JSData updateQueryJSON;
-  if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
+  if (!updateQuery.toJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
   }
   if (!Database::Mongo::updateOneFromQueryString(

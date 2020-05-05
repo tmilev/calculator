@@ -125,8 +125,8 @@ bool ExpressionContext::setVariablesFromStrings(
   return true;
 }
 
-bool Expression::MergeContexts(Expression& leftE, Expression& rightE) {
-  MacroRegisterFunctionWithName("Expression::MergeContexts");
+bool Expression::mergeContexts(Expression& leftE, Expression& rightE) {
+  MacroRegisterFunctionWithName("Expression::mergeContexts");
   if (!leftE.hasContext() || !rightE.hasContext()) {
     return false;
   }
@@ -417,7 +417,7 @@ bool ExpressionContext::mergeContexts(
   const ExpressionContext& other,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("Expression::ContextMergeContexts");
+  MacroRegisterFunctionWithName("Expression::ContextmergeContexts");
   if (this == &outputContext || &other == &outputContext) {
     ExpressionContext leftCopy = *this;
     ExpressionContext rightCopy = other;

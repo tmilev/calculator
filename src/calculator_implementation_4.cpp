@@ -822,9 +822,9 @@ bool Calculator::checkOperationHandlers() {
 }
 
 bool Calculator::checkConsistencyAfterInitialization() {
-  this->theExpressionContainer.GrandMasterConsistencyCheck();
-  this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
-  this->cachedExpressions.GrandMasterConsistencyCheck();
+  this->theExpressionContainer.grandMasterConsistencyCheck();
+  this->EvaluatedExpressionsStack.grandMasterConsistencyCheck();
+  this->cachedExpressions.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
     this->numberExpectedExpressionsAtInitialization = this->theExpressionContainer.size;
   } else if (
@@ -1791,7 +1791,7 @@ bool Expression::makeAtom(int input, Calculator& newBoss) {
 
 bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss) {
   Matrix<Expression> theMat;
-  theMat.MakeIdentityMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
+  theMat.makeIdentityMatrix(theDim, inputBoss.expressionOne(), inputBoss.expressionZero());
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);
 }
 

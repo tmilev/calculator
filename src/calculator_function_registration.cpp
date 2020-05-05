@@ -4266,16 +4266,16 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "Sort",
+    "sort",
     CalculatorFunctions::innerSort,
     "",
     "Sorts a sequence. ",
-    "Sort(x^2, x^3, x^1, x^{- 1});\n"
-    "Sort(3,2,1,4,3);\n"
-    "Sort((3,2,3,1));\n"
-    "Sort{}((3,2,3,1));\n",
+    "sort(x^2, x^3, x^1, x^{- 1});\n"
+    "sort(3,2,1,4,3);\n"
+    "sort((3,2,3,1));\n"
+    "sort{}((3,2,3,1));\n",
     "CalculatorFunctions::innerSort",
-    "Sort",
+    "sort",
     innerStandard
   );
   this->addOperationHandler(

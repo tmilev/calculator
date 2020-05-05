@@ -81,11 +81,11 @@ public:
     out << "]";
     return out.str();
   }
-  std::string ToStringLetterFormat(
+  std::string toStringLetterFormat(
     const std::string& inputLetter, FormatExpressions* theFormat = nullptr, bool DontIncludeLastVar = false
   ) const;
   std::string ToStringEpsilonFormat(FormatExpressions* theFormat = nullptr) const {
-    return this->ToStringLetterFormat("\\varepsilon", theFormat);
+    return this->toStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
   static void scalarProduct(
@@ -722,7 +722,7 @@ class Vectors: public List<Vector<Coefficient> > {
       this->theObjects[i] = input[i];
     }
   }
-  void AssignListList(const List<Vectors<Coefficient> >& input) {
+  void assignListList(const List<Vectors<Coefficient> >& input) {
     int count = 0;
     for (int i = 0; i < input.size; i ++) {
       count += input[i].size;
@@ -804,7 +804,7 @@ class Vectors: public List<Vector<Coefficient> > {
     Vector<Rational>* outputLinearCombo = nullptr,
     Vector<Rational>* outputSplittingNormal = nullptr
   );
-  static bool GetNormalSeparatingCones(
+  static bool getNormalSeparatingCones(
     List<Vector<Coefficient> >& coneStrictlyPositiveCoeffs,
     List<Vector<Coefficient> >& coneNonNegativeCoeffs,
     Vector<Coefficient>& outputNormal
@@ -1106,7 +1106,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];
     }
   }
-  bufferMatGaussianEliminationCC.MakeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
+  bufferMatGaussianEliminationCC.makeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit
   );

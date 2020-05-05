@@ -7,7 +7,7 @@
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
   int theDim = this->getAmbientWeyl().getDimension();
-  output.MakeIdentityMatrix(theDim);
+  output.makeIdentityMatrix(theDim);
   Matrix<Rational> tempMat;
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
     this->getAmbientWeyl().GetMatrixReflection(this->SimpleBasisK[i], tempMat);
@@ -51,8 +51,8 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.SumCoords().numeratorShort, coxeterNumber);
   }
   Complex<double> theEigenValue;
-  theEigenValue.Re = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
-  theEigenValue.Im = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
+  theEigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
+  theEigenValue.imaginaryPart = FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
@@ -80,14 +80,14 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   if (theEigenSpace.size > 0) {
     if (coxeterNumber > 2) {
       for (int j = 0; j < theDimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].Re;
-        outputBasis2[j] = theEigenSpace[0][j].Im;
+        outputBasis1[j] = theEigenSpace[0][j].realPart;
+        outputBasis2[j] = theEigenSpace[0][j].imaginaryPart;
       }
       tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     } else if (coxeterNumber <= 2 && theEigenSpace.size > 1) {
       for (int j = 0; j < theDimension; j ++) {
-        outputBasis1[j] = theEigenSpace[0][j].Re;
-        outputBasis2[j] = theEigenSpace[1][j].Re;
+        outputBasis1[j] = theEigenSpace[0][j].realPart;
+        outputBasis2[j] = theEigenSpace[1][j].realPart;
       }
       tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     }
@@ -621,7 +621,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   Vectors<Rational>& wNONprimalFundamental = this->WeightsModulesNONPrimalFundamental[moduleIndex];
   Vectors<Rational>& wNONprimalSimple = this->WeightsModulesNONPrimalSimple[moduleIndex];
   wPrimalSimple = currentWeights;
-  wPrimalSimple.QuickSortDescendingCustom(*this);
+  wPrimalSimple.quickSortDescendingCustom(*this);
   wNONprimalFundamental.setSize(wPrimalSimple.size);
   wNONprimalSimple.setSize(wPrimalSimple.size);
   for (int j = 0; j < wPrimalSimple.size; j ++) {
@@ -2623,7 +2623,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   SemisimpleLieAlgebra& theLieAlgebra = this->getOwnerLieAlgebra();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
   for (int cyclecounter = 0; cyclecounter<numCycles; cyclecounter ++, selectionRootsWithZeroCharacteristic.incrementSelection()) {
-    this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
+    this->SimpleBasisK.subSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->getAmbientWeyl());
     int theSlack = 0;
     rootsScalarProduct2HnonRaised.size = 0;
@@ -2782,7 +2782,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
         counter ++;
         theReport.report(reportStream.str());
       }
-      basis.SubSelection(parSel, currentBasis);
+      basis.subSelection(parSel, currentBasis);
       if (currentBasis.getRankOfSpanOfElements() != currentBasis.size) {
         continue;
       }
@@ -3639,7 +3639,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (simpleType == 'B') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.MakeIdentityMatrix(theDimension * 2 + 1, 1, 0);
+    tempMat.makeIdentityMatrix(theDimension * 2 + 1, 1, 0);
     tempMat.elements[theDimension][theDimension] = 0;
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isShort = false;
@@ -3703,7 +3703,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   }
   if (simpleType == 'C') {
     this->getOwnerWeyl().getEpsilonCoordinates(input, epsCoords);
-    tempMat.MakeIdentityMatrix(theDimension * 2, 1, 0);
+    tempMat.makeIdentityMatrix(theDimension * 2, 1, 0);
     for (int i = 0; i < epsCoords.size; i ++) {
       bool isLong= false;
       int firstIndex = - 1;

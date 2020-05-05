@@ -497,7 +497,7 @@ public:
   void initialize(int r, int c);
   void releaseMemory();
   bool isPositiveDefinite();
-  bool IsNonNegativeAllEntries() {
+  bool isNonNegativeAllEntries() {
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
         if (this->elements[i][j] < 0) {
@@ -756,15 +756,15 @@ public:
     }
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringLatex(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringSystemLatex(
+  std::string toStringLatex(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringSystemLatex(
     Matrix<Coefficient>* constTerms = 0,
     FormatExpressions* theFormat = nullptr
   ) const;
   std::string toStringPlainText(bool jsonFormat = false) const;
   std::string toStringOneLine(bool jsonFormat = false) const;
   std::string toStringWithBlocks(List<int>& theBlocks);
-  void MakeIdentityMatrix(int theDimension, const Coefficient& theRingUnit = 1, const Coefficient& theRingZero = 0) {
+  void makeIdentityMatrix(int theDimension, const Coefficient& theRingUnit = 1, const Coefficient& theRingZero = 0) {
     this->initialize(theDimension, theDimension);
     for (int i = 0; i < theDimension; i ++) {
       for (int j = 0; j < theDimension; j ++) {
@@ -1310,7 +1310,7 @@ bool Vectors<Coefficient>::conesIntersect(
     matA, matb, outputLinearCombo
   )) {
     if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<Coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
+      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
         global.fatal << "This is an algorithmic/mathematical (hence also programming) error. "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
@@ -1487,7 +1487,7 @@ bool Matrix<Coefficient>::invert() {
   }
   MacroRegisterFunctionWithName("Matrix::invert");
   Matrix theInverse;
-  theInverse.MakeIdentityMatrix(this->numberOfRows);
+  theInverse.makeIdentityMatrix(this->numberOfRows);
   Selection NonPivotCols;
   this->gaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
   if (NonPivotCols.cardinalitySelection != 0) {
@@ -2044,7 +2044,7 @@ public:
       this->addMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff)
     );
   }
-  void GetMinMonomial(templateMonomial& outputMon, Coefficient& outputCF) const {
+  void getMinimalMonomial(templateMonomial& outputMon, Coefficient& outputCF) const {
     if (this->isEqualToZero()) {
       global.fatal << "This is a programming error: calling GetMinMon "
       << "on a zero monomial collection is forbidden. " << global.fatal;
@@ -2059,13 +2059,13 @@ public:
     }
   }
 
-  Coefficient GetLeadingCoefficient(const typename List<templateMonomial>::Comparator* monomialOrder) {
+  Coefficient getLeadingCoefficient(const typename List<templateMonomial>::Comparator* monomialOrder) {
     Coefficient result;
     this->getIndexLeadingMonomial(nullptr, &result, monomialOrder);
     return result;
   }
 
-  templateMonomial GetLeadingMonomial(const typename List<templateMonomial>::Comparator* monomialOrder) {
+  templateMonomial getLeadingMonomial(const typename List<templateMonomial>::Comparator* monomialOrder) {
     templateMonomial result;
     this->getIndexLeadingMonomial(&result, nullptr, monomialOrder);
     return result;
@@ -2309,7 +2309,7 @@ public:
   }
   void checkConsistencyGrandMaster() const {
     this->checkConsistency();
-    this->theMonomials.GrandMasterConsistencyCheck();
+    this->theMonomials.grandMasterConsistencyCheck();
     for (int i = 0; i < this->size(); i ++) {
       this->coefficients[i].checkConsistency();
     }
@@ -2430,9 +2430,9 @@ public:
     }
   }
   void operator-=(const LinearCombination<templateMonomial, Coefficient>& other) {
-    this->subtractOtherTimesCoeff(other);
+    this->subtractOtherTimesCoefficient(other);
   }
-  void subtractOtherTimesCoeff(
+  void subtractOtherTimesCoefficient(
     const LinearCombination<templateMonomial, Coefficient>& other,
     Coefficient* inputcf = nullptr
   );
@@ -2666,7 +2666,7 @@ public:
   void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient GetDiscriminant();
-  void GetCoeffInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
+  void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
   void makeMonomial(
     int letterIndex,
     const Rational& power,
@@ -2698,7 +2698,7 @@ public:
   Polynomial<Coefficient> one() const;
   static Polynomial<Coefficient> zero();
   Rational rationalValue();
-  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
+  void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
   void makeConstant(const Coefficient& theConst) {
     this->makeZero();
     MonomialP theConstMon;
@@ -3276,7 +3276,7 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
 }
 
 template <class templateMonomial, class Coefficient>
-void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoeff(
+void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoefficient(
   const LinearCombination<templateMonomial, Coefficient>& other, Coefficient* inputcf
 ) {
   if (this == &other) {
@@ -3285,7 +3285,7 @@ void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoeff(
       return;
     }
     LinearCombination<templateMonomial, Coefficient> otherNew = other;
-    this->subtractOtherTimesCoeff(otherNew, inputcf);
+    this->subtractOtherTimesCoefficient(otherNew, inputcf);
     return;
   }
   this->setExpectedSize(other.size() + this->size());
@@ -3344,7 +3344,7 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
 ) {
   List<LinearCombinationTemplate> listCopy = theList;
   Matrix<Coefficient> theRowOperations;
-  theRowOperations.MakeIdentityMatrix(theList.size);
+  theRowOperations.makeIdentityMatrix(theList.size);
   LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(
     listCopy, 0, seedMonomials, &theRowOperations
   );
@@ -3356,7 +3356,7 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
     if (listCopy[i].isEqualToZero()) {
       break;
     }
-    listCopy[i].GetMinMonomial(currentMon, CFminMon);
+    listCopy[i].getMinimalMonomial(currentMon, CFminMon);
     CFinRemainder = remainderFromInput.getMonomialCoefficient(currentMon);
     outputFirstLinearCombination[i] = CFinRemainder;
     outputFirstLinearCombination[i] /= CFminMon;
@@ -3466,9 +3466,9 @@ void LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows
         int otherColIndex = currentOther.theMonomials.getIndex(currentMon);
         if (otherColIndex != - 1) {
           tempCF = currentOther.coefficients[otherColIndex];
-          currentOther.subtractOtherTimesCoeff(currentPivot, &tempCF);
+          currentOther.subtractOtherTimesCoefficient(currentPivot, &tempCF);
           if (carbonCopyList != 0) {
-            (*carbonCopyList)[j].subtractOtherTimesCoeff((*carbonCopyList)[currentRowIndex], &tempCF);
+            (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[currentRowIndex], &tempCF);
           }
           if (carbonCopyMatrix != 0) {
             tempCF2 = tempCF;
@@ -3646,7 +3646,7 @@ public:
   static void endLatexDocument(std::fstream& output);
   static void beginPSTricks(std::fstream& output);
   static void endPSTricks(std::fstream& output);
-  static void GetStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput);
+  static void getStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput);
 };
 
 class Permutation: public SelectionWithDifferentMaxMultiplicities {
@@ -3706,8 +3706,8 @@ class Complex {
   static bool flagEqualityIsApproximate;
   static double equalityPrecision;
   public:
-  Coefficient Im;
-  Coefficient Re;
+  Coefficient imaginaryPart;
+  Coefficient realPart;
   std::string toString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat; //taking care of unused parameters
     std::stringstream tempStream;
@@ -3715,30 +3715,30 @@ class Complex {
     return tempStream.str();
   }
   friend std::iostream& operator<<(std::iostream& output, const Complex<Coefficient>& input) {
-    output << input.Re << "+ i" << input.Im;
+    output << input.realPart << "+ i" << input.imaginaryPart;
     return output;
   }
   void operator*=(const Complex<Coefficient>& other) {
     Complex Accum;
-    Accum.Re = this->Re * other.Re - this->Im * other.Im;
-    Accum.Im = this->Re * other.Im + this->Im * other.Re;
+    Accum.realPart = this->realPart * other.realPart - this->imaginaryPart * other.imaginaryPart;
+    Accum.imaginaryPart = this->realPart * other.imaginaryPart + this->imaginaryPart * other.realPart;
     this->operator=(Accum);
   }
   void operator=(const Complex<Coefficient>& other) {
-    this->Re = other.Re;
-    this->Im = other.Im;
+    this->realPart = other.realPart;
+    this->imaginaryPart = other.imaginaryPart;
   }
   void operator+=(const Complex<Coefficient>& other) {
-    this->Re += other.Re;
-    this->Im += other.Im;
+    this->realPart += other.realPart;
+    this->imaginaryPart += other.imaginaryPart;
   }
   void operator-=(const Complex<Coefficient>& other) {
-    this->Re -= other.Re;
-    this->Im -= other.Im;
+    this->realPart -= other.realPart;
+    this->imaginaryPart -= other.imaginaryPart;
   }
   void operator=(int other) {
-    this->Re = other;
-    this->Im = 0;
+    this->realPart = other;
+    this->imaginaryPart = 0;
   }
   bool operator==(int other) const {
     Complex<Coefficient> otherComplex;
@@ -3752,27 +3752,27 @@ class Complex {
     return difference.isEqualToZero();
   }
   void operator=(double other) {
-    this->Re = other;
-    this->Im = 0;
+    this->realPart = other;
+    this->imaginaryPart = 0;
   }
   void invert() {
     Coefficient numerator;
-    numerator = this->Re * this->Re + this->Im * this->Im;
-    this->Re /= numerator;
+    numerator = this->realPart * this->realPart + this->imaginaryPart * this->imaginaryPart;
+    this->realPart /= numerator;
     numerator *= - 1;
-    this->Im /= numerator;
+    this->imaginaryPart /= numerator;
   }
   bool isEqualToZero() const;
   void minus() {
-    this->Im = - this->Im;
-    this->Re = - this->Re;
+    this->imaginaryPart = - this->imaginaryPart;
+    this->realPart = - this->realPart;
   }
   bool needsParenthesisForMultiplication(FormatExpressions* unused) {
     (void) unused;
-    if (this->Re == 0 && this->Im >= 0) {
+    if (this->realPart == 0 && this->imaginaryPart >= 0) {
       return false;
     }
-    if (this->Im == 0 && this->Re >= 0) {
+    if (this->imaginaryPart == 0 && this->realPart >= 0) {
       return false;
     }
     return true;
@@ -3792,11 +3792,11 @@ template < > double Complex<double>::equalityPrecision;
 template <class Coefficient>
 bool Complex<Coefficient>::isEqualToZero() const {
   if (!Complex<Coefficient>::flagEqualityIsApproximate) {
-    return this->Im == 0 && this->Re == 0;
+    return this->imaginaryPart == 0 && this->realPart == 0;
   } else {
     return
-    this->Im<Complex<Coefficient>::equalityPrecision && - this->Im<Complex<Coefficient>::equalityPrecision &&
-    this->Re<Complex<Coefficient>::equalityPrecision && - this->Re<Complex<Coefficient>::equalityPrecision;
+    this->imaginaryPart<Complex<Coefficient>::equalityPrecision && - this->imaginaryPart<Complex<Coefficient>::equalityPrecision &&
+    this->realPart<Complex<Coefficient>::equalityPrecision && - this->realPart<Complex<Coefficient>::equalityPrecision;
   }
 }
 
@@ -4033,7 +4033,7 @@ void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::GetNormalSeparatingCones(
+bool Vectors<Coefficient>::getNormalSeparatingCones(
   List<Vector<Coefficient> >& coneStrictlyPositiveCoeffs,
   List<Vector<Coefficient> >& coneNonNegativeCoeffs,
   Vector<Coefficient>& outputNormal
@@ -4236,10 +4236,10 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* theFormat) const {
 }
 
 template <class Object>
-void List<Object>::SubSelection(const Selection& theSelection, List<Object>& output) {
+void List<Object>::subSelection(const Selection& theSelection, List<Object>& output) {
   if (&output == this) {
     List<Object> thisCopy = *this;
-    thisCopy.SubSelection(theSelection, output);
+    thisCopy.subSelection(theSelection, output);
     return;
   }
   output.setSize(theSelection.cardinalitySelection);
@@ -4267,7 +4267,7 @@ void List<Object>::intersectWith(const List<Object>& other, List<Object>& output
 }
 
 template <class Coefficient>
-std::string Vector<Coefficient>::ToStringLetterFormat(
+std::string Vector<Coefficient>::toStringLetterFormat(
   const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
@@ -4414,7 +4414,7 @@ bool MonomialTensor<Coefficient, inputHashFunction>::simplifyEqualConsecutiveGen
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::ToStringLatex(FormatExpressions* theFormat) const {
+std::string Matrix<Coefficient>::toStringLatex(FormatExpressions* theFormat) const {
   FormatExpressions formatCopy;
   if (theFormat != nullptr) {
     formatCopy = *theFormat;
@@ -4425,7 +4425,7 @@ std::string Matrix<Coefficient>::ToStringLatex(FormatExpressions* theFormat) con
 }
 
 template <typename Coefficient>
-std::string Matrix<Coefficient>::ToStringSystemLatex(
+std::string Matrix<Coefficient>::toStringSystemLatex(
   Matrix<Coefficient>* constTerms, FormatExpressions* theFormat
 ) const {
   std::stringstream out;
@@ -4782,7 +4782,7 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
 }
 
 class Lattice {
-  void TestgaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output);
+  void testGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output);
 public:
   Matrix<Rational> basisRationalForm;
   Matrix<LargeInteger> basis;
@@ -4797,24 +4797,24 @@ public:
   bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output
   );
-  void IntersectWithPreimageOfLattice(
+  void intersectWithPreimageOfLattice(
     const Matrix<Rational> & theLinearMap, const Lattice& other
   );
-  void IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
-  static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
+  void intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
+  static bool getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection(
     Vector<Rational>& startingPoint,
     Vector<Rational>& theAffineHyperplane,
     Vector<Rational>& theDirection,
     Vector<Rational>& outputPoint
   );
-  void GetDefaultFundamentalDomainInternalPoint(Vector<Rational>& output);
-  bool GetInternalPointInConeForSomeFundamentalDomain(
+  void getDefaultFundamentalDomainInternalPoint(Vector<Rational>& output);
+  bool getInternalPointInConeForSomeFundamentalDomain(
     Vector<Rational>& output, Cone& coneContainingOutputPoint
   );
-  void GetRootOnLatticeSmallestPositiveProportionalTo(
+  void getRootOnLatticeSmallestPositiveProportionalTo(
     Vector<Rational>& input, Vector<Rational>& output
   );
-  void GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
+  void getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
     const Vector<Rational>& theDirection,
     Vector<Rational>& outputDirectionMultipleOnLattice,
     Vector<Rational>& theShift,
@@ -4823,18 +4823,18 @@ public:
     Vectors<Rational>& movementInDirectionPerRepresentative,
     Lattice& outputRougherLattice
   );
-  void ApplyLinearMap(Matrix<Rational>& theMap, Lattice& output);
-  void IntersectWithBothOfMaxRank(const Lattice& other);
-  void GetDualLattice(Lattice& output) const;
-  bool IsInLattice(const Vector<Rational>& theVector) const {
+  void applyLinearMap(Matrix<Rational>& theMap, Lattice& output);
+  void intersectWithBothOfMaximalRank(const Lattice& other);
+  void getDualLattice(Lattice& output) const;
+  bool isInLattice(const Vector<Rational>& theVector) const {
     Vector<Rational> tempVect = theVector;
-    if (!this->ReduceVector(tempVect)) {
+    if (!this->reduceVector(tempVect)) {
       return false;
     }
     return tempVect.isEqualToZero();
   }
   // returns false if the vector is not in the vector space spanned by the lattice
-  bool ReduceVector(Vector<Rational>& theVector) const;
+  bool reduceVector(Vector<Rational>& theVector) const;
   // In the following two functions, the format of the matrix theSub of the substitution is as follows.
   // Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
   // Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
@@ -4846,26 +4846,26 @@ public:
   // 1  1
   // 1 - 1
   // 1  0
-  bool SubstitutionHomogeneous(const Matrix<Rational>& theSub);
-  bool SubstitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub);
+  bool substitutionHomogeneous(const Matrix<Rational>& theSub);
+  bool substitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub);
   // The following function follows the same convention
   // as the preceding except that we allow n < m. However,
   // in order to assure that the preimage of the lattice is a lattice,
   // we provide as input an ambient lattice
   // in the new vector space of dimension m.
-  bool SubstitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf);
-  void Reduce();
-  void IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
-  void IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
-  void IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
-  static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms(
+  bool substitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf);
+  void reduce();
+  void intersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
+  void intersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
+  void intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
+  static bool getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
     const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
   );
   // Returning false means that the lattice given as rougher
   // is not actually rougher than the current one
   // or that there are too many representatives.
-  bool GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Rational>& output) const;
-  bool GetAllRepresentativesProjectingDownTo(
+  bool getAllRepresentatives(const Lattice& rougherLattice, Vectors<Rational>& output) const;
+  bool getAllRepresentativesProjectingDownTo(
     const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output
   ) const;
   std::string toString() const;
@@ -4879,15 +4879,15 @@ public:
   }
   void writeToFile(std::fstream& output);
   bool readFromFile(std::fstream& input);
-  void MakeZn(int theDim);
-  void RefineByOtherLattice(const Lattice& other);
-  void MakeFromRoots(const Vectors<Rational>& input);
+  void makeZn(int theDim);
+  void refineByOtherLattice(const Lattice& other);
+  void makeFromRoots(const Vectors<Rational>& input);
   Lattice() {
   }
   Lattice(const Lattice& other) {
     this->operator=(other);
   }
-  void MakeFromMat(const Matrix<Rational>& input);
+  void makeFromMatrix(const Matrix<Rational>& input);
 };
 
 class QuasiPolynomial {
@@ -4897,24 +4897,19 @@ public:
   }
   Lattice AmbientLatticeReduced;
   Vectors<Rational> LatticeShifts;
-  std::string DebugString;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(bool useHtml, bool useLatex) {
     return this->toString(useHtml, useLatex, nullptr);
   }
   std::string toString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
-  void ComputeDebugString() {
-    this->DebugString = this->toString(false, false);
-  }
   Rational evaluate(const Vector<Rational>& input);
-  void AddLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
-  void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
-  void MakeRougherLattice(const Lattice& latticeToRoughenBy);
-  void MakeFromPolyShiftAndLattice(
+  void addLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
+  void makeRougherLattice(const Lattice& latticeToRoughenBy);
+  void makeFromPolynomialShiftAndLattice(
     const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice
   );
-  void MakeZeroLatTiceZn(int theDim);
-  void MakeZeroOverLattice(Lattice& theLattice);
+  void makeZeroLatticeZn(int theDim);
+  void makeZeroOverLattice(Lattice& theLattice);
   bool isEqualToZero() const {
     return this->valueOnEachLatticeShift.size == 0;
   }
@@ -4933,7 +4928,7 @@ public:
     const Vector<Rational>& inputTranslationSubtractedFromArgument,
     QuasiPolynomial& output
   );
-  bool SubstitutionLessVariables(
+  bool substitutionFewerVariables(
     const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output
   ) const;
   void operator+=(const QuasiPolynomial& other);
@@ -4970,10 +4965,10 @@ public:
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
-  bool RemoveRedundantShortRootsClassicalRootSystem(
+  bool removeRedundantShortRootsClassicalRootSystem(
     PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
   );
-  bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
+  bool removeRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
   static std::fstream TheBigDump;
@@ -4981,31 +4976,31 @@ public:
   static bool MakingConsistencyCheck;
   static Rational CheckSum, CheckSum2;
   static Vector<Rational> theVectorToBePartitioned;
-  void ComputePolyCorrespondingToOneMonomial(
+  void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
     const MonomialP& theMon,
     Vectors<Rational>& normals,
     Lattice& theLattice
   ) const;
-  static void EvaluateIntPoly(
+  static void evaluateIntegerPolynomial(
     const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output
   );
-  static void MakePolynomialFromOneNormal(
+  static void makePolynomialFromOneNormal(
     Vector<Rational>& normal,
     const MonomialP& shiftRational,
     int theMult,
     Polynomial<Rational>& output
   );
-  void ComputeNormals(
+  void computeNormals(
     PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
   );
-  int ComputeGainingMultiplicityIndexInLinearRelation(
+  int computeGainingMultiplicityIndexInLinearRelation(
     bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
   );
-  void GetRootsFromDenominator(
+  void getRootsFromDenominator(
     PartFractions& owner, Vectors<Rational>& output
   ) const;
-  void GetVectorPartitionFunction(
+  void getVectorPartitionFunction(
     PartFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
   ) const;
   void decomposeAMinusNB(
@@ -5016,13 +5011,13 @@ public:
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
     PartFractions& owner
   );
-  bool DecomposeFromLinRelation(
+  bool decomposeFromLinearRelation(
     Matrix<Rational>& theLinearRelation,
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
     bool flagUsingOSbasis,
     List<Vector<Rational> >& startingVectors
   );
-  void ComputeOneCheckSuM(
+  void computeOneCheckSum(
     PartFractions& owner, Rational& output, int theDimension
   ) const;
   bool reduceMeOnce(
@@ -5030,7 +5025,7 @@ public:
     Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
-  void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
+  void reduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
   void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5049,7 +5044,7 @@ public:
     Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
   );
-  bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
+  bool checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
   );
@@ -5060,24 +5055,21 @@ public:
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
-  bool ReduceOnceGeneralMethod(
+  bool reduceOnceGeneralMethod(
     PartFractions& owner,
     LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
-  bool AreEqual(PartFraction& p);
-  bool IsReduced();
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const PartFraction& input) {
     return input.hashFunction();
   }
-  int MultiplyByOneFrac(OnePartialFractionDenominator& f);
   void initialize(int numRoots);
-  void ComputeIndicesNonZeroMults();
-  bool DecreasePowerOneFrac(int index, int increment);
-  void PrepareFraction(
+  void computeIndicesNonZeroMultiplicities();
+  bool decreasePowerOneFraction(int index, int increment);
+  void prepareFraction(
     int indexA,
     int indexB,
     int AminusNBindex,
@@ -5088,14 +5080,14 @@ public:
   );
   void assign(const PartFraction& p);
   void assignDenominatorOnly(const PartFraction& p);
-  void AssignNoIndicesNonZeroMults(PartFraction& p);
+  void assignNoIndicesNonZeroMults(PartFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
-  int ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
-  int ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
+  int controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
+  int controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
   PartFraction();
   ~PartFraction();
-  void GetPolyReduceMonomialByMonomial(
+  void getPolyReduceMonomialByMonomial(
     PartFractions& owner,
     Vector<Rational>& theExponent,
     int StartMonomialPower,
@@ -5103,14 +5095,14 @@ public:
     int startDenominatorPower,
     Polynomial<LargeInteger>& output
   );
-  void ReduceMonomialByMonomialModifyOneMonomial(
+  void reduceMonomialByMonomialModifyOneMonomial(
     PartFractions& Accum,
     SelectionWithDifferentMaxMultiplicities& thePowers,
     List<int>& thePowersSigned,
     MonomialP& input,
     LargeInteger& inputCoeff
   );
-  void GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
+  void getAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
   void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5120,7 +5112,7 @@ public:
     Polynomial<LargeInteger>& output,
     int theDimension
   );
-  void GetNElongationPoly(
+  void getNElongationPolynomial(
     List<Vector<Rational> >& startingVectors,
     int index,
     int baseElongation,
@@ -5128,20 +5120,20 @@ public:
     Polynomial<LargeInteger>& output,
     int theDimension
   );
-  static void GetNElongationPoly(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
-  int GetNumProportionalVectorsClassicalRootSystems(PartFractions& owner);
+  static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
+  int getNumberProportionalVectorsClassicalRootSystems(PartFractions& owner);
   bool operator==(const PartFraction& right) const;
   void operator=(const PartFraction& right);
   bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
   std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
   void readFromFile(PartFractions& owner, std::fstream& input);
   void writeToFile(std::fstream& output) const;
-  int SizeWithoutDebugString() const;
+  int sizeWithoutDebugString() const;
 };
 
 class Cone {
-  void ComputeVerticesFromNormalsNoFakeVertices();
-  bool EliminateFakeNormalsUsingVertices(int numAddedFakeWalls);
+  void computeVerticesFromNormalsNoFakeVertices();
+  bool eliminateFakeNormalsUsingVertices(int numAddedFakeWalls);
   friend std::ostream& operator << (std::ostream& output, const Cone& theCone) {
     output << theCone.toString();
     return output;
@@ -5154,11 +5146,11 @@ public:
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   void transformToWeylProjective(ConeComplex& owner);
-  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  void GetLinesContainedInCone(Vectors<Rational>& output);
-  void TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
-  bool IsAnHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
+  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  void getLinesContainedInCone(Vectors<Rational>& output);
+  void translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
+  bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
     int numCommonWalls = 0;
     for (int i = 0; i < this->Normals.size; i ++) {
       if (
@@ -5173,46 +5165,46 @@ public:
     }
     return false;
   }
-  bool IsTheEntireSpace() {
+  bool isTheEntireSpace() {
     return this->Normals.size == 0 && this->flagIsTheZeroCone;
   }
-  bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
+  bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
     Vector<Rational>& vertex1 = this->Vertices[vertexIndex1];
     Vector<Rational>& vertex2 = this->Vertices[vertexIndex2];
-    return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
+    return this->isHonest1DEdgeAffine(vertex1, vertex2);
   }
-  static bool IsRegularToBasis(
+  static bool isRegularToBasis(
     const Vectors<Rational>& basis,
     Vector<Rational>& r,
     Vector<Rational>& outputFailingNormal,
     int theDimension
   );
-  static bool RegularizeToBasis(
+  static bool regularizeToBasis(
     const Vectors<Rational> &basis,
     Vector<Rational>& output
   );
-  bool DrawMeLastCoordAffine(
+  bool drawMeLastCoordinateAffine(
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
     FormatExpressions& theFormat,
     const std::string& ChamberWallColor = nullptr
   ) const;
-  bool DrawMeProjective(
+  bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool initTheDrawVars,
     DrawingVariables& theDrawingVariables,
     FormatExpressions& theFormat
   ) const;
-  bool IsInCone(const Vector<Rational>& point) const;
-  bool IsInCone(const Vectors<Rational>& vertices) const {
+  bool isInCone(const Vector<Rational>& point) const;
+  bool isInCone(const Vectors<Rational>& vertices) const {
     for (int i = 0; i < vertices.size; i ++) {
-      if (!this->IsInCone(vertices[i])) {
+      if (!this->isInCone(vertices[i])) {
         return false;
       }
     }
     return true;
   }
-  bool GetLatticePointsInCone(
+  bool getLatticePointsInCone(
     Lattice& theLattice,
     Vector<Rational>& theShift,
     int upperBoundPointsInEachDim,
@@ -5220,8 +5212,8 @@ public:
     Vectors<Rational>& outputPoints,
     Vector<Rational>* shiftAllPointsBy
   ) const;
-  bool MakeConvexHullOfMeAnd(const Cone& other);
-  void ChangeBasis(Matrix<Rational>& theLinearMap);
+  bool makeConvexHullOfMeAnd(const Cone& other);
+  void changeBasis(Matrix<Rational>& theLinearMap);
   std::string DebugString;
   int getDimension() const {
     if (this->Normals.size == 0) {
@@ -5229,28 +5221,28 @@ public:
     }
     return this->Normals[0].size;
   }
-  void SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
-  bool CreateFromNormalS(
+  void sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
+  bool createFromNormals(
     Vectors<Rational>& inputNormals,
     bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
   //2) the resulting cone is the entire space
-  bool CreateFromNormals(Vectors<Rational>& inputNormals) {
-    return this->CreateFromNormalS(inputNormals, false);
+  bool createFromNormals(Vectors<Rational>& inputNormals) {
+    return this->createFromNormals(inputNormals, false);
   }
-  bool CreateFromVertices(const Vectors<Rational>& inputVertices);
+  bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
-  void GetInternalPoint(Vector<Rational>& output) const {
+  void getInternalPoint(Vector<Rational>& output) const {
     if (this->Vertices.size <= 0) {
       return;
     }
     this->Vertices.sum(output, this->Vertices[0].size);
   }
-  Vector<Rational> GetInternalPoint() const {
+  Vector<Rational> getInternalPoint() const {
     Vector<Rational> result;
-    this->GetInternalPoint(result);
+    this->getInternalPoint(result);
     return result;
   }
   unsigned int hashFunction() const {
@@ -5259,7 +5251,7 @@ public:
   static unsigned int hashFunction(const Cone& input) {
     return input.hashFunction();
   }
-  bool ProduceNormalFromTwoNormalsAndSlicingDirection(
+  bool produceNormalFromTwoNormalsAndSlicingDirection(
     Vector<Rational>& SlicingDirection,
     Vector<Rational>& normal1,
     Vector<Rational>& normal2,
@@ -5282,10 +5274,10 @@ public:
     this->flagIsTheZeroCone = true;
     //this->flagHasSufficientlyManyVertices = true;
   }
-  void IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim);
-  bool GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
-  bool SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
-  bool SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
+  void intersectHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim);
+  bool getRootFromLPolynomialConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
+  bool solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
+  bool solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
   bool operator>(const Cone& other) const {
     return this->Normals > other.Normals;
   }
@@ -5299,7 +5291,7 @@ class ConeLatticeAndShift {
   Cone theProjectivizedCone;
   Lattice theLattice;
   Vector<Rational> theShift;
-  void FindExtremaInDirectionOverLatticeOneNonParam(
+  void findExtremaInDirectionOverLatticeOneNonParametric(
     Vector<Rational>& theLPToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend
@@ -5310,7 +5302,7 @@ class ConeLatticeAndShift {
     this->theShift = other.theShift;
   }
   void writeToFile(std::fstream& output);
-  void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
+  void findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
     Vector<Rational>& theLPToMaximizeAffine,
     Vectors<Rational>& outputAppendLPToMaximizeAffine,
     List<ConeLatticeAndShift>& outputAppend,
@@ -5318,10 +5310,10 @@ class ConeLatticeAndShift {
   );
   bool readFromFile(std::fstream& input);
   std::string toString(FormatExpressions& theFormat);
-  int GetDimProjectivized() {
+  int getDimensionProjectivized() {
     return this->theProjectivizedCone.getDimension();
   }
-  int GetDimAffine() {
+  int getDimensionAffine() {
     return this->theProjectivizedCone.getDimension() - 1;
   }
 };
@@ -5336,13 +5328,13 @@ public:
   Vectors<Rational> slicingDirections;
   Cone ConvexHull;
   std::string DebugString;
-  void RefineOneStep();
-  void Refine();
-  void RefineMakeCommonRefinement(const ConeComplex& other);
-  void Sort();
-  void RefineAndSort();
-  void FindMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima);
-  void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
+  void refineOneStep();
+  void refine();
+  void refineMakeCommonRefinement(const ConeComplex& other);
+  void sort();
+  void refineAndSort();
+  void findMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima);
+  void makeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
   void transformToWeylProjective();
   int getDimension() {
     if (this->size <= 0) {
@@ -5350,28 +5342,28 @@ public:
     }
     return this->theObjects[0].getDimension();
   }
-  bool AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
-  void PopChamberSwapWithLast(int index);
-  void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
-  void InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
-  void InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
-  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  bool DrawMeProjective(
+  bool addNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
+  void popChamberSwapWithLast(int index);
+  void getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output) const;
+  bool drawMeLastCoordinateAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  void translateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
+  void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
+  void initializeFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
+  std::string drawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  bool drawMeProjective(
     Vector<Rational>* coordCenterTranslation,
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
     FormatExpressions& theFormat
   );
-  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string toString(bool useHtml = false);
   void ComputeDebugString() {
     this->DebugString = this->toString();
   }
   int GetLowestIndexchamberContaining(const Vector<Rational>& theRoot) const {
     for (int i = 0; i < this->size; i ++) {
-      if (this->theObjects[i].IsInCone(theRoot)) {
+      if (this->theObjects[i].isInCone(theRoot)) {
         return i;
       }
     }
@@ -5488,7 +5480,7 @@ public:
   void ComputeDebugString();
   void ComputeDebugStringNoNumerator();
   void ComputeDebugStringWithVPfunction();
-  void ComputePolyCorrespondingToOneMonomial(
+  void computePolynomialCorrespondingToOneMonomial(
     QuasiPolynomial& outputQP,
     int monomialIndex,
     Vectors<Rational>& normals,
@@ -5499,8 +5491,8 @@ public:
   void initAndSplit(Vectors<Rational>& input);
   void run(Vectors<Rational>& input);
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
-  void RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
-  void RemoveRedundantShortRoots(Vector<Rational>* Indicator);
+  void removeRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
+  void removeRedundantShortRoots(Vector<Rational>* Indicator);
   bool RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational>* Indicator);
   bool splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator);
   bool split(Vector<Rational>* Indicator);
@@ -5533,7 +5525,7 @@ public:
   );
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat);
   int ElementToStringBasisChangeOutputToFile(std::fstream& output, bool LatexFormat);
-  bool GetVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
+  bool getVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator);
   bool VerifyFileComputedContributions();
   void WriteToFileComputedContributions(std::fstream& output);
   int ReadFromFileComputedContributions(std::fstream& input);
@@ -5543,7 +5535,7 @@ public:
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
   PartFractions();
-  int SizeWithoutDebugString();
+  int sizeWithoutDebugString();
   bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot);
   void MakeProgressReportSplittingMainPart();
   void MakeProgressReportRemovingRedundantRoots();
@@ -5786,7 +5778,7 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
-  void Sort();
+  void sort();
   void GetDynkinType(DynkinType& output) const;
   void SwapDynkinStrings(int i, int j);
   Rational GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector);
@@ -7214,7 +7206,7 @@ std::string Vectors<Coefficient>::ElementsToInequalitiesString(
   }
   for (int i = 0; i < this->size; i ++) {
     Vector<Rational>& current = (*this)[i];
-    tempS = current.ToStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
+    tempS = current.toStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
     if (tempS == "") {
       out << "(0";
     }

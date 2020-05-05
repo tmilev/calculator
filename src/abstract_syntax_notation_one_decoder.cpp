@@ -969,7 +969,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
     global << Logger::red << "Wrong number of reserved bytes for sequence writer. "
     << "This is non-fatal but affects negatively performance. " << Logger::endL;
-    this->outputPointer->RemoveIndicesShiftDown(
+    this->outputPointer->removeIndicesShiftDown(
       this->offset + 1, this->reservedBytesForLength - actualBytesNeededForLength
     );
   }

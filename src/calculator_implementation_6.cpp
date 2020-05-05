@@ -2456,7 +2456,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
   const Expression& argument = input[1];
   LinearCombination<Expression, Rational> theCollection;
   theCommands.functionCollectSummands(theCommands, argument, theCollection);
-  theCollection /= theCollection.GetLeadingCoefficient(nullptr);
+  theCollection /= theCollection.getLeadingCoefficient(nullptr);
   return output.makeSum(theCommands, theCollection);
 }
 

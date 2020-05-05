@@ -42,7 +42,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation() const 
 }
 
 template <typename somegroup, typename Coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckAllSimpleGensAreOK() const {
+bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimpleGeneratorsAreOK() const {
   this->checkInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
     if (this->generatorS[i].numberOfRows == 0) {
@@ -55,7 +55,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckAllSimp
 }
 
 /*template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::CheckRepIsMultiplicativelyClosed() {
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkRepresentationIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
   tempList.addOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
@@ -86,7 +86,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
   this->ownerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdentityMatrix(this->getDimension());
+  this->theElementImageS[0].makeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
@@ -107,7 +107,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
       }
     }
   }
-//  this->CheckRepIsMultiplicativelyClosed();
+//  this->checkRepresentationIsMultiplicativelyClosed();
   //FormatExpressions tempFormat;
   //tempFormat.flagUseLatex = true;
   //for (int i = 0; i < this->theElementImages.size; i ++)
@@ -118,14 +118,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
 
 // This method uses auto everywhere, and a lot of copying data in order to use auto
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllElementImages() {
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllElementImages() {
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->checkInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   auto ElementsExplored = this->ownerGroup->theElements;
   ElementsExplored.clear();
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].MakeIdentityMatrix(this->getDimension());
+  this->theElementImageS[0].makeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
@@ -144,7 +144,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllEl
       }
     }
   }
-//  this->CheckRepIsMultiplicativelyClosed();
+//  this->checkRepresentationIsMultiplicativelyClosed();
   //FormatExpressions tempFormat;
   //tempFormat.flagUseLatex = true;
   //for (int i = 0; i < this->theElementImages.size; i ++)
@@ -214,19 +214,19 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresen
 }
 
 template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Restrict(
-  const Vectors<Coefficient>& VectorSpaceBasisSubrep,
+void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepresentation(
+  const Vectors<Coefficient>& vectorSpaceBasisSubrep,
   const ClassFunction<somegroup, Rational>& remainingCharacter,
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
-  this->CheckAllSimpleGensAreOK();
-  if (VectorSpaceBasisSubrep.size == 0) {
+  MacroRegisterFunctionWithName("WeylGroupRepresentation::restrict");
+  this->checkAllSimpleGeneratorsAreOK();
+  if (vectorSpaceBasisSubrep.size == 0) {
     global.fatal << "This is a programming error: restriction of "
     << "representation to a zero subspace is not allowed. " << global.fatal;
   }
   output.initialize(*this->ownerGroup);
-  output.basis = VectorSpaceBasisSubrep;
+  output.basis = vectorSpaceBasisSubrep;
   output.basis.getGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
   output.theCharacteR = remainingCharacter;
@@ -254,15 +254,15 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Restrict(
        output.gramMatrixInverted);
     }
   */
-  output.CheckAllSimpleGensAreOK();
+  output.checkAllSimpleGeneratorsAreOK();
 }
 
 template <typename somegroup, typename Coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTodorsVersion(
+bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTodorsVersion(
   VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >* appendOnlyGRCAMSList
 ) {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
+  MacroRegisterFunctionWithName("WeylGroupRepresentation::decomposeTodorsVersion");
   this->checkInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputIrrepMults.makeZero();
@@ -270,7 +270,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeTod
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     appendOnlyIrrepsList.addOnTop(this->ownerGroup->irreps[i]);
   }
-  return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
+  return this->decomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
 }
 
 template <class Element>
@@ -324,7 +324,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
       irrep.ownerGroup = &G;
       irrep.identifyingString = thePartitions[i].toString();
-      irrep.ComputeCharacter();
+      irrep.computeCharacter();
       G.AddIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'B')) {
@@ -350,7 +350,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     global << "pulling back irreps:\n";
     for (int i = 0; i < HOG.theGroup->irreps.size; i ++) {
       auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
-      irrep.ComputeCharacter();
+      irrep.computeCharacter();
       global << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
       G.AddIrreducibleRepresentation(irrep);
     }
@@ -535,9 +535,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.actOnVectorColumn(epsVect);
-    std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
+    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString =
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathSpanPure(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
@@ -545,7 +545,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     << (useMathTag ? HtmlRoutines::getMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>" << (useMathTag ? HtmlRoutines::getMathSpanPure(weightEltString) : weightEltString) << "</td>";
     latexReport << "$" << theOuterAutos.allElements[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
-    << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
+    << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
     out << "</tr>";
   }
   latexReport << "\\end{longtable}";
@@ -648,7 +648,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
     "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi") + "$";
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
   Vector<Polynomial<Rational> > differenceVector;
@@ -690,9 +690,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.actOnVectorColumn(epsVect);
-    std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
+    std::string orbitEltStringEpsilonCoords = epsVect.toStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
-    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+    theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? HtmlRoutines::getMathMouseHover(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
@@ -703,7 +703,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     << "</td>";
     latexReport << "$" << orbitGeneratingSet[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $"
-    << (outputOrbit[0] - outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
+    << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
     << "$\\\\\n<br>";
     if (useRho) {
       currentWeight = theHWsimpleCoords;
@@ -1937,7 +1937,7 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
   GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& inputRep =
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
-  inputRep.MakeGRCAM().DecomposeTodorsVersion(outputRep);
+  inputRep.MakeGRCAM().decomposeTodorsVersion(outputRep);
   return output.assignValue(outputRep, theCommands);
 }
 
@@ -1987,7 +1987,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
   theGroup.theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> tempRep;
   theGroup.GetStandardRepresentation(tempRep);
-  return output.assignValue(tempRep.MakeOtherGroupRepresentationClass(), theCommands);
+  return output.assignValue(tempRep.makeOtherGroupRepresentationClass(), theCommands);
 }
 
 class MonomialMacdonald {
@@ -2256,7 +2256,7 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(
     return theCommands << "Failed to extract representation from " << input[2].toString();
   }
   Matrix<Rational> result;
-  if (!theRep.GetMatrixOfElement(theElt, result)) {
+  if (!theRep.getMatrixOfElement(theElt, result)) {
     return theCommands << "Failed to get matrix of element " << theElt.toString()
     << " from representation: " << theRep.toString();
   }
@@ -2330,7 +2330,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;
-  R.ComputeCharacter();
+  R.computeCharacter();
   return output.assignValue(R, theCommands);
 }
 
@@ -2510,7 +2510,7 @@ void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepr
         continue;
       tempRep = this->ownerGroup->irreps[i];
       tempRep*= this->ownerGroup->irreps[j];
-      tempRep.DecomposeTodorsVersion(currentContribution, 0);
+      tempRep.decomposeTodorsVersion(currentContribution, 0);
       output.coefficientsIrreps+= currentContribution*theCoeff;
     }
   *this = output;*/
@@ -2523,14 +2523,14 @@ void VirtualRepresentation<somegroup, Coefficient>::AssignRep(
   global.fatal << " not implemented " << global.fatal;
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> otherCopy;
   otherCopy = other;
-//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
+//  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
 template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
   VirtualRepresentation<somegroup, Coefficient> out;
   out.addMonomial(other.theCharacteR, 1);
-//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
+//  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
 bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(

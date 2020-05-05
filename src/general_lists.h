@@ -176,7 +176,7 @@ public:
 class MathRoutines {
 public:
   template <class Coefficient>
-  static bool InvertXModN(const Coefficient& X, const Coefficient& N, Coefficient& output) {
+  static bool invertXModN(const Coefficient& X, const Coefficient& N, Coefficient& output) {
     Coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     Coefficient vD[2], vP[2], temp;
     vP[0] = 1;
@@ -321,7 +321,7 @@ public:
     return result;
   }
   static double reducePrecision(double x);
-  static unsigned int HashDouble(const double& input);
+  static unsigned int hashDouble(const double& input);
   static unsigned int hashVectorDoubles(const Vector<double>& input);
   static unsigned int hashListDoubles(const List<double>& input);
   static unsigned int hashListInts(const List<int>& input);
@@ -331,7 +331,7 @@ public:
     return static_cast<unsigned>(input);
   }
   static unsigned int hashString(const std::string& x);
-  static unsigned int HashChar(const char& x) {
+  static unsigned int hashChar(const char& x) {
     return static_cast<unsigned int>(x);
   }
   template <class Element>
@@ -548,7 +548,7 @@ public:
       this->reserve(this->getNewSizeRelativeToExpectedSize(theSize));
     }
   }
-  void ExpandOnTop(int theIncrease) {
+  void expandOnTop(int theIncrease) {
     int newSize = this->size + theIncrease;
     if (newSize < 0) {
       newSize = 0;
@@ -556,7 +556,7 @@ public:
     this->setSize(newSize);
   }
   void setSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
-  void SetSizeMakeMatrix(int numRows, int numCols) {
+  void setSizeMakeMatrix(int numRows, int numCols) {
     this->setSize(numRows);
     for (int i = 0; i < numRows; i ++) {
       this->theObjects[i].setSize(numCols);
@@ -564,7 +564,7 @@ public:
   }
   void initializeFillInObject(int theSize, const Object& o);
   void reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
-  void SortedInsert(const Object& o) {
+  void sortedInsert(const Object& o) {
     this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
   void insertAtIndexShiftElementsUp(const Object& o, int desiredIndex) {
@@ -594,7 +594,7 @@ public:
     }
     this->size --;
   }
-  void RemoveIndicesShiftDown(int firstToRemove, int numberToRemove) {
+  void removeIndicesShiftDown(int firstToRemove, int numberToRemove) {
     for (int i = firstToRemove; i < this->size - numberToRemove; i ++) {
       this->theObjects[i] = this->theObjects[i + numberToRemove];
     }
@@ -602,7 +602,7 @@ public:
   }
   void removeIndexSwapWithLast(int index);
   void removeLastObject();
-  void RemoveObjectsShiftDown(const List<Object>& theList) {
+  void removeObjectsShiftDown(const List<Object>& theList) {
     int currentIndex = 0;
     for (int i = 0; i < this->size; i ++) {
       if (!theList.contains((*this)[i])) {
@@ -624,7 +624,7 @@ public:
     this->removeIndexSwapWithLast(index);
     return result;
   }
-  Object PopIndexShiftDown(int index) {
+  Object popIndexShiftDown(int index) {
     Object result;
     result = (*this)[index];
     this->removeIndexShiftDown(index);
@@ -636,7 +636,7 @@ public:
     return this->quickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
   }
   template <class compareClass, class carbonCopyType = Object>
-  bool QuickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
+  bool quickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
     bool result = this->quickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
     this->reverseElements();
     if (carbonCopy != 0) {
@@ -645,7 +645,7 @@ public:
     return result;
   }
   // The function below is required to reserve the order of elements given by theSelection.elements.
-  void SubSelection(const Selection& theSelection, List<Object>& output);
+  void subSelection(const Selection& theSelection, List<Object>& output);
   // If comparison function is not specified, quickSortAscending uses operator >, else it uses the given
   // comparison function
   template <class otherType = Object>
@@ -788,8 +788,8 @@ public:
   }
   bool hasCommonElementWith(List<Object>& right);
   void swapTwoIndices(int index1, int index2);
-  void CycleIndices(const List<int>& cycle);
-  void PermuteIndices(const List<List<int> >& cycles);
+  void cycleIndices(const List<int>& cycle);
+  void permuteIndices(const List<List<int> >& cycles);
   std::string toStringConcatenate() const;
   std::string toString(FormatExpressions* theFormat) const;
   std::string toString() const;
@@ -802,7 +802,7 @@ public:
   bool contains(const Object& o) const {
     return this->getIndex(o) != - 1;
   }
-  bool ContainsAtLeastOneCopyOfEach(const List<Object>& other) const {
+  bool containsAtLeastOneCopyOfEach(const List<Object>& other) const {
     for (int i = 0; i < other.size; i ++) {
       if (!this->contains(other[i])) {
         return false;
@@ -942,7 +942,7 @@ public:
     return outdex;
   }
 
-  void Rotate(int r) {
+  void rotate(int r) {
     std::rotate(this->theObjects, this->theObjects + r, this->theObjects + (this->size - 1));
   }
   int sizeWithoutObjects() const;
@@ -1044,7 +1044,7 @@ public:
   bool operator<(const List<Object>& other) const;
   void shiftUpExpandOnTop(int StartingIndex);
   void shiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
-  void AssignListList(const List<List<Object> >& input) {
+  void assignListList(const List<List<Object> >& input) {
     int count = 0;
     for (int i = 0; i < input.size; i ++) {
       count += input[i].size;
@@ -1126,7 +1126,7 @@ class HashTemplate: public TemplateList {
 private:
   void AddObjectOnBottom(const Object& o);
   void addListOnTop(List<Object>& theList);
-  Object PopIndexShiftDown(int index);
+  Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int StartingIndex);
 
@@ -1197,10 +1197,10 @@ public:
     }
     this->removeIndexSwapWithLast(theIndex);
   }
-  const List<int>& GetHashArray(int hashIndex) const {
+  const List<int>& getHashArray(int hashIndex) const {
     return this->theHashedArrays[hashIndex];
   }
-  void GrandMasterConsistencyCheck() const {
+  void grandMasterConsistencyCheck() const {
     for (int i = 0; i < this->theHashedArrays.size; i ++) {
       List<int>& current = this->theHashedArrays[i];
       for (int j = 0; j < current.size; j ++) {
@@ -1729,7 +1729,7 @@ void List<Object>::swapTwoIndices(int index1, int index2) {
 }
 
 template<class Object>
-void List<Object>::CycleIndices(const List<int>& cycle) {
+void List<Object>::cycleIndices(const List<int>& cycle) {
   if (cycle.size < 2) {
     return;
   }
@@ -1750,9 +1750,9 @@ void List<Object>::CycleIndices(const List<int>& cycle) {
 }
 
 template<class Object>
-void List<Object>::PermuteIndices(const List<List<int> >& cycles) {
+void List<Object>::permuteIndices(const List<List<int> >& cycles) {
   for (int i = 0; i < cycles.size; i ++) {
-    this->CycleIndices(cycles[i]);
+    this->cycleIndices(cycles[i]);
   }
 }
 

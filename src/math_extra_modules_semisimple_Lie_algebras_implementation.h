@@ -455,7 +455,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   std::stringstream readyForLatexComsumption;
   readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
-  << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  << this->theHWFundamentalCoordsBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> hwFundCoordsNilPart;
@@ -480,8 +480,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicitTypeConversionHere
     currentWeight += hwFundCoordsNilPart;
-    readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
-    << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
+    readyForLatexComsumption <<  "$" << currentWeight.toStringLetterFormat("\\omega")
+    << "$&$" << currentVect.toStringLetterFormat("m") << "$";
     if (currentElt.size() > 1) {
       out << "(";
     }
@@ -496,7 +496,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
       out << ")";
     }
     out << " v_\\lambda";
-    out << "</td><td>(weight: " << currentWeight.ToStringLetterFormat("\\omega") << ")</td></tr>";
+    out << "</td><td>(weight: " << currentWeight.toStringLetterFormat("\\omega") << ")</td></tr>";
     readyForLatexComsumption << "\\\\\n<br>";
   }
   out << "</table>";
@@ -701,7 +701,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& theBF = this->theBilinearFormsAtEachWeightLevel[k];
     Matrix<Coefficient>& theBFinverted = this->theBilinearFormsInverted[k];
-    if (!theBF.IsNonNegativeAllEntries()) {
+    if (!theBF.isNonNegativeAllEntries()) {
       this->flagConjectureBholds = false;
     }
     if (theBFinverted.numberOfRows <= 0) {
@@ -806,7 +806,7 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
     if (!tempRat.isEqualToZero()) {
       this->theBilinearFormsInverted[l] = currentBF;
       this->theBilinearFormsInverted[l].invert();
-      if (!currentBF.IsNonNegativeAllEntries()) {
+      if (!currentBF.isNonNegativeAllEntries()) {
         this->flagConjectureBholds = false;
       }
     } else {
@@ -1331,7 +1331,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
     }
     else
       monomialDetailStream << " (positive definite)";*/
-    if (!theBF.IsNonNegativeAllEntries()) {
+    if (!theBF.isNonNegativeAllEntries()) {
       out << "<b>Has negative entries</b>";
     } else {
       out << " (positive entries only )";

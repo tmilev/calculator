@@ -457,7 +457,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   std::stringstream readyForLatexComsumption;
   readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
-  << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  << this->theHWFundamentalCoordsBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> hwFundCoordsNilPart;
@@ -485,7 +485,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicit type conversion here
     currentWeight += hwFundCoordsNilPart;
-    readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega") << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
+    readyForLatexComsumption <<  "$" << currentWeight.toStringLetterFormat("\\omega") << "$&$" << currentVect.toStringLetterFormat("m") << "$";
     if (currentElt.size() > 1) {
       out << "(";
     }
@@ -500,7 +500,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       out << ")";
     }
     out << " v_\\lambda";
-    out << "</td><td>(weight: " << currentWeight.ToStringLetterFormat("\\omega") << ")</td></tr>";
+    out << "</td><td>(weight: " << currentWeight.toStringLetterFormat("\\omega") << ")</td></tr>";
     readyForLatexComsumption << "\\\\\n<br>";
   }
   out << "</table>";
@@ -607,7 +607,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     int eigenIndexcounter = 0;
     if (i != 0) {
       latexTable2 << "\\hline\\multicolumn{3}{|c|}{$\\lambda ="
-      << theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega", &theG2B3Data.theFormat)
+      << theG2B3Data.theWeightFundCoords.toStringLetterFormat("\\omega", &theG2B3Data.theFormat)
       << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
     for (int k = 0; k < theG2B3Data.theSmallCharFDpart.size(); k ++) {
@@ -1113,7 +1113,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
     totalCycles ++;
     if (theWeight == theHW) {
       tmpWt = thePartition;
-      out << "<br>" << tmpWt.ToStringLetterFormat("\\alpha");
+      out << "<br>" << tmpWt.toStringLetterFormat("\\alpha");
       counter ++;
     }
     if (!(theHW - theWeight).isPositive() || i > rootsBorel.size) {
@@ -1246,7 +1246,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       << currentHW.toString() << ", dim: " << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
       theReport.report(reportStream.str());
-      latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
+      latexReport << "$" << currentHW.toStringLetterFormat("\\omega") << "$ &"
       << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "&";
       hwPath.MakeFromWeightInSimpleCoords(
         currentAlg.theWeyl.getSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl

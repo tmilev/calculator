@@ -104,7 +104,7 @@ bool Polynomial<Coefficient>::isOneVariablePolynomial(int* whichVariable) const 
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::MakeDeterminantFromSquareMatrix(
+void Polynomial<Coefficient>::makeDeterminantFromSquareMatrix(
   const Matrix<Polynomial<Coefficient> >& theMat
 ) {
   if (theMat.numberOfColumns != theMat.numberOfRows) {
@@ -444,7 +444,7 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
   // for univariate polynomials only
   MacroRegisterFunctionWithName("Polynomial::evaluateUnivariatePolynomial");
   Matrix<Coefficient> output, tempElt, idMat;
-  idMat.MakeIdentityMatrix(input.numberOfColumns);
+  idMat.makeIdentityMatrix(input.numberOfColumns);
   output.makeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
     const MonomialP& currentMon = (*this)[i];
@@ -939,7 +939,7 @@ void Polynomial<Coefficient>::makeMonomial(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
+void Polynomial<Coefficient>::getCoefficientInFrontOfLinearTermVariableIndex(
   int index, Coefficient& output
 ) {
   MonomialP tempM;

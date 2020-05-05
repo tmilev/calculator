@@ -630,7 +630,7 @@ void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j) {
   this->indicesEnds.swapTwoIndices(i, j);
 }
 
-void DynkinDiagramRootSubalgebra::Sort() {
+void DynkinDiagramRootSubalgebra::sort() {
   //doing bubble sort -> shortest to code
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     for (int j = i + 1; j < this->SimpleBasesConnectedComponents.size; j ++) {
@@ -891,7 +891,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
     }
   }
   this->ComputeDynkinStrings();
-  this->Sort();
+  this->sort();
   this->ComputeDynkinStrings();
   DynkinType tempType;
   this->GetDynkinType(tempType);
@@ -1384,7 +1384,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     if (this->thePfs.theChambersOld.theObjects[i] != 0) {
       QuasiPolynomial& currentQPNoSub = this->theQPsNonSubstituted.theObjects[i];
       this->theQPsSubstituted.theObjects[i].setSize(this->theLinearOperators.size);
-      this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.theObjects[i]->InternalPoint);
+      this->thePfs.getVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.theObjects[i]->InternalPoint);
       out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.theObjects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
       for (int k = 0; k< this->theLinearOperators.size; k++) {
         QuasiPolynomial& currentQPSub = this->theQPsSubstituted.theObjects[i].theObjects[k];
@@ -1407,9 +1407,9 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   ProgressReport theReport2;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
     QuasiPolynomial& currentSum = this->theMultiplicities.theObjects[i];
-    currentSum.MakeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
+    currentSum.makeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
     for (int k = 0; k < this->theLinearOperators.size; k ++) {
-      this->getProjection(k, this->projectivizedChambeR.theObjects[i].GetInternalPoint(), tempRoot);
+      this->getProjection(k, this->projectivizedChambeR.theObjects[i].getInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
       global.fatal << global.fatal ;
       int theIndex = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
@@ -1496,12 +1496,12 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
       tempVertices.addOnTop(- tempRoot);
     }
   }
-  smallWeylChamber.CreateFromVertices(tempVertices);
+  smallWeylChamber.createFromVertices(tempVertices);
   tempMat.initialize(2, 2);
   tempMat.elements[0][0] = 1; tempMat.elements[0][1] = 0;
   tempMat.elements[1][0] = 1; tempMat.elements[1][1] = 1;
   tempMat.transpose();
-  smallWeylChamber.ChangeBasis(tempMat);
+  smallWeylChamber.changeBasis(tempMat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.toString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged = - translationsProjectedFinal[0];
   for (int i = 0; i < this->theLinearOperators.size; i ++) {
@@ -1558,7 +1558,7 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
     tempComplex.splittingNormals.addOnTop(normal);
   }
   tempComplex.indexLowestNonRefinedChamber = 0;
-  tempComplex.Refine();
+  tempComplex.refine();
   out << "Number chambers with new walls: " << tempComplex.size;
   out << "\n" << tempComplex.toString();
   return out.str();
@@ -1578,7 +1578,7 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 1:
-      this->projectivizedChambeR.Refine();
+      this->projectivizedChambeR.refine();
       this->sortMultiplicities();
       out << this->projectivizedChambeR.toString(false);
 //      out << global.theIndicatorVariables.StatusString1;
@@ -1731,7 +1731,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << theSubgroup.allElements.size << " elements):\n";
   for (int i = 0; i < theSubgroup.allElements.size; i ++) {
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
-    theSubgroup.GetMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
+    theSubgroup.getMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
     currentLinearOperator.actOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
@@ -1755,7 +1755,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
     currentLO *= - 1;
     //tempList.addOnTopNoRepetition(this->theLinearOperators.theObjects[i]);
-    currentLOExtended.MakeIdentityMatrix(currentLO.numberOfRows);
+    currentLOExtended.makeIdentityMatrix(currentLO.numberOfRows);
     currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
       for (int j = 0; j < currentLO.numberOfColumns; j ++) {
@@ -1792,8 +1792,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
   tempRoot.minus();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
-  << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
-  << tempRoot.ToStringLetterFormat("\\alpha") << "$.";
+  << theSubgroup.GetRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
+  << tempRoot.toStringLetterFormat("\\alpha") << "$.";
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
   << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.toString(&theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
@@ -1815,9 +1815,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
   theWeYl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdentityMatrix(input.theDomain().getRank());
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.makeIdentityMatrix(input.theDomain().getRank());
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
-  this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
+  this->theExtendedIntegralLatticeMatForM.makeFromMatrix(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat = theWeYl.cartanSymmetric;
   tempMat.invert();
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
@@ -1837,7 +1837,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   rootsGeneratingExtendedLattice.setSize(totalDim);
   this->log << "\n" << tempMat.toString(&global.theDefaultFormat.getElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.toString();
-  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra);
+  this->WeylChamberSmallerAlgebra.createFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals = this->WeylChamberSmallerAlgebra.Normals;
   for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.Normals.size; i ++) {
@@ -1863,7 +1863,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.toString();
   this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.toString();
-  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots);
+  this->PreimageWeylChamberSmallerAlgebra.createFromVertices(tempRoots);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n"
@@ -1955,10 +1955,10 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   out << "\n\\begin{longtable}{cc} ";
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
-    tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[i].GetInternalPoint();
+    tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[i].getInternalPoint();
     bool found = false;
     for (int j = 0; j < this->projectivizedChamber.size; j ++)
-      if (this->projectivizedChamber.theObjects[j].IsInCone(tempRoot)) {
+      if (this->projectivizedChamber.theObjects[j].isInCone(tempRoot)) {
         if (found)
           global.fatal << global.fatal;
         found = true;
@@ -1969,8 +1969,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
     if (!theMult.isEqualToZero()) {
       int indexMultFreeChamber = - 1;
       for (int j = 0; j < this->projectivezedChambersSplitByMultFreeWalls.size; j ++) {
-        tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[j].GetInternalPoint();
-        if (this->projectivizedChamber.theObjects[i].IsInCone(tempRoot)) {
+        tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[j].getInternalPoint();
+        if (this->projectivizedChamber.theObjects[i].isInCone(tempRoot)) {
           Rational tempRat;
           tempRat =*tempRoot.lastObject();
           if (tempRat != 0)
@@ -2006,7 +2006,7 @@ void GeneralizedVermaModuleCharacters::initTheMaxComputation() {
   Lattice ZnLattice;
   int theAffineDim = 5;
 //  int theProjectivizedDim= theAffineDim + 1;
-  ZnLattice.MakeZn(theAffineDim);
+  ZnLattice.makeZn(theAffineDim);
   this->numNonZeroMults = 0;
   ProgressReport theReport;
   ConeLatticeAndShift currentCLS;
@@ -2044,7 +2044,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpress
     normalNoConstant.setSize(dimSmallerAlgebra + dimLargerAlgebra);
     theConst = - (*currentNormal.lastObject());
     if (!normalNoConstant.isEqualToZero()) {
-      out1 << "$" << normalNoConstant.ToStringLetterFormat("x", &theFormat) << "$ & $\\geq$ & $"
+      out1 << "$" << normalNoConstant.toStringLetterFormat("x", &theFormat) << "$ & $\\geq$ & $"
       << theConst.toString() << "$ \\\\";
     }
   }
@@ -2148,7 +2148,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep1() {
-  this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
+  this->smallerAlgebraChamber.initializeFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
   ProgressReport theReport1;
   ProgressReport theReport2;
   theReport1.report(this->smallerAlgebraChamber.toString(false));
@@ -2174,26 +2174,26 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     }
     tempRoots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
     theReport.report(tempRoots.toString());
-    currentProjectiveCone.CreateFromNormals(tempRoots);
-    projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
+    currentProjectiveCone.createFromNormals(tempRoots);
+    projectivizedChamberFinal.addNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
     projectivizedChamberFinal.splittingNormals.addOnTop(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
   }
   out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.toString(false);
-  projectivizedChamberFinal.Refine();
+  projectivizedChamberFinal.refine();
   out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.toString(false);
   for (int i = 0; i < projectivizedChamberFinal.size; i ++) {
     const Cone& currentCone = projectivizedChamberFinal[i];
     bool isNonDominant = false;
     for (int j = 0; j < this->PreimageWeylChamberSmallerAlgebra.Normals.size; j ++) {
-      if (currentCone.GetInternalPoint().ScalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).isNegative()) {
+      if (currentCone.getInternalPoint().ScalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).isNegative()) {
         isNonDominant = true;
         break;
       }
     }
     if (isNonDominant) {
-      projectivizedChamberFinal.PopChamberSwapWithLast(i);
+      projectivizedChamberFinal.popChamberSwapWithLast(i);
       i --;
     }
   }

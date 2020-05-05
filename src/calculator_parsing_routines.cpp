@@ -1231,7 +1231,7 @@ bool Calculator::replaceIntegerXbyEX() {
 
 std::string Calculator::toStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
-  HashedList<char, MathRoutines::HashChar> theBadChars;
+  HashedList<char, MathRoutines::hashChar> theBadChars;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!this->isStandardCalculatorCharacter(static_cast<unsigned char>(input[i]))) {
       theBadChars.addOnTopNoRepetition(input[i]);
@@ -1542,7 +1542,7 @@ bool Calculator::replaceSsSsXdotsXbySsXdotsX(int numDots) {
     left.theData.addChildOnTop(right.theData[i]);
   }
   left.controlIndex = this->conSequenceStatements();
-  (*this->currentSyntacticStack).PopIndexShiftDown((*this->currentSyntacticStack).size - numDots - 1);
+  (*this->currentSyntacticStack).popIndexShiftDown((*this->currentSyntacticStack).size - numDots - 1);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::replaceSsSsXdotsXbySsXdotsX]";
   }

@@ -13,12 +13,12 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
   bool formatWeightAsIndexVectorSpace = theFormat == nullptr ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
     if (this->owner == nullptr) {
-      return this->weightFundamentalCoordS.ToStringLetterFormat("\\psi", theFormat);
+      return this->weightFundamentalCoordS.toStringLetterFormat("\\psi", theFormat);
     }
     Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
     weightSimpleCoords = this->owner->theWeyl.getSimpleCoordinatesFromFundamental(this->weightFundamentalCoordS);
     this->owner->theWeyl.getEpsilonCoordinates(weightSimpleCoords, weightEpsCoords);
-    return weightEpsCoords.ToStringLetterFormat("\\varepsilon", theFormat);
+    return weightEpsCoords.toStringLetterFormat("\\varepsilon", theFormat);
   }
   bool useOmega = true;
   std::string oldCustomPlus;
@@ -30,10 +30,10 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
     VectorSpaceLetter = theFormat->FDrepLetter;
   }
   if (useOmega) {
-    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordS.ToStringLetterFormat("\\omega", theFormat) << "}";
+    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordS.toStringLetterFormat("\\omega", theFormat) << "}";
   } else {
     out << VectorSpaceLetter << "_{"
-    << this->weightFundamentalCoordS.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+    << this->weightFundamentalCoordS.toStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   }
   if (theFormat != nullptr) {
     theFormat->CustomPlusSign = oldCustomPlus;

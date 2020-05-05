@@ -29,7 +29,7 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
 void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const {
   MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
   int rank = this->getDimension();
-  output.MakeIdentityMatrix(rank);
+  output.makeIdentityMatrix(rank);
   for (int j = 0; j < rank; j ++) {
     output(indexSimpleRoot, j) -= (this->cartanSymmetric(indexSimpleRoot, j) / cartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
   }
@@ -249,7 +249,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
 
 template <typename somegroup, typename Coefficient>
 GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>
-GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::Reduced() const {
+GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   int d = basis.size;
   Matrix<Coefficient> GM;
   GM.initialize(d, d);
@@ -311,12 +311,12 @@ VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coeffi
 
 template <typename somegroup, typename Coefficient>
 List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::DecomposeThomasVersion() {
-  MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeThomasVersion");
+  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeThomasVersion() {
+  MacroRegisterFunctionWithName("WeylGroupRepresentation::decomposeThomasVersion");
   Matrix<Coefficient> splittingOperatorMatrix;
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
-  if (GetNumberOfComponents() == 1) {
+  if (getNumberOfComponents() == 1) {
     if (this->ownerGroup->characterTable.getIndex(this->theCharacteR) == - 1) {
       global.comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
@@ -329,7 +329,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
     if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
       global.comments << "contains irrep " << i << "\n";
-      this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
+      this->classFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb = tempVectors;
@@ -341,10 +341,10 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     V.ownerGroup = this->ownerGroup;
     V.generatorS = this->generatorS;
     V.basis = Vb;
-    V = V.Reduced();
+    V = V.reduced();
     global.comments << "done\n";
-    global.comments << "Decomposing remaining subrep " << V.GetCharacter();
-    return V.DecomposeThomasVersion();
+    global.comments << "Decomposing remaining subrep " << V.getCharacter();
+    return V.decomposeThomasVersion();
   }
   if (Vb.size == 0) {
     return out;
@@ -358,7 +358,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
       cf[cfi] = 1;
       global.Comments << "getting matrix " << cf << "\n";
       Matrix<Coefficient> A;
-      ClassFunctionMatrix(cf, A);
+      classFunctionMatrix(cf, A);
       List<List<Vector<Coefficient> > > es = eigenspaces(A);
       global.Comments << "eigenspaces were ";
       for (int i = 0; i <es.size; i ++)
@@ -384,7 +384,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     cf[cfi] = 1;
     global.comments << "getting matrix " << cf << "\n";
     Matrix<Coefficient> A;
-    ClassFunctionMatrix(cf, A);
+    classFunctionMatrix(cf, A);
     es = eigenspaces(A);
     if (es.size > 1) {
       global.comments << "eigenspaces were ";
@@ -401,7 +401,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     outeme.ownerGroup = this->ownerGroup;
     outeme.generatorS = this->generatorS;
     outeme.basis = es[i];
-    out.addOnTop(outeme.Reduced());
+    out.addOnTop(outeme.reduced());
   }
   return out;
 }
@@ -1073,7 +1073,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   this->simpleRootsInLeviParabolic = inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
   EiBasis.makeEiBasis(G.getDimension());
-  EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
+  EiBasis.subSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
   int d = inputGeneratingSimpleRoots.cardinalitySelection;
   this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
@@ -1087,8 +1087,8 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
   this->initializeGenerators();
 }
 
-void SubgroupDataRootReflections::MakeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
-  MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeFromRoots");
+void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections) {
+  MacroRegisterFunctionWithName("SubgroupDataRootReflections::makeFromRoots");
   this->theSubgroupData.MakeSubgroupOf(G.theGroup);
   this->theWeylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
@@ -1196,9 +1196,9 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;
   do {
-    extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
+    extendedBasis.subSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
     if (currentBasisExtendedParabolic.getRankOfSpanOfElements() == currentBasisExtendedParabolic.size) {
-      theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
+      theSG.makeFromRoots(*this, currentBasisExtendedParabolic);
       theSG.flagIsExtendedParabolic = true;
       theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
       outputSubgroups.addOnTop(theSG);
@@ -1226,7 +1226,7 @@ void WeylGroupData::GetSignSignatureRootSubgroups(
   g.owner = this;
   for (int i = 0; i < outputSubgroups.size; i ++) {
     SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
-    currentParabolic.MakeFromRoots(*this, rootsGeneratingReflections[i]);
+    currentParabolic.makeFromRoots(*this, rootsGeneratingReflections[i]);
     currentParabolic.ComputeCCSizesRepresentativesPreimages();
   }
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();

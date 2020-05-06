@@ -166,7 +166,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     return theCommands << "<hr>Type D is expected to have rank 4 or more, "
     << "your input was of rank " << theRank << ". ";
   }
-  outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
+  outputMon.makeArbitrary(theWeylLetter, theRank, theScale);
   return true;
 }
 
@@ -548,7 +548,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
   outputSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo.setSize(
-    outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetNumSimpleComponents()
+    outputSubalgebra.theWeylNonEmbedded->theDynkinType.getNumberOfSimpleComponents()
   );
   int componentCounter = - 1;
   int counter = - 1;

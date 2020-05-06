@@ -215,8 +215,8 @@ bool Calculator::innerAnimateLittelmannPaths(
   theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
-  thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  return output.assignValue(thePath.GenerateOrbitAndAnimate(), theCommands);
+  thePath.makeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
+  return output.assignValue(thePath.generateOrbitAndAnimate(), theCommands);
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -285,7 +285,7 @@ std::string HtmlRoutines::getSliderSpanStartsHidden(
   return out.str();
 }
 
-std::string LittelmannPath::GenerateOrbitAndAnimate() {
+std::string LittelmannPath::generateOrbitAndAnimate() {
   std::stringstream out;
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
@@ -318,7 +318,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     LittelmannPath& currentPath = theOrbit[i];
     out << "<tr><td>" << currentPath.toString() << "</td>"
     << "<td>"
-    << this->ElementToStringOperatorSequenceStartingOnMe(theGens[i])
+    << this->toStringOperatorSequenceStartingOnMe(theGens[i])
     << "</td></tr>";
   }
   out << "</table>";
@@ -333,15 +333,15 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     int curInd = - tempMon.generatorsIndices[i] - 1;
     int nextInd = - tempMon.generatorsIndices[i - 1] - 1;
     for (int k = 0; k < tempMon.Powers[i]; k ++) {
-      lastPath.ActByFalpha(curInd);
+      lastPath.actByFAlpha(curInd);
     }
     tempPath = lastPath;
-    tempPath.ActByEalpha(nextInd);
+    tempPath.actByEAlpha(nextInd);
     out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.toString() << ") =</td>" << "<td>"
     << tempPath.toString() << "</td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = lastPath;
-      tempPath.ActByEalpha(j);
+      tempPath.actByEAlpha(j);
       out << "<td> e_" << j + 1 << "("
       << lastPath.toString() << ")=</td>" << "<td>" << tempPath.toString() << "</td>";
     }
@@ -355,18 +355,18 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     tempMon = theGens[i];
     tempMon.generatorsIndices.reverseElements();
     tempMon.Powers.reverseElements();
-    bool isadapted = tempPath.IsAdaptedString(tempMon);
+    bool isadapted = tempPath.isAdaptedString(tempMon);
     out << "<tr><td>" << tempMon.toString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
     << tempPath.toString() << "</td><td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
       tempPath = theOrbit[i];
-      tempPath.ActByEFDisplayIndex(j + 1);
+      tempPath.actByEFDisplayIndex(j + 1);
       if (!tempPath.isEqualToZero()) {
         out << "e_{" << j + 1 << "}, ";
       }
       tempPath = theOrbit[i];
-      tempPath.ActByEFDisplayIndex(- j - 1);
+      tempPath.actByEFDisplayIndex(- j - 1);
       if (!tempPath.isEqualToZero()) {
         out << "e_{" << - j - 1 << "}, ";
       }
@@ -435,7 +435,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
     theReport.report(tempStream3.str());
     Matrix<Coefficient> currentOpMat;
-    currentOp.GetMatrix(currentOpMat, this->getDimension());
+    currentOp.getMatrix(currentOpMat, this->getDimension());
     currentOpMat.getZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
     tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
     theReport.report(tempStream3.str());
@@ -448,7 +448,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       tempSpace1 = theFinalEigenSpace;
       theReport.report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
-      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
+      theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
       tempStream4 << " done in " << global.getElapsedSeconds() - timeAtStart2 << " seconds. ";
       theReport.report(tempStream4.str());
     }
@@ -516,8 +516,8 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
 void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   MacroRegisterFunctionWithName("Calculator::makeHmmG2InB3");
   DynkinType b3Type, g2Type;
-  b3Type.MakeSimpleType('B', 3);
-  g2Type.MakeSimpleType('G', 2);
+  b3Type.makeSimpleType('B', 3);
+  g2Type.makeSimpleType('G', 2);
   output.domainAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(g2Type);
   output.rangeAlg = &this->theObjectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
 
@@ -897,7 +897,7 @@ void BranchingData::resetOutputData() {
 }
 
 template<class Coefficient>
-bool ElementSumGeneralizedVermas<Coefficient>::ExtractElementUE(
+bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping(
   ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner
 ) {
   output.makeZero(theOwner);
@@ -1019,7 +1019,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     ElementSumGeneralizedVermas<RationalFunction<Rational> >& currentTensorEltEigen = theG2B3Data.theEigenVectorS[k];
     ElementUniversalEnveloping<RationalFunction<Rational> >& currentUEelt = theG2B3Data.theUEelts[k];
     currentTensorEltLevi = theHWV;
-    currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k]);
+    currentTensorEltLevi.multiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k]);
     currentTensorEltEigen = currentTensorEltLevi;
     if (theG2B3Data.selInducing.cardinalitySelection > 0) {
       for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
@@ -1029,7 +1029,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
           tempElt.makeConstant(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
           theG2CasimirCopy -= tempElt;
           theG2CasimirCopy *= 12;
-          currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
+          currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff = theG2B3Data.theChars[j];
           charDiff -= *theG2B3Data.theChars.lastObject();
           theG2B3Data.theCharacterDifferences.addOnTopNoRepetition(charDiff);
@@ -1040,7 +1040,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     if (!scale.isConstant(&theG2B3Data.additionalMultipliers[k])) {
       global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
     }
-    currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
+    currentTensorEltEigen.extractElementUniversalEnveloping(currentUEelt, *theMod.owner);
     currentUEelt.HWTAAbilinearForm(
       currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
     );
@@ -1225,7 +1225,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
   DynkinType currentType;
   for (int i = 0; i < theRanks.size; i ++) {
-    currentType.MakeSimpleType(theWeylLetters[i], theRanks[i]);
+    currentType.makeSimpleType(theWeylLetters[i], theRanks[i]);
     SemisimpleLieAlgebra& currentAlg =
     theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.computeChevalleyConstants();
@@ -1248,7 +1248,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       theReport.report(reportStream.str());
       latexReport << "$" << currentHW.toStringLetterFormat("\\omega") << "$ &"
       << currentAlg.theWeyl.weylDimFormulaFundamentalCoords(currentHW) << "&";
-      hwPath.MakeFromWeightInSimpleCoords(
+      hwPath.makeFromWeightInSimpleCoords(
         currentAlg.theWeyl.getSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl
       );
       hwPath.generateOrbit(
@@ -1265,7 +1265,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
         tempMon = theStrings[k];
         tempMon.generatorsIndices.reverseElements();
         tempMon.Powers.reverseElements();
-        if (!currentPath.IsAdaptedString(tempMon)) {
+        if (!currentPath.isAdaptedString(tempMon)) {
           foundBad = true;
           break;
         }
@@ -1376,7 +1376,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   }
   waypoints = ownerSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
-  theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
+  theLSpath.makeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
   return output.assignValue(theLSpath, theCommands);
 }
 
@@ -1743,9 +1743,9 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   );
   ElementWeylAlgebra<Rational> outputEWA;
   if (assignPoly) {
-    outputEWA.Makexi(0, 1);
+    outputEWA.makexi(0, 1);
   } else {
-    outputEWA.Makedi(0, 1);
+    outputEWA.makedi(0, 1);
   }
   return output.assignValueWithContext(outputEWA, endContext, theCommands);
 }

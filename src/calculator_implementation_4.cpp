@@ -251,7 +251,7 @@ void QuasiDifferentialOperator<Coefficient>::fourierTransformDifferentialPartOnl
   for (int i = 0; i < this->size(); i ++) {
     startDO.makeZero();
     startDO.addMonomial((*this)[i].theWeylMon, this->coefficients[i]);
-    startDO.FourierTransform(finalDO);
+    startDO.fourierTransform(finalDO);
     for (int j = 0; j < finalDO.size(); j ++) {
       theMon.theMatMon = (*this)[i].theMatMon;
       theMon.theWeylMon = finalDO[j];
@@ -404,7 +404,7 @@ bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
       << "I have an exponent with non-small integer entry. "
       << global.fatal;
     }
-    currentMonContribution.Makexidj(i, i, 0);
+    currentMonContribution.makexidj(i, i, 0);
     currentMonContribution.raiseToPower(powerMonCoeff);
     outputDO *= currentMonContribution;
   }
@@ -429,7 +429,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
   result *= theGenElt;
   result.simplify();
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
-  idMT.MakeIdSpecial();
+  idMT.makeIdentitySpecial();
   MatrixTensor<RationalFunction<Rational> > tempMat1;
 
   int varShift = this->minimalNumberOfVariables();
@@ -465,7 +465,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
     theCoeff = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
       currentMon.Powers[j].getConstantTerm(currentShift);
-      ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo(
+      ElementWeylAlgebra<Rational>::getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
       exponentContribution *= oneIndexContribution;
@@ -572,7 +572,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   theMods.setSize(theHws.size);
   Vector<RationalFunction<Rational> > tempV;
   int numStartingVars = hwContext.numberOfVariables();
-  std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
+  std::stringstream reportfourierTransformedCalculatorCommands, reportCalculatorCommands;
   long long totalAdditions = 0;
   long long currentAdditions = 0;
   long long totalMultiplications = 0;
@@ -682,9 +682,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "</tr>";
     if (theMod.getDimension() == 1) {
       ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString())
+      reportfourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
-      reportFourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      reportfourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
       reportCalculatorCommands << "<hr>" << HtmlRoutines::getMathMouseHover(theMod.theChaR.toString())
       << ", differential operators - formatted for calculator input. <br><br>";
@@ -693,23 +693,23 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
 
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
         theQDOs[j].getElementWeylAlgebraSetMatrixPartsToId(diffOpPart);
-        diffOpPart.FourierTransform(transformedDO);
-        reportFourierTransformedCalculatorCommands << "<br>"
+        diffOpPart.fourierTransform(transformedDO);
+        reportfourierTransformedCalculatorCommands << "<br>"
         << theGeneratorsItry[j].toString() << "=" << transformedDO.toString() << ";";
         reportCalculatorCommands << "<br>" << theGeneratorsItry[j].toString() << "=" << diffOpPart.toString() << ";";
       }
-      reportFourierTransformedCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
+      reportfourierTransformedCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
       reportCalculatorCommands << "<br>generateVectorSpaceClosedWithRespectToLieBracket{}(248," ;
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].toString();
+        reportfourierTransformedCalculatorCommands << theGeneratorsItry[j].toString();
         reportCalculatorCommands << theGeneratorsItry[j].toString();
         if (j != theGeneratorsItry.size - 1) {
-          reportFourierTransformedCalculatorCommands << ", ";
+          reportfourierTransformedCalculatorCommands << ", ";
           reportCalculatorCommands << ", ";
         }
       }
-      reportFourierTransformedCalculatorCommands << ");";
-      reportFourierTransformedCalculatorCommands << "<hr>";
+      reportfourierTransformedCalculatorCommands << ");";
+      reportfourierTransformedCalculatorCommands << "<hr>";
       reportCalculatorCommands << ");";
       reportCalculatorCommands << "<hr>";
     }
@@ -725,7 +725,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   << "Total time to embed generators invoked by command: " << input.toString()
   << ": <br>" << totalTime << " seconds. ";
   out << reportCalculatorCommands.str();
-  out << reportFourierTransformedCalculatorCommands.str();
+  out << reportfourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();
   return output.assignValue<std::string>(out.str(), theCommands);
@@ -1000,7 +1000,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra.content->toStringLieAlgebraName();
   KLpolys theKLpolys;
-  theKLpolys.ComputeKLPolys(&theWeyl);
+  theKLpolys.computeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
   out << theKLpolys.toString(&theFormat);
   return output.assignValue(out.str(), theCommands);

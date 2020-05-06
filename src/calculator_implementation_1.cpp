@@ -273,7 +273,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   return outputContext.setVariables(theVars);
 }
 
-bool DynkinSimpleType:: HasPrecomputedSubalgebras() const {
+bool DynkinSimpleType:: hasPrecomputedSubalgebras() const {
   if (this->theLetter == 'F') {
     return true;
   }
@@ -344,7 +344,7 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   << folderComputer.toStringFileNameNoPathStructureConstants()
   << "\">"
   << theType[0].theLetter << theType[0].theRank << " structure constants</a></td>\n ";
-  if (theType[0].HasPrecomputedSubalgebras()) {
+  if (theType[0].hasPrecomputedSubalgebras()) {
     out << "<td><a href=\""
     << folderComputer.toStringDisplayFolderName(prefixFolder) << folderComputer.toStringFileNameNoPathSemisimpleSubalgebras()
     << "\">"
@@ -365,32 +365,32 @@ std::string Calculator::toStringSemismipleLieAlgebraLinksFromHD(const DynkinType
   return out.str();
 }
 
-void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
-  MacroRegisterFunctionWithName("DynkinType::GetPrecomputedDynkinTypes");
+void DynkinType::getPrecomputedDynkinTypes(List<DynkinType>& output) {
+  MacroRegisterFunctionWithName("DynkinType::getPrecomputedDynkinTypes");
   output.setSize(0);
   DynkinType theType;
-  theType.MakeSimpleType('F', 4);
+  theType.makeSimpleType('F', 4);
   output.addOnTop(theType);
   for (int i = 6; i <= 8; i ++) {
-    theType.MakeSimpleType('E', i);
+    theType.makeSimpleType('E', i);
     output.addOnTop(theType);
   }
-  theType.MakeSimpleType('G', 2);
+  theType.makeSimpleType('G', 2);
   output.addOnTop(theType);
   for (int i = 1; i <= 8; i ++) {
-    theType.MakeSimpleType('A', i);
+    theType.makeSimpleType('A', i);
     output.addOnTop(theType);
   }
   for (int i = 4; i <= 8; i ++) {
-    theType.MakeSimpleType('D', i);
+    theType.makeSimpleType('D', i);
     output.addOnTop(theType);
   }
   for (int i = 2; i <= 8; i ++) {
-    theType.MakeSimpleType('B', i);
+    theType.makeSimpleType('B', i);
     output.addOnTop(theType);
   }
   for (int i = 3; i <= 8; i ++) {
-    theType.MakeSimpleType('C', i);
+    theType.makeSimpleType('C', i);
     output.addOnTop(theType);
   }
 }
@@ -404,10 +404,10 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   << "<td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   List<DynkinType> precomputedTypes;
-  DynkinType::GetPrecomputedDynkinTypes(precomputedTypes);
+  DynkinType::getPrecomputedDynkinTypes(precomputedTypes);
   for (int i = 0; i < precomputedTypes.size; i ++) {
     outFromHD << theCommands.toStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
-    if (precomputedTypes[i].HasPrecomputedSubalgebras()) {
+    if (precomputedTypes[i].hasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
       recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].toString() << ")";
       outRecomputeLinks << "<br>" << HtmlRoutines::getCalculatorComputationAnchor(recomputeCommand.str());
@@ -2282,7 +2282,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
   WeylGroupData& theWeyl = theSSlieAlg->theWeyl;
-  if (!theWeyl.theDynkinType.IsSimple()) {
+  if (!theWeyl.theDynkinType.isSimple()) {
     return theCommands << "<hr>Function root subsystem works for simple ambient types only. ";
   }
   for (int i = 2; i < input.size(); i ++) {
@@ -2299,7 +2299,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
   theDiagram.AmbientBilinearForm = theWeyl.cartanSymmetric;
   theDiagram.AmbientRootSystem = theWeyl.RootSystem;
-  theDiagram.ComputeDiagramInputIsSimple(outputRoots);
+  theDiagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.toString()
   << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.toString();
   return output.assignValue(out.str(), theCommands);

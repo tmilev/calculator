@@ -705,7 +705,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
     *this += tempElt2;
   }
   *this /= theWeyl.GetKillingDivTraceRatio();
-// Check that the ninja formula is correct:
+// check that the ninja formula is correct:
 //  FormatExpressions tempPolyFormat;
 //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   //this->DebugString= out.str();

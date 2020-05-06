@@ -2719,7 +2719,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   }
   (void) input;
   List<DynkinType> theTypes;
-  DynkinType::GetPrecomputedDynkinTypes(theTypes);
+  DynkinType::getPrecomputedDynkinTypes(theTypes);
   ProgressReport theReport;
   std::stringstream out;
   int lastIndexPlusOne = theTypes.size;
@@ -2740,7 +2740,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
     theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
     theSl2s.toHTML();
     if ((false)) {
-      if (theTypes[i].HasPrecomputedSubalgebras()) {
+      if (theTypes[i].hasPrecomputedSubalgebras()) {
         SemisimpleSubalgebras theSubalgebras;
         MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
         ListReferences<SltwoSubalgebras> sl2Conainer;

@@ -971,7 +971,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   void beefUpWithEiToLinearlyIndependentBasis(int theDim);
   void chooseABasis();
-  static void IntersectTwoLinSpaces(
+  static void intersectTwoLinearSpaces(
     const List<Vector<Coefficient> >& firstSpace,
     const List<Vector<Coefficient> >& secondSpace,
     List<Vector<Coefficient> >& output

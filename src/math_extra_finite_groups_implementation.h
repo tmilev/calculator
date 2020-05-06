@@ -744,11 +744,11 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<Coefficient>& theWeight) {
     }
   }
   DynkinDiagramRootSubalgebra theStabilizerSubsystem;
-  theStabilizerSubsystem.ComputeDiagramTypeModifyInput(theStabilizingRoots, *this);
+  theStabilizerSubsystem.computeDiagramTypeModifyInput(theStabilizingRoots, *this);
   DynkinType theStabilizerDynkinType;
-  theStabilizerSubsystem.GetDynkinType(theStabilizerDynkinType);
+  theStabilizerSubsystem.getDynkinType(theStabilizerDynkinType);
   Rational resultRat = this->theGroup.getSize();
-  resultRat /= theStabilizerDynkinType.GetWeylGroupSizeByFormula();
+  resultRat /= theStabilizerDynkinType.getWeylGroupSizeByFormula();
   LargeInteger result;
   if (!resultRat.isInteger(&result)) {
     global.fatal << "Something has gone very wrong: orbit size reported to be " << resultRat.toString()
@@ -2054,7 +2054,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   MacroRegisterFunctionWithName("FiniteGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if (this->irreps_grcam.size == 0) {
     if (this->irreps.size == 0) {
-      global.fatal << "Need an initial irrep.  Check up the call chain and find out where it should be provided" << global.fatal;
+      global.fatal << "Need an initial irrep.  check up the call chain and find out where it should be provided" << global.fatal;
     }
     for (int i = 0; i < this->irreps.size; i ++) {
       this->irreps_grcam.addOnTop(irreps[i].MakeGRCAM());
@@ -2230,7 +2230,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       }
       splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
 
-      remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
+      remainingVectorSpace.intersectTwoLinearSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
 
       // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
       // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to

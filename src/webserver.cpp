@@ -3514,7 +3514,7 @@ bool WebWorker::runInitialize() {
   MutexProcess::currentProcessName = processNameStream.str();
   global.flagServerforkedIntoWorker = true;
   CreateTimerThread();
-  // Check web worker indices are initialized properly:
+  // check web worker indices are initialized properly:
   global.server().getActiveWorker();
   if (global.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
@@ -3789,7 +3789,7 @@ void WebServer::checkUnzipInstall() {
 
 void WebServer::checkMathJaxSetup() {
   MacroRegisterFunctionWithName("WebServer::checkMathJaxSetup");
-  std::string checkForMathJaxAndAutoInstall = "Check for mathjax on every boot.";
+  std::string checkForMathJaxAndAutoInstall = "check for mathjax on every boot.";
   if (
     global.configuration[Configuration::mathJaxSetup].theString !=
     checkForMathJaxAndAutoInstall
@@ -4417,10 +4417,10 @@ int WebServer::main(int argc, char **argv) {
     global << Logger::green << "Current folder: "
     << Logger::blue << FileOperations::getCurrentFolder()
     << Logger::endL;
-    // Compute configuration file location.
+    // compute configuration file location.
     // load the configuration file.
     global.configurationLoad();
-    // Compute various flags and settings from the desired configuration.
+    // compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.
     global.configurationProcess();
     // Store back the config file if it changed.

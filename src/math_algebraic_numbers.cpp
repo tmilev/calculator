@@ -47,7 +47,7 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
       }
     }
     resultVectorSel.computeIndicesFromSelection();
-    tempM.MakeEij(this->getIndexFromRadicalSelection(resultVectorSel), this->getIndexFromRadicalSelection(vectorActedOnSel));
+    tempM.makeEij(this->getIndexFromRadicalSelection(resultVectorSel), this->getIndexFromRadicalSelection(vectorActedOnSel));
     outputOp.addMonomial(tempM, theCoeff);
   } while (vectorActedOnSel.incrementReturnFalseIfPastLast());
 }
@@ -259,7 +259,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       this->GeneratingElemenT.element.addMonomial(tempV, theSel.theInts[i]);
     }
     this->getMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-    this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
+    this->GeneratingElementTensorForm.getMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
     this->theGeneratingElementPowersBasis.setSize(0);
     currentVect.makeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
@@ -371,10 +371,10 @@ bool AlgebraicClosureRationals::reduceMe(
   for (int i = 0; i < smallestFactorDegree; i ++) {
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
-      termBelowMainDiagonal.MakeEij(i + 1, i);
+      termBelowMainDiagonal.makeEij(i + 1, i);
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
-    termInLastColumn.MakeEij(i, smallestFactorDegree - 1);
+    termInLastColumn.makeEij(i, smallestFactorDegree - 1);
     Rational coefficientLastColumn = - smallestFactor.getMonomialCoefficient(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
@@ -383,7 +383,7 @@ bool AlgebraicClosureRationals::reduceMe(
     }
   }
   newBasis.setSize(smallestFactorDegree);
-  newBasis[0].MakeId(smallestFactorDegree);
+  newBasis[0].makeIdentity(smallestFactorDegree);
   newBasis[1] = generatorProjected;
   for (int i = 2; i < smallestFactorDegree; i ++) {
     newBasis[i] = generatorProjected;
@@ -402,7 +402,7 @@ bool AlgebraicClosureRationals::reduceMe(
   this->getMultiplicationBy(
     this->GeneratingElemenT, this->GeneratingElementTensorForm
   );
-  this->GeneratingElementTensorForm.GetMatrix(
+  this->GeneratingElementTensorForm.getMatrix(
     this->GeneratingElementMatForm, this->latestBasis.size
   );
   return true;
@@ -626,7 +626,7 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
 void AlgebraicClosureRationals::reset() {
   this->flagIsQuadraticRadicalExtensionRationals = true;
   this->latestBasis.setSize(1);
-  this->latestBasis[0].MakeId(1);
+  this->latestBasis[0].makeIdentity(1);
 
   this->theGeneratingElementPowersBasis.setSize(1);
   this->theGeneratingElementPowersBasis[0].makeEi(1, 0);
@@ -636,7 +636,7 @@ void AlgebraicClosureRationals::reset() {
   this->theQuadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
-  this->GeneratingElementTensorForm.MakeId(1);
+  this->GeneratingElementTensorForm.makeIdentity(1);
   this->GeneratingElementMatForm.makeIdentityMatrix(1);
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.element.makeEi(0);
@@ -676,7 +676,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
     return false;
   }
   outputRoot -= theLinearTermCFdividedByTwo;
-  //Check our work:
+  //check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
   checkSub[0].makeConstant(outputRoot);
@@ -794,7 +794,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   List<MatrixTensor<Rational> > finalBasis;
   finalBasis.setSize(this->latestBasis.size);
   MatrixTensor<Rational> theGenMatPower;
-  theGenMatPower.MakeId(degreeMinPoly);
+  theGenMatPower.makeIdentity(degreeMinPoly);
   for (int i = 0; i < startingDimension; i ++) {
     finalBasis[i].assignTensorProduct(theGenMatPower, this->latestBasis[i]);
   }
@@ -872,7 +872,7 @@ void AlgebraicNumber::invert() {
   MatrixTensor<Rational> theInverted;
   Matrix<Rational> tempMat2;
   this->owner->getMultiplicationBy(*this, theInverted);
-  theInverted.GetMatrix(tempMat2, this->owner->latestBasis.size);
+  theInverted.getMatrix(tempMat2, this->owner->latestBasis.size);
   tempMat2.invert();
   theInverted = tempMat2;
   this->element.makeEi(0);

@@ -187,7 +187,7 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
       Vector<Rational>& theWeight = this->theGeneratingWordsWeightsPlusWeightFDpart[i];
       tempCF = this->getOwner().theWeyl.RootScalarCartanRoot(weightH, theWeight);
       tempCF += hwCFshift;
-      theMon.IsId = false;
+      theMon.isIdentity = false;
       theMon.vIndex = i;
       theMon.dualIndex = i;
       output.addMonomial(theMon, tempCF);
@@ -445,11 +445,11 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     this->getOwner().getRank() + this->getOwner().getNumberOfPositiveRoots();
     MatrixTensor<Coefficient>& currentOp = this->getActionGeneratorIndex(theGenIndex);
     Matrix<Coefficient> currentOpMat;
-    currentOp.GetMatrix(currentOpMat, this->getDimension());
+    currentOp.getMatrix(currentOpMat, this->getDimension());
     currentOpMat.getZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1 = theFinalEigenSpace;
     tempSpace2 = eigenSpacesPerSimpleGenerator[i];
-    theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
+    theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
   }
   out << "<br>Eigenvectors:<table> ";
   std::stringstream readyForLatexComsumption;
@@ -617,7 +617,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   Rational::TotalLargeMultiplications +
   Rational::TotalSmallMultiplications;
   LittelmannPath startingPath;
-  startingPath.MakeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
+  startingPath.makeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
   List<List<int> > generatorsIndices;
   if (!startingPath.generateOrbit(
     this->thePaths, generatorsIndices, 1000, &this->parabolicSelectionNonSelectedAreElementsLevi
@@ -1110,7 +1110,7 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
         }
         tempOutput.addMonomial(currentSingleMon, this->coefficients[j]);
       }
-      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE);
+      tempOutput.multiplyMeByUEEltOnTheLeft(theUE);
       output = tempOutput;
       return true;
     }
@@ -1181,7 +1181,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
     for (int j = 0; j < currentMon.theMons.size; j ++) {
       tempElt.makeZero();
       tempElt.addMonomial(currentMon.theMons[j], theRingUnit);
-      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
+      tempElt.multiplyMeByUEEltOnTheLeft(theGenerator);
       for (int k = 0; k < tempElt.size(); k ++) {
         currentCoeff = this->coefficients[i];
         currentCoeff *= tempElt.coefficients[k];
@@ -1295,7 +1295,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
       out << "<td>";
       if (this->getDimension() < 28) {
         Matrix<Coefficient> outputMat;
-        this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->getDimension());
+        this->actionsGeneratorsMaT[i].getMatrix(outputMat, this->getDimension());
         out
         << HtmlRoutines::getMathMouseHover(outputMat.toString(&latexFormat), 5000)
         << " = ";

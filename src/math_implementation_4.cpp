@@ -112,7 +112,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     } else {
       this->crashReportHtml << "<hr>Failed to open crash report file: "
       << global.RelativePhysicalNameCrashReport
-      << ". Check file permissions. ";
+      << ". check file permissions. ";
       this->crashReportConsolE << "Failed to open crash report file: "
       << Logger::consoleRed()
       << global.RelativePhysicalNameCrashReport
@@ -623,7 +623,7 @@ FormatExpressions::getMonomialOrder<Weight<Rational> >() {
   return nullptr;
 }
 
-void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j) {
+void DynkinDiagramRootSubalgebra::swapDynkinStrings(int i, int j) {
   this->SimpleComponentTypes.swapTwoIndices(i, j);
   this->SimpleBasesConnectedComponents.swapTwoIndices(i, j);
   this->indicesThreeNodes.swapTwoIndices(i, j);
@@ -642,7 +642,7 @@ void DynkinDiagramRootSubalgebra::sort() {
         tempBool = ((this->SimpleComponentTypes[i]) < (this->SimpleComponentTypes[j]));
       }
       if (tempBool) {
-        this->SwapDynkinStrings(i, j);
+        this->swapDynkinStrings(i, j);
       }
     }
   }
@@ -663,8 +663,8 @@ void DynkinDiagramRootSubalgebra::sort() {
   }
 }
 
-Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
+Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
   Rational result = 0;
   for (int i = 0; i < this->AmbientRootSystem.size; i ++) {
     if (inputVector.scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0) {
@@ -677,8 +677,8 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const V
   return result;
 }
 
-Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
+Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
   Rational result = inputVector.scalarProduct(inputVector, this->AmbientBilinearForm);
   for (int i = 0; i < this->AmbientRootSystem.size; i ++) {
     if (inputVector.scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0) {
@@ -691,8 +691,8 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const 
   return result;
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
+void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinString");
   this->checkInitialization();
   if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
@@ -719,7 +719,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
     diagramWithoutTripleNode.AmbientBilinearForm = this->AmbientBilinearForm;
     diagramWithoutTripleNode.AmbientRootSystem = this->AmbientRootSystem;
-    diagramWithoutTripleNode.ComputeDiagramInputIsSimple(rootsWithoutTripleNode);
+    diagramWithoutTripleNode.computeDiagramInputIsSimple(rootsWithoutTripleNode);
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3) {
       global.fatal << "This is a programming error: Dynkin diagram has a triple "
       << "node whose removal does not yield 3 connected components. " << global.fatal;
@@ -735,7 +735,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
           diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size <
           diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size
         ) {
-          diagramWithoutTripleNode.SwapDynkinStrings(i, j);
+          diagramWithoutTripleNode.swapDynkinStrings(i, j);
         }
       }
     }
@@ -743,7 +743,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size == 1) {
       //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
-      Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('D') /
+      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.scalarProduct(currentComponent[0], this->AmbientBilinearForm).isEqualToZero()) {
@@ -752,10 +752,10 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       currentComponent.addOnTop(tripleNode);//<-then triple node
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2]);//<-last two vectors
-      outputType.MakeArbitrary('D', currentComponent.size, theScale);
+      outputType.makeArbitrary('D', currentComponent.size, theScale);
     } else {
       //the second largest component has more than one element, hence we are in type E_n.
-      Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
+      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size != 2) {
         global.fatal << "This is a programming error: the Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
@@ -778,7 +778,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
       currentComponent.addOnTop(tripleNode); //<- next the triple node
       currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
-      outputType.MakeArbitrary('E', currentComponent.size, theScale);
+      outputType.makeArbitrary('E', currentComponent.size, theScale);
     }
    return;
   }
@@ -796,7 +796,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
   }
   if (numLength2 == 0) {
     //type A
-    outputType.MakeArbitrary('A', numLength1, DynkinSimpleType::GetDefaultLongRootLengthSquared('A') / length1);
+    outputType.makeArbitrary('A', numLength1, DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1);
   } else {
     if (length1 < length2) {
       MathRoutines::swap(length1, length2);
@@ -808,20 +808,20 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     if (numLength1 == numLength2) {
       //B2, C2, F4 or G2
       if (numLength1 == 2) {
-        outputType.MakeArbitrary('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F') / length1);
+        outputType.makeArbitrary('F', 4, DynkinSimpleType::getDefaultLongRootLengthSquared('F') / length1);
       } else if (length1 / length2 == 3) {
-        outputType.MakeArbitrary('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') / length1);
+        outputType.makeArbitrary('G', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('G') / length1);
       } else {
-        outputType.MakeArbitrary('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1);
+        outputType.makeArbitrary('B', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1);
       }
     } else {
       if (numLength1>numLength2) {
-        outputType.MakeArbitrary(
-          'B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1
+        outputType.makeArbitrary(
+          'B', currentComponent.size, DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
         );
       } else {
-        outputType.MakeArbitrary(
-          'C', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('C') / length1
+        outputType.makeArbitrary(
+          'C', currentComponent.size, DynkinSimpleType::getDefaultLongRootLengthSquared('C') / length1
         );
       }
     }
@@ -861,8 +861,8 @@ bool DynkinDiagramRootSubalgebra::checkInitialization() const {
   return true;
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
+void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple");
   this->checkInitialization();
   this->SimpleBasesConnectedComponents.size = 0;
   this->SimpleBasesConnectedComponents.reserve(simpleBasisInput.size);
@@ -890,11 +890,11 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
       this->SimpleBasesConnectedComponents.lastObject()->addOnTop(simpleBasisInput[i]);
     }
   }
-  this->ComputeDynkinStrings();
+  this->computeDynkinStrings();
   this->sort();
-  this->ComputeDynkinStrings();
+  this->computeDynkinStrings();
   DynkinType tempType;
-  this->GetDynkinType(tempType);
+  this->getDynkinType(tempType);
   if (tempType.isEqualToZero() && simpleBasisInput.size != 0) {
     global.fatal
     << "Dynkin type of zero but the roots generating the type are: "
@@ -902,7 +902,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   }
 }
 
-bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2) {
+bool DynkinDiagramRootSubalgebra::letterIsDynkinGreaterThanLetter(char letter1, char letter2) {
   if ((letter1 == 'B' || letter1 == 'D') && (letter2 == 'B' || letter2 == 'D') ) {
     if (letter1 == letter2) {
       return false;
@@ -916,11 +916,11 @@ bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, 
   return letter1 > letter2;
 }
 
-bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& right) {
-  if (this->RankTotal() > right.RankTotal()) {
+bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& right) {
+  if (this->rankTotal() > right.rankTotal()) {
     return true;
   }
-  if (this->RankTotal() < right.RankTotal()) {
+  if (this->rankTotal() < right.rankTotal()) {
     return false;
   }
   if (this->SimpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
@@ -945,7 +945,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
   return false;
 }
 
-Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula() {
+Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     output *= WeylGroupData::SizeByFormulaOrNeg1(
@@ -955,7 +955,7 @@ Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula() {
   return output;
 }
 
-void DynkinDiagramRootSubalgebra::GetMapFromPermutation(
+void DynkinDiagramRootSubalgebra::getMapFromPermutation(
   Vectors<Rational>& domain,
   Vectors<Rational>& range,
   List<int>& thePerm, List<List<List<int > > >& theAutos,
@@ -976,33 +976,33 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(
   }
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput");
+void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
   this->AmbientRootSystem = theWeyl.RootSystem;
   this->AmbientBilinearForm = theWeyl.cartanSymmetric;
   theWeyl.TransformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
-  this->ComputeDiagramInputIsSimple(inputRoots);
+  this->computeDiagramInputIsSimple(inputRoots);
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative(
+void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   Vectors<Rational>& inputOutputSimpleWeightSystem,
   const HashedList<Vector<Rational> >& weightSystem,
   const Matrix<Rational>& theBilinearForm
 ) {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative");
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative");
   this->AmbientRootSystem = weightSystem;
   this->AmbientBilinearForm = theBilinearForm;
   WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
-  this->ComputeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
+  this->computeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDynkinStrings() {
-  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinStrings");
+void DynkinDiagramRootSubalgebra::computeDynkinStrings() {
+  MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinStrings");
   this->indicesThreeNodes.setSize(this->SimpleBasesConnectedComponents.size);
   this->SimpleComponentTypes.setSize(this->SimpleBasesConnectedComponents.size);
   this->indicesEnds.setSize(this->SimpleBasesConnectedComponents.size);
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    this->ComputeDynkinString(i);
+    this->computeDynkinString(i);
   }
 }
 
@@ -1021,7 +1021,7 @@ bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& 
   return true;
 }
 
-void DynkinDiagramRootSubalgebra::GetDynkinType(DynkinType& output) const {
+void DynkinDiagramRootSubalgebra::getDynkinType(DynkinType& output) const {
   output.makeZero();
   output.setExpectedSize(this->SimpleComponentTypes.size);
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
@@ -1029,7 +1029,7 @@ void DynkinDiagramRootSubalgebra::GetDynkinType(DynkinType& output) const {
   }
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int index) {
+void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int index) {
   Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[index];
   DynkinSimpleType& currentStrinG = this->SimpleComponentTypes[index];
   List<int> thePermutation;
@@ -1081,14 +1081,14 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
   }
 }
 
-void DynkinDiagramRootSubalgebra::GetAutomorphisms(List<List<List<int> > >& output) {
+void DynkinDiagramRootSubalgebra::getAutomorphisms(List<List<List<int> > >& output) {
   output.setSize(this->SimpleBasesConnectedComponents.size);
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    this->GetAutomorphism(output[i], i);
+    this->getAutomorphism(output[i], i);
   }
 }
 
-int DynkinDiagramRootSubalgebra::RankTotal() {
+int DynkinDiagramRootSubalgebra::rankTotal() {
   int result = 0;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     result += this->SimpleBasesConnectedComponents[i].size;
@@ -1096,7 +1096,7 @@ int DynkinDiagramRootSubalgebra::RankTotal() {
   return result;
 }
 
-int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram() {
+int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   int result = 0;
   if (this->SimpleBasesConnectedComponents.size != this->SimpleComponentTypes.size) {
     global.fatal << "Number of simple connected components does not match the number of types. " << global.fatal;
@@ -1364,11 +1364,9 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     this->theMultiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false
   );
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);
-  this->thePfs.ComputeDebugString();
-  out << this->thePfs.DebugString;
+  out << this->thePfs.toString(theFormat);
   this->thePfs.split(nullptr);
-  this->thePfs.ComputeDebugString();
-  out << "=" << this->thePfs.DebugString;
+  out << "=" << this->thePfs.toString(theFormat);
 //  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.setSize(this->projectivizedChambeR.size);
   global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
@@ -1472,7 +1470,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   drawOps.theBuffer.GraphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   std::string tempS;
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->theLinearOperators.size);
   this->theLinearOperators[0].actOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
@@ -1481,7 +1479,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.toString();
   out << "<br>Element u_w: projection, multiplication by - 1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
+  theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   drawOps.drawCoordSystemBuffer(drawOps, 2);
   Cone smallWeylChamber;
   tempMat = SmallerWeyl.cartanSymmetric;
@@ -1498,8 +1496,10 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   }
   smallWeylChamber.createFromVertices(tempVertices);
   tempMat.initialize(2, 2);
-  tempMat.elements[0][0] = 1; tempMat.elements[0][1] = 0;
-  tempMat.elements[1][0] = 1; tempMat.elements[1][1] = 1;
+  tempMat.elements[0][0] = 1;
+  tempMat.elements[0][1] = 0;
+  tempMat.elements[1][0] = 1;
+  tempMat.elements[1][1] = 1;
   tempMat.transpose();
   smallWeylChamber.changeBasis(tempMat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.toString(&theFormat);
@@ -1514,7 +1514,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   for (int i = 0; i < this->theLinearOperators.size; i ++) {
     theSubbedPoly = theStartingPoly;
     theSubbedPoly *= this->theCoeffs[i];
-    theSubbedPoly.TranslateArgument(translationsProjectedFinal[i]);
+    theSubbedPoly.translateArgument(translationsProjectedFinal[i]);
     Accum += theSubbedPoly;
   }
   Accum.drawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
@@ -1595,19 +1595,19 @@ void GeneralizedVermaModuleCharacters::incrementComputation(Vector<Rational>& pa
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
-      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR);
+      this->theMaxComputation.findExtremaParametricStep1(this->thePauseControlleR);
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 6:
-      this->theMaxComputation.FindExtremaParametricStep3();
+      this->theMaxComputation.findExtremaParametricStep3();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 7:
-      this->theMaxComputation.FindExtremaParametricStep4();
+      this->theMaxComputation.findExtremaParametricStep4();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     case 8:
-      this->theMaxComputation.FindExtremaParametricStep5();
+      this->theMaxComputation.findExtremaParametricStep5();
 //      out << global.theIndicatorVariables.StatusString1;
       break;
     default:

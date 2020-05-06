@@ -1155,8 +1155,8 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       readerSubgroup.generatingSimpleRoots.addOnTop(gapRootSystem[- 1 + theInt]);
     }
     DynkinDiagramRootSubalgebra theSAdiagram;
-    theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
-    theSAdiagram.GetDynkinType(readerSubgroup.theDynkinType);
+    theSAdiagram.computeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
+    theSAdiagram.getDynkinType(readerSubgroup.theDynkinType);
     if (readerSubgroup.theDynkinType.toString() != sgString) {
       global.fatal << "Corrupt JSon data: hard-coded Dynkin type is: "
       << sgString << " but dynkin type is computed to be: "

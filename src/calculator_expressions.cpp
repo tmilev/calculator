@@ -1039,7 +1039,7 @@ bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& ou
   }
   if (this->isOfType<Polynomial<Rational> >()) {
     ElementWeylAlgebra<Rational> resultEWA;
-    resultEWA.AssignPolynomial(this->getValue<Polynomial<Rational> >());
+    resultEWA.assignPolynomial(this->getValue<Polynomial<Rational> >());
     return output.assignValueWithContext(resultEWA, this->getContext(), *this->owner);
   }
   if (this->isOfType<ElementWeylAlgebra<Rational> >()) {
@@ -2454,7 +2454,7 @@ bool Expression::toStringBuiltIn<MatrixTensor<Rational> >(
   input.getContext().getFormat(format);
   format.flagUseLatex = true;
   format.flagUseHTML = false;
-  if (input.getValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
+  if (input.getValue<MatrixTensor<Rational> >().getMinimumNumberOfColumnsNumberOfRows() < 20) {
     out << "MatrixRationalsTensorForm{}("
     << input.getValue<MatrixTensor<Rational> > ().toStringMatrixForm(&format)
     << ")";

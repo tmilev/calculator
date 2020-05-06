@@ -848,7 +848,7 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<Coefficient> >& V
     return false;
   }
   // okay now do the really hard test
-  Matrix<Coefficient> M = GetMatrix(X);
+  Matrix<Coefficient> M = getMatrix(X);
   List<List<Vector<Coefficient> > > spaces = eigenspaces(M);
   if (spaces.size != 2) {
     return false;
@@ -907,7 +907,7 @@ ElementMonomialAlgebra<ElementWeylGroup, Rational> FromClassFunction(
 }
 
 template <typename Coefficient>
-Matrix<Coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& X) {
+Matrix<Coefficient> getMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, Coefficient>& X) {
   Matrix<Coefficient> M;
   M.makeZeroMatrix(X.G->N);
   for (int i1 = 0; i1 < X.G->ccCount; i1 ++) {
@@ -1093,7 +1093,7 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   this->theWeylData = &G;
   this->generatingSimpleRoots = inputRootReflections;
   DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
+  theDiagram.computeDiagramTypeModifyInput(this->generatingSimpleRoots, G);
   int d = this->generatingSimpleRoots.size;
   this->SubCartanSymmetric.initialize(d, d);
   for (int ii = 0; ii < d; ii ++) {
@@ -1105,7 +1105,7 @@ void SubgroupDataRootReflections::makeFromRoots(WeylGroupData& G, const Vectors<
   }
   this->ComputeDynkinType();
   DynkinType verificationType;
-  theDiagram.GetDynkinType(verificationType);
+  theDiagram.getDynkinType(verificationType);
   if (this->theDynkinType != verificationType) {
     global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
   }

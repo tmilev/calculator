@@ -790,7 +790,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   char theType ='X';
   int theRank = - 1;
   bool hasOuterAutosAndIsSimple = false;
-  if (theGroupData.theDynkinType.IsSimple(&theType, &theRank)) {
+  if (theGroupData.theDynkinType.isSimple(&theType, &theRank)) {
     if (theType == 'D' || theType == 'A') {
       hasOuterAutosAndIsSimple = true;
     }
@@ -815,7 +815,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   Matrix<Rational> currentAuto;
   List<Matrix<Rational> > outerAutos;
   for (int i = 0; i < theAutomorphismGroup.theOuterAutos.theGenerators.size; i ++) {
-    theAutomorphismGroup.theOuterAutos.theGenerators[i].GetMatrix(currentAuto, theGroupData.getDimension());
+    theAutomorphismGroup.theOuterAutos.theGenerators[i].getMatrix(currentAuto, theGroupData.getDimension());
     outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
@@ -947,7 +947,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
   }
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
-  theType.GetOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.theGenerators);
+  theType.getOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.theGenerators);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex = true;
   tempFormat.flagUseHTML = false;
@@ -1233,7 +1233,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     }
     mainTableStream << "\\\\\n<br>\n";
     mainTableStream << "Irrep label";
-    if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->theDynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
         mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne) << "$";
       }
@@ -1267,7 +1267,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       }
       out << "</tr><tr><td></td><td></td>";
     }
-    if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
+    if (this->theDynkinType.isSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
         out << "<td>" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne)
         << "</td>";
@@ -1376,7 +1376,7 @@ public:
   static unsigned int hashFunction(const KostkaNumber& input);
   std::string toString();
   KostkaNumber();
-  bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
+  bool compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
 };
 
 class SelectionFixedRankDifferentMaxMultiplicities {
@@ -1460,8 +1460,8 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
   return true;
 }
 
-bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("KostkaNumber::Compute");
+bool KostkaNumber::compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("KostkaNumber::compute");
   this->value = - 1;
   if (!this->initTableaux(comments)) {
     return false;
@@ -1502,7 +1502,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
       int ancestorIndex = KNcache->getIndex(ancestor);
       if (ancestorIndex != - 1) {
         ancestor = KNcache->getElement(ancestorIndex);
-      } else if (!ancestor.Compute(KNcache, comments)) {
+      } else if (!ancestor.compute(KNcache, comments)) {
         return false;
       } else {
         if (KNcache->size < this->MaxNumCachedKostkaNumbers) {
@@ -1510,7 +1510,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
         }
       }
     } else {
-      if (!ancestor.Compute(KNcache, comments)) {
+      if (!ancestor.compute(KNcache, comments)) {
         return false;
       }
     }
@@ -1596,14 +1596,14 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
       if (partitionsParabolics[i].p[j] <= 1) {
         continue;
       }
-      theSimpleType.MakeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
+      theSimpleType.makeArbitrary('A', partitionsParabolics[i].p[j] - 1, 1);
       theType.addMonomial(theSimpleType, 1);
     }
     if (typeBsize == 1) {
-      theSimpleType.MakeArbitrary('A', 1, 2);
+      theSimpleType.makeArbitrary('A', 1, 2);
       theType.addMonomial(theSimpleType,1);
     } else if (typeBsize > 1) {
-      theSimpleType.MakeArbitrary('B', typeBsize, 1);
+      theSimpleType.makeArbitrary('B', typeBsize, 1);
       theType.addMonomial(theSimpleType, 1);
     }
     outLaTeX << "&$" << theType.toString(&theFormat) << "$";
@@ -1692,10 +1692,10 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
       complementSelection[k] = parabolicPartition.p[k] - theSelection.Multiplicities[k];
     }
     leftKN.tuple = theSelection.Multiplicities;
-    leftKN.Compute(&KNcache, nullptr);
+    leftKN.compute(&KNcache, nullptr);
     rightKN.tuple = complementSelection;
     rightKN.tuple.addOnTop(BcomponentSize);
-    rightKN.Compute(&KNcache, nullptr);
+    rightKN.compute(&KNcache, nullptr);
     result += leftKN.value * rightKN.value;
   } while (theSelection.incrementReturnFalseIfPastLast());
   if (comments != nullptr) {
@@ -1796,7 +1796,7 @@ bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, co
   }
   std::stringstream out;
   HashedList<KostkaNumber> theKNs;
-  if (theKN.Compute(&theKNs, &out)) {
+  if (theKN.compute(&theKNs, &out)) {
     out << "<br>Final result: " << theKN.value.toString();
   }
   return output.assignValue(out.str(), theCommands);
@@ -1847,7 +1847,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
   }
   char type = 'X';
   int rank = - 1;
-  if (!theWeyl.theDynkinType.IsSimple(&type, &rank)) {
+  if (!theWeyl.theDynkinType.isSimple(&type, &rank)) {
     return theCommands << "This function is implemented for simple classical Weyl groups only.";
   }
   if (type != 'A' && type != 'B' && type != 'C' && type != 'D') {

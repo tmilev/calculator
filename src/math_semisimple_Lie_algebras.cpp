@@ -145,7 +145,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
   } else {
     out << "<b>sl(2)-subalgebras</b>.<br>";
   }
-  if (this->theWeyl.theDynkinType.HasPrecomputedSubalgebras()) {
+  if (this->theWeyl.theDynkinType.hasPrecomputedSubalgebras()) {
     if (includeSemisimpleSubalgebras) {
       out
       << "<a href = '" << relativeTo
@@ -268,7 +268,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   }
   out << "</table>";
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.theDynkinType.IsSimple(
+  if (theWeyl.theDynkinType.isSimple(
     &tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale
   )) {
     if (tempSimpleType.CartanSymmetricInverseScale == 1) {
@@ -277,7 +277,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
       tempM2 = tempM;
       tempM2.transpose();
       tempM2.multiplyOnTheRight(tempM);
-      tempM2 *= 2 / tempSimpleType.GetEpsilonRealizationLongRootLengthSquared();
+      tempM2 *= 2 / tempSimpleType.getEpsilonRealizationLongRootLengthSquared();
       if (!(tempM2 == theWeyl.cartanSymmetric)) {
         global.fatal << "This is a (non-critical) programming error: "
         << "the epsilon coordinates of the vectors are incorrect. "
@@ -312,11 +312,11 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   return out.str();
 }
 
-bool DynkinType::HasPrecomputedSubalgebras() const {
-  if (!this->IsSimple()) {
+bool DynkinType::hasPrecomputedSubalgebras() const {
+  if (!this->isSimple()) {
     return false;
   }
-  return this->GetSmallestSimpleType().HasPrecomputedSubalgebras();
+  return this->getSmallestSimpleType().hasPrecomputedSubalgebras();
 }
 
 std::string DynkinType::toStringVirtualNameFolder() const {
@@ -434,7 +434,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     Rational theHeight = posRoots[theBorelIndex].SumCoords();
     for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
       tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
-      if (theHeight.IsGreaterThan(tempRat)) {
+      if (theHeight.isGreaterThan(tempRat)) {
         theHeight = tempRat;
         theBorelIndex = nonExploredRoots.elements[i];
       }
@@ -450,7 +450,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
       CurrentHeight = smallRoot1.SumCoords();
       int FirstPosIndex = this->theWeyl.RootSystem.getIndex(smallRoot1);
       int FirstNegIndex = this->theWeyl.RootSystem.getIndex(- smallRoot1);
-      if (theHeight.IsGreaterThan(CurrentHeight)) {
+      if (theHeight.isGreaterThan(CurrentHeight)) {
         smallRoot2 = theRoot - smallRoot1;
         int SecondPosIndex = this->theWeyl.RootSystem.getIndex(smallRoot2);
         if (FirstPosIndex<SecondPosIndex) {

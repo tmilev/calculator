@@ -4885,7 +4885,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Computes whether a matrix is nilpotent. "
     "May/will be extended to work for an arbitrary object "
     "for which the term \"nilpotent\" makes sense. ",
-    "IsNilpotent{}((0, 1), (0, 0))",
+    "isNilpotent{}((0, 1), (0, 0))",
     "CalculatorFunctions::innerIsNilpotent",
     "IsNilpotent",
     innerStandard
@@ -4985,7 +4985,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "findOneSolutionSerreLikePolynomialSystem",
+    "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
     "",
     "Attempts to heuristically solve a system "
@@ -5032,11 +5032,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit",
-    "findOneSolutionSerreLikePolynomialSystem",
+    "FindOneSolutionSerreLikePolynomialSystem",
     innerStandard
   );
   this->addOperationHandler(
-    "findOneSolutionSerreLikePolynomialSystemUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit,
     "",
     "Same as findOneSolutionSerreLikePolynomialSystem "
@@ -5064,7 +5064,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit",
-    "findOneSolutionSerreLikePolynomialSystemUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
@@ -7306,7 +7306,7 @@ void Calculator::initPredefinedStandardOperations() {
     "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
     "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
-    "DividePolynomialByPolynomial",
+    "DividePolynomialModPByPolynomialModP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(

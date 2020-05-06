@@ -764,7 +764,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
       return output.makeError(out.str(), theCommands);
     } else {
       for (int j = 0; j < theLRO.Powers[i]; j ++) {
-        result.ActByEFDisplayIndex(theLRO.generatorsIndices[i]);
+        result.actByEFDisplayIndex(theLRO.generatorsIndices[i]);
       }
     }
   }

@@ -250,7 +250,7 @@ void MatrixTensor<Coefficient>::raiseToPower(int power) {
     global.fatal << "MatrixTensor::raiseToPower is currently implemented for positive integer power only. " << global.fatal;
   }
   MatrixTensor<Coefficient> id;
-  id.MakeIdSpecial();
+  id.makeIdentitySpecial();
   MathRoutines::raiseToPower(*this, power, id);
 }
 
@@ -295,7 +295,7 @@ void MatrixTensor<Coefficient>::operator*=(
       }
       currentMonomial = (*this)[j];
       currentMonomial *= other[i];
-      if (currentMonomial.IsZeroMonomial()) {
+      if (currentMonomial.isZeroMonomial()) {
         continue;
       }
       currentCoefficient = this->coefficients[j];

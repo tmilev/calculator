@@ -1910,7 +1910,7 @@ public:
   void MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots);
   void makeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
   LargeInteger SizeByFormulaOrNeg1() const {
-    return this->theDynkinType.GetWeylGroupSizeByFormula();
+    return this->theDynkinType.getWeylGroupSizeByFormula();
   }
   void MakeFromHardCodedStrings(
     WeylGroupData& G,

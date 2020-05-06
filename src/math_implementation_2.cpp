@@ -1690,7 +1690,7 @@ void Rational::AddInteger(int x) {
   this->operator+=(tempRat);
 }
 
-bool Rational::IsGreaterThan(const Rational& r) const {
+bool Rational::isGreaterThan(const Rational& r) const {
   Rational tempRat;
   tempRat.assign(*this);
   tempRat.Subtract(r);

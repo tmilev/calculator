@@ -770,7 +770,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
 ) {
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
   DynkinType theType;
-  theType.MakeSimpleType(theWeylLetter, theWeylDim);
+  theType.makeSimpleType(theWeylLetter, theWeylDim);
   this->domainAlg = &ownerOfAlgebras.getValueCreateNoInit(theType);
   this->rangeAlg = this->domainAlg;
   this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
@@ -973,7 +973,7 @@ void SemisimpleLieAlgebra::orderNilradical(const Selection& parSelZeroMeansLeviP
 }
 
 bool SemisimpleLieAlgebra::hasComputedStructureConstants() {
-  return this->ChevalleyConstants.numberOfRows == this->theWeyl.theDynkinType.GetRootSystemSize();
+  return this->ChevalleyConstants.numberOfRows == this->theWeyl.theDynkinType.getRootSystemSize();
 }
 
 void SemisimpleLieAlgebra::orderSSalgebraForHWbfComputation() {
@@ -1075,7 +1075,7 @@ bool VectorPartition::initialize(const Vectors<Rational>& inputPartitioningRoots
   return true;
 }
 
-Vector<Rational> VectorPartition::GetPartitionSum() {
+Vector<Rational> VectorPartition::getPartitionSum() {
   Vector<Rational> result;
   result.makeZero(this->goalVector.size);
   for (int i = 0; i < this->currentPartition.size; i ++) {
@@ -1084,8 +1084,8 @@ Vector<Rational> VectorPartition::GetPartitionSum() {
   return result;
 }
 
-void VectorPartition::BeefUpPartition() {
-  MacroRegisterFunctionWithName("VectorPartition::BeefUpPartition");
+void VectorPartition::beefUpPartition() {
+  MacroRegisterFunctionWithName("VectorPartition::beefUpPartition");
   Vector<Rational> remainder = this->goalVector-this->currentPartitionSum;
   while ((remainder-*this->PartitioningRoots.lastObject()).isPositiveOrZero()) {
     (*this->currentPartition.lastObject()) ++;
@@ -1094,8 +1094,8 @@ void VectorPartition::BeefUpPartition() {
   }
 }
 
-bool VectorPartition::NudgePartition() {
-  MacroRegisterFunctionWithName("VectorPartition::NudgePartition");
+bool VectorPartition::nudgePartition() {
+  MacroRegisterFunctionWithName("VectorPartition::nudgePartition");
   int indexFirstNonZero = - 1;
   for (int i = this->currentPartition.size - 1; i >= 0; i --) {
     if (this->currentPartition[i] != 0) {
@@ -1119,22 +1119,22 @@ bool VectorPartition::NudgePartition() {
 bool VectorPartition::incrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("VectorPartition::incrementReturnFalseIfPastLast");
   if (this->currentPartitionSum == this->goalVector) {
-    this->NudgePartition();
+    this->nudgePartition();
   }
   while (true) {
-    this->BeefUpPartition();
+    this->beefUpPartition();
     if (this->currentPartitionSum == this->goalVector) {
       return true;
     }
-    if (!this->NudgePartition()) {
+    if (!this->nudgePartition()) {
       return false;
     }
   }
   // return false;
 }
 
-std::string VectorPartition::ToStringPartitioningVectors() {
-  MacroRegisterFunctionWithName("VectorPartition::ToStringPartitioningVectors");
+std::string VectorPartition::toStringPartitioningVectors() {
+  MacroRegisterFunctionWithName("VectorPartition::toStringPartitioningVectors");
   std::stringstream out;
   for (int i = 0; i < this->PartitioningRoots.size; i ++) {
     out << "e_{" << i + 1 << "}=" << this->PartitioningRoots[i].toString() << "<br>";
@@ -1145,13 +1145,13 @@ std::string VectorPartition::ToStringPartitioningVectors() {
   return out.str();
 }
 
-std::string VectorPartition::ToStringOnePartition(const List<int>& currentPartition) {
+std::string VectorPartition::toStringOnePartition(const List<int>& currentPartition) {
   Vector<Rational> theV;
   theV = currentPartition;
   return theV.toStringLetterFormat("e");
 }
 
-std::string VectorPartition::ToStringAllPartitions(bool useHtml) {
+std::string VectorPartition::toStringAllPartitions(bool useHtml) {
   MacroRegisterFunctionWithName("VectorPartition::toString");
   std::stringstream out;
   out << this->goalVector.toString() << "\n\n";
@@ -1160,7 +1160,7 @@ std::string VectorPartition::ToStringAllPartitions(bool useHtml) {
   }
   for (int i = 0; i < this->thePartitions.size; i ++) {
     out << "=";
-    out << this->ToStringOnePartition(this->thePartitions[i]);
+    out << this->toStringOnePartition(this->thePartitions[i]);
     out << "\n\n";
     if (useHtml) {
       out << "<br>\n";
@@ -1328,10 +1328,10 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::needsParenthesisForMultiplication
   return this->size > 1;
 }
 
-void SlTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
+void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   Matrix<Rational>& input, Matrix<Rational>& output, Rational& outputCoeff, int generatorPower
 ) {
-  MacroRegisterFunctionWithName("SlTwoInSlN::ClimbDownFromHighestWeightAlongSl2String");
+  MacroRegisterFunctionWithName("SlTwoInSlN::climbDownFromHighestWeightAlongSl2String");
   if (&input == &output) {
     global.fatal << "Input coincides with output. " << global.fatal;
   }
@@ -1383,8 +1383,8 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
     }
   }
   int sRow, kRow, sColumn, kColumn;
-  this->GetIsPlusKIndexingFrom(firstNonZeroRow, sRow, kRow);
-  this->GetIsPlusKIndexingFrom(firstNonZeroColumn, sColumn, kColumn);
+  this->getIsPlusKIndexingFrom(firstNonZeroRow, sRow, kRow);
+  this->getIsPlusKIndexingFrom(firstNonZeroColumn, sColumn, kColumn);
   std::stringstream out;
   out << "V_{";
   if (currentEtaHw != 0) {
@@ -1400,7 +1400,7 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   return out.str();
 }
 
-void SlTwoInSlN::GetIsPlusKIndexingFrom(int input, int& s, int& k) {
+void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
   s = 0;
   k = input;
   if (input >= this->theDimension || input < 0) {
@@ -1412,7 +1412,7 @@ void SlTwoInSlN::GetIsPlusKIndexingFrom(int input, int& s, int& k) {
   }
 }
 
-std::string SlTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& input, bool useHtml) {
+std::string SlTwoInSlN::elementMatrixToTensorString(const Matrix<Rational>& input, bool useHtml) {
   std::string beginMath, endMath, newLine;
   if (useHtml) {
     beginMath = "<span class =\"math\">";
@@ -1448,8 +1448,8 @@ std::string SlTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& inpu
         found = true;
         out << tempS;
         int sI, kI, sJ, kJ;
-        this->GetIsPlusKIndexingFrom(i, sI, kI);
-        this->GetIsPlusKIndexingFrom(j, sJ, kJ);
+        this->getIsPlusKIndexingFrom(i, sI, kI);
+        this->getIsPlusKIndexingFrom(j, sJ, kJ);
         out << "v_{i_{" << sI << "}";
         if (kI != 0) {
           out << "+" << kI;
@@ -1465,7 +1465,7 @@ std::string SlTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& inpu
   return out.str();
 }
 
-void SlTwoInSlN::ExtractHighestWeightVectorsFromVector(
+void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   Matrix<Rational>& input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors
 ) {
   outputDecompositionOfInput.size = 0;
@@ -1476,8 +1476,8 @@ void SlTwoInSlN::ExtractHighestWeightVectorsFromVector(
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
   while (!remainder.isEqualToZero() ) {
-    this->ClimbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    this->ClimbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
+    this->climbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
+    this->climbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
     for (int i = 0; i < this->theProjectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->theProjectors[i];
       tempMat = highestWeightVector;
@@ -1499,7 +1499,7 @@ void SlTwoInSlN::ExtractHighestWeightVectorsFromVector(
 
 }
 
-void SlTwoInSlN::ClimbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput) {
+void SlTwoInSlN::climbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput) {
   Matrix<Rational>  tempMat;
   if (&input == &outputLastNonZero) {
     global.fatal << "Input not allowed to coincide with the output. " << global.fatal;
@@ -1580,11 +1580,11 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     }
     currentOffset += this->thePartition[i];
   }
-  out << newLine << beginMath << "h =" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
+  out << newLine << beginMath << "h =" << this->elementMatrixToTensorString(this->theH, useHtml) << "="
   << this->theH.toStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "e =" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
+  out << newLine << beginMath << "e =" << this->elementMatrixToTensorString(this->theE, useHtml) << "="
   << this->theE.toStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "f =" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
+  out << newLine << beginMath << "f =" << this->elementMatrixToTensorString(this->theF, useHtml) << "="
   << this->theF.toStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
   tempMat.initialize(this->theDimension, this->theDimension);
@@ -1595,7 +1595,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     for (int j = 0; j < this->theDimension; j ++) {
       tempMat.makeZero();
       tempMat.elements[i][j] = 1;
-      this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
+      this->extractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
       theHwCandidatesProjected.size = 0;
       for (int k = 0; k < theHwCandidatesBeforeProjection.size; k ++) {
         for (int l = 0; l < this->theProjectors.size; l ++) {
@@ -1607,7 +1607,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
         }
       }
       for (int k = 0; k < theHwCandidatesProjected.size; k ++) {
-        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
+        if (this->getModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
           Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
           this->theHighestWeightVectors.addOnTop(currentHighest);
           this->theGmodKModules.expandOnTop(1);
@@ -1628,7 +1628,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   out << newLine << "...and the highest weights of the module decomposition are ("
   << this->theHighestWeightVectors.size << " modules):";
   for (int i = 0; i < this->theHighestWeightVectors.size; i ++) {
-    out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors[i], useHtml)
+    out << newLine << beginMath << this->elementMatrixToTensorString(theHighestWeightVectors[i], useHtml)
     << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
   }
@@ -1645,13 +1645,13 @@ std::string SlTwoInSlN::initPairingTable(bool useHtml) {
     this->PairingTable[i].setSize(this->theHighestWeightVectors.size);
     for (int j = 0; j < this->PairingTable[i].size; j ++) {
       List<int>& currentPairing = this->PairingTable[i][j];
-      out << this->PairTwoIndices(currentPairing, i, j, useHtml);
+      out << this->pairTwoIndices(currentPairing, i, j, useHtml);
     }
   }
   return out.str();
 }
 
-std::string SlTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml) {
+std::string SlTwoInSlN::pairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml) {
   std::string beginMath, endMath, newLine;
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
@@ -1678,10 +1678,10 @@ std::string SlTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
       Matrix<Rational>& rightElt = rightElements[j];
       Matrix<Rational>::lieBracket(leftElt, rightElt, tempMat);
       if (!tempMat.isEqualToZero()) {
-        this->ExtractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
+        this->extractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
-          output.addOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
-          if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
+          output.addOnTopNoRepetition(this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
+          if (this->getModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
             global.comments << newLine << beginMath << "[" << leftElt.toString(&latexFormat) << ", "
             << rightElt.toString(&latexFormat) << "] =" << tempMat.toString(&latexFormat) << endMath;
           }
@@ -1700,7 +1700,7 @@ std::string SlTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   if (output.size > 0) {
     out << "  hw vectors: ";
     for (int i = 0; i < output.size; i ++) {
-      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml)
+      out << beginMath << this->elementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml)
       << endMath << ",";
     }
   }

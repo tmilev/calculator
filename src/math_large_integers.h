@@ -562,7 +562,7 @@ public:
     }
     return true;
   }
-  bool IsGreaterThan(const Rational& r) const;
+  bool isGreaterThan(const Rational& r) const;
   inline void AssignNumeratorAndDenominator(int n, int d) {
     if (d < 0) {
       d = - d;
@@ -847,15 +847,15 @@ public:
     return !((*this) == right);
   }
   inline bool operator>(const Rational& right) const {
-    return this->IsGreaterThan(right);
+    return this->isGreaterThan(right);
   }
   inline bool operator<(const Rational& right) const {
-    return right.IsGreaterThan(*this);
+    return right.isGreaterThan(*this);
   }
   inline bool operator>(const int right) const {
     Rational tempRat;
     tempRat.AssignInteger(right);
-    return this->IsGreaterThan(tempRat);
+    return this->isGreaterThan(tempRat);
   }
   inline bool operator>=(const Rational& right) const {
     return this->IsGreaterThanOrEqualTo(right);
@@ -863,7 +863,7 @@ public:
   inline bool operator<(const int right) const {
     Rational tempRat;
     tempRat.AssignInteger(right);
-    return tempRat.IsGreaterThan(*this);
+    return tempRat.isGreaterThan(*this);
   }
   class Test {
   public:

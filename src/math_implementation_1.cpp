@@ -48,7 +48,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
 }
 
-bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
+bool PartFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
   if (theArguments.size < 1) {
     return false;
   }
@@ -86,18 +86,18 @@ void Lattice::intersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
   }
 }
 
-void LittelmannPath::ActByEFDisplayIndex(int displayIndex) {
+void LittelmannPath::actByEFDisplayIndex(int displayIndex) {
   if (this->owner == nullptr) {
     global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (displayIndex > 0) {
-    this->ActByEalpha(displayIndex - 1);
+    this->actByEAlpha(displayIndex - 1);
   } else {
-    this->ActByFalpha(- displayIndex - 1);
+    this->actByFAlpha(- displayIndex - 1);
   }
 }
 
-void LittelmannPath::ActByEalpha(int indexAlpha) {
+void LittelmannPath::actByEAlpha(int indexAlpha) {
   if (this->owner == nullptr) {
     global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
@@ -139,7 +139,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
     }
   }
   Rational s2 = this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
-  if (!this->MinimaAreIntegral()) {
+  if (!this->minimaAreIntegral()) {
     global.comments << "<br>Something is wrong: starting path is BAD!";
   }
   if (s2 > theMin + 1) {
@@ -176,7 +176,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   this->simplify();
 }
 
-void LittelmannPath::ActByFalpha(int indexAlpha) {
+void LittelmannPath::actByFAlpha(int indexAlpha) {
   if (this->Waypoints.size == 0) {
     return;
   }
@@ -280,7 +280,7 @@ void LittelmannPath::simplify() {
   this->Waypoints.setSize(leftIndex + 1);
 }
 
-bool LittelmannPath::MinimaAreIntegral() {
+bool LittelmannPath::minimaAreIntegral() {
   if (this->Waypoints.size == 0) {
     return true;
   }
@@ -306,7 +306,7 @@ bool LittelmannPath::MinimaAreIntegral() {
   return true;
 }
 
-void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
+void LittelmannPath::makeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
   this->owner = &theOwner;
   this->Waypoints.setSize(2);
   this->Waypoints[0].makeZero(theOwner.getDimension());
@@ -314,7 +314,7 @@ void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weight
   this->simplify();
 }
 
-std::string LittelmannPath::ElementtoStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
+std::string LittelmannPath::toStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
   std::stringstream out;
   for (int i = input.size - 1; i >= 0; i --) {
     int displayIndex = input[i];
@@ -368,13 +368,13 @@ bool LittelmannPath::generateOrbit(
         int theIndex = parabolicSelectionSelectedAreInLeviPart.elements[j];
         while (found) {
           found = false;
-          currentPath.ActByEalpha(theIndex);
+          currentPath.actByEAlpha(theIndex);
           if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(theIndex);
               outputOperators.addOnTop(currentSequence);
-              if (!currentPath.MinimaAreIntegral()) {
+              if (!currentPath.minimaAreIntegral()) {
                 global.comments << "<hr>Found a bad path:<br> ";
                 global.comments << " = " << currentPath.toString();
               }
@@ -386,13 +386,13 @@ bool LittelmannPath::generateOrbit(
         currentSequence = outputOperators[lowestNonExplored];
         while (found) {
           found = false;
-          currentPath.ActByFalpha(theIndex);
+          currentPath.actByFAlpha(theIndex);
           if (!currentPath.isEqualToZero()) {
             if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(- theIndex - 1);
               outputOperators.addOnTop(currentSequence);
-              if (!currentPath.MinimaAreIntegral()) {
+              if (!currentPath.minimaAreIntegral()) {
                 global.comments << "<hr>Found a bad path:<br> ";
                 global.comments << " = " << currentPath.toString();
               }
@@ -406,7 +406,7 @@ bool LittelmannPath::generateOrbit(
   return result;
 }
 
-std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<int>& input) {
+std::string LittelmannPath:: toStringOperatorSequenceStartingOnMe(List<int>& input) {
   MonomialTensor<Rational> tempMon;
   tempMon = input;
   tempMon.generatorsIndices.reverseElements();
@@ -881,18 +881,18 @@ LittelmannPath::LittelmannPath(const LittelmannPath& other) {
   *this = other;
 }
 
-bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString) {
+bool LittelmannPath::isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString) {
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
   for (int i = 0; i < theString.generatorsIndices.size; i ++) {
     for (int k = 0; k < theString.Powers[i]; k ++) {
-      tempPath.ActByEalpha(- theString.generatorsIndices[i] - 1);
+      tempPath.actByEAlpha(- theString.generatorsIndices[i] - 1);
     }
     if (tempPath.isEqualToZero()) {
       return false;
     }
     tempPath2 = tempPath;
-    tempPath2.ActByEalpha(- theString.generatorsIndices[i] - 1);
+    tempPath2.actByEAlpha(- theString.generatorsIndices[i] - 1);
     if (!tempPath2.isEqualToZero()) {
       return false;
     }
@@ -952,12 +952,12 @@ std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool 
     out << " ";
     for (int i = 0; i < this->owner->getDimension(); i ++) {
       LittelmannPath tempP = *this;
-      tempP.ActByEFDisplayIndex(i + 1);
+      tempP.actByEFDisplayIndex(i + 1);
       if (!tempP.isEqualToZero()) {
         out << "e_{" << i + 1 << "}";
       }
       tempP = *this;
-      tempP.ActByEFDisplayIndex(- i - 1);
+      tempP.actByEFDisplayIndex(- i - 1);
       if (!tempP.isEqualToZero()) {
         out << "e_{" << - i - 1 << "},";
       }

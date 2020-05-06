@@ -96,14 +96,14 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
 
 void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
   this->SimpleBasisK = this->genK;
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->getAmbientWeyl());
+  this->theDynkinDiagram.computeDiagramTypeModifyInput(this->SimpleBasisK, this->getAmbientWeyl());
   this->SimpleBasisCentralizerRoots.size = 0;
   for (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
     if (this->rootIsInCentralizer(this->getAmbientWeyl().RootsOfBorel[i])) {
       this->SimpleBasisCentralizerRoots.addOnTop(this->getAmbientWeyl().RootsOfBorel[i]);
     }
   }
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
+  this->theCentralizerDiagram.computeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
 }
 
 void RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly() {
@@ -140,8 +140,8 @@ void RootSubalgebra::computeCentralizerFromKModulesAndSortKModules() {
       }
     }
   }
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
-  this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
+  this->theCentralizerDiagram.computeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
+  this->theCentralizerDiagram.getDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.isEqualToZero()) {
     if (this->theCentralizerDynkinType.getRank() + this->theDynkinType.getRank() != this->ownEr->owner->getRank()) {
       global.fatal << "Centralizer of " << this->theDynkinType.toString() << " computed to be "
@@ -896,7 +896,7 @@ void RootSubalgebra::extractRelations(
           }
         }
         if (!theRel.checkForBugs(*this, NilradicalRoots)) {
-          global.fatal << "Check for bugs failed. " << global.fatal;
+          global.fatal << "check for bugs failed. " << global.fatal;
         }
       }
       owner.theBadRelations.addOnTop(theRel);
@@ -945,8 +945,8 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
         )) {
           int startNumBetas = theRel.Betas.size;
           chosenAlphas.addListOnTop(theRel.Betas);
-          theDiagram.ComputeDiagramTypeModifyInput(chosenAlphas, this->getAmbientWeyl());
-          int theRank = theDiagram.RankTotal();
+          theDiagram.computeDiagramTypeModifyInput(chosenAlphas, this->getAmbientWeyl());
+          int theRank = theDiagram.rankTotal();
           if (
             theRank > 4 || theDiagram.toString() == "B^{2}_4" ||
             theDiagram.toString() == "C^{2}_4"
@@ -1257,7 +1257,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* theFormat) {
   << this->theDynkinDiagram.toString() << "</title>";
   output << "<meta name = \"keywords\" content = \"" << this->getAmbientWeyl().theDynkinType.toString()
   << " root subsystems, root subsystems, root systems";
-  if (this->getAmbientWeyl().theDynkinType.HasExceptionalComponent()) {
+  if (this->getAmbientWeyl().theDynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
@@ -1850,7 +1850,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
-  theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
+  theDomainRootSA.theCentralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   theDomainRootSA.theCentralizerDiagram.toString();
   tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i <CentralizerDiagramAutomorphisms.size; i ++) {
@@ -1884,7 +1884,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
     for (int l = 0; l < NumAutosCentralizer; l ++) {
       isoDomain.size = givenSize;
       isoRange.size = givenSize;
-      theDomainRootSA.theCentralizerDiagram.GetMapFromPermutation(
+      theDomainRootSA.theCentralizerDiagram.getMapFromPermutation(
         isoDomain,
         isoRange,
         tempPermutation2,
@@ -1930,8 +1930,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   List<int> tempList, tempPermutation1, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
   List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
-  this->theDynkinDiagram.GetAutomorphisms(DiagramAutomorphisms);
-  this->theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
+  this->theDynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
+  this->theCentralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initPart1(DiagramAutomorphisms.size);
   tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i < DiagramAutomorphisms.size; i ++) {
@@ -1967,10 +1967,10 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
       for (int k = 0; k < NumAutos; k++) {
         for (int l = 0; l < NumAutosCentralizer; l ++) {
           isoDomain.size = 0; isoRange.size = 0;
-          this->theDynkinDiagram.GetMapFromPermutation(
+          this->theDynkinDiagram.getMapFromPermutation(
             isoDomain, isoRange, tempPermutation1, DiagramAutomorphisms, tempAutos, right.theDynkinDiagram
           );
-          this->theCentralizerDiagram.GetMapFromPermutation(
+          this->theCentralizerDiagram.getMapFromPermutation(
             isoDomain,
             isoRange,
             tempPermutation2,
@@ -2117,7 +2117,7 @@ bool RootSubalgebras::growDynkinType(
   MacroRegisterFunctionWithName("RootSubalgebras::growDynkinType");
   input.grow(this->validScales, this->getOwnerWeyl().getDimension(), output, outputPermutationSimpleRoots);
   char theLetter;
-  if (!this->owner->theWeyl.theDynkinType.IsSimple(&theLetter)) {
+  if (!this->owner->theWeyl.theDynkinType.isSimple(&theLetter)) {
     return true;
   }
   for (int i = output.size - 1; i >= 0; i --) {
@@ -2188,7 +2188,7 @@ void RootSubalgebra::computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomo
     return;
   }
   List<MatrixTensor<Rational> > outerAutos;
-  this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(outerAutos);
+  this->theDynkinType.getOuterAutosGeneratorsActOnVectorColumn(outerAutos);
   Matrix<Rational> simpleBasisMatrixTimesCartanSymm;
   simpleBasisMatrixTimesCartanSymm.assignVectorsToRows(this->SimpleBasisK);
   simpleBasisMatrixTimesCartanSymm *= this->getAmbientWeyl().cartanSymmetric;
@@ -2247,8 +2247,8 @@ void RootSubalgebra::computeEssentials() {
   this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
   this->theDynkinDiagram.AmbientRootSystem= this->getAmbientWeyl().RootSystem;
   this->theDynkinDiagram.AmbientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
-  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
-  this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
+  this->theDynkinDiagram.computeDiagramInputIsSimple(this->SimpleBasisK);
+  this->theDynkinDiagram.getDynkinType(this->theDynkinType);
   if (this->SimpleBasisK.size != 0) {
     if (this->theDynkinType.toString() == "0") {
       global.fatal << "Subalgebra dynkin type computed to be zero while the simple basis is: "
@@ -2335,8 +2335,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   }
   this->theDynkinDiagram.AmbientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
   this->theDynkinDiagram.AmbientRootSystem = this->getAmbientWeyl().RootSystem;
-  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
-  this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
+  this->theDynkinDiagram.computeDiagramInputIsSimple(this->SimpleBasisK);
+  this->theDynkinDiagram.getDynkinType(this->theDynkinType);
   this->computeKModules();
   this->computeCentralizerFromKModulesAndSortKModules();
   this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
@@ -2624,7 +2624,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
   for (int cyclecounter = 0; cyclecounter<numCycles; cyclecounter ++, selectionRootsWithZeroCharacteristic.incrementSelection()) {
     this->SimpleBasisK.subSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
-    diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->getAmbientWeyl());
+    diagramZeroCharRoots.computeDiagramTypeModifyInput(rootsZeroChar, this->getAmbientWeyl());
     int theSlack = 0;
     rootsScalarProduct2HnonRaised.size = 0;
     simpleRootsChar2 = selectionRootsWithZeroCharacteristic;
@@ -2637,7 +2637,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         rootsScalarProduct2HnonRaised.addOnTop(this->PositiveRootsK[j]);
       }
     }
-    int theDynkinEpsilon = diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
+    int theDynkinEpsilon = diagramZeroCharRoots.numberRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is //
     //except for G_2 (go figure!).
@@ -2724,13 +2724,13 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     } else {
       output.BadHCharacteristics.addOnTop(characteristicH);
       DynkinType tempType;
-      diagramZeroCharRoots.GetDynkinType(tempType);
+      diagramZeroCharRoots.getDynkinType(tempType);
       global.comments
       << "<br>obtained bad characteristic " << characteristicH.toString()
       << ". The zero char root diagram is "
       << tempType.toString() << "; the Dynkin epsilon is "
       << theDynkinEpsilon << "= the num roots generated by diagram "
-      << diagramZeroCharRoots.NumRootsGeneratedByDiagram()
+      << diagramZeroCharRoots.numberRootsGeneratedByDiagram()
       << " + the relative dimension " << theRelativeDimension
       << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.toString();
     }
@@ -2983,7 +2983,7 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
   }
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
     for (int j = i + 1; j < this->theSubalgebras.size; j ++) {
-      if (this->theSubalgebras[SortingArray[j]].theDynkinDiagram.IsGreaterThan(
+      if (this->theSubalgebras[SortingArray[j]].theDynkinDiagram.isGreaterThan(
         this->theSubalgebras[SortingArray[i]].theDynkinDiagram
       )) {
         SortingArray.swapTwoIndices(i, j);
@@ -3031,7 +3031,7 @@ void RootSubalgebras::toHTML(FormatExpressions* theFormat) {
   output << "<meta name = \"keywords\" content = \""
   << this->theSubalgebras[0].theDynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
-  if (this->getOwnerWeyl().theDynkinType.HasExceptionalComponent()) {
+  if (this->getOwnerWeyl().theDynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
@@ -3078,7 +3078,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
     RootSubalgebra& current = this->theSubalgebras[i];
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& theOuterIsos = this->CentralizerOuterIsomorphisms[i];
     theOuterIsos.ComputeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.ExternalAutomorphisms, 0, true);
-    Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
+    Rational numInnerIsos = current.theCentralizerDiagram.getSizeCorrespondingWeylGroupByFormula();
     if (useHtml) {
       out << "<td>";
     }
@@ -3295,9 +3295,9 @@ std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(FormatExpressions*
     RootSubalgebra& currentSA = this->theSubalgebras[i];
     out << "$" << currentSA.theDynkinType.toString(theFormat) << "$&" ;
     out << "$" << currentSA.theCentralizerDynkinType.toString(theFormat) << "$&" ;
-    out << "$" << (currentSA.theDynkinType.GetRootSystemSize() / 2) << "$&" ;
-    out << "$" << (currentSA.theCentralizerDynkinType.GetRootSystemSize() / 2)<< "$&" ;
-    out << "$" << currentSA.theDynkinType.GetNumSimpleComponentsOfGivenRank(1) << "$&" ;
+    out << "$" << (currentSA.theDynkinType.getRootSystemSize() / 2) << "$&" ;
+    out << "$" << (currentSA.theCentralizerDynkinType.getRootSystemSize() / 2)<< "$&" ;
+    out << "$" << currentSA.theDynkinType.getNumberOfSimpleComponentsOfGivenRank(1) << "$&" ;
     out << "$" << currentSA.theDynkinType.getRank() << "$&" ;
     out << "$" << currentSA.theCentralizerDynkinType.getRank() << "$&" ;
     out << "\\\\" << endline;
@@ -3536,7 +3536,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
   int numNonSolvableNonReductive = 0;
   char simpleType;
   int theRank;
-  if (!this->getOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank)) {
+  if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theRank)) {
     global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
@@ -3633,7 +3633,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   Matrix<int> tempMat;
   char simpleType;
   int theDimension;
-  if (!this->getOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension)) {
+  if (!this->getOwnerWeyl().theDynkinType.isSimple(&simpleType, &theDimension)) {
     global.fatal << "This is a programming error: toStringConeConditionNotSatisfying "
     << "called on a non-simple Lie algebra. " << global.fatal;
   }
@@ -4130,7 +4130,7 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
   tempRoots.addListOnTop(this->Betas);
   tempRoots.addListOnTop(owner.genK);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
+  this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   if (this->theDiagram.toString() == "F^{1}_4") {
     return false;
   }
@@ -4168,7 +4168,7 @@ void ConeRelation::computeDiagramAndDiagramRelationsAndK(RootSubalgebra& owner) 
   Vectors<Rational> tempRoots;
   tempRoots = this->Alphas;
   tempRoots.addListOnTop(this->Betas);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
+  this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   this->computeDiagramRelationsAndK(owner);
 }
 
@@ -4179,7 +4179,7 @@ void ConeRelation::makeLookCivilized(RootSubalgebra& owner) {
   Vectors<Rational> tempRoots;
   tempRoots = this->Alphas;
   tempRoots.addListOnTop(this->Betas);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
+  this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   if (
     this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' &&
     this->theDiagram.SimpleComponentTypes[0].theRank == 1
@@ -4203,7 +4203,7 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
         tempRoot += this->Betas[j];
         if (owner.getAmbientWeyl().RootSystem.contains(tempRoot)) {
           int leavingIndex = j; int remainingIndex = i;
-          if (this->BetaCoeffs[j].IsGreaterThan(this->BetaCoeffs[i])) {
+          if (this->BetaCoeffs[j].isGreaterThan(this->BetaCoeffs[i])) {
             leavingIndex = i;
             remainingIndex = j;
           }
@@ -4302,7 +4302,7 @@ void ConeRelation::computeDiagramRelationsAndK(RootSubalgebra& owner) {
   for (int i = 0; i < this->theDiagram.SimpleBasesConnectedComponents.size; i ++) {
     tempRoots.addListOnTop(this->theDiagram.SimpleBasesConnectedComponents[i]);
   }
-  this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
+  this->theDiagramRelAndK.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
 }
 
 void ConeRelation::fixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs) {

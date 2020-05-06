@@ -451,7 +451,7 @@ bool CalculatorFunctions::functionHashString(
       return theCommands
       << "You are running a non-vanilla version of the calculator "
       << "that is missing ripemd160 support. "
-      << "Check out the vanilla version of the calculator at github.com.";
+      << "check out the vanilla version of the calculator at github.com.";
     }
     externalCrypto.computeRIPEMD160(inputString, hashUChar);
   }
@@ -898,7 +898,7 @@ bool CalculatorFunctions::innerFourierTransformEWA(
     return false;
   }
   ElementWeylAlgebra<Rational> theElt;
-  argument.getValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
+  argument.getValue<ElementWeylAlgebra<Rational> >().fourierTransform(theElt);
   return output.assignValueWithContext(theElt, argument.getContext(), theCommands);
 }
 
@@ -1358,10 +1358,10 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Vector<Polynomial<Rational> > thePolysRational;
   ExpressionContext theContext(theCommands);
   bool useArguments =
-  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystem")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
-  input.startsWith(theCommands.getOperations().getIndexNoFail("findOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
+  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystem")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
+  input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments) {
     if (!theCommands.getVectorFromFunctionArguments(
@@ -1445,7 +1445,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   MatrixTensor<Rational> numberMatrixTensor;
   theNumber.owner->getMultiplicationBy(theNumber, numberMatrixTensor);
   Matrix<Rational> result;
-  numberMatrixTensor.GetMatrix(result, dimension);
+  numberMatrixTensor.getMatrix(result, dimension);
   return output.assignMatrix(result, theCommands);
 }
 
@@ -2377,7 +2377,7 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
     << " onto " << theArgumentPoly.toString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
   }
-  if (!theEWA.ActOnPolynomial(theArgumentPoly)) {
+  if (!theEWA.actOnPolynomial(theArgumentPoly)) {
     std::stringstream out;
     out << "Failed to act by operator " << theEWA.toString() << " on polynomial " << theArgumentPoly.toString()
     << " (possibly the weyl algebra element has non-integral exponents)";
@@ -5847,7 +5847,7 @@ bool CalculatorFunctions::innerIsNilpotent(
       "Failed to extract matrix with rational coefficients", theCommands
     );
   }
-  if (theMatTensor.IsNilpotent()) {
+  if (theMatTensor.isNilpotent()) {
     return output.assignValue(1, theCommands);
   }
   return output.assignValue(0, theCommands);
@@ -6980,7 +6980,7 @@ bool CalculatorFunctions::innerGetPrincipalSl2Index(Calculator& theCommands, con
     return theCommands << "Failed to convert "
     << input.toString() << " to DynkinType.";
   }
-  return output.assignValue(theType.GetPrincipalSlTwoCSInverseScale(), theCommands);
+  return output.assignValue(theType.getPrincipalSlTwoCartanSymmetricInverseScale(), theCommands);
 }
 
 bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
@@ -7380,9 +7380,9 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
   std::stringstream out;
   int numFound = 0;
   ProgressReport theReport;
-  out << thePartition.ToStringPartitioningVectors();
+  out << thePartition.toStringPartitioningVectors();
   while (thePartition.incrementReturnFalseIfPastLast()) {
-    out << "<br>" << thePartition.ToStringOnePartition(thePartition.currentPartition);
+    out << "<br>" << thePartition.toStringOnePartition(thePartition.currentPartition);
     numFound ++;
     if (numFound % 1000 == 0) {
       std::stringstream reportStream;
@@ -7517,7 +7517,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   }
   KLpolys theKLpolys;
   WeylGroupData& theWeyl = theSSlieAlg.content->theWeyl;
-  if (!theKLpolys.ComputeKLPolys(&theWeyl)) {
+  if (!theKLpolys.computeKLPolys(&theWeyl)) {
     return output.makeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
   }
   theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);

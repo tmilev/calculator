@@ -179,7 +179,7 @@ GlobalVariables::GlobalVariables() {
   this->flagSSLIsAvailable = false;
 
   this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
-  this->mutexReturnBytes.mutexName = "WriteBytesLock";
+  this->mutexReturnBytes.mutexName = "WriteByteslock";
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
@@ -1437,7 +1437,7 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
     if (StringRoutines::stringBeginsWith(
       inputCopy, FileOperations::folderVirtualLinksNonSensitive().theKeys[i], &folderEnd
     )) {
-      output = global.PhysicalPathProjectBase +
+      output = global.physicalPathProjectBase +
       FileOperations::folderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       return true;
     }
@@ -1447,7 +1447,7 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
       if (StringRoutines::stringBeginsWith(
         inputCopy, FileOperations::folderVirtualLinksSensitive().theKeys[i], &folderEnd
       )) {
-        output = global.PhysicalPathProjectBase +
+        output = global.physicalPathProjectBase +
         FileOperations::folderVirtualLinksSensitive().theValues[i] + folderEnd;
         return true;
       }
@@ -1458,13 +1458,13 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
       if (StringRoutines::stringBeginsWith(
         inputCopy, FileOperations::folderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
       )) {
-        output = global.PhysicalPathProjectBase +
+        output = global.physicalPathProjectBase +
         FileOperations::folderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         return true;
       }
     }
   }
-  output = global.PhysicalPathServerBase + "public_html";
+  output = global.physicalPathServerBase + "public_html";
   if (inputCopy.size() > 0) {
     if (inputCopy[0] != '/') {
       output += "/";
@@ -7477,7 +7477,7 @@ void WeylGroupData::drawRootSystem(
   if (predefinedProjectionPlane == nullptr) {
     this->getCoxeterPlane(theTwoPlane[0], theTwoPlane[1]);
   } else {
-    predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
+    predefinedProjectionPlane->getVectorsDouble(theTwoPlane);
   }
   if (theTwoPlane.size != 2) {
     global.fatal << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
@@ -9632,7 +9632,7 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
       currentRoot[pivotColumnIndex] = theScalarProducts[i];
     }
   }
-  theScalarProducts.ScaleNormalizeFirstNonZero();
+  theScalarProducts.scaleNormalizeFirstNonZero();
   eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = theScalarProducts;
   Lattice eigenLattice, theZnLattice;
   eigenLattice.makeFromRoots(eigenSpacePlusOrthogonalComponent);
@@ -10123,7 +10123,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   return true;
 }
 
-std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex) {
+std::string DrawingVariables::getColorPsTricksFromColorIndex(int colorIndex) {
   std::stringstream out;
   int r = (colorIndex / 65536) % 256;
   int g = (colorIndex / 256) % 256;
@@ -10133,7 +10133,7 @@ std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex) {
   return out.str();
 }
 
-bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int& output) {
+bool DrawingVariables::getColorIntFromColorString(const std::string& input, int& output) {
   if (input == "blue") {
     output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
     return true;
@@ -10157,7 +10157,7 @@ bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int&
   return false;
 }
 
-std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex) {
+std::string DrawingVariables::getColorHtmlFromColorIndex(int colorIndex) {
   std::stringstream out;
   int r = (colorIndex / 65536) % 256;
   int g = (colorIndex / 256) % 256;
@@ -11168,7 +11168,7 @@ void ConeComplex::getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
       tempRoot = this->theObjects[i].Normals[j];
-      tempRoot.ScaleNormalizeFirstNonZero();
+      tempRoot.scaleNormalizeFirstNonZero();
       outputHashed.addOnTopNoRepetition(tempRoot);
     }
   }
@@ -11732,22 +11732,22 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParamDegenerate
     }
   }
   Rational firstCoord = preferredNormal[0];
-  preferredNormal.ShiftToTheLeftOnePos();
+  preferredNormal.shiftToTheLeftOnePosition();
   preferredNormal /= - firstCoord;
   ConeLatticeAndShift tempCLS;
   Vectors<Rational> newNormals = this->theProjectivizedCone.Normals;
   Rational firstCoordNewNormal;
   for (int i = 0; i < newNormals.size; i ++) {
     firstCoordNewNormal = newNormals[i][0];
-    newNormals[i].ShiftToTheLeftOnePos();
+    newNormals[i].shiftToTheLeftOnePosition();
     newNormals[i] += preferredNormal * firstCoordNewNormal;
   }
   tempCLS.theProjectivizedCone.createFromNormals(newNormals);
   tempCLS.theShift = this->theShift;
-  tempCLS.theShift.ShiftToTheLeftOnePos();
+  tempCLS.theShift.shiftToTheLeftOnePosition();
   this->theLattice.applyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
   Vector<Rational> tempRoot;
-  tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
+  tempRoot = theLPToMaximizeAffine.getshiftToTheLeftOnePositionition();
   tempRoot += preferredNormal * theLPToMaximizeAffine[0];
   if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
     outputAppend.addOnTop(tempCLS);
@@ -11810,7 +11810,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     for (int j = 0; j < currentCone.Normals.size; j ++) {
       Vector<Rational>& currentNormal = currentCone.Normals[j];
       if (currentNormal[0].isEqualToZero()) {
-        tempRoot = currentNormal.GetShiftToTheLeftOnePosition();
+        tempRoot = currentNormal.getshiftToTheLeftOnePositionition();
         theNewNormals.addOnTop(tempRoot);
       } else {
         numNonPerpWalls ++;
@@ -11854,16 +11854,16 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     }
     for (int j = 0; j < exitRepresentatives.size; j ++) {
       tempCLS.theProjectivizedCone.Normals = theNewNormals;
-      exitNormalShiftedAffineProjected = exitNormalAffine.GetShiftToTheLeftOnePosition();
+      exitNormalShiftedAffineProjected = exitNormalAffine.getshiftToTheLeftOnePositionition();
       *exitNormalShiftedAffineProjected.lastObject() = - exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
       global.comments << exitNormalShiftedAffineProjected.toString() << ", ";
       if (foundEnteringNormal) {
-        extraEquation = enteringNormalAffine.GetShiftToTheLeftOnePosition();
+        extraEquation = enteringNormalAffine.getshiftToTheLeftOnePositionition();
         extraEquation -= (exitNormalShiftedAffineProjected * enteringNormalAffine[0]) / exitNormalAffine[0];
         global.comments << "extra equation: " << extraEquation.toString() << ", ";
         tempCLS.theProjectivizedCone.Normals.addOnTop(extraEquation);
       }
-      tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
+      tempRoot = theLPToMaximizeAffine.getshiftToTheLeftOnePositionition();
       tempRoot -= exitNormalShiftedAffineProjected * theLPToMaximizeAffine[0] / exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.addOnTop(tempRoot);
       if (tempCLS.theProjectivizedCone.Normals.size <= 0) {
@@ -11990,10 +11990,10 @@ bool ConeComplex::splitChamber(
   }
   this->getNewVerticesAppend(myDyingCone, killerNormal, ZeroVertices);
   for (int i = 0; i < myDyingCone.Normals.size; i ++) {
-    if (newPlusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
+    if (newPlusCone.Vertices.hasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
       newPlusCone.Normals.addOnTop(myDyingCone.Normals[i]);
     }
-    if (newMinusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
+    if (newMinusCone.Vertices.hasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
       newMinusCone.Normals.addOnTop(myDyingCone.Normals[i]);
     }
   }
@@ -12264,12 +12264,12 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
     this->Normals.setSize(currentUniqueElementIndex + 1);
   }
   for (int i = 0; i < this->Vertices.size; i ++) {
-    if (this->Normals.HasAnElementWithNegativeScalarProduct(this->Vertices[i])) {
+    if (this->Normals.hasAnElementWithNegativeScalarProduct(this->Vertices[i])) {
       global.fatal << "Negative scalar products not allowed. " << global.fatal;
     }
   }
   for (int i = 0; i < this->Normals.size; i ++) {
-    if (!this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals[i])) {
+    if (!this->Vertices.hasAnElementWithPositiveScalarProduct(this->Normals[i])) {
       return false;
     }
   }
@@ -12445,7 +12445,7 @@ void ConeComplex::initFromCones(
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
       tempRoot = this->theObjects[i].Normals[j];
-      tempRoot.ScaleNormalizeFirstNonZero();
+      tempRoot.scaleNormalizeFirstNonZero();
       this->splittingNormals.addOnTopNoRepetition(tempRoot);
       std::stringstream out;
       out << "Extracting walls from cone " << i + 1 << " out of " << this->size
@@ -12490,7 +12490,7 @@ std::string Cone::toString(FormatExpressions* theFormat) const {
   if (theFormat == nullptr) {
     theFormat = &tempF;
   }
-  out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);
+  out << this->Normals.toInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);
   if (useLatex) {
     out << "\\]";
   }
@@ -12581,7 +12581,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   for (int i = 0; i < inputLFsLastCoordConst.size; i ++) {
     for (int j = i + 1; j < inputLFsLastCoordConst.size; j ++) {
       tempRoot = inputLFsLastCoordConst[i] - inputLFsLastCoordConst[j];
-      tempRoot.ScaleNormalizeFirstNonZero();
+      tempRoot.scaleNormalizeFirstNonZero();
       if (!tempRoot.isEqualToZero()) {
         this->splittingNormals.addOnTopNoRepetition(tempRoot);
       }

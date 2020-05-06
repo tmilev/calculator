@@ -30,17 +30,17 @@ public:
      degree = - 1;
      rank = 0;
    }
-   void MakeFullRank(int dim);
+   void makeFullRank(int dim);
    // true if it wasn't already there
    bool addVector(const Vector<Coefficient>& v);
-   bool AddVectorDestructively(Vector<Coefficient>& v);
+   bool addVectorDestructively(Vector<Coefficient>& v);
    bool addVectorToBasis(const Vector<Coefficient>& v);
    bool getCoordinatesDestructively(Vector<Coefficient>& v, Vector<Coefficient>& out) const;
    VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other) const;
    VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
    VectorSpace<Coefficient> orthogonalComplement(VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0) const;
-   Vector<Coefficient> GetBasisVector(int i) const;
-   Vector<Coefficient> GetCanonicalBasisVector(int i) const;
+   Vector<Coefficient> getBasisVector(int i) const;
+   Vector<Coefficient> getCanonicalBasisVector(int i) const;
    //unsigned int hashFunction() const {return this->hashFunction(*this);}
    static unsigned int hashFunction(const VectorSpace<Coefficient>& input) {
      return input.fastbasis.hashFunction();
@@ -109,11 +109,11 @@ Matrix<Coefficient> Basis<Coefficient>::putInBasis(const Matrix<Coefficient>& in
 template <typename Coefficient>
 bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
   Vector<Coefficient> tmp = v;
-  return AddVectorDestructively(tmp);
+  return addVectorDestructively(tmp);
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::AddVectorDestructively(Vector<Coefficient>& v) {
+bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
   if (fastbasis.numberOfRows == 0) {
     this->fastbasis.makeZeroMatrix(v.size);
     this->degree = v.size;
@@ -338,7 +338,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::orthogonalComplement(
   M.getZeroEigenSpaceModifyMe(VVs);
   // this appears common enough to warrant a better method
   for (int i = 0; i < VVs.size; i ++) {
-    V.AddVectorDestructively(VVs[i]);
+    V.addVectorDestructively(VVs[i]);
   }
   if (ambient && ambient->rank < ambient->degree) {
     VectorSpace<Coefficient> W = V.intersection(*ambient);
@@ -351,7 +351,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::orthogonalComplement(
 // was to find a way to special case full rank spaces and not carry around
 // identity matrices everywhere...
 template <typename Coefficient>
-void VectorSpace<Coefficient>::MakeFullRank(int d) {
+void VectorSpace<Coefficient>::makeFullRank(int d) {
   this->degree = d;
   this->rank = d;
 }
@@ -362,7 +362,7 @@ bool VectorSpace<Coefficient>::operator==(const VectorSpace<Coefficient>& other)
 }
 
 template <typename Coefficient>
-Vector<Coefficient> VectorSpace<Coefficient>::GetBasisVector(int i) const {
+Vector<Coefficient> VectorSpace<Coefficient>::getBasisVector(int i) const {
   if (i >= this->rank) {
     global.fatal << "Bad vector index. " << global.fatal;
   }
@@ -376,7 +376,7 @@ Vector<Coefficient> VectorSpace<Coefficient>::GetBasisVector(int i) const {
 }
 
 template <typename Coefficient>
-Vector<Coefficient> VectorSpace<Coefficient>::GetCanonicalBasisVector(int i) const {
+Vector<Coefficient> VectorSpace<Coefficient>::getCanonicalBasisVector(int i) const {
   if (i >= this->rank) {
     global.fatal << "Vector index too large. " << global.fatal;
   }

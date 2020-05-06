@@ -6,7 +6,7 @@
 #include "general_lists.h"
 
 class LargeIntegerUnsigned {
-  void AddNoFitSize(const LargeIntegerUnsigned& x);
+  void addNoFitSize(const LargeIntegerUnsigned& x);
 public:
   // The zero element is assumed to have length one array with a zero entry.
   //
@@ -53,17 +53,17 @@ public:
       int64_t maximumRunningTime
     );
   };
-  void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
-  void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
-  void SubtractSmallerPositive(const LargeIntegerUnsigned& x);
+  void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
+  void addLargeIntegerUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
+  void subtractSmallerPositive(const LargeIntegerUnsigned& x);
   void toString(std::string& output) const;
-  void ElementToStringLargeElementDecimal(std::string& output) const;
+  void toStringLargeElementDecimal(std::string& output) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
-  void DivPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
+  std::string toStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
+  void divPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void makeOne();
-  void AddUInt(unsigned int x);
+  void addUInt(unsigned int x);
   void makeZero();
   bool isEqualToZero() const;
   bool IsEven() const;
@@ -357,7 +357,7 @@ public:
     }
     this->sign*= other.sign;
     LargeIntegerUnsigned quotient, remainder;
-    this->value.DivPositive(other.value, quotient, remainder);
+    this->value.divPositive(other.value, quotient, remainder);
     this->value =quotient;
   }
   inline bool operator>(const LargeInteger& other) const {
@@ -368,7 +368,7 @@ public:
       return;
     }
     LargeIntegerUnsigned quotient, remainder;
-    this->value.DivPositive(other.value, quotient, remainder);
+    this->value.divPositive(other.value, quotient, remainder);
     this->value = remainder;
     if (this->isNegative()) {
       *this += other.value;

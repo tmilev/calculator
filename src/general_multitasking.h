@@ -32,11 +32,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MutexRecursiveWrapper {
 private:
-  bool flagUnsafeFlagForDebuggingIsLocked;
-  int lastLockerThread;
+  bool flagUnsafeFlagForDebuggingIslocked;
+  int lastlockerThread;
   bool flagDeallocated;
   bool flagInitialized;
-  static std::string noLockId;
+  static std::string nolockId;
   void operator=(const MutexRecursiveWrapper& other);
   MutexRecursiveWrapper(const MutexRecursiveWrapper& other);
 public:
@@ -44,7 +44,7 @@ public:
   std::string mutexName;
   void* theMutexImplementation;
   // note: the mutex implementation is not a named type for system portability.
-  bool isLockedUnsafeUseForWINguiOnly();
+  bool islockedUnsafeUseForWINguiOnly();
   // locks the mutex if the mutex is free. If not it suspends calling thread until
   // mutex becomes free and then locks it.
   void lockMe();
@@ -63,14 +63,14 @@ public:
 };
 
 //this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to std::lock_guard
-class MutexLockGuard {
+class MutexlockGuard {
 public:
   MutexRecursiveWrapper* theMutex;
-  MutexLockGuard(MutexRecursiveWrapper& inputMutex) {
+  MutexlockGuard(MutexRecursiveWrapper& inputMutex) {
     this->theMutex = &inputMutex;
     this->theMutex->lockMe();
   }
-  ~MutexLockGuard() {
+  ~MutexlockGuard() {
     this->theMutex->unlockMe();
     this->theMutex = nullptr;
   }
@@ -78,7 +78,7 @@ public:
 
 class PauseThread {
   private:
-  MutexRecursiveWrapper mutexLockMeToPauseCallersOfSafePoint;
+  MutexRecursiveWrapper mutexlockMeToPauseCallersOfSafePoint;
   MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;

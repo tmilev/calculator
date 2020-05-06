@@ -505,7 +505,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   List<ClassFunction<somegroup, Rational> > chars;
   chars.setSize(spaces.size);
   for (int i = 0; i < spaces.size; i ++) {
-    chars[i].data = spaces[i].GetCanonicalBasisVector(0);
+    chars[i].data = spaces[i].getCanonicalBasisVector(0);
     chars[i].G = &G;
   }
   for (int i = 0; i < spaces.size; i ++) {

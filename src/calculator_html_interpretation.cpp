@@ -115,7 +115,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out << "<hr>"
-    << "<a href=\"" << global.DisplayNameExecutable
+    << "<a href=\"" << global.displayNameExecutable
     << "?request=calculator&mainInput="
     << HtmlRoutines::convertStringToURLString(answerCommandsNoEnclosures.str(), false)
     << "\">Input link</a>"
@@ -346,7 +346,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   std::stringstream problemLinkStream;
   problemLinkStream
-  << "<a href=\"" << global.DisplayNameExecutable
+  << "<a href=\"" << global.displayNameExecutable
   << "?request=calculator&mainInput="
   << HtmlRoutines::convertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
@@ -1725,7 +1725,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   if (flagFilterCourse) {
     out << "<br>Displaying only students in course: <b style =\"color:blue\">"
     << currentCourse << "</b>. "
-    << "<a href=\"" << global.DisplayNameExecutable
+    << "<a href=\"" << global.displayNameExecutable
     << "?request=accounts&"
     << global.toStringCalculatorArgumentsNoNavigation(nullptr)
     << "filterAccounts=false&"
@@ -1821,7 +1821,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       oneTableLineStream << "<td><span style =\"color:green\">activated</span></td><td></td><td></td>";
     }
     std::stringstream oneLink;
-    oneLink << "<a href=\"" << global.DisplayNameExecutable << "?request=login&username="
+    oneLink << "<a href=\"" << global.displayNameExecutable << "?request=login&username="
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "</tr>";

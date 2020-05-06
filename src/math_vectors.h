@@ -260,9 +260,9 @@ public:
     }
     return result;
   }
-  void ScaleToFirstNonZeroCoordinatePositive();
+  void scaleToFirstNonZeroCoordinatePositive();
   // Returns the number by which the vector was multiplied.
-  void ScaleNormalizeFirstNonZero();
+  void scaleNormalizeFirstNonZero();
   void MakeAffineUsingLastCoordinate() {
     Coefficient theElt;
     theElt = *this->lastObject();
@@ -306,12 +306,12 @@ public:
     Coefficient TimesMeEqualsOther;
     return this->isProportionalTo(other, TimesMeEqualsOther);
   }
-  int FindLCMDenominatorsTruncateToInt();
-  void FindLCMDenominators(LargeIntegerUnsigned& output);
-  inline Vector<Coefficient> GetShiftToTheLeftOnePosition() {
-    return this->GetShiftToTheLeft(1);
+  int findLeastCommonMultipleDenominatorsTruncateToInt();
+  void findLeastCommonMultipleDenominators(LargeIntegerUnsigned& output);
+  inline Vector<Coefficient> getshiftToTheLeftOnePositionition() {
+    return this->getshiftToTheLeft(1);
   }
-  void MakeNormalInProjectivizationFromPointAndNormal(Vector<Coefficient>& point, Vector<Coefficient>& normal) {
+  void makeNormalInProjectivizationFromPointAndNormal(Vector<Coefficient>& point, Vector<Coefficient>& normal) {
     //the extra dimension is going to be the last dimension
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
@@ -321,7 +321,7 @@ public:
       this->theObjects[j] = normal[j];
     }
   }
-  bool ProjectToAffineSpace(Vector<Coefficient> &output) {
+  bool projectToAffineSpace(Vector<Coefficient> &output) {
     if (this->theObjects[this->size - 1].isEqualToZero()) {
       return false;
     }
@@ -332,7 +332,7 @@ public:
     output /= this->theObjects[this->size - 1];
     return true;
   }
-  bool MakeAffineProjectionFromNormal(AffineHyperplane<Rational>& output);
+  bool makeAffineProjectionFromNormal(AffineHyperplane<Rational>& output);
   int getIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
       if (!this->theObjects[i].isEqualToZero()) {
@@ -349,7 +349,7 @@ public:
     }
     return - 1;
   }
-  Vector<Coefficient> GetShiftToTheLeft(int numPositions) {
+  Vector<Coefficient> getshiftToTheLeft(int numPositions) {
     Vector<Coefficient> result;
     if (numPositions > this->size) {
       global.fatal << "You requested a shift of "
@@ -362,10 +362,10 @@ public:
     }
     return result;
   }
-  inline void ShiftToTheLeftOnePos() {
-    this->ShiftToTheLeft(1);
+  inline void shiftToTheLeftOnePosition() {
+    this->shiftToTheLeft(1);
   }
-  void ShiftToTheLeft(int numPositions) {
+  void shiftToTheLeft(int numPositions) {
     if (numPositions > this->size) {
       global.fatal << "Bad vector shift. " << global.fatal;
     }
@@ -374,7 +374,7 @@ public:
     }
     this->size -= numPositions;
   }
-  void ShiftToTheRightInsertZeroes(int numPositions, const Coefficient& theRingZero) {
+  void shiftToTheRightInsertZeroes(int numPositions, const Coefficient& theRingZero) {
     if (numPositions < 0) {
       global.fatal << "Bad vector shift, cannot fill with zeroes. " << global.fatal;
     }
@@ -386,7 +386,7 @@ public:
       this->theObjects[i] = theRingZero;
     }
   }
-  void SetDimInsertZeroes(int newDim) {
+  void setDimensionInsertZeroes(int newDim) {
     int oldDim = this->size;
     this->setSize(newDim);
     for (int i = oldDim; i < newDim; i ++) {
@@ -406,7 +406,7 @@ public:
     Vectors<Coefficient>& output
   ) {
     int Pivot = - 1;
-    if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
+    if (!this->findIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
       output.makeEiBasis(this->size);
       return;
     }
@@ -419,7 +419,7 @@ public:
       }
     }
   }
-  bool FindIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex) {
+  bool findIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex) {
     theIndex = - 1;
     for (int i = 0; i < this->size; i ++) {
       if (!this->theObjects[i].isEqualToZero()) {
@@ -574,7 +574,7 @@ public:
 };
 
 template <class Coefficient>
-void Vector<Coefficient>::ScaleNormalizeFirstNonZero() {
+void Vector<Coefficient>::scaleNormalizeFirstNonZero() {
   int index = this->getIndexFirstNonZeroCoordinate();
   if (index < 0) {
     return;
@@ -583,7 +583,7 @@ void Vector<Coefficient>::ScaleNormalizeFirstNonZero() {
 }
 
 template <class Coefficient>
-void Vector<Coefficient>::ScaleToFirstNonZeroCoordinatePositive() {
+void Vector<Coefficient>::scaleToFirstNonZeroCoordinatePositive() {
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i].isPositive()) {
       return;
@@ -625,19 +625,19 @@ bool Vector<Coefficient>::isProportionalTo(
 }
 
 template <class Coefficient>
-void Vector<Coefficient>::FindLCMDenominators(LargeIntegerUnsigned& output) {
+void Vector<Coefficient>::findLeastCommonMultipleDenominators(LargeIntegerUnsigned& output) {
   LargeIntegerUnsigned tempI, tempI2;
   output.makeOne();
   for (int i = 0; i < this->size; i ++) {
     this->theObjects[i].getDenominator(tempI2);
     LargeIntegerUnsigned::gcd(output, tempI2, tempI);
     output.multiplyBy(tempI2);
-    output.DivPositive(tempI, output, tempI2);
+    output.divPositive(tempI, output, tempI2);
   }
 }
 
 template <class Coefficient>
-int Vector<Coefficient>::FindLCMDenominatorsTruncateToInt() {
+int Vector<Coefficient>::findLeastCommonMultipleDenominatorsTruncateToInt() {
   int result = 1;
   for (int i = 0; i < this->size; i ++) {
     result = MathRoutines::leastCommonMultiple(result, this->theObjects[i].denominatorShort);
@@ -654,7 +654,7 @@ int Vector<Coefficient>::FindLCMDenominatorsTruncateToInt() {
 template <class Coefficient>
 class Vectors: public List<Vector<Coefficient> > {
   public:
-  std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable) {
+  std::string toStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable) {
     std::string tempS;
     std::stringstream out;
     if (useLatex) {
@@ -700,7 +700,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return out.str();
   }
-  std::string ElementsToInequalitiesString(
+  std::string toInequalitiesString(
     bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
   ) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -710,13 +710,13 @@ class Vectors: public List<Vector<Coefficient> > {
     Matrix<Coefficient>& buffer,
     Selection& NonPivotPointsBuffer
   );
-  void GetVectorsDouble(Vectors<double>& output) const {
+  void getVectorsDouble(Vectors<double>& output) const {
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
       output[i] = this->theObjects[i].getVectorDouble();
     }
   }
-  void AssignListListCoefficientType(const List<List<Coefficient> >& input) {
+  void assignListListCoefficientType(const List<List<Coefficient> >& input) {
     this->setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
       this->theObjects[i] = input[i];
@@ -735,7 +735,7 @@ class Vectors: public List<Vector<Coefficient> > {
       }
     }
   }
-  std::string ElementToLinearCombinationString() {
+  std::string toLinearCombinationString() {
     std::stringstream out;
     std::string tempS;
     for (int i = 0; i < this->size; i ++) {
@@ -754,7 +754,7 @@ class Vectors: public List<Vector<Coefficient> > {
   unsigned int hashFunction() const {
     return this->::List<Vector<Coefficient> >::hashFunction();
   }
-  bool HasAnElementWithPositiveScalarProduct(const Vector<Coefficient>& input) const {
+  bool hasAnElementWithPositiveScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
       if (input.ScalarEuclidean(this->theObjects[i]).isPositive()) {
         return true;
@@ -762,7 +762,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  bool HasAnElementWithNegativeScalarProduct(const Vector<Coefficient>& input) const {
+  bool hasAnElementWithNegativeScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
       if (input.ScalarEuclidean(this->theObjects[i]).isNegative()) {
         return true;
@@ -770,7 +770,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  bool HasAnElementPerpendicularTo(const Vector<Coefficient>& input) const {
+  bool hasAnElementPerpendicularTo(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
       if (input.ScalarEuclidean(this->theObjects[i]).isEqualToZero()) {
         return true;
@@ -876,10 +876,10 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return result;
   }
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex) {
+  std::string toStringLetterFormat(const std::string& inputLetter, bool useLatex) {
     std::stringstream out;
     for (int i = 0; i < this->size; i ++) {
-      out << this->theObjects[i].ElementToStringLetterFormat(inputLetter, useLatex);
+      out << this->theObjects[i].toStringLetterFormat(inputLetter, useLatex);
       if (i != this->size - 1) {
         out << ",";
       }
@@ -1173,7 +1173,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   if (this->size == 0) {
     return 0;
   }
-  int theDimension = this->GetDimensionOfElements();
+  int theDimension = this->getDimensionOfElements();
   Vectors<Rational> tempRoots;
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
@@ -1209,7 +1209,7 @@ public:
   bool projectFromFacetNormal(Vector<Coefficient>& input);
   Vector<Coefficient> projectOnMe(Vector<Coefficient>& input) const;
   bool containsPoint(Vector<Coefficient> & thePoint);
-  void MakeFromNormalAndPoint(Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal);
+  void makeFromNormalAndPoint(Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal);
   bool hasACommonPointWithPositiveTwoToTheNthQudrant();
   bool operator==(const AffineHyperplane& right);
 };
@@ -1219,8 +1219,8 @@ bool AffineHyperplane<Coefficient>::operator==(const AffineHyperplane& right) {
   Vector<Rational> tempRoot1, tempRoot2;
   tempRoot1 = this->normal;
   tempRoot2 = right.normal;
-  tempRoot1.ScaleNormalizeFirstNonZero();
-  tempRoot2.ScaleNormalizeFirstNonZero();
+  tempRoot1.scaleNormalizeFirstNonZero();
+  tempRoot2.scaleNormalizeFirstNonZero();
   if (!(tempRoot1 == tempRoot2)) {
     return false;
   }
@@ -1287,7 +1287,7 @@ bool AffineHyperplane<Coefficient>::hasACommonPointWithPositiveTwoToTheNthQudran
 }
 
 template <class Coefficient>
-void AffineHyperplane<Coefficient>::MakeFromNormalAndPoint(
+void AffineHyperplane<Coefficient>::makeFromNormalAndPoint(
   Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal
 ) {
   this->affinePoint = inputPoint;
@@ -1306,7 +1306,7 @@ unsigned int AffineHyperplane<Coefficient>::hashFunction() const {
   // warning: if normal gets streched, the hashfunction should not change!
   Vector<Rational> tempNormal;
   tempNormal = this->normal;
-  tempNormal.ScaleNormalizeFirstNonZero();
+  tempNormal.scaleNormalizeFirstNonZero();
   Rational tempRat = this->normal.ScalarEuclidean(this->affinePoint);
   return this->normal.hashFunction() + tempRat.hashFunction();
 }
@@ -1327,19 +1327,19 @@ public:
   inline static unsigned int hashFunction(const AffineCone& input) {
     return input.hashFunction();
   }
-  int GetDimension();
-  void SuperimposeAffineCones(AffineCones& theOtherComplex);
-  bool WallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate);
+  int getDimension();
+  void superimposeAffineCones(AffineCones& theOtherComplex);
+  bool wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate);
   // The below function returns true if the system of homogeneous linear inequalities Ax<=b
   // has a solution, false otherwise, where A is a matrix and x and b are column vectors.
   //  bool systemLinearInequalitiesHasSolution
   //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
-  bool SplitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output);
+  bool splitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output);
 };
 
 class AffineCones: public HashedList<AffineCone> {
 public:
-  void SuperimposeAffineCones(AffineCones& theOtherComplex);
+  void superimposeAffineCones(AffineCones& theOtherComplex);
 };
 
 

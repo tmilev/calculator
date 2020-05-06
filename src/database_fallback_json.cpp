@@ -45,7 +45,7 @@ bool Database::FallBack::updateOne(
     }
     return false;
   }
-  MutexProcessLockGuard guardDB(this->access);
+  MutexProcesslockGuard guardDB(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
@@ -53,7 +53,7 @@ bool Database::FallBack::updateOne(
     global << "Failed to read and index database. " << Logger::endL;
     return false;
   }
-  if (!this->updateOneNoLocks(findQuery, dataToMerge, commentsOnFailure)) {
+  if (!this->updateOneNolocks(findQuery, dataToMerge, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to update one. ";
     }
@@ -62,17 +62,17 @@ bool Database::FallBack::updateOne(
   return this->storeDatabase(commentsOnFailure);
 }
 
-bool Database::FallBack::updateOneNoLocks(
+bool Database::FallBack::updateOneNolocks(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::updateOneNoLocks");
+  MacroRegisterFunctionWithName("Database::FallBack::updateOneNolocks");
   if (!this->hasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
   int index = - 1;
-  if (!this->findIndexOneNoLocksMinusOneNotFound(findQuery, index, commentsOnFailure)) {
+  if (!this->findIndexOneNolocksMinusOneNotFound(findQuery, index, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to find one entry. ";
     }
@@ -100,12 +100,12 @@ bool Database::FallBack::findOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::findOne");
-  MutexProcessLockGuard guardDB(this->access);
+  MutexProcesslockGuard guardDB(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;
   }
   int index = - 1;
-  if (!this->findIndexOneNoLocksMinusOneNotFound(
+  if (!this->findIndexOneNolocksMinusOneNotFound(
     query, index, commentsOnFailure
   )) {
     return false;
@@ -142,12 +142,12 @@ std::string Database::FallBack::toStringIndices() const {
   return out.str();
 }
 
-bool Database::FallBack::findIndexOneNoLocksMinusOneNotFound(
+bool Database::FallBack::findIndexOneNolocksMinusOneNotFound(
   const QueryExact& query,
   int& output,
   std::stringstream* commentsOnNotFound
 ) {
-  MacroRegisterFunctionWithName("Database::FallBack::findIndexOneNoLocksMinusOneNotFound");
+  MacroRegisterFunctionWithName("Database::FallBack::findIndexOneNolocksMinusOneNotFound");
   output = - 1;
   if (!this->hasCollection(query.collection, commentsOnNotFound)) {
     if (commentsOnNotFound != nullptr) {
@@ -192,7 +192,7 @@ bool Database::FallBack::findIndexOneNoLocksMinusOneNotFound(
 bool Database::FallBack::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
-  MutexProcessLockGuard guardDB(this->access);
+  MutexProcesslockGuard guardDB(this->access);
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
   }
@@ -228,7 +228,7 @@ Database::FallBack::FallBack() {
 }
 
 void Database::FallBack::initialize() {
-  this->access.CreateMe("databaseFallback", false);
+  this->access.createMe("databaseFallback", false);
   this->knownIndices.addOnTop({
     DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
   });

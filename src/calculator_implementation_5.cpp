@@ -1536,7 +1536,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
     if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
     }
-    if (!DrawingVariables::GetColorIntFromColorString(
+    if (!DrawingVariables::getColorIntFromColorString(
       theSegment.colorJS, theSegment.colorRGB
     )) {
       theCommands << "Unrecognized color: " << theSegment.colorJS;
@@ -1637,7 +1637,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
     if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
     }
-    if (!DrawingVariables::GetColorIntFromColorString(theSegment.colorJS, theSegment.colorRGB)) {
+    if (!DrawingVariables::getColorIntFromColorString(theSegment.colorJS, theSegment.colorRGB)) {
       theCommands << "Unrecognized color: " << theSegment.colorJS;
     }
   }

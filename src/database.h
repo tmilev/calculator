@@ -150,12 +150,12 @@ public:
     // When the element isn't found but otherwise there were
     // no problems with the query, true will be returned with
     // output set to [].
-    bool findIndexOneNoLocksMinusOneNotFound(
+    bool findIndexOneNolocksMinusOneNotFound(
       const QueryExact& query,
       int& output,
       std::stringstream* commentsOnNotFound
     );
-    bool updateOneNoLocks(
+    bool updateOneNolocks(
       const QueryExact& findQuery,
       const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr

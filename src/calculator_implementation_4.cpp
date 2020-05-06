@@ -2450,7 +2450,7 @@ std::string Function::toStringFull() const {
     }
     // out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "") {
-      out2 << "<a href=\"" << global.DisplayNameExecutable
+      out2 << "<a href=\"" << global.displayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
       << HtmlRoutines::convertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;

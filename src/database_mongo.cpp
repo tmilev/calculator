@@ -1393,7 +1393,7 @@ std::string Database::toHtmlDatabaseCollection(const std::string& currentTable) 
       out << "There are " << theCollectionNames.size << " collections. ";
       for (int i = 0; i < theCollectionNames.size; i ++) {
         out << "<br>";
-        out << "<a href=\"" << global.DisplayNameExecutable
+        out << "<a href=\"" << global.displayNameExecutable
         << "?request=database&currentDatabaseTable="
         << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
       }

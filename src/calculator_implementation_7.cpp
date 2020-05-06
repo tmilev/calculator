@@ -6145,7 +6145,7 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
   if (!colorE.isOfType<std::string>(&colorString)) {
     colorString = colorE.toString();
   }
-  if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.colorFillRGB)) {
+  if (!DrawingVariables::getColorIntFromColorString(colorString, theFilledPlot.colorFillRGB)) {
     theCommands << "Failed to extract color from: " << colorE.toString() << "; using default color value. ";
   }
   theFilledPlot.colorFillJS = colorString;
@@ -6231,7 +6231,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     thePlotObj.colorJS = "red";
   }
   thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
-  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
+  DrawingVariables::getColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 6) {
     input[5].evaluatesToDouble(&thePlotObj.lineWidth);
@@ -6403,7 +6403,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   thePlot.dimension = theFinalPlot.dimension;
   thePlot.colorRGB =static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
   if (input[2].isOfType<std::string>()) {
-    DrawingVariables::GetColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
+    DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
   }
   thePlot.colorJS = input[2].toString();
   thePlot.thePlotType = "points";
@@ -6705,7 +6705,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
       thePlot.colorJS = input[4].toString();
     }
   }
-  DrawingVariables::GetColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
+  DrawingVariables::getColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
   thePlot.lineWidth = 1;
   if (input.size() >= 6) {
     if (!input[5].evaluatesToDouble(&thePlot.lineWidth)) {

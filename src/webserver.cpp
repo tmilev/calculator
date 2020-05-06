@@ -51,11 +51,11 @@ SignalsInfrastructure::SignalsInfrastructure() {
 }
 
 // This class locks/unlocks all signals within its scope
-class SignalLock {
-  SignalLock() {
+class Signallock {
+  Signallock() {
     SignalsInfrastructure::theSignals().blockSignals();
   }
-  ~SignalLock() {
+  ~Signallock() {
     SignalsInfrastructure::theSignals().unblockSignals();
   }
 };
@@ -363,11 +363,11 @@ std::string WebWorker::toStringMessageShort() const {
   out << lineBreak << "\nRelative physical file/directory name:\n"
   << HtmlRoutines::convertStringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << lineBreak << "\nExecutable url:\n"
-  << HtmlRoutines::convertStringToHtmlString(global.DisplayNameExecutable, false);
+  << HtmlRoutines::convertStringToHtmlString(global.displayNameExecutable, false);
   out << lineBreak << "\nPhysical address project base:\n"
-  << HtmlRoutines::convertStringToHtmlString(global.PhysicalPathProjectBase, false);
+  << HtmlRoutines::convertStringToHtmlString(global.physicalPathProjectBase, false);
   out << lineBreak << "\nPhysical address server base:\n"
-  << HtmlRoutines::convertStringToHtmlString(global.PhysicalPathServerBase, false);
+  << HtmlRoutines::convertStringToHtmlString(global.physicalPathServerBase, false);
   out << "<hr>";
   if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
@@ -722,7 +722,7 @@ std::string WebWorker::getHtmlHiddenInputs(bool includeUserName, bool includeAut
 void WebWorker::writeAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   this->pauseIfRequested();
   MacroRegisterFunctionWithName("WebWorker::writeAfterTimeoutProgress");
-  if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(true)) {
+  if (!this->workerToWorkerRequestIndicator.readOnceNoFailure(true)) {
     global << Logger::red
     << "Failed to read non-blocking worker-to-worker pipe. " << Logger::endL;
     return;
@@ -898,8 +898,8 @@ void WebWorker::attemptUnknownRequestErrorCorrection() {
     this->requestTypE = this->requestGet;
   }
   if (this->addressGetOrPost == "") {
-    global << "Address set to: " << global.DisplayNameExecutable << "\n";
-    this->addressGetOrPost = global.DisplayNameExecutable;
+    global << "Address set to: " << global.displayNameExecutable << "\n";
+    this->addressGetOrPost = global.displayNameExecutable;
   }
   global << Logger::blue
   << "Unrecognized message head, length: " << this->messageHead.size() << ".\n";
@@ -1059,7 +1059,7 @@ int WebWorker::getIndexIfRunningWorkerId(
   // of requesting a unique id.
   int indexOther = this->parent->workerIds.getValue(workerId, - 1);
   if (indexOther >= 0) {
-    this->parent->theWorkers[indexOther].writingReportFile.Lock();
+    this->parent->theWorkers[indexOther].writingReportFile.lock();
   }
   bool success = FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId,
@@ -1069,7 +1069,7 @@ int WebWorker::getIndexIfRunningWorkerId(
     &commentsOnError
   );
   if (indexOther >= 0) {
-    this->parent->theWorkers[indexOther].writingReportFile.Unlock();
+    this->parent->theWorkers[indexOther].writingReportFile.unlock();
   }
   if (!success) {
     commentsOnError << "Failed to load your output with id: " << workerId << ". ";
@@ -1137,7 +1137,7 @@ JSData WebWorker::processComputationIndicatorJSData() {
   }
   WebWorker& otherWorker = this->parent->theWorkers[otherIndex];
   // Request a progress report from the running worker, non-blocking.
-  otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", true);
+  otherWorker.workerToWorkerRequestIndicator.writeOnceAfterEmptying("!", true);
   return result;
 }
 
@@ -1191,7 +1191,7 @@ void WebWorker::writeAfterTimeoutPartTwo(
   WebWorker& currentWorker = global.server().getActiveWorker();
   result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
   std::string toWrite = result.toString(nullptr);
-  currentWorker.writingReportFile.Lock();
+  currentWorker.writingReportFile.lock();
   bool success = FileOperations::writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + currentWorker.workerId,
     toWrite,
@@ -1200,7 +1200,7 @@ void WebWorker::writeAfterTimeoutPartTwo(
     &commentsOnError
   );
   currentWorker.writeAfterTimeoutCarbonCopy(result, fileNameCarbonCopy);
-  currentWorker.writingReportFile.Unlock();
+  currentWorker.writingReportFile.unlock();
   if (success) {
     global << Logger::green << "Data written to file: "
     << currentWorker.workerId << Logger::endL;
@@ -1291,7 +1291,7 @@ int WebWorker::processFileDoesntExist() {
   << "<body>";
   out << "one page <a href = \"" << global.displayApplication << "\">app</a>. ";
   out << " Same app without browser cache: <a href = \""
-  << global.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
+  << global.displayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
   out << "<b>File does not exist.</b>";
   if (this->flagFileNameSanitized) {
     out
@@ -1470,7 +1470,7 @@ void WebWorker::wrapUpConnection() {
   if (global.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
-  this->pipeWorkerToServerControls.WriteOnceAfterEmptying(
+  this->pipeWorkerToServerControls.writeOnceAfterEmptying(
     this->resultWork.toString(nullptr), false
   );
   if (global.flagServerDetailedLog) {
@@ -1617,7 +1617,7 @@ std::string WebWorker::getChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   ) {
     out << "<br>It appears your password is already set. "
     << "<br>If you'd like to change it using your old password, "
-    << "<a href=\"" << global.DisplayNameExecutable
+    << "<a href=\"" << global.displayNameExecutable
     << "?request=changePasswordPage\">click here</a>. ";
     outputDoShowPasswordChangeField = false;
     userInfo[DatabaseStrings::labelActivationToken] = "activated";
@@ -1788,10 +1788,10 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   bool stateNotModified = true;
   if (!global.flagSSLIsAvailable) {
     if (
-      this->addressComputed == global.DisplayNameExecutable &&
+      this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
     ) {
-      this->addressComputed = global.DisplayNameExecutable;
+      this->addressComputed = global.displayNameExecutable;
       global.requestType = "calculator";
       stateNotModified = false;
     }
@@ -1817,8 +1817,8 @@ bool WebWorker::redirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     return false;
   }
   std::stringstream redirectedAddress;
-  if (this->addressComputed == global.DisplayNameExecutable) {
-    redirectedAddress << global.DisplayNameExecutable << "?request="
+  if (this->addressComputed == global.displayNameExecutable) {
+    redirectedAddress << global.displayNameExecutable << "?request="
     << global.requestType << "&";
   } else {
     redirectedAddress << this->addressComputed << "?";
@@ -1864,17 +1864,17 @@ bool WebWorker::correctRequestsAFTERLoginReturnFalseIfModified() {
   }
   if (!global.flagSSLIsAvailable) {
     if (
-      this->addressComputed == global.DisplayNameExecutable &&
+      this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
     ) {
-      this->addressComputed = global.DisplayNameExecutable;
+      this->addressComputed = global.displayNameExecutable;
       global.requestType = WebAPI::app;
       stateNotModified = false;
     }
   }
   if (global.flagLoggedIn) {
     if (
-      this->addressComputed == global.DisplayNameExecutable &&
+      this->addressComputed == global.displayNameExecutable &&
       global.requestType == ""
     ) {
       shouldFallBackToDefaultPage = true;
@@ -2000,7 +2000,7 @@ int WebWorker::serveClient() {
     this->flagArgumentsAreOK = false;
   }
   global.requestType = "";
-  if (this->addressComputed == global.DisplayNameExecutable) {
+  if (this->addressComputed == global.displayNameExecutable) {
     global.requestType = global.getWebInput("request");
   }
   std::stringstream comments;
@@ -2131,14 +2131,14 @@ int WebWorker::processFolderOrFile() {
 }
 
 void WebWorker::pauseIfRequested() {
-  this->PauseWorker.Lock(); // If pause was requested, here we block.
-  this->PauseWorker.Unlock();
+  this->PauseWorker.lock(); // If pause was requested, here we block.
+  this->PauseWorker.unlock();
 }
 
 void WebWorker::resetMutexProcesses() {
   MacroRegisterFunctionWithName("WebWorker::resetMutexProcesses");
-  this->PauseWorker.ResetNoAllocation();
-  this->writingReportFile.ResetNoAllocation();
+  this->PauseWorker.resetNoAllocation();
+  this->writingReportFile.resetNoAllocation();
 }
 
 void WebWorker::releaseKeepInUseFlag() {
@@ -2410,7 +2410,7 @@ void WebServer::workerTimerPing(int64_t pingTime) {
   }
   std::stringstream outTimestream;
   outTimestream << pingTime;
-  global.server().getActiveWorker().pipeWorkerToServerTimerPing.WriteOnceAfterEmptying(outTimestream.str(), false);
+  global.server().getActiveWorker().pipeWorkerToServerTimerPing.writeOnceAfterEmptying(outTimestream.str(), false);
 }
 
 void WebServer::releaseNonActiveWorkers() {
@@ -2479,22 +2479,22 @@ bool WebServer::createNewActiveWorker() {
   std::string wtos = wtosStream.str();
   std::string wtow = this->toStringWorkerToWorker();
   WebWorker& worker = this->getActiveWorker();
-  if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, true)) {
+  if (!worker.workerToWorkerRequestIndicator.createMe(wtow + "request-indicator", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.workerToWorkerRequestIndicator.name << "\n";
     return this->emergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, true)) {
+  if (!worker.pipeWorkerToServerTimerPing.createMe(wtos + "ping", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToServerTimerPing.name << "\n";
     return this->emergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, true)) {
+  if (!worker.pipeWorkerToServerControls.createMe(wtos + "controls", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToServerControls.name << "\n";
     return this->emergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, true)) {
+  if (!worker.pipeWorkerToWorkerStatus.createMe(wtos + "worker status", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToWorkerStatus.name << "\n";
     return this->emergencyRemoval_LastCreatedWorker();
@@ -2614,8 +2614,8 @@ std::string WebServer::toStringStatusAll() {
     if (!currentWorker.flagInUsE) {
       continue;
     }
-    currentWorker.pipeWorkerToWorkerStatus.ReadOnceWithoutEmptying(false);
-    currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
+    currentWorker.pipeWorkerToWorkerStatus.readOnceWithoutEmptying(false);
+    currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.getLastRead();
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.toString();
@@ -2758,7 +2758,7 @@ void WebServer::releaseWorkerSideResources() {
 
 bool WebServer::requiresLogin(const std::string& inputRequest, const std::string& inputAddress) {
   MacroRegisterFunctionWithName("WebServer::requiresLogin");
-  if (inputAddress == global.DisplayNameExecutable) {
+  if (inputAddress == global.displayNameExecutable) {
     if (this->requestsNotNeedingLogin.contains(inputRequest)) {
       return false;
     }
@@ -2875,7 +2875,7 @@ void WebServer::markChildNotInUse(int childIndex) {
 }
 
 void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
-  std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.GetLastRead();
+  std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.getLastRead();
   this->markChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
@@ -2913,7 +2913,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   if (currentControlPipe.flagReadEndBlocks) {
     global.fatal << "Pipe: " << currentControlPipe.toString() << " has blocking read end. " << global.fatal;
   }
-  currentControlPipe.ReadOnceIfFailThenCrash(true);
+  currentControlPipe.readOnceNoFailure(true);
   if (currentControlPipe.lastRead.size > 0) {
     this->processOneChildMessage(childIndex, numberInUse);
   } else {
@@ -2923,9 +2923,9 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   if (currentPingPipe.flagReadEndBlocks) {
     global.fatal << "Pipe: " << currentPingPipe.toString() << " has blocking read end. " << global.fatal;
   }
-  currentPingPipe.ReadOnceIfFailThenCrash(true);
+  currentPingPipe.readOnceNoFailure(true);
   if (currentPingPipe.lastRead.size > 0) {
-    currentWorker.pingMessage = currentPingPipe.GetLastRead();
+    currentWorker.pingMessage = currentPingPipe.getLastRead();
     currentWorker.millisecondsLastPingServerSideOnly = global.getElapsedMilliseconds();
     if (currentWorker.pingMessage != "") {
       global << Logger::blue << "Worker " << childIndex + 1 << " ping: "
@@ -3702,7 +3702,7 @@ void WebServer::checkSystemInstallationMongoDatabase() {
     global.externalCommandNoOutput("sudo yum install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
-  global.changeDirectory(global.PhysicalPathProjectBase);
+  global.changeDirectory(global.physicalPathProjectBase);
   global.externalCommandNoOutput("make clean", true);
   global << "Proceeding to rebuild the calculator. " << Logger::red
   << "This is expected to take 10+ minutes. " << Logger::endL;
@@ -3769,7 +3769,7 @@ void WebServer::checkFreecalcSetup() {
   global << Logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << Logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
   std::string startingDir = FileOperations::getCurrentFolder();
-  global.changeDirectory(global.PhysicalPathProjectBase + "../");
+  global.changeDirectory(global.physicalPathProjectBase + "../");
   global << Logger::green << "Current folder: " << FileOperations::getCurrentFolder() << Logger::endL;
   global << Logger::green << "git clone https://github.com/tmilev/freecalc.git" << Logger::endL;
   global.externalCommandNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
@@ -3942,7 +3942,7 @@ bool ArgumentAnalyzer::setPathExecutable() {
     return false;
   }
   this->currentIndex ++;
-  global.PathExecutableUserInputOrDeduced = global.programArguments[this->currentIndex];
+  global.pathExecutableUserInputOrDeduced = global.programArguments[this->currentIndex];
   return true;
 }
 
@@ -4013,7 +4013,7 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   if (argC == 0) {
     return;
   }
-  global.PathExecutableUserInputOrDeduced = global.programArguments[0];
+  global.pathExecutableUserInputOrDeduced = global.programArguments[0];
   if (argC < 2) {
     return;
   }
@@ -4237,7 +4237,7 @@ bool GlobalVariables::configurationStore() {
       global << Logger::red << "Physical file name configuration: "
       << Logger::blue << configFileNamePhysical << Logger::endL;
       global << Logger::red << "Server base: " << Logger::blue
-      << global.PhysicalPathProjectBase << Logger::endL;
+      << global.physicalPathProjectBase << Logger::endL;
     }
     return false;
   }
@@ -4407,12 +4407,12 @@ int WebServer::main(int argc, char **argv) {
     global.initDefaultFolderAndFileNames();
     // Ensure the server path coincides with the current
     // directory.
-    global.changeDirectory(global.PhysicalPathProjectBase);
+    global.changeDirectory(global.physicalPathProjectBase);
     // Initializes folder locations needed by logging facilities.
     FileOperations::initializeFoldersSensitive();
 
     global << Logger::green << "Project base folder: "
-    << Logger::blue << global.PhysicalPathProjectBase
+    << Logger::blue << global.physicalPathProjectBase
     << Logger::endL;
     global << Logger::green << "Current folder: "
     << Logger::blue << FileOperations::getCurrentFolder()

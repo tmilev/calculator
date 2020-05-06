@@ -3286,7 +3286,7 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
         if (this->theNilradicalSubsetWeights.conesIntersect(
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
-          betterIntersection.ScaleNormalizeFirstNonZero();
+          betterIntersection.scaleNormalizeFirstNonZero();
           this->ConeStrongIntersection.makeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.setSize(0);
           for (int k = 0; k < this->theNilradSubsel.cardinalitySelection; k ++) {
@@ -3329,7 +3329,7 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
           &this->ConeRelativelyStrongIntersection,
           nullptr
         )) {
-          this->ConeRelativelyStrongIntersection.ScaleNormalizeFirstNonZero();
+          this->ConeRelativelyStrongIntersection.scaleNormalizeFirstNonZero();
           return true;
         } else {
           this->FKnilradicalLog += "... but the cones dont intersect. ";
@@ -3788,8 +3788,8 @@ bool CandidateSSSubalgebra::compareLeftGreaterThanRight(const Vector<Rational>& 
   }
   Vector<Rational> leftCpart = left;
   Vector<Rational> rightCpart = right;
-  leftCpart.ShiftToTheLeft(this->theHs.size);
-  rightCpart.ShiftToTheLeft(this->theHs.size);
+  leftCpart.shiftToTheLeft(this->theHs.size);
+  rightCpart.shiftToTheLeft(this->theHs.size);
   return leftCpart > rightCpart;
 }
 
@@ -3988,7 +3988,7 @@ void CandidateSSSubalgebra::computePrimalModuleDecompositionHWVsOnly(HashedList<
     }
     adIncludingCartanActions.getZeroEigenSpace(outputV);
     for (int j = 0; j < outputV.size; j ++) {
-      outputV[j].ScaleNormalizeFirstNonZero();
+      outputV[j].scaleNormalizeFirstNonZero();
       tempElt.assignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->getAmbientSemisimpleLieAlgebra());
       this->HighestVectorsNonSorted.addOnTop(tempElt);
     }
@@ -7068,7 +7068,7 @@ void CandidateSSSubalgebra::computeCartanOfCentralizer() {
       theCentralizerH /= theFirstNonZeroCoeff;
     }
     this->CartanOfCentralizer[i] = theCentralizerH;
-    this->CartanOfCentralizer[i].ScaleNormalizeFirstNonZero();
+    this->CartanOfCentralizer[i].scaleNormalizeFirstNonZero();
   }
   ////////////////
   this->BilinearFormSimplePrimal = this->theWeylNonEmbedded->cartanSymmetric;

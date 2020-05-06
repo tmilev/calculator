@@ -10,13 +10,13 @@ void GlobalStatistics::checkPointerCounters() {
   if (GlobalStatistics::globalPointerCounter > GlobalStatistics::cgiLimitRAMuseNumPointersInList) {
     /////////////////////////////////////////////////
     // *** Deadlock alert: critical section start ***
-    global.MutexParallelComputingCrash.lockMe();
+    global.mutexParallelComputingCrash.lockMe();
     if (GlobalStatistics::flagUngracefulExitInitiated) {
-      global.MutexParallelComputingCrash.unlockMe();
+      global.mutexParallelComputingCrash.unlockMe();
       return;
     }
     GlobalStatistics::flagUngracefulExitInitiated = true;
-    global.MutexParallelComputingCrash.unlockMe();
+    global.mutexParallelComputingCrash.unlockMe();
     // *** Deadlock alert: critical section end ***
     /////////////////////////////////////////////////
     global.fatal << "This may or may not be an error: the number of pointers "
@@ -40,9 +40,9 @@ void MutexRecursiveWrapper::checkConsistency() {
 void MutexRecursiveWrapper::initConstructorCallOnly() {
   this->flagDeallocated = false;
   this->flagInitialized = false;
-  this->flagUnsafeFlagForDebuggingIsLocked = false;
+  this->flagUnsafeFlagForDebuggingIslocked = false;
   this->theMutexImplementation = nullptr;
-  this->lastLockerThread = - 1;
+  this->lastlockerThread = - 1;
 #ifdef AllocationLimitsSafeguard
 GlobalStatistics::globalPointerCounter ++;
 #endif
@@ -67,10 +67,10 @@ MutexRecursiveWrapper::~MutexRecursiveWrapper() {
   this->flagInitialized = false;
 }
 
-bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly() {
- // std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
+bool MutexRecursiveWrapper::islockedUnsafeUseForWINguiOnly() {
+ // std::cout << "checking consistency from islockedUnsafeUseForWINguiOnly";
   this->checkConsistency();
-  return this->flagUnsafeFlagForDebuggingIsLocked;
+  return this->flagUnsafeFlagForDebuggingIslocked;
 }
 
 void MutexRecursiveWrapper::lockMe() {
@@ -79,9 +79,9 @@ void MutexRecursiveWrapper::lockMe() {
     return;
   }
   try {
-    if (this->flagUnsafeFlagForDebuggingIsLocked) {
+    if (this->flagUnsafeFlagForDebuggingIslocked) {
       int currentThreadId = ThreadData::getCurrentThreadId();
-      if (currentThreadId == this->lastLockerThread) {
+      if (currentThreadId == this->lastlockerThread) {
         global << Logger::red << "Fatal: about to self-lock: ["
         << this->mutexName << "] thread: "
         << currentThreadId
@@ -93,8 +93,8 @@ void MutexRecursiveWrapper::lockMe() {
   } catch (...) {
     global.fatal << "Fatal error: mutex lock failed. " << global.fatal;
   }
-  this->flagUnsafeFlagForDebuggingIsLocked = true;
-  this->lastLockerThread = ThreadData::getCurrentThreadId();
+  this->flagUnsafeFlagForDebuggingIslocked = true;
+  this->lastlockerThread = ThreadData::getCurrentThreadId();
 }
 
 void MutexRecursiveWrapper::unlockMe() {
@@ -102,16 +102,16 @@ void MutexRecursiveWrapper::unlockMe() {
   if (!this->initializeIfNeeded()) {
     return;
   }
-  this->flagUnsafeFlagForDebuggingIsLocked = false;
-  this->lastLockerThread = - 1;
+  this->flagUnsafeFlagForDebuggingIslocked = false;
+  this->lastlockerThread = - 1;
   static_cast<std::mutex*>(this->theMutexImplementation)->unlock();
 }
 
 void PauseThread::safePointDontCallMeFromDestructors() {
   this->mutexSignalMeWhenReachingSafePoint.unlockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.lockMe();
+  this->mutexlockMeToPauseCallersOfSafePoint.lockMe();
   this->mutexSignalMeWhenReachingSafePoint.lockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.unlockMe();
+  this->mutexlockMeToPauseCallersOfSafePoint.unlockMe();
 }
 
 void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint() {
@@ -121,7 +121,7 @@ void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesS
     return;
   }
   this->mutexHoldMeWhenReadingOrWritingInternalFlags.unlockMe();
-  this->mutexLockMeToPauseCallersOfSafePoint.lockMe();
+  this->mutexlockMeToPauseCallersOfSafePoint.lockMe();
   this->mutexSignalMeWhenReachingSafePoint.lockMe();
   this->flagIsPausedWhileRunning = true;
   this->mutexSignalMeWhenReachingSafePoint.unlockMe();
@@ -129,7 +129,7 @@ void PauseThread::signalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesS
 
 void PauseThread::unlockSafePoint() {
   this->flagIsPausedWhileRunning = false;
-  this->mutexLockMeToPauseCallersOfSafePoint.unlockMe();
+  this->mutexlockMeToPauseCallersOfSafePoint.unlockMe();
 }
 
 void PauseThread::initComputation() {
@@ -201,7 +201,7 @@ ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
 }
 
 void ThreadData::createThread(void (*InputFunction)(int), const std::string& inputName) {
-  MutexLockGuard(global.MutexRegisterNewThread);
+  MutexlockGuard(global.mutexRegisterNewThread);
   ThreadData& theData = ThreadData::registerNewThread(inputName);
   std::thread newThread(InputFunction, theData.index);
   global.theThreads.lastObject().swap(newThread);
@@ -220,7 +220,7 @@ int ThreadData::getCurrentThreadId() {
 
 std::string ThreadData::toStringHtml() const {
   std::stringstream out;
-  out << "Process type: <b>" << global.logs.ToStringprocessType() << "</b>. ";
+  out << "Process type: <b>" << global.logs.toStringProcessType() << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
     out << "<b style = 'color:green'>Current thread</b> ";
   } else {

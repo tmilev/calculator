@@ -204,7 +204,7 @@ bool WebAPIResponse::processUnpauseWorker() {
     return global.theResponse.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
-  if (!otherWorker.PauseWorker.Unlock()) {
+  if (!otherWorker.PauseWorker.unlock()) {
     result[WebAPI::result::error] = "Failed to unpause process";
   } else {
     result[WebAPI::result::status] = "unpaused";
@@ -222,7 +222,7 @@ bool WebAPIResponse::processPauseWorker() {
     return global.theResponse.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
-  if (otherWorker.PauseWorker.Lock()) {
+  if (otherWorker.PauseWorker.lock()) {
     result[WebAPI::result::status] = "paused";
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";
@@ -323,7 +323,7 @@ bool WebAPIResponse::processChangePassword(const std::string& reasonForNoAuthent
   if (global.getWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
-    << global.DisplayNameExecutable  << "?request=logout"
+    << global.displayNameExecutable  << "?request=logout"
     << "&username="
     << HtmlRoutines::convertStringToURLString(global.userDefault.username, false)
     << "&activationToken = &authenticationToken = &"

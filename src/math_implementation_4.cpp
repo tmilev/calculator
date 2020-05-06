@@ -224,9 +224,9 @@ std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
 
 std::string GlobalVariables::toStringFolderInfo() const {
   std::stringstream out;
-  out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
-  out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
-  out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderExecutable;
+  out << "<br>Physical path server base: " << this->physicalPathServerBase;
+  out << "<br>Diplay name executable: " << this->displayNameExecutable;
+  out << "<br>Physical name folder below executable: " << this->physicalNameFolderExecutable;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
 }
@@ -332,22 +332,22 @@ void GlobalVariables::initThreadsExecutableStart() {
 
 void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  this->PhysicalPathProjectBase = FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
-  this->changeDirectory(this->PhysicalPathProjectBase);
-  this->PhysicalPathProjectBase = FileOperations::getCurrentFolder() + "/";
+  this->physicalPathProjectBase = FileOperations::getPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
+  this->changeDirectory(this->physicalPathProjectBase);
+  this->physicalPathProjectBase = FileOperations::getCurrentFolder() + "/";
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames() {
-  this->initFoldersProjectBase(global.PathExecutableUserInputOrDeduced);
-  this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase;
-  this->PhysicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.PathExecutableUserInputOrDeduced);
-  this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
-  this->PhysicalPathServerBase = this->PhysicalPathProjectBase;
+  this->initFoldersProjectBase(global.pathExecutableUserInputOrDeduced);
+  this->physicalNameFolderExecutable = this->physicalPathProjectBase;
+  this->PhysicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.pathExecutableUserInputOrDeduced);
+  this->PhysicalNameExecutableWithPath = this->physicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
+  this->physicalPathServerBase = this->physicalPathProjectBase;
   this->DisplayPathOutputFolder = "/output/";
 
-  this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
+  this->displayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
-  this->DisplayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
+  this->displayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -368,7 +368,7 @@ bool GlobalVariables::userStudentVieWOn() {
   return global.getWebInput("studentView") == "true";
 }
 
-std::string GlobalVariables::LogData::ToStringprocessType() const {
+std::string GlobalVariables::LogData::toStringProcessType() const {
   switch (this->logType) {
   case GlobalVariables::LogData::type::server:
     return "server";
@@ -1189,18 +1189,18 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   return result;
 }
 
-bool AffineCone::SplitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output) {
+bool AffineCone::splitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output) {
   (void) theKillerPlane;
   (void) output;
   return true;
 }
 
-bool AffineCone::WallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate) {
+bool AffineCone::wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate) {
   (void) theKillerCandidate;
   return true;
 }
 
-int AffineCone::GetDimension() {
+int AffineCone::getDimension() {
   if (this->theWalls.size == 0) {
     return 0;
   }
@@ -2204,7 +2204,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
       for (int j = 0; j < this->smallerAlgebraChamber[i].Normals.size; j ++) {
         this->transformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
-        wallToSliceWith.ScaleNormalizeFirstNonZero();
+        wallToSliceWith.scaleNormalizeFirstNonZero();
         this->projectivizedChambeR.splittingNormals.addOnTopNoRepetition(wallToSliceWith);
       }
     }

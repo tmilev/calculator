@@ -67,7 +67,7 @@ std::string CalculatorHTML::toStringLinkFromProblem(
     request[WebAPI::frontend::exerciseType] = WebAPI::frontend::scoredQuiz;
   }
   std::stringstream out;
-  out << "<a href='" << global.DisplayNameExecutableAppNoCache
+  out << "<a href='" << global.displayNameExecutableAppNoCache
   << "#"
   << request.toString()
   << "'>"
@@ -724,7 +724,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     thePlotObj.colorJS = "blue";
   }
   thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
-  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
+  DrawingVariables::getColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 8) {
     input[7].evaluatesToDouble(&thePlotObj.lineWidth);

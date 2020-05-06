@@ -1734,7 +1734,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     outScript << currentPlot.toStringPointsList();
     outScript << ", " << "\"";
     if (currentPlot.colorJS == "") {
-      outScript << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
+      outScript << DrawingVariables::getColorHtmlFromColorIndex (currentPlot.colorRGB);
     } else {
       outScript << currentPlot.colorJS;
     }

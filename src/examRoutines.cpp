@@ -567,7 +567,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
     return "";
   }
   std::stringstream out;
-  out << "<a class =\"linkStandardButtonLike\" href=\"" << global.DisplayNameExecutable << "?request="
+  out << "<a class =\"linkStandardButtonLike\" href=\"" << global.displayNameExecutable << "?request="
   << global.requestType << "&";
   std::string urledProblem = HtmlRoutines::convertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
@@ -622,14 +622,14 @@ std::string CalculatorHTML::toStringLinkFromFileName(const std::string& theFileN
     theFileName == this->courseHome ||
     StringRoutines::stringEndsWith(theFileName, ".txt")
   ) {
-    out << "<a href=\"" << global.DisplayNameExecutable
+    out << "<a href=\"" << global.displayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();
   }
   if (!global.userGuestMode()) {
-    refStreamExercise << global.DisplayNameExecutable
+    refStreamExercise << global.displayNameExecutable
     << "?request=exercise&" << refStreamNoRequest.str();
-    refStreamForReal << global.DisplayNameExecutable
+    refStreamForReal << global.displayNameExecutable
     << "?request=scoredQuiz&" << refStreamNoRequest.str();
   } else {
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
@@ -1301,7 +1301,7 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
     return;
   }
   std::stringstream out;
-  out << "<a href=\"" << global.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
+  out << "<a href=\"" << global.displayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 }
 
@@ -2936,7 +2936,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
     out << "<b>Guest mode</b>" << linkSeparator;
   }
   if (!global.flagLoggedIn) {
-    out << "<a href=\"" << global.DisplayNameExecutable
+    out << "<a href=\"" << global.displayNameExecutable
     << "?request=login\">Log in</a> " << linkSeparator;
   }
   List<std::string> randomSeedContainer;
@@ -2945,7 +2945,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
   global.toStringCalculatorArgumentsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem) {
     if (global.requestType == "exercise") {
-      out << "<a href=\"" << global.DisplayNameExecutable << "?request=scoredQuiz&"
+      out << "<a href=\"" << global.displayNameExecutable << "?request=scoredQuiz&"
       << this->toStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
       out << "<b style =\"color:green\">" << this->stringPracticE
@@ -2953,7 +2953,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
     } else if (global.requestType == "scoredQuiz") {
       out << "<b style =\"color:brown\">"
       << this->stringScoredQuizzes << "</b>" << linkSeparator;
-      out << "<a href=\"" << global.DisplayNameExecutable
+      out << "<a href=\"" << global.displayNameExecutable
       << "?request=exercise&"
       << this->toStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
@@ -2965,7 +2965,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
       out << "<b>Problem not in course</b>" << linkSeparator;
     } else {
       if (indexInParent > 0) {
-        out << "<a href=\"" << global.DisplayNameExecutable << "?request="
+        out << "<a href=\"" << global.displayNameExecutable << "?request="
         << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
@@ -2980,7 +2980,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
         out << "<a disabled =\"disabled\">&#8592;</a>" << linkSeparator;
       }
       if (indexInParent < this->problemNamesNoTopics.size - 1) {
-        out << "<a href=\"" << global.DisplayNameExecutable << "?request="
+        out << "<a href=\"" << global.displayNameExecutable << "?request="
         << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
@@ -3000,7 +3000,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
     global.requestType == "exercise" ||
     global.requestType == "exerciseNoLogin"
   )) {
-    out << "<a href=\"" << global.DisplayNameExecutable
+    out << "<a href=\"" << global.displayNameExecutable
     << "?request=" << global.requestType << "&"
     << this->toStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << " (#"
@@ -3008,7 +3008,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
   }
   if (global.userDefaultHasAdminRights()) {
     if (global.userStudentVieWOn()) {
-      out << "<a href=\"" << global.DisplayNameExecutable << "?"
+      out << "<a href=\"" << global.displayNameExecutable << "?"
       << this->toStringCalculatorArgumentsForProblem(
         global.requestType,
         "false",
@@ -3021,7 +3021,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
       if (global.userStudentVieWOn()) {
         out << "<b>Student View</b>";
       } else {
-        out << "<a href=\"" << global.DisplayNameExecutable << "?"
+        out << "<a href=\"" << global.displayNameExecutable << "?"
         << this->toStringCalculatorArgumentsForProblem(global.requestType, "true", "")
         << "\">Student view</a>";
       }
@@ -3038,7 +3038,7 @@ std::string CalculatorHTML::toStringProblemNavigation() const {
         ) {
           out << "<b>" << this->databaseStudentSections[i] << "</b>";
         } else {
-          out << "<a href=\"" << global.DisplayNameExecutable << "?"
+          out << "<a href=\"" << global.displayNameExecutable << "?"
           << this->toStringCalculatorArgumentsForProblem(
             global.requestType, "true", this->databaseStudentSections[i]
           ) << "\">" << this->databaseStudentSections[i] << " </a>";
@@ -3839,9 +3839,9 @@ void CalculatorHTML::interpretAccountInformationLinks(SyntacticElementHTML& inpu
     inputOutput.interpretedCommand = out.str();
     return;
   }
-  out << "<a href=\"" << global.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
+  out << "<a href=\"" << global.displayNameExecutable << "?request=changePasswordPage\">Change password</a>";
   if (global.userDefaultHasAdminRights()) {
-    out << "<br>\n<a href=\"" << global.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
+    out << "<br>\n<a href=\"" << global.displayNameExecutable << "?request=accounts\">Manage accounts</a>";
   }
   inputOutput.interpretedCommand = out.str();
   return;
@@ -3916,7 +3916,7 @@ void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput)
   bool chapterStarted = false;
   out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
-  out << "<a href=\"" << global.DisplayNameExecutable
+  out << "<a href=\"" << global.displayNameExecutable
   << "?request=template&fileName=" << this->fileName << "&"
   << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
@@ -3945,7 +3945,7 @@ void CalculatorHTML::interpretTableOfContents(SyntacticElementHTML& inputOutput)
       }
     }
     if (currentElt.type == TopicElement::types::chapter) {
-      out << "<li>" << "<a href=\"" << global.DisplayNameExecutable
+      out << "<li>" << "<a href=\"" << global.displayNameExecutable
       << "?request=template&fileName=" << this->fileName << "&"
       << "topicList=" << this->topicListFileName << "&" << "chapter =" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
@@ -4239,10 +4239,10 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     problemSolved = false;
     returnEmptyStringIfNoDeadline = true;
   } else {
-    //std::string theRawSQLink = global.DisplayNameExecutable +
+    //std::string theRawSQLink = global.displayNameExecutable +
     //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = global.DisplayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
+    theRawExerciseLink = global.displayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
     this->displayProblemLink = owner.toStringLinkFromFileName(this->problemFileName);
     this->displayScore = owner.toStringProblemScoreShort(this->problemFileName, problemSolved);
   }

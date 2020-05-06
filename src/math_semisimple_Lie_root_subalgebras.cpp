@@ -408,10 +408,10 @@ void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSuba
         if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.AmbientWeyl.cartanSymmetric.numberOfRows)) {
           Vectors<Rational> tempRoots; std::stringstream out; std::string tempS;
           this->AmbientWeyl.getEpsilonCoordinates(tempNilradical, tempRoots);
-          tempRoots.ElementToStringEpsilonForm(tempS, true, false, false);
+          tempRoots.toStringEpsilonForm(tempS, true, false, false);
           out << tempS;
           this->AmbientWeyl.getEpsilonCoordinates(tempK, tempRoots);
-          tempRoots.ElementToStringEpsilonForm(tempS, true, false, false);
+          tempRoots.toStringEpsilonForm(tempS, true, false, false);
           out << "\n\n" << tempS;
           owner.ReportStringNonNilradicalParabolic = out.str();
         }
@@ -1285,9 +1285,9 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   out << " (Dynkin type computed to be: " << HtmlRoutines::getMathSpanPure(this->theDynkinType.toString()) << ")";
   out << "\n<br>\nSimple basis: " << this->SimpleBasisK.toString();
   out << "\n<br>\nSimple basis epsilon form: "
-  << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  << this->SimpleBasisgEpsCoords.toStringEpsilonForm(useLatex, useHtml, false);
   out << "\n<br>\nSimple basis epsilon form with respect to k: "
-  << this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  << this->SimpleBasisKEpsCoords.toStringEpsilonForm(useLatex, useHtml, false);
   out << "<br>Number of outer autos with trivial action on orthogonal complement and extending to autos of ambient algebra: "
   << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
   out << "<br>Number of outer autos with trivial action on orthogonal complement: "
@@ -1436,7 +1436,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
           linComb[j] += tempRat;
         }
       }
-      int x = linComb.FindLCMDenominatorsTruncateToInt();
+      int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
       linComb *= - x;
       std::string tempS;
       if (this->linearCombinationToString(AllRoots[i], x, linComb, tempS)) {
@@ -1489,7 +1489,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
               linComb[j] += tempRat;
             }
           }
-          int x = linComb.FindLCMDenominatorsTruncateToInt();
+          int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
           linComb *= - x;
           std::string tempS;
           if (this->linearCombinationToStringDistinguishedIndex(l, AllRoots.theObjects[i], x, linComb, tempS)) {
@@ -2057,7 +2057,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
           linComb[j] += tempRat;
         }
       }
-      int x = linComb.FindLCMDenominatorsTruncateToInt();
+      int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
       linComb *= - x;
       bool foundBadCombination = true;
       for (int i = 0; i < theDimension; i ++) {
@@ -3584,7 +3584,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(std::string& output, bo
         out << "\\\\";
       }
       currentRootSA.getAmbientWeyl().getEpsilonCoordinates(currentRootSA.PositiveRootsK, tempRoots2);
-      tempS = tempRoots2.ElementToStringEpsilonForm(true, false, false);
+      tempS = tempRoots2.toStringEpsilonForm(true, false, false);
       out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
       if (includeMatrixForm) {
         out << "\n\n\\noindent\\rule{\\textwidth}{0.3pt}\n\n";

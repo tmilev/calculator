@@ -18,41 +18,41 @@ public:
   std::string name;
   int numberOfBytesLastWrite;
   void release();
-  bool CreateMe(
+  bool createMe(
     const std::string& inputPipeName,
     bool readEndBlocks,
     bool writeEndBlocks,
     bool dontCrashOnFail
   );
-  std::string GetLastRead();
+  std::string getLastRead();
   bool checkConsistency();
-  bool SetPipeFlagsIfFailThenCrash(
+  bool setPipeFlagsNoFailure(
     int inputFlags,
     int whichEnd,
     bool dontCrashOnFail
   );
 
-  bool SetReadNonBlocking (bool dontCrashOnFail);
-  bool SetReadBlocking(bool dontCrashOnFail);
+  bool setReadNonBlocking (bool dontCrashOnFail);
+  bool setReadBlocking(bool dontCrashOnFail);
 
-  bool SetWriteBlocking(bool dontCrashOnFail);
-  bool SetPipeWriteNonBlockingIfFailThenCrash(bool dontCrashOnFail);
+  bool setWriteBlocking(bool dontCrashOnFail);
+  bool setPipeWriteNonBlockingIfFailThenCrash(bool dontCrashOnFail);
 
-  bool SetPipeWriteFlagsIfFailThenCrash(
+  bool setPipeWriteFlagsNoFailure(
     int inputFlags,
     int whichEnd,
     bool dontCrashOnFail
   );
-  bool WriteOnceIfFailThenCrash(
+  bool writeOnceNoFailure(
     const std::string& input,
     int offset,
     bool dontCrashOnFail
   );
-  bool ReadOnceIfFailThenCrash(bool dontCrashOnFail);
-  bool WriteOnceAfterEmptying(const std::string& input, bool dontCrashOnFail);
+  bool readOnceNoFailure(bool dontCrashOnFail);
+  bool writeOnceAfterEmptying(const std::string& input, bool dontCrashOnFail);
 
-  bool ReadOnceWithoutEmptying(bool dontCrashOnFail);
-  bool HandleFailedWriteReturnFalse(
+  bool readOnceWithoutEmptying(bool dontCrashOnFail);
+  bool handleFailedWriteReturnFalse(
     const std::string& toBeSent,
     bool dontCrashOnFail,
     int numBadAttempts
@@ -70,7 +70,7 @@ public:
 
   static std::string lockContent;
   PipePrimitive lockPipe;
-  bool flagLockHeldByAnotherThread;
+  bool flaglockHeldByAnotherThread;
   bool flagInitialized;
   std::string name;
   MemorySaving<MutexRecursiveWrapper> lockThreads;
@@ -80,11 +80,11 @@ public:
   void release();
   // inputName is the display name of the mutex - something you want
   // to see in error messages and logs.
-  bool CreateMe(
+  bool createMe(
     const std::string& inputName,
     bool dontCrashOnFail
   );
-  bool ResetNoAllocation();
+  bool resetNoAllocation();
 
   bool checkConsistency();
   // Acts in a similar fashion to single-process mutex lock.
@@ -93,45 +93,45 @@ public:
   // falls asleep until the lock is released.
   // When released, the lock is acquired and true is returned.
   //
-  // MutexProcess::Lock() returns false on
+  // MutexProcess::lock() returns false on
   // critical pipe read/write errors.
   // When false is returned, the lock was not
   // successfully acquired.
   // The lock may or may not be currently held by
   // another process.
   //
-  // A false return from MutexProcess::Lock()
+  // A false return from MutexProcess::lock()
   // usually indicates a fatal error,
   // but we may choose to handle it gracefully
   // for stability reasons.
-  bool Lock();
+  bool lock();
 
-  // Unlock the mutex.
+  // unlock the mutex.
   //
   // False return may indicate an i/o failure.
   // False result should normally be a fatal error but
   // may be handled gracefully for stability reasons.
-  bool Unlock();
+  bool unlock();
   static void release(int& theDescriptor);
   MutexProcess();
   ~MutexProcess();
 };
 
-class MutexProcessLockGuard {
+class MutexProcesslockGuard {
 public:
   MutexProcess* guarded;
-  MutexProcessLockGuard(MutexProcess& input) {
+  MutexProcesslockGuard(MutexProcess& input) {
     this->guarded = &input;
-    if (!this->guarded->Lock()) {
+    if (!this->guarded->lock()) {
       this->guarded = nullptr;
       return;
     }
   }
-  ~MutexProcessLockGuard() {
+  ~MutexProcesslockGuard() {
     if (this->guarded == nullptr) {
       return;
     }
-    this->guarded->Unlock();
+    this->guarded->unlock();
     this->guarded = nullptr;
   }
 };
@@ -150,14 +150,14 @@ public:
   bool flagDeallocated;
   std::string name;
   //  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
-  std::string GetLastRead() {
-    return this->thePipe.GetLastRead();
+  std::string getLastRead() {
+    return this->thePipe.getLastRead();
   }
   static void WriteIfFailThenCrash(
     int theFD, const List<char>& input, bool dontCrashOnFail
   );
   void ReadOnce(bool dontCrashOnFail);
-  void ReadOnceWithoutEmptying(bool dontCrashOnFail);
+  void readOnceWithoutEmptying(bool dontCrashOnFail);
   void ReadLoop(List<char>& output);
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
@@ -174,7 +174,7 @@ public:
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  void WriteOnceAfterEmptying(
+  void writeOnceAfterEmptying(
     const std::string& toBeSent,
     bool dontCrashOnFail
   );
@@ -182,8 +182,8 @@ public:
   std::string toString() const;
   void release();
   bool checkConsistency();
-  bool CreateMe(const std::string& inputPipeName);
-  bool ResetNoAllocation();
+  bool createMe(const std::string& inputPipeName);
+  bool resetNoAllocation();
   ~Pipe();
   Pipe();
 };

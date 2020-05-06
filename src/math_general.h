@@ -7166,7 +7166,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::makeGenerator(int generatorIndex,
 }
 
 template <class Coefficient>
-std::string Vectors<Coefficient>::ElementsToInequalitiesString(
+std::string Vectors<Coefficient>::toInequalitiesString(
   bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
 ) const {
   std::stringstream out;

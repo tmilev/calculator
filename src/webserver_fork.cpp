@@ -11,12 +11,12 @@ void WebServer::initializeRandomBytes() {
 
 bool WebServer::createProcessMutex() {
   WebWorker& worker = this->getActiveWorker();
-  if (!worker.PauseWorker.CreateMe(this->toStringWorkerToWorker() + "pause mutex", true)) {
+  if (!worker.PauseWorker.createMe(this->toStringWorkerToWorker() + "pause mutex", true)) {
     global << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
     return false;
   }
-  if (!worker.writingReportFile.CreateMe(this->toStringWorkerToWorker() + "output file mutex", true)) {
+  if (!worker.writingReportFile.createMe(this->toStringWorkerToWorker() + "output file mutex", true)) {
     global << "Failed to create process mutex: "
     << worker.writingReportFile.name << "\n";
     return false;

@@ -87,7 +87,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   }
   std::stringstream commandStream;
   commandStream << "mongodump --db calculator --archive ="
-  << global.PhysicalPathProjectBase
+  << global.physicalPathProjectBase
   << "database-backups/dbBackup"
   << global.getDateForLogFiles() << ".mongo";
   global << Logger::orange << "Backing up database with command: " << Logger::endL;
@@ -1058,7 +1058,7 @@ bool WebWorker::writeToBodyJSON(const JSData& result) {
 }
 
 bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCrash) {
-  MutexLockGuard guard(global.mutexReturnBytes);
+  MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("WebWorker::writeResponse");
   if (!global.flagRunningBuiltInWebServer) {
     if (!isCrash) {
@@ -1094,7 +1094,7 @@ bool GlobalVariables::Response::writeResponse(const JSData& incoming, bool isCra
 }
 
 void GlobalVariables::Response::report(const std::string &input) {
-  MutexLockGuard guard(global.mutexReturnBytes);
+  MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::report");
   return global.server().getActiveWorker().writeAfterTimeoutProgress(input, false);
 }
@@ -1104,7 +1104,7 @@ void GlobalVariables::Response::initiate(const std::string& message) {
   if (global.theResponse.flagTimedOut) {
     return;
   }
-  MutexLockGuard guard(global.mutexReturnBytes);
+  MutexlockGuard guard(global.mutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::initiate");
   if (!global.theResponse.monitoringAllowed()) {
     return;

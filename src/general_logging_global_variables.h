@@ -125,10 +125,10 @@ class Logger {
 class GlobalVariables {
   MutexRecursiveWrapper mutexReturnBytes;
 public:
-  MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
-  MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
-  MutexRecursiveWrapper MutexParallelComputingCrash;
-  MutexRecursiveWrapper MutexRegisterNewThread;
+  MutexRecursiveWrapper mutexWebWorkerPipeWritelock;
+  MutexRecursiveWrapper mutexWebWorkerPipeReadlock;
+  MutexRecursiveWrapper mutexParallelComputingCrash;
+  MutexRecursiveWrapper mutexRegisterNewThread;
 
   GlobalVariables();
   ~GlobalVariables();
@@ -155,7 +155,7 @@ public:
     LogData() {
       this->logType = LogData::type::server;
     }
-    std::string ToStringprocessType() const;
+    std::string toStringProcessType() const;
   };
   LogData logs;
   template <typename theType>
@@ -348,23 +348,23 @@ public:
   std::string RelativePhysicalNameOptionalProgressReport;
   std::string relativePhysicalNameOptionalResult;
 
-  std::string PathExecutableUserInputOrDeduced;
+  std::string pathExecutableUserInputOrDeduced;
 
-  std::string PhysicalPathProjectBase;
-  std::string PhysicalPathServerBase;
-  std::string PhysicalNameFolderExecutable;
+  std::string physicalPathProjectBase;
+  std::string physicalPathServerBase;
+  std::string physicalNameFolderExecutable;
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;
 
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
   // The backend URL, for example
-  // DisplayNameExecutable ="/cgi-bin/calculator";
-  std::string DisplayNameExecutable;
+  // displayNameExecutable ="/cgi-bin/calculator";
+  std::string displayNameExecutable;
   // The app display name in the web browser,
   // displayApplication ="/app";
   std::string displayApplication;
-  std::string DisplayNameExecutableAppNoCache;
+  std::string displayNameExecutableAppNoCache;
 
   std::string IPAdressCaller;
 

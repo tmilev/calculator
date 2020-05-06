@@ -195,7 +195,7 @@ void DrawOperations::drawPath(
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typePath;
   Vectors<double> vectorsDouble;
-  theVectors.GetVectorsDouble(vectorsDouble);
+  theVectors.getVectorsDouble(vectorsDouble);
   theOperation[DrawOperations::fieldPoints] = vectorsDouble;
   theOperation[DrawOperations::fieldFrameId] = frameId;
   theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
@@ -317,7 +317,7 @@ void DrawOperations::drawTextBuffer(
   this->theOperations.addOnTop(theOperation);
 }
 
-int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle) {
+int DrawingVariables::getActualPenStyleFromFlagsAnd(int inputPenStyle) {
   if (inputPenStyle == this->PenStyleInvisible) {
     return this->PenStyleInvisible;
   }
@@ -357,7 +357,7 @@ int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle) {
   return this->PenStyleNormal;
 }
 
-int DrawingVariables::GetActualTextStyleFromFlagsAnd(int inputTextStyle) {
+int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
   if (inputTextStyle == this->TextStyleInvisible) {
     return this->TextStyleInvisible;
   }

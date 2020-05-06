@@ -232,7 +232,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   //Vectors<Rational> integralRoots, integralRootsEpsForm;
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
   //theWeyl.getEpsilonCoordinates(integralRoots, integralRootsEpsForm);
-  //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
+  //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.toStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
   Vectors<Rational> simpleBasis, simplebasisEpsCoords;
   out << "<hr> Half sum of positive roots: " << theWeyl.rho.toString();

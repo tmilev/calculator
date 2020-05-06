@@ -210,7 +210,7 @@ public:
   enum TextStyles {
     TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber
   };
-  //MutexRecursiveWrapper LockedWhileDrawing;
+  //MutexRecursiveWrapper lockedWhileDrawing;
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;
@@ -242,12 +242,12 @@ public:
   }
   int getColorFromChamberIndex(int index);
   static void projectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output);
-  static std::string GetColorHtmlFromColorIndex(int colorIndex);
-  std::string GetColorPsTricksFromColorIndex(int colorIndex);
-  static bool GetColorIntFromColorString(const std::string& input, int& output);
+  static std::string getColorHtmlFromColorIndex(int colorIndex);
+  std::string getColorPsTricksFromColorIndex(int colorIndex);
+  static bool getColorIntFromColorString(const std::string& input, int& output);
   DrawOperations theBuffer;
-  int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
-  int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
+  int getActualPenStyleFromFlagsAnd(int inputPenStyle);
+  int getActualTextStyleFromFlagsAnd(int inputTextStyle);
 
   std::string getHTMLDiv(int theDimension);
   void drawString(drawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);

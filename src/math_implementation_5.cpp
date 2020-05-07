@@ -711,7 +711,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
       this->theRange(),
       polyOne
     );
-    RationalFunction<Rational>& thePower = input.Powers[i];
+    RationalFunction<Rational>& thePower = input.powers[i];
     int theIntegralPower;
     if (!thePower.isSmallInteger(&theIntegralPower)) {
       return false;

@@ -1467,7 +1467,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   drawOps.theBuffer.BasisProjectionPlane[1][1] = 1;
   drawOps.theBuffer.modifyToOrthonormalNoShiftSecond
   (drawOps.theBuffer.BasisProjectionPlane[1], drawOps.theBuffer.BasisProjectionPlane[0]);
-  drawOps.theBuffer.GraphicsUnit = 50;
+  drawOps.theBuffer.graphicsUnit = 50;
   PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   std::string tempS;
   theStartingPoly.makeVPF(this->GmodKNegWeightsBasisChanged, tempS);

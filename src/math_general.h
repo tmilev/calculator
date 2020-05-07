@@ -79,7 +79,7 @@ class MonomialTensor {
 private:
 public:
   List<int> generatorsIndices;
-  List<Coefficient> Powers;
+  List<Coefficient> powers;
   bool flagDeallocated;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool isEqualToOne() const {
@@ -87,7 +87,7 @@ public:
   }
   void operator=(List<int>& other) {
     this->generatorsIndices.reserve(other.size);
-    this->Powers.reserve(other.size);
+    this->powers.reserve(other.size);
     this->makeConstant();
     for (int i = 0; i < other.size; i ++) {
       this->multiplyByGeneratorPowerOnTheRight(other[i], 1);
@@ -101,7 +101,7 @@ public:
   }
   void operator=(const MonomialTensor<Coefficient, inputHashFunction>& other) {
     this->generatorsIndices = other.generatorsIndices;
-    this->Powers = other.Powers;
+    this->powers = other.powers;
   }
   MonomialTensor() {
     this->flagDeallocated = false;
@@ -111,17 +111,17 @@ public:
   }
   int minimalNumberOfVariables() {
     int result = 0;
-    for (int i = 0; i < this->Powers.size; i ++) {
-      result = MathRoutines::maximum(result, this->Powers[i].minimalNumberOfVariables());
+    for (int i = 0; i < this->powers.size; i ++) {
+      result = MathRoutines::maximum(result, this->powers[i].minimalNumberOfVariables());
     }
     return result;
   }
   template<class otherType>
   void operator=(const MonomialTensor<otherType>& other) {
     this->generatorsIndices = other.generatorsIndices;
-    this->Powers.setSize(other.Powers.size);
-    for (int i = 0; i < other.Powers.size; i ++) {
-      this->Powers[i] = other.Powers[i];
+    this->powers.setSize(other.powers.size);
+    for (int i = 0; i < other.powers.size; i ++) {
+      this->powers[i] = other.powers[i];
     }
   }
   bool simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
@@ -132,7 +132,7 @@ public:
     unsigned int result = 0;
     for (int i = 0; i < top; i ++) {
       result += someRandomPrimes[i] * this->generatorsIndices[i] +
-      someRandomPrimes[top - 1 - i] * inputHashFunction(this->Powers[i]);
+      someRandomPrimes[top - 1 - i] * inputHashFunction(this->powers[i]);
     }
     return result;
   }
@@ -141,7 +141,7 @@ public:
   }
   void makeConstant() {
     this->generatorsIndices.size = 0;
-    this->Powers.size = 0;
+    this->powers.size = 0;
   }
   bool operator>(const MonomialTensor<Coefficient, inputHashFunction>& other) const {
     if (other.generatorsIndices.size > this->generatorsIndices.size) {
@@ -157,26 +157,26 @@ public:
       if (other.generatorsIndices[i] < this->generatorsIndices[i]) {
         return true;
       }
-      if (other.Powers[i] > this->Powers[i]) {
+      if (other.powers[i] > this->powers[i]) {
         return false;
       }
-      if (this->Powers[i] > other.Powers[i]) {
+      if (this->powers[i] > other.powers[i]) {
         return true;
       }
     }
     return false;
   }
   bool operator==(const MonomialTensor<Coefficient, inputHashFunction>& other) const {
-    return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
+    return this->powers == other.powers && this->generatorsIndices == other.generatorsIndices;
   }
   bool operator<(const MonomialTensor<Coefficient, inputHashFunction>& right) const {
     Coefficient leftrank = 0;
-    for (int i = 0; i < this->Powers.size; i ++) {
-      leftrank += this->Powers[i];
+    for (int i = 0; i < this->powers.size; i ++) {
+      leftrank += this->powers[i];
     }
     Coefficient rightrank = 0;
-    for (int i = 0; i < right.Powers.size; i ++) {
-      rightrank += right.Powers[i];
+    for (int i = 0; i < right.powers.size; i ++) {
+      rightrank += right.powers[i];
     }
     if (leftrank < rightrank) {
       return true;
@@ -192,10 +192,10 @@ public:
       if (right.generatorsIndices[i] < this->generatorsIndices[i]) {
         return true;
       }
-      if (this->Powers[i] < right.Powers[i]) {
+      if (this->powers[i] < right.powers[i]) {
         return false;
       }
-      if (right.Powers[i] < this->Powers[i]) {
+      if (right.powers[i] < this->powers[i]) {
         return true;
       }
     }
@@ -212,17 +212,17 @@ public:
       return;
     }
     this->generatorsIndices.setExpectedSize(standsOnTheRight.generatorsIndices.size + this->generatorsIndices.size);
-    this->Powers.setExpectedSize(standsOnTheRight.generatorsIndices.size + this->generatorsIndices.size);
+    this->powers.setExpectedSize(standsOnTheRight.generatorsIndices.size + this->generatorsIndices.size);
     int firstIndex = standsOnTheRight.generatorsIndices[0];
     int i = 0;
     if (this->generatorsIndices.size > 0) {
       if (firstIndex == (*this->generatorsIndices.lastObject())) {
-        *this->Powers.lastObject() += standsOnTheRight.Powers[0];
+        *this->powers.lastObject() += standsOnTheRight.powers[0];
         i = 1;
       }
     }
     for (; i < standsOnTheRight.generatorsIndices.size; i ++) {
-      this->Powers.addOnTop(standsOnTheRight.Powers[i]);
+      this->powers.addOnTop(standsOnTheRight.powers[i]);
       this->generatorsIndices.addOnTop(standsOnTheRight.generatorsIndices[i]);
     }
   }
@@ -303,7 +303,7 @@ public:
   }
   MonomialP() {
   }
-  friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const MonomialP& theMon) {
     output << theMon.toString();
     return output;
   }
@@ -481,7 +481,7 @@ public:
 };
 
 template <typename Coefficient>
-std::ostream& operator<<  (std::ostream& output, const Matrix<Coefficient>& theMat);
+std::ostream& operator<<(std::ostream& output, const Matrix<Coefficient>& theMat);
 
 template <typename Coefficient>
 class Matrix {
@@ -4326,9 +4326,9 @@ void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnT
   newGeneratorIndices.addOnTop(theGeneratorIndexStandsOnTheLeft);
   newPowers.addOnTop(thePower);
   newGeneratorIndices.addListOnTop(this->generatorsIndices);
-  newPowers.addListOnTop(this->Powers);
+  newPowers.addListOnTop(this->powers);
   this->generatorsIndices = newGeneratorIndices;
-  this->Powers = newPowers;
+  this->powers = newPowers;
   this->simplifyEqualConsecutiveGenerators(0);
 }
 
@@ -4341,11 +4341,11 @@ void MonomialTensor<Coefficient, inputHashFunction>::multiplyByGeneratorPowerOnT
   }
   if (this->generatorsIndices.size > 0) {
     if (*this->generatorsIndices.lastObject() == theGeneratorIndex) {
-      (*this->Powers.lastObject()) += thePower;
+      (*this->powers.lastObject()) += thePower;
       return;
     }
   }
-  this->Powers.addOnTop(thePower);
+  this->powers.addOnTop(thePower);
   this->generatorsIndices.addOnTop(theGeneratorIndex);
 }
 
@@ -4364,25 +4364,25 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(FormatExpre
     } else {
       out << theLetter << "_{" << this->generatorsIndices[i] << "}";
     }
-    if (!(this->Powers[i] == 1)) {
-      if (this->Powers[i] == 2) {
+    if (!(this->powers[i] == 1)) {
+      if (this->powers[i] == 2) {
         out << exponents[2];
-      } else if (this->Powers[i] == 3) {
+      } else if (this->powers[i] == 3) {
         out << exponents[3];
-      } else if (this->Powers[i] == 4) {
+      } else if (this->powers[i] == 4) {
         out << exponents[4];
-      } else if (this->Powers[i] == 5) {
+      } else if (this->powers[i] == 5) {
         out << exponents[5];
-      } else if (this->Powers[i] == 6) {
+      } else if (this->powers[i] == 6) {
         out << exponents[6];
-      } else if (this->Powers[i] == 7) {
+      } else if (this->powers[i] == 7) {
         out << exponents[7];
-      } else if (this->Powers[i] == 8) {
+      } else if (this->powers[i] == 8) {
         out << exponents[8];
-      } else if (this->Powers[i] == 9) {
+      } else if (this->powers[i] == 9) {
         out << exponents[9];
       } else {
-        out << "^{" << this->Powers[i] << "}";
+        out << "^{" << this->powers[i] << "}";
       }
     }
   }
@@ -4401,15 +4401,15 @@ bool MonomialTensor<Coefficient, inputHashFunction>::simplifyEqualConsecutiveGen
   for (int next = lowestNonReducedIndex + 1; next < this->generatorsIndices.size; next ++) {
     if (this->generatorsIndices[lowestNonReducedIndex] == this->generatorsIndices[next]) {
       result = true;
-      this->Powers[lowestNonReducedIndex] += this->Powers[next];
+      this->powers[lowestNonReducedIndex] += this->powers[next];
     } else {
       lowestNonReducedIndex ++;
-      this->Powers[lowestNonReducedIndex] = this->Powers[next];
+      this->powers[lowestNonReducedIndex] = this->powers[next];
       this->generatorsIndices[lowestNonReducedIndex] = this->generatorsIndices[next];
     }
   }
   this->generatorsIndices.setSize(lowestNonReducedIndex + 1);
-  this->Powers.setSize(lowestNonReducedIndex + 1);
+  this->powers.setSize(lowestNonReducedIndex + 1);
   return result;
 }
 
@@ -7010,15 +7010,15 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
   for (int l = 0; l < theUEelt.size(); l ++) {
     currentMon = theUEelt[l];
     tempMat1.makeIdentitySpecial();
-    for (int k = currentMon.Powers.size - 1; k >= 0; k --) {
+    for (int k = currentMon.powers.size - 1; k >= 0; k --) {
       std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.toString() << " of index "
       << l + 1 << " out of "
-      << theUEelt.size() << " and letter index " << currentMon.Powers.size - k
-      << " out of " << currentMon.Powers.size << "...";
+      << theUEelt.size() << " and letter index " << currentMon.powers.size - k
+      << " out of " << currentMon.powers.size << "...";
       theReport.report(reportStream.str());
       int thePower = - 1;
-      if (!currentMon.Powers[k].isSmallInteger(&thePower)) {
+      if (!currentMon.powers[k].isSmallInteger(&thePower)) {
         break;
       }
       int theIndex = currentMon.generatorsIndices[k];
@@ -7029,7 +7029,7 @@ void MonomialGeneralizedVerma<Coefficient>::reduceMe(
       tempMat1 = theMod.getActionGeneratorIndex(theIndex);
       tempMat1.raiseToPower(thePower);
       tempMat1 *= tempMat2;
-      currentMon.Powers.size --;
+      currentMon.powers.size --;
       currentMon.generatorsIndices.size --;
       reportStream << "done!";
       theReport.report(reportStream.str());

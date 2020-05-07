@@ -444,9 +444,9 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
     //problemCounter ++;
     const MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon = result[i];
     endoPart = idMT;
-    for (int j = currentMon.Powers.size - 1; j >= indicesNilrad.size; j --) {
+    for (int j = currentMon.powers.size - 1; j >= indicesNilrad.size; j --) {
       int thePower = 0;
-      if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
+      if (!currentMon.powers[j].isSmallInteger(&thePower)) {
         return false;
       }
       tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
@@ -464,7 +464,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
     exponentContribution.makeOne();
     theCoeff = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
-      currentMon.Powers[j].getConstantTerm(currentShift);
+      currentMon.powers[j].getConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );

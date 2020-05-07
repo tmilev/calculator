@@ -410,7 +410,7 @@ std::string LittelmannPath:: toStringOperatorSequenceStartingOnMe(List<int>& inp
   MonomialTensor<Rational> tempMon;
   tempMon = input;
   tempMon.generatorsIndices.reverseElements();
-  tempMon.Powers.reverseElements();
+  tempMon.powers.reverseElements();
   return tempMon.toString();
 }
 
@@ -445,7 +445,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
       return false;
     }
     int thePower = 0;
-    if (!this->Powers[k].isSmallInteger(thePower)) {
+    if (!this->powers[k].isSmallInteger(thePower)) {
       return false;
     }
     int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
@@ -587,11 +587,11 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
     theCoeff = this->coefficients[i];
     tempMon.owner = currentMon.owner;
-    tempMon.Powers.size = 0;
+    tempMon.powers.size = 0;
     tempMon.generatorsIndices.size = 0;
-    for (int j = 0; j < currentMon.Powers.size; j ++) {
+    for (int j = 0; j < currentMon.powers.size; j ++) {
       int thePower;
-      if (!currentMon.Powers[j].isSmallInteger(&thePower)) {
+      if (!currentMon.powers[j].isSmallInteger(&thePower)) {
         return false;
       }
       int theGenerator = currentMon.generatorsIndices[j];
@@ -600,7 +600,7 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
       } else if (theGenerator >= numPosRoots + theRank) {
         theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
+      tempMon.multiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.powers[j]);
       if (thePower % 2 == 1) {
         theCoeff *= - 1;
       }
@@ -645,8 +645,8 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int thePower;
-    for (int i = rightMon.Powers.size - 1; i >= 0; i --) {
-      if (rightMon.Powers[i].isSmallInteger(&thePower)) {
+    for (int i = rightMon.powers.size - 1; i >= 0; i --) {
+      if (rightMon.powers[i].isSmallInteger(&thePower)) {
         for (int k = 0; k < thePower; k ++) {
           tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
@@ -728,9 +728,9 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
     if (!this->coefficients[i].isConstant(theCoeff)) {
       return false;
     }
-    for (int j = 0; j < currentMon.Powers.size; j ++) {
+    for (int j = 0; j < currentMon.powers.size; j ++) {
       Rational tempRat;
-      if (!currentMon.Powers[j].isConstant(tempRat)) {
+      if (!currentMon.powers[j].isConstant(tempRat)) {
         return false;
       }
       tempMon.multiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
@@ -885,7 +885,7 @@ bool LittelmannPath::isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
   for (int i = 0; i < theString.generatorsIndices.size; i ++) {
-    for (int k = 0; k < theString.Powers[i]; k ++) {
+    for (int k = 0; k < theString.powers[i]; k ++) {
       tempPath.actByEAlpha(- theString.generatorsIndices[i] - 1);
     }
     if (tempPath.isEqualToZero()) {

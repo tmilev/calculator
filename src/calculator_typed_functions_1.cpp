@@ -721,7 +721,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
   result = leftMon;
   result *= rightMon;
   for (int i = 0; i < result.generatorsIndices.size; i ++) {
-    if (result.Powers[i] > 100000 || result.Powers[i] < 0) {
+    if (result.powers[i] > 100000 || result.powers[i] < 0) {
       return output.makeError(
         "The result of this operation is " + result.toString() + " which is outside of the allowed range. ",
         theCommands
@@ -763,7 +763,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
       << theLRO.generatorsIndices[i];
       return output.makeError(out.str(), theCommands);
     } else {
-      for (int j = 0; j < theLRO.Powers[i]; j ++) {
+      for (int j = 0; j < theLRO.powers[i]; j ++) {
         result.actByEFDisplayIndex(theLRO.generatorsIndices[i]);
       }
     }
@@ -1463,7 +1463,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   }
   MonomialUniversalEnveloping<RationalFunction<Rational> > theMon;
   theMon = theUE[0];
-  theMon.Powers[0] *= exponentConverted.getValue<RationalFunction<Rational> >();
+  theMon.powers[0] *= exponentConverted.getValue<RationalFunction<Rational> >();
   ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
   outputUE.makeZero(*theUE.owner);
   outputUE.addMonomial(theMon, 1);

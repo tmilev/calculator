@@ -187,9 +187,9 @@ public:
   std::string DebugString;
   std::string toString(FormatExpressions* PolyFormatLocal) const;
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
-  // Powers gives the powers of the generators in the order specified in the owner
+  // powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
-  List<Coefficient> Powers;
+  List<Coefficient> powers;
   Coefficient theCoefficient;
   static bool flagAnErrorHasOccurredTimeToPanic;
   void multiplyBy(
@@ -219,7 +219,7 @@ public:
   void getDegree(Polynomial<Rational>& output) {
     output.makeZero(this->Coefficient.NumVars);
     for (int i = 0; i < this->generatorsIndices.size; i ++) {
-      output += this->Powers[i];
+      output += this->powers[i];
     }
   }
   bool getElementUniversalEnveloping(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
@@ -242,7 +242,7 @@ public:
   );
   void makeConstant(const Coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner) {
     this->generatorsIndices.size = 0;
-    this->Powers.size = 0;
+    this->powers.size = 0;
     this->Coefficient = theConst;
     this->owner = &theOwner;
   }
@@ -271,21 +271,21 @@ public:
     if (this->owner != other.owner) {
       global.fatal << "Attempt to compare universal enveloping algebra monomials with different owners. " << global.fatal;
     }
-    return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
+    return this->powers == other.powers && this->generatorsIndices == other.generatorsIndices;
   }
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);
   template<class OtherCoefficientType>
   void assignChangeCoefficientType(const MonomialUniversalEnvelopingOrdered<OtherCoefficientType>& other) {
     this->Coefficient = other.Coefficient;
     this->generatorsIndices = other.generatorsIndices.size;
-    this->Powers.setSize(other.Powers.size);
-    for (int i = 0; i < this->Powers.size; i ++) {
-      this->Powers[i] = other.Powers[i];
+    this->powers.setSize(other.powers.size);
+    for (int i = 0; i < this->powers.size; i ++) {
+      this->powers[i] = other.powers[i];
     }
   }
   inline void operator=(const MonomialUniversalEnvelopingOrdered& other) {
     this->generatorsIndices = other.generatorsIndices;
-    this->Powers = other.Powers;
+    this->powers = other.powers;
     this->Coefficient = other.Coefficient;
     this->owner = other.owner;
   }

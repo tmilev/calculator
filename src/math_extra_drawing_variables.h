@@ -10,7 +10,7 @@ private:
   void changeBasisPReserveAngles(double newX, double newY);
 public:
   List<JSData> theOperations;
-  List<List<double> > ProjectionsEiVectors;
+  List<List<double> > projectionsEiVectors;
   Vectors<double> BasisProjectionPlane;
   static const int GraphicsUnitDefault = 100;
   int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1= center of coordinate system, nonnegative integers = selectedindex
@@ -21,7 +21,7 @@ public:
   double ClickToleranceY;
   double centerX;
   double centerY;
-  double GraphicsUnit;
+  double graphicsUnit;
   int frameLengthInMilliseconds;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
@@ -38,7 +38,7 @@ public:
     this->BasisProjectionPlane = startingPlane;
     this->centerX = 300;
     this->centerY = 300;
-    this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+    this->graphicsUnit = DrawOperations::GraphicsUnitDefault;
     this->computeProjectionsEiVectors();
   }
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane) {
@@ -57,18 +57,18 @@ public:
   void getCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1) {
     X1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[0]);
     Y1 = this->theBilinearForm.scalarProduct(input, this->BasisProjectionPlane[1]);
-    X1 = X1 * this->GraphicsUnit + this->centerX;
-    Y1 = Y1 * this->GraphicsUnit + this->centerY;
+    X1 = X1 * this->graphicsUnit + this->centerX;
+    Y1 = Y1 * this->graphicsUnit + this->centerY;
   }
   void getCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1) {
     X1 = 0;
     Y1 = 0;
     for (int j = 0; j < input.size; j ++) {
-      X1 += this->ProjectionsEiVectors[j][0] * input[j];
-      Y1 += this->ProjectionsEiVectors[j][1] * input[j];
+      X1 += this->projectionsEiVectors[j][0] * input[j];
+      Y1 += this->projectionsEiVectors[j][1] * input[j];
     }
-    X1 = X1 * this->GraphicsUnit + this->centerX;
-    Y1 = Y1 * this->GraphicsUnit + this->centerY;
+    X1 = X1 * this->graphicsUnit + this->centerX;
+    Y1 = Y1 * this->graphicsUnit + this->centerY;
   }
   void getCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2) {
     X1 = 0;
@@ -76,15 +76,15 @@ public:
     Y1 = 0;
     Y2 = 0;
     for (int j = 0; j < input1.size; j ++) {
-      X1 += this->ProjectionsEiVectors[j][0] * input1[j];
-      Y1 += this->ProjectionsEiVectors[j][1] * input1[j];
-      X2 += this->ProjectionsEiVectors[j][0] * input2[j];
-      Y2 += this->ProjectionsEiVectors[j][1] * input2[j];
+      X1 += this->projectionsEiVectors[j][0] * input1[j];
+      Y1 += this->projectionsEiVectors[j][1] * input1[j];
+      X2 += this->projectionsEiVectors[j][0] * input2[j];
+      Y2 += this->projectionsEiVectors[j][1] * input2[j];
     }
-    X1 = X1 * this->GraphicsUnit + this->centerX;
-    X2 = X2 * this->GraphicsUnit + this->centerX;
-    Y1 = Y1 * this->GraphicsUnit + this->centerY;
-    Y2 = Y2 * this->GraphicsUnit + this->centerY;
+    X1 = X1 * this->graphicsUnit + this->centerX;
+    X2 = X2 * this->graphicsUnit + this->centerX;
+    Y1 = Y1 * this->graphicsUnit + this->centerY;
+    Y2 = Y2 * this->graphicsUnit + this->centerY;
   }
   void ensureProperInitialization();
   bool areWithinClickTolerance(double x1, double y1, double x2, double y2) {

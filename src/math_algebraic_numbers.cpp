@@ -1395,12 +1395,12 @@ std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   this->owner->getAdditionTo(*this, theAdditiveVector);
   out << theAdditiveVector.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
   if (this->basisIndex < this->owner->basisInjections.size - 1 && global.userDebugFlagOn()) {
-    out << "[=" << this->ToStringNonInjected() << "]";
+    out << "[=" << this->toStringNonInjected() << "]";
   }
   return out.str();
 }
 
-std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) const {
+std::string AlgebraicNumber::toStringNonInjected(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
     if (this->element.isEqualToZero()) {
       return "0";

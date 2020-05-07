@@ -25,16 +25,16 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight = newPair.Object2;
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight = thePair.Object2;
   newLeft = thePair.Object1;
-  (*newLeft.Powers.lastObject()) -= 1;
+  (*newLeft.powers.lastObject()) -= 1;
   int theIndex = *newLeft.generatorsIndices.lastObject();
-  if (*newLeft.Powers.lastObject() == 0) {
+  if (*newLeft.powers.lastObject() == 0) {
     newLeft.generatorsIndices.size --;
-    newLeft.Powers.size --;
+    newLeft.powers.size --;
   }
   int theIndexMinus = 2 * this->getOwner().getNumberOfPositiveRoots() + this->getOwner().getRank() - theIndex - 1;
   int theSimpleIndex = theIndex - this->getOwner().getNumberOfPositiveRoots() - this->getOwner().getRank();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
-  Accum.Powers.reserve(oldRight.Powers.size);
+  Accum.powers.reserve(oldRight.powers.size);
   Accum.generatorsIndices.reserve(oldRight.generatorsIndices.size);
   Vector<Rational> RemainingWeight;
   Rational result = 0;
@@ -44,28 +44,28 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
     if (oldRight.generatorsIndices[i] == theIndexMinus) {
       summand = 0;
       newRight = Accum;
-      newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.Powers[i] - 1);
+      newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.powers[i] - 1);
       RemainingWeight.makeZero(theWeyl.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
-        newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.Powers[j]);
-        RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.Powers[j];
+        newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.powers[j]);
+        RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
       RemainingWeight += this->theHWFDpartSimpleCoordS;
       summand += theWeyl.GetScalarProdSimpleRoot(RemainingWeight, theSimpleIndex);
       summand *= 2;
       summand /= theWeyl.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
       summand += 1;
-      summand -= oldRight.Powers[i];
+      summand -= oldRight.powers[i];
       if (!summand.isEqualToZero()) {
         summand *= this->hwTrace(
           newPair, theProgressReport
         );
       }
-      summand *= oldRight.Powers[i];
+      summand *= oldRight.powers[i];
       result += summand;
     }
     Accum.generatorsIndices.addOnTop(oldRight.generatorsIndices[i]);
-    Accum.Powers.addOnTop(oldRight.Powers[i]);
+    Accum.powers.addOnTop(oldRight.powers[i]);
   }
   if (this->cachedPairs.size < this->MaxNumCachedPairs) {
     this->cachedPairs.addOnTop(thePair);
@@ -86,7 +86,7 @@ void ModuleSSalgebra<Coefficient>::applyTAA(MonomialTensor<int, MathRoutines::In
     theMon.generatorsIndices[i] =
     this->getOwner().getNumberOfPositiveRoots() * 2 + this->getOwner().getRank() - theMon.generatorsIndices[i] - 1;
   }
-  theMon.Powers.reverseElements();
+  theMon.powers.reverseElements();
   theMon.generatorsIndices.reverseElements();
 }
 
@@ -1148,9 +1148,9 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
   }
   output = *this;
   ElementTensorsGeneralizedVermas<Coefficient> buffer;
-  for (int i = theUE.Powers.size - 1; i >= 0; i --) {
+  for (int i = theUE.powers.size - 1; i >= 0; i --) {
     int thePower;
-    if (!theUE.Powers[i].isSmallInteger(&thePower)) {
+    if (!theUE.powers[i].isSmallInteger(&thePower)) {
       return false;
     }
     int theIndex = theUE.generatorsIndices[i];

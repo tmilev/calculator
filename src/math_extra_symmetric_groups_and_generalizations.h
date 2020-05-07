@@ -1306,10 +1306,10 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   this->fillTableau(initialTableau, stuffing);
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tm1;
   tm1.generatorsIndices.setSize(n);
-  tm1.Powers.setSize(n);
+  tm1.powers.setSize(n);
   for (int i = 0; i < n; i ++) {
     tm1.generatorsIndices[i] = i;
-    tm1.Powers[i] = 1;
+    tm1.powers[i] = 1;
   }
   ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> t1, t2;
   t1.addMonomial(tm1,1);

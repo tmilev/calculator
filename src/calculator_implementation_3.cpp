@@ -327,12 +327,12 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
   tempMon = *theGens.lastObject();
   tempMon.generatorsIndices.reverseElements();
-  tempMon.Powers.reverseElements();
+  tempMon.powers.reverseElements();
   out << "<table>";
   for (int i = tempMon.generatorsIndices.size - 1; i >= 1; i --) {
     int curInd = - tempMon.generatorsIndices[i] - 1;
     int nextInd = - tempMon.generatorsIndices[i - 1] - 1;
-    for (int k = 0; k < tempMon.Powers[i]; k ++) {
+    for (int k = 0; k < tempMon.powers[i]; k ++) {
       lastPath.actByFAlpha(curInd);
     }
     tempPath = lastPath;
@@ -354,7 +354,7 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     tempPath = theOrbit[i];
     tempMon = theGens[i];
     tempMon.generatorsIndices.reverseElements();
-    tempMon.Powers.reverseElements();
+    tempMon.powers.reverseElements();
     bool isadapted = tempPath.isAdaptedString(tempMon);
     out << "<tr><td>" << tempMon.toString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
@@ -1264,7 +1264,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
         LittelmannPath& currentPath = tempList[k];
         tempMon = theStrings[k];
         tempMon.generatorsIndices.reverseElements();
-        tempMon.Powers.reverseElements();
+        tempMon.powers.reverseElements();
         if (!currentPath.isAdaptedString(tempMon)) {
           foundBad = true;
           break;

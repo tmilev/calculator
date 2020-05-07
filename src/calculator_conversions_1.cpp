@@ -798,7 +798,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     theGen.theGeneratorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, theGen, chevGenE);
-    CalculatorConversions::innerExpressionFromRF(theCommands, input.Powers[i], powerE, inputContext);
+    CalculatorConversions::innerExpressionFromRF(theCommands, input.powers[i], powerE, inputContext);
     termE.MakeXOX(theCommands, theCommands.opThePower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }

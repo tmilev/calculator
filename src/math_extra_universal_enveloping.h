@@ -12,7 +12,7 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
-  // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
+  // powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
   friend std::ostream& operator<<(std::ostream& output, const MonomialUniversalEnveloping<Coefficient>& theMon) {
     output << theMon.toString();
     return output;
@@ -39,8 +39,8 @@ public:
     this->owner = &inputOwner;
     this->generatorsIndices.setSize(1);
     this->generatorsIndices[0] = generatorIndex;
-    this->Powers.setSize(1);
-    this->Powers[0] = 1;
+    this->powers.setSize(1);
+    this->powers[0] = 1;
   }
   bool HWTAAbilinearForm(
     const MonomialUniversalEnveloping<Coefficient>& right,
@@ -65,13 +65,13 @@ public:
     return input.hashFunction();
   }
   void getDegree(Coefficient& output) const {
-    if (this->Powers.size == 0) {
+    if (this->powers.size == 0) {
       output.makeZero();
       return;
     }
-    output = this->Powers[0];
+    output = this->powers[0];
     for (int i = 1; i < this->generatorsIndices.size; i ++) {
-      output += (this->Powers[i]);
+      output += (this->powers[i]);
     }
   }
   bool commutingABntoBnAPlusLowerOrderAllowed(
@@ -83,7 +83,7 @@ public:
   bool switchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
   void makeOne(SemisimpleLieAlgebra& inputOwner) {
     this->generatorsIndices.size = 0;
-    this->Powers.size = 0;
+    this->powers.size = 0;
     this->owner = &inputOwner;
   }
   // We assume the standard order for being simplified to be Ascending.
@@ -108,7 +108,7 @@ public:
     return this->::MonomialTensor<Coefficient>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other) const {
-    return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
+    return this->owner == other.owner && this->powers == other.powers && this->generatorsIndices == other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other) {
     this->::MonomialTensor<Coefficient>::operator=(other);

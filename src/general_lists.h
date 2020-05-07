@@ -1120,7 +1120,6 @@ typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignI
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {
 private:
-  void AddObjectOnBottom(const Object& o);
   void addListOnTop(List<Object>& theList);
   Object popIndexShiftDown(int index);
   void reverseElements();

@@ -12,7 +12,7 @@ std::string DrawingVariables::getHTMLDiv(int theDimension) {
   theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;
   theData["draggablePoints"] = this->theBuffer.basisToDrawCirclesAt;
   theData["bilinearForm"] = this->theBuffer.theBilinearForm;
-  theData["graphicsUnit"] = this->theBuffer.GraphicsUnit;
+  theData["graphicsUnit"] = this->theBuffer.graphicsUnit;
   theData["frameLength"] = this->theBuffer.frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
   theData[drawObjects].theType = JSData::token::tokenArray;

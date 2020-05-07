@@ -732,13 +732,13 @@ void PermutationR2::actOnMonomialTensor(
   MonomialTensor<int,MathRoutines::IntUnsignIdentity>& out, const MonomialTensor<int,MathRoutines::IntUnsignIdentity>& in
 ) const {
   int rank = 0;
-  for (int i = 0; i < in.Powers.size; i ++) {
-    rank += in.Powers[i];
+  for (int i = 0; i < in.powers.size; i ++) {
+    rank += in.powers[i];
   }
   List<int> expanded;
   expanded.setSize(rank);
   for (int i = 0, cur = 0; i < in.generatorsIndices.size; i ++) {
-    for (int j = 0; j < in.Powers[i]; j ++) {
+    for (int j = 0; j < in.powers[i]; j ++) {
       expanded[cur] = in.generatorsIndices[i];
       cur ++;
      }
@@ -750,7 +750,7 @@ void PermutationR2::actOnMonomialTensor(
     xi ++;
     for (int j =1; ; j ++, xi ++) {
       if ((xi == expanded.size) || (expanded[xi] != out.generatorsIndices[i])) {
-        out.Powers.addOnTop(j);
+        out.powers.addOnTop(j);
         break;
       }
     }

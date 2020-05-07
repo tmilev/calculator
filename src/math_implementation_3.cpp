@@ -7413,7 +7413,7 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
   tempDO.initDimensions(theDimension);
-  tempDO.GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+  tempDO.graphicsUnit = DrawOperations::GraphicsUnitDefault;
   theEigenSpace.operator=(theEigenSpaceList);
   for (int i = 0; i < theDimension; i ++) {
     for (int j = 0; j < theDimension; j ++) {
@@ -7466,7 +7466,7 @@ void WeylGroupData::drawRootSystem(
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(theDimension);
   output.initDimensions(theDimension);
-  output.GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+  output.graphicsUnit = DrawOperations::GraphicsUnitDefault;
   for (int i = 0; i < theDimension; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       output.theBilinearForm.elements[i][j] = this->cartanSymmetric.elements[i][j].getDoubleValue();
@@ -10190,25 +10190,25 @@ void DrawOperations::makeMeAStandardBasis(int theDim) {
     return;
   }
   if (theDim > 3) {
-    this->ProjectionsEiVectors.setSizeMakeMatrix(theDim, 2);
+    this->projectionsEiVectors.setSizeMakeMatrix(theDim, 2);
     for (int i = 0; i < theDim; i ++) {
-      this->ProjectionsEiVectors[i][0] = FloatingPoint::sinFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
-      this->ProjectionsEiVectors[i][1] = FloatingPoint::cosFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
+      this->projectionsEiVectors[i][0] = FloatingPoint::sinFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
+      this->projectionsEiVectors[i][1] = FloatingPoint::cosFloating(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::pi()));
     }
   } else if (theDim == 3) {
-    this->ProjectionsEiVectors.setSizeMakeMatrix(3, 2);
-    this->ProjectionsEiVectors[0][0] = 1;
-    this->ProjectionsEiVectors[0][1] = - 0.2;
-    this->ProjectionsEiVectors[1][0] = 0.1;
-    this->ProjectionsEiVectors[1][1] = 1;
-    this->ProjectionsEiVectors[2][0] = 0.01;
-    this->ProjectionsEiVectors[2][1] = 0.01;
+    this->projectionsEiVectors.setSizeMakeMatrix(3, 2);
+    this->projectionsEiVectors[0][0] = 1;
+    this->projectionsEiVectors[0][1] = - 0.2;
+    this->projectionsEiVectors[1][0] = 0.1;
+    this->projectionsEiVectors[1][1] = 1;
+    this->projectionsEiVectors[2][0] = 0.01;
+    this->projectionsEiVectors[2][1] = 0.01;
   } else {
-    this->ProjectionsEiVectors.setSizeMakeMatrix(2, 2);
-    this->ProjectionsEiVectors[0][0] = 1;
-    this->ProjectionsEiVectors[0][1] = 0;
-    this->ProjectionsEiVectors[1][0] = 0;
-    this->ProjectionsEiVectors[1][1] = - 1;
+    this->projectionsEiVectors.setSizeMakeMatrix(2, 2);
+    this->projectionsEiVectors[0][0] = 1;
+    this->projectionsEiVectors[0][1] = 0;
+    this->projectionsEiVectors[1][0] = 0;
+    this->projectionsEiVectors[1][1] = - 1;
   }
   if (this->BasisProjectionPlane.size < 1)
     this->BasisProjectionPlane.setSize(1);
@@ -10540,7 +10540,7 @@ void DrawOperations::initDimensions(int theDim) {
     theDim = 2;
   }
   this->theBilinearForm.makeIdentityMatrix(theDim, 1, 0);
-  this->ProjectionsEiVectors.setSizeMakeMatrix(theDim, 2);
+  this->projectionsEiVectors.setSizeMakeMatrix(theDim, 2);
   this->BasisProjectionPlane.makeEiBasis(theDim);
   this->BasisProjectionPlane.size = 2;
 /*  for (int i = 0; i < tempBasis[1].size; i ++)
@@ -10552,7 +10552,7 @@ void DrawOperations::initDimensions(int theDim) {
   this->SelectedCircleMinus2noneMinus1Center = - 2;
   this->centerX = 300;
   this->centerY = 300;
-  this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+  this->graphicsUnit = DrawOperations::GraphicsUnitDefault;
   this->frameLengthInMilliseconds = 500;
 }
 
@@ -10569,7 +10569,7 @@ int DrawOperations::getDimensionFirstDimensionDependentOperation() {
 
 void DrawOperations::ensureProperInitialization() {
   int theDim = this->getDimensionFirstDimensionDependentOperation();
-  bool isGood = (this->ProjectionsEiVectors.size == theDim && this->theBilinearForm.numberOfRows == theDim);
+  bool isGood = (this->projectionsEiVectors.size == theDim && this->theBilinearForm.numberOfRows == theDim);
   if (isGood) {
     isGood = this->BasisProjectionPlane.size == 2;
   }
@@ -10612,7 +10612,7 @@ void DrawOperations::initialize() {
   this->theOperations.reserve(1000);
   this->centerX = 300;
   this->centerY = 300;
-  this->GraphicsUnit = DrawOperations::GraphicsUnitDefault;
+  this->graphicsUnit = DrawOperations::GraphicsUnitDefault;
   this->ClickToleranceX = 5;
   this->ClickToleranceY = 5;
   this->SelectedCircleMinus2noneMinus1Center = - 2;
@@ -10693,19 +10693,19 @@ void DrawOperations::modifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vec
 
 void DrawOperations::computeProjectionsEiVectors() {
   int theDimension = this->theBilinearForm.numberOfRows;
-  this->ProjectionsEiVectors.setSizeMakeMatrix(theDimension, 2);
+  this->projectionsEiVectors.setSizeMakeMatrix(theDimension, 2);
   Vector<double> tempRoot;
   for (int i = 0; i < theDimension; i ++) {
     tempRoot.makeEi(theDimension, i);
-    this->ProjectionsEiVectors[i][0] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[0]);
-    this->ProjectionsEiVectors[i][1] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[1]);
+    this->projectionsEiVectors[i][0] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[0]);
+    this->projectionsEiVectors[i][1] = this->theBilinearForm.scalarProduct(tempRoot, this->BasisProjectionPlane[1]);
   }
 }
 
 void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   double bufferCenterX = this->centerX;
   double bufferCenterY = this->centerY;
-  double bufferGraphicsUnit = this->GraphicsUnit;
+  double bufferGraphicsUnit = this->graphicsUnit;
   newX = (newX - bufferCenterX) / bufferGraphicsUnit;
   newY = (newY - bufferCenterY) / bufferGraphicsUnit;
   if (newX == 0.0 && newY == 0.0) {
@@ -10903,9 +10903,9 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   int theDim = theOps.theBilinearForm.numberOfRows;
   theMat.initialize(theDim, 2);
   // We assume that the computeProjectionsEiVectors has been called.
-  for (int i = 0; i < theOps.ProjectionsEiVectors.size; i ++) {
+  for (int i = 0; i < theOps.projectionsEiVectors.size; i ++) {
     for (int j = 0; j < 2; j ++) {
-      theMat.elements[i][j] = theOps.ProjectionsEiVectors[i][j];
+      theMat.elements[i][j] = theOps.projectionsEiVectors[i][j];
     }
   }
   ProgressReport theReport;
@@ -10924,7 +10924,7 @@ void DrawOperations::operator+=(const DrawOperations& other) {
   //this->BasisProjectionPlane.addListOnTop(other.BasisProjectionPlane);
   //this->centerX.addListOnTop(other.centerX);
   //this->centerY.addListOnTop(other.centerY);
-  //this->GraphicsUnit.addListOnTop(other.GraphicsUnit);
+  //this->graphicsUnit.addListOnTop(other.graphicsUnit);
 }
 
 void Selection::operator=(const Vector<Rational>& other) {

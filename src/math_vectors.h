@@ -148,13 +148,13 @@ public:
     Vector<double> result;
     result.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      result[i] = this->theObjects[i].GetDoubleValue();
+      result[i] = this->objects[i].getDoubleValue();
     }
     return result;
   }
   bool IsIntegral() {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].isInteger()) {
+      if (!this->objects[i].isInteger()) {
         return false;
       }
     }
@@ -167,7 +167,7 @@ public:
   }
   bool isNegativeOrZero() {
     for (int i = 0; i < this->size; i ++) {
-      if (this->theObjects[i] > 0) {
+      if (this->objects[i] > 0) {
         return false;
       }
     }
@@ -175,7 +175,7 @@ public:
   }
   bool isPositiveOrZero() const {
     for (int i = 0; i < this->size; i ++) {
-      if (this->theObjects[i] < 0) {
+      if (this->objects[i] < 0) {
         return false;
       }
     }
@@ -184,7 +184,7 @@ public:
   Coefficient SumCoords() const {
     Coefficient result = 0;
     for (int i = 0; i < this->size; i ++) {
-      result += this->theObjects[i];
+      result += this->objects[i];
     }
     return result;
   }
@@ -205,7 +205,7 @@ public:
     output = 0;
     for (int i = 0; i < this->size; i ++) {
       tempElt = other[i];
-      tempElt *= this->theObjects[i];
+      tempElt *= this->objects[i];
       output += tempElt;
     }
   }
@@ -237,12 +237,12 @@ public:
     for (int i = 0; i < r1.size; i ++) {
       tempRat = r2[i];
       tempRat *= theCoeff;
-      output.theObjects[i] += (tempRat);
+      output.objects[i] += (tempRat);
     }
   }
   void minus() {
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i] *= - 1;
+      this->objects[i] *= - 1;
     }
   }
   void makeEi(int DesiredDimension, int NonZeroIndex) {
@@ -256,7 +256,7 @@ public:
     unsigned int result = 0;
     int theSize = MathRoutines::minimum(this->size, someRandomPrimesSize);
     for (int i = 0; i < theSize; i ++) {
-      result += this->theObjects[i].hashFunction() * ::someRandomPrimes[i];
+      result += this->objects[i].hashFunction() * ::someRandomPrimes[i];
     }
     return result;
   }
@@ -273,14 +273,14 @@ public:
     if (input.numberOfColumns == 1) {
       this->setSize(input.numberOfRows);
       for (int i = 0; i < this->size; i ++) {
-        this->theObjects[i] = input.elements[i][0];
+        this->objects[i] = input.elements[i][0];
       }
       return true;
     }
     if (input.numberOfRows == 1) {
       this->setSize(input.numberOfColumns);
       for (int i = 0; i < this->size; i ++) {
-        this->theObjects[i] = input.elements[0][i];
+        this->objects[i] = input.elements[0][i];
       }
       return true;
     }
@@ -295,16 +295,16 @@ public:
   int GetNumNonZeroCoords() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].isEqualToZero()) {
+      if (!this->objects[i].isEqualToZero()) {
         result ++;
       }
     }
     return result;
   }
-  bool isProportionalTo(const Vector<Coefficient>& other, Coefficient& TimesMeEqualsOther) const;
+  bool isProportionalTo(const Vector<Coefficient>& other, Coefficient& outputTimesMeEqualsOther) const;
   bool isProportionalTo(const Vector<Coefficient>& other) const {
-    Coefficient TimesMeEqualsOther;
-    return this->isProportionalTo(other, TimesMeEqualsOther);
+    Coefficient outputTimesMeEqualsOther;
+    return this->isProportionalTo(other, outputTimesMeEqualsOther);
   }
   int findLeastCommonMultipleDenominatorsTruncateToInt();
   void findLeastCommonMultipleDenominators(LargeIntegerUnsigned& output);
@@ -315,27 +315,27 @@ public:
     //the extra dimension is going to be the last dimension
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
-    this->RootScalarEuclideanRoot(normal, point, this->theObjects[newDimension - 1]);
-    this->theObjects[newDimension - 1].minus();
+    this->RootScalarEuclideanRoot(normal, point, this->objects[newDimension - 1]);
+    this->objects[newDimension - 1].minus();
     for (int j = 0; j < newDimension - 1; j ++) {
-      this->theObjects[j] = normal[j];
+      this->objects[j] = normal[j];
     }
   }
   bool projectToAffineSpace(Vector<Coefficient> &output) {
-    if (this->theObjects[this->size - 1].isEqualToZero()) {
+    if (this->objects[this->size - 1].isEqualToZero()) {
       return false;
     }
     output.setSize(this->size - 1);
     for (int i = 0; i < this->size - 1; i ++) {
-      output[i] = this->theObjects[i];
+      output[i] = this->objects[i];
     }
-    output /= this->theObjects[this->size - 1];
+    output /= this->objects[this->size - 1];
     return true;
   }
   bool makeAffineProjectionFromNormal(AffineHyperplane<Rational>& output);
   int getIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].isEqualToZero()) {
+      if (!this->objects[i].isEqualToZero()) {
         return i;
       }
     }
@@ -343,7 +343,7 @@ public:
   }
   int getIndexLastNonZeroCoordinate() {
     for (int i = this->size - 1; i >= 0; i --) {
-      if (!this->theObjects[i].isEqualToZero()) {
+      if (!this->objects[i].isEqualToZero()) {
         return i;
       }
     }
@@ -358,7 +358,7 @@ public:
     }
     result.setSize(this->size - numPositions);
     for (int i = 0; i < result.size; i ++) {
-      result[i] = this->theObjects[i + numPositions];
+      result[i] = this->objects[i + numPositions];
     }
     return result;
   }
@@ -370,20 +370,20 @@ public:
       global.fatal << "Bad vector shift. " << global.fatal;
     }
     for (int i = 0; i < this->size - numPositions; i ++) {
-      this->theObjects[i] = this->theObjects[i + numPositions];
+      this->objects[i] = this->objects[i + numPositions];
     }
     this->size -= numPositions;
   }
-  void shiftToTheRightInsertZeroes(int numPositions, const Coefficient& theRingZero) {
+  void shiftToTheRightInsertZeroes(int numPositions, const Coefficient& ringZero) {
     if (numPositions < 0) {
       global.fatal << "Bad vector shift, cannot fill with zeroes. " << global.fatal;
     }
     this->setSize(this->size + numPositions);
     for (int i = this->size - 1; i >= numPositions; i --) {
-      this->theObjects[i] = this->theObjects[i - numPositions];
+      this->objects[i] = this->objects[i - numPositions];
     }
     for (int i = 0; i < numPositions; i ++) {
-      this->theObjects[i] = theRingZero;
+      this->objects[i] = ringZero;
     }
   }
   void setDimensionInsertZeroes(int newDim) {
@@ -398,9 +398,9 @@ public:
     Vector<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
     Matrix<Coefficient>& bufferMatGaussianElimination,
-    const Coefficient& theRingUnit,
+    const Coefficient& ringUnit,
     const Coefficient& theRingMinusUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringZero
   );
   void GetVectorsPerpendicularTo(
     Vectors<Coefficient>& output
@@ -413,16 +413,16 @@ public:
     output.setSize(this->size - 1);
     for (int i = 0; i < this->size; i ++) {
       if (i != Pivot) {
-        Vector<Coefficient>& current = output.theObjects[i];
+        Vector<Coefficient>& current = output.objects[i];
         current.makeEi(this->size, i);
-        current.theObjects[Pivot] -= this->theObjects[i];
+        current.objects[Pivot] -= this->objects[i];
       }
     }
   }
   bool findIndexFirstNonZeroCoordinateFromTheLeft(int& theIndex) {
     theIndex = - 1;
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].isEqualToZero()) {
+      if (!this->objects[i].isEqualToZero()) {
         theIndex = i;
         return true;
       }
@@ -435,7 +435,7 @@ public:
     Vector<Coefficient> result;
     result.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      result[i] = this->theObjects[i];
+      result[i] = this->objects[i];
       result[i] *= other;
     }
     return result;
@@ -455,12 +455,12 @@ public:
   }
   void operator*=(const Coefficient& other) {
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i] *= other;
+      this->objects[i] *= other;
     }
   }
   void operator/=(const Coefficient& other) {
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i] /= other;
+      this->objects[i] /= other;
     }
   }
   template <class otherType>
@@ -482,8 +482,8 @@ public:
     }
     Coefficient c1 = 0, c2 = 0;
     for (int i = 0; i < this->size; i ++) {
-      c1 += this->theObjects[i];
-      c2 += other.theObjects[i];
+      c1 += this->objects[i];
+      c2 += other.objects[i];
     }
     if (c1 > c2) {
       return true;
@@ -492,10 +492,10 @@ public:
       return false;
     }
     for (int i = this->size - 1; i >= 0; i --) {
-      if (this->theObjects[i] > other.theObjects[i]) {
+      if (this->objects[i] > other.objects[i]) {
         return true;
       }
-      if (other.theObjects[i] > this->theObjects[i]) {
+      if (other.objects[i] > this->objects[i]) {
         return false;
       }
     }
@@ -507,7 +507,7 @@ public:
       global.fatal << "This is a programming error: subtracting vectors with different dimensions. " << global.fatal;
     }
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i] -= other[i];
+      this->objects[i] -= other[i];
     }
   }
   Vector<Coefficient> operator+(const Vector<Coefficient>& right) const {
@@ -529,7 +529,7 @@ public:
     }
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theObjects[i] = other[i];
+      this->objects[i] = other[i];
     }
     return *this;
   }
@@ -540,7 +540,7 @@ public:
     }
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theObjects[i] = other[i];
+      this->objects[i] = other[i];
     }
     return *this;
   }
@@ -548,7 +548,7 @@ public:
   Vector<Coefficient>& operator=(const List<otherType>& other) {
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theObjects[i] = other[i];
+      this->objects[i] = other[i];
     }
     return *this;
   }
@@ -559,7 +559,7 @@ public:
   }
   bool isEqualToZero() const {
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].isEqualToZero()) {
+      if (!this->objects[i].isEqualToZero()) {
         return false;
       }
     }
@@ -605,7 +605,7 @@ bool Vector<Coefficient>::isProportionalTo(
   }
   int IndexFirstNonZero = - 1;
   for (int i = 0; i < this->size; i ++) {
-    if (!this->theObjects[i].isEqualToZero()) {
+    if (!this->objects[i].isEqualToZero()) {
       IndexFirstNonZero = i;
       break;
     }
@@ -629,7 +629,7 @@ void Vector<Coefficient>::findLeastCommonMultipleDenominators(LargeIntegerUnsign
   LargeIntegerUnsigned tempI, tempI2;
   output.makeOne();
   for (int i = 0; i < this->size; i ++) {
-    this->theObjects[i].getDenominator(tempI2);
+    this->objects[i].getDenominator(tempI2);
     LargeIntegerUnsigned::gcd(output, tempI2, tempI);
     output.multiplyBy(tempI2);
     output.divPositive(tempI, output, tempI2);
@@ -640,7 +640,7 @@ template <class Coefficient>
 int Vector<Coefficient>::findLeastCommonMultipleDenominatorsTruncateToInt() {
   int result = 1;
   for (int i = 0; i < this->size; i ++) {
-    result = MathRoutines::leastCommonMultiple(result, this->theObjects[i].denominatorShort);
+    result = MathRoutines::leastCommonMultiple(result, this->objects[i].denominatorShort);
     if ((*this)[i].extended != 0) {
       global.fatal
       << "Coefficient is large rational at a "
@@ -667,7 +667,7 @@ class Vectors: public List<Vector<Coefficient> > {
       out << "\\begin{array}{l}";
     }
     for (int i = 0; i < this->size; i ++) {
-      tempS = this->theObjects[i].ToStringEpsilonFormat();
+      tempS = this->objects[i].ToStringEpsilonFormat();
       if (useHtml && makeTable) {
         out << "<tr><td>";
       }
@@ -713,13 +713,13 @@ class Vectors: public List<Vector<Coefficient> > {
   void getVectorsDouble(Vectors<double>& output) const {
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      output[i] = this->theObjects[i].getVectorDouble();
+      output[i] = this->objects[i].getVectorDouble();
     }
   }
   void assignListListCoefficientType(const List<List<Coefficient> >& input) {
     this->setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
-      this->theObjects[i] = input[i];
+      this->objects[i] = input[i];
     }
   }
   void assignListList(const List<Vectors<Coefficient> >& input) {
@@ -739,7 +739,7 @@ class Vectors: public List<Vector<Coefficient> > {
     std::stringstream out;
     std::string tempS;
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].toString(tempS);
+      this->objects[i].toString(tempS);
       out << tempS;
       if (i != this->size - 1) {
         out << " + ";
@@ -756,7 +756,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementWithPositiveScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).isPositive()) {
+      if (input.ScalarEuclidean(this->objects[i]).isPositive()) {
         return true;
       }
     }
@@ -764,7 +764,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementWithNegativeScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).isNegative()) {
+      if (input.ScalarEuclidean(this->objects[i]).isNegative()) {
         return true;
       }
     }
@@ -772,7 +772,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementPerpendicularTo(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->theObjects[i]).isEqualToZero()) {
+      if (input.ScalarEuclidean(this->objects[i]).isEqualToZero()) {
         return true;
       }
     }
@@ -790,7 +790,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void makeEiBasis(int theDimension) {
     this->setSize(theDimension);
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].makeEi(theDimension, i);
+      this->objects[i].makeEi(theDimension, i);
     }
   }
   bool linearSpanContainsVector(const Vector<Coefficient>& input) const;
@@ -819,7 +819,7 @@ class Vectors: public List<Vector<Coefficient> > {
   void sum(Vector<Coefficient>& output, int resultDim) const {
     output.makeZero(resultDim);
     for (int i = 0; i < this->size; i ++) {
-      output += this->theObjects[i];
+      output += this->objects[i];
     }
   }
   bool getCoordinatesInBasis(
@@ -828,22 +828,22 @@ class Vectors: public List<Vector<Coefficient> > {
   bool getIntegralCoordsInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
-    const Coefficient& theRingUnit,
+    const Coefficient& ringUnit,
     const Coefficient& theRingMinusUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringZero
   ) const {
     Matrix<Coefficient> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
     bool result = true;
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].getIntegralCoordsInBasisIfTheyExist(
+      if (!this->objects[i].getIntegralCoordsInBasisIfTheyExist(
         inputBasis,
-        output.theObjects[i],
+        output.objects[i],
         bufferMatGaussianEliminationCC,
         bufferMatGaussianElimination,
-        theRingUnit,
+        ringUnit,
         theRingMinusUnit,
-        theRingZero
+        ringZero
       )) {
         result = false;
       }
@@ -855,21 +855,21 @@ class Vectors: public List<Vector<Coefficient> > {
     Vectors<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
     Matrix<Coefficient>& bufferMatGaussianElimination,
-    const Coefficient& theRingUnit,
+    const Coefficient& ringUnit,
     const Coefficient& theRingMinusUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringZero
   ) const {
     bool result = true;
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
-      if (!this->theObjects[i].getIntegralCoordsInBasisIfTheyExist(
+      if (!this->objects[i].getIntegralCoordsInBasisIfTheyExist(
         inputBasis,
-        output.theObjects[i],
+        output.objects[i],
         bufferMatGaussianEliminationCC,
         bufferMatGaussianElimination,
-        theRingUnit,
+        ringUnit,
         theRingMinusUnit,
-        theRingZero
+        ringZero
       )) {
         result = false;
       }
@@ -879,7 +879,7 @@ class Vectors: public List<Vector<Coefficient> > {
   std::string toStringLetterFormat(const std::string& inputLetter, bool useLatex) {
     std::stringstream out;
     for (int i = 0; i < this->size; i ++) {
-      out << this->theObjects[i].toStringLetterFormat(inputLetter, useLatex);
+      out << this->objects[i].toStringLetterFormat(inputLetter, useLatex);
       if (i != this->size - 1) {
         out << ",";
       }
@@ -922,10 +922,10 @@ class Vectors: public List<Vector<Coefficient> > {
     if (this->size < 10) {
       Vector<Rational> tempRoot;
       for (int i = 0; i < this->size; i ++) {
-        tempRoot = this->theObjects[i];
+        tempRoot = this->objects[i];
         tempRoot.minus();
         for (int j = i + 1; j < this->size; j ++) {
-          if (this->theObjects[j].isEqualTo(tempRoot)) {
+          if (this->objects[j].isEqualTo(tempRoot)) {
             return true;
           }
         }
@@ -936,7 +936,7 @@ class Vectors: public List<Vector<Coefficient> > {
     tempList.setExpectedSize(this->size);
     tempList = *this;
     for (int i = 0; i < this->size; i ++) {
-      if (tempList.contains(- this->theObjects[i])) {
+      if (tempList.contains(- this->objects[i])) {
         return true;
       }
     }
@@ -950,22 +950,22 @@ class Vectors: public List<Vector<Coefficient> > {
       for (int j = 0; j < mat.numberOfRows; j ++) {
         tempRoot[j] = mat.elements[j][i];
       }
-      this->theObjects[i] = tempRoot;
+      this->objects[i] = tempRoot;
     }
   }
   void assignMatrixRows(const Matrix<Coefficient>& mat) {
     this->size = 0;
     this->setSize(mat.numberOfRows);
     for (int i = 0; i < mat.numberOfRows; i ++) {
-      this->theObjects[i].setSize(mat.numberOfColumns);
+      this->objects[i].setSize(mat.numberOfColumns);
       for (int j = 0; j < mat.numberOfColumns; j ++) {
-        this->theObjects[i].theObjects[j] = mat.elements[i][j];
+        this->objects[i].objects[j] = mat.elements[i][j];
       }
     }
   }
   int getDimension() const {
     if (this->size > 0) {
-      return this->theObjects[0].size;
+      return this->objects[0].size;
     }
     return - 1;
   }
@@ -979,14 +979,14 @@ class Vectors: public List<Vector<Coefficient> > {
   void operator=(const List<List<Coefficient> >& other) {
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theObjects[i] = other.theObjects[i];
+      this->objects[i] = other.objects[i];
     }
   }
   template <class otherType>
   void operator=(const List<Vector<otherType> >& other) {
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->theObjects[i] = other[i];
+      this->objects[i] = other[i];
     }
   }
 };
@@ -1095,9 +1095,9 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   Vector<Coefficient>& output,
   Matrix<Coefficient>& bufferMatGaussianEliminationCC,
   Matrix<Coefficient>& bufferMatGaussianElimination,
-  const Coefficient& theRingUnit,
+  const Coefficient& ringUnit,
   const Coefficient& theRingMinusUnit,
-  const Coefficient& theRingZero
+  const Coefficient& ringZero
 ) {
   int theDim = this->size;
   bufferMatGaussianElimination.initialize(inputBasis.size, theDim);
@@ -1106,9 +1106,9 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];
     }
   }
-  bufferMatGaussianEliminationCC.makeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, theRingUnit, theRingZero);
+  bufferMatGaussianEliminationCC.makeIdentityMatrix(bufferMatGaussianElimination.numberOfRows, ringUnit, ringZero);
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
-    &bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit
+    &bufferMatGaussianEliminationCC, theRingMinusUnit, ringUnit
   );
   Vector<Coefficient> tempRoot, theCombination;
   if (this == &output) {
@@ -1127,7 +1127,7 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
       break;
     }
     bufferMatGaussianElimination.getVectorFromRow(i, tempRoot);
-    output[i] = this->theObjects[col];
+    output[i] = this->objects[col];
     output[i] /= bufferMatGaussianElimination.elements[i][col];
     tempRoot *= output[i];
     theCombination -= tempRoot;
@@ -1145,7 +1145,7 @@ void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matr
   for (int i = 0; i < this->size; i ++) {
     for (int j = i; j < this->size; j ++) {
       if (theBilinearForm != nullptr) {
-        Vector<Coefficient>::scalarProduct(this->theObjects[i], this->theObjects[j], *theBilinearForm, output.elements[i][j]);
+        Vector<Coefficient>::scalarProduct(this->objects[i], this->objects[j], *theBilinearForm, output.elements[i][j]);
       } else {
         output(i, j) = (*this)[i].ScalarEuclidean((*this)[j]);
       }
@@ -1161,7 +1161,7 @@ bool Vectors<Coefficient>::containsVectorNonPerpendicularTo(
   const Vector<Coefficient>& input, const Matrix<Coefficient>& theBilinearForm
 ) {
   for (int i = 0; i < this->size; i ++) {
-    if (!Vector<Coefficient>::scalarProduct(this->theObjects[i], input, theBilinearForm).isEqualToZero()) {
+    if (!Vector<Coefficient>::scalarProduct(this->objects[i], input, theBilinearForm).isEqualToZero()) {
       return true;
     }
   }
@@ -1177,7 +1177,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(Matrix<Coeffici
   Vectors<Rational> tempRoots;
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
-    tempRoots.addOnTop(this->theObjects[i]);
+    tempRoots.addOnTop(this->objects[i]);
     int newRank = tempRoots.getRankOfSpanOfElements(bufferMat, bufferSel);
     if (newRank == oldRank) {
       tempRoots.removeIndexSwapWithLast(tempRoots.size - 1);

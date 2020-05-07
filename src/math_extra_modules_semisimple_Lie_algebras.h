@@ -132,13 +132,13 @@ public:
     }
     return true;
   }
-  void intermediateStepForMakeFromHW(const Coefficient& theRingUnit, const Coefficient& theRingZero);
+  void intermediateStepForMakeFromHW(const Coefficient& ringUnit, const Coefficient& ringZero);
   bool makeFromHW(
     SemisimpleLieAlgebra& inputAlgebra,
     Vector<Coefficient>& HWFundCoords,
     const Selection& selNonSelectedAreElementsLevi,
-    const Coefficient& theRingUnit,
-    const Coefficient& theRingZero,
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero,
     std::string* outputReport,
     bool computeSimpleGens = true
   );
@@ -153,24 +153,24 @@ public:
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     Vector<Rational> & weightUEEltSimpleCoords,
     List<List<ElementUniversalEnveloping<Coefficient> > >& outputSortedByArgumentWeight,
-    const Coefficient& theRingUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero
   );
   void getMatrixHomogenousElt(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     List<List<ElementUniversalEnveloping<Coefficient> > >& outputSortedByArgumentWeight,
     Vector<Rational>& weightUEEltSimpleCoords,
     MatrixTensor<Coefficient>& output,
-    const Coefficient& theRingUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero
   );
   void expressAsLinearCombinationHomogenousElement(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     ElementUniversalEnveloping<Coefficient>& outputHomogeneous,
     int indexInputBasis,
     const Vector<Coefficient>& subHiGoesToIthElement,
-    const Coefficient& theRingUnit,
-    const Coefficient& theRingZero
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero
   );
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string elementToStringHWV(FormatExpressions* theFormat = nullptr) const {
@@ -247,13 +247,13 @@ public:
     const ElementUniversalEnveloping<Coefficient>& theUE,
     ElementTensorsGeneralizedVermas<Coefficient>& output,
     SemisimpleLieAlgebra& ownerAlgebra,
-    const Coefficient& theRingUnit
+    const Coefficient& ringUnit
   ) const;
   bool multiplyOnTheLeft(
     const MonomialUniversalEnveloping<Coefficient>& theUE,
     ElementTensorsGeneralizedVermas<Coefficient>& output,
     SemisimpleLieAlgebra& ownerAlgebra,
-    const Coefficient& theRingUnit
+    const Coefficient& ringUnit
   ) const;
   void tensorOnTheRight(
     const ElementTensorsGeneralizedVermas<Coefficient>& right
@@ -262,7 +262,7 @@ public:
     ElementTensorsGeneralizedVermas<Coefficient>& output,
     SemisimpleLieAlgebra& ownerAlgebra,
     int indexGenerator,
-    const Coefficient& theRingUnit
+    const Coefficient& ringUnit
   ) const;
   void multiplyBy(const ElementTensorsGeneralizedVermas<Coefficient>& standsOnTheRight);
   bool isHWV() const {
@@ -274,11 +274,11 @@ public:
     }
     return (*this)[0].isHWV();
   }
-  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& theRingUnit);
+  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit);
   void substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods);
   void setNumberOfVariables(int goalNumVars) {
     for (int i = 0; i < this->size; i ++) {
-      this->theObjects[i].setNumberOfVariables(goalNumVars);
+      this->objects[i].setNumberOfVariables(goalNumVars);
     }
   }
   SemisimpleLieAlgebra& getOwnerSemisimple() const {
@@ -304,9 +304,9 @@ public:
     if (this->size == 0) {
       return - 1;
     }
-    int theAnswer = this->theObjects[0].minimalNumberOfVariables();
+    int theAnswer = this->objects[0].minimalNumberOfVariables();
     for (int i = 1; i < this->size; i ++) {
-      if (theAnswer != this->theObjects[i].minimalNumberOfVariables()) {
+      if (theAnswer != this->objects[i].minimalNumberOfVariables()) {
         return - 1;
       }
     }

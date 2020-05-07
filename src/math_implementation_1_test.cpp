@@ -12,7 +12,7 @@ bool LargeIntegerUnsigned::Test::serializationToHex(const LargeIntegerUnsigned& 
     global.fatal << "Function Crypto::convertLargeUnsignedToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
   }
   List<unsigned char> serialization;
-  input.WriteBigEndianBytes(serialization, true);
+  input.writeBigEndianBytes(serialization, true);
   resultByteSerializationHex = Crypto::convertListUnsignedCharsToHex(serialization);
   if (resultByteSerializationHex != resultCryptoHex) {
     global.fatal << "Byte serialization hex: " << resultByteSerializationHex
@@ -37,7 +37,7 @@ bool LargeIntegerUnsigned::Test::comparisons() {
   List<LargeIntegerUnsigned> toTest = {x, y};
   for (int i = 0; i < toTest.size; i ++) {
     LargeIntegerUnsigned& current = toTest[i];
-    if (!current.IsGreaterThanOrEqualTo(current)) {
+    if (!current.isGreaterThanOrEqualTo(current)) {
       global.fatal << "Number: " << current
       << " not greater than or equal to itself. " << global.fatal;
     }

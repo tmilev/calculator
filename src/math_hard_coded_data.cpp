@@ -1484,7 +1484,7 @@ bool WeylGroupData::LoadCharTable() {
     result = LoadCharTableE1_8(*this);
   }
   if (result) {
-    this->theGroup.CheckOrthogonalityCharTable();
+    this->theGroup.checkOrthogonalityCharacterTable();
   }
   return result;
 }

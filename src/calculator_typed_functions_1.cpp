@@ -8,7 +8,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::makeOne(int)
-#include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
+#include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::raiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 #include "math_rational_function_implementation.h"
 
 template <>
@@ -396,14 +396,14 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(
     if (!input[1].isOfType(&leftR)) {
       return false;
     } else {
-      leftD = leftR.GetDoubleValue();
+      leftD = leftR.getDoubleValue();
     }
   }
   if (!input[2].isOfType(&rightD)) {
     if (!input[2].isOfType(&rightR)) {
       return false;
     } else {
-      rightD = rightR.GetDoubleValue();
+      rightD = rightR.getDoubleValue();
     }
   }
   if (rightD == 0.0) {
@@ -1700,12 +1700,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
   Rational base, exp;
   double baseDouble, expDouble;
   if (input[1].isRational(&base)) {
-    baseDouble = base.GetDoubleValue();
+    baseDouble = base.getDoubleValue();
   } else if (!input[1].isOfType(&baseDouble)) {
     return false;
   }
   if (input[2].isRational(&exp)) {
-    expDouble = exp.GetDoubleValue();
+    expDouble = exp.getDoubleValue();
   } else if (!input[2].isOfType(&expDouble)) {
     return false;
   }
@@ -1714,7 +1714,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
       return false;
     }
     int thePower = 0;
-    if (exp.IsEven()) {
+    if (exp.isEven()) {
       if (!exp.isSmallInteger(&thePower)) {
         return false;
       }
@@ -1742,12 +1742,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRation
   Rational leftR, rightR;
   double leftD, rightD;
   if (input[1].isOfType(&leftR)) {
-    leftD = leftR.GetDoubleValue();
+    leftD = leftR.getDoubleValue();
   } else if (!input[1].isOfType(&leftD)) {
     return false;
   }
   if (input[2].isOfType(&rightR)) {
-    rightD = rightR.GetDoubleValue();
+    rightD = rightR.getDoubleValue();
   } else if (!input[2].isOfType(&rightD)) {
     return false;
   }
@@ -1765,12 +1765,12 @@ bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(
   Rational leftR, rightR;
   double leftD, rightD;
   if (input[1].isOfType(&leftR)) {
-    leftD = leftR.GetDoubleValue();
+    leftD = leftR.getDoubleValue();
   } else if (!input[1].isOfType(&leftD)) {
     return false;
   }
   if (input[2].isOfType(&rightR)) {
-    rightD = rightR.GetDoubleValue();
+    rightD = rightR.getDoubleValue();
   } else if (!input[2].isOfType(&rightD)) {
     return false;
   }

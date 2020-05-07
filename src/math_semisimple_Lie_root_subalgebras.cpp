@@ -57,7 +57,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   eigenMat.initialize(matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns);
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
     for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
-      eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].GetDoubleValue();
+      eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].getDoubleValue();
       if (i == j) {
         eigenMat.elements[i][i] -= theEigenValue;
       }
@@ -72,7 +72,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   for (int i = 0; i < theDimension; i ++) {
     for (int j = 0; j < theDimension; j ++) {
       tempDO.theBilinearForm.elements[i][j] =
-      this->getAmbientWeyl().cartanSymmetric.elements[i][j].GetDoubleValue();
+      this->getAmbientWeyl().cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
   outputBasis1.setSize(theDimension);
@@ -391,19 +391,19 @@ void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSuba
 
       //the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
       //this task is pushed on the end of the to-do list.
-      /* owner.NumconeConditionHoldsBySSpart.theObjects[indexInOwner] ++;
+      /* owner.NumconeConditionHoldsBySSpart.objects[indexInOwner] ++;
       if (owner.ReportStringNonNilradicalParabolic == "") {
         this->computeRootsOfK();
         Vectors<Rational> tempNilradical; Vectors<Rational> tempOthers; Vectors<Rational> tempK;
         for (int i = 0; i < this->kModules.size; i ++)
           if (this->NilradicalKmods.selected[i])
-            tempNilradical.addListOnTop(this->kModules.theObjects[i]);
+            tempNilradical.addListOnTop(this->kModules.objects[i]);
           else
-            tempOthers.addListOnTop(this->kModules.theObjects[i]);
+            tempOthers.addListOnTop(this->kModules.objects[i]);
         for (int i = 0; i < this->PositiveRootsK.size; i ++) {
-          tempOthers.addOnTop(this->PositiveRootsK.theObjects[i]);
-          tempOthers.addOnTop(-this->PositiveRootsK.theObjects[i]);
-          tempK.addOnTop(this->PositiveRootsK.theObjects[i]);
+          tempOthers.addOnTop(this->PositiveRootsK.objects[i]);
+          tempOthers.addOnTop(-this->PositiveRootsK.objects[i]);
+          tempK.addOnTop(this->PositiveRootsK.objects[i]);
         }
         if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.AmbientWeyl.cartanSymmetric.numberOfRows)) {
           Vectors<Rational> tempRoots; std::stringstream out; std::string tempS;
@@ -831,7 +831,7 @@ void RootSubalgebra::matrixToRelation(
   for (int i = 0; i < matA.numberOfColumns; i ++) {
     if (!matX.elements[i][0].isEqualToZero()) {
       for (int j = 0; j < theDimension; j ++) {
-        tempRoot.theObjects[j].assign(matA.elements[j][i]);
+        tempRoot.objects[j].assign(matA.elements[j][i]);
       }
       if (!(matX.elements[i][0].denominatorShort == 1)) {
         global.fatal << "Matrix element not integer. " << global.fatal;
@@ -1004,7 +1004,7 @@ void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rat
           } else {
             int changedIndex = i, otherIndex = j;
             Rational alpha1coeff, alpha2coeff;
-            if (alpha1coeff.IsGreaterThanOrEqualTo(alpha2coeff)) {
+            if (alpha1coeff.isGreaterThanOrEqualTo(alpha2coeff)) {
               changedIndex = j;
               otherIndex = i;
             }
@@ -1227,8 +1227,8 @@ bool RootSubalgebra::isAnIsomorphism(
   Vector<Rational> tempRoot;
   if (additionalDomain != nullptr) {
     for (int i = 0; i < additionalDomain->size; i ++) {
-      additionalDomain->theObjects[i].getCoordinatesInBasis(tempRoots, tempRoot);
-      if (!(tempRoot == additionalRange->theObjects[i])) {
+      additionalDomain->objects[i].getCoordinatesInBasis(tempRoots, tempRoot);
+      if (!(tempRoot == additionalRange->objects[i])) {
         return false;
       }
     }
@@ -1479,7 +1479,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       tempMat.invert();
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
-        if (this->AllRootsK.getIndex(AllRoots.theObjects[i]) == - 1) {
+        if (this->AllRootsK.getIndex(AllRoots.objects[i]) == - 1) {
           for (int j = 0; j < theDimension; j ++) {
             linComb[j].makeZero();
             for (int k = 0; k < theDimension; k++) {
@@ -1492,7 +1492,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
           int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
           linComb *= - x;
           std::string tempS;
-          if (this->linearCombinationToStringDistinguishedIndex(l, AllRoots.theObjects[i], x, linComb, tempS)) {
+          if (this->linearCombinationToStringDistinguishedIndex(l, AllRoots.objects[i], x, linComb, tempS)) {
             out << tempS << "\n";
             counter ++;
           }
@@ -1659,7 +1659,7 @@ std::string RootSubalgebra::toStringLieBracketTable(bool useLaTeX, bool useHtml,
     if (useHtml) {
       out << "<td>";
     }
-    out << i << "/" << owner.theOppositeKmods.theObjects[i];
+    out << i << "/" << owner.theOppositeKmods.objects[i];
     if (useHtml) {
       out << "</td>";
     }
@@ -1700,7 +1700,7 @@ bool RootSubalgebra::linearCombinationToStringDistinguishedIndex(
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension + 1;
   for (int i = 0; i < theDimension; i ++) {
-    tempS = linComb.theObjects[i].toString();
+    tempS = linComb.objects[i].toString();
     if (tempS != "0") {
       if (tempS == "- 1" || tempS == "-1") {
         tempS = "-";
@@ -2669,7 +2669,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << " which is supposed to equal 2. " << global.fatal;
       }
     }
-    this->getAmbientWeyl().RaiseToDominantWeight(characteristicH, nullptr, nullptr, &raisingElt);
+    this->getAmbientWeyl().raiseToDominantWeight(characteristicH, nullptr, nullptr, &raisingElt);
     reflectedSimpleBasisK = this->SimpleBasisK;
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
       this->getAmbientWeyl().actOn(raisingElt, reflectedSimpleBasisK[k]);
@@ -4350,7 +4350,7 @@ void ConeRelations::addRelationNoRepetition(ConeRelation& input, RootSubalgebras
   int i = static_cast<signed>(this->getHash(input));
   List<int>& theIndices = this->theHashedArrays[i];
   for (int j = 0; j < theIndices.size; j ++) {
-    if (this->theObjects[theIndices[j]].generateAutomorphisms(input)) {
+    if (this->objects[theIndices[j]].generateAutomorphisms(input)) {
       return;
     }
   }
@@ -4383,15 +4383,15 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
   int oldIndex = - 1;
   int lineCounter = 0;
   for (int i = 0; i < this->size; i ++) {
-    if (oldIndex != this->theObjects[i].IndexOwnerRootSubalgebra) {
-      oldIndex = this->theObjects[i].IndexOwnerRootSubalgebra;
+    if (oldIndex != this->objects[i].IndexOwnerRootSubalgebra) {
+      oldIndex = this->objects[i].IndexOwnerRootSubalgebra;
       if (useLatex) {
         out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
         << owners.theSubalgebras[oldIndex].theDynkinDiagram.toString()
         << "}\\\\\n\\hline\\hline";
       }
     }
-    lineCounter += this->theObjects[i].toString(tempS, owners, useLatex, true, true);
+    lineCounter += this->objects[i].toString(tempS, owners, useLatex, true, true);
     out << tempS;
     if (useLatex) {
       out << "\\\\";
@@ -4401,9 +4401,9 @@ void ConeRelations::toString(std::string& output, RootSubalgebras& owners, bool 
       lineCounter += 2;
       out << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~"
       << "the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
-      this->theObjects[i].RelationOneSideToStringCoordForm(tempS, this->theObjects[i].AlphaCoeffs, tempAlphas, true);
+      this->objects[i].RelationOneSideToStringCoordForm(tempS, this->objects[i].AlphaCoeffs, tempAlphas, true);
       out << "\\multicolumn{5}{c}{" << tempS;
-      this->theObjects[i].RelationOneSideToStringCoordForm(tempS, this->theObjects[i].BetaCoeffs, tempBetas, true);
+      this->objects[i].RelationOneSideToStringCoordForm(tempS, this->objects[i].BetaCoeffs, tempBetas, true);
       out << "=" << tempS; //<<"~~~~";
       out << "}\\\\\\hline\n";
     }

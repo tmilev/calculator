@@ -188,7 +188,7 @@ bool WebWorker::receiveAll() {
       return false;
     }
   }
-  this->messageHead.assign(readBuffer.theObjects, static_cast<unsigned>(numBytesInBuffer));
+  this->messageHead.assign(readBuffer.objects, static_cast<unsigned>(numBytesInBuffer));
   this->parseMessageHead();
 
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
@@ -249,7 +249,7 @@ bool WebWorker::receiveAll() {
       this->displayUserInput = this->error;
       return false;
     }
-    bufferString.assign(readBuffer.theObjects, static_cast<unsigned>(numBytesInBuffer));
+    bufferString.assign(readBuffer.objects, static_cast<unsigned>(numBytesInBuffer));
     this->messageBody += bufferString;
   }
   if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
@@ -821,7 +821,7 @@ void WebWorker::parseMessageHead() {
     ) {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
         LargeIntegerUnsigned theLI;
-        if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
+        if (theLI.assignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
           if (!theLI.isIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
           }
@@ -1397,7 +1397,7 @@ int WebWorker::processFile() {
     this->bufferFileIO.setSize(static_cast<int>(numBytesRead));
     this->queueBytesForSendingNoHeader(this->bufferFileIO);
     this->bufferFileIO.setSize(bufferSize);
-    theFile.read(this->bufferFileIO.theObjects, this->bufferFileIO.size);
+    theFile.read(this->bufferFileIO.objects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
   }
   this->sendAllBytesNoHeaders();
@@ -3865,7 +3865,7 @@ bool WebServer::analyzeMainArgumentsTimeString(const std::string& timeLimitStrin
     return false;
   }
   Rational timeLimit;
-  if (!timeLimit.AssignStringFailureAllowed(timeLimitString)) {
+  if (!timeLimit.assignStringFailureAllowed(timeLimitString)) {
     return false;
   }
   int timeLimitInt = 0;

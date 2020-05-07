@@ -2317,7 +2317,7 @@ public:
   static bool innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFreudenthalFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
   template<class Coefficient>

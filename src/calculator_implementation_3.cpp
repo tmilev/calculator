@@ -114,12 +114,12 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   Vectors<Rational> basisEi;
   int theDim= this->AmbientWeyl->getDimension();
   basisEi.makeEiBasis(theDim);
-  this->RaiseToDominantWeightInner(highestWeightTrue);
+  this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().GetDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
@@ -153,7 +153,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
         currentWeight -= this->AmbientWeyl->RootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
-          this->AmbientWeyl->RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
+          this->AmbientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
             int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().numeratorShort;

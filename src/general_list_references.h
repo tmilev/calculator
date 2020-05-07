@@ -34,7 +34,7 @@ template <class Object>
 class ListReferences {
 public:
   bool flagDeallocated;
-  List<Object*> theReferences;
+  List<Object*> references;
   int size;
   Object& operator[](int i) const {
     if (i < 0 || i >= this->size) {
@@ -43,13 +43,13 @@ public:
       << i << " in ListReferences that has only " << this->size << " elements. ";
       fatalCrash(commentsOnCrash.str());
     }
-    if (this->theReferences[i] == 0) {
+    if (this->references[i] == 0) {
       std::stringstream commentsOnCrash;
       commentsOnCrash << "This is a programing error: element of index "
       << i << " in ListReferences has zero pointer. This is not allowed. ";
       fatalCrash(commentsOnCrash.str());
     }
-    return *this->theReferences[i];
+    return *this->references[i];
   }
   bool contains(const Object& theObject) const {
     for (int i = 0; i < this->size; i ++) {
@@ -62,12 +62,12 @@ public:
   void removeIndexSwapWithLast(int theIndex) {
     //This is not thread-safe
     this->killElementIndex(theIndex);
-    this->theReferences[theIndex] = this->theReferences[this->size - 1];
-    this->theReferences[this->size - 1] = 0;
+    this->references[theIndex] = this->references[this->size - 1];
+    this->references[this->size - 1] = 0;
     this->size --;
   }
   void swapTwoIndices(int index1, int index2) {
-    this->theReferences.swapTwoIndices(index1, index2);
+    this->references.swapTwoIndices(index1, index2);
   }
   void allocateElements(int newSize);
   void reserve(int desiredSize) {
@@ -89,8 +89,8 @@ public:
   }
   void killAllElements();
   void killElementIndex(int i) {
-    delete this->theReferences[i]; //<- NOT thread safe!
-    this->theReferences[i] = 0;
+    delete this->references[i]; //<- NOT thread safe!
+    this->references[i] = 0;
   }
   void addOnTop(const Object& o);
   int getIndex(const Object& o) const;
@@ -155,13 +155,13 @@ void ListReferences<Object>::allocateElements(int newSize) {
     << "rather than provide a negative argument to setSize.";
     fatalCrash(commentsOnCrash.str());
   }
-  if (newSize <= this->theReferences.size) {
+  if (newSize <= this->references.size) {
     return;
   }
-  int oldReferencesSize = this->theReferences.size;
-  this->theReferences.setSize(newSize);
+  int oldReferencesSize = this->references.size;
+  this->references.setSize(newSize);
   for (int i = oldReferencesSize; i < newSize; i ++) {
-    this->theReferences[i] = (new Object);
+    this->references[i] = (new Object);
   }
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter += newSize - oldReferencesSize;
@@ -171,15 +171,15 @@ void ListReferences<Object>::allocateElements(int newSize) {
 
 template<class Object>
 void ListReferences<Object>::killAllElements() {
-  for (int i = 0; i < this->theReferences.size; i ++) {
-    delete this->theReferences[i];
+  for (int i = 0; i < this->references.size; i ++) {
+    delete this->references[i];
 #ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter --;
     GlobalStatistics::checkPointerCounters();
 #endif
-    this->theReferences[i] = 0;
+    this->references[i] = 0;
   }
-  this->theReferences.size = 0;
+  this->references.size = 0;
   this->size = 0;
 }
 

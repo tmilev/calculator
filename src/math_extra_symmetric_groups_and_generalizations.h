@@ -52,8 +52,8 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
     return;
   }
   for (int i = 0; i < basis.size; i ++) {
-    for (int j = 0; j < basis[i].theMonomials.size; j ++) {
-      this->involvedMonomials.BSInsertDontDup(basis[i].theMonomials[j]);
+    for (int j = 0; j < basis[i].monomials.size; j ++) {
+      this->involvedMonomials.BSInsertDontDup(basis[i].monomials[j]);
     }
   }
   Matrix<Coefficient> basisMatrix;
@@ -1425,9 +1425,9 @@ void PermutationR2::actOnTensor(
   ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& out,
   const ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, Coefficient>& in
 ) const {
-  for (int i = 0; i < in.theMonomials.size; i ++) {
+  for (int i = 0; i < in.monomials.size; i ++) {
     MonomialTensor<int, MathRoutines::IntUnsignIdentity> tmpout, tmpin;
-    tmpin = in.theMonomials[i];
+    tmpin = in.monomials[i];
     this->actOnMonomialTensor(tmpout, tmpin);
     out.addMonomial(tmpout, in.coefficients[i]);
   }

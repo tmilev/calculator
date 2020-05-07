@@ -597,7 +597,7 @@ bool GroebnerBasisComputation<Coefficient>::hasImpliedSubstitutions(
     tempP = inputSystem[i];
     for (int j = 0; j < numVars; j ++) {
       tempM.makeEi(j, 1, numVars);
-      int indexTempM = tempP.theMonomials.getIndex(tempM);
+      int indexTempM = tempP.monomials.getIndex(tempM);
       if (indexTempM == - 1) {
         continue;
       }

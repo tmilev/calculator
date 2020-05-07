@@ -290,7 +290,7 @@ bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
 ) const {
   int whichtotalDegreeContainer = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->theMonomials[i].hasSmallIntegralPositivePowers(&whichtotalDegreeContainer)) {
+    if (!this->monomials[i].hasSmallIntegralPositivePowers(&whichtotalDegreeContainer)) {
       return false;
     }
   }
@@ -380,7 +380,7 @@ bool Polynomial<Coefficient>::isNegative() const {
 template <class Coefficient>
 bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
   for (int i = 0; i < this->size; i ++) {
-    if (!this->theObjects[i].isLinearNoConstantTerm()) {
+    if (!this->objects[i].isLinearNoConstantTerm()) {
       return false;
     }
   }
@@ -483,7 +483,7 @@ int Polynomial<Coefficient>::getHighestIndexSuchThatHigherIndexVariablesDontPart
   for (int i = 0; i < this->size; i ++) {
     result = MathRoutines::maximum(
       result,
-      this->theObjects[i].getHighestIndexSuchThatHigherIndexVariablesDontParticipate()
+      this->objects[i].getHighestIndexSuchThatHigherIndexVariablesDontParticipate()
     );
   }
   return result;
@@ -717,26 +717,26 @@ bool Polynomial<Coefficient>::operator<=(const Polynomial<Coefficient>& other) c
 template <class Coefficient>
 bool Polynomial<Coefficient>::isProportionalTo(
   const Polynomial<Coefficient>& other,
-  Coefficient& TimesMeEqualsOther,
-  const Coefficient& theRingUnit
+  Coefficient& outputTimesMeEqualsOther,
+  const Coefficient& ringUnit
 ) const {
   if (this->size() != other.size()) {
     return false;
   }
   if (other.size() == 0) {
-    TimesMeEqualsOther = theRingUnit;
+    outputTimesMeEqualsOther = ringUnit;
     return true;
   }
   const MonomialP& firstMon = (*this)[0];
-  int indexInOther = other.theMonomials.getIndex(firstMon);
+  int indexInOther = other.monomials.getIndex(firstMon);
   if (indexInOther == - 1) {
     return false;
   }
-  TimesMeEqualsOther = other.coefficients[indexInOther];
-  TimesMeEqualsOther /= this->coefficients[0];
+  outputTimesMeEqualsOther = other.coefficients[indexInOther];
+  outputTimesMeEqualsOther /= this->coefficients[0];
   Polynomial<Coefficient> tempP;
   tempP = *this;
-  tempP *= TimesMeEqualsOther;
+  tempP *= outputTimesMeEqualsOther;
   tempP -= other;
   return tempP.isEqualToZero();
 }
@@ -909,12 +909,12 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getConstantTerm(Coefficient& output, const Coefficient& theRingZero) const {
+void Polynomial<Coefficient>::getConstantTerm(Coefficient& output, const Coefficient& ringZero) const {
   MonomialP tempM;
   tempM.makeOne();
-  int i = this->theMonomials.getIndex(tempM);
+  int i = this->monomials.getIndex(tempM);
   if (i == - 1) {
-    output = theRingZero;
+    output = ringZero;
   } else {
     output = this->coefficients[i];
   }
@@ -944,7 +944,7 @@ void Polynomial<Coefficient>::getCoefficientInFrontOfLinearTermVariableIndex(
 ) {
   MonomialP tempM;
   tempM.makeEi(index);
-  int i = this->theMonomials.getIndex(tempM);
+  int i = this->monomials.getIndex(tempM);
   if (i == - 1) {
     output = 0;
   } else {
@@ -982,7 +982,7 @@ bool Polynomial<Coefficient>::differential(
   int numberOfVariables = this->minimalNumberOfVariables();
   output.setSize(numberOfVariables);
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialP& currentMonomial = this->theMonomials[i];
+    const MonomialP& currentMonomial = this->monomials[i];
     const Coefficient& currentCoefficient = this->coefficients[i];
     int currentNumberOfVariables = currentMonomial.minimalNumberOfVariables();
     for (int j = 0; j < currentNumberOfVariables; j ++) {
@@ -1035,8 +1035,8 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
   const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
 ) const {
   MacroRegisterFunctionWithName("PolynomialOrder::compareLeftGreaterThanRight");
-  List<MonomialP> sortedLeft = left.theMonomials;
-  List<MonomialP> sortedRight = right.theMonomials;
+  List<MonomialP> sortedLeft = left.monomials;
+  List<MonomialP> sortedRight = right.monomials;
   sortedLeft.quickSortAscending(&this->monomialOrder);
   sortedRight.quickSortAscending(&this->monomialOrder);
   int leftIndex = sortedLeft.size - 1;
@@ -1083,7 +1083,7 @@ std::string GroebnerBasisComputation<Coefficient>::getPolynomialStringSpacedMono
     *firstNonZeroIndex = - 1;
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
+    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       if (i != this->allMonomials.size - 1) {
         out << "&";
@@ -1137,12 +1137,12 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringLaTeX() {
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands.getElement();
   this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   std::string HighlightedColor = "red";
-  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasis.size);
@@ -1160,7 +1160,7 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringLaTeX() {
   << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
   out << "\\multicolumn{1}{|c|}{} & ";
   out << this->getPolynomialStringSpacedMonomialsLaTeX(
-    this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials
+    this->remainderDivision, &HighlightedColor, &this->remainderDivision.monomials
   ) << "\\\\\\hline";
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
   << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
@@ -1202,7 +1202,7 @@ std::string GroebnerBasisComputation<Coefficient>::getPolynomialStringSpacedMono
   bool found = false;
   int countMons = 0;
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
+    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       out << "<td" << extraStyle << ">" << "</td>";
       continue;
@@ -1256,11 +1256,11 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringHtml() {
   this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
-  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
     if (i < theSubtracands.size) {
-      this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
+      this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
     }
   }
   //List<std::string> basisColorStyles;
@@ -1272,7 +1272,7 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionStringHtml() {
   out << "<table style ='white-space: nowrap; border:1px solid black;'>";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
   out << this->getPolynomialStringSpacedMonomialsHtml(
-    this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials
+    this->remainderDivision, underlineStyle, &this->remainderDivision.monomials
   )
   << "</td></tr>";
   out << "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"

@@ -46,7 +46,7 @@ public:
     tempMat.initialize(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
     for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
       for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
-        tempMat.elements[i][j] = bilinearForm.elements[i][j].GetDoubleValue();
+        tempMat.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
       }
     }
     this->initDimensions(tempMat, draggableBasis, startingPlane);
@@ -250,7 +250,7 @@ public:
   int getActualTextStyleFromFlagsAnd(int inputTextStyle);
 
   std::string getHTMLDiv(int theDimension);
-  void drawString(drawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
+  void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);
   void drawLineDirectly(

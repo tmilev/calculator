@@ -110,7 +110,7 @@ bool TransportLayerSecurity::SSLReadLoop(
       includeNoErrorInComments
     );
     if (numBytes > 0) {
-      next.assign(this->readBuffer.theObjects, static_cast<unsigned>(numBytes));
+      next.assign(this->readBuffer.objects, static_cast<unsigned>(numBytes));
       output += next;
       if (expectedLength <= 0) {
         break;
@@ -335,7 +335,7 @@ bool TransportLayerSecurityServer::WriteBytesOnce(
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   ssize_t numBytesSent = send(
     this->session.socketId,
-    input.theObjects,
+    input.objects,
     static_cast<size_t>(input.size),
     0
   );
@@ -424,7 +424,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   this->incomingBytes.setSize(this->defaultBufferCapacity);
   int numBytesInBuffer = static_cast<int>(recv(
     this->session.socketId,
-    this->incomingBytes.theObjects,
+    this->incomingBytes.objects,
     static_cast<unsigned>(this->incomingBytes.size - 1),
     0
   ));
@@ -620,7 +620,7 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
   std::stringstream shouldNotBeNeeded;
   List<unsigned char> publicKeyBytes;
   bool mustBeTrue =
-  this->ephemerealPublicKey.xCoordinate.theValue.WriteBigEndianFixedNumberOfBytes(
+  this->ephemerealPublicKey.xCoordinate.theValue.writeBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
   Serialization::writeOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
@@ -1999,7 +1999,7 @@ int TransportLayerSecurity::readOnce(
   } else {
     result = static_cast<int>(recv(
       socket,
-      this->readBuffer.theObjects,
+      this->readBuffer.objects,
       static_cast<size_t>(readBuffer.size - 1), 0
     ));
   }

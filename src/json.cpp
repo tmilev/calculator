@@ -346,7 +346,7 @@ bool JSData::tryToComputeType(std::stringstream* commentsOnFailure) {
       this->theInteger.freeMemory();
       this->theType = JSData::token::tokenUndefined;
       Rational parser;
-      if (parser.AssignStringFailureAllowed(this->theString)) {
+      if (parser.assignStringFailureAllowed(this->theString)) {
         LargeInteger theInt;
         if (parser.isInteger(&theInt)) {
           this->theType = JSData::token::tokenLargeInteger;

@@ -2340,7 +2340,7 @@ bool CalculatorFunctions::innerDistributeSqrt(Calculator& theCommands, const Exp
     } else {
       Rational exponentRat;
       if (oneOverExponentE.isRational(&exponentRat)) {
-        if (!exponentRat.getDenominator().IsEven()) {
+        if (!exponentRat.getDenominator().isEven()) {
           isGood = true;
         }
       }
@@ -2558,7 +2558,7 @@ bool CalculatorFunctions::innerValueOfModularExpression(
   if (input[1].isOfType(&candidatePolynomial)) {
     Polynomial<Rational> rationalConversion;
     for (int i = 0; i < candidatePolynomial.size(); i ++) {
-      rationalConversion.addMonomial(candidatePolynomial.theMonomials[i], candidatePolynomial.coefficients[i].theValue);
+      rationalConversion.addMonomial(candidatePolynomial.monomials[i], candidatePolynomial.coefficients[i].theValue);
     }
     return output.assignValueWithContext(rationalConversion, input[1].getContext(), theCommands);
   }

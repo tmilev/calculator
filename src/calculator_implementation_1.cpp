@@ -70,7 +70,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         Matrix<Rational>::computePotentialChangeGradient(
           tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
         );
-        if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
+        if (PotentialChangeGradient.isGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
           EnteringVariable = i;
           ChangeGradient.assign(PotentialChangeGradient);
         }
@@ -676,7 +676,7 @@ bool Calculator::innerGroebner(
       theCommands
     );
   }
-  int upperBoundComputations = int(upperBound.GetDoubleValue());
+  int upperBoundComputations = int(upperBound.getDoubleValue());
   output.reset(theCommands);
   for (int i = 1; i < input.children.size; i ++) {
     output.children.addOnTop(input.children[i]);
@@ -1991,7 +1991,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       return output.assignValue(out.str(), theCommands);
     }
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<Rational>().GetDoubleValue();
+    theDoubleValue = input.getValue<Rational>().getDoubleValue();
   }
   if (input.isOfType<AlgebraicNumber>()) {
     hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);

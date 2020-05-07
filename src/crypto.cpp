@@ -42,7 +42,7 @@ bool Crypto::haveEqualHashes(const std::string& left, const std::string& right) 
 
 void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
   Crypto::Random::getRandomLargeIntegerSecure(output, numBytes);
-  if (output.IsEven()) {
+  if (output.isEven()) {
     output ++;
   }
   while (true) {
@@ -695,14 +695,14 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
 std::string Crypto::convertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.objects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::convertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.objects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -713,14 +713,14 @@ std::string Crypto::convertListUnsignedCharsToHex(const List<unsigned char>& inp
 std::string Crypto::convertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.objects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::convertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<const char*>(input.theObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<const char*>(input.objects), static_cast<unsigned>(input.size));
   return Crypto::convertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -1034,7 +1034,7 @@ bool Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
 bool Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(
   const LargeIntegerUnsigned& input, int numberOfLeadingZeroesToPadWith, std::string& output
 ) {
-  input.GetHexBigEndian(numberOfLeadingZeroesToPadWith, output);
+  input.getHexBigEndian(numberOfLeadingZeroesToPadWith, output);
   return true;
 }
 
@@ -1180,7 +1180,7 @@ void Crypto::computeSha256(const std::string& input, std::string& output) {
   List<unsigned char> inputList, outputList;
   inputList = input;
   computeSha256(inputList, outputList);
-  output.assign(reinterpret_cast<char*>(outputList.theObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char*>(outputList.objects), static_cast<unsigned>(outputList.size));
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
@@ -1787,7 +1787,7 @@ bool Crypto::External::decryptAES_CBC_256_string(
   if (!this->decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
     return false;
   }
-  output.assign(reinterpret_cast<char *>(outputList.theObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char *>(outputList.objects), static_cast<unsigned>(outputList.size));
   return true;
 }
 
@@ -1809,7 +1809,7 @@ bool Crypto::External::encryptAES_CBC_256_string(
   if (!this->encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
     return false;
   }
-  output.assign(reinterpret_cast<char*>(outputList.theObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char*>(outputList.objects), static_cast<unsigned>(outputList.size));
   return true;
 
 }

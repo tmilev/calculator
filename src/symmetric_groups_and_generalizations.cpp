@@ -1390,7 +1390,7 @@ void HyperoctahedralGroupData::allSpechtModules() {
         //global.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->spechtModuleOfPartititons(pps[ppi], nps[npi], sm);
         //sm.verifyRepresentation();
-        this->theGroup->AddIrreducibleRepresentation(sm);
+        this->theGroup->addIrreducibleRepresentation(sm);
       }
     }
   }

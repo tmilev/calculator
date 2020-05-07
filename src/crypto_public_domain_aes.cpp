@@ -532,7 +532,7 @@ bool CryptoPublicDomain::decryptAES_CBC_256(
   AESContext context;
   context.AES_init_ctx(reinterpret_cast<const uint8_t*>(inputKey.c_str()));
   output = inputCipherText;
-  context.AES_CBC_decrypt_buffer(static_cast<uint8_t*>(output.theObjects), static_cast<unsigned>(output.size));
+  context.AES_CBC_decrypt_buffer(static_cast<uint8_t*>(output.objects), static_cast<unsigned>(output.size));
   return true;
 }
 
@@ -567,7 +567,7 @@ bool CryptoPublicDomain::encryptAES_CBC_256(
   context.AES_init_ctx(reinterpret_cast<const uint8_t *>(inputKey.c_str()));
   output = inputPlainText;
   context.AES_CBC_encrypt_buffer(
-    reinterpret_cast<uint8_t *>(output.theObjects),
+    reinterpret_cast<uint8_t *>(output.objects),
     static_cast<unsigned>(output.size)
   );
   return true;

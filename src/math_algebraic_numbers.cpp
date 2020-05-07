@@ -1100,7 +1100,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   Rational ratValue;
   if (this->isRational(&ratValue)) {
     if (outputWhichDouble != nullptr) {
-      *outputWhichDouble = ratValue.GetDoubleValue();
+      *outputWhichDouble = ratValue.getDoubleValue();
     }
     return true;
   }
@@ -1118,7 +1118,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   for (int i = 0; i < this->element.size(); i ++) {
     this->owner->getRadicalSelectionFromIndex(this->element[i].theIndex, currentRadicalSelection);
     if (outputWhichDouble != nullptr) {
-      currentMultiplicand = this->element.coefficients[i].GetDoubleValue();
+      currentMultiplicand = this->element.coefficients[i].getDoubleValue();
     }
     for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
@@ -1126,7 +1126,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
       } else {
         if (outputWhichDouble != nullptr) {
           currentMultiplicand *= FloatingPoint::sqrtFloating(
-            this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue()
+            this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].getDoubleValue()
           );
         }
       }

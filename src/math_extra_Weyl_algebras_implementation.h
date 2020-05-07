@@ -345,7 +345,7 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
     theCoeff = this->coefficients[i];
-    if (totalDeg.IsEven()) {
+    if (totalDeg.isEven()) {
       theCoeff *= - 1;
     }
     output.addMonomial(theMon, theCoeff);

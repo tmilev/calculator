@@ -1373,7 +1373,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
   );
   if (this->theIterator.theGroupGeneratingElements.size > 0) {
     WeylGroupAutomorphisms& ownerGroup = *this->theIterator.theGroupGeneratingElements[0].owner;
-    this->computedSize = ownerGroup.GetOrbitSize(this->orbitDefiningElement);
+    this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
     if (this->computedSize > this->maxOrbitBufferSize) {
       this->maxOrbitBufferSize = 0;
       this->orbitBuffer.setSize(0);
@@ -2577,9 +2577,9 @@ bool CandidateSSSubalgebra::computeSystemPart2(bool AttemptToChooseCentalizer, b
     this->flagSystemGroebnerBasisFound = false;
     this->flagSystemProvedToHaveNoSolution = false;
     if (this->owner->flagAttemptToSolveSystems) {
-      long long int startNumOps =Rational::TotalArithmeticOperations();
+      long long int startNumOps =Rational::totalArithmeticOperations();
       this->attemptToSolveSystem();
-      this->totalArithmeticOpsToSolveSystem +=Rational::TotalArithmeticOperations()-startNumOps;
+      this->totalArithmeticOpsToSolveSystem +=Rational::totalArithmeticOperations()-startNumOps;
     }
   } else {
     this->flagSystemGroebnerBasisFound = false;
@@ -4577,7 +4577,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     output.getElement(i).IndicesMinimalContainingRootSAs.size = 0;
     for (int j = 0; j < output.getElement(i).IndicesContainingRootSAs.size; j ++) {
       bool isMinimalContaining = true;
-//      RootSubalgebra& currentRootSA = output.theRootSAs.theObjects[];
+//      RootSubalgebra& currentRootSA = output.theRootSAs.objects[];
       for (int k = 0; k < output.getElement(i).IndicesContainingRootSAs.size; k ++) {
         RootSubalgebra& theOtherRootSA = output.theRootSAs.theSubalgebras[output.getElement(i).IndicesContainingRootSAs[k]];
         if (theOtherRootSA.indicesSubalgebrasContainingK.contains(output.getElement(i).IndicesContainingRootSAs[j])) {
@@ -4692,7 +4692,7 @@ bool SltwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* output
   this->checkInitialization();
   tempH.makeCartanGenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
-    if (this->theObjects[i].theH == tempH) {
+    if (this->objects[i].theH == tempH) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -5265,7 +5265,7 @@ std::string CandidateSSSubalgebra::toStringDrawWeights(FormatExpressions* theFor
   theDV.theBuffer.theBilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.theBilinearForm(i, j) = this->BilinearFormFundPrimal(i, j).GetDoubleValue();
+      theDV.theBuffer.theBilinearForm(i, j) = this->BilinearFormFundPrimal(i, j).getDoubleValue();
     }
   }
   Vector<Rational> zeroVector;
@@ -5352,7 +5352,7 @@ std::string CandidateSSSubalgebra::toStringDrawWeights(FormatExpressions* theFor
   for (int i = 0; i < theDV.theBuffer.basisToDrawCirclesAt.size; i ++) {
     theDV.theBuffer.basisToDrawCirclesAt[i].setSize(thePrimalRank);
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.basisToDrawCirclesAt[i][j] = basisToDrawCirclesAt[i][j].GetDoubleValue();
+      theDV.theBuffer.basisToDrawCirclesAt[i][j] = basisToDrawCirclesAt[i][j].getDoubleValue();
     }
     theDV.drawCircleAtVectorBufferRational(basisToDrawCirclesAt[i], "red", 4);
   }

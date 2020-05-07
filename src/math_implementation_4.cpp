@@ -1204,7 +1204,7 @@ int AffineCone::getDimension() {
   if (this->theWalls.size == 0) {
     return 0;
   }
-  return this->theWalls.theObjects[0].affinePoint.size;
+  return this->theWalls.objects[0].affinePoint.size;
 }
 
 unsigned int AffineCone::hashFunction() const {
@@ -1220,7 +1220,7 @@ void AffineHyperplanes::toString(std::string& output) {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     std::string tempS;
-    this->theObjects[i].toString(tempS);
+    this->objects[i].toString(tempS);
     out << "index: " << i << " " << tempS << "\n";
   }
   output = out.str();
@@ -1379,18 +1379,18 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   global.fatal << "Not implemented yet. " << global.fatal;
 /*
   for (int i = 0; i < this->thePfs.theChambersOld.size; i ++)
-    if (this->thePfs.theChambersOld.theObjects[i] != 0) {
-      QuasiPolynomial& currentQPNoSub = this->theQPsNonSubstituted.theObjects[i];
-      this->theQPsSubstituted.theObjects[i].setSize(this->theLinearOperators.size);
-      this->thePfs.getVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.theObjects[i]->InternalPoint);
-      out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.theObjects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
+    if (this->thePfs.theChambersOld.objects[i] != 0) {
+      QuasiPolynomial& currentQPNoSub = this->theQPsNonSubstituted.objects[i];
+      this->theQPsSubstituted.objects[i].setSize(this->theLinearOperators.size);
+      this->thePfs.getVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.objects[i]->InternalPoint);
+      out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.objects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
       for (int k = 0; k< this->theLinearOperators.size; k++) {
-        QuasiPolynomial& currentQPSub = this->theQPsSubstituted.theObjects[i].theObjects[k];
+        QuasiPolynomial& currentQPSub = this->theQPsSubstituted.objects[i].objects[k];
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
         global.makeReport();
-        currentQPNoSub.substitution(this->theLinearOperatorsExtended.theObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
+        currentQPNoSub.substitution(this->theLinearOperatorsExtended.objects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
       }
     }
@@ -1404,10 +1404,10 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   ProgressReport theReport;
   ProgressReport theReport2;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
-    QuasiPolynomial& currentSum = this->theMultiplicities.theObjects[i];
+    QuasiPolynomial& currentSum = this->theMultiplicities.objects[i];
     currentSum.makeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
     for (int k = 0; k < this->theLinearOperators.size; k ++) {
-      this->getProjection(k, this->projectivizedChambeR.theObjects[i].getInternalPoint(), tempRoot);
+      this->getProjection(k, this->projectivizedChambeR.objects[i].getInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
       global.fatal << global.fatal ;
       int theIndex = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
@@ -1754,7 +1754,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLOExtended = this->theLinearOperatorsExtended[k];
     currentLO.multiplyOnTheLeft(theProjectionBasisChanged);
     currentLO *= - 1;
-    //tempList.addOnTopNoRepetition(this->theLinearOperators.theObjects[i]);
+    //tempList.addOnTopNoRepetition(this->theLinearOperators.objects[i]);
     currentLOExtended.makeIdentityMatrix(currentLO.numberOfRows);
     currentLOExtended.resize(currentLO.numberOfRows, currentLO.numberOfRows + currentLO.numberOfColumns, true);
     for (int i = 0; i < currentLO.numberOfRows; i ++) {
@@ -1870,12 +1870,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << this->theLinearOperatorsExtended[0].toString(&global.theDefaultFormat.getElement()) << "\n";
   this->log << "\nThe second operator extended:\n"
   << this->theLinearOperatorsExtended[1].toString(&global.theDefaultFormat.getElement()) << "\n";
-  /*tempMat = this->theLinearOperatorsExtended.theObjects[0];
+  /*tempMat = this->theLinearOperatorsExtended.objects[0];
   tempMat.transpose();
   tempMat.actOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.size; i ++) {
-    this->PreimageWeylChamberSmallerAlgebra.theObjects[i].setSize(input.theRange.getRank() + input.theDomain.getRank() + 1);
-    *this->PreimageWeylChamberSmallerAlgebra.theObjects[i].lastObject()= 0;
+    this->PreimageWeylChamberSmallerAlgebra.objects[i].setSize(input.theRange.getRank() + input.theDomain.getRank() + 1);
+    *this->PreimageWeylChamberSmallerAlgebra.objects[i].lastObject()= 0;
   }*/
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
     tempRoot.makeZero(input.theRange().getRank() + input.theDomain().getRank() + 1);
@@ -1883,7 +1883,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       tempRoot[j] = this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
     }
   //  for (int j = 0; j < input.theRange.getRank(); j ++)
-   //   tempRoot.theObjects[j+ input.theDomain.getRank()] = tempRoot2.theObjects[j];
+   //   tempRoot.objects[j+ input.theDomain.getRank()] = tempRoot2.objects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i] = tempRoot;
   }
 
@@ -1955,27 +1955,27 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   out << "\n\\begin{longtable}{cc} ";
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
-    tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[i].getInternalPoint();
+    tempRoot = this->projectivezedChambersSplitByMultFreeWalls.objects[i].getInternalPoint();
     bool found = false;
     for (int j = 0; j < this->projectivizedChamber.size; j ++)
-      if (this->projectivizedChamber.theObjects[j].isInCone(tempRoot)) {
+      if (this->projectivizedChamber.objects[j].isInCone(tempRoot)) {
         if (found)
           global.fatal << global.fatal;
         found = true;
       }
   }
   for (int i = 0; i < this->projectivizedChamber.size; i ++) {
-    QuasiPolynomial& theMult = this->theMultiplicities.theObjects[i];
+    QuasiPolynomial& theMult = this->theMultiplicities.objects[i];
     if (!theMult.isEqualToZero()) {
       int indexMultFreeChamber = - 1;
       for (int j = 0; j < this->projectivezedChambersSplitByMultFreeWalls.size; j ++) {
-        tempRoot = this->projectivezedChambersSplitByMultFreeWalls.theObjects[j].getInternalPoint();
-        if (this->projectivizedChamber.theObjects[i].isInCone(tempRoot)) {
+        tempRoot = this->projectivezedChambersSplitByMultFreeWalls.objects[j].getInternalPoint();
+        if (this->projectivizedChamber.objects[i].isInCone(tempRoot)) {
           Rational tempRat;
           tempRat =*tempRoot.lastObject();
           if (tempRat != 0)
             tempRoot/= tempRat;
-          theMult.valueOnEachLatticeShift.theObjects[0].evaluate(tempRoot, tempRat);
+          theMult.valueOnEachLatticeShift.objects[0].evaluate(tempRoot, tempRat);
           if (tempRat<1) {
             indexMultFreeChamber = j;
             break;
@@ -1984,8 +1984,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
       }
       if (indexMultFreeChamber!= - 1) {
         numFoundChambers++;
-        out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.theObjects[i] << "}\\\\\n";
-        out << this->prepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.theObjects[indexMultFreeChamber]) << "&";
+        out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.objects[i] << "}\\\\\n";
+        out << this->prepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.objects[indexMultFreeChamber]) << "&";
         out << theMult.toString(false, true, theFormat) << "\\\\\n";
       }
     }
@@ -2167,7 +2167,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   ProgressReport theReport;
   projectivizedChamberFinal.initialize();
   for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
-    Cone& currentAffineCone = this->smallerAlgebraChamber.theObjects[i];
+    Cone& currentAffineCone = this->smallerAlgebraChamber.objects[i];
     tempRoots.setSize(currentAffineCone.Normals.size);
     for (int j = 0; j < currentAffineCone.Normals.size; j ++) {
       this->transformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);

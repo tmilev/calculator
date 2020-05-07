@@ -985,7 +985,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeUnsignedIntegerObject(
   const LargeIntegerUnsigned& input, List<unsigned char>& output
 ) {
   List<unsigned char> serialized;
-  input.WriteBigEndianBytes(serialized, true);
+  input.writeBigEndianBytes(serialized, true);
   ASNElement::writeBytesASNAtom(
     AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
     serialized,
@@ -1306,7 +1306,7 @@ void ASNElement::makeInteger(const LargeIntegerUnsigned& input) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
-  input.WriteBigEndianBytes(this->ASNAtom, true);
+  input.writeBigEndianBytes(this->ASNAtom, true);
 }
 
 void ASNElement::makeNull() {
@@ -1652,7 +1652,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   );
   MathRoutines::raiseToPower(theElement, this->privateExponent, theOne);
   output.setSize(0);
-  theElement.theValue.WriteBigEndianBytes(output, false);
+  theElement.theValue.writeBigEndianBytes(output, false);
 }
 
 PrivateKeyRSA::PrivateKeyRSA() {
@@ -1690,7 +1690,7 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
       return false;
     }
   }
-  this->thePublicKey.theExponent.AssignUnsignedInt(this->thePublicKey.defaultExponent);
+  this->thePublicKey.theExponent.assignUnsignedInt(this->thePublicKey.defaultExponent);
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
   this->CarmichaelTotientOfModulus = MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
   ElementZmodP inverter;

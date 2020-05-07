@@ -189,9 +189,9 @@ public:
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > irreps_grcam;
   List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
 
-  void AddIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r);
-  void AddIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r);
-  void AddCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X);
+  void addIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r);
+  void addIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r);
+  void addCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X);
 
 
   List<elementSomeGroup> squaresCCReps;
@@ -233,22 +233,22 @@ public:
   }
   bool checkInitialization() const;
   // WARNING:  This recalculates conjugacy classes, screwing up their order for other methods
-  bool CheckConjugacyClassRepsMatchCCsizes();
-  bool CheckOrthogonalityCharTable();
+  bool checkConjugacyClassRepresentationsMatchCCSizes();
+  bool checkOrthogonalityCharacterTable();
   void SetSizE(const LargeInteger& inputSize) {
     this->sizePrivate = inputSize;
   }
   void initialize();
-  std::string toString(FormatExpressions* theFormat = nullptr){
+  std::string toString(FormatExpressions* theFormat = nullptr) {
     std::stringstream out;
-    out << this->ToStringElements(theFormat);
+    out << this->toStringElements(theFormat);
     if (this->flagCCRepresentativesComputed) {
-      out << this->ToStringConjugacyClasses(theFormat);
+      out << this->toStringConjugacyClasses(theFormat);
     }
     return out.str();
   }
-  std::string ToStringElements(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringConjugacyClasses(FormatExpressions* theFormat = nullptr);
+  std::string toStringElements(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringConjugacyClasses(FormatExpressions* theFormat = nullptr);
   int ConjugacyClassCount() const;
   LargeInteger getSize();
   LargeInteger SizeByFormulaOrNeg1() {
@@ -274,14 +274,14 @@ public:
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015- 11 the only way to generate the words and conjugacy information
   void computeConjugacyClassesFromAllElements();
-  void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
+  void computeConjugacyClassesFromConjugacyClassIndicesInAllElements(const List<List<int> >& ccIndices);
 
-  void ComputeCCSizeOrCCFromRepresentative(ConjugacyClass& inputOutputClass, bool storeCC);
+  void computeCCSizeOrCCFromRepresentative(ConjugacyClass& inputOutputClass, bool storeCC);
   bool registerConjugacyClass(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants);
   bool ComputeCCRepresentatives();
   void ComputeGeneratorsConjugacyClasses();
   void computeConjugacyClassSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords = true);
-  void ComputeCCSizesAndRepresentativesWithOrbitIterator();
+  void computeConjugacyClassSizesAndRepresentativesWithOrbitIterator();
   void computeConjugacyClassesSizesRepresentativesWords();
   bool CheckInitializationFDrepComputation() const;
   void ComputeSquaresCCReps();
@@ -618,7 +618,7 @@ public:
     Vector<Rational>& output,
     bool lookingForHighest
   );
-  void AddCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
+  void addCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat = nullptr);
   std::string toString(FormatExpressions* theFormat = nullptr);
@@ -631,7 +631,7 @@ public:
   void MakeFinalSteps();
   void initializeGenerators();
   template <class Coefficient>
-  LargeInteger GetOrbitSize(Vector<Coefficient>& theWeight);
+  LargeInteger getOrbitSize(Vector<Coefficient>& theWeight);
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
@@ -730,14 +730,14 @@ public:
     return result;
   }
   template <class Coefficient>
-  Coefficient weylDimFormulaSimpleCoords(
+  Coefficient weylDimensionFormulaSimpleCoordinates(
     Vector<Coefficient>& theWeightInSimpleCoords,
-    const Coefficient& theRingUnit = 1
+    const Coefficient& ringUnit = 1
   );
   template <class Coefficient>
   Coefficient weylDimFormulaFundamentalCoords(Vector<Coefficient>& weightFundCoords);
   template <class Coefficient>
-  void RaiseToDominantWeight(
+  void raiseToDominantWeight(
     Vector<Coefficient>& theWeight,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr,
@@ -801,7 +801,7 @@ public:
     std::string* outputDetails
   );
   template <class Coefficient>
-  bool FreudenthalEval(
+  bool freudenthalFormula(
     Vector<Coefficient>& inputHWfundamentalCoords,
     HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
     List<Coefficient>& outputMultsSimpleCoords,
@@ -932,7 +932,7 @@ public:
     this->ActOnRhoModified(this->theGroup.theElements[indexOfWeylElement], theVector);
   }
   template <class Coefficient>
-  void ActOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& theRingZero);
+  void ActOnDual(int index,Vector<Coefficient>& theVector, bool RhoAction, const Coefficient& ringZero);
   //theRoot is a list of the simple coordinates of the Vector<Rational>
   //theRoot serves as both input and output
   void ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
@@ -996,7 +996,7 @@ public:
     double result = 0;
     for (int i = 0; i < this->getDimension(); i ++) {
       for (int j = 0; j < this->getDimension(); j ++) {
-        result += this->cartanSymmetric.elements[i][j].GetDoubleValue() * r1[i] * r2[j];
+        result += this->cartanSymmetric.elements[i][j].getDoubleValue() * r1[i] * r2[j];
       }
     }
     return result;
@@ -1074,13 +1074,13 @@ public:
   WeylGroupAutomorphisms();
   ~WeylGroupAutomorphisms();
   template <class Coefficient>
-  bool GenerateOuterOrbit(
+  bool generateOuterOrbit(
     Vectors<Coefficient>& theWeights,
     HashedList<Vector<Coefficient> >& output,
     HashedList<ElementWeylGroupAutomorphisms>* outputSubset = nullptr,
     int UpperLimitNumElements = - 1
   );
-  LargeInteger GetOrbitSize(Vector<Rational>& theWeight);
+  LargeInteger getOrbitSize(Vector<Rational>& theWeight);
   bool IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& theMat);
   bool AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights);
   bool checkInitialization() const;
@@ -1962,11 +1962,11 @@ public:
   }
   Vector<Rational> GetRho();
   template <class Coefficient>
-  void RaiseToDominantWeightInner(
+  void raiseToDominantWeightInner(
     Vector<Coefficient>& theWeight, int* sign = nullptr, bool* stabilizerFound = nullptr
   );
   template <class Coefficient>
-  bool FreudenthalEvalIrrepIsWRTLeviPart(
+  bool freudenthalFormulaIrrepIsWRTLeviPart(
     const Vector<Coefficient>& inputHWfundamentalCoords,
     HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
     List<Coefficient>& outputMultsSimpleCoordS,
@@ -2007,7 +2007,7 @@ public:
   template <class Coefficient>
   Coefficient WeylDimFormulaInnerSimpleCoords(
     const Vector<Coefficient>& theWeightInnerSimpleCoords,
-    const Coefficient& theRingUnit = 1
+    const Coefficient& ringUnit = 1
   );
   void FindQuotientRepresentatives(int UpperLimit);
   void getMatrixOfElement(
@@ -2457,7 +2457,7 @@ bool FiniteGroup<elementSomeGroup>::registerConjugacyClass(
     }
   }
   theClass.flagRepresentativeComputed = true;
-  this->ComputeCCSizeOrCCFromRepresentative(theClass, false);
+  this->computeCCSizeOrCCFromRepresentative(theClass, false);
   this->conjugacyClasses.addOnTop(theClass);
   this->CCsStandardRepCharPolys.addOnTop(theCharPoly);
   this->sizePrivate += theClass.size;

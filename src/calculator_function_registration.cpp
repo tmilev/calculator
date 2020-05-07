@@ -3696,14 +3696,14 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "IsEven",
+    "isEven",
     CalculatorFunctions::innerIsEven,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an even integer, 0 otherwise. ",
-    "i^{{n}} : if IsEven n = (- 1)^(n/2); i^100 ",
+    "i^{{n}} : if isEven n = (- 1)^(n/2); i^100 ",
     "CalculatorFunctions::innerIsEven",
-    "IsEven",
+    "isEven",
     innerStandard
   );
   this->addOperationHandler(
@@ -5423,7 +5423,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Freudenthal",
-    Calculator::innerFreudenthalEval,
+    Calculator::innerFreudenthalFormula,
     "",
     "Computes the dominant weights with multiplicities of a "
     "finite dimensional module of a highest weight "
@@ -5431,7 +5431,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "the semisimple Lie algebra type, the second argument gives "
     "the highest weight in fundamental coordinates. ",
     "Freudenthal{}(B_3, (2,2,2))",
-    "Calculator::innerFreudenthalEval",
+    "Calculator::innerFreudenthalFormula",
     "Freudenthal",
     innerStandard
   );

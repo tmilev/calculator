@@ -390,7 +390,7 @@ void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& i
 }
 
 void DrawingVariables::drawString(
-  drawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle
+  DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle
 ) {
   theDrawData.outputHeight = 0; theDrawData.outputWidth = 0;
   if (input == "") {
@@ -502,7 +502,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
 
 bool SemisimpleLieAlgebra::isInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight) {
   Vector<Rational> correspondingDominant = theWeight;
-  this->theWeyl.RaiseToDominantWeight(correspondingDominant);
+  this->theWeyl.raiseToDominantWeight(correspondingDominant);
   Vector<Rational> theDiff = highestWeight - correspondingDominant;
   if (!theDiff.isPositiveOrZero())
     return false;
@@ -520,17 +520,17 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
   int numExplored = 0;
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
-    Vector<Rational>& current = this->theWeyl.RootSystem.theObjects[i];
+    Vector<Rational>& current = this->theWeyl.RootSystem.objects[i];
     if (current.SumCoordinates() ==1 || current.SumCoordinates() == - 1) {
       numExplored++;
-      Explored.theObjects[i] = true;
-      Matrix<Rational> & currentMat = this->EmbeddingsRootSpaces.theObjects[i];
+      Explored.objects[i] = true;
+      Matrix<Rational> & currentMat = this->EmbeddingsRootSpaces.objects[i];
       currentMat.initialize(weightSupport.size, weightSupport.size);
       currentMat.makeZero();
       for (int j = 0; j<weightSupport.size; j ++) {
-        int indexTarget = weightSupport.getIndex(current +weightSupport.theObjects[j]);
+        int indexTarget = weightSupport.getIndex(current +weightSupport.objects[j]);
         if (indexTarget != - 1) {
-          highestWeight = - 1+ this->getLengthStringAlongAlphaThroughBeta(current, weightSupport.theObjects[j], distanceToHW, weightSupport);
+          highestWeight = - 1+ this->getLengthStringAlongAlphaThroughBeta(current, weightSupport.objects[j], distanceToHW, weightSupport);
           if (current.isNegativeOrZero())
             currentMat.elements[indexTarget][j] =1;
           else
@@ -543,30 +543,30 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   simpleBasis.makeEiBasis(theDimension);
   while (numExplored< this->theWeyl.RootSystem.size) {
     for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
-      if (Explored.theObjects[i])
+      if (Explored.objects[i])
         for (int j = 0; j < this->theWeyl.RootSystem.size; j ++)
-          if (Explored.theObjects[j]) {
-            Vector<Rational> tempRoot = this->theWeyl.RootSystem.theObjects[i] + this->theWeyl.RootSystem.theObjects[j];
+          if (Explored.objects[j]) {
+            Vector<Rational> tempRoot = this->theWeyl.RootSystem.objects[i] + this->theWeyl.RootSystem.objects[j];
             if (this->theWeyl.isARoot(tempRoot)) {
               int index = this->theWeyl.RootSystem.getIndex(tempRoot);
-              if (!Explored.theObjects[index]) {
-                Explored.theObjects[index] = true;
+              if (!Explored.objects[index]) {
+                Explored.objects[index] = true;
                 numExplored++;
-                this->EmbeddingsRootSpaces.theObjects[index] = this->EmbeddingsRootSpaces.theObjects[i];
-                this->EmbeddingsRootSpaces.theObjects[index].lieBracketWith(this->EmbeddingsRootSpaces.theObjects[j]);
+                this->EmbeddingsRootSpaces.objects[index] = this->EmbeddingsRootSpaces.objects[i];
+                this->EmbeddingsRootSpaces.objects[index].lieBracketWith(this->EmbeddingsRootSpaces.objects[j]);
               }
             }
           }
   }
   this->EmbeddingsCartan.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
-    Matrix<Rational> & current = this->EmbeddingsCartan.theObjects[i];
+    Matrix<Rational> & current = this->EmbeddingsCartan.objects[i];
     current.initialize(weightSupport.size, weightSupport.size);
     current.makeZero();
     Vector<Rational> tempRoot;
     tempRoot.makeEi(theDimension, i);
     for (int j = 0; j<weightSupport.size; j ++)
-      current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.theObjects[j]);
+      current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.objects[j]);
   }*/
 }
 
@@ -1309,8 +1309,8 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   }
 //  int theRank = 0; int numRoots = 0;
 //  if (theElements.size > 0)
-//  { theRank = theElements.theObjects[0].Hcomponent.size;
-//    numRoots = theElements.theObjects[0].coeffsRootSpaces.size;
+//  { theRank = theElements.objects[0].Hcomponent.size;
+//    numRoots = theElements.objects[0].coeffsRootSpaces.size;
 //  }
   theRootForm.chooseABasis();
   outputTheBasis.setSize(theRootForm.size);
@@ -1364,8 +1364,8 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
     endMath = "$";
     newLine = "\n\n\n";
   }
-  Matrix<Rational>& currentHW = this->theHighestWeightVectors.theObjects[input];
-  int currentEtaHw = this->theGmodKModules.theObjects[input].size - 1;
+  Matrix<Rational>& currentHW = this->theHighestWeightVectors.objects[input];
+  int currentEtaHw = this->theGmodKModules.objects[input].size - 1;
   //currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
@@ -1495,7 +1495,7 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
   }
   //remainder.makeZero();
 //  for (int i = 0; i <outputVectors.size; i ++)
-//    remainder.Add(outputVectors.theObjects[i]);
+//    remainder.Add(outputVectors.objects[i]);
 
 }
 

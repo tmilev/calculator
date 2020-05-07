@@ -325,7 +325,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       irrep.ownerGroup = &G;
       irrep.identifyingString = thePartitions[i].toString();
       irrep.computeCharacter();
-      G.AddIrreducibleRepresentation(irrep);
+      G.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'B')) {
     int theRank = ranks[0];
@@ -352,7 +352,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
       irrep.computeCharacter();
       global << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
-      G.AddIrreducibleRepresentation(irrep);
+      G.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
     int theRank = ranks[0];
@@ -514,7 +514,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
   theOuterAutos.theWeyl = &theWeyl;
-  if (!theOuterAutos.GenerateOuterOrbit(
+  if (!theOuterAutos.generateOuterOrbit(
     theHWs, outputOrbit, &theOuterAutos.allElements, 1921 * 2
   )) {
     out << "Failed to generate the entire orbit "
@@ -563,7 +563,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
   if (theCommands.getTypeWeight<Rational>(
     theCommands, input, theWeightRat, theAlgebra, nullptr
   )) {
-    Rational result = theAlgebra.content->theWeyl.GetOrbitSize(theWeightRat);
+    Rational result = theAlgebra.content->theWeyl.getOrbitSize(theWeightRat);
     return output.assignValue(result, theCommands);
   }
   SemisimpleLieAlgebra* theSSalgebra = theAlgebra.content;
@@ -575,7 +575,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
     theAlgebra,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly);
+    Rational result = theSSalgebra->theWeyl.getOrbitSize(theWeightPoly);
     return output.assignValue(result, theCommands);
   }
   return false;

@@ -1363,7 +1363,7 @@ bool CalculatorFunctions::innerDistributeExponent(
     } else {
       Rational exponentRat;
       if (exponentE.isRational(&exponentRat)) {
-        if (!exponentRat.getDenominator().IsEven()) {
+        if (!exponentRat.getDenominator().isEven()) {
           isGood = true;
         }
       }
@@ -1816,8 +1816,8 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   }
   argNum = theArg.getNumerator();
   LargeInteger argDen = theArg.getDenominator();
-  double doubleBase = baseInt.GetDoubleValue();
-  double doubleArgNum = argNum.GetDoubleValue();
+  double doubleBase = baseInt.getDoubleValue();
+  double doubleArgNum = argNum.getDoubleValue();
   if (FloatingPoint::logFloating(doubleArgNum) / FloatingPoint::logFloating(doubleBase) > 1000) {
     return false;
   }
@@ -1921,7 +1921,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   double theDoubleValue = - 1;
   if (input.isOfType<Rational>()) {
     hasDoubleValue = true;
-    theDoubleValue = input.getValue<Rational>().GetDoubleValue();
+    theDoubleValue = input.getValue<Rational>().getDoubleValue();
   }
   if (input.isOfType<AlgebraicNumber>()) {
     hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
@@ -2415,7 +2415,7 @@ std::string GroebnerBasisComputation<Coefficient>::getSpacedMonomialsWithHighlig
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
+    int theIndex = thePoly.monomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       if (useColumnSeparator) {
         if (i != this->allMonomials.size - 1) {
@@ -2590,7 +2590,7 @@ void GroebnerBasisComputation<Coefficient>::computeHighLightsFromRemainder(
   << currentSlideNumber << ","
   << currentSlideNumber + 1 << "}{"
   << "$" << currentRemainder.getBlendCoefficientAndMonomial(
-    currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN],
+    currentDivisor.monomials[indexCurrentDivisorLeadingMoN],
     currentDivisor.coefficients[indexCurrentDivisorLeadingMoN],
     false,
     &this->theFormat
@@ -2605,7 +2605,7 @@ void GroebnerBasisComputation<Coefficient>::computeHighLightsFromRemainder(
   int indexCurrentQuotientMonInAllMons =
   this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]);
   Polynomial<Coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
-  int indexCurrentQuotientMoN = currentQuotient.theMonomials.getIndex(
+  int indexCurrentQuotientMoN = currentQuotient.monomials.getIndex(
     this->intermediateHighestMonDivHighestMon.getElement()[remainderIndex]
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
@@ -2626,7 +2626,7 @@ void GroebnerBasisComputation<Coefficient>::computeHighLightsFromRemainder(
   << currentSlideNumber + 1
   << "}{$"
   << currentQuotient.getBlendCoefficientAndMonomial(
-    currentQuotient.theMonomials[indexCurrentQuotientMoN],
+    currentQuotient.monomials[indexCurrentQuotientMoN],
     currentQuotient.coefficients[indexCurrentQuotientMoN],
     false,
     &this->theFormat
@@ -2697,19 +2697,19 @@ std::string GroebnerBasisComputation<Coefficient>::getDivisionLaTeXSlide() {
   this->theFormat.monomialOrder = this->thePolynomialOrder.monomialOrder;
   bool oneDivisor = (this->theBasis.size == 1);
   this->allMonomials.clear();
-  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.getElement().monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].monomials);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].monomials);
   }
   for (int i = 0; i < this->theBasis.size; i ++) {
     Polynomial<Coefficient>& current = this->theBasis[i].element;
-    this->allMonomials.addOnTopNoRepetition(current.theMonomials);
+    this->allMonomials.addOnTopNoRepetition(current.monomials);
   }
   for (int i = 0; i < this->theQuotients.size; i ++) {
-    this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].monomials);
   }
   if (this->remainderDivision.isEqualToZero()) {
     MonomialP constMon;

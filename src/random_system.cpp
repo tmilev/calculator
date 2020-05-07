@@ -25,9 +25,9 @@ void Crypto::Random::initializeRandomBytes() {
   // must not block or return fewer than the requested bytes in Linux
   // when the number of bytes is less than 256.
   int generatedBytes = static_cast<int>(
-    syscall(SYS_getrandom, output.theObjects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
+    syscall(SYS_getrandom, output.objects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
     // Does not compile on older linux systems:
-    // getrandom(output.theObjects, static_cast<unsigned>(output.size), 0)
+    // getrandom(output.objects, static_cast<unsigned>(output.size), 0)
   );
   if (generatedBytes != output.size) {
     global.fatal << "Failed to get the necessary number of random bytes. " << global.fatal;

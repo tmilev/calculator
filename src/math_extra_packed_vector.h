@@ -202,7 +202,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     int den = 1;
     for (int i = 0; i < cartanSymmetric.numberOfRows; i ++) {
       for (int j = 0; j < cartanSymmetric.numberOfColumns; j ++) {
-        den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].getDenominator().GetUnsignedIntValueTruncated());
+        den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].getDenominator().getUnsignedIntValueTruncated());
       }
     }
     unrationalCartanSymmetric.initialize(cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns);
@@ -510,7 +510,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   }
   for (int i = 0; i < spaces.size; i ++) {
     Rational x = chars[i].InnerProduct(chars[i]);
-    int x2 = x.getDenominator().GetUnsignedIntValueTruncated();
+    int x2 = x.getDenominator().getUnsignedIntValueTruncated();
     x2 = static_cast<int>(FloatingPoint::sqrtFloating(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {

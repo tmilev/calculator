@@ -73,7 +73,7 @@ MutexProcess::~MutexProcess() {
 
 std::string PipePrimitive::getLastRead() {
   MacroRegisterFunctionWithName("PipePrimitive::getLastRead");
-  std::string result(this->lastRead.theObjects, static_cast<unsigned>(this->lastRead.size));
+  std::string result(this->lastRead.objects, static_cast<unsigned>(this->lastRead.size));
   return result;
 }
 
@@ -91,7 +91,7 @@ bool PipePrimitive::createMe(
   bool dontCrashOnFail
 ) {
   this->name = inputPipeName;
-  if (pipe(this->pipeEnds.theObjects) < 0) {
+  if (pipe(this->pipeEnds.objects) < 0) {
     global << Logger::red << "FAILED to create pipe: " << this->name << ". " << Logger::endL;
     this->release();
     global.server().stopKillAll();
@@ -253,7 +253,7 @@ int Pipe::ReadWithTimeOutViaSelect(
   do {
     bytesRead = static_cast<int>(read(
       theFD,
-      output.theObjects,
+      output.objects,
       static_cast<unsigned>(output.size - 1)
     ));
     if (bytesRead > 0) {
@@ -566,7 +566,7 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
   this->buffer.setSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes = 0;
   for (;;) {
-    numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.theObjects, bufferSize));
+    numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.objects, bufferSize));
     if (numReadBytes >= 0) {
       break;
     }
@@ -907,7 +907,7 @@ bool MathRoutines::parseListIntegers(
   result.setSize(theNumbers.size);
   for (int i = 0; i < theNumbers.size; i ++) {
     LargeInteger theInt;
-    bool success = theInt.AssignStringFailureAllowed(theNumbers[i], commentsOnFailure);
+    bool success = theInt.assignStringFailureAllowed(theNumbers[i], commentsOnFailure);
     if (!success) {
       return false;
     }

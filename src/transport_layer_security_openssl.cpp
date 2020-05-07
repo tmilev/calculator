@@ -557,7 +557,7 @@ int TransportLayerSecurityOpenSSL::SSLRead(
   (void) includeNoErrorInComments;
 #ifdef MACRO_use_open_ssl
   ERR_clear_error();
-  int result = SSL_read(this->sslData, readBuffer.theObjects, readBuffer.size);
+  int result = SSL_read(this->sslData, readBuffer.objects, readBuffer.size);
   this->ClearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
@@ -588,7 +588,7 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
   if (this->sslData == nullptr) {
     global.fatal << "Uninitialized ssl not allowed here. " << global.fatal;
   }
-  int result = SSL_write(this->sslData, writeBuffer.theObjects, writeBuffer.size);
+  int result = SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
   this->ClearErrorQueue(
     result, outputError, commentsOnError, includeNoErrorInComments
   );

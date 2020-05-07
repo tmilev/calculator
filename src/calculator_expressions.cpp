@@ -1884,7 +1884,7 @@ bool Expression::isIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const 
   if (!this->isOfType<Rational>(&theRat)) {
     return false;
   }
-  if (theRat.IsNonPositive()) {
+  if (theRat.isNonPositive()) {
     return false;
   }
   if (whichInteger == nullptr) {

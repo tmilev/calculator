@@ -4,7 +4,7 @@
 
 template <class Coefficient>
 void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
-  Coefficient& output, const Coefficient& theRingOne, const Coefficient& theRingZero
+  Coefficient& output, const Coefficient& theRingOne, const Coefficient& ringZero
 ) {
   MacroRegisterFunctionWithName("Matrix::computeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
@@ -20,7 +20,7 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   for (int i = 0; i < dim; i ++) {
     tempI = this->findPivot(i, i);
     if (tempI == - 1) {
-      output = theRingZero;
+      output = ringZero;
       return;
     }
     this->switchRows(i, tempI);
@@ -113,7 +113,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& theMa
 
 template <class Coefficient, typename theIntegerType>
 void MathRoutines::raiseToPower(
-  Coefficient& theElement, const theIntegerType& thePower, const Coefficient& theRingUnit
+  Coefficient& theElement, const theIntegerType& thePower, const Coefficient& ringUnit
 ) {
   MacroRegisterFunctionWithName("MathRoutines::raiseToPower");
   theIntegerType thePowerCopy;
@@ -125,7 +125,7 @@ void MathRoutines::raiseToPower(
     return;
   }
   if (thePowerCopy == 0) {
-    theElement = theRingUnit;
+    theElement = ringUnit;
     return;
   }
   ProgressReport reportOne;
@@ -144,7 +144,7 @@ void MathRoutines::raiseToPower(
     << " to power: " << thePowerCopy;
     reportOne.report(reportStream.str());
   }
-  theElement = theRingUnit;
+  theElement = ringUnit;
   while (thePowerCopy > 0) {
     if (thePowerCopy % 2 == 1) {
       if (reportTwo.tickAndWantReport()) {
@@ -238,7 +238,7 @@ void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
   output.makeZero();
   templateMonomial currentMonomial;
   for (int i = 0; i < this->size(); i ++) {
-    currentMonomial = this->theMonomials[i];
+    currentMonomial = this->monomials[i];
     currentMonomial *= other;
     output.addMonomial(currentMonomial, this->coefficients[i]);
   }
@@ -310,7 +310,7 @@ template <class Coefficient>
 void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   Matrix<Coefficient>* otherMatrix,
   const Coefficient& theRingMinusUnit,
-  const Coefficient& theRingUnit,
+  const Coefficient& ringUnit,
   bool (*comparisonGEQFunction) (const Coefficient& left, const Coefficient& right)
 ) {
   MacroRegisterFunctionWithName("Matrix_Element::gaussianEliminationEuclideanDomain");
@@ -370,7 +370,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
         tempElt.assignFloor();
         this->subtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
         if (this->elements[i][col].isNegative()) {
-          this->addTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
+          this->addTwoRowsWithCarbonCopy(row, i, 0, ringUnit, otherMatrix);
         }
       }
       row ++;
@@ -385,7 +385,7 @@ void Vectors<Coefficient>::chooseABasis() {
   Matrix<Coefficient> tempMat;
   Selection tempSel;
   for (int i = 0; i < this->size; i ++) {
-    output.addOnTop(this->theObjects[i]);
+    output.addOnTop(this->objects[i]);
     if (output.getRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
       output.removeLastObject();
     }

@@ -3495,7 +3495,7 @@ bool CalculatorFunctions::innerIsEven(Calculator& theCommands, const Expression&
   if (!argument.isInteger(&theInt)) {
     return output.assignValue(0, theCommands);
   }
-  if (theInt.IsEven()) {
+  if (theInt.isEven()) {
     return output.assignValue(1, theCommands);
   }
   return output.assignValue(0, theCommands);
@@ -4074,7 +4074,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
   List<Expression> theCFsIncludingZeros;
   Expression currentCF;
   for (int i = 0; i < highestPowerPlus1; i ++) {
-    int theIndex = theCFs.theMonomials.getIndex(MonomialVector(i));
+    int theIndex = theCFs.monomials.getIndex(MonomialVector(i));
     if (theIndex == - 1) {
       currentCF.assignValue(0, theCommands);
     } else {
@@ -4207,13 +4207,13 @@ bool CalculatorFunctions::extractQuadraticCoeffsWRTvariable(
   outputCoeffVarSquared.assignValue(0, theCommands);
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
-  if (theCoeffs.theMonomials.contains(MonomialVector(0))) {
+  if (theCoeffs.monomials.contains(MonomialVector(0))) {
     outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
   }
-  if (theCoeffs.theMonomials.contains(MonomialVector(1))) {
+  if (theCoeffs.monomials.contains(MonomialVector(1))) {
     outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
   }
-  if (theCoeffs.theMonomials.contains(MonomialVector(2))) {
+  if (theCoeffs.monomials.contains(MonomialVector(2))) {
     outputCoeffVarSquared = theCoeffs.getMonomialCoefficient(MonomialVector(2));
   }
   return true;
@@ -4237,10 +4237,10 @@ bool CalculatorFunctions::extractLinearCoeffsWRTvariable(
   }
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
-  if (theCoeffs.theMonomials.contains(MonomialVector(1))) {
+  if (theCoeffs.monomials.contains(MonomialVector(1))) {
     outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
   }
-  if (theCoeffs.theMonomials.contains(MonomialVector(0))) {
+  if (theCoeffs.monomials.contains(MonomialVector(0))) {
     outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
   }
   return true;
@@ -6562,7 +6562,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   outHtml << "<br>";
   for (int i = 0; i < rValues.size; i ++) {
     std::stringstream tempStream;
-    tempStream << "\\rput[t](" << std::fixed << rValues[i].GetDoubleValue() << ",-0.03)" << "{$";
+    tempStream << "\\rput[t](" << std::fixed << rValues[i].getDoubleValue() << ",-0.03)" << "{$";
     if (rValues[i].isInteger()) {
       tempStream << rValues[i].toString();
     } else {
@@ -7091,7 +7091,7 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   theCommands << "<br>Weyl dim formula input: simple coords: "
   << theWeightInSimpleCoords.toString(&theFormat)
   << ", fundamental coords: " << theWeight.toString(&theFormat);
-  RationalFunction<Rational> tempRF = theSSowner.content->theWeyl.weylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  RationalFunction<Rational> tempRF = theSSowner.content->theWeyl.weylDimensionFormulaSimpleCoordinates(theWeightInSimpleCoords);
   return output.assignValueWithContext(tempRF, theSSowner.context, theCommands);
 }
 
@@ -8360,7 +8360,7 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   }
   if (this->isOfType<Rational>()) {
     if (whichDouble != nullptr) {
-      *whichDouble = this->getValue<Rational>().GetDoubleValue();
+      *whichDouble = this->getValue<Rational>().getDoubleValue();
     }
     return true;
   }
@@ -8431,8 +8431,8 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (leftD < 0) {
         Rational theRat;
         if ((*this)[2].isRational(&theRat)) {
-          if (!theRat.getDenominator().IsEven()) {
-            if (!theRat.getNumerator().IsEven()) {
+          if (!theRat.getDenominator().isEven()) {
+            if (!theRat.getNumerator().isEven()) {
               signChange = true;
             }
             leftD *= - 1;
@@ -8461,8 +8461,8 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       if (rightD < 0) {
         Rational theRat;
         if ((*this)[1].isRational(&theRat)) {
-          if (!theRat.getNumerator().IsEven()) {
-            if (!theRat.getDenominator().IsEven()) {
+          if (!theRat.getNumerator().isEven()) {
+            if (!theRat.getDenominator().isEven()) {
               signChange = true;
             }
             rightD *= - 1;
@@ -9254,7 +9254,7 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThat
   currentWeight = theWeightInFundCoords;
   for (
     ;
-    this->theMonomials.contains(currentWeight);
+    this->monomials.contains(currentWeight);
     result ++, currentWeight.weightFundamentalCoordS -= theAlphaInFundCoords
   ) {
   }
@@ -9534,7 +9534,7 @@ public:
       for (int j = 0; j < this->arrows[i].size; j ++) {
         arrowBase = this->NodePositionsDouble[i];
         arrowHead = this->NodePositionsDouble[this->arrows[i][j]];
-        arrowHead[1] += this->charHeight.GetDoubleValue() / 2;
+        arrowHead[1] += this->charHeight.getDoubleValue() / 2;
         PlotObject theSegment;
         theSegment.thePlotString = "segment";
         theSegment.thePointsDouble.addOnTop(arrowBase);

@@ -342,15 +342,15 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndTwoExtraRoots(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->theObjects[0].size;
+  int theDimension = this->objects[0].size;
   output.setSize(theDimension);
   bufferMat.initialize(theSelection.cardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMat.elements[i][j].assign(this->theObjects[theSelection.elements[i]].theObjects[j]);
+      bufferMat.elements[i][j].assign(this->objects[theSelection.elements[i]].objects[j]);
     }
-    bufferMat.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot1.theObjects[j]);
-    bufferMat.elements[theSelection.cardinalitySelection + 1][j].assign(ExtraRoot2.theObjects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot1.objects[j]);
+    bufferMat.elements[theSelection.cardinalitySelection + 1][j].assign(ExtraRoot2.objects[j]);
   }
   bufferMat.gaussianEliminationByRows(0, NonPivotPoints);
   if (NonPivotPoints.cardinalitySelection != 1) {
@@ -373,7 +373,7 @@ void Vectors<Coefficient>::selectionToMatrixAppend(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
   for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    Vector<Coefficient>& tempRoot = this->theObjects[theSelection.elements[i]];
+    Vector<Coefficient>& tempRoot = this->objects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
     }
@@ -385,7 +385,7 @@ void Vectors<Coefficient>::selectionToMatrix(
   Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex
 ) {
   for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-    Vector<Rational>& tempRoot = this->theObjects[theSelection.elements[i]];
+    Vector<Rational>& tempRoot = this->objects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++) {
       output.elements[StartRowIndex + i][j] = tempRoot[j];
     }
@@ -400,7 +400,7 @@ bool Vectors<Coefficient>::computeNormalExcludingIndex(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->theObjects[0].size;
+  int theDimension = this->objects[0].size;
   output.setSize(theDimension);
   bufferMatrix.initialize(this->size - 1, theDimension);
   int k = - 1;
@@ -432,7 +432,7 @@ bool Vectors<Coefficient>::computeNormalFromSelection(
   bufferMatrix.initialize(theSelection.cardinalitySelection, theDimension);
   for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
     for (int j = 0; j < theDimension; j ++) {
-      bufferMatrix.elements[i][j] = this->theObjects[theSelection.elements[i]].theObjects[j];
+      bufferMatrix.elements[i][j] = this->objects[theSelection.elements[i]].objects[j];
     }
   }
   bufferMatrix.gaussianEliminationByRows(0, &NonPivotPoints);
@@ -454,7 +454,7 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->theObjects[0].size;
+  int theDimension = this->objects[0].size;
   output.setSize(theDimension);
   Matrix<Coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
@@ -462,7 +462,7 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
   matOutputEmpty.initialize(- 1, - 1);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.cardinalitySelection; i ++) {
-      bufferMatrix.elements[i][j].assign(this->theObjects[theSelection.elements[i]][j]);
+      bufferMatrix.elements[i][j].assign(this->objects[theSelection.elements[i]][j]);
     }
     bufferMatrix.elements[theSelection.cardinalitySelection][j].assign(ExtraRoot[j]);
   }
@@ -493,7 +493,7 @@ int Vectors<Coefficient>::getRankOfSpanOfElements(Matrix<Coefficient>* buffer, S
   if (this->size == 0) {
     return 0;
   }
-  int theDimension = this->theObjects[0].size;
+  int theDimension = this->objects[0].size;
   MemorySaving<Matrix<Coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
   if (buffer == nullptr) {
@@ -527,9 +527,9 @@ void Vector<Coefficient>::operator=(const Selection& other) {
   this->setSize(other.MaxSize);
   for (int i = 0; i < other.MaxSize; i ++) {
     if (other.selected[i]) {
-      this->theObjects[i] = 1;
+      this->objects[i] = 1;
     } else {
-      this->theObjects[i] = 0;
+      this->objects[i] = 0;
     }
   }
 }
@@ -538,7 +538,7 @@ template <class Coefficient>
 void Vector<Coefficient>::operator=(const SelectionWithMultiplicities& other) {
   this->setSize(other.Multiplicities.size);
   for (int i = 0; i < other.Multiplicities.size; i ++) {
-    this->theObjects[i] = other.Multiplicities[i];
+    this->objects[i] = other.Multiplicities[i];
   }
 }
 
@@ -552,7 +552,7 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   if (this->size == 0) {
     return false;
   }
-  int theDimension = this->theObjects[0].size;
+  int theDimension = this->objects[0].size;
   output.setSize(theDimension);
   if (theDimension - 1 != theSelection.cardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;

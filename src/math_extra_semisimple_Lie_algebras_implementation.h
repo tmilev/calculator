@@ -64,7 +64,7 @@ void Weight<Coefficient>::accountSingleWeight(
       return;
     }
   }
-  theWeyl.RaiseToDominantWeight(dominant, &sign);
+  theWeyl.raiseToDominantWeight(dominant, &sign);
   dominant -= theWeyl.rho;
   if (!theWeyl.isDominantWeight(dominant)) {
     return;
@@ -104,7 +104,7 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   }
   HashedList<Vector<Coefficient> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, 1000000)) {
+  if (!theWeyl.freudenthalFormula(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, 1000000)) {
     errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -215,7 +215,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::freudenthalEvalMeDominant
   Coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
     currentWeightFundCoords = (*this)[i].weightFundamentalCoordS;
-    if (!this->getOwner()->theWeyl.FreudenthalEval(
+    if (!this->getOwner()->theWeyl.freudenthalFormula(
       currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights
     )) {
       if (outputDetails != nullptr) {
@@ -340,7 +340,7 @@ Vector<Coefficient> ElementSemisimpleLieAlgebra<Coefficient>::getCartanPart() co
   }
   for (int i = 0; i < theRank; i ++) {
     tempGen.makeGenerator(*owner, i + numPosRoots);
-    int currentIndex = this->theMonomials.getIndex(tempGen);
+    int currentIndex = this->monomials.getIndex(tempGen);
     if (currentIndex != - 1) {
       result[i] += this->coefficients[currentIndex];
     }
@@ -537,7 +537,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Coefficient bufferCoeff, highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& currentMon = (*this)[i];
-    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(
+    if (!inputData.WeylFD.freudenthalFormulaIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordS,
       tempHashedRoots,
       tempMults,
@@ -605,7 +605,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Vector<Coefficient> simpleGeneratorBaseField;
   output.makeZero();
   while (!remainingCharProjected.isEqualToZero()) {
-    localHighest = *remainingCharProjected.theMonomials.lastObject();
+    localHighest = *remainingCharProjected.monomials.lastObject();
     for (bool Found = true; Found;) {
       Found = false;
       for (int i = 0; i < WeylFDSmall.RootsOfBorel.size; i ++) {
@@ -614,15 +614,15 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
         tempMon.weightFundamentalCoordS += WeylFDSmall.AmbientWeyl->getFundamentalCoordinatesFromSimple(
           simpleGeneratorBaseField
         );
-        if (remainingCharProjected.theMonomials.contains(tempMon)) {
+        if (remainingCharProjected.monomials.contains(tempMon)) {
           localHighest = tempMon;
           Found = true;
         }
       }
     }
-    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.theMonomials.getIndex(localHighest)];
+    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.monomials.getIndex(localHighest)];
     output.addMonomial(localHighest, highestCoeff);
-    if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart(
+    if (!WeylFDSmall.freudenthalFormulaIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
       if (report != nullptr) {

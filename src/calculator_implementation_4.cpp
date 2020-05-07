@@ -657,11 +657,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
       currentTime = global.getElapsedSeconds();
-      currentAdditions = Rational::TotalAdditions();
-      currentMultiplications = Rational::TotalMultiplications();
+      currentAdditions = Rational::totalAdditions();
+      currentMultiplications = Rational::totalMultiplications();
       theMod.getActionGeneralizedVermaModuleAsDifferentialOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
-      totalAdditions += Rational::TotalAdditions() - currentAdditions;
-      totalMultiplications += Rational::TotalMultiplications() - currentMultiplications;
+      totalAdditions += Rational::totalAdditions() - currentAdditions;
+      totalMultiplications += Rational::totalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
@@ -1728,7 +1728,7 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
   if (!isGood) {
     Rational powerInner, powerOuter;
     if (input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)) {
-      if ((powerInner * powerOuter).IsEven()) {
+      if ((powerInner * powerOuter).isEven()) {
         isGood = true;
       }
     }
@@ -3037,7 +3037,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   return output.assignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerFreudenthalFormula(Calculator& theCommands, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> theSSalg;

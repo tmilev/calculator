@@ -478,7 +478,7 @@ bool ProblemDataAdministrative::getWeightFromCourse(
     outputAsGivenByInstructor = &tempString;
   }
   *outputAsGivenByInstructor = this->problemWeightsPerCoursE.getValueCreate(theCourseNonURLed);
-  return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
+  return output.assignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
 std::string ProblemDataAdministrative::toString() const {

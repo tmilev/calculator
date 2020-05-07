@@ -2329,7 +2329,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<tr><td><b>maximum score</b></td>"
   << "<td>-</td>";
   out
-  << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()
+  << "<td>" << theScores.theProblem.currentUseR.pointsMax.getDoubleValue()
   << "</td>";
   for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
     TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[j];
@@ -2348,7 +2348,7 @@ std::string WebAPIResponse::toStringUserScores() {
   for (int i = 0; i < theScores.userInfos.size; i ++) {
     out << "<tr><td>" << theScores.userNames[i] << "</td>"
     << "<td>" << theScores.userInfos[i] << "</td>"
-    << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
+    << "<td>" << theScores.userScores[i].getDoubleValue() << "</td>";
     for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
       TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[j];
       if (currentElt.problemFileName != "") {
@@ -2364,7 +2364,7 @@ std::string WebAPIResponse::toStringUserScores() {
         theScores.theProblem.topics.theTopics.theKeys[j]
       )) {
         out << "<td>"
-        << theScores.scoresBreakdown[i].theValues[j].GetDoubleValue()
+        << theScores.scoresBreakdown[i].theValues[j].getDoubleValue()
         << "</td>";
       } else {
         out << "<td></td>";

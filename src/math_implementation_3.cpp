@@ -2492,7 +2492,7 @@ Selection::Selection(int m) {
   this->initialize(m);
 }
 
-void Selection::RemoveLastSelection() {
+void Selection::removeLastSelection() {
   if (this->cardinalitySelection == 0) {
     return;
   }
@@ -2500,7 +2500,7 @@ void Selection::RemoveLastSelection() {
   this->cardinalitySelection--;
 }
 
-int Selection::SelectionToIndex() {
+int Selection::selectionToIndex() {
   int result = 0;
   for (int i = 0; i < MaxSize; i ++) {
     result *= 2;
@@ -3159,7 +3159,7 @@ bool PartFraction::decomposeFromLinearRelation(
     this->computeOneCheckSum(tempRat);
     tempRat.toString(tempS1);
     this->CheckSum2.toString(tempS2);
-    tempRat2.Subtract(tempRat);
+    tempRat2.subtract(tempRat);
     if (!oldCheckSum.isEqualTo(tempRat2))global.fatal << global.fatal;
   }*/
   //Accum.ComputeDebugString();
@@ -3238,22 +3238,22 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
   int theDim = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
   TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
-  int TotalMultiplicity;
-  TotalMultiplicity = 0;
+  int totalMultiplicity;
+  totalMultiplicity = 0;
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     int tempI = this->denominator[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
     TheBigBadIndexingSet.MaxMultiplicities[i] = tempI;
-    TotalMultiplicity += tempI;
+    totalMultiplicity += tempI;
   }
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
     int oldMaxMultiplicity = TheBigBadIndexingSet.MaxMultiplicities[i];
     TheBigBadIndexingSet.MaxMultiplicities[i] = 0;
-    int NumSubsets = TheBigBadIndexingSet.TotalNumSubsetsMustBeSmalInt();
+    int NumSubsets = TheBigBadIndexingSet.totalNumberSubsetsSmallInt();
     for (int j = 0; j < NumSubsets; j ++) {
       tempFrac.assign(*this);
       tempFrac.RelevanceIsComputed = false;
-      int tempN = TheBigBadIndexingSet.TotalMultiplicity() + oldMaxMultiplicity;
+      int tempN = TheBigBadIndexingSet.totalMultiplicity() + oldMaxMultiplicity;
       for (int k = 0; k < theSelectedIndices.size; k ++) {
         int multiplicityChange;
         if (k != i) {
@@ -3279,7 +3279,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
         tempN -= tempI;
       }
       tempFrac.denominator[GainingMultiplicityIndex].addMultiplicity(
-        TheBigBadIndexingSet.TotalMultiplicity() + oldMaxMultiplicity + 1,
+        TheBigBadIndexingSet.totalMultiplicity() + oldMaxMultiplicity + 1,
         ElongationGainingMultiplicityIndex
       );
       tempFrac.computeIndicesNonZeroMultiplicities();
@@ -3834,8 +3834,8 @@ void PartFraction::reduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           thePowersSigned[i] = 0;
         }
       }
-      thePowers.ComputeElements();
-      int numSummands = thePowers.TotalNumSubsetsMustBeSmalInt();
+      thePowers.computeElements();
+      int numSummands = thePowers.totalNumberSubsetsSmallInt();
       if (numSummands ==1)
         owner.AddAlreadyReduced(tempFrac, Indicator);
       else {
@@ -3859,7 +3859,7 @@ void PartFraction::reduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           tempFrac.reduceMonomialByMonomial(owner, - 1, Indicator);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempFrac.reduceMonomialByMonomial(tempFracs, - 1, Indicator);
-          thePowers.IncrementSubset();
+          thePowers.incrementSubset();
         }
         if (this->flagAnErrorHasOccurredTimeToPanic) {
           Rational tempFracsCheckSum;
@@ -3876,7 +3876,7 @@ void PartFraction::reduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   if (this->flagAnErrorHasOccurredTimeToPanic) {
     Rational tempRat;
     owner.computeOneCheckSum(tempRat);
-    tempRat.Subtract(theDiff);
+    tempRat.subtract(theDiff);
     if (!tempRat.isEqualTo(StartCheckSum))
       global.fatal << global.fatal;
   }*/
@@ -4721,7 +4721,7 @@ void SelectionWithMaxMultiplicity::initMaxMultiplicity(int NumElements, int MaxM
   this->MaxMultiplicity =MaxMult;
 }
 
-int ::SelectionWithMaxMultiplicity::CardinalitySelectionWithMultiplicities() {
+int ::SelectionWithMaxMultiplicity::cardinalitySelectionWithMultiplicities() {
   int result = 0;
   for (int i = 0; i < this->Multiplicities.size; i ++) {
     result += this->Multiplicities[i];
@@ -4729,7 +4729,7 @@ int ::SelectionWithMaxMultiplicity::CardinalitySelectionWithMultiplicities() {
   return result;
 }
 
-bool SelectionWithMaxMultiplicity::HasMultiplicitiesZeroAndOneOnly() {
+bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
   for (int i = 0; i < this->elements.size; i ++) {
     if (this->Multiplicities[elements[i]] > 1) {
       return false;
@@ -4738,14 +4738,14 @@ bool SelectionWithMaxMultiplicity::HasMultiplicitiesZeroAndOneOnly() {
   return true;
 }
 
-void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinality) {
+void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(int Cardinality) {
   if (Cardinality < 1 || Cardinality > this->MaxMultiplicity * this->Multiplicities.size) {
     return;
   }
-  if (this->CardinalitySelectionWithMultiplicities() != Cardinality) {
+  if (this->cardinalitySelectionWithMultiplicities() != Cardinality) {
     this->Multiplicities.initializeFillInObject(this->Multiplicities.size, 0);
   }
-  if (this->CardinalitySelectionWithMultiplicities() == 0) {
+  if (this->cardinalitySelectionWithMultiplicities() == 0) {
     for (int i = this->Multiplicities.size - 1; Cardinality > 0; i --) {
       if (Cardinality >= this->MaxMultiplicity) {
         this->Multiplicities[i] = this->MaxMultiplicity;
@@ -4754,7 +4754,7 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
       }
       Cardinality -= this->Multiplicities[i];
     }
-    this->ComputeElements();
+    this->computeElements();
     return;
   }
   int firstNonZeroMult;
@@ -4790,15 +4790,15 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
     }
     currentCardinality += this->Multiplicities[i];
   }
-  this->ComputeElements();
+  this->computeElements();
 }
 
-int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality) {
+int ::SelectionWithMaxMultiplicity::numberOfCombinationsOfCardinality(int cardinality) {
   //this function needs a complete rewrite;
   return ::MathRoutines::nChooseK(this->Multiplicities.size + cardinality - 1, cardinality);
 }
 
-LargeInteger SelectionWithMaxMultiplicity::GetNumTotalCombinations() const {
+LargeInteger SelectionWithMaxMultiplicity::getTotalCombinationCount() const {
   //if (this->MaxMultiplicity == 0)
   //  return 1;
   LargeInteger result;
@@ -4807,11 +4807,11 @@ LargeInteger SelectionWithMaxMultiplicity::GetNumTotalCombinations() const {
 }
 
 bool SelectionWithMaxMultiplicity::incrementReturnFalseIfPastLast() {
-  this->IncrementSubset();
+  this->incrementSubset();
   return this->elements.size != 0;
 }
 
-void SelectionWithMaxMultiplicity::IncrementSubset() {
+void SelectionWithMaxMultiplicity::incrementSubset() {
   for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
     if (this->Multiplicities[i] < this->MaxMultiplicity) {
       if (this->Multiplicities[i] == 0) {
@@ -4826,7 +4826,7 @@ void SelectionWithMaxMultiplicity::IncrementSubset() {
   }
 }
 
-void SelectionWithMultiplicities::ComputeElements() {
+void SelectionWithMultiplicities::computeElements() {
   this->elements.size = 0;
   for (int i = 0; i < this->Multiplicities.size; i ++) {
     if (this->Multiplicities[i] > 0) {
@@ -4835,28 +4835,28 @@ void SelectionWithMultiplicities::ComputeElements() {
   }
 }
 
-int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities() {
+int SelectionWithMultiplicities::cardinalitySelectionWithoutMultiplicities() {
   return this->elements.size;
 }
 
-int SelectionWithDifferentMaxMultiplicities::TotalNumSubsetsMustBeSmalInt() {
+int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
   int result = 1;
   for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
     result *= (this->MaxMultiplicities[i] + 1);
     if (result < 0) {
       global.fatal << "This is a programming error: I was asked to enumerate "
       << "all subsets of a multi-set, however the number of subsets is larger than  "
-      << " the maximum value allowed for int on the system "
+      << "the maximum value allowed for int on the system "
       << "(on a 32 bit machine that is around  2 billion). "
       << "This can be fixed, however I do not have time at the moment. If you "
-      << " encounter this error, write me an email and I will take the time to fix this issue. "
+      << "encounter this error, write me an email and I will take the time to fix this issue. "
       << global.fatal;
     }
   }
   return result;
 }
 
-LargeInteger SelectionWithDifferentMaxMultiplicities::TotalNumSubsets() {
+LargeInteger SelectionWithDifferentMaxMultiplicities::totalNumberOfSubsets() {
   LargeInteger result = 1;
   for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
     result *= (this->MaxMultiplicities[i] + 1);
@@ -4879,7 +4879,7 @@ void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theM
   this->MaxMultiplicities = theMaxMults;
 }
 
-int ::SelectionWithDifferentMaxMultiplicities::TotalMultiplicity() {
+int ::SelectionWithDifferentMaxMultiplicities::totalMultiplicity() {
   int result = 0;
   for (int i = 0; i < this->Multiplicities.size; i ++) {
     result += this->Multiplicities[i];
@@ -4887,7 +4887,7 @@ int ::SelectionWithDifferentMaxMultiplicities::TotalMultiplicity() {
   return result;
 }
 
-int ::SelectionWithDifferentMaxMultiplicities::MaxTotalMultiplicity() {
+int ::SelectionWithDifferentMaxMultiplicities::maximumTotalMultiplicity() {
   int result = 0;
   for (int i = 0; i < this->Multiplicities.size; i ++) {
     result += this->MaxMultiplicities[i];
@@ -6495,9 +6495,9 @@ void WeylGroupData::reflectSimple(
   alphaShift.divideBy(this->cartanSymmetric.elements[index][index]);
   if (rhoAction) {
     if (useMinusRho) {
-      alphaShift.AddInteger(1);
+      alphaShift.addInteger(1);
     } else {
-      alphaShift.AddInteger(- 1);
+      alphaShift.addInteger(- 1);
     }
   }
   theRoot[index] += alphaShift;
@@ -8910,7 +8910,7 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   }
   SelectionWithDifferentMaxMultiplicities theCoeffSelection;
   theCoeffSelection.initFromInts(thePeriods);
-  int NumCycles = theCoeffSelection.TotalNumSubsetsMustBeSmalInt();
+  int NumCycles = theCoeffSelection.totalNumberSubsetsSmallInt();
   output.setSize(NumCycles);
   for (int i = 0; i < NumCycles; i ++, theCoeffSelection.incrementReturnFalseIfPastLast()) {
     output[i].makeZero(theDim);
@@ -9247,7 +9247,7 @@ bool Lattice::reduceVector(Vector<Rational>& theVector) const {
     return false;
   }
   for (int i = 0; i < output.size; i ++) {
-    output[i].AssignFracValue();
+    output[i].assignFractionalValue();
   }
   theVector.makeZero(theVector.size);
   for (int i = 0; i < basisRoots.size; i ++) {
@@ -10040,7 +10040,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
     tempRat = (theNormal.ScalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
-    tempRat.AssignFracValue();
+    tempRat.assignFractionalValue();
     theShiftedConst = theConstOnTheOtherSide + tempRat;
     Vector<Rational>& currentMovement =movementInDirectionPerRepresentative[i];
     currentMovement = theAffineHyperplane;
@@ -10055,7 +10055,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
   outputError = "";
-  int numCycles = theSel.NumCombinationsOfCardinality(theDegree);
+  int numCycles = theSel.numberOfCombinationsOfCardinality(theDegree);
   if (numCycles <= 0) {
     outputError = " Computation too large. ";
     return false;
@@ -10074,9 +10074,9 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   for (int j = 0; j < this->theDimension; j ++) {
     theCartanAction[j] = this->theH.elements[j][j];
   }
-  theSel.IncrementSubsetFixedCardinality(theDegree);
+  theSel.incrementSubsetFixedCardinality(theDegree);
   Rational theMonCoeff = 1;
-  for (int i = 0; i < numCycles; i ++, theSel.IncrementSubsetFixedCardinality(theDegree)) {
+  for (int i = 0; i < numCycles; i ++, theSel.incrementSubsetFixedCardinality(theDegree)) {
     for (int j = 0; j < this->theDimension; j ++) {
       theMon.setVariable(j, theSel.Multiplicities[j]);
       theWeight[j] = theMon[j];
@@ -11023,7 +11023,7 @@ bool Cone::getLatticePointsInCone(
   // format of the boundingBox:
   // if bounding box shows a vector (x_1, ...) then
   // it corresponds to a vector with coodinates (x_1-upperBoundPointsInEachDim, x_2-upperBoundPointsInEachDim, ...)
-  int numCycles = boundingBox.NumSelectionsTotal();
+  int numCycles = boundingBox.numberOfSelectionsTotal();
   if (numCycles <= 0 || numCycles > 1000000) {
     // We test up to 1 million lattice points.
     // This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
@@ -11035,7 +11035,7 @@ bool Cone::getLatticePointsInCone(
   Vector<Rational> candidatePoint;
   Vectors<Rational> LatticeBasis;
   LatticeBasis.assignMatrixRows(theLattice.basisRationalForm);
-  for (int i = 0; i < numCycles; i ++, boundingBox.IncrementSubset()) {
+  for (int i = 0; i < numCycles; i ++, boundingBox.incrementSubset()) {
     candidatePoint = theActualShift;
     if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
@@ -12131,7 +12131,7 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
   }
   int theDim = this->Normals[0].size;
   theSel.initialize(this->Normals.size);
-  int numCycles = theSel.GetNumCombinationsFixedCardinality(theDim - 1);
+  int numCycles = theSel.getNumberOfCombinationsFixedCardinality(theDim - 1);
   if (theDim == 1) {
     numCycles = 0;
     bool foundNegative = false;

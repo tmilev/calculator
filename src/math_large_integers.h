@@ -208,7 +208,7 @@ public:
   bool isNegative() const {
     return this->sign == - 1 && (this->value.isPositive());
   }
-  bool BeginsWithMinus() {
+  bool beginsWithMinus() {
     return this->isNegative();
   }
   bool isPositiveOrZero() const {
@@ -232,7 +232,7 @@ public:
   bool isEqualToOne() const {
     return this->value.isEqualToOne() && this->sign == 1;
   }
-  void AssignLargeIntUnsigned(const LargeIntegerUnsigned& x) {
+  void assignLargeIntUnsigned(const LargeIntegerUnsigned& x) {
     this->value = x;
     this->sign = 1;
   }
@@ -468,7 +468,7 @@ private:
   GlobalStatistics::checkPointerCounters();
 #endif
   }
-  bool ShrinkExtendedPartIfPossible();
+  bool shrinkExtendedPartIfPossible();
 public:
   int numeratorShort;
   int denominatorShort;
@@ -487,40 +487,37 @@ public:
     return false;
     //return this->isNegative();
   }
-  bool GetSquareRootIfRational(Rational& output) const;
+  bool getSquareRootIfRational(Rational& output) const;
   // Scales a vector of rationals so as to make all coordinates
   // relatively prime integers such that the non-zero coefficient is positive.
   // Returns the number by which the vector was multiplied.
   static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
   LargeIntegerUnsigned getDenominator() const;
-  bool BeginsWithMinus();
+  bool beginsWithMinus();
   LargeInteger getNumerator() const;
-  bool GetPrimeFactorsAbsoluteValue(
+  bool getPrimeFactorsAbsoluteValue(
     List<LargeInteger>& numeratorPrimeFactors,
     List<int>& numeratorMultiplicities,
     List<LargeInteger>& denominatorPrimeFactors,
     List<int>& denominatorMultiplicities
   );
-  const Rational& GetComplexConjugate() const;
+  const Rational& getComplexConjugate() const;
   Rational rationalValue() {
     return *this;
   }
-  void Subtract(const Rational& r);
-  void AdD(const Rational& r) {
-    this->operator+=(r);
-  }
-  void AddInteger(int x);
-  void AssignLargeIntUnsigned(const LargeIntegerUnsigned& other);
-  void AssignLargeInteger(const LargeInteger& other);
+  void subtract(const Rational& r);
+  void addInteger(int x);
+  void assignLargeIntUnsigned(const LargeIntegerUnsigned& other);
+  void assignLargeInteger(const LargeInteger& other);
   void assignString(const std::string& input);
   bool assignStringFailureAllowed(const std::string& input);
   static Rational zero();
   static Rational zeroStatic();
   static Rational one();
-  void AssignFracValue();
+  void assignFractionalValue();
   void assignFloor() {
     Rational tempRat = *this;
-    tempRat.AssignFracValue();
+    tempRat.assignFractionalValue();
     *this -= tempRat;
   }
   void multiplyBy(const Rational& r);
@@ -802,7 +799,7 @@ public:
     this->simplify();
   }
   inline void operator-=(const Rational& right) {
-    this->Subtract(right);
+    this->subtract(right);
   }
   inline void operator*=(const Rational& right) {
     this->multiplyBy(right);
@@ -811,17 +808,17 @@ public:
     this->divideBy(right);
   }
   void operator+=(int right) {
-    this->AddInteger(right);
+    this->addInteger(right);
   }
   void operator-=(int right) {
     Rational tempRat = right;
-    this->Subtract(tempRat);
+    this->subtract(tempRat);
   }
   void operator=(int right) {
     this->assignInteger(right);
   }
   inline void operator=(const LargeInteger& other) {
-    this->AssignLargeInteger(other);
+    this->assignLargeInteger(other);
   }
   Rational operator*(const Rational& right) const;
   void operator++(int) {

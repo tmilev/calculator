@@ -398,7 +398,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic = false;
   Vectors<Rational>& posRoots = this->theWeyl.RootsOfBorel;
-  nonExploredRoots.MakeFullSelection(posRoots.size);
+  nonExploredRoots.makeFullSelection(posRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;
   ProgressReport theReport;

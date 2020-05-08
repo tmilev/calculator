@@ -100,7 +100,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       matX[EnteringVariable] += MaxMovement;
       if (!tempTotalChange.isEqualToZero()) {
         VisitedVertices.clear();
-        GlobalGoal.Subtract(tempTotalChange);
+        GlobalGoal.subtract(tempTotalChange);
       } else {
         int tempI = VisitedVertices.getIndex(BaseVariables);
         if (tempI == - 1) {

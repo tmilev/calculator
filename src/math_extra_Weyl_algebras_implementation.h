@@ -57,7 +57,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   MonomialWeylAlgebra buffer;
   buffer.makeOne();
   output.makeZero();
-  int numCycles = tempSel.TotalNumSubsetsMustBeSmalInt();
+  int numCycles = tempSel.totalNumberSubsetsSmallInt();
   Rational coeffBuff;
   output.setExpectedSize(theExpectedSize);
   for (int i = 0; i < numCycles; i ++) {

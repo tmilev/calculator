@@ -270,7 +270,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
 
   Selection invertedSel;
   invertedSel = splittingParSel;
-  invertedSel.InvertSelection();
+  invertedSel.invertSelection();
   complementGroup.MakeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, invertedSel, 1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.toString(false);
@@ -420,7 +420,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   }
   Selection splittingParSelectedInLevi;
   splittingParSelectedInLevi = splittingParSel;
-  splittingParSelectedInLevi.InvertSelection();
+  splittingParSelectedInLevi.invertSelection();
   if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi)) {
     out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
     << " The parabolic has root of Levi given by " << splittingParSel.toString()
@@ -584,7 +584,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
 
   this->parabolicSelectionNonSelectedAreElementsLevi = selNonSelectedAreElementsLevi;
   this->parabolicSelectionSelectedAreElementsLevi = this->parabolicSelectionNonSelectedAreElementsLevi;
-  this->parabolicSelectionSelectedAreElementsLevi.InvertSelection();
+  this->parabolicSelectionSelectedAreElementsLevi.invertSelection();
 
   this->theHWFundamentalCoordsBaseField = HWFundCoords;
   this->theHWDualCoordsBaseFielD.setSize(theRank);

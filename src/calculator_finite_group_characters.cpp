@@ -1262,7 +1262,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
         parSelrootsAreOuttaLevi = inputSubgroups[i].simpleRootsInLeviParabolic;
-        parSelrootsAreOuttaLevi.InvertSelection();
+        parSelrootsAreOuttaLevi.invertSelection();
         out << "<td>" << parSelrootsAreOuttaLevi.toString() << "</td>";
       }
       out << "</tr><tr><td></td><td></td>";

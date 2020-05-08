@@ -923,7 +923,7 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   }
   Selection theParSel;
   theParSel = leviSelection;
-  theParSel.InvertSelection();
+  theParSel.invertSelection();
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
   theCasimir.makeCasimirWRTLeviParabolic(*theSSalg, theParSel);
   ExpressionContext contextE(theCommands);
@@ -3417,9 +3417,9 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   knownValues.setSize(knownEs.size);
   SelectionWithDifferentMaxMultiplicities theSamplingSelector;
   theSamplingSelector.initFromInts(numSamples);
-  if (theSamplingSelector.TotalNumSubsets() > 1000000) {
+  if (theSamplingSelector.totalNumberOfSubsets() > 1000000) {
     return theCommands << "The total number of sampling points, "
-    << theSamplingSelector.TotalNumSubsets().toString() << " exceeds "
+    << theSamplingSelector.totalNumberOfSubsets().toString() << " exceeds "
     << "the hard-coded limit of 1000000. ";
   }
   double tolerance = 0.0001;
@@ -3430,7 +3430,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   if (tolerance < 0) {
     tolerance *= - 1;
   }
-  Rational totalSamples = theSamplingSelector.TotalNumSubsetsMustBeSmalInt();
+  Rational totalSamples = theSamplingSelector.totalNumberSubsetsSmallInt();
   Rational numFailedSamples = 0;
   do {
     for (int i = 0; i < theSamplingSelector.Multiplicities.size; i ++) {
@@ -7550,7 +7550,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   << "<td>Image hw under small rho modified action fund coords</td>"
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel = parSel;
-  invertedParSel.InvertSelection();
+  invertedParSel.invertSelection();
   CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theChar, currentChar;
   Weight<RationalFunction<Rational> > theMon;
   theChar.makeZero();
@@ -7688,26 +7688,26 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   RFOne.makeOne();
   RFZero.makeZero();
   Selection selInducing;
-  selInducing.MakeFullSelection(theRank);
+  selInducing.makeFullSelection(theRank);
   int theCoeff;
   for (int i = 0; i < theRank; i ++) {
     if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
       if (theCoeff == 0) {
-        selInducing.RemoveSelection(i);
+        selInducing.removeSelection(i);
       }
     }
   }
   Vectors<Polynomial<Rational> > theHws;
   Selection invertedSelInducing = selInducing;
-  invertedSelInducing.InvertSelection();
+  invertedSelInducing.invertSelection();
   theHws.setSize(0);
   SelectionWithMaxMultiplicity theHWenumerator;
   Vector<Polynomial<Rational> > theHWrf;
   for (int j = 0; j <= desiredHeight; j ++) {
     theHWenumerator.initMaxMultiplicity(theRank - selInducing.cardinalitySelection, j);
-    theHWenumerator.IncrementSubsetFixedCardinality(j);
-    int numCycles = theHWenumerator.NumCombinationsOfCardinality(j);
-    for (int i = 0; i < numCycles; i ++, theHWenumerator.IncrementSubsetFixedCardinality(j)) {
+    theHWenumerator.incrementSubsetFixedCardinality(j);
+    int numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
+    for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = highestWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++) {
         theHWrf[invertedSelInducing.elements[k]] += Rational(theHWenumerator.Multiplicities[k]);
@@ -7817,13 +7817,13 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   //= theElementData.theElementTensorGenVermas.getElement();
   Selection selParSel1, selFD;
   Expression hwvFD, hwvGenVerma;
-  selParSel1.MakeFullSelection(theRank);
+  selParSel1.makeFullSelection(theRank);
   selFD.initialize(theRank);
   int theCoeff;
   for (int i = 0; i < theRank; i ++) {
     if (highestWeightFundCoords[i].isSmallInteger(&theCoeff)) {
       if (theCoeff >= 0) {
-        selParSel1.RemoveSelection(i);
+        selParSel1.removeSelection(i);
       }
     }
     bool isGood = false;
@@ -8181,13 +8181,13 @@ bool Calculator::innerPrintB3G2branchingTableCommon(Calculator& theCommands,
   }
   Selection invertedSelInducing = theG2B3Data.selInducing;
   theContext.getFormat(theG2B3Data.theFormat);
-  invertedSelInducing.InvertSelection();
+  invertedSelInducing.invertSelection();
   outputHWs.setSize(0);
   for (int j = 0; j <= desiredHeight; j ++) {
     theHWenumerator.initMaxMultiplicity(3 - theG2B3Data.selInducing.cardinalitySelection, j);
-    theHWenumerator.IncrementSubsetFixedCardinality(j);
-    int numCycles = theHWenumerator.NumCombinationsOfCardinality(j);
-    for (int i = 0; i < numCycles; i ++, theHWenumerator.IncrementSubsetFixedCardinality(j)) {
+    theHWenumerator.incrementSubsetFixedCardinality(j);
+    int numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
+    for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = theG2B3Data.theWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++)
         theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.Multiplicities[k];

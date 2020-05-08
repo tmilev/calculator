@@ -1521,7 +1521,7 @@ void Rational::raiseToPower(int x) {
   this->extended->numerator.sign = theSign;
   this->extended->denominator = tempDen;
   this->extended->numerator.value = tempNum.value;
-  this->ShrinkExtendedPartIfPossible();
+  this->shrinkExtendedPartIfPossible();
 }
 
 void Rational::invert() {
@@ -1649,7 +1649,7 @@ void Rational::assign(const Rational& r) {
   this->extended->denominator = r.extended->denominator;
 }
 
-void Rational::AssignFracValue() {
+void Rational::assignFractionalValue() {
   if (this->extended == nullptr) {
     if (this->numeratorShort == 0) {
       return;
@@ -1684,13 +1684,13 @@ void Rational::AssignFracValue() {
   this->simplify();
 }
 
-void Rational::AssignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
+void Rational::assignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
   LargeInteger tempInt;
-  tempInt.AssignLargeIntUnsigned(other);
-  this->AssignLargeInteger(tempInt);
+  tempInt.assignLargeIntUnsigned(other);
+  this->assignLargeInteger(tempInt);
 }
 
-void Rational::AssignLargeInteger(const LargeInteger& other){
+void Rational::assignLargeInteger(const LargeInteger& other){
   if (this->extended == nullptr) {
     this->extended = new LargeRationalExtended;
 #ifdef AllocationLimitsSafeguard
@@ -1700,10 +1700,10 @@ GlobalStatistics::checkPointerCounters();
   }
   this->extended->numerator = other;
   this->extended->denominator.makeOne();
-  this->ShrinkExtendedPartIfPossible();
+  this->shrinkExtendedPartIfPossible();
 }
 
-void Rational::AddInteger(int x) {
+void Rational::addInteger(int x) {
   Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(x, 1);
   this->operator+=(tempRat);
@@ -1712,18 +1712,18 @@ void Rational::AddInteger(int x) {
 bool Rational::isGreaterThan(const Rational& r) const {
   Rational tempRat;
   tempRat.assign(*this);
-  tempRat.Subtract(r);
+  tempRat.subtract(r);
   return tempRat.isPositive();
 }
 
-void Rational::Subtract(const Rational& r) {
+void Rational::subtract(const Rational& r) {
   Rational temp;
   temp.assign(r);
   temp.minus();
   this->operator+=(temp);
 }
 
-bool Rational::GetSquareRootIfRational(Rational& output) const {
+bool Rational::getSquareRootIfRational(Rational& output) const {
   if (*this < 0) {
     return false;
   }
@@ -1897,7 +1897,7 @@ LargeIntegerUnsigned Rational::getDenominator() const {
   return result;
 }
 
-bool Rational::BeginsWithMinus() {
+bool Rational::beginsWithMinus() {
   return this->isNegative();
 }
 
@@ -1919,17 +1919,17 @@ LargeInteger Rational::getNumerator() const {
   return result;
 }
 
-const Rational& Rational::GetComplexConjugate() const {
+const Rational& Rational::getComplexConjugate() const {
   return *this;
 }
 
-bool Rational::GetPrimeFactorsAbsoluteValue(
+bool Rational::getPrimeFactorsAbsoluteValue(
   List<LargeInteger>& numeratorPrimeFactors,
   List<int>& numeratorMultiplicities,
   List<LargeInteger>& denominatorPrimeFactors,
   List<int>& denominatorMultiplicities
 ) {
-  MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
+  MacroRegisterFunctionWithName("Rational::getPrimeFactorsAbsoluteValue");
   if (!this->getNumerator().value.factor(
     numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr
   )) {
@@ -1946,7 +1946,7 @@ void Rational::assignInteger(int x) {
   this->numeratorShort = x;
 }
 
-bool Rational::ShrinkExtendedPartIfPossible() {
+bool Rational::shrinkExtendedPartIfPossible() {
   if (this->extended == nullptr) {
     return true;
   }
@@ -2071,7 +2071,7 @@ void Rational::simplify() {
     this->extended->denominator.divPositive(tempI, this->extended->denominator, tempI2);
     this->extended->numerator.value.divPositive(tempI, this->extended->numerator.value, tempI2);
   }
-  this->ShrinkExtendedPartIfPossible();
+  this->shrinkExtendedPartIfPossible();
 }
 
 template <>
@@ -2091,7 +2091,7 @@ bool Rational::isEqualTo(const Rational& b) const {
   }
   Rational tempRat;
   tempRat.assign(*this);
-  tempRat.Subtract(b);
+  tempRat.subtract(b);
   return tempRat.isEqualToZero();
 }
 
@@ -2101,7 +2101,7 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   }
   Rational tempRat;
   tempRat.assign(*this);
-  tempRat.Subtract(right);
+  tempRat.subtract(right);
   return tempRat.isPositiveOrZero();
 }
 

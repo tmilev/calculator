@@ -487,7 +487,7 @@ void AlgebraicClosureRationals::getMultiplicationBy(
 bool AlgebraicNumber::assignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
   MacroRegisterFunctionWithName("AlgebraicNumber::assignCosRationalTimesPi");
   Rational fracPart = input;
-  fracPart.AssignFracValue();
+  fracPart.assignFractionalValue();
   Rational halfIntegerPart = input * 2;
   halfIntegerPart.assignFloor();
   LargeInteger halfIntegerPartTimesTwo;

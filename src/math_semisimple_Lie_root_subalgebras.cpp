@@ -927,9 +927,9 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   DynkinDiagramRootSubalgebra theDiagram;
   for (int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, theRank); i ++) {
     tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
-    int NumElts = tempSel.NumCombinationsOfCardinality(i);
+    int NumElts = tempSel.numberOfCombinationsOfCardinality(i);
     for (int j = 0; j < NumElts; j ++) {
-      tempSel.IncrementSubsetFixedCardinality(i);
+      tempSel.incrementSubsetFixedCardinality(i);
       Accum.makeZero(this->getAmbientWeyl().cartanSymmetric.numberOfRows);
       chosenAlphas.size = 0;
       for (int k = 0; k < tempSel.elements.size; k ++) {
@@ -961,7 +961,7 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
               }
             }
           }
-          theRel.Alphas.setSize(tempSel.CardinalitySelectionWithoutMultiplicities());
+          theRel.Alphas.setSize(tempSel.cardinalitySelectionWithoutMultiplicities());
           theRel.AlphaCoeffs.setSize(tempSel.elements.size);
           for (int k = 0; k < tempSel.elements.size; k ++) {
             theRel.Alphas[k] = highestWeightsAllowed[tempSel.elements[k]];
@@ -1011,7 +1011,7 @@ void RootSubalgebra::ensureAlphasDontSumToRoot(ConeRelation& theRel, Vectors<Rat
             alpha1coeff = theRel.AlphaCoeffs[changedIndex];
             alpha2coeff = theRel.AlphaCoeffs[otherIndex];
             alpha2 = theRel.Alphas[otherIndex];
-            alpha2coeff.Subtract(alpha1coeff);
+            alpha2coeff.subtract(alpha1coeff);
             madeChange = true;
             theRel.Alphas[changedIndex] = beta1;
             theRel.AlphaCoeffs[changedIndex] = alpha1coeff;
@@ -1863,8 +1863,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
     tempSize += tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
-  int tempI2= permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
-  int NumAutosCentralizer = tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
+  int tempI2= permComponentsCentralizer.totalNumberSubsetsSmallInt();
+  int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   Matrix<Rational> tempMat;
   Selection tempSel;
@@ -1956,10 +1956,10 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI1;
   int NumAutos;
-  tempI1 = permComponents.TotalNumSubsetsMustBeSmalInt();
-  NumAutos = tempAutos.TotalNumSubsetsMustBeSmalInt();
-  int tempI2 = permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
-  int NumAutosCentralizer = tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
+  tempI1 = permComponents.totalNumberSubsetsSmallInt();
+  NumAutos = tempAutos.totalNumberSubsetsSmallInt();
+  int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
+  int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
   permComponents.getPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i = 0; i < tempI1; i ++) {
@@ -2628,7 +2628,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     int theSlack = 0;
     rootsScalarProduct2HnonRaised.size = 0;
     simpleRootsChar2 = selectionRootsWithZeroCharacteristic;
-    simpleRootsChar2.InvertSelection();
+    simpleRootsChar2.invertSelection();
     Vector<Rational> simpleRootsChar2Vect;
     simpleRootsChar2Vect = simpleRootsChar2;
     for (int j = 0; j < relativeRootSystem.size; j ++) {
@@ -4208,7 +4208,7 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
             remainingIndex = j;
           }
           this->Betas[leavingIndex] = tempRoot;
-          this->BetaCoeffs[remainingIndex].Subtract(this->BetaCoeffs[leavingIndex]);
+          this->BetaCoeffs[remainingIndex].subtract(this->BetaCoeffs[leavingIndex]);
           if (this->BetaCoeffs[remainingIndex].isEqualToZero()) {
             this->BetaCoeffs.removeIndexSwapWithLast(remainingIndex);
             this->Betas.removeIndexSwapWithLast(remainingIndex);

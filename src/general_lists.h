@@ -338,7 +338,7 @@ public:
   static void lieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>
   static number complexConjugate(number x) {
-    return x.GetComplexConjugate();
+    return x.getComplexConjugate();
   }
   static int complexConjugate(int x) {
     return x;

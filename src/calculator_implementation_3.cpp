@@ -411,7 +411,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
-  InvertedLeviInSmall.InvertSelection();
+  InvertedLeviInSmall.invertSelection();
   eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.cardinalitySelection);
   Vectors<Coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<Coefficient> > tempEigenVects;

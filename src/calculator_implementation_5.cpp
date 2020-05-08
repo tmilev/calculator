@@ -2662,7 +2662,7 @@ void GroebnerBasisComputation<Coefficient>::computeHighLightsFromRemainder(
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
   this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
-  << currentSlideNumber + 1 << "| handout:0>{Subtract last two polynomials.}";
+  << currentSlideNumber + 1 << "| handout:0>{subtract last two polynomials.}";
   currentSlideNumber ++;
   for (int i = 0; i < this->intermediateRemainders.getElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][

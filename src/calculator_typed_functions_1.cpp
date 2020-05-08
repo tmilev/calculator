@@ -1573,7 +1573,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.getNumerator().value;
   List<LargeInteger> numeratorFactors, denominatorFactors;
   List<int> numeratorPowersInt, denominatorPowersInt;
-  if (!base.GetPrimeFactorsAbsoluteValue(
+  if (!base.getPrimeFactorsAbsoluteValue(
     numeratorFactors,
     numeratorPowersInt,
     denominatorFactors,

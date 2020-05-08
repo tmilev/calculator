@@ -405,7 +405,7 @@ template <typename scalar, typename templateVector>
 Rational AnotherWeylGroup<scalar, templateVector>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const {
   Rational acc = 0;
   for (int i = 0; i < X1.size; i ++) {
-    acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
+    acc += X1[i].getComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
   }
   return acc / this->size();
 }

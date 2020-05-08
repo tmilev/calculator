@@ -14,16 +14,16 @@ public:
   int MaxSize;
   int cardinalitySelection;
   void addSelectionAppendNewIndex(int index);
-  void RemoveLastSelection();
-  void RemoveSelection(int index) {
+  void removeLastSelection();
+  void removeSelection(int index) {
     this->selected[index] = false;
     this->computeIndicesFromSelection();
   }
-  void MakeFullSelection(int inputMaxSize) {
+  void makeFullSelection(int inputMaxSize) {
     this->initialize(inputMaxSize);
-    this->MakeFullSelection();
+    this->makeFullSelection();
   }
-  void MakeFullSelection() {
+  void makeFullSelection() {
     for (int i = 0; i < this->MaxSize; i ++) {
       this->elements[i] = i;
       this->selected[i] = true;
@@ -57,16 +57,16 @@ public:
     }
     return true;
   }
-  int SelectionToIndex();
+  int selectionToIndex();
   void expandMaxSize();
-  int GetNumCombinationsFixedCardinality(int theCardinality) {
+  int getNumberOfCombinationsFixedCardinality(int theCardinality) {
     return MathRoutines::nChooseK(this->MaxSize, theCardinality);
   }
   void shrinkMaxSize();
   void makeSubSelection(Selection& theSelection, Selection& theSubSelection);
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
-  void InvertSelection() {
+  void invertSelection() {
     for (int i = 0; i < this->MaxSize; i ++) {
       this->selected[i] = !this->selected[i];
     }
@@ -100,10 +100,6 @@ public:
 
 class SelectionWithMultiplicities {
 public:
-  std::string DebugString;
-  void ComputeDebugString() {
-    this->toString(this->DebugString);
-  }
   void toString(std::string& output);
   std::string toString() {
     std::string tempS;
@@ -119,31 +115,30 @@ public:
     }
     return result;
   }
-  int CardinalitySelectionWithoutMultiplicities();
+  int cardinalitySelectionWithoutMultiplicities();
   void initWithMultiplicities(int NumElements);
-  void ComputeElements();
+  void computeElements();
 };
 
 class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
   void initialize(int NumElements);
-  void InitMe(int NumElements);
   void initWithMultiplicities(int NumElements);
 public:
   int MaxMultiplicity;
   void initMaxMultiplicity(int NumElements, int MaxMult);
-  int NumCombinationsOfCardinality(int cardinality);
-  LargeInteger GetNumTotalCombinations() const;
-  int NumSelectionsTotal() {
+  int numberOfCombinationsOfCardinality(int cardinality);
+  LargeInteger getTotalCombinationCount() const;
+  int numberOfSelectionsTotal() {
     return MathRoutines::kToTheNth(MaxMultiplicity, this->Multiplicities.size);
   }
   bool incrementReturnFalseIfPastLast();
-  void IncrementSubset();
-  void IncrementSubsetFixedCardinality(int Cardinality);
-  bool HasMultiplicitiesZeroAndOneOnly();
-  int MaxCardinalityWithMultiplicities() {
-    return this->MaxMultiplicity*this->Multiplicities.size;
+  void incrementSubset();
+  void incrementSubsetFixedCardinality(int Cardinality);
+  bool hasMultiplicitiesZeroAndOneOnly();
+  int maximumCardinalityWithMultiplicities() {
+    return this->MaxMultiplicity * this->Multiplicities.size;
   }
-  int CardinalitySelectionWithMultiplicities();
+  int cardinalitySelectionWithMultiplicities();
   static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
     return static_cast<unsigned int>(input.MaxMultiplicity) * someRandomPrimes[0] +
     input.::SelectionWithMultiplicities::hashFunction(input);
@@ -158,13 +153,13 @@ public:
   void initPart1(int NumElements);
   void clearNoMaxMultiplicitiesChange();
   bool incrementReturnFalseIfPastLast();
-  LargeInteger TotalNumSubsets();
-  int TotalNumSubsetsMustBeSmalInt();
-  int TotalMultiplicity();
-  int MaxTotalMultiplicity();
+  LargeInteger totalNumberOfSubsets();
+  int totalNumberSubsetsSmallInt();
+  int totalMultiplicity();
+  int maximumTotalMultiplicity();
   void initFromInts(int* theMaxMults, int NumberMaxMults);
   void initFromInts(const List<int>& theMaxMults);
-  bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
+  bool hasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
     return this->MaxMultiplicities.isEqualTo(other.MaxMultiplicities);
   }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right) {

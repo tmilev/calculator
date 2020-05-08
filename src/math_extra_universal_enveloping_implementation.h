@@ -44,7 +44,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   ElementSemisimpleLieAlgebra<Rational> leftE, rightE;
   ChevalleyGenerator baseGen;
   Selection rootsNotInLEvi = theLeviRoots;
-  rootsNotInLEvi.InvertSelection();
+  rootsNotInLEvi.invertSelection();
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
   Vector<Rational> theWeightLeft, theWeightRight;
   this->makeZero(theOwner);

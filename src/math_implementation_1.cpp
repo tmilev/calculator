@@ -352,9 +352,9 @@ bool LittelmannPath::generateOrbit(
   parabolicSelectionSelectedAreInLeviPart.initialize(theDim);
   if (parabolicNonSelectedAreInLeviPart != nullptr) {
     parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
-    parabolicSelectionSelectedAreInLeviPart.InvertSelection();
+    parabolicSelectionSelectedAreInLeviPart.invertSelection();
   } else {
-    parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
+    parabolicSelectionSelectedAreInLeviPart.makeFullSelection();
   }
   for (int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size; lowestNonExplored ++) {
     if (UpperBoundNumElts > 0 && UpperBoundNumElts < hashedOutput.size) {

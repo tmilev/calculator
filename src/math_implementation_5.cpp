@@ -94,7 +94,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   //which will work on any simple Weyl group. A proper fix
   //requires some math work and we postpone it to the future.
   vectorGeneratingFaithfulOrbit *= 50; // scale rho by 50
-  vectorGeneratingFaithfulOrbit[0].AddInteger(1); // <- slightly perturb the first coordinate.
+  vectorGeneratingFaithfulOrbit[0].addInteger(1); // <- slightly perturb the first coordinate.
   //This perturbation breaks the outer automorphism invariance for all
   //simple Weyl group of simple Lie algebras.
   //This needs needs improvement for non-simple groups.
@@ -433,7 +433,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   Selection NonExplored;
   int numRoots = this->theWeyl.RootSystem.size;
   NonExplored.initialize(numRoots);
-  NonExplored.MakeFullSelection();
+  NonExplored.makeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
   this->computeChevalleyConstants();
@@ -454,7 +454,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
       Range[theIndex] = tempElt;
       tempElt.makeGGenerator(domainRoot, *this);
       Domain[theIndex] = tempElt;
-      NonExplored.RemoveSelection(theIndex);
+      NonExplored.removeSelection(theIndex);
     }
   }
   Vector<Rational> left, right;
@@ -476,7 +476,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
               ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = Range[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = Range[rightIndex];
               this->lieBracket(leftRangeElt, rightRangeElt, Range[theIndex]);
-              NonExplored.RemoveSelection(theIndex);
+              NonExplored.removeSelection(theIndex);
             }
           }
         }
@@ -597,7 +597,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   Selection NonExplored;
   int numRoots = this->theDomain().theWeyl.RootSystem.size;
   NonExplored.initialize(numRoots);
-  NonExplored.MakeFullSelection();
+  NonExplored.makeFullSelection();
   List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
   tempDomain.setSize(numRoots+theDomainDimension);
   tempRange.setSize(numRoots+theDomainDimension);
@@ -611,7 +611,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
       tempGen.makeGenerator(this->theDomain(), this->theDomain().getGeneratorFromRoot(tempRoot));
       tempDomain[index].addMonomial(tempGen, 1);
       tempRange[index] = this->imagesSimpleChevalleyGenerators[i +j*theDomainDimension];
-      NonExplored.RemoveSelection(index);
+      NonExplored.removeSelection(index);
     }
   }
   Vector<Rational> right;
@@ -633,7 +633,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
               ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = tempRange[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = tempRange[rightIndex];
               this->theRange().lieBracket(leftRangeElt, rightRangeElt, tempRange[theIndex]);
-              NonExplored.RemoveSelection(theIndex);
+              NonExplored.removeSelection(theIndex);
               break;
             }
           }

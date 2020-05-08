@@ -7303,6 +7303,7 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
     "Divides polynomial modulo integer by another polynomial modulo integer. ",
+    "PolynomialModP{}(x^5+5x^3+x^2+4x+1, 7) / PolynomialModP{}(x^5+6x^3+x^2+5x+1, 7);\n"
     "PolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 3);\n"
     "PolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\n"
     "PolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\n"

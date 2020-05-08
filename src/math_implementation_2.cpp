@@ -374,7 +374,7 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
   if (this->isEven()) {
     if (*this != 2 && comments != nullptr) {
-      *comments << "Input is even but not two. ";
+      *comments << "Number " << *this << " is even but not two. ";
     }
     return *this == 2;
   }

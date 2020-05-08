@@ -877,9 +877,9 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
     return theCommands << "Division of modular polynomials not allowed for modulus larger than " << maximumModulusForDivision << ". ";
   }
   if (!modulus.isPossiblyPrime(0, true, &theCommands.comments)) {
-    return theCommands << "I only accept modular polynomials over prime moduli. ";
+    return theCommands
+    << "Polynomial division is currently only implemented over prime moduli. ";
   }
-    return theCommands << "Got to here. Modulus: " << modulus;
   RationalFunction<ElementZmodP> result;
   result = left;
   result /= right;

@@ -2940,7 +2940,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "IsPossiblyPrime",
+    "isPossiblyPrime",
     CalculatorFunctions::innerIsPossiblyPrime,
     "",
     "Checks whether the number is "
@@ -2948,11 +2948,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "and by the Miller-Rabin test next.",
     "A =100!+ 1;\n"
     "IsPrimeMillerRabin(A);\n"
-    "IsPossiblyPrime(4256233);\n"
-    "IsPossiblyPrime(49979687);\n"
-    "IsPossiblyPrime(4256233 * 49979687)",
+    "isPossiblyPrime(4256233);\n"
+    "isPossiblyPrime(49979687);\n"
+    "isPossiblyPrime(4256233 * 49979687)",
     "CalculatorFunctions::innerIsPossiblyPrime",
-    "IsPossiblyPrime",
+    "isPossiblyPrime",
     innerStandard
   );
   this->addOperationHandler(
@@ -7302,9 +7302,11 @@ void Calculator::initPredefinedStandardOperations() {
     CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomialModuloInteger,
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
-    "Divides polynomial by polynomial (to get a rational function). ",
-    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
-    "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
+    "Divides polynomial modulo integer by another polynomial modulo integer. ",
+    "PolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 3);\n"
+    "PolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\n"
+    "PolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\n"
+    "PolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);\n",
     "CalculatorFunctionsBinaryOps::innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial",
     "DividePolynomialModPByPolynomialModP",
     innerStandard

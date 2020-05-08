@@ -5800,7 +5800,7 @@ bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Ex
   if (!input[1].isInteger(&theInt)) {
     return false;
   }
-  bool resultBool = theInt.value.IsPossiblyPrime(10, true, &theCommands.comments);
+  bool resultBool = theInt.value.isPossiblyPrime(10, true, &theCommands.comments);
   Rational result = 1;
   if (!resultBool) {
     result = 0;
@@ -5817,7 +5817,7 @@ bool CalculatorFunctions::innerIsPrimeMillerRabin(Calculator& theCommands, const
   if (!input[1].isInteger(&theInt)) {
     return false;
   }
-  bool resultBool = theInt.value.IsPossiblyPrimeMillerRabiN(10, &theCommands.comments);
+  bool resultBool = theInt.value.isPossiblyPrimeMillerRabin(10, &theCommands.comments);
   Rational result = 1;
   if (!resultBool) {
     result = 0;

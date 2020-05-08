@@ -866,11 +866,20 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
   if (right.isEqualToZero()) {
     return output.makeError("Division by zero.", theCommands);
   }
+  LargeIntegerUnsigned modulus = right.coefficients[0].theModulus;
+  int maximumModulusForDivision = 1000;
   if (!left.isEqualToZero()) {
-    if (left.coefficients[0].theModulus != right.coefficients[0].theModulus) {
+    if (left.coefficients[0].theModulus != modulus) {
       return theCommands << "Attempt to multiply polynomials with different moduli. ";
     }
   }
+  if (modulus > maximumModulusForDivision) {
+    return theCommands << "Division of modular polynomials not allowed for modulus larger than " << maximumModulusForDivision << ". ";
+  }
+  if (!modulus.isPossiblyPrime(0, true, &theCommands.comments)) {
+    return theCommands << "I only accept modular polynomials over prime moduli. ";
+  }
+    return theCommands << "Got to here. Modulus: " << modulus;
   RationalFunction<ElementZmodP> result;
   result = left;
   result /= right;

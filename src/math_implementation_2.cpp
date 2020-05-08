@@ -245,13 +245,13 @@ bool LargeIntegerUnsigned::isGreaterThanOrEqualTo(const LargeIntegerUnsigned& x)
   return true;
 }
 
-bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
+bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   unsigned int theBase,
   int theExponentOfThePowerTwoFactorOfNminusOne,
   const LargeIntegerUnsigned& theOddFactorOfNminusOne,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce");
+  MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrimeMillerRabinOnce");
   if (*this == theBase) {
     return true;
   }
@@ -294,6 +294,9 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
     }
     thePower *= thePower;
   }
+  if (comments != nullptr) {
+    *comments << "It appears your number is even. ";
+  }
   return false;
 }
 
@@ -331,19 +334,20 @@ bool LargeIntegerUnsigned::tryIsPower(
   return true;
 }
 
-bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabiN(int numberOfTries, std::stringstream* comments) {
-  return this->IsPossiblyPrime(numberOfTries, false, comments);
+bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabin(int numberOfTries, std::stringstream* comments) {
+  return this->isPossiblyPrime(numberOfTries, false, comments);
 }
 
-bool LargeIntegerUnsigned::IsCompositePrimeDivision(
+bool LargeIntegerUnsigned::isCompositePrimeDivision(
   List<unsigned int>& primesGenerated, std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::IsCompositePrimeDivision");
+  MacroRegisterFunctionWithName("LargeIntUnsigned::isCompositePrimeDivision");
   if (this->isEven()) {
     return *this == 2;
   }
+  int maximumDivisor = this->maximumDivisorToTryWhenFactoring(- 1);
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(
-    100000, primesGenerated
+    static_cast<unsigned>(maximumDivisor), primesGenerated
   );
   for (int i = 0; i < primesGenerated.size; i ++) {
     LargeIntegerUnsigned current = primesGenerated[i];
@@ -362,22 +366,28 @@ bool LargeIntegerUnsigned::IsCompositePrimeDivision(
   return false;
 }
 
-bool LargeIntegerUnsigned::IsPossiblyPrime(
-  int timesToRunMillerRabin,
+bool LargeIntegerUnsigned::isPossiblyPrime(
+  int millerRabinTries,
   bool tryDivisionSetTrueFaster,
   std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrime");
+  MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
+  if (this->isEven()) {
+    if (*this != 2 && comments != nullptr) {
+      *comments << "Input is even but not two. ";
+    }
+    return *this == 2;
+  }
   List<unsigned int> aFewPrimes;
   if (tryDivisionSetTrueFaster) {
-    if (this->IsCompositePrimeDivision(aFewPrimes, comments)) {
+    if (this->isCompositePrimeDivision(aFewPrimes, comments)) {
       return false;
     }
   } else {
-    LargeIntegerUnsigned::getPrimesEratosthenesSieve(100000, aFewPrimes);
+    LargeIntegerUnsigned::getPrimesEratosthenesSieve(1000, aFewPrimes);
   }
-  if (timesToRunMillerRabin > aFewPrimes.size) {
-    timesToRunMillerRabin = aFewPrimes.size;
+  if (millerRabinTries > aFewPrimes.size) {
+    millerRabinTries = aFewPrimes.size;
   }
   LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
@@ -387,15 +397,15 @@ bool LargeIntegerUnsigned::IsPossiblyPrime(
     theExponentOfThePowerTwoFactorOfNminusOne ++;
   }
   ProgressReport theReport;
-  for (int i = 0; i < timesToRunMillerRabin; i ++) {
+  for (int i = 0; i < millerRabinTries; i ++) {
     if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Testing whether " << this->toStringAbbreviate()
       << " is prime using Miller-Rabin test " << i + 1 << " out of "
-      << timesToRunMillerRabin << ". ";
+      << millerRabinTries << ". ";
       theReport.report(reportStream.str());
     }
-    if (!this->IsPossiblyPrimeMillerRabinOnce(
+    if (!this->isPossiblyPrimeMillerRabinOnce(
       aFewPrimes[i],
       theExponentOfThePowerTwoFactorOfNminusOne,
       theOddFactorOfNminusOne,
@@ -1043,6 +1053,26 @@ void LargeIntegerUnsigned::accountFactor(
   }
 }
 
+int LargeIntegerUnsigned::maximumDivisorToTryWhenFactoring(int desiredByUser) const {
+  int result = desiredByUser;
+  if (result <= 0) {
+    result = 100000;
+  }
+  if (*this < result) {
+    if (*this < 100) {
+      result = 10;
+    } else if (*this < 1000) {
+      result = 32;
+    } else {
+      this->isIntegerFittingInInt(&result);
+    }
+  }
+  if (result > 1000000000 || result < 0) {
+    result = 1000000000;
+  }
+  return result;
+}
+
 bool LargeIntegerUnsigned::factor(
   List<LargeInteger>& outputFactors,
   List<int>& outputMultiplicites,
@@ -1067,18 +1097,7 @@ bool LargeIntegerUnsigned::factor(
   LargeIntegerUnsigned toBeFactored = *this;
   outputFactors.setSize(0);
   outputMultiplicites.setSize(0);
-  if (maximumDivisorToTry <= 0) {
-    maximumDivisorToTry = 100000;
-  }
-  if (*this < maximumDivisorToTry) {
-    if (*this < 100) {
-      maximumDivisorToTry = 10;
-    } else if (*this < 1000) {
-      maximumDivisorToTry = 32;
-    } else {
-      this->isIntegerFittingInInt(&maximumDivisorToTry);
-    }
-  }
+  maximumDivisorToTry = this->maximumDivisorToTryWhenFactoring(maximumDivisorToTry);
   List<bool> theSieve;
   theSieve.initializeFillInObject(maximumDivisorToTry + 1, true);
   for (int i = 2; i <= maximumDivisorToTry; i ++) {
@@ -1097,7 +1116,7 @@ bool LargeIntegerUnsigned::factor(
   }
   if (toBeFactored > 1) {
     this->accountFactor(toBeFactored, outputFactors, outputMultiplicites);
-    if (!toBeFactored.IsPossiblyPrimeMillerRabiN(numberMillerRabinRuns, nullptr)) {
+    if (!toBeFactored.isPossiblyPrimeMillerRabin(numberMillerRabinRuns, nullptr)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "The largest remaining factor "
@@ -1939,7 +1958,7 @@ bool Rational::ShrinkExtendedPartIfPossible() {
   ) {
     return false;
   }
-  this->numeratorShort = this->extended->numerator.GetIntValueTruncated();
+  this->numeratorShort = this->extended->numerator.getIntValueTruncated();
   this->denominatorShort = this->extended->denominator.getUnsignedIntValueTruncated();
   this->freeExtended();
   return true;
@@ -2054,6 +2073,9 @@ void Rational::simplify() {
   }
   this->ShrinkExtendedPartIfPossible();
 }
+
+template <>
+bool Polynomial<Rational>::isConstant(Rational* whichConstant) const;
 
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.isConstant(this)) {

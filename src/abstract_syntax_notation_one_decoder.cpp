@@ -1677,13 +1677,13 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
   this->primeOne = inputPrimeOne;
   this->primeTwo = inputPrimeTwo;
   if (verifyInputsArePrime) {
-    if (!this->primeOne.IsPossiblyPrime(10, true, commentsOnFailure)) {
+    if (!this->primeOne.isPossiblyPrime(10, true, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "First input: " << this->primeTwo.toString() << " is not prime. ";
       }
       return false;
     }
-    if (!this->primeTwo.IsPossiblyPrime(10, true, commentsOnFailure)) {
+    if (!this->primeTwo.isPossiblyPrime(10, true, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Second input: " << this->primeTwo.toString() << " is not prime. ";
       }

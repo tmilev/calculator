@@ -211,7 +211,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     //  this->ucsm[i].setSize(cartanSymmetric.numberOfColumns);
     for (int i = 0; i < cartanSymmetric.numberOfRows; i ++) {
       for (int j = 0; j < cartanSymmetric.numberOfColumns; j ++) {
-        unrationalCartanSymmetric.elements[i][j] = (cartanSymmetric.elements[i][j] * den).getNumerator().GetIntValueTruncated();
+        unrationalCartanSymmetric.elements[i][j] = (cartanSymmetric.elements[i][j] * den).getNumerator().getIntValueTruncated();
         //ucsm[i][j] = unrationalCartanSymmetric.elements[i][j];
       }
     }

@@ -70,10 +70,10 @@ public:
   bool isEven() const;
   bool isPositive() const;
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool IsCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
-  bool IsPossiblyPrime(int MmillerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
-  bool IsPossiblyPrimeMillerRabiN(int numTimesToRun = 1, std::stringstream* comments = nullptr);
-  bool IsPossiblyPrimeMillerRabinOnce(
+  bool isCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
+  bool isPossiblyPrime(int millerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
+  bool isPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = nullptr);
+  bool isPossiblyPrimeMillerRabinOnce(
     unsigned int theBase,
     int theExponentOfThePowerTwoFactorOfNminusOne,
     const LargeIntegerUnsigned& theOddFactorOfNminusOne,
@@ -105,6 +105,9 @@ public:
   // returns ceiling of the logarithm base two of the number,
   // i.e., the smallest x such that this <= 2^x.
   unsigned int logarithmBaseNCeiling(unsigned int theBase) const;
+
+  int maximumDivisorToTryWhenFactoring(int desiredByUser) const;
+
   static void accountFactor(
     const LargeInteger& prime,
     List<LargeInteger>& outputPrimeFactors,
@@ -265,7 +268,7 @@ public:
   unsigned int hashFunction() const {
     return this->value.hashFunction() + static_cast<unsigned int>(this->sign) + 3;
   }
-  int GetIntValueTruncated() {
+  int getIntValueTruncated() {
    return this->sign * this->value.getUnsignedIntValueTruncated();
   }
   double getDoubleValue() const;

@@ -46,7 +46,7 @@ void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numBy
     output ++;
   }
   while (true) {
-    if (output.IsPossiblyPrime(15, true, nullptr)) {
+    if (output.isPossiblyPrime(15, true, nullptr)) {
       break;
     }
     output += 2;

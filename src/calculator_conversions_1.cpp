@@ -666,7 +666,6 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.flagcomputeModuleDecompositionsition = true;
   theSAs.flagcomputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
-  theReport.report("Got to here pt 3");
   theSAs.millisecondsComputationStart = global.getElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
   theReport.report(reportStream.str());

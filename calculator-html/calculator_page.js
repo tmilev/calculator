@@ -104,35 +104,70 @@ function createSelection(field, start, end) {
   }
 }
 
-Calculator.prototype.processOneFunctionAtom = function(handlers, isComposite) {
-  var resultString = "";
-  for (var counterHandlers = 0; counterHandlers < handlers.length; counterHandlers ++) {
-    resultString += "<br>";
-    var currentDescription = handlers[counterHandlers].description;
-    var currentExample = handlers[counterHandlers].example;
-    resultString += `<calculatorAtom>${handlers[counterHandlers].atom}</calculatorAtom>`;
-    if (handlers[counterHandlers].composite === "true") {
-      resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
-    }
-    resultString += ` (${counterHandlers + 1} out of ${handlers.length})`;
-    var currentId = "example_";
-    if (isComposite) {
-      currentId += "t_";
-    } else {
-      currentId += "f_";
-    }
-    var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
-    currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
-    resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
-    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}`;
-    resultString += `<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
+function AtomHandler() {
+  this.description = "";
+  this.atom = "";
+  this.example = "";
+  this.composite = false;
+  this.index = - 1;
+  this.totalRules = 0;
 
-    var theLink = this.getComputationLink(currentExample);
-    resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
-    //resultString += currentExample;
-    //console.log(handlers[counterHandlers]);
+}
+
+AtomHandler.prototype.fromObject = function(
+  input, 
+  /**@type {number}*/ index, 
+  /**@type {number}*/ totalRules,
+) {
+  this.index = index;
+  this.totalRules = totalRules;
+  this.description = input.description;
+  this.example = input.example;
+  this.atom = input.atom;
+  this.ruleName = input.ruleName;
+  if (input.composite === "true" || input.composite === true) {
+    this.composite = true;
+  } else {
+    this.composite = false;
   }
+}
+
+AtomHandler.prototype.toString = function(
+  /**@type {Calculator}*/
+  calculator
+) {
+  var resultString = "";
+  resultString += `<calculatorAtom>${this.atom}</calculatorAtom>`;
+  if (this.composite) {
+    resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+  }
+  resultString += ` (${this.index + 1} out of ${this.totalRules})`;
+  var currentId = "example_";
+  if (this.composite) {
+    currentId += "t_";
+  } else {
+    currentId += "f_";
+  }
+  var encodedAtom = encodeURIComponent(this.atom);
+  currentId += `${encodedAtom}_${this.index}_${this.totalRules}`;
+  resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
+  resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${this.description}`;
+  resultString += `<br><b>Example:</b><br>${this.example}</calculatorExampleInfo>`;
+  var theLink = calculator.getComputationLink(this.example);
+  resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
+  resultString += ` [${this.ruleName}]`;
   return resultString;
+}
+
+Calculator.prototype.processOneFunctionAtom = function(handlers) {
+  var resultStrings = [];
+  for (var i = 0; i < handlers.length; i ++) {
+    resultStrings.push("<br>");
+    var handler = new AtomHandler();
+    handler.fromObject(handlers[i], i, handlers.length);
+    resultStrings.push(handler.toString(this));
+  }
+  return resultStrings.join("");
 }
 
 Calculator.prototype.processExamples = function(inputJSONtext) {
@@ -144,8 +179,8 @@ Calculator.prototype.processExamples = function(inputJSONtext) {
     for (var i = 0; i < atomsSorted.length; i ++) {
       var atom = atomsSorted[i];
       var currentExamples = this.examples[atom];
-      examplesString += this.processOneFunctionAtom(currentExamples.regular, false);
-      examplesString += this.processOneFunctionAtom(currentExamples.composite, true);
+      examplesString += this.processOneFunctionAtom(currentExamples.regular);
+      examplesString += this.processOneFunctionAtom(currentExamples.composite);
       numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
     }
     var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;

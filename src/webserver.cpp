@@ -2893,7 +2893,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   this->NumWorkersNormallyExited ++;
   if (workerMessage["connectionsServed"].theType == JSData::token::tokenLargeInteger) {
     this->NumberOfServerRequestsWithinAllConnections +=
-    workerMessage["connectionsServed"].theInteger.getElement().GetIntValueTruncated()
+    workerMessage["connectionsServed"].theInteger.getElement().getIntValueTruncated()
     ;
   }
   if (

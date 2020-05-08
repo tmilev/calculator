@@ -2970,7 +2970,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     return theCommands << "The modulus: " << thePrime << " is not positive. ";
   }
   std::stringstream commentsOnFailure;
-  if (!thePrime.value.IsPossiblyPrime(2, true, &commentsOnFailure)) {
+  if (!thePrime.value.isPossiblyPrime(2, true, &commentsOnFailure)) {
     theCommands << "The modulus: " << thePrime
     << " appears not to be prime. " << commentsOnFailure.str();
   }

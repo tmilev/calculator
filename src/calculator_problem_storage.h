@@ -30,7 +30,7 @@ public:
   bool flagUseMathMode;
   bool flagUseMathSpan;
   std::string interpretedCommand;
-  static int ParsingNumDummyElements;
+  static int parsingDummyElements;
   bool isInterpretedByCalculatorDuringProblemGeneration();
   bool isInterpretedByCalculatorDuringSubmission();
   bool isInterpretedNotByCalculator();

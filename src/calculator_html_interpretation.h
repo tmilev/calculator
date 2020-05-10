@@ -191,15 +191,15 @@ public:
 
 class CalculatorHTML {
 public:
-  int NumAttemptsToInterpret;
+  int numberOfInterpretationAttempts;
   int MaxInterpretationAttempts;
-  int NumProblemsFound;
-  int NumVideosFound;
-  int NumVideosWithSlidesFound;
-  int NumVideosHandwrittenFound;
-  int NumSlidesFound;
-  int NumHandwrittenSolutionsFound;
-  int NumAnswerIdsMathquilled;
+  int numberOfProblemsFound;
+  int numberOfVideosFound;
+  int numberOfVideosWithSlidesFound;
+  int numberOfVideosHandwrittenFound;
+  int numberOfSlidesFound;
+  int numberOfHandwrittenSolutionsFound;
+  int numberOfAnswerIdsMathquilled;
   List<int> randomSeedsIfInterpretationFails;
   bool flagIsExamHome;
   bool flagIsExamProblem;
@@ -480,7 +480,7 @@ public:
       int inputFilesToInterpret,
       int inputRandomSeed
     );
-    static bool BuiltInCrashOnFailure();
+    static bool builtInCrashOnFailure();
     static bool all();
     std::string toStringSummary();
     std::string toHTMLBuiltIn();

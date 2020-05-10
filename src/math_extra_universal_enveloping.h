@@ -42,17 +42,17 @@ public:
     this->powers.setSize(1);
     this->powers[0] = 1;
   }
-  bool HWTAAbilinearForm(
+  bool highestWeightTransposeAntiAutomorphismBilinearForm(
     const MonomialUniversalEnveloping<Coefficient>& right,
     Coefficient& output,
-    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::stringstream* logStream = nullptr
   );
   void modOutVermaRelations(
     Coefficient& outputCoeff,
-    const Vector<Coefficient>* subHiGoesToIthElement = 0,
+    const Vector<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
@@ -136,26 +136,26 @@ public:
   bool HWMTAbilinearForm(
     const ElementUniversalEnveloping<Coefficient>& right,
     Coefficient& output,
-    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::stringstream* logStream = nullptr
   );
   std::string isInProperSubmodule(
-    const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
+    const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
   );
-  bool HWTAAbilinearForm(
+  bool highestWeightTransposeAntiAutomorphismBilinearForm(
     const ElementUniversalEnveloping<Coefficient>&right,
     Coefficient& output,
-    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::stringstream* logStream = nullptr
   ) const;
-  bool HWTAAbilinearForm(
+  bool highestWeightTransposeAntiAutomorphismBilinearForm(
     const MonomialUniversalEnveloping<Coefficient>& right,
     Coefficient& output,
-    const Vector<Coefficient>* subHiGoesToIthElement,
+    const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::stringstream* logStream = nullptr
@@ -163,7 +163,7 @@ public:
     ElementUniversalEnveloping<Coefficient> tempElt;
     tempElt.makeZero(*this->owner);
     tempElt.addMonomial(right, ringUnit);
-    return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, ringUnit, ringZero, logStream);
+    return this->highestWeightTransposeAntiAutomorphismBilinearForm(tempElt, output, substitutionHiGoesToIthElement, ringUnit, ringZero, logStream);
   }
   bool needsBracketForMultiplication() {
     return this->size > 1;
@@ -174,13 +174,13 @@ public:
   void assignElementLieAlgebra(
     const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
   );
-  void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit);
-  void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit = 1);
-  void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
-  void MakeOneGeneratorCoeffOne(
+  void makeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit);
+  void makeOneGeneratorCoefficientOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit = 1);
+  void makeOneGeneratorCoefficientOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
+  void makeOneGeneratorCoefficientOne(
     const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit = 1
   ) {
-    this->MakeOneGeneratorCoeffOne(inputOwner.getGeneratorFromRoot(rootSpace), inputOwner, ringUnit);
+    this->makeOneGeneratorCoefficientOne(inputOwner.getGeneratorFromRoot(rootSpace), inputOwner, ringUnit);
   }
   Coefficient getKillingFormProduct(const ElementUniversalEnveloping<Coefficient>& right) const;
   void makeZero(SemisimpleLieAlgebra& inputOwner);
@@ -205,7 +205,7 @@ public:
     const Vector<Rational> & theHWinSimpleCoords, const Coefficient& ringUnit, const Coefficient& ringZero
   );
   void modOutVermaRelations(
-    const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0
+    const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0
   );
   static void getCoordinateFormOfSpanOfElements(
     List<ElementUniversalEnveloping<Coefficient> >& theElements,

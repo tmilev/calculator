@@ -478,14 +478,14 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.toString() << " is not orthogonal to char number "
           << j + 1 << " = " << rightChar.toString() << ". <br>The entire char table is: "
-          << this->PrettyPrintCharacterTable() << global.fatal;
+          << this->prettyPrintCharacterTable() << global.fatal;
         }
       }
       if (j == i) {
         if (theScalarProd != 1) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.toString() << " is not of norm 1. "
-          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << global.fatal;
+          << "<br>The entire char table is: " << this->prettyPrintCharacterTable() << global.fatal;
         }
       }
     }
@@ -1333,14 +1333,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::initialize(s
 template <typename somegroup, typename Coefficient>
 unsigned int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::hashFunction() const {
   unsigned int result = 0;
-  result += this->theCharacteR.hashFunction();
+  result += this->theCharacter.hashFunction();
   return result;
 }
 
 template <typename somegroup, typename Coefficient>
 unsigned int GroupRepresentation<somegroup, Coefficient>::hashFunction() const {
   unsigned int result = 0;
-  result += this->theCharacteR.hashFunction();
+  result += this->theCharacter.hashFunction();
   return result;
 }
 
@@ -1405,7 +1405,7 @@ template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator>(
   const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& right
 ) const {
-  return this->theCharacteR > right.theCharacteR;
+  return this->theCharacter > right.theCharacter;
 }
 
 template <typename somegroup, typename Coefficient>
@@ -1502,7 +1502,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
   }
   std::stringstream out;
   if (this->flagCharacterIsComputed) {
-    out << "Character: " << this->theCharacteR.toString(theFormat) << " of norm " << this->theCharacteR.Norm();
+    out << "Character: " << this->theCharacter.toString(theFormat) << " of norm " << this->theCharacter.Norm();
   } else {
     out << "Character needs to be computed.";
   }
@@ -2022,7 +2022,7 @@ void FiniteGroup<elementSomeGroup>::addIrreducibleRepresentation(
 ) {
   p.computeCharacter();
   this->irreps.BSInsertDontDup(p);
-  this->characterTable.BSInsertDontDup(p.theCharacteR);
+  this->characterTable.BSInsertDontDup(p.theCharacter);
 }
 
 template <typename elementSomeGroup>
@@ -2033,8 +2033,8 @@ void FiniteGroup<elementSomeGroup>::addCharacter(const ClassFunction<FiniteGroup
   //                             (2) to remind the user not to use a list of pointers
   /*  ClassFunction<FiniteGroup<elementSomeGroup>, Rational>* place = 0;
   for (int i = 0; i < this->irreps.size; i ++)
-    if (this->irreps[i].theCharacteR == X)
-      place = &(this->irreps[i].theCharacteR);
+    if (this->irreps[i].theCharacter == X)
+      place = &(this->irreps[i].theCharacter);
   if (place == 0)
     for (int i = 0; i < this->orphanCharacters.size; i ++)
       if (this->orphanCharacters[i] == X)
@@ -2064,8 +2064,8 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   appendOnlyIrrepsList = this->irreps_grcam;
   {
     bool nontrivial = false;
-    for (int i = 0; i < appendOnlyIrrepsList[0].theCharacteR.data.size; i ++) {
-      if (appendOnlyIrrepsList[0].theCharacteR.data[i] != 1) {
+    for (int i = 0; i < appendOnlyIrrepsList[0].theCharacter.data.size; i ++) {
+      if (appendOnlyIrrepsList[0].theCharacter.data[i] != 1) {
         nontrivial = true;
         break;
       }
@@ -2090,15 +2090,15 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       if (theReport1.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << this->irreps.size << " irreducible representations found so far. ";
-        reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacteR
-        << " * " << appendOnlyIrrepsList[i].theCharacteR << "\n";
+        reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacter
+        << " * " << appendOnlyIrrepsList[i].theCharacter << "\n";
         theReport1.report(reportStream.str());
       }
       newRep = appendOnlyIrrepsList[j];//we are initializing by the sign or natural rep.
       newRep *= appendOnlyIrrepsList[i];
       bool tempB = newRep.decomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
       if (!tempB) {
-        global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.toString() << ". " << global.fatal;
+        global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacter.toString() << ". " << global.fatal;
       }
     }
   }
@@ -2106,7 +2106,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreps.size; i ++) {
-      reportStream << "\n<br>\n" << this->irreps[i].theCharacteR.toString();
+      reportStream << "\n<br>\n" << this->irreps[i].theCharacter.toString();
     }
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex = true;
@@ -2178,31 +2178,31 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   this->getCharacter();
   Coefficient SumOfNumComponentsSquared = this->getNumberOfComponents();
   if (SumOfNumComponentsSquared == 0) {
-    global.fatal << "This is a programming error: a module has character " << this->theCharacteR.toString()
+    global.fatal << "This is a programming error: a module has character " << this->theCharacter.toString()
     << " of zero length, which is impossible. " << "Here is a printout of the module. "
     << this->toString() << global.fatal;
   }
   if (SumOfNumComponentsSquared == 1) {
-    int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
+    int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacter);
     if (i == - 1) {
       this->ownerGroup->addIrreducibleRepresentation(*this);
       appendOnlyIrrepsList.addOnTop(this->makeOtherGroupRepresentationClass());
       if (appendOnlyGRCAMSList) {
         appendOnlyGRCAMSList->addOnTop(*this);
       }
-      i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
+      i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacter);
     }
     outputIrrepMults.addMonomial(this->ownerGroup->characterTable[i], 1);
     return true;
   }
   Matrix<Coefficient> splittingOperatorMatrix;
   Vectors<Coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
-  ClassFunction<somegroup, Coefficient> remainingCharacter = this->theCharacteR;
+  ClassFunction<somegroup, Coefficient> remainingCharacter = this->theCharacter;
   remainingVectorSpace.makeEiBasis(this->getDimension());
   ProgressReport Report1, Report2, Report3, Report4;
   {
     std::stringstream reportStream;
-    reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.toString();
+    reportStream << "<br>\nDecomposing module with character " << this->theCharacter.toString();
     LargeIntegerUnsigned largestDen, lcmDen;
     this->getLargestDenominatorSimpleGenerators(lcmDen, largestDen);
     reportStream << "\n<br>\n Largest denominator is " << largestDen.toString()
@@ -2211,17 +2211,17 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   }
   //chop off already known pieces:
   for (int i = 0; i < appendOnlyIrrepsList.size; i ++) {
-    Coefficient NumIrrepsOfType = this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i].getCharacter());
+    Coefficient NumIrrepsOfType = this->theCharacter.InnerProduct(appendOnlyIrrepsList[i].getCharacter());
     if (NumIrrepsOfType != 0) {
       this->ownerGroup->CheckInitializationFDrepComputation();
       {
         std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacteR.toString() << " with multiplicity "
+        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacter.toString() << " with multiplicity "
         << NumIrrepsOfType << "\n";
-        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacteR;
+        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacter;
         Report2.report(reportStream.str());
       }
-      this->getClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix);
+      this->getClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacter, splittingOperatorMatrix);
       {
         std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.toString() << "\n <br>\n"
@@ -2235,9 +2235,9 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
       // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
       // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to
       // by the appendOnlyIrrepsList[i]
-      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].theCharacteR);
+      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].theCharacter);
       outputIrrepMults.addMonomial(this->ownerGroup->characterTable[ci], NumIrrepsOfType);
-      remainingCharacter -= appendOnlyIrrepsList[i].theCharacteR*NumIrrepsOfType;
+      remainingCharacter -= appendOnlyIrrepsList[i].theCharacter*NumIrrepsOfType;
       {
         std::stringstream reportStream;
         reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.toString() << " with "
@@ -2255,7 +2255,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
         if (remainingVectorSpace.size != 0) {
           global.fatal << "Remaining character is zero but "
           << "remaining space is " << remainingVectorSpace.toString()
-          << ". Starting char: " << this->theCharacteR.toString() << global.fatal;
+          << ". Starting char: " << this->theCharacter.toString() << global.fatal;
         }
       }
     }
@@ -2321,7 +2321,7 @@ GroupRepresentation<somegroup, Coefficient> GroupRepresentationCarriesAllMatrice
     }
   }
   out.identifyingString = s.str();
-  out.theCharacteR = this->theCharacteR;
+  out.theCharacter = this->theCharacter;
   return out;
 }
 
@@ -2386,7 +2386,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
             if (shards[shi].getNumberOfComponents() == 1) {
               if (!this->theGroup.characterTable.contains(shards[shi].getCharacter())) {
                 this->irreps_grcam.addOnTop(spaces[spi]);
-                this->characterTable.addOnTop(this->irreps_grcam.lastObject()->theCharacteR);
+                this->characterTable.addOnTop(this->irreps_grcam.lastObject()->theCharacter);
                 newspaces.addOnTop(spaces[spi]);
               }
             } else {
@@ -2403,7 +2403,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   this->characterTable.setSize(0);
   for (int i = 0; i < irreps_grcam.size; i ++) {
     this->irreps.addOnTop(this->irreps_grcam[i].makeOtherGroupRepresentationClass());
-    this->characterTable.addOnTop(&(this->irreps[i].theCharacteR));
+    this->characterTable.addOnTop(&(this->irreps[i].theCharacter));
   }
   this->theGroup.flagCharTableIsComputed = true;
   this->theGroup.flagIrrepsAreComputed = true;
@@ -2425,15 +2425,15 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations() {
 template <typename somegroup, typename Coefficient>
 const ClassFunction<somegroup, Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getCharacter() {
   if (this->flagCharacterIsComputed) {
-    return this->theCharacteR;
+    return this->theCharacter;
   }
-  this->theCharacteR.G = this->ownerGroup;
-  this->theCharacteR.data.setSize(this->ownerGroup->ConjugacyClassCount());
+  this->theCharacter.G = this->ownerGroup;
+  this->theCharacter.data.setSize(this->ownerGroup->ConjugacyClassCount());
   for (int cci = 0; cci < this->ownerGroup->ConjugacyClassCount(); cci ++) {
-    this->theCharacteR.data[cci] = this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).getTrace();
+    this->theCharacter.data[cci] = this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].representative).getTrace();
   }
   this->flagCharacterIsComputed = true;
-  return this->theCharacteR;
+  return this->theCharacter;
 }
 
 template <typename somegroup, typename Coefficient>

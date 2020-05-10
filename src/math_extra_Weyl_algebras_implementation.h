@@ -44,7 +44,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
     if (!left.differentialPart(i).isSmallInteger(&powerDiffOp)) {
-      global.fatal << "This is a programming error. Requested operations with elements of Weyl algebra "
+      global.fatal << "Requested operations with elements of Weyl algebra "
       << "that have monomials of exponent "
       << left.differentialPart(i).toString()
       << " which I cannot handle. If this is bad user input, "
@@ -273,8 +273,8 @@ void ElementWeylAlgebra<Coefficient>::getStandardOrderDifferentialOperatorCorres
   outputDO.makeZero();
   int inputPower = 0;
   if (!inputRationalPower.isSmallInteger(&inputPower)) {
-    global.fatal << "This is a programming error: "
-    << "I can give you a differential operator only from integer exponent. " << global.fatal;
+    global.fatal
+    << "Differential operator requires integer exponent. " << global.fatal;
   }
   if (inputPower >= 0) {
     tempMon.polynomialPart.makeEi(indexVar, inputPower);
@@ -293,7 +293,8 @@ void ElementWeylAlgebra<Coefficient>::getStandardOrderDifferentialOperatorCorres
 
 template <class Coefficient>
 bool ElementWeylAlgebra<Coefficient>::substitution(
-  const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt
+  const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
+  const PolynomialSubstitution<Rational>& substitutionDifferentialPart
 ) {
   MacroRegisterFunctionWithName("ElementWeylAlgebra::substitution");
   Polynomial<Rational> DOpart, polyPart;
@@ -303,10 +304,10 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   Coefficient theNewCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!currentMon.polynomialPart.substitution(SubPolyPart, polyPart)) {
+    if (!currentMon.polynomialPart.substitution(substitutionPolynomialPart, polyPart)) {
       return false;
     }
-    if (!currentMon.differentialPart.substitution(SubDiffPArt, DOpart)) {
+    if (!currentMon.differentialPart.substitution(substitutionDifferentialPart, DOpart)) {
       return false;
     }
     for (int j = 0; j < polyPart.size(); j ++) {
@@ -339,8 +340,8 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(ElementWeylAlgebra<Coeffi
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!(currentMon.polynomialPart.totalDegree() + currentMon.differentialPart.totalDegree()).isInteger(&totalDeg)) {
-      global.fatal << "This is a programming error: calling Fourier transoform "
-      << "on differential operator with non-integral exponents. " << global.fatal;
+      global.fatal << "Calling Fourier transoform "
+      << "on differential operator with non-integral exponents is not allowed. " << global.fatal;
     }
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
@@ -356,33 +357,33 @@ template <class Coefficient>
 bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(Polynomial<Rational>& thePoly) const {
   Polynomial<Rational> result;
   result.makeZero();
-  MonomialP resultMon;
-  Rational coeff;
+  MonomialP resultMonomial;
+  Rational currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < thePoly.size(); j ++) {
-      const MonomialP& currentPolMon = thePoly[j];
+      const MonomialP& currentMonomial = thePoly[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
-      resultMon = currentPolMon;
-      coeff = thePoly.coefficients[j];
-      coeff *= this->coefficients[i];
+      resultMonomial = currentMonomial;
+      currentCoefficient = thePoly.coefficients[j];
+      currentCoefficient *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {
         int numDiff = 0;
         if (!currentOpMon.differentialPart(k).isSmallInteger(&numDiff)) {
           return false;
         }
         for (; numDiff > 0; numDiff --) {
-          coeff *= resultMon[k];
-          if (coeff.isEqualToZero()) {
+          currentCoefficient *= resultMonomial[k];
+          if (currentCoefficient.isEqualToZero()) {
             break;
           }
-          resultMon.multiplyByVariable(k, -1);
+          resultMonomial.multiplyByVariable(k, - 1);
         }
-        if (coeff.isEqualToZero()) {
+        if (currentCoefficient.isEqualToZero()) {
           break;
         }
       }
-      resultMon *= currentOpMon.polynomialPart;
-      result.addMonomial(resultMon, coeff);
+      resultMonomial *= currentOpMon.polynomialPart;
+      result.addMonomial(resultMonomial, currentCoefficient);
     }
   }
   thePoly = result;

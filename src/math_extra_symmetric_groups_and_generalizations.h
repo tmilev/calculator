@@ -23,7 +23,7 @@ public:
   Matrix<Coefficient> projectionOperator;
 
   void SetBasis(const List<templateVector>& basis);
-  void DenseVectorInBasis(Vector<Coefficient>& out, const templateVector& in);
+  void denseVectorInBasis(Vector<Coefficient>& out, const templateVector& in);
   bool checkConsistency() const {
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use of SparseSubspaceBasis after free. " << global.fatal;
@@ -72,7 +72,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
 }
 
 template <class templateVector, class templateMonomial, class Coefficient>
-void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::DenseVectorInBasis(
+void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::denseVectorInBasis(
   Vector<Coefficient>& out, const templateVector& in
 ) {
   Vector<Coefficient> inDense;
@@ -488,7 +488,7 @@ public:
     return out;
   }
 
-  void ToggleBit(int i) {
+  void toggleBit(int i) {
     if (i < this->bits.size) {
       this->bits[i] = !this->bits[i];
     } else {
@@ -583,7 +583,7 @@ public:
     this->bits.setSize(0);
     for (unsigned i = 0; i < in.size(); i ++) {
       if (in[i] == '1') {
-        this->ToggleBit(static_cast<int>(i));
+        this->toggleBit(static_cast<int>(i));
       }
     }
   }
@@ -661,7 +661,7 @@ public:
       this->theGroup->generators[i].h.addTransposition(i, i + 1);
     }
     for (int i = 0; i < n; i ++) {
-      this->theGroup->generators[n - 1 + i].k.ToggleBit(i);
+      this->theGroup->generators[n - 1 + i].k.toggleBit(i);
     }
     this->flagIsEntireHyperoctahedralGroup = true;
     this->theGroup->GetWordByFormula = this->getWordByFormulaImplementation;
@@ -714,7 +714,7 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
   void MakeFromPermutation(const PermutationR2& in);
   void MakeFromBits(const List<bool>& in);
   void addTransposition(int i, int j);
-  void ToggleBit(int i);
+  void toggleBit(int i);
   void makeFromMultiplicities(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right);
   // for compatibility with element classes that need a prototype to be able to
   // turn themselves into the identity element
@@ -1335,7 +1335,7 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
       ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> sparse;
       perms[permi].actOnTensor(sparse,basisvs[bi]);
       Vector<scalar> dense;
-      basis.DenseVectorInBasis(dense, sparse);
+      basis.denseVectorInBasis(dense, sparse);
       // AssignColumnFromVector ?  oh well.
       for (int j = 0; j< basis.rank; j ++) {
         out[permi].elements[j][bi] = dense[j];
@@ -1533,7 +1533,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesW
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
+void FiniteGroup<elementSomeGroup>::computeGeneratorCommutationRelations() {
   if (this->generatorCommutationRelations.numberOfRows == this->generators.size) {
     return;
   }
@@ -1574,8 +1574,8 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations(bool andPrint) {
-  this->ComputeGeneratorCommutationRelations();
+std::string FiniteGroup<elementSomeGroup>::prettyPrintGeneratorCommutationRelations(bool andPrint) {
+  this->computeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.toStringPlainText();
   List<char*> rows;
   rows.addOnTop(&crs[0]);
@@ -1623,7 +1623,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPrint) {
+std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPrint) {
   for (int i = 0; i < this->irreps.size; i ++) {
     this->irreps[i].computeCharacter();
   }
@@ -1656,9 +1656,9 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
   values.setSize(this->irreps.size);
   int columnsPerElement = 0;
   for (int i = 0; i < this->irreps.size; i ++) {
-    values[i].setSize(this->irreps[i].theCharacteR.data.size);
-    for (int j = 0; j < this->irreps[i].theCharacteR.data.size; j ++) {
-      values[i][j] = irreps[i].theCharacteR.data[j].toString();
+    values[i].setSize(this->irreps[i].theCharacter.data.size);
+    for (int j = 0; j < this->irreps[i].theCharacter.data.size; j ++) {
+      values[i][j] = irreps[i].theCharacter.data[j].toString();
       int vijcols = static_cast<int>(values[i][j].length());
       if (vijcols > columnsPerElement) {
         columnsPerElement = vijcols;
@@ -1683,7 +1683,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
       }
       out << values[i][j];
     }
-    Rational x = this->irreps[i].theCharacteR.Norm();
+    Rational x = this->irreps[i].theCharacter.Norm();
     if (x != 1) {
       out << "][" << x;
     }
@@ -1692,13 +1692,13 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
   }
   Rational x = 0;
   for (int i = 0; i < this->irreps.size; i ++) {
-    x += irreps[i].theCharacteR.data[0] * irreps[i].theCharacteR.data[0];
+    x += irreps[i].theCharacter.data[0] * irreps[i].theCharacter.data[0];
   }
   out << "Sum of squares of first column: " << x << '\n';
   // print information about if anything's wrong
   for (int i = 0; i < this->irreps.size; i ++) {
     for (int j = i + 1; j < this->irreps.size; j ++) {
-      Rational x = this->irreps[i].theCharacteR.InnerProduct(this->irreps[j].theCharacteR);
+      Rational x = this->irreps[i].theCharacter.InnerProduct(this->irreps[j].theCharacter);
       if (x != 0) {
         out << "characters " << i << ", " << j << " have inner product " << x << '\n';
       }
@@ -1712,7 +1712,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint) {
+std::string FiniteGroup<elementSomeGroup>::prettyPrintCCRepsSizes(bool andPrint) {
   std::stringstream out;
   // pad the numbers out front
   List<std::string> numbers;
@@ -1968,7 +1968,7 @@ template <typename someGroup, typename Coefficient>
 bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
   bool badrep = false;
   if (this->generatorS.size != this->ownerGroup->generatorCommutationRelations.numberOfRows) {
-    this->ownerGroup->ComputeGeneratorCommutationRelations();
+    this->ownerGroup->computeGeneratorCommutationRelations();
     for (int i = 0; i < this->generatorS.size; i ++) {
       for (int j = i; j < this->generatorS.size; j ++) {
         Matrix<Rational> M1;
@@ -2002,8 +2002,8 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
       global.comments << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
     }
     global.comments << "Group and \"representation\" generator commutation relations follow" << "\n";
-    global.comments << this->ownerGroup->PrettyPrintGeneratorCommutationRelations() << "\n";
-    global.comments << RG.PrettyPrintGeneratorCommutationRelations() << "\n";
+    global.comments << this->ownerGroup->prettyPrintGeneratorCommutationRelations() << "\n";
+    global.comments << RG.prettyPrintGeneratorCommutationRelations() << "\n";
   }
   if (!badrep) {
     global.comments << "verifyRepresentation: this has the proper commutation relations\n";
@@ -2019,7 +2019,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
-    x = this->theCharacteR.InnerProduct(this->ownerGroup->irreps[i].theCharacteR);
+    x = this->theCharacter.InnerProduct(this->ownerGroup->irreps[i].theCharacter);
     if (x != 0) {
       if (firstone) {
         firstone = false;

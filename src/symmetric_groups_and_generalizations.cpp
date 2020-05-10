@@ -889,7 +889,7 @@ void ElementHyperoctahedralGroup::addTransposition(int i, int j) {
   this->p.addTransposition(i, j);
 }
 
-void ElementHyperoctahedralGroup::ToggleBit(int i) {
+void ElementHyperoctahedralGroup::toggleBit(int i) {
   if (i + 1< this->s.size);
   { int n = this->s.size;
     this->s.setSize(i + 1);
@@ -1138,7 +1138,7 @@ void HyperoctahedralGroup::MakeBn(int n) {
   for (int i = 0; i < this->generators.size; i ++)
     this->generators[i].addTransposition(i,i + 1);
   if (this->generators.size > 0)
-    this->generators[0].ToggleBit(0);
+    this->generators[0].toggleBit(0);
 }
 
 
@@ -1374,7 +1374,7 @@ void HyperoctahedralGroup::allSpechtModules() {
     }
   }
   this->irreps.quickSortAscending();
-  global.Comments << this->PrettyPrintCharacterTable() << '\n';
+  global.Comments << this->prettyPrintCharacterTable() << '\n';
   representationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }*/
 
@@ -1394,7 +1394,7 @@ void HyperoctahedralGroupData::allSpechtModules() {
       }
     }
   }
-  global.comments << this->theGroup->PrettyPrintCharacterTable() << '\n';
+  global.comments << this->theGroup->prettyPrintCharacterTable() << '\n';
   //this->theGroup->representationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 

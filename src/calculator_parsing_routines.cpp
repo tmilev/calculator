@@ -314,7 +314,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\text");
 
   this->initializePredefinedStandardOperationsWithoutHandler();
-  this->TotalNumpatternMatchedPerformed = 0;
+  this->totalPatternMatchesPerformed = 0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initCalculusTestingFunctions();
@@ -1024,11 +1024,11 @@ bool Calculator::replaceXXByEEmptySequence() {
 }
 
 bool Calculator::isBoundVariableInContext(int inputOp) {
-  return this->BoundVariablesInContext.contains(inputOp);
+  return this->boundVariablesInContext.contains(inputOp);
 }
 
 bool Calculator::isNonBoundVariableInContext(int inputOp) {
-  return this->NonBoundVariablesInContext.contains(inputOp);
+  return this->nonBoundVariablesInContext.contains(inputOp);
 }
 
 bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
@@ -1047,7 +1047,7 @@ bool Calculator::replaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
     return true;
   }
   if (!this->isBoundVariableInContext(theBoundVar)) {
-    this->BoundVariablesInContext.addOnTopNoRepetition(theBoundVar);
+    this->boundVariablesInContext.addOnTopNoRepetition(theBoundVar);
   }
   theElt.theData.reset(*this, 2);
   theElt.theData.addChildAtomOnTop(this->opBind());
@@ -1068,7 +1068,7 @@ bool Calculator::replaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   } else {
     theElt.theData.makeAtom(theBoundVar, *this);
     if (!this->isNonBoundVariableInContext(theBoundVar)) {
-      this->NonBoundVariablesInContext.addOnTop(theBoundVar);
+      this->nonBoundVariablesInContext.addOnTop(theBoundVar);
     }
   }
   theElt.controlIndex = this->conExpression();
@@ -1507,15 +1507,15 @@ bool Calculator::replaceEXdotsXbySsXdotsX(int numDots) {
   for (int i = (*this->currentSyntacticStack).size - numDots - 2; i >= 0; i --) {
     SyntacticElement& current = (*this->currentSyntacticStack)[i];
     if (current.numBoundVariablesInherited >= 0 && current.numNonBoundVariablesInherited >= 0) {
-      this->NonBoundVariablesInContext.setSize(current.numNonBoundVariablesInherited);
-      this->BoundVariablesInContext.setSize(current.numBoundVariablesInherited);
+      this->nonBoundVariablesInContext.setSize(current.numNonBoundVariablesInherited);
+      this->boundVariablesInContext.setSize(current.numBoundVariablesInherited);
       found = true;
       break;
     }
   }
   if (!found) {
-    this->NonBoundVariablesInContext.clear();
-    this->BoundVariablesInContext.clear();
+    this->nonBoundVariablesInContext.clear();
+    this->boundVariablesInContext.clear();
   }
   Expression newExpr;
   newExpr.reset(*this);
@@ -1866,8 +1866,8 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
     (*this->currentSyntacticStack)[i] = this->getEmptySyntacticElement();
   }
   this->parsingLog = "";
-  this->NonBoundVariablesInContext.clear();
-  this->BoundVariablesInContext.clear();
+  this->nonBoundVariablesInContext.clear();
+  this->boundVariablesInContext.clear();
   const int maxNumTimesOneRuleCanBeCalled = 1000;
   int counterReport = 0;
   int symbolsToIssueReport = 100;
@@ -1969,8 +1969,8 @@ bool Calculator::applyOneRule() {
     return this->popTopSyntacticStack();
   }
   if (lastS == "(" || lastS == "{") {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].numNonBoundVariablesInherited = this->NonBoundVariablesInContext.size;
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].numBoundVariablesInherited = this->BoundVariablesInContext.size;
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].numNonBoundVariablesInherited = this->nonBoundVariablesInContext.size;
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1].numBoundVariablesInherited = this->boundVariablesInContext.size;
   }
   const SyntacticElement& thirdToLastE = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3];
   const std::string& thirdToLastS = this->controlSequences[thirdToLastE.controlIndex];

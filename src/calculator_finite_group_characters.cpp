@@ -172,8 +172,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   }
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> output;
   output.initialize(*this->ownerGroup);
-  output.theCharacteR = this->theCharacteR;
-  output.theCharacteR *= other.theCharacteR;
+  output.theCharacter = this->theCharacter;
+  output.theCharacter *= other.theCharacter;
   for (int i = 0; i < output.generatorS.size; i ++) {
     output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
   }
@@ -205,8 +205,8 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresen
   }
   GroupRepresentation<somegroup, Coefficient> output;
   output.ownerGroup = this->ownerGroup;
-  output.theCharacteR = this->theCharacteR;
-  output.theCharacteR *= other.theCharacteR;
+  output.theCharacter = this->theCharacter;
+  output.theCharacter *= other.theCharacter;
   for (int i = 0; i < output.generatorS.size; i ++) {
     output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
   }
@@ -229,7 +229,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   output.basis = vectorSpaceBasisSubrep;
   output.basis.getGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.invert();
-  output.theCharacteR = remainingCharacter;
+  output.theCharacter = remainingCharacter;
   ProgressReport theReport;
   for (int i = 0; i < this->generatorS.size; i ++) {
     if (theReport.tickAndWantReport()) {
@@ -339,19 +339,19 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       phi.generatorImages[i].h.addTransposition(i, i + 1);
     }
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
-      phi.generatorImages.lastObject()->k.ToggleBit(i);
+      phi.generatorImages.lastObject()->k.toggleBit(i);
     }
     global << "Generator commutation relations of groups\n";
-    global << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
+    global << HOG.theGroup->prettyPrintGeneratorCommutationRelations();
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
-    global << phiG.PrettyPrintGeneratorCommutationRelations();
-    global << G.PrettyPrintGeneratorCommutationRelations();
+    global << phiG.prettyPrintGeneratorCommutationRelations();
+    global << G.prettyPrintGeneratorCommutationRelations();
     global << "pulling back irreps:\n";
     for (int i = 0; i < HOG.theGroup->irreps.size; i ++) {
       auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
       irrep.computeCharacter();
-      global << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
+      global << HOG.theGroup->irreps[i].theCharacter << "->" << irrep.theCharacter << '\n';
       G.addIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
@@ -363,26 +363,26 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     inclusionMap.generatorImages.setSize(G.generators.size);
     for (int i = 0; i < inclusionMap.generatorImages.size - 1; i ++) {
       inclusionMap.generatorImages[i].h.addTransposition(i, i + 1);
-      inclusionMap.generatorImages[i].k.ToggleBit(i);
-      inclusionMap.generatorImages[i].k.ToggleBit(i + 1);
+      inclusionMap.generatorImages[i].k.toggleBit(i);
+      inclusionMap.generatorImages[i].k.toggleBit(i + 1);
     }
     int oneortwo = (inclusionMap.generatorImages.size + 1) % 2;
     for (int i = 0; i < inclusionMap.generatorImages.size - 1 - oneortwo; i ++) {
-      inclusionMap.generatorImages.lastObject()->k.ToggleBit(i);
+      inclusionMap.generatorImages.lastObject()->k.toggleBit(i);
     }
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
     imG.generators = inclusionMap.generatorImages;
-    global << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
-    global << imG.PrettyPrintGeneratorCommutationRelations();
-    global << G.PrettyPrintGeneratorCommutationRelations() << '\n';
+    global << HOG.theGroup->prettyPrintGeneratorCommutationRelations() << '\n';
+    global << imG.prettyPrintGeneratorCommutationRelations();
+    global << G.prettyPrintGeneratorCommutationRelations() << '\n';
   }
   // silently fail instead of crashing to support calling into this and if it doesn't
   // work then using brute force
   //  else
   //    global.fatal << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
   // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << global.fatal;
-  global << G.PrettyPrintCharacterTable() << '\n';
+  global << G.prettyPrintCharacterTable() << '\n';
 }
 
 template <class Coefficient>
@@ -921,11 +921,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   tempFormat.flagUseHTML = false;
   std::stringstream out;
   out << "Character table: ";
-  out << theGroupData.theGroup.PrettyPrintCharacterTable();
+  out << theGroupData.theGroup.prettyPrintCharacterTable();
   //Matrix<Rational> charMat;
   //charMat.initialize(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
   //for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++)
-  //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.toString();
+  //{ //out << "<br>" << theGroup.irreps[i].theCharacter.toString();
   //  charMat.assignVectorToRowKeepOtherRowsIntactNoInitialization(i, theGroupData.irreps[i].GetCharacter().data);
   //}
   //out << HtmlRoutines::getMathSpanPure(charMat.toString(&tempFormat));
@@ -2385,7 +2385,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpec
   HyperoctahedralGroupData G;
   G.makeHyperoctahedralGroup(theRank);
   G.allSpechtModules();
-  return output.assignValue(G.theGroup->PrettyPrintCharacterTable(), theCommands);
+  return output.assignValue(G.theGroup->prettyPrintCharacterTable(), theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations(
@@ -2401,7 +2401,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutation
   }
   HyperoctahedralGroupData G;
   G.makeHyperoctahedralGroup(theRank);
-  return output.assignValue(G.theGroup->PrettyPrintGeneratorCommutationRelations(), theCommands);
+  return output.assignValue(G.theGroup->prettyPrintGeneratorCommutationRelations(), theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
@@ -2529,7 +2529,7 @@ void VirtualRepresentation<somegroup, Coefficient>::AssignRep(
 template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
   VirtualRepresentation<somegroup, Coefficient> out;
-  out.addMonomial(other.theCharacteR, 1);
+  out.addMonomial(other.theCharacter, 1);
 //  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 

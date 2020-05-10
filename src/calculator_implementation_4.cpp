@@ -40,7 +40,7 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
   if (!FileOperations::openFileCreateIfNotPresentVirtual(
-    theFile, global.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
+    theFile, global.displayPathOutputFolder + fileName.str() + ".tex", false, true, false
   )) {
     return "failed to create file: " + fileName.str() + ".tex";
   }
@@ -64,13 +64,13 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
     global.externalCommandNoOutput(systemCommand3.str(), true);
   }
   std::stringstream out;
-  out << "<img src =\"" << global.DisplayPathOutputFolder
+  out << "<img src =\"" << global.displayPathOutputFolder
   << fileName.str() << ".png\"></img><a href=\""
-  << global.DisplayPathOutputFolder
-  << fileName.str() << ".tex\">" << global.DisplayPathOutputFolder
+  << global.displayPathOutputFolder
+  << fileName.str() << ".tex\">" << global.displayPathOutputFolder
   << fileName.str() << ".tex</a>";
   if (outputFileNameNoExtension != nullptr) {
-    *outputFileNameNoExtension = global.DisplayPathOutputFolder + fileName.str();
+    *outputFileNameNoExtension = global.displayPathOutputFolder + fileName.str();
   }
   this->numOutputFileS ++;
   return out.str();
@@ -2568,7 +2568,7 @@ JSData Calculator::toJSONPerformance() {
   moreDetails << "<br>Expressions generated: " << this->theExpressionContainer.size << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->stats.expressionEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
-  << this->TotalNumpatternMatchedPerformed << "";
+  << this->totalPatternMatchesPerformed << "";
   if (this->DepthRecursionReached > 0) {
     moreDetails << "<br>maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }

@@ -22,19 +22,19 @@ std::string SyntacticElementHTML::Tags::calculatorExamProblem = "calculatorExamP
 std::string SyntacticElementHTML::Tags::calculatorAnswer = "calculatorAnswer";
 
 CalculatorHTML::CalculatorHTML() {
-  this->NumAttemptsToInterpret = 0;
-  this->NumAnswerIdsMathquilled = 0;
+  this->numberOfInterpretationAttempts = 0;
+  this->numberOfAnswerIdsMathquilled = 0;
   this->MaxInterpretationAttempts = 25;
   this->flagLoadedSuccessfully = false;
   this->flagIsExamHome = false;
   this->flagIsExamProblem = false;
   this->flagParentInvestigated = false;
-  this->NumProblemsFound = 0;
-  this->NumVideosFound = 0;
-  this->NumHandwrittenSolutionsFound = 0;
-  this->NumVideosHandwrittenFound = 0;
-  this->NumVideosWithSlidesFound = 0;
-  this->NumSlidesFound = 0;
+  this->numberOfProblemsFound = 0;
+  this->numberOfVideosFound = 0;
+  this->numberOfHandwrittenSolutionsFound = 0;
+  this->numberOfVideosHandwrittenFound = 0;
+  this->numberOfVideosWithSlidesFound = 0;
+  this->numberOfSlidesFound = 0;
   this->flagIsForReal = false;
   this->flagLoadedFromDB = false;
   this->flagLoadedClassDataSuccessfully = false;
@@ -1329,8 +1329,8 @@ bool CalculatorHTML::computeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idAnswerPanel = "spanAnswerPanel" + answerId;
   currentA.varAnswerId = answerId + "spanVariable";
   currentA.varMQfield = answerId + "MQspanVar";
-  currentA.MQobject = "answerMathQuillObjects[" + std::to_string(this->NumAnswerIdsMathquilled) + "]";
-  this->NumAnswerIdsMathquilled ++;
+  currentA.MQobject = "answerMathQuillObjects[" + std::to_string(this->numberOfAnswerIdsMathquilled) + "]";
+  this->numberOfAnswerIdsMathquilled ++;
   currentA.MQUpdateFunction = answerId + "MQFieldUpdate";
   currentA.idVerificationSpan = "verification" + answerId;
   currentA.idSpanSolution = "solution" + answerId;
@@ -1802,15 +1802,15 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->timePerAttempt.setSize(0);
   this->timeIntermediatePerAttempt.setSize(0);
   this->timeIntermediateComments.setSize(0);
-  this->NumAttemptsToInterpret = 0;
-  while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts) {
+  this->numberOfInterpretationAttempts = 0;
+  while (this->numberOfInterpretationAttempts < this->MaxInterpretationAttempts) {
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
     this->timeIntermediateComments.lastObject()->setSize(0);
     Calculator theInterpreter;
-    this->NumAttemptsToInterpret ++;
+    this->numberOfInterpretationAttempts ++;
     std::stringstream commentsOnLastFailure;
     if (this->interpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
       this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
@@ -1818,8 +1818,8 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
       return true;
     }
     this->timePerAttempt.addOnTop(global.getElapsedSeconds() - startTime);
-    if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
-      *comments << "Failed attempt " << this->NumAttemptsToInterpret
+    if (this->numberOfInterpretationAttempts >= this->MaxInterpretationAttempts && comments != nullptr) {
+      *comments << "Failed attempt " << this->numberOfInterpretationAttempts
       << " to interpret your file. Attempted random seeds: "
       << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
       << "Last interpretation failure follows. <br>"
@@ -1827,7 +1827,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     }
   }
   if (comments != nullptr) {
-    *comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
+    *comments << "<hr>Failed to evaluate the commands: " << this->numberOfInterpretationAttempts
     << " attempts made. ";
   }
   if (this->flagIsForReal) {
@@ -1847,12 +1847,12 @@ bool CalculatorHTML::isSplittingChar(const std::string& input) {
   return this->splittingChars.contains(input[0]);
 }
 
-int SyntacticElementHTML::ParsingNumDummyElements = 8;
+int SyntacticElementHTML::parsingDummyElements = 8;
 std::string CalculatorHTML::toStringParsingStack(List<SyntacticElementHTML>& theStack) {
   MacroRegisterFunctionWithName("CalculatorHTML::toStringParsingStack");
   std::stringstream out;
-  out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::ParsingNumDummyElements << ". ";
-  for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < theStack.size; i ++) {
+  out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::parsingDummyElements << ". ";
+  for (int i = SyntacticElementHTML::parsingDummyElements; i < theStack.size; i ++) {
     out << "<span style =\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
     std::string theContent = theStack[i].toStringDebug();
     if (theContent.size() == 0) {
@@ -2047,8 +2047,8 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
   tempElt.syntacticRole = "command";
   tempElt.tag = "";
   tempElt.content = "";
-  eltsStack.setExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
-  for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i ++) {
+  eltsStack.setExpectedSize(theElements.size + SyntacticElementHTML::parsingDummyElements);
+  for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
     eltsStack.addOnTop(dummyElt);
   }
   int indexInElts = - 1;
@@ -2326,9 +2326,9 @@ bool CalculatorHTML::parseHTML(std::stringstream* comments) {
   } while (reduced || indexInElts < theElements.size);
   this->theContent.setSize(0);
   bool result = true;
-  for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < eltsStack.size; i ++) {
+  for (int i = SyntacticElementHTML::parsingDummyElements; i < eltsStack.size; i ++) {
     bool needNewTag = false;
-    if (i == SyntacticElementHTML::ParsingNumDummyElements) {
+    if (i == SyntacticElementHTML::parsingDummyElements) {
       needNewTag = true;
     } else if (this->theContent.lastObject()->syntacticRole != "") {
       needNewTag = true;
@@ -2767,7 +2767,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   global.requestType == "template" ||
   global.requestType == "templateNoLogin";
   this->theProblemData.randomSeed = static_cast<unsigned>(this->randomSeedsIfInterpretationFails[
-    this->NumAttemptsToInterpret - 1
+    this->numberOfInterpretationAttempts - 1
   ]);
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
@@ -2826,7 +2826,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before class management routines");
   this->prepareAnswerElements(comments);
-  this->NumAnswerIdsMathquilled = 0;
+  this->numberOfAnswerIdsMathquilled = 0;
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].isInterpretedNotByCalculator()) {
       this->interpretNotByCalculatorNotAnswer(this->theContent[i]);
@@ -2889,7 +2889,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven) {
       shouldResetTheRandomSeed = true;
     }
-    if (this->flagIsForReal && this->NumAttemptsToInterpret > 1) {
+    if (this->flagIsForReal && this->numberOfInterpretationAttempts > 1) {
       shouldResetTheRandomSeed = true;
       outBody
       << "<hr><b style =\"color:red\">"
@@ -4259,13 +4259,13 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
   << this->displayHandwrittenSolution;
   this->displayResourcesLinks = displayResourcesLinksStream.str();
   if (this->problemFileName != "") {
-    owner.NumProblemsFound ++;
+    owner.numberOfProblemsFound ++;
   }
   if (this->video != "") {
-    owner.NumVideosWithSlidesFound ++;
+    owner.numberOfVideosWithSlidesFound ++;
   }
   if (this->videoHandwritten != "") {
-    owner.NumVideosHandwrittenFound ++;
+    owner.numberOfVideosHandwrittenFound ++;
   }
 }
 

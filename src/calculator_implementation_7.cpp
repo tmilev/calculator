@@ -5401,7 +5401,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
   } else {
-    CandidateSSSubalgebra tempCandidate;
+    CandidateSemisimpleSubalgebra tempCandidate;
     out << " can grow to the following types. <br>";
     out << "<table border =\"1\">"
     << "<td>Larger type</td>"
@@ -6876,7 +6876,7 @@ bool CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras(
   FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
   theFile << theSAs.toString(&tempFormat);
   std::stringstream out;
-  out << "<a href=\"" << global.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  out << "<a href=\"" << global.displayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -8078,7 +8078,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   constSSalg.orderSSalgebraForHWbfComputation();
   hwDualCoords = theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunction<Rational> outputRF;
-  if (!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.comments)) {
+  if (!leftUE.highestWeightTransposeAntiAutomorphismBilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.comments)) {
     return output.makeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
   }
   constSSalg.orderStandardAscending();

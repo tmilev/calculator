@@ -168,7 +168,7 @@ public:
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     ElementUniversalEnveloping<Coefficient>& outputHomogeneous,
     int indexInputBasis,
-    const Vector<Coefficient>& subHiGoesToIthElement,
+    const Vector<Coefficient>& substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
   );

@@ -176,7 +176,7 @@ class ElementUniversalEnvelopingOrdered;
 
 template<class Coefficient>
 class MonomialUniversalEnvelopingOrdered {
-  void SimplifyAccumulateInOutputNoOutputInit(
+  void simplifyAccumulateInOutputNoOutputInit(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
@@ -207,7 +207,7 @@ public:
     const Coefficient& ringZero = 0
   );
   void modOutVermaRelations(
-    const List<Coefficient>* subHiGoesToIthElement = 0,
+    const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
@@ -364,12 +364,12 @@ public:
     this->operator*=(other);
   }
   void modOutVermaRelations(
-    const List<Coefficient>* subHiGoesToIthElement = 0,
+    const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0
   );
   void modOutVermaRelationsOld(
-    bool SubHighestWeightWithZeroes,
+    bool substitutionHighestWeightWithZeroes,
     const PolynomialSubstitution<Rational>& highestWeightSub,
     const Coefficient& ringUnit
   );

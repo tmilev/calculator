@@ -317,7 +317,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if (getNumberOfComponents() == 1) {
-    if (this->ownerGroup->characterTable.getIndex(this->theCharacteR) == - 1) {
+    if (this->ownerGroup->characterTable.getIndex(this->theCharacter) == - 1) {
       global.comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->addIrreducibleRepresentation(*this);
     }
@@ -327,7 +327,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   List<Vector<Coefficient> > Vb = this->basis;
   List<Vector<Coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
-    if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
+    if (this->theCharacter.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
       global.comments << "contains irrep " << i << "\n";
       this->classFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
@@ -992,10 +992,10 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << "here is the character table of the group, the representatives and sizes for "
   //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
   //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  //global.Comments << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
+  //global.Comments << this->theSubgroupData.theGroup->prettyPrintCharacterTable();
   //global.Comments << Xs << " <- subgroup sign character\n";
-  //global.Comments << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
-  //global.Comments << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
+  //global.Comments << this->theSubgroupData.theGroup->prettyPrintCCRepsSizes();
+  //global.Comments << this->theSubgroupData.theSubgroup->prettyPrintCCRepsSizes();
   //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.toStringCommaDelimited() << '\n';
  //}
 

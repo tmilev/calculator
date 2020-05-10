@@ -7,12 +7,12 @@
 #include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
 
 class SemisimpleSubalgebras;
-class CandidateSSSubalgebra;
+class CandidateSemisimpleSubalgebra;
 class SubalgebraSemisimpleLieAlgebra;
 
 class NilradicalCandidate {
   public:
-  CandidateSSSubalgebra* owner;
+  CandidateSemisimpleSubalgebra* owner;
   std::string FKnilradicalLog;
   bool flagNilradicalConesIntersect;
   bool flagNilradicalConesStronglyIntersect;
@@ -88,8 +88,8 @@ public:
   bool checkInitialization();
 };
 
-class CandidateSSSubalgebra {
-  friend std::ostream& operator << (std::ostream& output, const CandidateSSSubalgebra& theCandidate) {
+class CandidateSemisimpleSubalgebra {
+  friend std::ostream& operator << (std::ostream& output, const CandidateSemisimpleSubalgebra& theCandidate) {
     output << theCandidate.toString();
     return output;
   }
@@ -159,16 +159,16 @@ public:
   int NumBadParabolics;
   int NumCentralizerConditionFailsconeConditionHolds;
   //The highest weight vectors are by definition cartan-centralizer-split
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > HighestVectorsNonSorted;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > highestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;
   List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
 
-  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > HighestVectors;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > highestVectors;
   HashedList<Vector<Rational> > HighestWeightsPrimal;
   List<Vector<Rational> > HighestWeightsNONPrimal;
 
-  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > Modules;
-  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > ModulesSl2opposite;
+  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modules;
+  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > modulesSl2opposite;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > ModulesIsotypicallyMerged;
 //  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
@@ -193,8 +193,8 @@ public:
   Rational centralizerDimension;
 
   bool flagDeallocated;
-  CandidateSSSubalgebra();
-  ~CandidateSSSubalgebra();
+  CandidateSemisimpleSubalgebra();
+  ~CandidateSemisimpleSubalgebra();
   void reset(SemisimpleSubalgebras* inputOwner = nullptr);
   bool checkConsistency() const;
   bool checkMaximalDominance() const;
@@ -208,7 +208,7 @@ public:
   ) const;
   bool hasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other) const;
   bool computeCentralizerTypeFailureAllowed();
-  bool isDirectSummandOf(const CandidateSSSubalgebra& other);
+  bool isDirectSummandOf(const CandidateSemisimpleSubalgebra& other);
   void getGenericCartanCentralizerLinearCombination(
     int indexCartanCentralizerGen,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
@@ -240,7 +240,7 @@ public:
     const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish
   );
   bool createAndAddExtendBaseSubalgebra(
-    const CandidateSSSubalgebra& baseSubalgebra,
+    const CandidateSemisimpleSubalgebra& baseSubalgebra,
     Vector<Rational>& newHrescaledToActByTwo,
     const DynkinType& theNewType,
     const List<int>& theRootInjection
@@ -248,7 +248,7 @@ public:
   bool getCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
   void computeHsAndHsScaledToActByTwoFromComponents();
   void setUpInjectionHs(
-    const CandidateSSSubalgebra& baseSubalgebra,
+    const CandidateSemisimpleSubalgebra& baseSubalgebra,
     const DynkinType& theNewType,
     const List<int>& theRootInjection,
     Vector<Rational>* newHScaledToActByTwo = nullptr
@@ -348,7 +348,7 @@ public:
   std::string toStringDrawWeights(FormatExpressions* theFormat = nullptr) const;
   std::string toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
   //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = nullptr) const;
-  bool operator>(const CandidateSSSubalgebra& other) const;
+  bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
 
 class SemisimpleSubalgebras {
@@ -360,9 +360,9 @@ public:
   SltwoSubalgebras theSl2s;
   MapReferences<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
-  List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
-  HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
-  List<OrbitIteratorRootActionWeylGroupAutomorphisms> theOrbiTs;
+  List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
+  HashedList<DynkinSimpleType> cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
+  List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
   // List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
@@ -373,7 +373,7 @@ public:
 
   //current computation state:
   // state that gets stored to hd:
-  List<CandidateSSSubalgebra> currentSubalgebraChain;
+  List<CandidateSemisimpleSubalgebra> currentSubalgebraChain;
   List<int> currentNumLargerTypesExplored;
   List<int> currentNumHcandidatesExplored;
   // state that is recomputed each load:
@@ -383,7 +383,7 @@ public:
 
   //end current computation state variables.
 
-  MapReferences<Vectors<Rational>, CandidateSSSubalgebra> theSubalgebras; //used to search for subalgebras quickly
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> theSubalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagcomputePairingTable;
@@ -396,10 +396,10 @@ public:
   unsigned long long int numAdditions;
   unsigned long long int numMultiplications;
   bool flagDeallocated;
-  std::string DisplayNameMainFile1NoPath;
-  std::string DisplayNameMainFile1WithPath;
+  std::string displayNameMainFile1NoPath;
+  std::string displayNameMainFile1WithPath;
 
-  std::string VirtualNameMainFile1;
+  std::string virtualNameMainFile1;
 
   // Possible values:
   // 1. nulltpr.
@@ -416,7 +416,7 @@ public:
     int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
   void computeFolderNames(FormatExpressions& outputFormat);
-  void CheckFileWritePermissions();
+  void checkFileWritePermissions();
   void writeReportToFiles();
   std::string toStringAlgebraLink(
     int actualindexSubalgebra, FormatExpressions* theFormat
@@ -434,26 +434,26 @@ public:
   std::string getDisplayFileNameFKFTNilradicals(
     int actualindexSubalgebra, FormatExpressions* theFormat
   ) const;
-  const CandidateSSSubalgebra& baseSubalgebra();
+  const CandidateSemisimpleSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {
     MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
     if (this->owner == other.owner) {
       return true;
     }
     if (this->owner == nullptr || other.owner == nullptr) {
-      global.fatal << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << global.fatal;
+      global.fatal << "Comparison of non-initialized Semisimple Lie Subalgebras. " << global.fatal;
     }
     return *this->owner == *other.owner;
   }
-  SemisimpleLieAlgebra& GetSSowner() const {
+  SemisimpleLieAlgebra& getSemisimpleOwner() const {
     if (this->owner == nullptr) {
       global.fatal << "This is a programming error: attempted to "
       << "access non-initialized semisimple Lie subalgerbas. " << global.fatal;
     }
     return *this->owner;
   }
-  void makeEmptyCandidateSubalgebra(CandidateSSSubalgebra& output);
-  void makeCandidateSubalgebra(const DynkinType& input, CandidateSSSubalgebra& output);
+  void makeEmptyCandidateSubalgebra(CandidateSemisimpleSubalgebra& output);
+  void makeCandidateSubalgebra(const DynkinType& input, CandidateSemisimpleSubalgebra& output);
   bool incrementReturnFalseIfPastLast();
   bool removeLastSubalgebra();
   bool getCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
@@ -475,13 +475,13 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false) {
     this->reset();
   }
-  void addSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input);
+  void addSubalgebraIfNewSetToStackTop(CandidateSemisimpleSubalgebra& input);
   void addSubalgebraToStack(
-    CandidateSSSubalgebra& input,
+    CandidateSemisimpleSubalgebra& input,
     int inputNumLargerTypesExplored,
     int inputNumHcandidatesExplored
   );
-  bool setUpParabolicInductionDataPrecomputedSubalgebra(CandidateSSSubalgebra& theCandidate);
+  bool setUpParabolicInductionDataPrecomputedSubalgebra(CandidateSemisimpleSubalgebra& theCandidate);
   bool checkConsistencyHs() const;
   bool checkConsistency() const;
   bool checkInitialization() const;
@@ -511,9 +511,9 @@ public:
   getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
     const DynkinType& input,
     const List<int>& imagesOldSimpleRootsAndNewRoot,
-    CandidateSSSubalgebra& theSSSubalgebraToBeModified
+    CandidateSemisimpleSubalgebra& theSSSubalgebraToBeModified
   );
-  //void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
+  //void RegisterPossibleCandidate(CandidateSemisimpleSubalgebra& theCandidate);
   void hookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void computeSl2sInitOrbitsForComputationOnDemand();
   bool findTheSemisimpleSubalgebrasFromScratch(
@@ -542,7 +542,7 @@ public:
 
   void getHCandidates(
     Vectors<Rational>& outputHCandidatesScaledToActByTwo,
-    CandidateSSSubalgebra& newCandidate,
+    CandidateSemisimpleSubalgebra& newCandidate,
     DynkinType& currentType,
     List<int>& currentRootInjection
   );

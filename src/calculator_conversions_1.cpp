@@ -461,7 +461,7 @@ bool CalculatorConversions::innerLoadKey(
 }
 
 bool CalculatorConversions::innerStoreCandidateSA(
-  Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output
+  Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStoreCandidateSA");
   Expression currentE;
@@ -501,7 +501,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  CandidateSSSubalgebra& outputSubalgebra,
+  CandidateSemisimpleSubalgebra& outputSubalgebra,
   SemisimpleSubalgebras& owner
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSAPrecomputed");
@@ -676,7 +676,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << i << " is being loaded from expression "
     << theSAsE[i].toString() << ".";
     theReport.report(reportStream2.str());
-    CandidateSSSubalgebra currentCandidate;
+    CandidateSemisimpleSubalgebra currentCandidate;
     if (!CalculatorConversions::innerCandidateSAPrecomputed(
       theCommands, theSAsE[i], tempE, currentCandidate, theSAs
     )) {
@@ -1001,7 +1001,7 @@ bool CalculatorConversions::innerElementUE(
         << owner.toStringLieAlgebraName();
       }
       if (isHonestElementUE) {
-        currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
+        currentMultiplicand.makeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
         currentMultiplicand.raiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {
@@ -1385,7 +1385,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   theElement.h.addCycle(oneCycle);
   for (int i = 2; i < input.children.size; i ++) {
     if (input[i].isEqualToOne()) {
-      theElement.k.ToggleBit(i - 2);
+      theElement.k.toggleBit(i - 2);
     } else if (!input[i].isEqualToZero()) {
       return theCommands << "Your input: " << input.toString()
       << " had bit values that were not ones and zeroes.";

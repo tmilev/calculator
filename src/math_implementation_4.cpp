@@ -94,7 +94,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     std::fstream theFile;
     bool openSuccess = FileOperations::openFileCreateIfNotPresentVirtual(
       theFile,
-      "crashes/" + global.RelativePhysicalNameCrashReport,
+      "crashes/" + global.relativePhysicalNameCrashReport,
       false,
       true,
       false,
@@ -108,14 +108,14 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
       << "folder within your calculator folder. "
       << "If running remotely, you will need an ssh connection. ";
       this->crashReportConsolE << "Crash dumped in file: " << Logger::consoleGreen()
-      << global.RelativePhysicalNameCrashReport << Logger::consoleNormal() << "\n";
+      << global.relativePhysicalNameCrashReport << Logger::consoleNormal() << "\n";
     } else {
       this->crashReportHtml << "<hr>Failed to open crash report file: "
-      << global.RelativePhysicalNameCrashReport
+      << global.relativePhysicalNameCrashReport
       << ". check file permissions. ";
       this->crashReportConsolE << "Failed to open crash report file: "
       << Logger::consoleRed()
-      << global.RelativePhysicalNameCrashReport
+      << global.relativePhysicalNameCrashReport
       << Logger::consoleNormal() << "\n";
     }
     theFile << this->crashReportFile.str();
@@ -138,10 +138,10 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
-  for (int threadCounter = 0; threadCounter < global.CustomStackTrace.size; threadCounter ++) {
+  for (int threadCounter = 0; threadCounter < global.customStackTrace.size; threadCounter ++) {
     if (threadCounter >= global.theThreadData.size) {
       out << "<td><b>WARNING: the stack trace reports "
-      << global.CustomStackTrace.size
+      << global.customStackTrace.size
       << " threads but the thread data array has record of only "
       << global.theThreadData.size
       << " threads. " << "</b></td>";
@@ -150,7 +150,7 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
     out << "<td>" << global.theThreadData[threadCounter].toStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
-  for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
+  for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
     if (threadCounter >= global.theThreadData.size) {
       break;
     }
@@ -159,7 +159,7 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<StackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
+    ListReferences<StackInfo>& currentInfo = global.customStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << "<tr><td>" << HtmlRoutines::getHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
@@ -177,9 +177,9 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML() {
 
 std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
-  for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
+  for (int threadCounter = 0; threadCounter<global.customStackTrace.size; threadCounter ++) {
     if (threadCounter >= global.theThreadData.size) {
-      out << "WARNING: stack trace reports " << global.CustomStackTrace.size << " threads "
+      out << "WARNING: stack trace reports " << global.customStackTrace.size << " threads "
       << "while I have only " << global.theThreadData.size << " registered threads. ";
       break;
     }
@@ -189,7 +189,7 @@ std::string GlobalVariables::Crasher::getStackTraceEtcErrorMessageConsole() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<StackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
+    ListReferences<StackInfo>& currentInfo = global.customStackTrace[threadCounter];
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << currentInfo[i].functionName << "\n";
     }
@@ -227,7 +227,7 @@ std::string GlobalVariables::toStringFolderInfo() const {
   out << "<br>Physical path server base: " << this->physicalPathServerBase;
   out << "<br>Diplay name executable: " << this->displayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->physicalNameFolderExecutable;
-  out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
+  out << "<br>Display path output folder: " << this->displayPathOutputFolder;
   return out.str();
 }
 
@@ -343,7 +343,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   this->PhysicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.pathExecutableUserInputOrDeduced);
   this->PhysicalNameExecutableWithPath = this->physicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   this->physicalPathServerBase = this->physicalPathProjectBase;
-  this->DisplayPathOutputFolder = "/output/";
+  this->displayPathOutputFolder = "/output/";
 
   this->displayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
@@ -528,7 +528,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
     inputAbbreviated = this->userInputStringIfAvailable;
   }
   StringRoutines::stringTrimToLengthWithHash(inputAbbreviated, 150);
-  this->RelativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
+  this->relativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
 }
 
 UserCalculatorData::UserCalculatorData() {

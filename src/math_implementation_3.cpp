@@ -266,7 +266,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   if (this->threadIndex == - 1) {
     return;
   }
-  ListReferences<StackInfo>& theStack = global.CustomStackTrace[this->threadIndex];
+  ListReferences<StackInfo>& theStack = global.customStackTrace[this->threadIndex];
   theStack.setSize(theStack.size + 1);
   StackInfo& stackTop = theStack.lastObject();
   stackTop.fileName = fileName;
@@ -281,7 +281,7 @@ RegisterFunctionCall::~RegisterFunctionCall() {
   if (this->threadIndex == - 1) {
     return;
   }
-  global.CustomStackTrace[this->threadIndex].size --;
+  global.customStackTrace[this->threadIndex].size --;
 }
 
 int DrawingVariables::getColorFromChamberIndex(int index) {
@@ -6987,7 +6987,7 @@ std::string WeylGroupData::toString(FormatExpressions* theFormat) {
   out << "<br>Symmetric cartan: " << this->cartanSymmetric.toString();
   if (this->flagCharTableIsComputed) {
     out << "<br>Character table: ";
-    out << this->theGroup.PrettyPrintCharacterTable();
+    out << this->theGroup.prettyPrintCharacterTable();
   }
   out << this->theGroup.toStringConjugacyClasses(theFormat);
   out << this->theGroup.toStringElements(theFormat);

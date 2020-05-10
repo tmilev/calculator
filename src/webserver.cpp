@@ -3299,7 +3299,7 @@ int WebServer::daemon() {
 
 int WebServer::run() {
   MacroRegisterFunctionWithName("WebServer::run");
-  global.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
+  global.relativePhysicalNameCrashReport = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
   if (global.millisecondsMaxComputation <= 0) {
     global
@@ -3615,7 +3615,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::figureOutOperatingSystem() {
   MacroRegisterFunctionWithName("WebServer::figureOutOperatingSystem");
-  if (global.OperatingSystem != "") {
+  if (global.operatingSystem != "") {
     return;
   }
   List<std::string> supportedOSes;
@@ -3627,13 +3627,13 @@ void WebServer::figureOutOperatingSystem() {
     commandOutput.find("Ubuntu") != std::string::npos ||
     commandOutput.find("UBUNTU") != std::string::npos
   ) {
-    global.OperatingSystem = "Ubuntu";
+    global.operatingSystem = "Ubuntu";
   } else if (commandOutput.find("CentOS") != std::string::npos) {
-    global.OperatingSystem = "CentOS";
+    global.operatingSystem = "CentOS";
   } else {
-    global.OperatingSystem = "";
+    global.operatingSystem = "";
   }
-  if (global.OperatingSystem != "") {
+  if (global.operatingSystem != "") {
     return;
   }
   global << Logger::red << "Your Linux flavor is not currently supported. " << Logger::endL;
@@ -3657,9 +3657,9 @@ void WebServer::checkSystemInstallationOpenSSL() {
   WebServer::figureOutOperatingSystem();
   StateMaintainerCurrentFolder preserveFolder;
   std::string sslInstallCommand = "CentOS";
-  if (global.OperatingSystem == "Ubuntu") {
+  if (global.operatingSystem == "Ubuntu") {
     sslInstallCommand = "sudo apt-get install libssl-dev";
-  } else if (global.OperatingSystem == "CentOS") {
+  } else if (global.operatingSystem == "CentOS") {
     sslInstallCommand = "sudo yum install openssl-devel";
   } else {
     global << "You appear to be missing an openssl installation. "
@@ -3682,7 +3682,7 @@ void WebServer::checkSystemInstallationMongoDatabase() {
     return;
   }
   WebServer::figureOutOperatingSystem();
-  if (global.OperatingSystem == "") {
+  if (global.operatingSystem == "") {
     return;
   }
   if (global.configuration["mongoDB"].theType != JSData::token::tokenUndefined) {
@@ -3695,10 +3695,10 @@ void WebServer::checkSystemInstallationMongoDatabase() {
   global << "You appear to be missing an mongoDB installation. "
   << "Let me try to install that for you. "
   << Logger::green << "Enter your the sudo password as prompted please. " << Logger::endL;
-  if (global.OperatingSystem == "Ubuntu") {
+  if (global.operatingSystem == "Ubuntu") {
     global.externalCommandNoOutput("sudo apt-get install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on Ubuntu";
-  } else if (global.OperatingSystem == "CentOS") {
+  } else if (global.operatingSystem == "CentOS") {
     global.externalCommandNoOutput("sudo yum install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
@@ -3779,9 +3779,9 @@ void WebServer::checkFreecalcSetup() {
 
 void WebServer::checkUnzipInstall() {
   WebServer::figureOutOperatingSystem();
-  if (global.OperatingSystem == "Ubuntu") {
+  if (global.operatingSystem == "Ubuntu") {
     global.externalCommandNoOutput("sudo apt-get install unzip", true);
-  } else if (global.OperatingSystem == "CentOS") {
+  } else if (global.operatingSystem == "CentOS") {
     global.externalCommandNoOutput("sudo yum install unzip", true);
   }
 

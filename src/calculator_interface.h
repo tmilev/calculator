@@ -1266,7 +1266,7 @@ public:
   long long int NumLargeMultiplicationsStart;
   long long int NumLargeGCDcallsStart;
   ////////////////////////////////////////////////
-  int TotalNumpatternMatchedPerformed;
+  int totalPatternMatchesPerformed;
   int NumPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
@@ -1282,8 +1282,8 @@ public:
   List<Expression> imagesCachedExpressions;
   ////
   HashedList<Expression> EvaluatedExpressionsStack;
-  HashedList<int, MathRoutines::IntUnsignIdentity> NonBoundVariablesInContext;
-  HashedList<int, MathRoutines::IntUnsignIdentity> BoundVariablesInContext;
+  HashedList<int, MathRoutines::IntUnsignIdentity> nonBoundVariablesInContext;
+  HashedList<int, MathRoutines::IntUnsignIdentity> boundVariablesInContext;
 
   Expression RuleStack;
   HashedList<Expression> cachedRuleStacks;
@@ -2753,7 +2753,7 @@ public:
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
-  static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
+  static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
   static bool innerExpressionFromDynkinSimpleType(Calculator& theCommands, const DynkinSimpleType& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(
@@ -2777,7 +2777,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    CandidateSSSubalgebra& outputPointer,
+    CandidateSemisimpleSubalgebra& outputPointer,
     SemisimpleSubalgebras& owner
   );
   static bool innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);

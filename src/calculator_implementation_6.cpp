@@ -476,11 +476,11 @@ bool TopicElementParser::Test::defaultTopicListsOK() {
 }
 
 bool CalculatorHTML::Test::all() {
-  CalculatorHTML::Test::BuiltInCrashOnFailure();
+  CalculatorHTML::Test::builtInCrashOnFailure();
   return true;
 }
 
-bool CalculatorHTML::Test::BuiltInCrashOnFailure() {
+bool CalculatorHTML::Test::builtInCrashOnFailure() {
   std::stringstream comments;
   if (!CalculatorHTML::Test::BuiltInMultiple(0, 0, 0, 3, &comments)) {
     global.fatal << "Built-in problem tests failed. "

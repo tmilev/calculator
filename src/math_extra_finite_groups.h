@@ -295,13 +295,13 @@ public:
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   void makeIdentity(elementSomeGroup& x);
   bool isIdentity(elementSomeGroup& x);
-  void ComputeGeneratorCommutationRelations();
+  void computeGeneratorCommutationRelations();
   void verifyCCSizesAndRepresentativesFormula();
   void VerifyWords();
   void VerifyArithmetic();
-  std::string PrettyPrintGeneratorCommutationRelations(bool andPrint = false);
-  std::string PrettyPrintCharacterTable(bool andPrint = false);
-  std::string PrettyPrintCCRepsSizes(bool andPrint = false);
+  std::string prettyPrintGeneratorCommutationRelations(bool andPrint = false);
+  std::string prettyPrintCharacterTable(bool andPrint = false);
+  std::string prettyPrintCCRepsSizes(bool andPrint = false);
   JSData representationDataIntoJS();
 
   // these methods are refugees from the WeylGroup class
@@ -1176,7 +1176,7 @@ class GroupRepresentation {
 public:
   someGroup* ownerGroup;
   List<Matrix<Coefficient> > generatorS;
-  mutable ClassFunction<someGroup, Coefficient> theCharacteR;
+  mutable ClassFunction<someGroup, Coefficient> theCharacter;
   mutable bool flagCharacterIsComputed;
   std::string identifyingString; // in Python, this would be an anonymous object
 
@@ -1193,7 +1193,7 @@ public:
   void computeCharacter() const;
   ClassFunction<someGroup, Coefficient> getCharacter() {
     this->computeCharacter();
-    return this->theCharacteR;
+    return this->theCharacter;
   }
 
   bool operator>(const GroupRepresentation& right) const;
@@ -1249,7 +1249,7 @@ public:
   }
   GroupRepresentation(const GroupRepresentationCarriesAllMatrices<someGroup, Coefficient>& in) {
     this->generatorS = in.generatorS;
-    this->theCharacteR = in.theCharacteR;
+    this->theCharacter = in.theCharacter;
     this->flagCharacterIsComputed = in.flagCharacterIsComputed;
   }
   GroupRepresentationCarriesAllMatrices<someGroup, Coefficient> MakeGRCAM() const {
@@ -1259,7 +1259,7 @@ public:
     if (this->identifyingString.size() > 0) {
       out.names.addOnTop(this->identifyingString);
     }
-    out.theCharacteR = this->theCharacteR;
+    out.theCharacter = this->theCharacter;
     return out;
   }
   // Note: the group representation types compute the hash value from the character,
@@ -1303,8 +1303,8 @@ void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
   if (!this->ownerGroup->flagCCsComputed) {
     this->ownerGroup->computeConjugacyClassSizesAndRepresentatives();
   }
-  this->theCharacteR.G = ownerGroup;
-  this->theCharacteR.data.setSize(this->ownerGroup->conjugacyClasses.size);
+  this->theCharacter.G = ownerGroup;
+  this->theCharacter.data.setSize(this->ownerGroup->conjugacyClasses.size);
   for (int cci = 0; cci < this->ownerGroup->conjugacyClasses.size; cci ++) {
     Matrix<Coefficient> M;
     M.makeIdentity(this->generatorS[0]);
@@ -1314,9 +1314,9 @@ void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generatorS[ccirWord[i]];
     }
-    this->theCharacteR.data[cci] = M.getTrace();
+    this->theCharacter.data[cci] = M.getTrace();
   }
-  this->theCharacteR.G = ownerGroup;
+  this->theCharacter.G = ownerGroup;
   this->flagCharacterIsComputed = true;
 }
 
@@ -1330,7 +1330,7 @@ bool GroupRepresentation<someGroup, Coefficient>::operator>(const GroupRepresent
   if (!right.flagCharacterIsComputed) {
     right.computeCharacter();
   }
-  return this->theCharacteR > right.theCharacteR;
+  return this->theCharacter > right.theCharacter;
 }
 
 template <typename someGroup, typename Coefficient>
@@ -1358,7 +1358,7 @@ somestream& GroupRepresentation<someGroup, Coefficient>::intoStream(somestream& 
   if (!this->identifyingString.empty()) {
     out << "identified as " << identifyingString;
   }
-  out << " with character " << this->theCharacteR;
+  out << " with character " << this->theCharacter;
   return out;
 }
 
@@ -1375,7 +1375,7 @@ JSData GroupRepresentation<someGroup, Coefficient>::JSOut() {
   JSData out;
   out["identifyingString"] = identifyingString;
   if (this->flagCharacterIsComputed) {
-    out["character"] = this->theCharacteR.data;
+    out["character"] = this->theCharacter.data;
   } else {
     out["character"].theType = JSData::token::tokenNull;
   }
@@ -1394,7 +1394,7 @@ class GroupRepresentationCarriesAllMatrices {
 public:
   List<Matrix<Coefficient> > theElementImageS;
   List<bool> theElementIsComputed;
-  ClassFunction<somegroup, Coefficient> theCharacteR;
+  ClassFunction<somegroup, Coefficient> theCharacter;
   List<Matrix<Coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
   List<Matrix<Coefficient> > generatorS;
@@ -1461,7 +1461,7 @@ public:
     return result;
   }
   bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other) const {
-    return this->ownerGroup == other.ownerGroup && this->theCharacteR == other.theCharacteR;
+    return this->ownerGroup == other.ownerGroup && this->theCharacter == other.theCharacter;
   }
   void spreadVector(const Vector<Coefficient>& input, Vectors<Coefficient>& outputBasisGeneratedSpace);
   std::string getName() const;
@@ -1867,13 +1867,13 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<someGroup, elementSomeG
     FiniteGroup<Matrix<Coefficient> > ingroup;
     ingroup.generators = in.generatorS;
     global.comments << "Generator commutation relations for input representation:\n"
-    << ingroup.PrettyPrintGeneratorCommutationRelations();
-    global.comments << "a quotient group of\n" << this->theSubgroup->PrettyPrintGeneratorCommutationRelations();
+    << ingroup.prettyPrintGeneratorCommutationRelations();
+    global.comments << "a quotient group of\n" << this->theSubgroup->prettyPrintGeneratorCommutationRelations();
     FiniteGroup<Matrix<Coefficient> > outgroup;
     outgroup.generators = out.generatorS;
     global.comments << "Generator commutation relations for 'representation':\n"
-    << outgroup.PrettyPrintGeneratorCommutationRelations();
-    global.comments << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();
+    << outgroup.prettyPrintGeneratorCommutationRelations();
+    global.comments << "It was supposed to be a quotient group of\n" << this->theGroup->prettyPrintGeneratorCommutationRelations();
     global.fatal << "Error in InduceRepresentation. " << global.fatal;
   }
   return out;
@@ -2508,7 +2508,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const 
     return false;
   }
   for (int i = 0; i < this->irreps.size; i ++) {
-    if (this->irreps[i].theCharacteR.data.isEqualToZero()) {
+    if (this->irreps[i].theCharacter.data.isEqualToZero()) {
       global.fatal << "This is a programming error: irrep number "
       << i + 1 << " has zero character!" << global.fatal;
       return false;

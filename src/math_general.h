@@ -5853,8 +5853,8 @@ public:
   void lieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight);
   void lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
   bool substitution(
-    const PolynomialSubstitution<Rational>& SubPolyPart,
-    const PolynomialSubstitution<Rational>& SubDiffPArt
+    const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
+    const PolynomialSubstitution<Rational>& substitutionDifferentialPart
   );
   void makeOne() {
     MonomialWeylAlgebra tempMon;

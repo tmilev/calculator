@@ -535,7 +535,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   this->ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   this->owner = &newOwner;
   this->computeFolderNames(this->currentFormat);
-  if (!FileOperations::fileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
+  if (!FileOperations::fileExistsVirtual(this->virtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
       this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }
@@ -544,7 +544,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     this->flagAttemptToSolveSystems = attemptToSolveSystems;
     this->flagcomputePairingTable = computePairingTable;
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
-    this->CheckFileWritePermissions();
+    this->checkFileWritePermissions();
     if (doFullInit) {
       this->findTheSemisimpleSubalgebrasFromScratch(newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras, nullptr);
     }
@@ -556,8 +556,8 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   }
   if (outputStream != nullptr) {
     *outputStream << "<br>Output file: <a href = \""
-    << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"
-    << this->DisplayNameMainFile1NoPath << "</a>";
+    << this->displayNameMainFile1WithPath << "\" target = \"_blank\">"
+    << this->displayNameMainFile1NoPath << "</a>";
   }
   return true;
 }

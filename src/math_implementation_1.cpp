@@ -436,11 +436,11 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --) {
-    int IndexCurrentGenerator = this->generatorsIndices[k];
-    if (IndexCurrentGenerator >= numPosRoots) {
+    int indexCurrentGenerator = this->generatorsIndices[k];
+    if (indexCurrentGenerator >= numPosRoots) {
       return false;
     }
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[IndexCurrentGenerator];
+    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[indexCurrentGenerator];
     if (!currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1) {
       return false;
     }
@@ -615,7 +615,7 @@ template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
   const ElementUniversalEnveloping<Coefficient>& right,
   Coefficient& output,
-  const Vector<Coefficient>* subHiGoesToIthElement,
+  const Vector<Coefficient>* substitutionHiGoesToIthElement,
   const Coefficient& ringUnit,
   const Coefficient& ringZero,
   std::stringstream* logStream
@@ -641,14 +641,14 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
       *logStream << "intermediate after simplification: "
       << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
     }
-    intermediateAccum.modOutVermaRelations(&global, subHiGoesToIthElement, ringUnit, ringZero);
+    intermediateAccum.modOutVermaRelations(&global, substitutionHiGoesToIthElement, ringUnit, ringZero);
     MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int thePower;
     for (int i = rightMon.powers.size - 1; i >= 0; i --) {
       if (rightMon.powers[i].isSmallInteger(&thePower)) {
         for (int k = 0; k < thePower; k ++) {
-          tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
+          tempElt.makeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, ringUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
             *logStream << "tempElt before mult: " << tempElt.toString(&global.theDefaultFormat) << "<br>";
@@ -665,7 +665,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
             *logStream << "intermediate after simplification: "
             << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
           }
-          intermediateAccum.modOutVermaRelations(subHiGoesToIthElement, ringUnit, ringZero);
+          intermediateAccum.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
             << intermediateAccum.toString(&global.theDefaultFormat.getElement()) << "<br>";
@@ -690,7 +690,7 @@ bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
 
 template <class Coefficient>
 std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
-  const Vector<Coefficient>* subHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
+  const Vector<Coefficient>* substitutionHiGoesToIthElement, const Coefficient& ringUnit, const Coefficient& ringZero
 ) {
   std::stringstream out;
   List<ElementUniversalEnveloping<Coefficient> > theOrbit;
@@ -701,10 +701,10 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
-      theElt.MakeOneGenerator(j + numPosRoots + theDim, *this->owner, ringUnit);
+      theElt.makeOneGenerator(j + numPosRoots + theDim, *this->owner, ringUnit);
       theElt *= theOrbit[i];
       theElt.simplify(ringUnit);
-      theElt.modOutVermaRelations(subHiGoesToIthElement, ringUnit, ringZero);
+      theElt.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit, ringZero);
       if (!theElt.isEqualToZero()) {
         theOrbit.addOnTop(theElt);
       }

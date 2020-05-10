@@ -1041,7 +1041,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
       global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
     }
     currentTensorEltEigen.extractElementUniversalEnveloping(currentUEelt, *theMod.owner);
-    currentUEelt.HWTAAbilinearForm(
+    currentUEelt.highestWeightTransposeAntiAutomorphismBilinearForm(
       currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
     );
   }

@@ -801,7 +801,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     i ++
   ) {
     const Expression& currentPattern = this->owner->RuleStack[i];
-    this->owner->TotalNumpatternMatchedPerformed ++;
+    this->owner->totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluatioN) {
       beforepatternMatch = *this->outpuT;
     }

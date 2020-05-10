@@ -227,7 +227,7 @@ public:
 
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
-  std::string OperatingSystem;
+  std::string operatingSystem;
   std::string hostWithPort;
   std::string hostNoPort;
 
@@ -303,9 +303,9 @@ public:
   // generate random numbers for mathematical problems/education.
   UnsecurePseudoRandomGenerator unsecurePseudoRandomGenerator;
   Response theResponse;
-  ListReferences<std::thread>theThreads;
+  ListReferences<std::thread> theThreads;
   ListReferences<ThreadData> theThreadData;
-  ListReferences<ListReferences<StackInfo> > CustomStackTrace;
+  ListReferences<ListReferences<StackInfo> > customStackTrace;
   ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
 
@@ -344,7 +344,7 @@ public:
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
 
-  std::string RelativePhysicalNameCrashReport;
+  std::string relativePhysicalNameCrashReport;
   std::string RelativePhysicalNameOptionalProgressReport;
   std::string relativePhysicalNameOptionalResult;
 
@@ -356,8 +356,7 @@ public:
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;
 
-  std::string DisplayPathExecutable;
-  std::string DisplayPathOutputFolder;
+  std::string displayPathOutputFolder;
   // The backend URL, for example
   // displayNameExecutable ="/cgi-bin/calculator";
   std::string displayNameExecutable;

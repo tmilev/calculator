@@ -74,7 +74,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   if (theProgressReport != nullptr && this->cachedPairs.size < 500000) {
     std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size
-    << " at recursion depth " << global.CustomStackTrace.size;
+    << " at recursion depth " << global.customStackTrace.size;
     theProgressReport->report(tempStream.str());
   }
   return result;
@@ -854,7 +854,7 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
     }
   }
   for (int i = 0; i < outputListOfGenerators->size; i ++) {
-    theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->objects[i], *this->owner);
+    theElt.makeOneGeneratorCoefficientOne(outputListOfGenerators->objects[i], *this->owner);
     output.addOnTop(theElt);
   }
 }
@@ -932,7 +932,7 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
   ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
   ElementUniversalEnveloping<Coefficient>& outputHomogeneous,
   int indexInputBasis,
-  const Vector<Coefficient>& subHiGoesToIthElement,
+  const Vector<Coefficient>& substitutionHiGoesToIthElement,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
@@ -943,10 +943,10 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
 
   for (int i = 0; i < inputBasis.size; i ++) {
     std::stringstream tempStream;
-    inputHomogeneous.HWTAAbilinearForm(
+    inputHomogeneous.highestWeightTransposeAntiAutomorphismBilinearForm(
       inputBasis[i],
       theScalarProducts[i],
-      &subHiGoesToIthElement,
+      &substitutionHiGoesToIthElement,
       ringUnit,
       ringZero,
       &tempStream
@@ -1173,7 +1173,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
   MonomialTensorGeneralizedVermas<Coefficient> accumMon, monActedOn;
   ElementSumGeneralizedVermas<Coefficient> tempElt;
   ElementUniversalEnveloping<Coefficient> theGenerator;
-  theGenerator.MakeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
+  theGenerator.makeOneGenerator(indexGenerator, ownerAlgebra, ringUnit);
   Coefficient currentCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialTensorGeneralizedVermas<Coefficient>& currentMon = (*this)[i];

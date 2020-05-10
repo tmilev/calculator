@@ -123,8 +123,8 @@ public:
   bool flagComputeConeCondition;
   bool flagMakingProgressReport;
   bool flagDeallocated;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > Modules;
-  List<ElementSemisimpleLieAlgebra<Rational> > HighestVectors;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > modules;
+  List<ElementSemisimpleLieAlgebra<Rational> > highestVectors;
   List<Vectors<Rational> > WeightsModulesNONPrimalSimple;
   List<Vectors<Rational> > WeightsModulesNONPrimalFundamental;
   List<Vectors<Rational> > WeightsModulesPrimalSimple;
@@ -190,7 +190,7 @@ public:
   Vector<Rational> getFundamentalCoordinatessOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const;
   Vector<Rational> getSimpleCoordinatesOverSubalgebraSemisimplePart(const Vector<Rational>& inputGweightSimpleCoords) const;
   inline int getNumberOfModules() const {
-    return this->HighestVectors.size;
+    return this->highestVectors.size;
   }
   int getIndexKModuleContainingRoot(const Vector<Rational>& input);
   void getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);

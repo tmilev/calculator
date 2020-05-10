@@ -191,11 +191,11 @@ ThreadData& ThreadData::registerNewThread(const std::string& inputName) {
   newThreadData.index = theThreadData.size;
   theThreadData.addOnTop(newThreadData);
   global.theThreads.setSize(theThreadData.size);
-  global.CustomStackTrace.reserve(2);
+  global.customStackTrace.reserve(2);
   global.progressReportStrings.reserve(2);
-  global.CustomStackTrace.setSize(theThreadData.size);
+  global.customStackTrace.setSize(theThreadData.size);
   global.progressReportStrings.setSize(theThreadData.size);
-  global.CustomStackTrace.lastObject().reserve(30);
+  global.customStackTrace.lastObject().reserve(30);
   global.progressReportStrings.lastObject().reserve(30);
   return global.theThreadData.lastObject();
 }

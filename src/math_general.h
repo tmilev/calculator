@@ -2985,50 +2985,18 @@ class PolynomialSubstitution: public List<Polynomial<Coefficient> > {
 };
 
 template<class Coefficient>
-class GroebnerBasisComputation {
-  public:
-  PolynomialOrder<Coefficient> thePolynomialOrder;
-  Polynomial<Coefficient> remainderDivision;
-  Polynomial<Coefficient> bufPolyForGaussianElimination;
-  MonomialP soPolyLeftShift;
-  MonomialP soPolyRightShift;
-  MonomialP bufferMoN1;
-  List<Polynomial<Coefficient> > theQuotients;
-  List<Polynomial<Coefficient> > basisCandidates;
-  class BasisElement {
-  public:
-    Polynomial<Coefficient> element;
-    MonomialP leadingMonomial;
-    Coefficient leadingCoefficient;
-    std::string toString(FormatExpressions* theFormat) const;
-  };
-  List<BasisElement> theBasis;
-  int RecursionCounterSerreLikeSystem;
-  int NumVarsToSolveForStarT;
-  int NumVariablesToSolveForAfterReduction;
-  int NumberSerreSystemComputations;
-  int NumberSerreVariablesOneGenerator;
-  int numberPolynomialDivisions;
-  int numberMonomialOperations;
-
-  int MaxNumSerreSystemComputationsPreferred;
-  int maximumPolynomialComputations;
-  int MaxNumBasisReductionComputations;
-  int firstIndexLatexSlide;
-  int numberOfIntermediateRemainders;
-  int numberOfSymmetricDifferenceRounds;
-  bool flagFoundNewBasisElements;
-  bool flagUseTheMonomialBranchingOptimization;
-  bool flagDoProgressReport;
-  bool flagDoLogDivision;
-  bool flagStoreQuotients;
-  bool flagSystemProvenToHaveNoSolution;
-  bool flagSystemProvenToHaveSolution;
-  bool flagSystemSolvedOverBaseField;
-  bool flagUsingAlgebraicClosuRe;
-  bool flagTryDirectlySolutionOverAlgebraicClosure;
-  AlgebraicClosureRationals* theAlgebraicClosurE;
+class PolynomialDivisionReport {
+public:
   HashedList<MonomialP> allMonomials;
+  List<Polynomial<Coefficient> > intermediateRemainders;
+  List<List<MonomialP> > intermediateHighlightedMons;
+  List<MonomialP> intermediateHighestMonDivHighestMon;
+  List<Coefficient> intermediateCoeffs;
+  List<Polynomial<Coefficient> > intermediateSubtractands;
+  Polynomial<Coefficient> startingPolynomial;
+  int highlightAllMonsFinalRemainder;
+  int firstIndexLatexSlide;
+  List<List<int> > additionalHighlightRemainders;
   List<List<List<int> > > highlightMonsQuotients;
   List<List<List<int> > > highlightMonsRemainders;
   List<List<List<int> > > highlightMonsSubtracands;
@@ -3037,37 +3005,21 @@ class GroebnerBasisComputation {
   List<List<int> > fcAnswerMonsRemainders;
   List<List<int> > fcAnswerMonsSubtracands;
   List<List<int> > fcAnswerMonsDivisors;
+  List<int> firstNonZeroIndicesPerIntermediateSubtracand;
+  List<int> intermediateSelectedDivisors;
   List<int> uncoverAllMonsQuotients;
   List<int> uncoverAllMonsRemainders;
   List<int> uncoverAllMonsSubtracands;
   List<int> uncoverAllMonsDivisors;
   List<int> uncoverMonsFinalRemainder;
-  int highlightAllMonsFinalRemainder;
   List<int> additionalHighlightFinalRemainder;
-  List<List<int> > additionalHighlightRemainders;
-  List<int> firstNonZeroIndicesPerIntermediateSubtracand;
-  std::stringstream longDivisionLog;
-  MemorySaving<GroebnerBasisComputation<Coefficient> > ComputationUsedInRecursiveCalls;
-  MemorySaving<List<Polynomial<Coefficient> > > intermediateRemainders;
-  MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
-  MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
-  MemorySaving<List<Coefficient> > intermediateCoeffs;
-  MemorySaving<List<Polynomial<Coefficient> > > intermediateSubtractands;
-  MemorySaving<List<int> > intermediateSelectedDivisors;
-  MemorySaving<Polynomial<Coefficient> > startingPoly;
-  MemorySaving<List<Coefficient> > systemSolution;
-  MemorySaving<Selection> solutionsFound;
-  List<PolynomialSubstitution<Coefficient> > theImpliedSubS;
-  FormatExpressions theFormat;
-  void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
-  void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
-  void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
-  std::string toStringSerreLikeSolution();
-  std::string getPolynomialStringSpacedMonomialsHtml(
-    const Polynomial<Coefficient>& thePoly,
-    const std::string& extraStyle,
-    List<MonomialP>* theHighLightedMons = nullptr
-  );
+  std::stringstream divisionLog;
+
+  GroebnerBasisComputation<Coefficient>* owner;
+  bool checkInitialization();
+  std::string getDivisionStringHtml();
+  std::string getDivisionStringLaTeX();
+  std::string getDivisionLaTeXSlide();
   std::string getPolynomialStringSpacedMonomialsLaTeX(
     const Polynomial<Coefficient>& thePoly,
     std::string* highlightColor = nullptr,
@@ -3083,10 +3035,71 @@ class GroebnerBasisComputation {
     int slidesToUncoverAllMons,
     bool useColumnSeparator
   );
+  std::string getPolynomialStringSpacedMonomialsHtml(
+    const Polynomial<Coefficient>& thePoly,
+    const std::string& extraStyle,
+    List<MonomialP>* theHighLightedMons = nullptr
+  );
   void computeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);
-  std::string getDivisionStringHtml();
-  std::string getDivisionStringLaTeX();
-  std::string getDivisionLaTeXSlide();
+  PolynomialDivisionReport();
+};
+
+template<class Coefficient>
+class PolynomialSystemSolution {
+
+};
+
+template<class Coefficient>
+class GroebnerBasisComputation {
+  public:
+  PolynomialOrder<Coefficient> thePolynomialOrder;
+  Polynomial<Coefficient> remainderDivision;
+  Polynomial<Coefficient> bufPolyForGaussianElimination;
+  List<Polynomial<Coefficient> > theQuotients;
+  List<Polynomial<Coefficient> > basisCandidates;
+  class BasisElement {
+  public:
+    Polynomial<Coefficient> element;
+    MonomialP leadingMonomial;
+    Coefficient leadingCoefficient;
+    std::string toString(FormatExpressions* theFormat) const;
+  };
+  List<BasisElement> theBasis;
+  int recursionCounterSerreLikeSystem;
+  int numberOfVariablesToSolveForStart;
+  int numberOfVariablesToSolveForAfterReduction;
+  int numberOfSerreSystemComputations;
+  int numberOfSerreVariablesOneGenerator;
+  int numberPolynomialDivisions;
+  int numberMonomialOperations;
+
+  int maximumSerreSystemComputationsPreferred;
+  int maximumPolynomialComputations;
+  int maximumBasisReductionComputations;
+  int numberOfIntermediateRemainders;
+  int numberOfSymmetricDifferenceRounds;
+  bool flagFoundNewBasisElements;
+  bool flagUseTheMonomialBranchingOptimization;
+  bool flagDoProgressReport;
+  bool flagDoLogDivision;
+  bool flagStoreQuotients;
+  bool flagSystemProvenToHaveNoSolution;
+  bool flagSystemProvenToHaveSolution;
+  bool flagSystemSolvedOverBaseField;
+  bool flagUsingAlgebraicClosuRe;
+  bool flagTryDirectlySolutionOverAlgebraicClosure;
+  MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
+
+  AlgebraicClosureRationals* theAlgebraicClosurE;
+  MemorySaving<GroebnerBasisComputation<Coefficient> > computationUsedInRecursiveCalls;
+  MemorySaving<List<Coefficient> > systemSolution;
+  MemorySaving<Selection> solutionsFound;
+  List<PolynomialSubstitution<Coefficient> > theImpliedSubS;
+  FormatExpressions theFormat;
+  void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
+  void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
+  void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
+  std::string toStringSerreLikeSolution();
   bool limitsExceeded() const;
   bool addAndReducePolynomials();
   bool addAndReduceOnePolynomial();

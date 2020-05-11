@@ -1402,7 +1402,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic = thePolysRational;
   theComputation.maximumPolynomialComputations = upperLimit;
-  theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
+  theComputation.maximumSerreSystemComputationsPreferred = upperLimit;
   theComputation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
@@ -1412,7 +1412,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.toString();
   out << "<br>The polynomials: " << thePolysAlgebraic.toString(&theComputation.theFormat);
-  out << "<br>Total number of polynomial computations: " << theComputation.NumberSerreSystemComputations;
+  out << "<br>Total number of polynomial computations: " << theComputation.numberOfSerreSystemComputations;
   if (theComputation.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
   } else if (theComputation.flagSystemProvenToHaveSolution) {
@@ -2113,9 +2113,9 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
     Polynomial<Rational> theNumCopy = this->theNum;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
-    this->printoutPFsLatex << computation.getDivisionStringLaTeX();
+    this->printoutPFsLatex << computation.divisionReport.getElement().getDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
-    this->printoutPFsHtml << computation.getDivisionStringHtml();
+    this->printoutPFsHtml << computation.divisionReport.getElement().getDivisionStringHtml();
   }
   LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.makeZero();

@@ -2940,7 +2940,7 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "isPossiblyPrime",
+    "IsPossiblyPrime",
     CalculatorFunctions::innerIsPossiblyPrime,
     "",
     "Checks whether the number is "
@@ -2948,11 +2948,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "and by the Miller-Rabin test next.",
     "A =100!+ 1;\n"
     "IsPrimeMillerRabin(A);\n"
-    "isPossiblyPrime(4256233);\n"
-    "isPossiblyPrime(49979687);\n"
-    "isPossiblyPrime(4256233 * 49979687)",
+    "IsPossiblyPrime(4256233);\n"
+    "IsPossiblyPrime(49979687);\n"
+    "IsPossiblyPrime(4256233 * 49979687)",
     "CalculatorFunctions::innerIsPossiblyPrime",
-    "isPossiblyPrime",
+    "IsPossiblyPrime",
     innerStandard
   );
   this->addOperationHandler(
@@ -3696,14 +3696,14 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "isEven",
+    "IsEven",
     CalculatorFunctions::innerIsEven,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an even integer, 0 otherwise. ",
-    "i^{{n}} : if isEven n = (- 1)^(n/2); i^100 ",
+    "i^{{n}} : if IsEven n = (- 1)^(n/2); i^100 ",
     "CalculatorFunctions::innerIsEven",
-    "isEven",
+    "IsEven",
     innerStandard
   );
   this->addOperationHandler(

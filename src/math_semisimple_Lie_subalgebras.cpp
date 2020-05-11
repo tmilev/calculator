@@ -132,7 +132,7 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
       *logStream << "<br>" << theSystem[i].toString() << " = 0 ";
     }
   }
-  theComputation.MaxNumSerreSystemComputationsPreferred = 4001;
+  theComputation.maximumSerreSystemComputationsPreferred = 4001;
   theComputation.maximumPolynomialComputations = 2001;
   theComputation.thePolynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_rightLargerWins);
   theComputation.solveSerreLikeSystem(theSystem);
@@ -4071,7 +4071,7 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
   theComputation.thePolynomialOrder.monomialOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   for (int i = 500; i < 200000; i += 100000) {
     theComputation.maximumPolynomialComputations = i;
-    theComputation.MaxNumSerreSystemComputationsPreferred = i;
+    theComputation.maximumSerreSystemComputationsPreferred = i;
     theComputation.theAlgebraicClosurE = this->owner->ownerField;
     theComputation.solveSerreLikeSystem(this->transformedSystem);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution) {

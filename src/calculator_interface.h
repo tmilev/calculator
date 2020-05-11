@@ -1195,7 +1195,6 @@ public:
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
 
-  List<Expression> buffer1, buffer2;
   int maximumRecursionDepth;
   int RecursionDeptH;
   int DepthRecursionReached;

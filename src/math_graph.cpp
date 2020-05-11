@@ -9,13 +9,13 @@ GraphOLD::GraphOLD(int max_vertices, int max_edges) {
 }
 
 void GraphOLD::addEdge(int v1, int v2) {
-  this->AddDiEdge(v1, v2);
-  this->AddDiEdge(v2, v1);
+  this->addDiEdge(v1, v2);
+  this->addDiEdge(v2, v1);
 }
 
 // assuming that - 1 only happens after all the edges is okay because
 // the DeleteEdge method packs the vertices when it finishes
-void GraphOLD::AddDiEdge(int v1, int v2) {
+void GraphOLD::addDiEdge(int v1, int v2) {
   for (int i = 0; i < this->max_edges; i ++) {
     if (this->data[v1 * this->max_edges + i] == v2) {
       return;
@@ -30,13 +30,13 @@ void GraphOLD::AddDiEdge(int v1, int v2) {
 }
 
 // methods that can only be called once can have long names
-List<List<int> > GraphOLD::DestructivelyGetConnectedComponents() {
+List<List<int> > GraphOLD::destructivelyGetConnectedComponents() {
   List<List<int> > outerl;
   for (int i = 0; i < this->vertices * this->max_edges; i ++) {
     if (this->data[i] != - 1) {
       List<int> l;
       l.addOnTop(i / this->max_edges);
-      this->TreeRecurseCopyDelete(l, i / this->max_edges, this->max_edges);
+      this->treeRecurseCopyDelete(l, i / this->max_edges, this->max_edges);
       outerl.addOnTop(l);
     }
   }
@@ -46,7 +46,7 @@ List<List<int> > GraphOLD::DestructivelyGetConnectedComponents() {
   return outerl;
 }
 
-void GraphOLD::TreeRecurseCopyDelete(List<int>& l, int v, int m) {
+void GraphOLD::treeRecurseCopyDelete(List<int>& l, int v, int m) {
   for (int i = 0; i < m; i ++) {
     if (this->data[v * m + i] != - 1) {
       int w = this->data[v * m + i];
@@ -54,7 +54,7 @@ void GraphOLD::TreeRecurseCopyDelete(List<int>& l, int v, int m) {
         l.addOnTop(w);
       }
       this->data[v * m + i] = - 1;
-      this->TreeRecurseCopyDelete(l, w, m);
+      this->treeRecurseCopyDelete(l, w, m);
     }
   }
 }

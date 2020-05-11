@@ -42,45 +42,45 @@ public:
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   TransportLayerSecurityOpenSSL();
   ~TransportLayerSecurityOpenSSL();
-  void FreeSSL();
-  void FreeContext();
-  void FreeEverythingShutdownSSL();
+  void freeSSL();
+  void freeContext();
+  void freeEverythingShutdownSSL();
   void initSSLLibrary();
   void initSSLServer();
   void initSSLClient();
   void initSSLCommon(bool isServer);
-  void Reset();
-  void ClearErrorQueue(
+  void reset();
+  void clearErrorQueue(
     int errorCode,
     std::string *outputError,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
-  bool HandShakeIamClientNoSocketCleanup(
+  bool handShakeIAmClientNoSocketCleanup(
     int inputSocketID,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  int SSLRead(
+  int sslRead(
     List<char>& readBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
-  int SSLWrite(const List<char>& writeBuffer,
+  int sslWrite(const List<char>& writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,
     std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
-  bool CheckCanInitializeToClient();
-  bool CheckCanInitialize(bool toServer);
-  bool CheckCanInitializeToServer();
-  void DoSetSocket(int theSocket);
-  void SetSocketAddToStack(int theSocket);
-  void RemoveLastSocket();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool InspectCertificates(
+  bool checkCanInitializeToClient();
+  bool checkCanInitialize(bool toServer);
+  bool checkCanInitializeToServer();
+  void doSetSocket(int theSocket);
+  void setSocketAddToStack(int theSocket);
+  void removeLastSocket();
+  bool handShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
+  bool inspectCertificates(
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   static bool initSSLKeyFiles();
@@ -208,9 +208,9 @@ public:
   SignatureAlgorithmSpecification();
   JSData toJSON();
   void processValue();
-  std::string ToHex();
-  std::string GetHashName();
-  std::string GetSignatureAlgorithmName();
+  std::string toHex();
+  std::string getHashName();
+  std::string getSignatureAlgorithmName();
 };
 
 // At the time of writing, a list of extensions **should** be available here:
@@ -221,20 +221,20 @@ public:
   SSLContent* owner;
   List<unsigned char> content;
   int theType;
-  std::string Name();
+  std::string name();
   SSLHelloExtension();
   JSData toJSON();
   bool checkInitialization();
   bool processMe(std::stringstream* commentsOnError);
-  bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
+  bool processRenegotiateConnection(std::stringstream* commentsOnError);
   bool processServerName(std::stringstream* commentsOnError);
-  bool ProcessRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
-  bool ProcessRequestSignedCertificateTimestamp(std::stringstream* commentsOnError);
+  bool processRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
+  bool processRequestSignedCertificateTimestamp(std::stringstream* commentsOnError);
   bool processSignatureAlgorithms(std::stringstream* commentsOnError);
-  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations);
-  void MakeEllipticCurvePointFormat(SSLContent* inputOwner);
-  void MakeExtendedMasterSecret(SSLContent* inputOwner);
-  void MakeGrease(SSLContent* inputOwner);
+  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations);
+  void makeEllipticCurvePointFormat(SSLContent* inputOwner);
+  void makeExtendedMasterSecret(SSLContent* inputOwner);
+  void makeGrease(SSLContent* inputOwner);
 };
 
 // SSL client hello helpful links.
@@ -318,49 +318,49 @@ public:
   bool checkInitialization() const;
   Logger::StringHighligher getStringHighlighter();
   bool decode(std::stringstream* commentsOnFailure);
-  bool DecodeSupportedCiphers(std::stringstream* commentsOnFailure);
-  bool DecodeExtensions(std::stringstream* commentsOnFailure);
-  bool ProcessExtensions(std::stringstream* commentsOnFailure);
+  bool decodeSupportedCiphers(std::stringstream* commentsOnFailure);
+  bool decodeExtensions(std::stringstream* commentsOnFailure);
+  bool processExtensions(std::stringstream* commentsOnFailure);
   // https://tls.ulfheim.net
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
-  void PrepareServerHello1Start(SSLContent& clientHello);
+  void prepareServerHello1Start(SSLContent& clientHello);
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
-  void PrepareServerHello2Certificate();
+  void prepareServerHello2Certificate();
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
-  bool PrepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError);
+  bool prepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError);
 
   JSData toJSON() const;
 
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
-  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteType(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteVersion(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesHandshakeClientHello(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
+  void WriteType(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
+  void WriteVersion(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
+  void writeBytesHandshakeClientHello(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesHandshakeServerHello(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesHandshakeServerHello(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesHandshakeCertificate(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesHandshakeCertificate(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesHandshakeSecretExchange(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesHandshakeSecretExchange(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  List<unsigned char>& GetMyRandomBytes() const;
-  void WriteBytesIncomingRandomAndSessionId(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  List<unsigned char>& getMyRandomBytes() const;
+  void writeBytesIncomingRandomAndSessionId(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesMyRandomAndSessionId(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesMyRandomAndSessionId(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesSupportedCiphers(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesSupportedCiphers(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
-  void WriteBytesExtensionsOnly(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  void writeBytesExtensionsOnly(
+    List<unsigned char>& output, List<serialization::Marker>* annotations
   ) const;
 };
 
@@ -389,8 +389,8 @@ public:
   public:
     static std::string sampleClientHelloHex;
     static bool all();
-    static bool Serialization();
-    static bool SerializationClientHello(TransportLayerSecurityServer& testServer);
+    static bool serialization();
+    static bool serializationClientHello(TransportLayerSecurityServer& testServer);
   };
   int offsetDecoded;
   unsigned char theType;
@@ -403,17 +403,16 @@ public:
   void resetExceptOwner();
   bool checkInitialization() const;
   bool decode(std::stringstream* commentsOnFailure);
-  bool DecodeBody(std::stringstream* commentsOnFailure);
-  std::string ToBytes() const;
-  std::string ToHtml(int id);
+  bool decodeBody(std::stringstream* commentsOnFailure);
+  std::string toHtml(int id);
   std::string toString() const;
   std::string toStringType() const;
-  JSData ToJSONSerialization();
+  JSData toJSONSerialization();
   JSData toJSON();
-  void PrepareServerHello1Start(SSLRecord& clientHello);
-  void PrepareServerHello2Certificate();
-  bool PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure);
-  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void prepareServerHello1Start(SSLRecord& clientHello);
+  void prepareServerHello2Certificate();
+  bool prepareServerHello3SecretExchange(std::stringstream* commentsOnFailure);
+  void writeBytes(List<unsigned char>& output, List<serialization::Marker>* annotations) const;
 };
 
 class TransportLayerSecurityServer {
@@ -440,8 +439,8 @@ public:
     List<std::string> errorsOnIncoming;
     int currentInputMessageIndex;
     NetworkSpoofer();
-    bool ReadBytesOnce(std::stringstream* commentsOnError);
-    bool WriteSSLRecords(List<SSLRecord>& input);
+    bool readBytesOnce(std::stringstream* commentsOnError);
+    bool writeSSLRecords(List<SSLRecord>& input);
     JSData toJSON();
   };
   NetworkSpoofer spoofer;
@@ -479,17 +478,17 @@ public:
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
     List<unsigned char> serverName;
     List<CipherSuiteSpecification> incomingCiphers;
-    std::string ToStringChosenCipher();
+    std::string toStringChosenCipher();
     JSData toJSON();
     Session();
-    bool ComputeAndSignEphemerealKey(std::stringstream* commentsOnError);
-    bool ChooseCipher(std::stringstream* commentsOnFailure);
+    bool computeAndSignEphemerealKey(std::stringstream* commentsOnError);
+    bool chooseCipher(std::stringstream* commentsOnFailure);
     void initialize();
-    bool SetIncomingRandomBytes(
+    bool setIncomingRandomBytes(
       List<unsigned char>& input, std::stringstream* commentsOnFailure
     );
-    void WriteNamedCurveAndPublicKey(
-      List<unsigned char>& output, List<Serialization::Marker>* annotations
+    void writeNamedCurveAndPublicKey(
+      List<unsigned char>& output, List<serialization::Marker>* annotations
     ) const;
   };
   TransportLayerSecurityServer::Session session;
@@ -511,8 +510,8 @@ public:
   List<unsigned char> outgoingBytes;
   List<SSLRecord> outgoingRecords;
 
-  CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
-  void AddSupportedCipher(int inputId);
+  CipherSuiteSpecification getCipherNoFailure(int inputId);
+  void addSupportedCipher(int inputId);
   bool initializeAll(const std::string &privateKeyPEMEncoded,
     const std::string &serverCertificatePEMEncoded,
     std::stringstream* commentsOnError
@@ -521,13 +520,13 @@ public:
   void initializeCipherSuites();
   void initializeExtensions();
   TransportLayerSecurityServer();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool ReadBytesOnce(std::stringstream* commentsOnError);
-  bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
-  bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
-  bool WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure);
-  bool WriteSSLRecords(List<SSLRecord>& input, std::stringstream* commentsOnFailure);
+  bool handShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
+  bool readBytesOnce(std::stringstream* commentsOnError);
+  bool decodeSSLRecord(std::stringstream* commentsOnFailure);
+  bool replyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
+  bool readBytesDecodeOnce(std::stringstream* commentsOnFailure);
+  bool writeBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure);
+  bool writeSSLRecords(List<SSLRecord>& input, std::stringstream* commentsOnFailure);
   JSData toJSON();
 };
 
@@ -560,7 +559,7 @@ public:
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
-  bool SSLReadLoop(
+  bool sslReadLoop(
     int numTries,
     std::string& output,
     const LargeInteger& expectedLength,
@@ -568,7 +567,7 @@ public:
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
-  bool SSLWriteLoop(
+  bool sslWriteLoop(
     int numTries,
     const std::string& input,
     std::string* outputError,
@@ -585,17 +584,17 @@ public:
   );
   TransportLayerSecurity();
   ~TransportLayerSecurity();
-  void RemoveLastSocket();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool HandShakeIamClientNoSocketCleanup(
+  void removeLastSocket();
+  bool handShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
+  bool handShakeIAmClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool initSSLKeyFiles(std::stringstream* commentsOnFailure);
   bool initSSLKeyFilesInternal(std::stringstream* commentsOnFailure);
-  bool LoadPEMCertificate(std::stringstream *commentsOnFailure);
-  bool LoadPEMPrivateKey(std::stringstream* commentsOnFailure);
-  void Free();
-  void FreeEverythingShutdown();
+  bool loadPEMCertificate(std::stringstream *commentsOnFailure);
+  bool loadPEMPrivateKey(std::stringstream* commentsOnFailure);
+  void free();
+  void freeEverythingShutdown();
 };
 
 #endif

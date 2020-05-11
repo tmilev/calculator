@@ -1253,38 +1253,38 @@ public:
 
   bool flagforkingprocessAllowed;
 
-  double LastLogEvaluationTime;
+  double lastLogEvaluationTime;
   ///////////////////////////////////////////////////////////////////////////
-  int NumListsStart;
-  int NumListResizesStart;
-  int NumHashResizesStart;
-  long long int NumSmallAdditionsStart;
-  long long int NumSmallMultiplicationsStart;
-  long long int NumSmallGCDcallsStart;
-  long long int NumLargeAdditionsStart;
-  long long int NumLargeMultiplicationsStart;
-  long long int NumLargeGCDcallsStart;
+  int numberOfListsStart;
+  int numberListResizesStart;
+  int numberHashResizesStart;
+  long long int numberOfSmallAdditionsStart;
+  long long int numberOfSmallMultiplicationsStart;
+  long long int numberOfSmallGreatestCommonDivisorsStart;
+  long long int numberOfLargeAdditionsStart;
+  long long int numberOfLargeMultiplicationsStart;
+  long long int numberOfLargeGreatestCommonDivisorsStart;
   ////////////////////////////////////////////////
   int totalPatternMatchesPerformed;
-  int NumPredefinedAtoms;
+  int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
   // std::vector<std::stringstream> theLogs;
   int counterInSyntacticSoup;
-  List<SyntacticElement> syntacticSouP;
+  List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStacK;
 
-  List<SyntacticElement>* CurrrentSyntacticSouP;
+  List<SyntacticElement>* currrentSyntacticSoup;
   List<SyntacticElement>* currentSyntacticStack;
 
   HashedList<Expression> cachedExpressions;
   List<Expression> imagesCachedExpressions;
   ////
-  HashedList<Expression> EvaluatedExpressionsStack;
+  HashedList<Expression> evaluatedExpressionsStack;
   HashedList<int, MathRoutines::IntUnsignIdentity> nonBoundVariablesInContext;
   HashedList<int, MathRoutines::IntUnsignIdentity> boundVariablesInContext;
 
-  Expression RuleStack;
+  Expression ruleStack;
   HashedList<Expression> cachedRuleStacks;
 
   HashedListReferences<Expression> theExpressionContainer;
@@ -1302,8 +1302,6 @@ public:
   ObjectContainer theObjectContainer;
   int64_t startTimeEvaluationMilliseconds;
 
-  char DefaultWeylLetter;
-  int DefaultWeylRank;
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
   std::string userLabel;
@@ -2724,14 +2722,14 @@ public:
     const std::string& inputKey,
     Expression& output
   );
-  static bool innerLoadKeysFromStatementLisT(
+  static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
     MapList<std::string, Expression, MathRoutines::hashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
-  static bool innerLoadKeysFromStatementLisT(
+  static bool innerLoadKeysFromStatementList(
     Calculator& theCommands,
     const Expression& input,
     MapList<Expression, Expression>& output,
@@ -2752,7 +2750,7 @@ public:
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
-  static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output);
+  static bool innerStoreCandidateSubalgebra(Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
   static bool innerExpressionFromDynkinSimpleType(Calculator& theCommands, const DynkinSimpleType& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(
@@ -2772,7 +2770,7 @@ public:
   static bool innerSemisimpleLieAlgebra(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool innerCandidateSAPrecomputed(
+  static bool innerCandidateSubalgebraPrecomputed(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,

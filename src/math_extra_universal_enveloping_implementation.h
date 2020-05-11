@@ -639,7 +639,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
 //    { killingForm.elements[i][j] = 0;
 //      tempRoot2.makeEi(theDimension, j);
 //      for (int k = 0; k<theWeyl.RootSystem.size; k++)
-//        killingForm.elements[i][j] += theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.objects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.objects[k]);
+//        killingForm.elements[i][j] += theWeyl.rootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.objects[k])* theWeyl.rootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.objects[k]);
 //    }
 //  }
 //  killingForm.invert(global);
@@ -701,10 +701,10 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
     tempElt2.makeOneGeneratorCoefficientOne(- theRoot, theOwner);
     tempElt1.makeOneGeneratorCoefficientOne(theRoot, theOwner);
     tempElt2 *= tempElt1;
-    tempElt2 *= theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[i]) / 2;
+    tempElt2 *= theWeyl.rootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[i]) / 2;
     *this += tempElt2;
   }
-  *this /= theWeyl.GetKillingDivTraceRatio();
+  *this /= theWeyl.getKillingDividedByTraceRatio();
 // check that the ninja formula is correct:
 //  FormatExpressions tempPolyFormat;
 //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
@@ -713,11 +713,11 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
 //  for (int i = 0; i < theDimension; i ++)
 //  { tempRoot.makeEi(theDimension, i);
 //    if (!length1Explored)
-//    { length1= theWeyl.RootScalarCartanRoot(tempRoot, tempRoot);
+//    { length1= theWeyl.rootScalarCartanRoot(tempRoot, tempRoot);
 //      length1Explored = true;
 //      coefficient1= 0;
 //      for (int j = 0; j < theWeyl.RootsOfBorel.size; j ++)
-//      { coefficient1+= theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j])*theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j]);
+//      { coefficient1+= theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j])*theWeyl.rootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.objects[j]);
 //        coef
 //      }
 //    }

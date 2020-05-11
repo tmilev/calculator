@@ -113,12 +113,12 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
     global.fatal << "zero owner not allowed here. " << global.fatal;
   }
   WeylGroupData& theWeyl = *this->owner;
-  theWeyl.ComputeRho(true);
+  theWeyl.computeRho(true);
   Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
-  Rational LengthAlpha = theWeyl.RootScalarCartanRoot(alpha, alpha);
+  Rational LengthAlpha = theWeyl.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
-    Rational tempRat = this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    Rational tempRat = this->owner->rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
     if (tempRat <= theMin) {
       theMin = tempRat;
       minIndex = i;
@@ -130,7 +130,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   int precedingIndex = 0;
   for (int i = 0; i <= minIndex; i ++) {
-    Rational tempScalar = theWeyl.RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    Rational tempScalar = theWeyl.rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
     if (tempScalar >= theMin + 1) {
       precedingIndex = i;
     }
@@ -138,7 +138,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s2 = this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
+  Rational s2 = this->owner->rootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
   if (!this->minimaAreIntegral()) {
     global.comments << "<br>Something is wrong: starting path is BAD!";
   }
@@ -151,7 +151,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
     minIndex ++;
     Vector<Rational>& r1 = this->Waypoints[precedingIndex];
     Vector<Rational>& r2 = this->Waypoints[precedingIndex - 1];
-    Rational s1 = theWeyl.RootScalarCartanRoot(r1, alphaScaled);
+    Rational s1 = theWeyl.rootScalarCartanRoot(r1, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
     this->Waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
@@ -161,7 +161,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
     differences[i] = this->Waypoints[i + precedingIndex + 1] - this->Waypoints[i + precedingIndex];
-    currentDist += theWeyl.RootScalarCartanRoot(differences[i], alphaScaled);
+    currentDist += theWeyl.rootScalarCartanRoot(differences[i], alphaScaled);
     if (currentDist < minDist) {
       theWeyl.reflectSimple(indexAlpha, differences[i]);
       minDist = currentDist;
@@ -190,23 +190,23 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   int minIndex = - 1;
   WeylGroupData& theWeyl = *this->owner;
   Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
-  Rational LengthAlpha = this->owner->RootScalarCartanRoot(alpha, alpha);
+  Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
-    Rational tempRat = this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    Rational tempRat = this->owner->rootScalarCartanRoot(this->Waypoints[i], alphaScaled);
     if (tempRat <= theMin) {
       theMin = tempRat;
       minIndex = i;
     }
   }
-  Rational lastScalar = this->owner->RootScalarCartanRoot(*this->Waypoints.lastObject(), alphaScaled);
+  Rational lastScalar = this->owner->rootScalarCartanRoot(*this->Waypoints.lastObject(), alphaScaled);
   if (minIndex < 0 || lastScalar - theMin < 1) {
     this->Waypoints.size = 0;
     return;
   }
   int succeedingIndex = 0;
   for (int i = this->Waypoints.size - 1; i >= minIndex; i --) {
-    Rational tempScalar = theWeyl.RootScalarCartanRoot(alphaScaled, this->Waypoints[i]);
+    Rational tempScalar = theWeyl.rootScalarCartanRoot(alphaScaled, this->Waypoints[i]);
     if (tempScalar >= theMin + 1) {
       succeedingIndex = i;
     }
@@ -214,16 +214,16 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
       break;
     }
   }
-  Rational s1 = this->owner->RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
+  Rational s1 = this->owner->rootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
   if (s1 > theMin + 1) {
     this->Waypoints.setSize(this->Waypoints.size + 1);
     for (int i = this->Waypoints.size - 1; i >= succeedingIndex + 1; i --) {
       this->Waypoints[i] = this->Waypoints[i - 1];
     }
-    //Rational scalarNext = theWeyl.RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
+    //Rational scalarNext = theWeyl.rootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
     Vector<Rational>& r1 = this->Waypoints[succeedingIndex];
     Vector<Rational>& r2 = this->Waypoints[succeedingIndex - 1];
-    Rational s2 = theWeyl.RootScalarCartanRoot(r2, alphaScaled);
+    Rational s2 = theWeyl.rootScalarCartanRoot(r2, alphaScaled);
     Rational x = (theMin + 1 - s2) / (s1 - s2);
     this->Waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
@@ -232,7 +232,7 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Rational currentDist = 0;
   for (int i = 0; i < succeedingIndex - minIndex; i ++) {
     diff = this->Waypoints[i + minIndex + 1] - oldWayPoint;
-    currentDist += theWeyl.RootScalarCartanRoot(diff, alphaScaled);
+    currentDist += theWeyl.rootScalarCartanRoot(diff, alphaScaled);
     if (currentDist > 0) {
       theWeyl.reflectSimple(indexAlpha, diff);
       currentDist = 0;
@@ -289,11 +289,11 @@ bool LittelmannPath::minimaAreIntegral() {
   int theDim = theWeyl.getDimension();
   theMinima.setSize(theDim);
   for (int i = 0; i < theDim; i ++) {
-    theMinima[i] = theWeyl.GetScalarProdSimpleRoot(this->Waypoints[0], i) * 2 / theWeyl.cartanSymmetric.elements[i][i];
+    theMinima[i] = theWeyl.getScalarProductSimpleRoot(this->Waypoints[0], i) * 2 / theWeyl.cartanSymmetric.elements[i][i];
   }
   for (int i = 1; i < this->Waypoints.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
-      theMinima[j] = MathRoutines::minimum(theWeyl.GetScalarProdSimpleRoot(
+      theMinima[j] = MathRoutines::minimum(theWeyl.getScalarProductSimpleRoot(
         this->Waypoints[i], j) * 2 / theWeyl.cartanSymmetric.elements[j][j], theMinima[j]
       );
     }
@@ -423,7 +423,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
   WeylGroupData& theWeyl = this->owner->theOwner->theWeyl;
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   theWeyl.raiseToDominantWeight(theHWsimpleCoordsTrue);
-  Vector<Rational> theHWdualCoords = theWeyl.GetDualCoordinatesFromFundamental(
+  Vector<Rational> theHWdualCoords = theWeyl.getDualCoordinatesFromFundamental(
     theWeyl.getFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
   );
   List<Coefficient> theSub;
@@ -840,14 +840,14 @@ BranchingData::BranchingData() {
 
 void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   List<Vectors<Rational> > emptyList;
-  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
-  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots(
+  this->WeylFDSmallAsSubInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
+  this->WeylFDSmall.makeParabolicFromSelectionSimpleRoots(
     *this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, 1000
   );
-  this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, 1000);
-  this->WeylFD.ComputeRootSubsystem();
-  this->WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
-  this->WeylFDSmall.ComputeRootSubsystem();
+  this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, 1000);
+  this->WeylFD.computeRootSubsystem();
+  this->WeylFDSmallAsSubInLarge.computeRootSubsystem();
+  this->WeylFDSmall.computeRootSubsystem();
 }
 
 std::string BranchingData::getStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
@@ -900,10 +900,10 @@ bool LittelmannPath::isAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   return true;
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetGroupElementsIndexedAsAmbientGroup(
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup(
   List<ElementWeylGroup>& output
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetGroupElementsIndexedAsAmbientGroup");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup");
   if (this->ExternalAutomorphisms.size > 0) {
     global.fatal << "This is  a programming error: a function meant for subgroups that are "
     << "Weyl groups of Levi parts of parabolics "

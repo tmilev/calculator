@@ -9,7 +9,7 @@
 
 #include <unistd.h> //<- close, open defined here
 
-bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurity::loadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
   if (!FileOperations::loadFiletoStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure
@@ -19,10 +19,10 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
     }
     return false;
   }
-  return this->theServer.certificate.LoadFromPEM(certificateContent, commentsOnFailure);
+  return this->theServer.certificate.loadFromPEM(certificateContent, commentsOnFailure);
 }
 
-bool TransportLayerSecurity::LoadPEMPrivateKey(
+bool TransportLayerSecurity::loadPEMPrivateKey(
   std::stringstream* commentsOnFailure
 ) {
   std::string certificateContent, certificateContentStripped;
@@ -43,20 +43,20 @@ bool TransportLayerSecurity::LoadPEMPrivateKey(
     return false;
   }
   accessULTRASensitiveFoldersAllowed = false;
-  return this->theServer.privateKey.LoadFromPEM(certificateContent, commentsOnFailure);
+  return this->theServer.privateKey.loadFromPEM(certificateContent, commentsOnFailure);
 }
 
 bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initSSLKeyFilesInternal");
   this->openSSLData.initSSLKeyFilesCreateOnDemand();
   global << Logger::purple << "Using self-signed certificate. " << Logger::endL;
-  if (!this->LoadPEMCertificate(commentsOnFailure)) {
+  if (!this->loadPEMCertificate(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load pem certificate. ";
     }
     return false;
   }
-  if (!this->LoadPEMPrivateKey(commentsOnFailure)) {
+  if (!this->loadPEMPrivateKey(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load pem private key. ";
     }

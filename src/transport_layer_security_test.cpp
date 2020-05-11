@@ -25,8 +25,8 @@ std::string SSLRecord::Test::sampleClientHelloHex =
 "000000000000000000000000000000000000000000000000000000000000000"
 "000000000000000000000000000000000000";
 
-bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& testServer) {
-  MacroRegisterFunctionWithName("SSLRecord::Test::SerializationClientHello");
+bool SSLRecord::Test::serializationClientHello(TransportLayerSecurityServer& testServer) {
+  MacroRegisterFunctionWithName("SSLRecord::Test::serializationClientHello");
   std::string inputHex = SSLRecord::Test::sampleClientHelloHex;
   SSLRecord theRecord;
   theRecord.owner = &testServer;
@@ -40,7 +40,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
     global.fatal << "Failed to decode built-in message. " << comments.str() << global.fatal;
   }
   List<unsigned char> encoded;
-  theRecord.WriteBytes(encoded, nullptr);
+  theRecord.writeBytes(encoded, nullptr);
   if (encoded != theRecord.incomingBytes) {
     global << "Decoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::convertListUnsignedCharsToHex(theRecord.incomingBytes) << Logger::endL;
@@ -53,17 +53,17 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
 
 bool SSLRecord::Test::all() {
   MacroRegisterFunctionWithName("SSLRecord::Test::all");
-  SSLRecord::Test::Serialization();
+  SSLRecord::Test::serialization();
   return true;
 }
 
-bool SSLRecord::Test::Serialization() {
-  MacroRegisterFunctionWithName("SSLRecord::Test::Serialization");
+bool SSLRecord::Test::serialization() {
+  MacroRegisterFunctionWithName("SSLRecord::Test::serialization");
 
   TransportLayerSecurityServer server;
   server.initialize();
   server.session.initialize();
-  if (!SSLRecord::Test::SerializationClientHello(server)) {
+  if (!SSLRecord::Test::serializationClientHello(server)) {
     global.fatal << "Failed serialization of client hello. " << global.fatal;
   }
   return true;

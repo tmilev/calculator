@@ -6,22 +6,22 @@
 #include "math_extra_algebraic_numbers.h"
 
 bool PrivateKeyRSA::Test::all() {
-  PrivateKeyRSA::Test::LoadFromPEMFile();
-  PrivateKeyRSA::Test::LoadFromPEM();
+  PrivateKeyRSA::Test::loadFromPEMFile();
+  PrivateKeyRSA::Test::loadFromPEM();
   return true;
 }
 
-bool PrivateKeyRSA::Test::LoadFromPEMFile() {
+bool PrivateKeyRSA::Test::loadFromPEMFile() {
   std::string fileName = "test/private_key.pem";
   PrivateKeyRSA theKey;
   std::stringstream commentsOnFailure;
-  if (!theKey.LoadFromPEMFile(fileName, &commentsOnFailure)) {
+  if (!theKey.loadFromPEMFile(fileName, &commentsOnFailure)) {
     global.fatal << "Failed to load pem file. " << commentsOnFailure.str() << global.fatal;
   }
   return true;
 }
 
-bool PrivateKeyRSA::Test::LoadFromPEM() {
+bool PrivateKeyRSA::Test::loadFromPEM() {
   std::string pemContent =
   "-----BEGIN PRIVATE KEY-----\n"
   "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDvlOX7G1JZ/TxJ\n"
@@ -53,22 +53,22 @@ bool PrivateKeyRSA::Test::LoadFromPEM() {
   "-----END PRIVATE KEY-----";
   PrivateKeyRSA theKey;
   std::stringstream commentsOnFailure;
-  if (!theKey.LoadFromPEM(pemContent, &commentsOnFailure)) {
+  if (!theKey.loadFromPEM(pemContent, &commentsOnFailure)) {
     global.fatal << "Failed to load pem content. " << global.fatal;
   }
-  if (!theKey.BasicChecks(&commentsOnFailure)) {
+  if (!theKey.basicChecks(&commentsOnFailure)) {
     global.fatal << "Hard coded private key did not pass basic checks. " << global.fatal;
   }
   return true;
 }
 
 bool X509Certificate::Test::all() {
-  X509Certificate::Test::LoadFromPEMFile();
-  X509Certificate::Test::LoadFromPEM();
+  X509Certificate::Test::loadFromPEMFile();
+  X509Certificate::Test::loadFromPEM();
   return true;
 }
 
-bool X509Certificate::Test::LoadFromPEM() {
+bool X509Certificate::Test::loadFromPEM() {
   std::string pemContent =
   "-----BEGIN CERTIFICATE-----"
   "MIID5TCCAs2gAwIBAgIUOFXi72uftmcTij+B7sbVOUdkOlcwDQYJKoZIhvcNAQEL"
@@ -96,17 +96,17 @@ bool X509Certificate::Test::LoadFromPEM() {
   ;
   std::stringstream commentsOnFailure;
   X509Certificate theCertificate;
-  if (!theCertificate.LoadFromPEM(pemContent, &commentsOnFailure)) {
+  if (!theCertificate.loadFromPEM(pemContent, &commentsOnFailure)) {
     global.fatal << "Failed to load built-in test certificate content. " << global.fatal;
   }
   return true;
 }
 
-bool X509Certificate::Test::LoadFromPEMFile() {
+bool X509Certificate::Test::loadFromPEMFile() {
   std::string fileName = "test/certificate_self_signed.pem";
   std::stringstream commentsOnFailure;
   X509Certificate theCertificate;
-  if (!theCertificate.LoadFromPEMFile(fileName, &commentsOnFailure)) {
+  if (!theCertificate.loadFromPEMFile(fileName, &commentsOnFailure)) {
     global.fatal << "Failed to load built-in test certificate file. "
     << commentsOnFailure.str() << global.fatal;
   }

@@ -805,13 +805,13 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "LoadKnownCertificates",
+    "loadKnownCertificates",
     CalculatorFunctions::innerLoadKnownCertificates,
     "",
     "Loads known security certificates from the <a href=\"/certificates-public/\">certificates-public/</a> folder. ",
-    "LoadKnownCertificates(0);",
+    "loadKnownCertificates(0);",
     "CalculatorFunctions::innerLoadKnownCertificates",
-    "LoadKnownCertificates",
+    "loadKnownCertificates",
     innerAdminNoTest
   );
   this->addOperationHandler(
@@ -5010,7 +5010,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Therefore a solution over the complex numbers "
     "exists. However, no such solution was found. <br>"
     "Outcome 4. A solution was found and is presented to the user.",
-    "findOneSolutionSerreLikePolynomialSystem{}("
+    "FindOneSolutionSerreLikePolynomialSystem{}("
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -5039,10 +5039,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit,
     "",
-    "Same as findOneSolutionSerreLikePolynomialSystem "
+    "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
     "to the number of polynomial computations that can be carried out. ",
-    "findOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -5313,13 +5313,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "EmbedSemisimpleInSemisimple",
-    CalculatorFunctions::innerEmbedSSalgInSSalg,
+    CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra,
     "",
     "Tries to find all embeddings of the first semisimple type into the second. "
     "Records all intermediate subalgebras. ",
     "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
-    "CalculatorFunctions::innerEmbedSSalgInSSalg",
+    "CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra",
     "EmbedSemisimpleInSemisimple",
     innerNoTest
   );

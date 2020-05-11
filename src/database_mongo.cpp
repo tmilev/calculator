@@ -472,7 +472,7 @@ bool MongoQuery::FindMultiple(
 }
 #endif
 
-std::string Database::Mongo::ConvertErrorToString(void* bson_error_t_pointer) {
+std::string Database::Mongo::convertErrorToString(void* bson_error_t_pointer) {
   std::stringstream out;
 #ifdef MACRO_use_MongoDB
   bson_error_t* error = static_cast<bson_error_t*>(bson_error_t_pointer);
@@ -499,7 +499,7 @@ bool Database::Mongo::deleteDatabase(std::stringstream* commentsOnFailure) {
   bson_error_t errorResult;
   if (!mongoc_database_drop(static_cast<mongoc_database_t*>(this->database), &errorResult)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to drop database. " << this->ConvertErrorToString(&errorResult);
+      *commentsOnFailure << "Failed to drop database. " << this->convertErrorToString(&errorResult);
     }
     return false;
   }
@@ -688,7 +688,7 @@ bool Database::Mongo::findOneFromSome(
   MacroRegisterFunctionWithName("Database::findOneFromSome");
   #ifdef MACRO_use_MongoDB
   MongoQuery query;
-  if (!Database::Mongo::GetOrFindQuery(findOrQueries, query.findQuery, commentsOnFailure)) {
+  if (!Database::Mongo::getOrFindQuery(findOrQueries, query.findQuery, commentsOnFailure)) {
     return false;
   }
   for (int i = 0; i < findOrQueries.size; i ++) {
@@ -717,12 +717,12 @@ bool Database::Mongo::findOneFromSome(
   #endif
 }
 
-bool Database::Mongo::GetOrFindQuery(
+bool Database::Mongo::getOrFindQuery(
   const List<QueryExact>& input,
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::GetOrFindQuery");
+  MacroRegisterFunctionWithName("Database::getOrFindQuery");
   (void) commentsOnFailure;
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
@@ -1036,7 +1036,7 @@ bool Database::Mongo::updateOneFromSome(
 ) {
   MacroRegisterFunctionWithName("Database::updateOneFromSomeJSON");
   std::string queryString;
-  if (!this->GetOrFindQuery(findOrQueries, queryString, commentsOnFailure)) {
+  if (!this->getOrFindQuery(findOrQueries, queryString, commentsOnFailure)) {
     return false;
   }
   if (findOrQueries.size == 0) {
@@ -1411,7 +1411,7 @@ std::string Database::toHtmlDatabaseCollection(const std::string& currentTable) 
   if (totalItems > theRows.size) {
     out << "Only the first " << theRows.size << " are displayed. ";
   }
-  out << "<br>" << HtmlRoutines::ToHtmlTable(theLabels, theRows, true);
+  out << "<br>" << HtmlRoutines::toHtmlTable(theLabels, theRows, true);
   return out.str();
 }
 

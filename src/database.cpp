@@ -1594,7 +1594,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (userWrapper.enteredGoogleToken == "") {
     return false;
   }
-  if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral)) {
+  if (!Crypto::verifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral)) {
     return false;
   }
   tokenIsGood = true;

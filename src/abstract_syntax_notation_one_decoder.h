@@ -71,11 +71,11 @@ public:
   void reset();
   bool isIntegerUnsigned(LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
   bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse) const;
-  std::string InterpretAsObjectIdentifier() const;
-  std::string InterpretAsObjectIdentifierGetNameAndId() const;
+  std::string interpretAsObjectIdentifier() const;
+  std::string interpretAsObjectIdentifierGetNameAndId() const;
   void toJSON(JSData& output) const;
   JSData toJSON() const;
-  void writeAnnotations(List<Serialization::Marker>& output);
+  void writeAnnotations(List<serialization::Marker>& output);
   std::string toString() const;
   bool isComposite() const;
   bool isPureComposite() const;
@@ -95,7 +95,7 @@ public:
   void makeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
   void makeNull();
   void makeInteger(const LargeIntegerUnsigned& input);
-  void mMakeBitString(const List<unsigned char>& input);
+  void makeBitString(const List<unsigned char>& input);
   void makeOctetString(const List<unsigned char>& input);
   void setStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void makeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
@@ -183,8 +183,8 @@ public:
   );
   // static initialization order fiasco guard:
   // The function is thread-safe after returning once.
-  static MapList<std::string, ASNObject, MathRoutines::hashString>& NamesToObjectIdsNonThreadSafe();
-  static MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& ObjectIdsToNames();
+  static MapList<std::string, ASNObject, MathRoutines::hashString>& namesToObjectIdsNonThreadSafe();
+  static MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(
     const ASNElement& input,
@@ -291,7 +291,7 @@ public:
   bool decodeCurrent(ASNElement& output);
   bool decodeSequenceLikeContent(ASNElement& output);
   bool decodeBitString(ASNElement& output);
-  static LargeInteger VariableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
+  static LargeInteger variableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
   void decodeASNAtomContent(ASNElement& output);
   bool decodeNull(ASNElement& output);
   bool decodeLengthIncrementDataPointerNoCheck(ASNElement& output);

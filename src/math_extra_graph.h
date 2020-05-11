@@ -16,15 +16,15 @@ public:
   int max_edges;
   List<int> data;
   void addEdge(int v1, int v2);
-  void AddDiEdge(int v1, int v2);
-  List<List<int> > DestructivelyGetConnectedComponents();
+  void addDiEdge(int v1, int v2);
+  List<List<int> > destructivelyGetConnectedComponents();
 private:
-  void TreeRecurseCopyDelete(List<int>& l, int v, int m);
+  void treeRecurseCopyDelete(List<int>& l, int v, int m);
 };
 
 class GraphEdge {
 public:
-  friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge) {
+  friend std::ostream& operator<<(std::ostream& output, const GraphEdge& theEdge) {
     output << theEdge.toString();
     return output;
   }

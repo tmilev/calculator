@@ -29,8 +29,8 @@ class LaTeXCrawler {
     List<LaTeXCrawler::FileWithOption> filesToCrawl;
     void addSlidesOnTop(const List<std::string>& input);
     JSData toJSON();
-    bool FromJSON(JSData& input, std::stringstream* commentsOnFailure);
-    bool FromString(const std::string& input, std::stringstream* commentsOnFailure);
+    bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
+    bool fromString(const std::string& input, std::stringstream* commentsOnFailure);
   };
   int recursionDepth;
   std::string theFileNameToCrawlPhysicalNoPathName;

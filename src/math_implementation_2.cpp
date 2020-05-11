@@ -806,7 +806,7 @@ void LargeIntegerUnsigned::assignShiftedUInt(unsigned int x, int shift) {
 }
 
 void LargeIntegerUnsigned::addNoFitSize(const LargeIntegerUnsigned& x) {
-  MacroIncrementCounter(Rational::TotalLargeAdditions);
+  MacroIncrementCounter(Rational::totalLargeAdditions);
   int oldsize = this->theDigits.size;
   this->theDigits.setSize(MathRoutines::maximum(this->theDigits.size, x.theDigits.size) + 1);
   for (int i = oldsize; i < this->theDigits.size; i ++) {
@@ -932,7 +932,7 @@ void LargeIntegerUnsigned::multiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     LargeIntegerUnsigned xCopy = x;
     return thisCopy.multiplyBy(xCopy, output);
   }
-  MacroIncrementCounter(Rational::TotalLargeMultiplications);
+  MacroIncrementCounter(Rational::totalLargeMultiplications);
   output.theDigits.setSize(x.theDigits.size + this->theDigits.size);
   for (int i = 0; i < output.theDigits.size; i ++) {
     output.theDigits[i] = 0;
@@ -1011,7 +1011,7 @@ void LargeIntegerUnsigned::gcd(
   const LargeIntegerUnsigned& b,
   LargeIntegerUnsigned& output
 ) {
-  MacroIncrementCounter(Rational::TotalLargeGCDcalls);
+  MacroIncrementCounter(Rational::totalLargeGreatestCommonDivisors);
   LargeIntegerUnsigned p, q, r, temp;
   p = a;
   q = b;
@@ -1308,7 +1308,7 @@ bool LargeInteger::operator==(const LargeInteger& x) const {
   return this->value == x.value;
 }
 
-bool LargeInteger::CheckForConsistensy() {
+bool LargeInteger::checkConsistensy() {
   if (this->sign != - 1 && this->sign != 1) {
     return false;
   }
@@ -1344,7 +1344,7 @@ void LargeInteger::assignUInt64(uint64_t x) {
   this->value.assignUInt64(x);
 }
 
-void LargeInteger::AssignInt64(int64_t x) {
+void LargeInteger::assignInt64(int64_t x) {
   this->sign = 1;
   if (x < 0) {
     this->sign = - 1;
@@ -1366,7 +1366,7 @@ void LargeInteger::assignInteger(int x) {
   this->value.assignShiftedUInt(static_cast<unsigned int>(x), 0);
 }
 
-bool LargeInteger::GetDivisors(List<int>& output, bool includeNegative) {
+bool LargeInteger::getDivisors(List<int>& output, bool includeNegative) {
   if (this->value.theDigits.size > 1) {
     return false;
   }
@@ -1386,7 +1386,7 @@ bool LargeInteger::GetDivisors(List<int>& output, bool includeNegative) {
   return true;
 }
 
-void LargeInteger::AddLargeIntUnsigned(const LargeIntegerUnsigned& x) {
+void LargeInteger::addLargeIntUnsigned(const LargeIntegerUnsigned& x) {
   if (this->sign == 1) {
     this->value += x;
     return;
@@ -1454,7 +1454,7 @@ LargeInteger LargeInteger::operator/(LargeInteger& x) const {
   LargeInteger remainder;
   this->value.divPositive(x.value, result.value, remainder.value);
   result.sign = this->sign * x.sign;
-  if (!result.CheckForConsistensy()) {
+  if (!result.checkConsistensy()) {
     global.fatal << "Large integer corrupt. " << global.fatal;
   }
   return result;
@@ -1676,7 +1676,7 @@ void Rational::assignFractionalValue() {
   this->extended->numerator.value.divPositive(this->extended->denominator, tempI, newNum);
   this->extended->numerator.value = newNum;
   if (this->extended->numerator.isNegative()) {
-    this->extended->numerator.AddLargeIntUnsigned(this->extended->denominator);
+    this->extended->numerator.addLargeIntUnsigned(this->extended->denominator);
   }
   if (!this->extended->numerator.isPositiveOrZero()) {
     global.fatal << "Numerator must not be negative. " << global.fatal;
@@ -1791,7 +1791,7 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
   if (N == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
-    MacroIncrementCounter(Rational::TotalSmallAdditions);
+    MacroIncrementCounter(Rational::totalSmallAdditions);
     return true;
   }
   int tempGCD = 0;
@@ -1802,7 +1802,7 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
   }
   this->numeratorShort = N / tempGCD;
   this->denominatorShort = D / tempGCD;
-  MacroIncrementCounter(Rational::TotalSmallAdditions);
+  MacroIncrementCounter(Rational::totalSmallAdditions);
   return true;
 }
 
@@ -1851,7 +1851,7 @@ bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
     this->numeratorShort = N / static_cast<signed int>(tempGCD);
     this->denominatorShort = D / tempGCD;
   }
-  MacroIncrementCounter(Rational::TotalSmallMultiplications);
+  MacroIncrementCounter(Rational::totalSmallMultiplications);
   return true;
 }
 

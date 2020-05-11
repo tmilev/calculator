@@ -149,11 +149,11 @@ void Calculator::doLogEvaluationIfNeedBe(Function& inputF) {
     return;
   }
   *this << "<hr>Built-in substitution: " << inputF.toStringSummary()
-  << "<br>" << global.getElapsedSeconds() - this->LastLogEvaluationTime
+  << "<br>" << global.getElapsedSeconds() - this->lastLogEvaluationTime
   << " second(s) since last log entry. "
   << "Rule stack id: "
-  << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
-  this->LastLogEvaluationTime = global.getElapsedSeconds();
+  << this->RuleStackCacheIndex << ", stack size: " << this->ruleStack.size();
+  this->lastLogEvaluationTime = global.getElapsedSeconds();
 }
 
 const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
@@ -398,7 +398,7 @@ void StateMaintainerCalculator::addRule(const Expression& theRule) {
   if (this->owner == nullptr) {
     global.fatal << "StackMaintainerCalculator has zero owner. " << global.fatal;
   }
-  this->owner->RuleStack.addChildOnTop(theRule);
+  this->owner->ruleStack.addChildOnTop(theRule);
   std::string currentRule;
   if (
     theRule.startsWith(this->owner->opRulesOn()) ||
@@ -415,11 +415,11 @@ void StateMaintainerCalculator::addRule(const Expression& theRule) {
       theRule.startsWith(this->owner->opRulesOff());
     }
   }
-  this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->RuleStack);
+  this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->ruleStack);
   if (this->owner->RuleStackCacheIndex == - 1) {
     if (this->owner->cachedRuleStacks.size < this->owner->MaxCachedExpressionPerRuleStack) {
       this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
-      this->owner->cachedRuleStacks.addOnTop(this->owner->RuleStack);
+      this->owner->cachedRuleStacks.addOnTop(this->owner->ruleStack);
     }
   }
   if (this->owner->flagLogRules) {
@@ -431,14 +431,14 @@ void StateMaintainerCalculator::addRule(const Expression& theRule) {
 StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
   this->owner = &inputBoss;
   this->startingRuleStackIndex = inputBoss.RuleStackCacheIndex;
-  this->startingRuleStackSize = inputBoss.RuleStack.size();
+  this->startingRuleStackSize = inputBoss.ruleStack.size();
 }
 
 StateMaintainerCalculator::~StateMaintainerCalculator() {
   if (this->owner == nullptr) {
     return;
   }
-  Expression& theRuleStack = this->owner->RuleStack;
+  Expression& theRuleStack = this->owner->ruleStack;
   std::string currentRuleName;
   bool shouldUpdateRules = false;
   for (int i = this->startingRuleStackSize; i < theRuleStack.size(); i ++) {
@@ -479,7 +479,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     }
   }
   this->owner->RuleStackCacheIndex = this->startingRuleStackIndex;
-  this->owner->RuleStack.children.setSize(this->startingRuleStackSize);
+  this->owner->ruleStack.children.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
 }
 
@@ -797,10 +797,10 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
   Expression beforepatternMatch, afterpatternMatch;
   for (
     int i = 0;
-    i < this->owner->RuleStack.size() && !this->owner->flagAbortComputationASAP;
+    i < this->owner->ruleStack.size() && !this->owner->flagAbortComputationASAP;
     i ++
   ) {
-    const Expression& currentPattern = this->owner->RuleStack[i];
+    const Expression& currentPattern = this->owner->ruleStack[i];
     this->owner->totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluatioN) {
       beforepatternMatch = *this->outpuT;
@@ -881,7 +881,7 @@ bool Calculator::EvaluateLoop::reduceOnce() {
 }
 
 void Calculator::EvaluateLoop::lookUpCache() {
-  this->owner->EvaluatedExpressionsStack.addOnTop(*(this->outpuT));
+  this->owner->evaluatedExpressionsStack.addOnTop(*(this->outpuT));
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
   theExpressionWithContext.addChildAtomOnTop(this->owner->opSequence());
@@ -953,7 +953,7 @@ bool Calculator::evaluateExpression(
     }
     theCommands << "Evaluating " << input.lispify()
     << " with rule stack cache index "
-    << theCommands.RuleStackCacheIndex; // << this->RuleStack.toString();
+    << theCommands.RuleStackCacheIndex; // << this->ruleStack.toString();
   }
   if (theCommands.recursionDepthExceededHandleRoughly()) {
     return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
@@ -963,7 +963,7 @@ bool Calculator::evaluateExpression(
     theCommands.flagAbortComputationASAP = true;
     return true;
   }
-  if (theCommands.EvaluatedExpressionsStack.contains(input)) {
+  if (theCommands.evaluatedExpressionsStack.contains(input)) {
     std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
     << input.toString()
@@ -983,7 +983,7 @@ bool Calculator::evaluateExpression(
   while (state.reduceOnce()) {
   }
   outputIsNonCacheable = state.flagIsNonCacheable;
-  theCommands.EvaluatedExpressionsStack.removeLastObject();
+  theCommands.evaluatedExpressionsStack.removeLastObject();
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
@@ -1123,25 +1123,25 @@ bool Calculator::parseAndExtractExpressions(
 ) {
   MacroRegisterFunctionWithName("Calculator::parseAndExtractExpressions");
   this->currentSyntacticStack = &outputSynStack;
-  this->CurrrentSyntacticSouP = &outputSynSoup;
+  this->currrentSyntacticSoup = &outputSynSoup;
   this->parseFillDictionary(input);
   bool result = this->extractExpressions(output, outputSynErrors);
   this->currentSyntacticStack = &this->syntacticStacK;
-  this->CurrrentSyntacticSouP = &this->syntacticSouP;
+  this->currrentSyntacticSoup = &this->syntacticSoup;
   return result;
 }
 
 void Calculator::initComputationStats() {
   this->startTimeEvaluationMilliseconds = global.getElapsedMilliseconds();
-  this->NumListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
-  this->NumListResizesStart             = static_cast<signed>( GlobalStatistics::numListResizesTotal);
-  this->NumHashResizesStart             = static_cast<signed>( GlobalStatistics::numHashResizes     );
-  this->NumSmallAdditionsStart          = static_cast<signed>( Rational::TotalSmallAdditions         );
-  this->NumSmallMultiplicationsStart    = static_cast<signed>( Rational::TotalSmallMultiplications   );
-  this->NumSmallGCDcallsStart           = static_cast<signed>( Rational::TotalSmallGCDcalls          );
-  this->NumLargeAdditionsStart          = static_cast<signed>( Rational::TotalLargeAdditions         );
-  this->NumLargeMultiplicationsStart    = static_cast<signed>( Rational::TotalLargeMultiplications   );
-  this->NumLargeGCDcallsStart           = static_cast<signed>( Rational::TotalLargeGCDcalls          );
+  this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
+  this->numberListResizesStart             = static_cast<signed>( GlobalStatistics::numListResizesTotal);
+  this->numberHashResizesStart             = static_cast<signed>( GlobalStatistics::numHashResizes     );
+  this->numberOfSmallAdditionsStart          = static_cast<signed>( Rational::totalSmallAdditions         );
+  this->numberOfSmallMultiplicationsStart    = static_cast<signed>( Rational::totalSmallMultiplications   );
+  this->numberOfSmallGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors          );
+  this->numberOfLargeAdditionsStart          = static_cast<signed>( Rational::totalLargeAdditions         );
+  this->numberOfLargeMultiplicationsStart    = static_cast<signed>( Rational::totalLargeMultiplications   );
+  this->numberOfLargeGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalLargeGreatestCommonDivisors          );
 }
 
 void Calculator::evaluate(const std::string& theInput) {
@@ -1149,7 +1149,7 @@ void Calculator::evaluate(const std::string& theInput) {
   this->initComputationStats();
   this->inputString = theInput;
   this->parseAndExtractExpressions(
-    theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, &this->syntaxErrors
+    theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStacK, &this->syntaxErrors
   );
   this->evaluateCommands();
 }

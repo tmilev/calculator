@@ -22,7 +22,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool LoadFromModulusAndExponentStrings(std::stringstream* commentsOnFailure);
+  bool loadFromModulusAndExponentStrings(std::stringstream* commentsOnFailure);
   std::string toString();
 };
 
@@ -32,7 +32,7 @@ class PrivateKeyRSA {
 public:
   LargeIntegerUnsigned primeOne;
   LargeIntegerUnsigned primeTwo;
-  LargeIntegerUnsigned CarmichaelTotientOfModulus;
+  LargeIntegerUnsigned carmichaelTotientOfModulus;
   LargeIntegerUnsigned privateExponent;
   PublicKeyRSA thePublicKey;
   int bitSize; // = ceiling(log_2 (pimeOne * primeTwo))
@@ -41,26 +41,26 @@ public:
   ASNElement sourceASNOuter;
   ASNElement sourceASNInner;
   PrivateKeyRSA();
-  void ComputeBitSize();
+  void computeBitSize();
   class Test {
     public:
     static bool all();
-    static bool LoadFromPEMFile();
-    static bool LoadFromPEM();
+    static bool loadFromPEMFile();
+    static bool loadFromPEM();
   };
-  bool BasicChecks(std::stringstream* comments);
-  bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
-  bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
-  bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
-  bool GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes);
-  bool ComputeFromTwoPrimes(
+  bool basicChecks(std::stringstream* comments);
+  bool loadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
+  bool loadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
+  bool loadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
+  bool generateRandom(std::stringstream* commentsOnFailure, int numberOfBytes);
+  bool computeFromTwoPrimes(
     LargeIntegerUnsigned& inputPrimeOne,
     LargeIntegerUnsigned& inputPrimeTwo,
     bool verifyInputsArePrime,
     std::stringstream* commentsOnFailure
   );
-  void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
-  void HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
+  void signBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
+  void hashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   std::string toString() const;
 };
 
@@ -77,7 +77,7 @@ public:
     ASNObject emailAddress;
     void computeASN(ASNElement& output);
     std::string toString();
-    bool LoadFields(
+    bool loadFields(
       const MapList<std::string, ASNObject, MathRoutines::hashString>& fields,
       std::stringstream* commentsOnFailure
     );
@@ -108,27 +108,27 @@ public:
   ASNElement validityNotBefore;
   ASNElement validityNotAfter;
   List<ASNElement> extensions;
-  bool LoadValidity(
+  bool loadValidity(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
   bool load(const ASNElement& input, std::stringstream* commentsOnFailure);
-  bool LoadExtensions(
+  bool loadExtensions(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  static bool LoadASNAlgorithmIdentifier(
+  static bool loadASNAlgorithmIdentifier(
     const ASNElement& input,
     ASNElement& output,
     std::stringstream* commentsOnFailure
   );
   std::string toString();
   void computeASN(ASNElement& output);
-  void ComputeASNVersionWrapper(ASNElement& output);
-  void ComputeASNValidityWrapper(ASNElement& output);
-  void ComputeASNSignatureAlgorithmIdentifier(ASNElement& output);
-  void ComputeASNSignature(ASNElement& output);
-  void ComputeASNExtensions(ASNElement& output);
+  void computeASNVersionWrapper(ASNElement& output);
+  void computeASNValidityWrapper(ASNElement& output);
+  void computeASNSignatureAlgorithmIdentifier(ASNElement& output);
+  void computeASNSignature(ASNElement& output);
+  void computeASNExtensions(ASNElement& output);
 };
 
 // For definition, google RFC 5280
@@ -144,12 +144,12 @@ public:
   class Test {
   public:
     static bool all();
-    static bool LoadFromPEMFile();
-    static bool LoadFromPEM();
+    static bool loadFromPEMFile();
+    static bool loadFromPEM();
   };
-  bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
-  bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
-  bool LoadFromASNEncoded(
+  bool loadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
+  bool loadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
+  bool loadFromASNEncoded(
     const List<unsigned char>& input,
     std::stringstream* commentsOnFailure
   );
@@ -159,11 +159,11 @@ public:
     std::stringstream* commentsGeneral
   );
   std::string toString();
-  std::string ToHex();
-  std::string ToStringTestEncode();
+  std::string toHex();
+  std::string toStringTestEncode();
   void computeASN(ASNElement& output);
-  void ComputeASNSignatureAlgorithm(ASNElement& output);
-  void WriteBytesASN1(List<unsigned char>& output, List<Serialization::Marker>* annotations);
+  void computeASNSignatureAlgorithm(ASNElement& output);
+  void writeBytesASN1(List<unsigned char>& output, List<serialization::Marker>* annotations);
 };
 
 class Crypto {
@@ -182,59 +182,59 @@ public:
     static bool sha256();
     static bool all();
   };
-  static bool LoadKnownCertificates(
+  static bool loadKnownCertificates(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  static bool LoadOneKnownCertificate(
+  static bool loadOneKnownCertificate(
     const std::string& input,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  static std::string ConvertStringToBase64Standard(const std::string& input);
-  static std::string ConvertStringToBase64URL(const std::string& input);
-  static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
-  static void ConvertStringToListUInt32BigendianZeroPad(
+  static std::string convertStringToBase64Standard(const std::string& input);
+  static std::string convertStringToBase64URL(const std::string& input);
+  static uint32_t getUInt32FromCharBigendian(const List<unsigned char>& input);
+  static void convertStringToListUInt32BigendianZeroPad(
     const List<unsigned char>& input, List<uint32_t>& output
   );
-  static void ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output);
-  static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
-  static void ConvertUint32ToString(const List<uint32_t>& input, std::string& output);
-  static bool ConvertBase64ToBitStream(
+  static void convertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output);
+  static void convertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
+  static void convertUint32ToString(const List<uint32_t>& input, std::string& output);
+  static bool convertBase64ToBitStream(
     const std::string& input,
     List<unsigned char>& output,
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneral = nullptr
   );
-  static bool ConvertBase64ToString(
+  static bool convertBase64ToString(
     const std::string& input,
     std::string& output,
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneral = nullptr
   );
 
-  static void ConvertStringToLargeIntUnsigned(
+  static void convertStringToLargeIntUnsigned(
     const std::string& input, LargeIntegerUnsigned& output
   );
-  static void ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(
+  static void convertLargeIntUnsignedToBase58SignificantDigitsLAST(
     const LargeIntegerUnsigned& input, std::string& output
   );
-  static void ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(
+  static void convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
     const LargeIntegerUnsigned& input, std::string& output, int numberOfOnesToPrepend
   );
-  static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
+  static bool convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     const std::string& inputSignificantDigitsFirst,
     LargeIntegerUnsigned& output,
     int& numberOfLeadingZeroes,
     std::stringstream* commentsOnFailure
   );
-  static bool ConvertBase58ToHexSignificantDigitsFirst(
+  static bool convertBase58ToHexSignificantDigitsFirst(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );
-  static std::string ConvertIntToHex(int input, int significantBytes);
-  static std::string ConvertUintToHex(unsigned int input, int significantBytes);
-  static std::string ConvertUint64ToHex(uint64_t input);
-  static bool ConvertHexToString(
+  static std::string convertIntToHex(int input, int significantBytes);
+  static std::string convertUintToHex(unsigned int input, int significantBytes);
+  static std::string convertUint64ToHex(uint64_t input);
+  static bool convertHexToString(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );
   static bool convertHexToListUnsignedChar(
@@ -273,22 +273,22 @@ public:
   static bool convertStringToHex(
     const std::string& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
   );
-  static void AppendDoubleSha256Check(const std::string& input, std::string& output);
+  static void appendDoubleSha256Check(const std::string& input, std::string& output);
   static std::string convertStringToHex(
     const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml
   );
-  static bool GetBase58FromChar(char input, uint32_t& output);
-  static bool GetCharFromBase58(uint32_t input, char& output);
-  static bool Get6bitFromChar(unsigned char input, uint32_t& output);
-  static char GetCharFrom6bit(uint32_t input, bool useBase64URL);
-  static void ConvertBitStreamToString(const List<unsigned char>& input, std::string& output);
-  static void ConvertStringToListBytes(const std::string& input, List<unsigned char>& output);
-  static void ConvertStringToListBytesSigned(const std::string& input, List<char>& output);
-  static void ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend);
-  static void ConvertUint64toBigendianListUnsignedCharAppendResult(
+  static bool getBase58FromChar(char input, uint32_t& output);
+  static bool getCharFromBase58(uint32_t input, char& output);
+  static bool get6BitFromChar(unsigned char input, uint32_t& output);
+  static char getCharFrom6Bit(uint32_t input, bool useBase64URL);
+  static void convertBitStreamToString(const List<unsigned char>& input, std::string& output);
+  static void convertStringToListBytes(const std::string& input, List<unsigned char>& output);
+  static void convertStringToListBytesSigned(const std::string& input, List<char>& output);
+  static void convertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend);
+  static void convertUint64toBigendianListUnsignedCharAppendResult(
     uint64_t input, List<unsigned char>& outputAppend
   );
-  static void ConvertUint128toBigendianListUnsignedCharAppendResult(
+  static void convertUint128toBigendianListUnsignedCharAppendResult(
     uint64_t input, List<unsigned char>& outputAppend
   );
   static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
@@ -316,7 +316,7 @@ public:
   static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
   static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void convertListUint32ToLargeIntegerUnsignedLittleEndian(List<uint32_t>& input, LargeIntegerUnsigned& output);
-  static LargeIntegerUnsigned RSAencrypt(
+  static LargeIntegerUnsigned rsaEncrypt(
     const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
   );
   static void convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
@@ -346,7 +346,7 @@ public:
     int numberOfLeadingZeroesToPadWith,
     std::string& output
   );
-  static bool VerifyJWTagainstKnownKeys(
+  static bool verifyJWTagainstKnownKeys(
     const std::string& inputToken,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral

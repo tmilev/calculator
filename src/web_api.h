@@ -303,10 +303,10 @@ public:
   ) {
     return HtmlRoutines::elementToStringTooltip(input, inputTooltip, true);
   }
-  static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
-  static void MakeStdCoutReport(const std::string& input);
-  static void MakeReportIndicatorFile(const std::string& input);
-  static std::string ToHtmlTable(
+  static uint32_t redGreenBlue(unsigned int r, unsigned int g, unsigned int b);
+  static void makeStdCoutReport(const std::string& input);
+  static void makeReportIndicatorFile(const std::string& input);
+  static std::string toHtmlTable(
     List<std::string>& labels,
     List<List<std::string> >& content,
     bool nestTables

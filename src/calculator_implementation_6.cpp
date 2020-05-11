@@ -723,7 +723,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   } else {
     thePlotObj.colorJS = "blue";
   }
-  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
+  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
   DrawingVariables::getColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 8) {
@@ -862,7 +862,7 @@ bool CalculatorFunctions::innerJWTVerifyAgainstKnownKeys(
     return false;
   }
   std::stringstream out;
-  Crypto::VerifyJWTagainstKnownKeys(inputString, &out, &out);
+  Crypto::verifyJWTagainstKnownKeys(inputString, &out, &out);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -877,7 +877,7 @@ bool CalculatorFunctions::innerHexToString(Calculator& theCommands, const Expres
   }
   std::string result;
   std::stringstream commentsOnFailure;
-  if (!Crypto::ConvertHexToString(inputString, result, &commentsOnFailure)) {
+  if (!Crypto::convertHexToString(inputString, result, &commentsOnFailure)) {
     return theCommands << "Failed to interpret your input as string. " << commentsOnFailure.str();
   }
   return output.assignValue(result, theCommands);
@@ -955,7 +955,7 @@ bool CalculatorFunctions::innerBase64ToHex(
     inputString = input[1].toString();
   }
   std::string result, bitStream;
-  if (!Crypto::ConvertBase64ToString(inputString, bitStream, &theCommands.comments, &theCommands.comments)) {
+  if (!Crypto::convertBase64ToString(inputString, bitStream, &theCommands.comments, &theCommands.comments)) {
     return false;
   }
   Crypto::convertStringToHex(bitStream, result, 0, false);
@@ -1005,15 +1005,15 @@ bool CalculatorFunctions::innerTestRSASign(
     return theCommands << "Failed to extract positive integers from the second and third argument. ";
   }
   if (
-    !theKey.ComputeFromTwoPrimes(theKey.primeOne, theKey.primeTwo, true, &errorStream)
+    !theKey.computeFromTwoPrimes(theKey.primeOne, theKey.primeTwo, true, &errorStream)
   ) {
     return theCommands << "Inputs do not appear to be prime. " << errorStream.str();
   }
   List<unsigned char> message, paddedMessage, signature;
   message = messageString;
-  theKey.HashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
+  theKey.hashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
   out << "Temporary private key:<br>" << theKey.toString() << "<br>";
-  theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
+  theKey.signBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
   out << "Message:<br>" << Crypto::convertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::convertListUnsignedCharsToHex(paddedMessage);
   out << "<br>Signature:<br>" << Crypto::convertListUnsignedCharsToHex(signature);
@@ -1058,7 +1058,7 @@ bool CalculatorFunctions::innerRSAEncrypt(
   if (theModulus == 1) {
     return theCommands << "Modulus 1 not allowed";
   }
-  result = Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
+  result = Crypto::rsaEncrypt(theModulus.value, theExponent, theMessage);
   return output.assignValue(Rational(result), theCommands);
 }
 
@@ -2732,7 +2732,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
     << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
     theReport.report(reportStream.str());
     SemisimpleLieAlgebra theAlgebra;
-    theAlgebra.theWeyl.MakeFromDynkinType(theTypes[i]);
+    theAlgebra.theWeyl.makeFromDynkinType(theTypes[i]);
     theAlgebra.computeChevalleyConstants();
     theAlgebra.toHTMLCalculator(true, true, false);
     SltwoSubalgebras theSl2s(theAlgebra);
@@ -2816,7 +2816,7 @@ std::string StringRoutines::convertStringToCalculatorDisplay(
     return converted;
   }
   std::stringstream out;
-  out << "ConvertHexToString{}\"" << converted << "\"";
+  out << "convertHexToString{}\"" << converted << "\"";
   out << "<br>\""
   << StringRoutines::convertStringToJavascriptString(input)
   << "\"";

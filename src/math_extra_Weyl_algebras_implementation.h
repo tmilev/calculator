@@ -38,8 +38,8 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
 ) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN = MathRoutines::maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
-  tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
-  tempSel.MaxMultiplicities.setSize(theDimensioN);
+  tempSel.multiplicities.initializeFillInObject(theDimensioN, 0);
+  tempSel.capacities.setSize(theDimensioN);
   int theExpectedSize = 1;
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
@@ -50,7 +50,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       << " which I cannot handle. If this is bad user input, "
       << "it should have been caught at an earlier level. " << global.fatal;
     }
-    tempSel.MaxMultiplicities[i] = powerDiffOp;
+    tempSel.capacities[i] = powerDiffOp;
     theExpectedSize *= powerDiffOp;
   }
   tempSel.elements.initializeFillInObject(theDimensioN, 0);
@@ -63,7 +63,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   for (int i = 0; i < numCycles; i ++) {
     coeffBuff = 1;
     for (int k = 0; k<theDimensioN; k ++) {
-      int multDrop = tempSel.Multiplicities[k];
+      int multDrop = tempSel.multiplicities[k];
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);
       coeffBuff *= Rational::nChooseK(theDOPower, multDrop) * Rational::nChooseK(thePolPower, multDrop) * Rational::factorial(multDrop);

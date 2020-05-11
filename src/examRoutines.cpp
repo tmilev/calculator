@@ -4066,7 +4066,7 @@ JSData LaTeXCrawler::Slides::toJSON() {
   return result;
 }
 
-bool LaTeXCrawler::Slides::FromJSON(
+bool LaTeXCrawler::Slides::fromJSON(
   JSData& input, std::stringstream* commentsOnFailure
 ) {
   if (!input[WebAPI::request::slides::title].isString(&this->title)) {
@@ -4094,7 +4094,7 @@ bool LaTeXCrawler::Slides::FromJSON(
   return  true;
 }
 
-bool LaTeXCrawler::Slides::FromString(
+bool LaTeXCrawler::Slides::fromString(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
   if (input == "") {
@@ -4109,11 +4109,11 @@ bool LaTeXCrawler::Slides::FromString(
   if (!parsed.readstring(decoded, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your input in "
-      << "LaTeXCrawler::Slides::FromString. ";
+      << "LaTeXCrawler::Slides::fromString. ";
     }
     return false;
   }
-  return this->FromJSON(parsed, commentsOnFailure);
+  return this->fromJSON(parsed, commentsOnFailure);
 }
 
 JSData TopicElement::computeSlidesJSON(CalculatorHTML& owner) {

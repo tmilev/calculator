@@ -94,7 +94,7 @@ public:
   }
   void addOnTop(const Object& o);
   int getIndex(const Object& o) const;
-  bool ContainsExactlyOnce(const Object& o) const {
+  bool containsExactlyOnce(const Object& o) const {
     bool result = false;
     for (int i = 0; i < this->size; i ++) {
       if ((*this)[i] == o) {

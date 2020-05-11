@@ -60,7 +60,7 @@ void Weight<Coefficient>::accountSingleWeight(
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
   for (int i = 0; i < theWeyl.RootsOfBorel.size; i ++) {
-    if (theWeyl.RootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).isEqualToZero()) {
+    if (theWeyl.rootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).isEqualToZero()) {
       return;
     }
   }
@@ -560,7 +560,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   Vectors<Coefficient> orbitDom;
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
-    if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(
+    if (!inputData.WeylFD.generateOrbitReturnFalseIfTruncated(
       theWeyL.getSimpleCoordinatesFromFundamental(
         charAmbientFDWeyl[i].weightFundamentalCoordS
       ),
@@ -595,7 +595,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
     inSimpleCoords = theWeyL.getSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
     for (int j = 0; j < WeylFDSmall.AmbientWeyl->getDimension(); j ++) {
-      fundCoordsSmaller[j] = theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
+      fundCoordsSmaller[j] = theWeyL.rootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
       fundCoordsSmaller[j] /= WeylFDSmall.AmbientWeyl->cartanSymmetric(j, j) / 2;
     }
     tempMon.owner = &theSmallAlgebra;
@@ -658,7 +658,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
       for (int j = 1; j < WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j ++) {
         tempRoot2 = tempRoot;
-        WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
+        WeylFDSmall.AmbientWeyl->actOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }

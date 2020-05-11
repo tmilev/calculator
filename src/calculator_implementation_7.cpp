@@ -204,8 +204,8 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
   X509Certificate theCertificate;
   std::stringstream errorStream, resultStream;
   // May not be initialized if unit testing. Safe after the first run.
-  ASNObject::NamesToObjectIdsNonThreadSafe();
-  bool success = theCertificate.LoadFromASNEncoded(binaryString, &errorStream);
+  ASNObject::namesToObjectIdsNonThreadSafe();
+  bool success = theCertificate.loadFromASNEncoded(binaryString, &errorStream);
   if (!success) {
     resultStream << "Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
@@ -234,13 +234,13 @@ bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
     return theCommands << commentsOnFailure.str();
   }
   testServer.initialize();
-  bool success = testServer.DecodeSSLRecord(&commentsOnFailure);
+  bool success = testServer.decodeSSLRecord(&commentsOnFailure);
   std::stringstream out;
   if (!success) {
     out << "<b style = 'color:red'>Failed to decode the record.</b> "
     << commentsOnFailure.str();
   }
-  out << testServer.lastReaD.ToHtml(1);
+  out << testServer.lastReaD.toHtml(1);
 
   return output.assignValue(out.str(), theCommands);
 }
@@ -275,7 +275,7 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
   }
   spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
-  spoofServer.HandShakeIamServer(- 1, &errorStream);
+  spoofServer.handShakeIamServer(- 1, &errorStream);
 
   std::stringstream out;
   std::stringstream spanId;
@@ -303,8 +303,8 @@ bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
   privateKeyBytes = privateKeyString;
   std::stringstream errorStream, resultStream;
   PrivateKeyRSA thePrivateKey;
-  bool success = thePrivateKey.LoadFromASNEncoded(privateKeyBytes, &errorStream);
-  if (!thePrivateKey.BasicChecks(&resultStream)) {
+  bool success = thePrivateKey.loadFromASNEncoded(privateKeyBytes, &errorStream);
+  if (!thePrivateKey.basicChecks(&resultStream)) {
     resultStream << "<b style = 'color:red'>Private key failed basic checks. </b>";
   }
   if (!success) {
@@ -322,7 +322,7 @@ bool CalculatorFunctions::innerLoadKnownCertificates(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLoadKnownCertificates");
   (void) input;
   std::stringstream out;
-  Crypto::LoadKnownCertificates(&out, &out);
+  Crypto::loadKnownCertificates(&out, &out);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -439,7 +439,7 @@ bool CalculatorFunctions::functionHashString(
     } else if (hashId == "SHA224") {
       Crypto::computeSha224(inputString, theSha1Uint);
     }
-    Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, hashUChar);
+    Crypto::convertUint32ToUcharBigendian(theSha1Uint, hashUChar);
   } else if (hashId == "SHA3_256") {
     Crypto::computeSha3_256(inputString, hashUChar);
   } else if (hashId == "KECCAK256") {
@@ -484,7 +484,7 @@ bool CalculatorFunctions::innerConvertBase64ToString(
   if (!input[1].isOfType(&inputString)) {
     inputString = input[1].toString();
   }
-  if (!Crypto::ConvertBase64ToString(inputString, result, &theCommands.comments)) {
+  if (!Crypto::convertBase64ToString(inputString, result, &theCommands.comments)) {
     return false;
   }
   return output.assignValue(result, theCommands);
@@ -617,7 +617,7 @@ bool CalculatorFunctions::innerConvertIntegerUnsignedToBase58(
     return theCommands << "Conversion from negative integer to base58 not allowed. ";
   }
   std::string result;
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result, 0);
+  Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(theInt.value, result, 0);
   return output.assignValue(result, theCommands);
 }
 
@@ -633,7 +633,7 @@ bool CalculatorFunctions::innerAppendDoubleSha256Check(
     return false;
   }
   std::string outputString;
-  Crypto::AppendDoubleSha256Check(inputString, outputString);
+  Crypto::appendDoubleSha256Check(inputString, outputString);
   return output.assignValue(outputString, theCommands);
 }
 
@@ -699,7 +699,7 @@ bool CalculatorFunctions::innerConvertBase58ToHex(
     return false;
   }
   std::string outputString;
-  if (!Crypto::ConvertBase58ToHexSignificantDigitsFirst(
+  if (!Crypto::convertBase58ToHexSignificantDigitsFirst(
     inputString, outputString, &theCommands.comments
   )) {
     return theCommands << "Failed to convert " << inputString << " to hex. ";
@@ -724,7 +724,7 @@ bool CalculatorFunctions::innerConvertHexToBase58(
   if (!Crypto::convertHexToInteger(inputString, outputInteger, numLeadingZeroBytes)) {
     return theCommands << "Failed to convert " << inputString << " from hex to integer. ";
   }
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString, numLeadingZeroBytes);
+  Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(outputInteger, outputString, numLeadingZeroBytes);
   return output.assignValue(outputString, theCommands);
 }
 
@@ -770,7 +770,7 @@ bool CalculatorFunctions::innerBase64ToCharToBase64Test(
     return false;
   }
   List<unsigned char> theBitStream;
-  if (!Crypto::ConvertBase64ToBitStream(inputString, theBitStream, &theCommands.comments)) {
+  if (!Crypto::convertBase64ToBitStream(inputString, theBitStream, &theCommands.comments)) {
     return false;
   }
   std::stringstream out;
@@ -1355,7 +1355,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure
 ) {
   MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
-  Vector<Polynomial<Rational> > thePolysRational;
+  Vector<Polynomial<Rational> > polynomialsRational;
   ExpressionContext theContext(theCommands);
   bool useArguments =
   input.startsWith(theCommands.getOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystem")) ||
@@ -1366,7 +1366,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   if (useArguments) {
     if (!theCommands.getVectorFromFunctionArguments(
       input,
-      thePolysRational,
+      polynomialsRational,
       &theContext,
       0,
       CalculatorConversions::functionPolynomial<Rational>
@@ -1376,7 +1376,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   } else {
     if (!theCommands.getVector(
       input,
-      thePolysRational,
+      polynomialsRational,
       &theContext,
       0,
       CalculatorConversions::functionPolynomial<Rational>
@@ -1384,43 +1384,44 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
       return output.makeError("Failed to extract list of polynomials. ", theCommands);
     }
   }
-  GroebnerBasisComputation<AlgebraicNumber> theComputation;
-  theContext.getFormat(theComputation.theFormat);
-  int upperLimit = 1001;
+  PolynomialSystem<AlgebraicNumber> system;
+  theContext.getFormat(system.groebner.theFormat);
+  int upperLimit = 501;
   if (useUpperLimit) {
     Rational upperLimitRat;
-    if (!thePolysRational[0].isConstant(&upperLimitRat)) {
+    if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
       return theCommands << "Failed to extract a constant from the first argument "
-      << thePolysRational[0].toString(&theComputation.theFormat) << ". ";
+      << polynomialsRational[0].toString(&system.format()) << ". ";
     }
     if (!upperLimitRat.isIntegerFittingInInt(&upperLimit)) {
       return theCommands << "Failed to extract a small integer from the first argument "
-      << upperLimitRat.toString(&theComputation.theFormat) << ". ";
+      << upperLimitRat.toString(&system.groebner.theFormat) << ". ";
     }
-    thePolysRational.popIndexShiftDown(0);
+    polynomialsRational.popIndexShiftDown(0);
   }
-  Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
-  thePolysAlgebraic = thePolysRational;
-  theComputation.maximumPolynomialComputations = upperLimit;
-  theComputation.maximumSerreSystemComputationsPreferred = upperLimit;
-  theComputation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
-  theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
-  theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
-  global.theDefaultFormat.getElement() = theComputation.theFormat;
-  theComputation.flagUseTheMonomialBranchingOptimization = true;
-  theComputation.solveSerreLikeSystem(thePolysAlgebraic);
+  Vector<Polynomial<AlgebraicNumber> > polynomials;
+  polynomials = polynomialsRational;
+  system.groebner.maximumPolynomialComputations = upperLimit;
+  system.maximumSerreSystemComputationsPreferred = upperLimit;
+  system.groebner.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+  system.theAlgebraicClosure = &theCommands.theObjectContainer.theAlgebraicClosure;
+  system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
+  global.theDefaultFormat.getElement() = system.groebner.theFormat;
+  system.flagUseTheMonomialBranchingOptimization = true;
+  system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.toString();
-  out << "<br>The polynomials: " << thePolysAlgebraic.toString(&theComputation.theFormat);
-  out << "<br>Total number of polynomial computations: " << theComputation.numberOfSerreSystemComputations;
-  if (theComputation.flagSystemProvenToHaveNoSolution) {
+  out << "<br>The polynomials: " << polynomials.toString(&system.groebner.theFormat);
+  out << "<br>Total number of polynomial computations: "
+  << system.numberOfSerreSystemComputations;
+  if (system.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
-  } else if (theComputation.flagSystemProvenToHaveSolution) {
+  } else if (system.flagSystemProvenToHaveSolution) {
     out << "<br>System proven to have solution. ";
   }
-  if (!theComputation.flagSystemProvenToHaveNoSolution) {
-    if (theComputation.flagSystemSolvedOverBaseField) {
-      out << "<br>One solution follows. " << theComputation.toStringSerreLikeSolution();
+  if (!system.flagSystemProvenToHaveNoSolution) {
+    if (system.flagSystemSolvedOverBaseField) {
+      out << "<br>One solution follows. " << system.toStringSerreLikeSolution();
     } else {
       out << "However, I was unable to find such a solution: my heuristics are not good enough.";
     }
@@ -1562,7 +1563,7 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   MacroRegisterFunctionWithName("Polynomial::getPolynomialWithPolynomialCoefficient");
-  if (theNonCoefficientVariables.MaxSize != this->minimalNumberOfVariables()) {
+  if (theNonCoefficientVariables.maximumSize != this->minimalNumberOfVariables()) {
     global.fatal << "getPolynomialWithPolynomialCoefficient called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
@@ -1647,7 +1648,7 @@ Coefficient Polynomial<Coefficient>::GetDiscriminant() {
   return b * b - a * c * 4;
 }
 
-class IntegralRFComputation {
+class IntegralRationalFunctionComputation {
 public:
   RationalFunction<Rational> theRF;
   Polynomial<Rational> theDen, theNum;
@@ -1665,7 +1666,7 @@ public:
   Calculator* owner;
   bool allFactorsAreOfDegree2orless;
   bool needPolyDivision;
-  int NumberOfSystemVariables;
+  int numberOfSystemVariables;
   std::stringstream printoutPFsHtml;
   std::stringstream printoutPFsLatex;
   std::stringstream printoutIntegration;
@@ -1680,26 +1681,26 @@ public:
   List<Expression> theIntegralSummands;
   Expression theIntegralSum;
   bool computePartialFractionDecomposition();
-  void PrepareFormatExpressions();
-  void PrepareDenominatorFactors();
-  void PrepareNumerators();
-  void PrepareFinalAnswer();
-  bool PreparePFExpressionSummands();
-  std::string ToStringRationalFunctionLatex();
-  bool IntegrateRF();
-  IntegralRFComputation(Calculator* inputOwner): owner(inputOwner) {}
+  void prepareFormatExpressions();
+  void prepareDenominatorFactors();
+  void prepareNumerators();
+  void prepareFinalAnswer();
+  bool preparePartialFractionExpressionSummands();
+  std::string toStringRationalFunctionLatex();
+  bool integrateRationalFunction();
+  IntegralRationalFunctionComputation(Calculator* inputOwner): owner(inputOwner) {}
   bool checkConsistency() const;
 };
 
-bool IntegralRFComputation::checkConsistency() const {
+bool IntegralRationalFunctionComputation::checkConsistency() const {
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized rf computation" << global.fatal;
   }
   return true;
 }
 
-bool IntegralRFComputation::PreparePFExpressionSummands() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::PreparePFExpressionSummands");
+bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands");
   this->checkConsistency();
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic,
   currentDen, currentPFnoCoeff, currentPFWithCoeff,
@@ -1764,8 +1765,8 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
   return true;
 }
 
-bool IntegralRFComputation::IntegrateRF() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::IntegrateRF");
+bool IntegralRationalFunctionComputation::integrateRationalFunction() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::integrateRationalFunction");
   this->checkConsistency();
   if (!this->computePartialFractionDecomposition()) {
     printoutIntegration
@@ -1849,8 +1850,8 @@ bool IntegralRFComputation::IntegrateRF() {
   return true;
 }
 
-void IntegralRFComputation::PrepareFormatExpressions() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFormatExpressions");
+void IntegralRationalFunctionComputation::prepareFormatExpressions() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFormatExpressions");
   std::stringstream rfStream, polyStream;
   rfStream << transformedRF.toString(&this->currentFormaT) << " = ";
   polyStream << remainderRescaledAlgebraic.toString(&this->currentFormaT) << " = ";
@@ -1921,13 +1922,13 @@ void IntegralRFComputation::PrepareFormatExpressions() {
   this->stringPolyIndentityNonSimplifiedLatex = polyStream.str();
 }
 
-void IntegralRFComputation::PrepareNumerators() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::PrepareNumerators");
+void IntegralRationalFunctionComputation::prepareNumerators() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareNumerators");
   this->transformedRF = this->remainderRat;
   this->transformedRF /= this->theDen;
   this->remainderRescaledAlgebraic = this->remainderRat;
   this->remainderRescaledAlgebraic /= additionalMultiple;
-  this->NumberOfSystemVariables = 0;
+  this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
   MonomialP currentMon;
   this->thePolyThatMustVanish.makeZero();
@@ -1941,8 +1942,8 @@ void IntegralRFComputation::PrepareNumerators() {
       currentSummand.makeZero();
       this->theNumerators[i][k].makeZero();
       for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
-        this->NumberOfSystemVariables ++;
-        currentMon.makeEi(this->NumberOfSystemVariables);
+        this->numberOfSystemVariables ++;
+        currentMon.makeEi(this->numberOfSystemVariables);
         currentMon.setVariable(0, j);
         this->theNumerators[i][k].addMonomial(currentMon, 1);
         currentSummand.addMonomial(currentMon, 1);
@@ -1964,8 +1965,8 @@ void IntegralRFComputation::PrepareNumerators() {
   }
 }
 
-void IntegralRFComputation::PrepareFinalAnswer() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFinalAnswer");
+void IntegralRationalFunctionComputation::prepareFinalAnswer() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareFinalAnswer");
   std::stringstream rfComputedStream, answerFinalStream;
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
@@ -1999,8 +2000,8 @@ void IntegralRFComputation::PrepareFinalAnswer() {
   this->stringFinalAnswer = answerFinalStream.str();
 }
 
-void IntegralRFComputation::PrepareDenominatorFactors() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
+void IntegralRationalFunctionComputation::prepareDenominatorFactors() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::prepareDenominatorFactors");
   this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::getMathSpanPure(
     "\\frac{" + this->theNum.toString(&this->currentFormaT) + "}{" + this->theDen.toString(&this->currentFormaT) + "}"
   )
@@ -2033,8 +2034,8 @@ void IntegralRFComputation::PrepareDenominatorFactors() {
   this->printoutPFsHtml << ". <br>";
 }
 
-bool IntegralRFComputation::computePartialFractionDecomposition() {
-  MacroRegisterFunctionWithName("IntegralRFComputation::computePartialFractionDecomposition");
+bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() {
+  MacroRegisterFunctionWithName("IntegralRationalFunctionComputation::computePartialFractionDecomposition");
   this->checkConsistency();
   this->context = this->inpuTE.getContext();
   this->context.getFormat(this->currentFormaT);
@@ -2078,7 +2079,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   this->printoutPFsLatex
   << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
   << "\\begin{document}";
-  this->PrepareDenominatorFactors();
+  this->prepareDenominatorFactors();
   if (!allFactorsAreOfDegree2orless) {
     this->printoutPFsHtml
     << "There were factors (over the rationals) of "
@@ -2174,8 +2175,8 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   << "'s so that I have the equality of rational functions: ";
   this->printoutPFsLatex
   << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
-  this->PrepareNumerators();
-  this->PrepareFormatExpressions();
+  this->prepareNumerators();
+  this->prepareFormatExpressions();
   this->printoutPFsHtml << HtmlRoutines::getMathSpanPure(this->stringRationalFunctionLatex, - 1);
   this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
   this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
@@ -2203,7 +2204,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
   this->currentFormaT.flagUseHTML = false;
   theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.makeIdentitySubstitution(this->NumberOfSystemVariables + 1);
+  theSub.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
   for (int i = 1; i < theSub.size; i ++) {
     theSub[i].makeConstant(theConstTerms(i - 1, 0));
   }
@@ -2212,7 +2213,7 @@ bool IntegralRFComputation::computePartialFractionDecomposition() {
       this->theNumerators[i][k].substitution(theSub);
     }
   }
-  this->PrepareFinalAnswer();
+  this->prepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
   << HtmlRoutines::getMathSpanPure(this->stringFinalAnswer);
   this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
@@ -2239,7 +2240,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
-  IntegralRFComputation theComputation(&theCommands);
+  IntegralRationalFunctionComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::functionRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
@@ -2259,7 +2260,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
     return theCommands << "Did not manage do decompose "
     << input.toString() << " into partial fractions. ";
   }
-  if (!theComputation.PreparePFExpressionSummands()) {
+  if (!theComputation.preparePartialFractionExpressionSummands()) {
     return theCommands << "Something went wrong while collecting summands "
     << "while splitting "
     << input.toString() << " into partial fractions. ";
@@ -2271,7 +2272,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
-  IntegralRFComputation theComputation(&theCommands);
+  IntegralRationalFunctionComputation theComputation(&theCommands);
   bool isGood = CalculatorConversions::innerRationalFunctioN(theCommands, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.isOfType<RationalFunction<Rational> >();
@@ -3433,16 +3434,16 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   Rational totalSamples = theSamplingSelector.totalNumberSubsetsSmallInt();
   Rational numFailedSamples = 0;
   do {
-    for (int i = 0; i < theSamplingSelector.Multiplicities.size; i ++) {
+    for (int i = 0; i < theSamplingSelector.multiplicities.size; i ++) {
       double& currentValue = knownValues[i + theCommands.knownDoubleConstants.size];
       double& lBound = leftBoundaries[i];
       double& rBound = rightBoundaries[i];
-      if (theSamplingSelector.MaxMultiplicities[i] == 1) {
+      if (theSamplingSelector.capacities[i] == 1) {
         currentValue = (lBound + rBound) / 2;
         continue;
       }
-      double paramBnZeroAndOne = theSamplingSelector.Multiplicities[i];
-      paramBnZeroAndOne /= theSamplingSelector.MaxMultiplicities[i] - 1;
+      double paramBnZeroAndOne = theSamplingSelector.multiplicities[i];
+      paramBnZeroAndOne /= theSamplingSelector.capacities[i] - 1;
       currentValue = lBound *(1 - paramBnZeroAndOne) + rBound * paramBnZeroAndOne;
     }
     double floatingResult = 0;
@@ -4003,7 +4004,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
   }
-  IntegralRFComputation theComputation(&theCommands);
+  IntegralRationalFunctionComputation theComputation(&theCommands);
   if (!CalculatorConversions::functionRationalFunction(
     theCommands, theFunctionE, theComputation.inpuTE
   )) {
@@ -4042,7 +4043,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
   if (theComputation.theDen.totalDegree() < 1) {
     return false;
   }
-  if (!theComputation.IntegrateRF()) {
+  if (!theComputation.integrateRationalFunction()) {
     return theCommands << theComputation.printoutIntegration.str();
   }
   theComputation.theIntegralSum.checkConsistencyRecursively();
@@ -6059,7 +6060,7 @@ bool CalculatorFunctions::innerPlotViewWindow(
     widthHeight[0] = 100;
     widthHeight[1] = 100;
     MapList<std::string, Expression, MathRoutines::hashString> theMap;
-    if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
+    if (!CalculatorConversions::innerLoadKeysFromStatementList(
       theCommands, input, theMap, nullptr, false
     )) {
       isGood = false;
@@ -6230,7 +6231,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   } else {
     thePlotObj.colorJS = "red";
   }
-  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
+  thePlotObj.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   DrawingVariables::getColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 6) {
@@ -6401,7 +6402,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
     }
   }
   thePlot.dimension = theFinalPlot.dimension;
-  thePlot.colorRGB =static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
+  thePlot.colorRGB =static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   if (input[2].isOfType<std::string>()) {
     DrawingVariables::getColorIntFromColorString(input[2].getValue<std::string>(), thePlot.colorRGB);
   }
@@ -6699,7 +6700,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     HtmlRoutines::getJavascriptVariable(thePlot.variablesInPlay[0].toString())
   );
   thePlot.colorJS = "red";
-  thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
+  thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
     if (!input[4].isOfType<std::string>(&thePlot.colorJS)) {
       thePlot.colorJS = input[4].toString();
@@ -6897,7 +6898,7 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
     out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
     << theSAs.owner->theWeyl.theDynkinType.toString() << ", (";
     for (int j = 0; j < theChains[i].size; j ++) {
-      CalculatorConversions::innerStoreCandidateSA(
+      CalculatorConversions::innerStoreCandidateSubalgebra(
         theCommands, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE
       );
       out << currentChainE.toString();
@@ -7008,8 +7009,8 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
   return output.assignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEmbedSSalgInSSalg");
+bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra");
   if (input.size() != 3) {
     return output.makeError("I expect two arguments - the two semisimple subalgebras.", theCommands);
   }
@@ -7208,11 +7209,11 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
     return output.makeError("Error extracting Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra& theSSalgebra = *theSSPointer.content;
-  int numCycles = MathRoutines::twoToTheNth(selectionParSel.MaxSize);
+  int numCycles = MathRoutines::twoToTheNth(selectionParSel.maximumSize);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
   for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
-    theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
+    theSubgroup.makeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
     out << "<hr>" << HtmlRoutines::getMathSpanPure(theSubgroup.toString());
   }
   return output.assignValue(out.str(), theCommands);
@@ -7244,10 +7245,10 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   WeylGroupData& theAmbientWeyl = theSSalgebra.theWeyl;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
-  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500)) {
+  if (!theSubgroup.makeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500)) {
     return output.makeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   }
-  theSubgroup.FindQuotientRepresentatives(2000);
+  theSubgroup.findQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: "
   << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
@@ -7256,7 +7257,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   FormatExpressions theFormat;
   theSSalgPointer.context.getFormat(theFormat);
   if (theSubgroup.allElements.size > 498) {
-    if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.getSize()) {
+    if (theSubgroup.AmbientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.getSize()) {
       out << "Weyl group is too large. <br>";
     } else {
       out << "Weyl group is too large for LaTeX. <br>";
@@ -7266,10 +7267,10 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
     std::string fileHasse, fileCosetGraph;
     bool useJavascript = (theSubgroup.allElements.size < 100);
     outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-    outputFileContent << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+    outputFileContent << "\\[" << theSubgroup.toStringBruhatGraph() << "\\]";
     outputFileContent << "\n\\end{document}";
     outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-    outputFileContent2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
+    outputFileContent2 << "\\[" << theSubgroup.toStringCosetGraph() << "\\]";
     outputFileContent2 << "\n\\end{document}";
     theCommands.writeDefaultLatexFileReturnHtmlLink(outputFileContent.str(), &fileHasse, true);
     theCommands.writeDefaultLatexFileReturnHtmlLink(outputFileContent2.str(), &fileCosetGraph, true);
@@ -7302,7 +7303,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
       << (useJavascript ? HtmlRoutines::getMathSpanPure(current.toString()) : current.toString())
       << "</td>";
       theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
-      theSSalgebra.theWeyl.ActOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
+      theSSalgebra.theWeyl.actOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
       << (useJavascript ? HtmlRoutines::getMathSpanPure(theHWsimplecoords.toString(&theFormat))
       : theHWsimplecoords.toString(&theFormat))
@@ -7515,7 +7516,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   for (int i = 0; i < parSel.cardinalitySelection; i ++) {
     theHWFundCoordsFDPart[parSel.elements[i]] = 0;
   }
-  KLpolys theKLpolys;
+  KazhdanLusztigPolynomials theKLpolys;
   WeylGroupData& theWeyl = theSSlieAlg.content->theWeyl;
   if (!theKLpolys.computeKLPolys(&theWeyl)) {
     return output.makeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
@@ -7523,7 +7524,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart += theWeyl.rho;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSub;
-  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
+  if (!theSub.makeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
     return output.makeError(
       "Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).",
       theCommands
@@ -7531,21 +7532,21 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   }
   theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
-  theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
+  theSub.getGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunction<Rational> > currentHW;
   out << "<br>Orbit modified with small rho: "
   << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
   for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
     currentHW = theHWsimpCoords;
-    currentHW += theSub.GetRho();
+    currentHW += theSub.getRho();
     theWeyl.actOn(i, currentHW);
-    currentHW -= theSub.GetRho();
+    currentHW -= theSub.getRho();
     out << "<tr><td>" << currentHW.toString() << "</td><td>"
     << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
   }
   out << "</table>";
   out << "<br>The rho of the Levi part is: "
-  << theSub.GetRho().toString() << "<br>Weyl group of Levi part follows. "
+  << theSub.getRho().toString() << "<br>Weyl group of Levi part follows. "
   << "<br><table><tr><td>Weyl element</td>"
   << "<td>Image hw under small rho modified action fund coords</td>"
   << "<td>Character Verma given h.w.</td></tr>";
@@ -7576,16 +7577,16 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     for (int j = 0; j < theKLpolys.theKLcoeffs[indexInWeyl].size; j ++) {
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].isEqualToZero()) {
         currentHW = theHWsimpCoords;
-        theWeyl.ActOnRhoModified(j, currentHW);
+        theWeyl.actOnRhoModified(j, currentHW);
         theMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
         int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
         currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
       }
     }
     currentHW = theHWsimpCoords;
-    currentHW += theSub.GetRho();
+    currentHW += theSub.getRho();
     theWeyl.actOn(indexInWeyl, currentHW);
-    currentHW -= theSub.GetRho();
+    currentHW -= theSub.getRho();
     out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << HtmlRoutines::getMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
@@ -7710,7 +7711,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = highestWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++) {
-        theHWrf[invertedSelInducing.elements[k]] += Rational(theHWenumerator.Multiplicities[k]);
+        theHWrf[invertedSelInducing.elements[k]] += Rational(theHWenumerator.multiplicities[k]);
       }
       theHws.addOnTop(theHWrf);
     }
@@ -7870,23 +7871,23 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   ModuleSSalgebra<RationalFunction<Rational> >& theFDMod = theHWfd[0].theMons[0].getOwner();
   if (
     theGenMod.owner != theFDMod.owner ||
-    theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
-    theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
+    theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize ||
+    theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize
   ) {
     global.fatal << "This is a programming error: the two modules have owners, "
     << theFDMod.getOwner().theWeyl.theDynkinType.toString()
     << " and " << theGenMod.getOwner().theWeyl.theDynkinType.toString() << ", and parabolic selections of max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
-    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << global.fatal;
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize
+    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize << global.fatal;
   }
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir, theCasimirMinusChar;
   CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.makeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction<Rational> > > theLeviEigenVectors;
   Vectors<RationalFunction<Rational> > theEigenVectorWeightsFund;
-  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.getOwner().getRank()) {
+  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize != theGenMod.getOwner().getRank()) {
     global.fatal << "This is a programming error: module has parabolic selection with max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize << " but the ambient semisimple Lie algebra is of rank "
     << theGenMod.getOwner().getRank() << ". " << global.fatal;
   }
   std::string report;
@@ -7929,7 +7930,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempMon.weightFundamentalCoordS = theEigenVectorWeightsFund[i];
     tempMon.weightFundamentalCoordS += theGenMod.theHWFundamentalCoordsBaseField;
     theFDLeviSplitShifteD.addMonomial(tempMon, RFOne);
-    currentHWdualcoords = theSSalgebra.content->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
+    currentHWdualcoords = theSSalgebra.content->theWeyl.getDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar = theCasimir;
     currentChar.modOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.addOnTop(currentChar);
@@ -8076,7 +8077,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   WeylGroupData& theWeyl = constSSalg.theWeyl;
   Vector<RationalFunction<Rational> > hwDualCoords;
   constSSalg.orderSSalgebraForHWbfComputation();
-  hwDualCoords = theWeyl.GetDualCoordinatesFromFundamental(weight);
+  hwDualCoords = theWeyl.getDualCoordinatesFromFundamental(weight);
   RationalFunction<Rational> outputRF;
   if (!leftUE.highestWeightTransposeAntiAutomorphismBilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.comments)) {
     return output.makeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
@@ -8190,7 +8191,7 @@ bool Calculator::innerPrintB3G2branchingTableCommon(Calculator& theCommands,
     for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = theG2B3Data.theWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++)
-        theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.Multiplicities[k];
+        theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.multiplicities[k];
       outputHWs.addOnTop(theHWrf);
     }
   }
@@ -9039,7 +9040,7 @@ void Calculator::Test::calculatorTestPrepare() {
     global.fatal << "Non-initialized calculator test. " << global.fatal;
   }
   this->commands.clear();
-  for (int i = 0; i < this->owner->NumPredefinedAtoms; i ++) {
+  for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& currentPointer = this->owner->operations.theValues[i];
     if (currentPointer.isZeroPointer()) {
       continue;
@@ -9111,7 +9112,7 @@ bool CalculatorFunctions::innerPrintRuleStack(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintRuleStack");
   (void) input;//portable way of avoiding unused parameter warning
-  return output.assignValue(theCommands.RuleStack.toString(), theCommands);
+  return output.assignValue(theCommands.ruleStack.toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerCrash(

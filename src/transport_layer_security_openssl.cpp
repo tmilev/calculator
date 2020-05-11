@@ -18,27 +18,27 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WA
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
-  this->FreeSSL();
-  this->FreeContext();
+  this->freeSSL();
+  this->freeContext();
 }
 
-void TransportLayerSecurityOpenSSL::FreeSSL() {
+void TransportLayerSecurityOpenSSL::freeSSL() {
 #ifdef MACRO_use_open_ssl
   SSL_free(this->sslData);
   this->sslData = nullptr;
 #endif
 }
 
-void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
+void TransportLayerSecurityOpenSSL::freeEverythingShutdownSSL() {
   if (!global.flagSSLIsAvailable) {
     return;
   }
   global.flagSSLIsAvailable = false;
-  this->FreeSSL();
-  this->FreeContext();
+  this->freeSSL();
+  this->freeContext();
 }
 
-void TransportLayerSecurityOpenSSL::FreeContext() {
+void TransportLayerSecurityOpenSSL::freeContext() {
 #ifdef MACRO_use_open_ssl
   // if (this->context != nullptr && this->name != "") {
   // }
@@ -125,15 +125,15 @@ void TransportLayerSecurityOpenSSL::initSSLClient() {
   this->initSSLCommon(false);
 }
 
-bool TransportLayerSecurityOpenSSL::CheckCanInitializeToClient() {
-  return this->CheckCanInitialize(false);
+bool TransportLayerSecurityOpenSSL::checkCanInitializeToClient() {
+  return this->checkCanInitialize(false);
 }
 
-bool TransportLayerSecurityOpenSSL::CheckCanInitializeToServer() {
-  return this->CheckCanInitialize(true);
+bool TransportLayerSecurityOpenSSL::checkCanInitializeToServer() {
+  return this->checkCanInitialize(true);
 }
 
-bool TransportLayerSecurityOpenSSL::CheckCanInitialize(bool toServer) {
+bool TransportLayerSecurityOpenSSL::checkCanInitialize(bool toServer) {
   if (this->flagContextInitialized) {
     if (this->flagIsServer != toServer) {
       global.fatal << "Attempt to initialize TLS as both server and client. " << global.fatal;
@@ -145,7 +145,7 @@ bool TransportLayerSecurityOpenSSL::CheckCanInitialize(bool toServer) {
 
 void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLCommon");
-  this->CheckCanInitialize(isServer);
+  this->checkCanInitialize(isServer);
   if (this->flagContextInitialized) {
     return;
   }
@@ -260,7 +260,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
 #endif // MACRO_use_open_ssl
 }
 
-void TransportLayerSecurityOpenSSL::ClearErrorQueue(
+void TransportLayerSecurityOpenSSL::clearErrorQueue(
   int errorCode,
   std::string* outputError,
   std::stringstream* commentsGeneral,
@@ -344,8 +344,8 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
 #endif // MACRO_use_open_ssl
 }
 
-void TransportLayerSecurityOpenSSL::DoSetSocket(int theSocket) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::DoSetSocket");
+void TransportLayerSecurityOpenSSL::doSetSocket(int theSocket) {
+  MacroRegisterFunctionWithName("TransportLayerSecurity::doSetSocket");
   (void) theSocket;
 #ifdef MACRO_use_open_ssl
   int result = 0;
@@ -362,7 +362,7 @@ void TransportLayerSecurityOpenSSL::DoSetSocket(int theSocket) {
 #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
+bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   int inputSocketID,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
@@ -370,7 +370,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   (void) inputSocketID;
   (void) commentsOnFailure;
   (void) commentsGeneral;
-  this->FreeSSL();
+  this->freeSSL();
   this->initSSLClient();
 #ifdef MACRO_use_open_ssl
 
@@ -380,7 +380,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
     global << Logger::red << "Failed to allocate ssl. " << Logger::endL;
     global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
   }
-  this->SetSocketAddToStack(inputSocketID);
+  this->setSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 4;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
     this->errorCode = SSL_connect(this->sslData);
@@ -479,7 +479,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   // Get the cipher - opt.
   // Get client's certificate (note: beware of dynamic allocation) - opt.
   if ((false)) {
-    this->InspectCertificates(commentsOnFailure, commentsGeneral);
+    this->inspectCertificates(commentsOnFailure, commentsGeneral);
   }
   return true;
 #else
@@ -487,10 +487,10 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
 #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::InspectCertificates(
+bool TransportLayerSecurityOpenSSL::inspectCertificates(
   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::InspectCertificates");
+  MacroRegisterFunctionWithName("TransportLayerSecurity::inspectCertificates");
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
@@ -545,7 +545,7 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
 #endif
 }
 
-int TransportLayerSecurityOpenSSL::SSLRead(
+int TransportLayerSecurityOpenSSL::sslRead(
   List<char>& readBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
@@ -558,7 +558,7 @@ int TransportLayerSecurityOpenSSL::SSLRead(
 #ifdef MACRO_use_open_ssl
   ERR_clear_error();
   int result = SSL_read(this->sslData, readBuffer.objects, readBuffer.size);
-  this->ClearErrorQueue(
+  this->clearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
   return result;
@@ -567,7 +567,7 @@ int TransportLayerSecurityOpenSSL::SSLRead(
 #endif // MACRO_use_open_ssl
 }
 
-int TransportLayerSecurityOpenSSL::SSLWrite(
+int TransportLayerSecurityOpenSSL::sslWrite(
   const List<char>& writeBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
@@ -589,7 +589,7 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
     global.fatal << "Uninitialized ssl not allowed here. " << global.fatal;
   }
   int result = SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
-  this->ClearErrorQueue(
+  this->clearErrorQueue(
     result, outputError, commentsOnError, includeNoErrorInComments
   );
   return result;
@@ -598,10 +598,10 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
 #endif
 }
 
-bool TransportLayerSecurityOpenSSL::HandShakeIamServer(
+bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
+  MacroRegisterFunctionWithName("WebServer::handShakeIamServer");
   (void) inputSocketID;
   (void) commentsOnFailure;
   if (this->sslData != nullptr) {
@@ -613,7 +613,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(
   if (this->sslData == nullptr) {
     global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
   }
-  this->SetSocketAddToStack(inputSocketID);
+  this->setSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 3;
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {

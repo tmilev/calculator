@@ -305,14 +305,14 @@ void WebCrawler::PingCalculatorStatus() {
     }
     std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
-    numBytesWritten = Pipe::WriteWithTimeoutViaSelect(this->theSocket, getMessage, 1, 10, &errorStream1);
+    numBytesWritten = Pipe::writeWithTimeoutViaSelect(this->theSocket, getMessage, 1, 10, &errorStream1);
     if (static_cast<unsigned>(numBytesWritten) != getMessage.size()) {
       this->lastTransactionErrors += "\nERROR writing to socket. " + errorStream1.str();
       close(this->theSocket);
       continue;
     }
     std::stringstream errorStream2;
-    this->lastNumBytesRead = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
+    this->lastNumBytesRead = Pipe::readWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
     if (this->lastNumBytesRead < 0) {
       this->lastTransactionErrors += "ERROR reading from socket. " + errorStream2.str();
       close(this->theSocket);
@@ -332,7 +332,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
-  this->theTSL.openSSLData.CheckCanInitializeToClient();
+  this->theTSL.openSSLData.checkCanInitializeToClient();
   this->theTSL.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
   this->lastTransaction = "";
@@ -442,7 +442,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    global.server().theTLS.RemoveLastSocket();
+    global.server().theTLS.removeLastSocket();
     close(this->theSocket);
     break;
   }
@@ -468,8 +468,8 @@ void WebCrawler::FetchWebPagePart2(
     theMessageHeader << "\r\n\r\n";
     theMessageHeader << this->postMessageToSend;
   }
-  this->theTSL.openSSLData.CheckCanInitializeToClient();
-  if (!this->theTSL.HandShakeIamClientNoSocketCleanup(
+  this->theTSL.openSSLData.checkCanInitializeToClient();
+  if (!this->theTSL.handShakeIAmClientNoSocketCleanup(
     this->theSocket, commentsOnFailure, commentsGeneral
   )) {
     if (commentsOnFailure != nullptr) {
@@ -484,7 +484,7 @@ void WebCrawler::FetchWebPagePart2(
     *commentsGeneral << "<hr>";
   }
   std::string errorSSL;
-  if (!this->theTSL.SSLWriteLoop(
+  if (!this->theTSL.sslWriteLoop(
     10, theMessageHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
@@ -492,7 +492,7 @@ void WebCrawler::FetchWebPagePart2(
     }
     return;
   }
-  if (!this->theTSL.SSLReadLoop(
+  if (!this->theTSL.sslReadLoop(
     10, this->headerReceived, 0, &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
@@ -554,7 +554,7 @@ void WebCrawler::FetchWebPagePart2(
   }
   this->flagContinueWasNeeded = true;
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
-  if (!this->theTSL.SSLWriteLoop(
+  if (!this->theTSL.sslWriteLoop(
     10, theContinueHeader.str(), &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
@@ -563,7 +563,7 @@ void WebCrawler::FetchWebPagePart2(
     return;
   }
   std::string secondPart;
-  if (!this->theTSL.SSLReadLoop(
+  if (!this->theTSL.sslReadLoop(
     10, secondPart, expectedLength, &errorSSL, commentsGeneral, true
   )) {
     if (commentsOnFailure != nullptr) {
@@ -597,7 +597,7 @@ void WebCrawler::FetchWebPagePart2(
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
     }
   }
-  this->theTSL.Free();
+  this->theTSL.free();
 #endif
 }
 
@@ -738,12 +738,12 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   googleKeysFile.flush();
 }
 
-bool Crypto::VerifyJWTagainstKnownKeys(
+bool Crypto::verifyJWTagainstKnownKeys(
   const std::string& inputToken,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::VerifyJWTagainstKnownKeys");
+  MacroRegisterFunctionWithName("Crypto::verifyJWTagainstKnownKeys");
   // This function is slightly insecure.
   // If an attacker hijacks a machine connecting the server to the outside
   // and impersonates google
@@ -786,7 +786,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     *commentsGeneral << "Seeking key: <b style =\"color:brown\">" << keyIDstring << "</b>. ";
   }
   for (int i = 0; i < 2; i ++) {
-    Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
+    Crypto::loadKnownCertificates(commentsOnFailure, commentsGeneral);
     for (int j = 0; j < Crypto::knownCertificates.size; j ++) {
       if (keyIDstring == Crypto::knownCertificates[j].keyid) {
         theIndex = j;

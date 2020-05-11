@@ -27,7 +27,7 @@ std::string SyntacticElement::toStringHumanReadable(Calculator& theBoss, bool in
   out << "<tr><td style = \"text-align:center\">" << this->theData.toString(nullptr) << "</td></tr>";
   out << "<tr><td style = \"color:#AAAAAA\">" << controlString << "</td></tr>";
   if (includeLispifiedExpressions) {
-    out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.toStringFull() << "</td></tr>";
+    out << "<tr><td style =\"color:#AAAAAA\">" << this->theData.toStringFull() << "</td></tr>";
   }
   if (this->errorString != "") {
     out << "<tr><td>" << this->errorString << "</td></tr>";
@@ -53,16 +53,16 @@ void Calculator::reset() {
   this->maximumRecursionDepth = 10000;
   this->RecursionDeptH = 0;
   this->NumErrors = 0;
-  this->NumListsStart               = - 1;
-  this->NumListResizesStart         = - 1;
-  this->NumHashResizesStart         = - 1;
-  this->NumSmallAdditionsStart      = - 1;
-  this->NumSmallMultiplicationsStart = - 1;
-  this->NumSmallGCDcallsStart       = - 1;
-  this->NumLargeAdditionsStart      = - 1;
-  this->NumLargeMultiplicationsStart = - 1;
-  this->NumLargeGCDcallsStart       = - 1;
-  this->LastLogEvaluationTime = global.getElapsedSeconds();
+  this->numberOfListsStart               = - 1;
+  this->numberListResizesStart         = - 1;
+  this->numberHashResizesStart         = - 1;
+  this->numberOfSmallAdditionsStart      = - 1;
+  this->numberOfSmallMultiplicationsStart = - 1;
+  this->numberOfSmallGreatestCommonDivisorsStart       = - 1;
+  this->numberOfLargeAdditionsStart      = - 1;
+  this->numberOfLargeMultiplicationsStart = - 1;
+  this->numberOfLargeGreatestCommonDivisorsStart       = - 1;
+  this->lastLogEvaluationTime = global.getElapsedSeconds();
   this->DepthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
@@ -107,7 +107,7 @@ void Calculator::reset() {
   this->knownDoubleConstantValues.setSize(0);
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.clear();
 
-  this->syntacticSouP.setSize(0);
+  this->syntacticSoup.setSize(0);
   this->syntacticStacK.setSize(0);
   this->flagTimeLimitErrorDetected = false;
   this->flagFirstErrorEncountered = false;
@@ -115,18 +115,18 @@ void Calculator::reset() {
   this->flagMaxRecursionErrorEncountered = false;
   this->flagAbortComputationASAP = false;
   this->flagDisplayContext = false;
-  this->EvaluatedExpressionsStack.clear();
+  this->evaluatedExpressionsStack.clear();
   this->theCruncherIds.clear();
   this->theCruncherS.setSize(0);
   this->syntaxErrors = "";
   this->evaluationErrors.setSize(0);
   this->currentSyntacticStack = &this->syntacticStacK;
-  this->CurrrentSyntacticSouP = &this->syntacticSouP;
+  this->currrentSyntacticSoup = &this->syntacticSoup;
   this->cachedExpressions.clear();
   this->imagesCachedExpressions.setSize(0);
   this->theProgramExpression.reset(*this);
   this->RuleStackCacheIndex = - 1;
-  this->RuleStack.reset(*this,this->MaxRuleStacksCached);
+  this->ruleStack.reset(*this,this->MaxRuleStacksCached);
   this->cachedRuleStacks.clear();
   // The expression container must be cleared last!
   this->theExpressionContainer.clear();
@@ -332,12 +332,12 @@ void Calculator::initialize() {
 
   this->initializeToStringHandlers();
 
-  this->RuleStack.reset(*this, 100);
-  this->RuleStack.addChildAtomOnTop(this->opEndStatement());
+  this->ruleStack.reset(*this, 100);
+  this->ruleStack.addChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.clear();
   this->RuleStackCacheIndex = 0;
-  this->cachedRuleStacks.addOnTop(this->RuleStack);
-  this->NumPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
+  this->cachedRuleStacks.addOnTop(this->ruleStack);
+  this->numberOfPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   this->checkConsistencyAfterInitialization();
 }
 
@@ -808,11 +808,11 @@ bool Calculator::isInterpretedAsEmptySpace(unsigned char input) {
 
 void Calculator::parseFillDictionary(const std::string& input) {
   MacroRegisterFunctionWithName("Calculator::parseFillDictionary");
-  this->parseFillDictionary(input, *this->CurrrentSyntacticSouP);
+  this->parseFillDictionary(input, *this->currrentSyntacticSoup);
   SyntacticElement currentElement;
   currentElement.theData.reset(*this);
   currentElement.controlIndex = this->conEndProgram();
-  (*this->CurrrentSyntacticSouP).addOnTop(currentElement);
+  (*this->currrentSyntacticSoup).addOnTop(currentElement);
 }
 
 bool Calculator::shouldSplitOutsideQuotes(const std::string& left, char right) {
@@ -1860,7 +1860,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   MacroRegisterFunctionWithName("Calculator::extractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
-  (*this->currentSyntacticStack).reserve((*this->CurrrentSyntacticSouP).size + this->numEmptyTokensStart);
+  (*this->currentSyntacticStack).reserve((*this->currrentSyntacticSoup).size + this->numEmptyTokensStart);
   (*this->currentSyntacticStack).setSize(this->numEmptyTokensStart);
   for (int i = 0; i < this->numEmptyTokensStart; i ++) {
     (*this->currentSyntacticStack)[i] = this->getEmptySyntacticElement();
@@ -1876,7 +1876,7 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
   ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
-    this->counterInSyntacticSoup < (*this->CurrrentSyntacticSouP).size;
+    this->counterInSyntacticSoup < (*this->currrentSyntacticSoup).size;
     this->counterInSyntacticSoup ++
   ) {
     counterReport ++;
@@ -1886,12 +1886,12 @@ bool Calculator::extractExpressions(Expression& outputExpression, std::string* o
       if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
         currentMilliseconds = lastMilliseconds;
         std::stringstream reportStream;
-        reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->CurrrentSyntacticSouP).size
+        reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->currrentSyntacticSoup).size
         << " syntactic elements. ";
         theReport.report(reportStream.str());
       }
     }
-    (*this->currentSyntacticStack).addOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
+    (*this->currentSyntacticStack).addOnTop((*this->currrentSyntacticSoup)[this->counterInSyntacticSoup]);
     int numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->currentSyntacticStack->size ;
     while (this->applyOneRule()) {

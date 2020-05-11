@@ -191,7 +191,7 @@ public:
     void* database;
     Database* owner;
     bool flagInitialized;
-    std::string ConvertErrorToString(void* bson_error_t_pointer);
+    std::string convertErrorToString(void* bson_error_t_pointer);
     bool initialize();
     void shutdown();
     bool deleteDatabase(std::stringstream *commentsOnFailure);
@@ -211,7 +211,7 @@ public:
       JSData& output,
       std::stringstream* commentsOnFailure
     );
-    static bool GetOrFindQuery(
+    static bool getOrFindQuery(
       const List<QueryExact>& input,
       std::string& output,
       std::stringstream* commentsOnFailure = nullptr

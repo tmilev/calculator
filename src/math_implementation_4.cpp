@@ -340,12 +340,12 @@ void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExe
 void GlobalVariables::initDefaultFolderAndFileNames() {
   this->initFoldersProjectBase(global.pathExecutableUserInputOrDeduced);
   this->physicalNameFolderExecutable = this->physicalPathProjectBase;
-  this->PhysicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.pathExecutableUserInputOrDeduced);
-  this->PhysicalNameExecutableWithPath = this->physicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
+  this->physicalNameExecutableNoPath = FileOperations::getFileNameFromFileNameWithPath(global.pathExecutableUserInputOrDeduced);
+  this->physicalNameExecutableWithPath = this->physicalNameFolderExecutable + this->physicalNameExecutableNoPath;
   this->physicalPathServerBase = this->physicalPathProjectBase;
   this->displayPathOutputFolder = "/output/";
 
-  this->displayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
+  this->displayNameExecutable = "/cgi-bin/" + this->physicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
   this->displayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
   this->initOutputReportAndCrashFileNames("", "");
@@ -948,7 +948,7 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& rig
 Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    output *= WeylGroupData::SizeByFormulaOrNeg1(
+    output *= WeylGroupData::sizeByFormulaOrNegative1(
       this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank
     );
   }
@@ -969,7 +969,7 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
       }
       domain.addOnTop( this->SimpleBasesConnectedComponents[i][j]);
       int indexTargetComponent = thePerm[i];
-      int indexAutomorphismInComponent = theAutosPerm.Multiplicities[i];
+      int indexAutomorphismInComponent = theAutosPerm.multiplicities[i];
       int indexRoot = theAutos[i][indexAutomorphismInComponent][j];
       range.addOnTop(right.SimpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
     }
@@ -980,7 +980,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
   this->AmbientRootSystem = theWeyl.RootSystem;
   this->AmbientBilinearForm = theWeyl.cartanSymmetric;
-  theWeyl.TransformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
+  theWeyl.transformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
   this->computeDiagramInputIsSimple(inputRoots);
 }
 
@@ -992,7 +992,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative");
   this->AmbientRootSystem = weightSystem;
   this->AmbientBilinearForm = theBilinearForm;
-  WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
+  WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(inputOutputSimpleWeightSystem, weightSystem);
   this->computeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
 }
 
@@ -1229,8 +1229,8 @@ void AffineHyperplanes::toString(std::string& output) {
 void Permutation::initPermutation(int n) {
   this->initPart1(n);
   for (int i = 0; i < n; i ++) {
-    this->MaxMultiplicities[i] = n - i - 1;
-    this->Multiplicities[i] = 0;
+    this->capacities[i] = n - i - 1;
+    this->multiplicities[i] = 0;
   }
 }
 
@@ -1239,8 +1239,8 @@ void Permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
   int counter = 0;
   for (int i = 0; i < disjointSubsets.size; i ++) {
     for (int j = 0; j < disjointSubsets[i]; j ++) {
-      this->MaxMultiplicities[counter] = disjointSubsets[i] - j - 1;
-      this->Multiplicities[counter] = 0;
+      this->capacities[counter] = disjointSubsets[i] - j - 1;
+      this->multiplicities[counter] = 0;
       counter ++;
     }
     TotalNumElements -= disjointSubsets[i];
@@ -1256,24 +1256,24 @@ void Permutation::incrementAndGetPermutation(List<int>& output) {
 }
 
 void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output) {
-  int numElements = this->Multiplicities.size;
+  int numElements = this->multiplicities.size;
   output.setSize(numElements);
   for (int i = 0; i < numElements; i ++) {
     output[i] = i;
   }
   for (int i = 0; i < numElements; i ++) {
-    MathRoutines::swap(output[i], output[i + this->Multiplicities[i]]);
+    MathRoutines::swap(output[i], output[i + this->multiplicities[i]]);
   }
 }
 
-bool WeylGroupData::AreMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights) {
+bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights) {
   MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantInner");
   for (int i = 0; i < theWeights.size; i ++) {
     for (int j = 0; j < this->RootsOfBorel.size; j ++) {
-      if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
+      if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1297,19 +1297,19 @@ bool WeylGroupAutomorphisms::checkInitialization() const {
   return true;
 }
 
-bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights) {
-  MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantGroupOuter");
+bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights) {
+  MacroRegisterFunctionWithName("WeylGroup::areMaximallyDominantGroupOuter");
   this->checkInitialization();
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
-  this->ComputeOuterAutos();
+  this->computeOuterAutomorphisms();
   zeroWeight.makeZero(this->theWeyl->getDimension());
   for (int i = 0; i < theWeights.size; i ++) {
     for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
-      if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
+      if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1395,7 +1395,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       }
     }
     */
-//  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
+//  this->theParser.theHmm.theRange.theWeyl.getIntegralLatticeInSimpleCoordinates(integralLattice);
   //out << "\nThe integral lattice:\n" << integralLattice.toString(false, false);
   //this->theMultiplicitiesMaxOutputReport2.flush();
   QuasiPolynomial tempQP;
@@ -1458,7 +1458,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vectors<double> theDraggableBasis;
   theDraggableBasis.makeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
-  tmpWeyl.MakeArbitrarySimple('A', 2);
+  tmpWeyl.makeArbitrarySimple('A', 2);
   drawOps.theBuffer.initDimensions(tmpWeyl.cartanSymmetric, theDraggableBasis, theDraggableBasis);
   FormatExpressions theFormat;
   drawOps.theBuffer.BasisProjectionPlane[0][0] = 1;
@@ -1487,7 +1487,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
   tMpRt = this->ParabolicSelectionSmallerAlgebra;
-  for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.MaxSize; i ++) {
+  for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.maximumSize; i ++) {
     tempMat.getVectorFromRow(i, tempRoot);
     tempVertices.addOnTop(tempRoot);
     if (this->ParabolicSelectionSmallerAlgebra.selected[i]) {
@@ -1645,7 +1645,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->WeylLarger = &input.theRange().theWeyl;
   this->WeylSmaller = &input.theDomain().theWeyl;
   WeylGroupData& theWeYl = input.theRange().theWeyl;
-//  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
+//  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();
   theWeYl.theGroup.computeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
@@ -1654,10 +1654,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   FormatExpressions theFormat;
   global.fatal << "Not implemented. " << global.fatal;
 //  SSalgebraModuleOld tempM;
-  input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
+  input.computeHomomorphismFromImagesSimpleChevalleyGenerators();
   global.fatal << "Not implemented. " << global.fatal;
 //  tempM.InduceFromEmbedding(tempStream, input);
-  input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS);
+  input.getWeightsGmodKInSimpleCoordinatesK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.toString();
   Matrix<Rational> tempMat;
   tempMat = input.theDomain().theWeyl.cartanSymmetric;
@@ -1694,7 +1694,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   theProjectionBasisChanged.initialize(input.theDomain().getRank(), input.theRange().getRank());
   for (int i = 0; i < input.theRange().getRank(); i ++) {
     startingWeight.makeEi(input.theRange().getRank(), i);
-    input.ProjectOntoSmallCartan(startingWeight, projectedWeight);
+    input.projectOntoSmallCartan(startingWeight, projectedWeight);
     this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
       theProjectionBasisChanged.elements[j][i] = projectedWeight[j];
@@ -1703,7 +1703,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = theParabolicSel;
   Matrix<Rational> DualCartanEmbedding;
-  input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
+  input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   Vector<Rational> ParabolicEvaluationRootImage, tempRoot;
   ParabolicEvaluationRootImage = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
   this->ParabolicSelectionSmallerAlgebra.initialize(input.theDomain().getRank());
@@ -1718,7 +1718,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.toString();
   tempRoot = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.toString();
-  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
+  theSubgroup.makeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, - 1);
 
   this->theLinearOperators.setSize(theSubgroup.allElements.size);
   this->theLinearOperatorsExtended.setSize(theSubgroup.allElements.size);
@@ -1726,7 +1726,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->theTranslationsProjectedBasisChanged.setSize(theSubgroup.allElements.size);
   this->theCoeffs.setSize(theSubgroup.allElements.size);
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.toString() << "\n\n\n\n\n\n";
-  this->log << theSubgroup.ElementToStringBruhatGraph();
+  this->log << theSubgroup.toStringBruhatGraph();
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic ("
   << theSubgroup.allElements.size << " elements):\n";
   for (int i = 0; i < theSubgroup.allElements.size; i ++) {
@@ -1734,8 +1734,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     theSubgroup.getMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.multiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
-    currentLinearOperator.actOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
-    this->theTranslationS[i] -= theSubgroup.GetRho();
+    currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->theTranslationS[i]);
+    this->theTranslationS[i] -= theSubgroup.getRho();
     this->theTranslationS[i].minus();
     theProjectionBasisChanged.actOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
@@ -1767,7 +1767,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
 
   List<int> displayIndicesReflections;
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize; i ++) {
+  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize; i ++) {
     if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
       displayIndicesReflections.addOnTop(i + 1);
     }
@@ -1787,12 +1787,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   theFormat.polynomialAlphabet[2] = "y_1";
   theFormat.polynomialAlphabet[3] = "y_2";
   theFormat.polynomialAlphabet[4] = "y_3";
-  tempRoot = theSubgroup.GetRho();
+  tempRoot = theSubgroup.getRho();
   this->theLinearOperators[0].actOnVectorColumn(tempRoot);
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
   tempRoot.minus();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
-  << theSubgroup.GetRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
+  << theSubgroup.getRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
   << tempRoot.toStringLetterFormat("\\alpha") << "$.";
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
   << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
@@ -1814,7 +1814,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\\end{longtable}\n\n";
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
-  theWeYl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
+  theWeYl.getIntegralLatticeInSimpleCoordinates(tempLattice);
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.makeIdentityMatrix(input.theDomain().getRank());
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.directSumWith(tempLattice.basisRationalForm, Rational(0));
   this->theExtendedIntegralLatticeMatForM.makeFromMatrix(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
@@ -1918,17 +1918,17 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
   out << "\n The chamber complex + multiplicities follow.\n\n\n"
-  << "\\begin{longtable}{cc}\\caption{Multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
+  << "\\begin{longtable}{cc}\\caption{multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
   << " for $\\gop$ with Dynkin diagram";
   std::stringstream tempStream;
   tempStream << "(";
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize; i ++) {
+  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize; i ++) {
     if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
       tempStream << "+";
     } else {
       tempStream << "0";
     }
-    if (i != this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize - 1) {
+    if (i != this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize - 1) {
       tempStream << ",";
     }
   }

@@ -428,19 +428,19 @@ bool Vectors<Coefficient>::linearSpanContainsVector(const Vector<Coefficient>& i
   }
 
 template <class Coefficient>
-void Vectors<Coefficient>::SelectABasisInSubspace(
+void Vectors<Coefficient>::selectBasisInSubspace(
   const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivotColumns
 ) {
   if (&input == &output) {
     List<Vector<Coefficient> > inputCopy = input;
-    Vectors<Coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
+    Vectors<Coefficient>::selectBasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
     return;
   }
   if (input.size == 0) {
     output = input;
     return;
   }
-  MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
+  MacroRegisterFunctionWithName("Vectors::selectBasisInSubspace");
   ProgressReport reportTask(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport reportProgress(200, GlobalVariables::Response::ReportType::gaussianElimination);
   int theDim = input[0].size;

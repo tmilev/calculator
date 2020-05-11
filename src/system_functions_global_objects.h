@@ -15,13 +15,13 @@ extern int getElapsedMilliseconds();
 extern int externalCommandNoOutput(const std::string& theCommand);
 extern std::string externalCommandReturnStandartOut(const std::string& theCommand);
 extern int externalCommandStreamOutput(const std::string& theCommand);
-extern void CallChDirWrapper(const std::string& theCommand);
+extern void callChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();
 
-extern void InitializeGlobalObjects();
-extern void CreateTimerThread();
-extern void InitializeTimeR();
+extern void initializeGlobalObjects();
+extern void createTimerThread();
+extern void initializeTimer();
 
-extern void* RunTimerVoidPtr(void* ptr);
+extern void* runTimerVoidPointer(void* ptr);
 
 #endif // vpfHeaderSystemGlobalObjects_already_included

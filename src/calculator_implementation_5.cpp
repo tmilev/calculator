@@ -230,7 +230,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
   }
   double minSide = MathRoutines::minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
+  currentPlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   Vectors<double>& theSegment = currentPlot.thePointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->theTriangles.size; i ++) {
@@ -309,15 +309,15 @@ void MeshTriangles::ComputeImplicitPlot() {
     }
   }
   if (this->flagShowGrid) {
-    this->plotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(240, 240, 0)));
+    this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid) {
-    this->plotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
+    this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
-  // this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
+  // this->theCurve.colorRGB=HtmlRoutines::redGreenBlue(255,0,0);
   this->thePlot.thePlots.addListOnTop(this->theCurve.thePlots);
 }
 
@@ -1196,8 +1196,8 @@ bool CalculatorFunctions::innerPlotRectangle(
   thePlot.colorJS = "blue";
   thePlot.thePointsDouble.addOnTop(currentCorner);
   thePlot.theRectangles.addOnTop(theRectangle);
-  thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
-  thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 255));
+  thePlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
+  thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
   return output.assignValue(thePlot, theCommands);
 }
 
@@ -1531,7 +1531,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   PlotObject theSegment;
   if (input.size() >= 3) {
     theSegment.colorJS = "black";
-    theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
+    theSegment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
     const Expression& colorE = input[2];
     if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
@@ -1632,7 +1632,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
   PlotObject theSegment;
   if (input.size() >= 4) {
     theSegment.colorJS = "black";
-    theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
+    theSegment.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
     const Expression& colorE = input[3];
     if (!colorE.isOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.toString();
@@ -1902,7 +1902,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     if (input.isOperationGiven(theCommands.opPi())) {
       return output.assignValue<std::string>(" 3.141592654 ", theCommands);
     }
-    if (input.theData >= theCommands.NumPredefinedAtoms) {
+    if (input.theData >= theCommands.numberOfPredefinedAtoms) {
       return output.assignValue(HtmlRoutines::getJavascriptVariable(atomString), theCommands);
     }
     if (atomString == "+" || atomString == "*" || atomString == "/" || atomString == "-") {
@@ -2187,7 +2187,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     }
   }
   MapList<std::string, Expression, MathRoutines::hashString> theKeys;
-  if (CalculatorConversions::innerLoadKeysFromStatementLisT(
+  if (CalculatorConversions::innerLoadKeysFromStatementList(
     theCommands, input, theKeys, &theCommands.comments, true
   )) {
     if (theKeys.contains("color1")) {

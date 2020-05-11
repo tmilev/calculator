@@ -169,7 +169,7 @@ void Sha3::reset() {
   this->saved = 0;
 }
 
-// For Init or Reset call these:
+// For Init or reset call these:
 void Sha3::sha3_Init256() {
   bool flagOldUseKeccak = this->flagUseKeccak;
   this->reset();
@@ -210,7 +210,7 @@ std::string Sha3::toStringState() {
     if (i == intermediate) {
       out << "----------------\n";
     }
-    out << Crypto::ConvertUint64ToHex(this->stateStorage[i]) << "\n";
+    out << Crypto::convertUint64ToHex(this->stateStorage[i]) << "\n";
   }
   return out.str();
 }

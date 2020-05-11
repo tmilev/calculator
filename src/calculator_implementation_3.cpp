@@ -18,15 +18,15 @@
 // - Try moving template generics into .h files.
 
 template <>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWRTgenerator<RationalFunction<Rational> >(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<RationalFunction<Rational> >(
   const Vector<RationalFunction<Rational> >& theWeight, int generatorIndex
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::IsDominantWRTgenerator");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::isDominantWithRespectToGenerator");
   this->checkInitialization();
   Vector<RationalFunction<Rational> > tempVect;
   RationalFunction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
-  tempRF = this->AmbientWeyl->RootScalarCartanRoot(theWeight, tempVect);
+  tempRF = this->AmbientWeyl->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
@@ -50,21 +50,21 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
 }
 
 template <>
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::IsDominantWRTgenerator<Rational>(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::isDominantWithRespectToGenerator<Rational>(
   const Vector<Rational>& theWeight, int generatorIndex
 ) {
   this->checkInitialization();
-  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
+  return !this->AmbientWeyl->rootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
 }
 
 template <>
-bool WeylGroupData::IsDominantWRTgenerator<RationalFunction<Rational> >(
+bool WeylGroupData::isDominantWithRespectToGenerator<RationalFunction<Rational> >(
   const Vector<RationalFunction<Rational> >& theWeight, int generatorIndex
 ) {
   Vector<Rational> tempVect;
   RationalFunction<Rational> tempRF;
   tempVect.makeEi(this->getDimension(), generatorIndex);
-  tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
+  tempRF = this->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
@@ -89,25 +89,25 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction<Rational> >(
 }
 
 template <>
-bool WeylGroupData::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex) {
-  return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).isNegative();
+bool WeylGroupData::isDominantWithRespectToGenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex) {
+  return !this->getScalarProductSimpleRoot(theWeight, generatorIndex).isNegative();
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MakeParabolicFromSelectionSimpleRoots(
-  WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::makeParabolicFromSelectionSimpleRoots(
+  WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int upperLimitNumberOfElements
 ) {
   Selection tempSel;
   tempSel = ZeroesMeanSimpleRootSpaceIsInParabolic;
-  this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, UpperLimitNumElements);
+  this->makeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, upperLimitNumberOfElements);
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   Vector<Rational>& highestWeightSimpleCoords,
   HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
   this->checkInitialization();
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
@@ -234,7 +234,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
   theCasimir.makeCasimir(algebraReference);
   theCommands << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
-  << ". The coefficient: " << algebraReference.theWeyl.GetKillingDivTraceRatio().toString()
+  << ". The coefficient: " << algebraReference.theWeyl.getKillingDividedByTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   ExpressionContext context(theCommands);
   context.setAmbientSemisimpleLieAlgebra(algebraReference);
@@ -537,8 +537,8 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   output.imagesSimpleChevalleyGenerators[1] = g_2;
   output.imagesSimpleChevalleyGenerators[3] = g_m2;
   output.imagesSimpleChevalleyGenerators[2] = g_m1plusg_m3;
-  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
-  output.GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.RestrictedRootSystem);
+  output.computeHomomorphismFromImagesSimpleChevalleyGenerators();
+  output.getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(output.RestrictedRootSystem);
 }
 
 bool Calculator::innerPrintB3G2branchingIntermediate(
@@ -641,7 +641,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
           );
           RationalFunction<Rational> theWeylSize;
-          theWeylSize = theG2B3Data.WeylFD.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates);
+          theWeylSize = theG2B3Data.WeylFD.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates);
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theWeylSize.toString(&theG2B3Data.theFormat)
           << "$}";
@@ -664,7 +664,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             tempChar[0].weightFundamentalCoordS
           );
           RationalFunction<Rational> dimension;
-          dimension = theG2B3Data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
+          dimension = theG2B3Data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
           latexTable << dimension.toString(&theG2B3Data.theFormat) << "$}";
         } else {
           latexTable << "&";
@@ -819,7 +819,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       theCharacter[0].weightFundamentalCoordS
     );
     RationalFunction<Rational> dimension;
-    dimension = theg2b3data.WeylFD.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
+    dimension = theg2b3data.WeylFD.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
     out << "<td>" << dimension.toString() << "</td>";
     latexTable << " $ " << theCharacter.toString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter = "\\psi";
@@ -835,16 +835,16 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
       );
-      dimension = theg2b3data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
+      dimension = theg2b3data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);
       out << dimension;
       if (i != outputChar.size() - 1) {
         out << "+";
       }
       leftWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
-      leftWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
+      leftWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       for (int j = 0; j < outputChar.size(); j ++) {
         rightWeightSimple = smallWeyl.getSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
-        rightWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
+        rightWeightDual = smallWeyl.getDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         if ((rightWeightSimple - leftWeightSimple).isPositive()) {
           resultChar = theCasimir;
           theCentralCharacter = theCasimir;
@@ -969,11 +969,11 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     Vector<RationalFunction<Rational> >& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFunction<Rational> >& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.setSize(2);
-    currentG2DualWeight[0] = theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot(
+    currentG2DualWeight[0] = theG2B3Data.theHmm.theRange().theWeyl.rootScalarCartanRoot(
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
-    currentG2DualWeight[1] = theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot(
+    currentG2DualWeight[1] = theG2B3Data.theHmm.theRange().theWeyl.rootScalarCartanRoot(
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]
     );
     //<-note: implicit type conversion: the return type is the left coefficient type.
@@ -1135,7 +1135,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   return output.assignValue(out.str(), theCommands);
 }
 
-void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
+void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
   List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
 ) {
   if (inputDimBound < 1) {
@@ -1229,7 +1229,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     SemisimpleLieAlgebra& currentAlg =
     theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.computeChevalleyConstants();
-    currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
+    currentAlg.theWeyl.getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.toStringLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out << "<br>" << " <table><tr><td  border =\"1\" colspan =\"3\">"
@@ -1293,8 +1293,8 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
           latexReport << theMod.NumCachedPairsBeforeSimpleGen;
         latexReport
         << "&" << theMod.cachedPairs.size << " & "
-        << Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
-        +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications -
+        << Rational::totalLargeAdditions+Rational::totalSmallAdditions
+        +Rational::totalLargeMultiplications+Rational::totalSmallMultiplications -
         startRatOps;
       }
       else {
@@ -2001,7 +2001,7 @@ bool Calculator::Test::processResults() {
 
 int Calculator::getNumberOfBuiltInFunctions() {
   int result = 0;
-  for (int i = this->NumPredefinedAtoms - 1; i >= 0; i --) {
+  for (int i = this->numberOfPredefinedAtoms - 1; i >= 0; i --) {
     MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
     if (current.isZeroPointer()) {
       continue;

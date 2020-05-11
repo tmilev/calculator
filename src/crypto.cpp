@@ -19,7 +19,7 @@ void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
   ) {
     global.fatal << "Current random bytes have not been initialized. " << global.fatal;
   }
-  Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(
+  Crypto::convertUint64toBigendianListUnsignedCharAppendResult(
     static_cast<uint64_t>(additionalRandomness), global.randomBytesCurrent
   );
   Crypto::computeSha512(global.randomBytesCurrent, global.randomBytesCurrent);
@@ -59,7 +59,7 @@ void Crypto::Random::getRandomLargeIntegerSecure(LargeIntegerUnsigned& output, i
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
 }
 
-char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
+char Crypto::getCharFrom6Bit(uint32_t input, bool useBase64URL) {
   switch (input) {
     case 0: return  'A';
     case 1: return  'B';
@@ -141,7 +141,7 @@ char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
   return - 1;
 }
 
-bool Crypto::GetCharFromBase58(uint32_t input, char& output) {
+bool Crypto::getCharFromBase58(uint32_t input, char& output) {
   switch (input) {
     case 0:  output = '1'; return true;
     case 1:  output = '2'; return true;
@@ -205,7 +205,7 @@ bool Crypto::GetCharFromBase58(uint32_t input, char& output) {
   }
 }
 
-bool Crypto::GetBase58FromChar(char input, uint32_t& output) {
+bool Crypto::getBase58FromChar(char input, uint32_t& output) {
   switch (input) {
     case '1': output = 0;  return true;
     case '2': output = 1;  return true;
@@ -269,7 +269,7 @@ bool Crypto::GetBase58FromChar(char input, uint32_t& output) {
   }
 }
 
-bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output) {
+bool Crypto::get6BitFromChar(unsigned char input, uint32_t& output) {
   switch (input) {
     case 'A': output = 0;  return true;
     case 'B': output = 1;  return true;
@@ -344,18 +344,18 @@ bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output) {
   }
 }
 
-bool Crypto::ConvertBase64ToString(
+bool Crypto::convertBase64ToString(
   const std::string& input, std::string& output, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   List<unsigned char> byteList;
-  if (!Crypto::ConvertBase64ToBitStream(input, byteList, commentsOnFailure, commentsGeneral)) {
+  if (!Crypto::convertBase64ToBitStream(input, byteList, commentsOnFailure, commentsGeneral)) {
     return false;
   }
-  Crypto::ConvertBitStreamToString(byteList, output);
+  Crypto::convertBitStreamToString(byteList, output);
   return true;
 }
 
-bool Crypto::ConvertBase64ToBitStream(
+bool Crypto::convertBase64ToBitStream(
   const std::string& input,
   List<unsigned char>& output,
   std::stringstream* commentsOnFailure,
@@ -367,7 +367,7 @@ bool Crypto::ConvertBase64ToBitStream(
   uint32_t theStack = 0, sixBitDigit = 0;
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
-    bool isGood = Crypto::Get6bitFromChar(static_cast<unsigned char>(input[i]), sixBitDigit);
+    bool isGood = Crypto::get6BitFromChar(static_cast<unsigned char>(input[i]), sixBitDigit);
     if (!isGood && input[i] == '\n') {
       continue;
     }
@@ -411,8 +411,8 @@ bool Crypto::ConvertBase64ToBitStream(
   return true;
 }
 
-void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::string& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertBitStreamToString");
+void Crypto::convertBitStreamToString(const List<unsigned char>& input, std::string& output) {
+  MacroRegisterFunctionWithName("Crypto::convertBitStreamToString");
   output.clear();
   output.reserve(static_cast<unsigned>(input.size));
   for (int i = 0; i < input.size; i ++) {
@@ -420,23 +420,23 @@ void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::str
   }
 }
 
-void Crypto::ConvertStringToListBytes(const std::string& input, List<unsigned char>& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytes");
+void Crypto::convertStringToListBytes(const std::string& input, List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("Crypto::convertStringToListBytes");
   output = input;
 }
 
-void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytesSigned");
+void Crypto::convertStringToListBytesSigned(const std::string& input, List<char>& output) {
+  MacroRegisterFunctionWithName("Crypto::convertStringToListBytesSigned");
   output = input;
 }
 
-std::string Crypto::ConvertStringToBase64Standard(const std::string& input) {
+std::string Crypto::convertStringToBase64Standard(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
   return Crypto::convertListUnsignedCharsToBase64(inputChar, false);
 }
 
-std::string Crypto::ConvertStringToBase64URL(const std::string& input) {
+std::string Crypto::convertStringToBase64URL(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
   return Crypto::convertListUnsignedCharsToBase64(inputChar, true);
@@ -453,29 +453,29 @@ std::string Crypto::convertListUnsignedCharsToBase64(const List<unsigned char>& 
     theStack += input[i];
     numBitsInTheStack += 8;
     if (numBitsInTheStack == 8) {
-      result.push_back(Crypto::GetCharFrom6bit(theStack / 4, useBase64URL));
+      result.push_back(Crypto::getCharFrom6Bit(theStack / 4, useBase64URL));
       numBitsInTheStack = 2;
       theStack %= 4;
     }
     if (numBitsInTheStack == 10) {
-      result.push_back(Crypto::GetCharFrom6bit(theStack / 16, useBase64URL));
+      result.push_back(Crypto::getCharFrom6Bit(theStack / 16, useBase64URL));
       numBitsInTheStack = 4;
       theStack %= 16;
     }
     if (numBitsInTheStack == 12) {
-      result.push_back(Crypto::GetCharFrom6bit(theStack / 64, useBase64URL));
-      result.push_back(Crypto::GetCharFrom6bit(theStack % 64, useBase64URL));
+      result.push_back(Crypto::getCharFrom6Bit(theStack / 64, useBase64URL));
+      result.push_back(Crypto::getCharFrom6Bit(theStack % 64, useBase64URL));
       numBitsInTheStack = 0;
       theStack = 0;
     }
   }
   if (numBitsInTheStack == 2) {
-    result.push_back(Crypto::GetCharFrom6bit(theStack * 16, useBase64URL));
+    result.push_back(Crypto::getCharFrom6Bit(theStack * 16, useBase64URL));
     result.push_back('=');
     result.push_back('=');
   }
   if (numBitsInTheStack == 4) {
-    result.push_back(Crypto::GetCharFrom6bit(theStack * 4, useBase64URL));
+    result.push_back(Crypto::getCharFrom6Bit(theStack * 4, useBase64URL));
     result.push_back('=');
   }
   return result;
@@ -547,8 +547,8 @@ uint64_t Crypto::rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate)
   return left | right;
 }
 
-void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertUint32ToUcharBigendian");
+void Crypto::convertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("Crypto::convertUint32ToUcharBigendian");
   output.setSize(input.size * 4);
   for (int i = 0; i < input.size; i ++) {
     output[i * 4 + 0] = static_cast<unsigned char>( input[i] / 16777216    );
@@ -558,8 +558,8 @@ void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<uns
   }
 }
 
-void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertUint32ToString");
+void Crypto::convertUint32ToString(const List<uint32_t>& input, std::string& output) {
+  MacroRegisterFunctionWithName("Crypto::convertUint32ToString");
   output.resize(static_cast<unsigned>(input.size * 4));
   for (unsigned i = 0; i < static_cast<unsigned>(input.size); i ++) {
     output[i * 4 + 0] = static_cast<char>( input[static_cast<int>(i)] / 16777216    );
@@ -569,17 +569,17 @@ void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& out
   }
 }
 
-std::string Crypto::ConvertIntToHex(int input, int significantBytes) {
-  return Crypto::ConvertUintToHex(static_cast<unsigned int>(input), significantBytes);
+std::string Crypto::convertIntToHex(int input, int significantBytes) {
+  return Crypto::convertUintToHex(static_cast<unsigned int>(input), significantBytes);
 }
 
-std::string Crypto::ConvertUintToHex(unsigned int input, int significantBytes) {
+std::string Crypto::convertUintToHex(unsigned int input, int significantBytes) {
   std::stringstream out;
   out << std::hex << std::setfill('0') << std::setw(2 * significantBytes) << input;
   return out.str();
 }
 
-std::string Crypto::ConvertUint64ToHex(uint64_t input) {
+std::string Crypto::convertUint64ToHex(uint64_t input) {
   std::stringstream out;
   out << std::hex << std::setfill('0') << std::setw(2 * 8) << input;
   return out.str();
@@ -587,14 +587,14 @@ std::string Crypto::ConvertUint64ToHex(uint64_t input) {
 
 bool Crypto::convertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
   std::string outputString;
-  if (!Crypto::ConvertHexToString(input, outputString, commentsOnFailure)) {
+  if (!Crypto::convertHexToString(input, outputString, commentsOnFailure)) {
     return false;
   }
   output = outputString;
   return true;
 }
 
-bool Crypto::ConvertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure) {
+bool Crypto::convertHexToString(const std::string& input, std::string& output, std::stringstream* commentsOnFailure) {
   output.reserve(input.size() / 2);
   output.clear();
   bool result = true;
@@ -681,7 +681,7 @@ std::string Crypto::convertStringToHex(const std::string& input, int byteWidthLi
   return result;
 }
 
-void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& output) {
+void Crypto::appendDoubleSha256Check(const std::string& input, std::string& output) {
   std::string theSha256, doubleSha256;
   Crypto::computeSha256(input, theSha256);
   Crypto::computeSha256(theSha256, doubleSha256);
@@ -756,7 +756,7 @@ bool Crypto::convertStringToHex(
   return true;
 }
 
-void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend) {
+void Crypto::convertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.push_back(static_cast<char>(input / 72057594037927936)      );
   outputAppend.push_back(static_cast<char>((input / 281474976710656) % 256));
@@ -768,7 +768,7 @@ void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t input, std::str
   outputAppend.push_back(static_cast<char>( input % 256)                   );
 }
 
-void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
+void Crypto::convertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.setExpectedSize(outputAppend.size + 8);
   outputAppend.addOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
@@ -781,7 +781,7 @@ void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input
   outputAppend.addOnTop(static_cast<unsigned char>( input % 256)                   );
 }
 
-void Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
+void Crypto::convertUint128toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.setExpectedSize(outputAppend.size + 16);
   for (int i = 0; i < 8; i ++) {
@@ -797,14 +797,14 @@ void Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(uint64_t inpu
   outputAppend.addOnTop(static_cast<unsigned char>( input % 256)                   );
 }
 
-void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output) {
+void Crypto::convertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output) {
   List<unsigned char> resultChar;
-  Crypto::ConvertStringToListBytes(input, resultChar);
-  Crypto::ConvertStringToListUInt32BigendianZeroPad(resultChar, output);
+  Crypto::convertStringToListBytes(input, resultChar);
+  Crypto::convertStringToListUInt32BigendianZeroPad(resultChar, output);
 }
 
-void Crypto::ConvertStringToListUInt32BigendianZeroPad(const List<unsigned char>& input, List<uint32_t>& output) {
-  MacroRegisterFunctionWithName("Crypto::ConvertStringToListUInt32BigendianZeroPad");
+void Crypto::convertStringToListUInt32BigendianZeroPad(const List<unsigned char>& input, List<uint32_t>& output) {
+  MacroRegisterFunctionWithName("Crypto::convertStringToListUInt32BigendianZeroPad");
   List<unsigned char> theConvertor;
   theConvertor.setSize(4);
   int finalSize = input.size / 4;
@@ -816,11 +816,11 @@ void Crypto::ConvertStringToListUInt32BigendianZeroPad(const List<unsigned char>
     for (int j = 0; j < 4; j ++) {
       theConvertor[j] = (i * 4 + j < input.size) ? input[i * 4 + j] : 0;
     }
-    output[i] = Crypto::GetUInt32FromCharBigendian(theConvertor);
+    output[i] = Crypto::getUInt32FromCharBigendian(theConvertor);
   }
 }
 
-uint32_t Crypto::GetUInt32FromCharBigendian(const List<unsigned char>& input) {
+uint32_t Crypto::getUInt32FromCharBigendian(const List<unsigned char>& input) {
   uint32_t result = input[0];
   for (int i = 1; i < 4; i ++) {
     result *= 256;
@@ -856,7 +856,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   for (unsigned i = numbytesMod64; i < 56; i ++) {
     inputStringPreprocessed.push_back(0);
   }
-  Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
   inputStringUint32.reserve(static_cast<signed>(inputStringPreprocessed.size() / 4));
@@ -866,7 +866,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
     convertorToUint32[1] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 1]);
     convertorToUint32[2] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 2]);
     convertorToUint32[3] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 3]);
-    inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+    inputStringUint32.addOnTop(Crypto::getUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
   currentChunk.setSize(80);
@@ -1051,7 +1051,7 @@ bool Crypto::convertBase64ToLargeUnsigned(
   const std::string& inputBase64, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure
 ) {
   List<unsigned char> theBitStream;
-  if (!Crypto::ConvertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure)) {
     return false;
   }
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(theBitStream, output);
@@ -1081,10 +1081,10 @@ void Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
   }
 }
 
-void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(
+void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
   const LargeIntegerUnsigned& input, std::string& output
 ) {
-  MacroRegisterFunctionWithName("Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST");
+  MacroRegisterFunctionWithName("Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST");
   output.clear();
   LargeIntegerUnsigned copy = input;
   while (copy > 0) {
@@ -1092,16 +1092,16 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(
     copy /= 58;
     int32_t nextDigitInt = nextDigitLIU.theDigits[0];
     char next = '#';
-    Crypto::GetCharFromBase58(static_cast<uint32_t>(nextDigitInt), next);
+    Crypto::getCharFromBase58(static_cast<uint32_t>(nextDigitInt), next);
     output.push_back(next);
   }
 }
 
-void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(
+void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
   const LargeIntegerUnsigned& input, std::string& output, int numberOfOnesToPrepend
 ) {
   std::string outputReversed;
-  Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsLAST(input, outputReversed);
+  Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(input, outputReversed);
   output.clear();
   output.reserve(outputReversed.size() + static_cast<unsigned>(numberOfOnesToPrepend));
   for (int i = 0; i < numberOfOnesToPrepend; i ++) {
@@ -1112,7 +1112,7 @@ void Crypto::ConvertLargeIntUnsignedToBase58SignificantDigitsFIRST(
   }
 }
 
-bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
+bool Crypto::convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
   const std::string& input, LargeIntegerUnsigned& output, int& numberOfLeadingZeroes, std::stringstream* commentsOnFailure
 ) {
   output = 0;
@@ -1121,7 +1121,7 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
   for (unsigned i = 0; i < input.size(); i ++) {
     output *= 58;
     uint32_t currentChar;
-    if (!Crypto::GetBase58FromChar(input[i], currentChar)) {
+    if (!Crypto::getBase58FromChar(input[i], currentChar)) {
       currentChar = 0;
       if (result) {
         if (commentsOnFailure != nullptr) {
@@ -1139,14 +1139,14 @@ bool Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
   return result;
 }
 
-bool Crypto::ConvertBase58ToHexSignificantDigitsFirst(
+bool Crypto::convertBase58ToHexSignificantDigitsFirst(
   const std::string& input, std::string& output, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHexSignificantDigitsFirst");
+  MacroRegisterFunctionWithName("Crypto::convertBase58ToHexSignificantDigitsFirst");
   LargeIntegerUnsigned outputLIU;
   bool result = true;
   int numberOfLeadingZeroes = 0;
-  if (!Crypto::ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
+  if (!Crypto::convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     input, outputLIU, numberOfLeadingZeroes, commentsOnFailure
   )) {
     result = false;
@@ -1157,7 +1157,7 @@ bool Crypto::ConvertBase58ToHexSignificantDigitsFirst(
   return result;
 }
 
-void Crypto::ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntegerUnsigned& output) {
+void Crypto::convertStringToLargeIntUnsigned(const std::string& input, LargeIntegerUnsigned& output) {
   output = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     output *= 256;
@@ -1186,7 +1186,7 @@ void Crypto::computeSha256(const std::string& input, std::string& output) {
 void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
   List<uint32_t> theSha256Uint;
   Crypto::computeSha256(input, theSha256Uint);
-  Crypto::ConvertUint32ToUcharBigendian(theSha256Uint, output);
+  Crypto::convertUint32ToUcharBigendian(theSha256Uint, output);
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<uint32_t>& output) {
@@ -1233,7 +1233,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
   for (unsigned i = numbytesMod64; i < 56; i ++) {
     inputPreprocessed.addOnTop(0);
   }
-  Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(messageLength, inputPreprocessed);
+  Crypto::convertUint64toBigendianListUnsignedCharAppendResult(messageLength, inputPreprocessed);
 ////////////////////////
 //  std::stringstream tempSTream;
 //  for (unsigned i = 0; i < inputStringPreprocessed.size(); i ++)
@@ -1250,7 +1250,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
     convertorToUint32[1] = inputPreprocessed[i * 4 + 1];
     convertorToUint32[2] = inputPreprocessed[i * 4 + 2];
     convertorToUint32[3] = inputPreprocessed[i * 4 + 3];
-    inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+    inputStringUint32.addOnTop(Crypto::getUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
   currentChunk.setSize(64);
@@ -1334,7 +1334,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<unsigned char>
   output.setSize(0);
   output.reserve(64);
   for (int i = 0; i < output64.size; i ++) {
-    Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(output64[i], output);
+    Crypto::convertUint64toBigendianListUnsignedCharAppendResult(output64[i], output);
   }
 }
 
@@ -1364,7 +1364,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   for (unsigned i = numbytesMod128; i < 112; i ++) {
     inputPreprocessed.addOnTop(0);
   }
-  Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(messageBitLength, inputPreprocessed);
+  Crypto::convertUint128toBigendianListUnsignedCharAppendResult(messageBitLength, inputPreprocessed);
   List<uint64_t> inputStringUint64;
   inputStringUint64.reserve(1 + inputPreprocessed.size / 8);
   for (int i = 0; i < inputPreprocessed.size; ) {
@@ -1476,11 +1476,11 @@ bool PublicKeyRSA::loadFromJSON(JSData& input, std::stringstream* commentsOnFail
   if (input.hasKey("e")) {
     this->theExponentString = input.getValue("e").theString;
   }
-  return this->LoadFromModulusAndExponentStrings(commentsOnFailure);
+  return this->loadFromModulusAndExponentStrings(commentsOnFailure);
 }
 
-bool PublicKeyRSA::LoadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
-  MacroRegisterFunctionWithName("CertificateRSA::LoadFromModulusAndExponentStrings");
+bool PublicKeyRSA::loadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
+  MacroRegisterFunctionWithName("CertificateRSA::loadFromModulusAndExponentStrings");
   if (!Crypto::convertBase64ToLargeUnsigned(this->theModulusString, this->theModulus, commentsOnFailure)) {
     return false;
   }
@@ -1492,10 +1492,10 @@ bool PublicKeyRSA::LoadFromModulusAndExponentStrings(std::stringstream *comments
 
 List<PublicKeyRSA> Crypto::knownCertificates;
 
-bool Crypto::LoadOneKnownCertificate(
+bool Crypto::loadOneKnownCertificate(
   const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
-  MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
+  MacroRegisterFunctionWithName("Crypto::loadOneKnownCertificate");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Loading from: " << input;
   }
@@ -1543,8 +1543,8 @@ std::string PublicKeyRSA::toString() {
   return out.str();
 }
 
-bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
-  MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
+bool Crypto::loadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+  MacroRegisterFunctionWithName("Crypto::loadKnownCertificates");
   Crypto::knownCertificates.setSize(0);
   List<std::string> theFileNames;
   if (! FileOperations::getFolderFileNamesVirtual("certificates-public/", theFileNames, nullptr)) {
@@ -1575,7 +1575,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     )) {
       continue;
     }
-    if (!Crypto::LoadOneKnownCertificate(currentCert, commentsOnFailure, commentsGeneral)) {
+    if (!Crypto::loadOneKnownCertificate(currentCert, commentsOnFailure, commentsGeneral)) {
       return false;
     }
   }
@@ -1587,10 +1587,10 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   return true;
 }
 
-LargeIntegerUnsigned Crypto::RSAencrypt(
+LargeIntegerUnsigned Crypto::rsaEncrypt(
   const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
 ) {
-  MacroRegisterFunctionWithName("Crypto::RSAencrypt");
+  MacroRegisterFunctionWithName("Crypto::rsaEncrypt");
   if (theModulus == 0 || theExponent == 0) {
     global.fatal << "The modulus and the exponent are not allowed to be zero while running RSA. "
     << "The modulus: " << theModulus.toString() << "; the exponent: " << theExponent.toString() << global.fatal;
@@ -1646,7 +1646,7 @@ bool JSONWebToken::verifyRSA256(
     }
     return false;
   }
-  LargeIntegerUnsigned RSAresult = Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
+  LargeIntegerUnsigned RSAresult = Crypto::rsaEncrypt(theModulus, theExponent, theSignatureInt);
   // In order to have reproducible comments, we don't want to log time.
   // if (commentsGeneral != nullptr) {
   //
@@ -1658,7 +1658,7 @@ bool JSONWebToken::verifyRSA256(
   if (RSAresultBitstream.size() > 32) {
     RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
   }
-  Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
+  Crypto::convertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
   bool result = (RSAresultInts == outputSha);
   if (!result) {
     RSAresultInts.reverseElements();
@@ -1670,7 +1670,7 @@ bool JSONWebToken::verifyRSA256(
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
       outputSha, theShaUI
     );
-    RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
+    RSAresultBase64 = Crypto::convertStringToBase64Standard(RSAresultBitstream);
     Crypto::convertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
     Crypto::convertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);
     Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theShaUI, 0, theShaHex);
@@ -1707,10 +1707,10 @@ bool JSONWebToken::assignString(const std::string& other, std::stringstream* com
   this->headerBase64    = theStrings[0];
   this->claimsBase64    = theStrings[1];
   this->signatureBase64 = theStrings[2];
-  if (!Crypto::ConvertBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure)) {
     return false;
   }
-  if (!Crypto::ConvertBase64ToString(this->claimsBase64, this->claimsJSON, commentsOnFailure)) {
+  if (!Crypto::convertBase64ToString(this->claimsBase64, this->claimsJSON, commentsOnFailure)) {
     return false;
   }
   return true;

@@ -90,14 +90,14 @@ bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Sel
 }
 
 int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& theSel) {
-  if (theSel.MaxSize > 30) {
+  if (theSel.maximumSize > 30) {
     global.fatal
     << "This is a programming error: the algebraic extension "
     << "is too large to be handled by the current data structures. "
     << global.fatal;
   }
   int result = 0;
-  for (int i = theSel.MaxSize - 1; i >= 0; i --) {
+  for (int i = theSel.maximumSize - 1; i >= 0; i --) {
     result *= 2;
     if (theSel.selected[i]) {
       result += 1;

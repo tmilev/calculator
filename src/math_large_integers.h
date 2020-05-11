@@ -237,23 +237,23 @@ public:
     this->sign = 1;
   }
   void assignInteger(int x);
-  void AssignInt64(int64_t x);
+  void assignInt64(int64_t x);
   void assignUInt64(uint64_t x);
-  void AddLargeIntUnsigned(const LargeIntegerUnsigned& x);
-  inline void AddInt(int x) {
+  void addLargeIntUnsigned(const LargeIntegerUnsigned& x);
+  inline void addInt(int x) {
     LargeInteger tempInt;
     tempInt.assignInteger(x);
     *this += (tempInt);
   }
   //bool IsGEQ(LargeInt& x);
-  bool CheckForConsistensy();
+  bool checkConsistensy();
   void writeToFile(std::fstream& output);
   void assignString(const std::string& input);
   bool assignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
   void readFromFile(std::fstream& input);
   void checkConsistency(){}
   void makeZero();
-  bool GetDivisors(List<int>& output, bool includeNegative);
+  bool getDivisors(List<int>& output, bool includeNegative);
   void makeOne() {
     this->value.makeOne();
     this->sign = 1;
@@ -303,10 +303,10 @@ public:
   }
   void operator+=(const LargeInteger& other);
   inline void operator+=(const LargeIntegerUnsigned& other) {
-    this->AddLargeIntUnsigned(other);
+    this->addLargeIntUnsigned(other);
   }
   inline void operator+=(int x) {
-    this->AddInt(x);
+    this->addInt(x);
   }
   inline bool operator!=(const LargeInteger& other) const {
     return !(*this == other);
@@ -344,7 +344,7 @@ public:
   }
   inline LargeInteger operator+(int x) const {
     LargeInteger result = *this;
-    result.AddInt(x);
+    result.addInt(x);
     return result;
   }
   LargeInteger operator*(int x) {
@@ -390,7 +390,7 @@ public:
     this->assignInteger(x);
   }
   LargeInteger(int64_t x) {
-    this->AssignInt64(x);
+    this->assignInt64(x);
   }
   LargeInteger(uint64_t x) {
     this->assignUInt64(x);
@@ -473,12 +473,12 @@ public:
   int numeratorShort;
   int denominatorShort;
   LargeRationalExtended *extended;
-  static unsigned long long int TotalSmallAdditions;
-  static unsigned long long int TotalLargeAdditions;
-  static unsigned long long int TotalSmallMultiplications;
-  static unsigned long long int TotalLargeMultiplications;
-  static unsigned long long int TotalSmallGCDcalls;
-  static unsigned long long int TotalLargeGCDcalls;
+  static unsigned long long int totalSmallAdditions;
+  static unsigned long long int totalLargeAdditions;
+  static unsigned long long int totalSmallMultiplications;
+  static unsigned long long int totalLargeMultiplications;
+  static unsigned long long int totalSmallGreatestCommonDivisors;
+  static unsigned long long int totalLargeGreatestCommonDivisors;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->isNegative();
   }
@@ -692,10 +692,10 @@ public:
     }
   }
   static long long int totalAdditions() {
-    return static_cast<long long int>(Rational::TotalLargeAdditions + Rational::TotalSmallAdditions);
+    return static_cast<long long int>(Rational::totalLargeAdditions + Rational::totalSmallAdditions);
   }
   static long long int totalMultiplications() {
-    return static_cast<long long int>(Rational::TotalLargeMultiplications + Rational::TotalSmallMultiplications);
+    return static_cast<long long int>(Rational::totalLargeMultiplications + Rational::totalSmallMultiplications);
   }
   static long long int totalArithmeticOperations() {
     return Rational::totalAdditions() + Rational::totalMultiplications();
@@ -737,7 +737,7 @@ public:
   }
   //the below must be called only with positive arguments!
   static inline int greatestCommonDivisor(int a, int b) {
-    MacroIncrementCounter(Rational::TotalSmallGCDcalls);
+    MacroIncrementCounter(Rational::totalSmallGreatestCommonDivisors);
     return MathRoutines::greatestCommonDivisor(a, b);
   }
   static int gcdSigned(int a, int b) {
@@ -785,7 +785,7 @@ public:
       this->multiplyByInt(2);
       return;
     }
-    MacroIncrementCounter(Rational::TotalLargeAdditions);
+    MacroIncrementCounter(Rational::totalLargeAdditions);
     this->initializeExtendedFromShortIfNeeded();
     Rational tempRat;
     tempRat.assign(r);
@@ -868,7 +868,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool TestScale();
+    static bool testScale();
   };
 };
 #endif

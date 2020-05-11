@@ -3,7 +3,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "json.h"
 
-void ElementWeylGroup::MakeFromReadableReflections(
+void ElementWeylGroup::makeFromReadableReflections(
   WeylGroupData& input, bool dontmakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
 ) {
   this->owner = &input;
@@ -24,13 +24,13 @@ void ElementWeylGroup::MakeFromReadableReflections(
   }
 }
 
-void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream) {
-  MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
+void WeylGroupData::computeOrLoadCharacterTable(std::stringstream* reportStream) {
+  MacroRegisterFunctionWithName("WeylGroup::computeOrLoadCharacterTable");
   if (this->flagCharTableIsComputed) {
     return;
   }
-  this->ComputeOrLoadConjugacyClasses(reportStream);
-  if (this->LoadCharTable()) {
+  this->computeOrLoadConjugacyClasses(reportStream);
+  if (this->loadCharacterTable()) {
     if (reportStream != nullptr) {
       *reportStream << "The character table of " << this->theDynkinType.toString()
       << " is precomputed (hard-coded in c++), loading directly. ";
@@ -42,19 +42,19 @@ void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
     this->theGroup.ComputeIrreducibleRepresentationsWithFormulas(this->theGroup);
   }
   if (this->theGroup.irreps.size < this->theGroup.conjugacyClasses.size) {
-    this->ComputeInitialIrreps();
-    this->theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
+    this->computeInitialIrreducibleRepresentations();
+    this->theGroup.computeIrreducibleRepresentationsTodorsVersion();
   }
   // this flag should already be set
   this->flagCharTableIsComputed = true;
 }
 
-void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStream) {
-  MacroRegisterFunctionWithName("WeylGroupData::ComputeOrLoadConjugacyClasses");
+void WeylGroupData::computeOrLoadConjugacyClasses(std::stringstream* reportStream) {
+  MacroRegisterFunctionWithName("WeylGroupData::computeOrLoadConjugacyClasses");
   if (this->theGroup.flagCCRepresentativesComputed) {
     return;
   }
-  if (this->LoadConjugacyClasses()) {
+  if (this->loadConjugacyClasses()) {
     if (reportStream != nullptr) {
       *reportStream << "The conjugacy classes of "
       << this->theDynkinType.toString()
@@ -68,35 +68,35 @@ void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStrea
 }
 
 bool LoadConjugacyClassesF1_4(WeylGroupData& output) {
-  output.ComputeRho(true);
+  output.computeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
   output.theGroup.conjugacyClasses.setSize(0);
-  theClass.representative.MakeFromReadableReflections(output, false, "[  ]                                                                      "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 1, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3 ]                                                            "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 1 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 1, 3, 4 ]                                          "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 2, 4, 3, 2, 1, 3, 2, 4, 3, 2, 1 ]                                    "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 3 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 1, 4, 3, 2, 1, 3, 2, 3 ]                                          "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 2, 1, 4, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2 ]                        "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 2, 4, 3, 2, 1, 3, 2 ]                                                "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 3, 2, 1 ]                                                            "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1 ]                                                                     "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 3, 4 ]                                             "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 4, 3 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 3, 2 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 1, 3 ]                                                         "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3 ]                                                                     "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 1, 3, 2, 1, 3, 2, 3 ]                                             "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 1, 4 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 2, 1 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 3, 2, 3 ]                                                         "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 3 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 2 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 1, 3, 2, 4, 3, 2, 1 ]                              "); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 3, 2, 1, 3 ]                                                      "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[  ]                                                                      "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 1, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 2, 3 ]                                                            "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 1 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 1, 3, 4 ]                                          "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 2, 4, 3, 2, 1, 3, 2, 4, 3, 2, 1 ]                                    "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 3 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 1, 4, 3, 2, 1, 3, 2, 3 ]                                          "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 2, 1, 4, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2 ]                        "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 2, 4, 3, 2, 1, 3, 2 ]                                                "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 3, 2, 1 ]                                                            "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1 ]                                                                     "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 3, 4 ]                                             "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 4, 3 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 3, 2 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 2, 1, 3 ]                                                         "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3 ]                                                                     "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 1, 3, 2, 1, 3, 2, 3 ]                                             "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 1, 4 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 2, 1 ]                                                               "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 3, 2, 3 ]                                                         "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 3 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 2 ]                                                                  "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 1, 3, 2, 4, 3, 2, 1 ]                              "); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 3, 2, 1, 3 ]                                                      "); output.theGroup.conjugacyClasses.addOnTop(theClass);
 
   output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "         );
@@ -150,75 +150,75 @@ bool LoadConjugacyClassesF1_4(WeylGroupData& output) {
   i ++; output.theGroup.conjugacyClasses[i].size = 36 ;
   i ++; output.theGroup.conjugacyClasses[i].size = 36 ;
   i ++; output.theGroup.conjugacyClasses[i].size = 144;
-  output.LoadConjugacyClassesHelper();
+  output.loadConjugacyClassesHelper();
   return true;
 }
 
 bool LoadConjugacyClassesE1_7(WeylGroupData& output) {
-  output.ComputeRho(true);
+  output.computeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
   output.theGroup.conjugacyClasses.setSize(0);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 3, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 4, 7, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 4, 1, 5, 3, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 2, 4, 3, 4, 5, 2, 4, 3, 1, 3, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 6, 2, 4, 5, 6, 3, 4, 5, 6, 1, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 3, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 4, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 5, 4, 2, 7, 6, 5, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 3, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 4, 7, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 4, 1, 5, 3, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 2, 4, 3, 4, 5, 2, 4, 3, 1, 3, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 6, 2, 4, 5, 6, 3, 4, 5, 6, 1, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 1, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 6, 4, 5, 6, 2, 4, 3, 4, 5, 6, 2, 4, 5, 3, 1, 3, 4, 5, 2, 4, 3, 1]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 3, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 5, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 4, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 5, 4, 2, 7, 6, 5, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
 
   output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "              );
@@ -343,131 +343,131 @@ bool LoadConjugacyClassesE1_7(WeylGroupData& output) {
   i ++; output.theGroup.conjugacyClasses[i].size = 120960      ;
   i ++; output.theGroup.conjugacyClasses[i].size = 96768       ;
 
-  output.LoadConjugacyClassesHelper();
+  output.loadConjugacyClassesHelper();
   return true;
 }
 
 
 bool LoadConjugacyClassesE1_8(WeylGroupData& output) {
-  output.ComputeRho(true);
+  output.computeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
   output.theGroup.conjugacyClasses.setSize(0);
 
 
 
-  theClass.representative.MakeFromReadableReflections(output, false, "[ ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 8, 6, 7, 8, 5, 6, 7, 8, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 8, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 6, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 2, 4, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 8, 6, 7, 5, 6, 7, 4, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 6, 4, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 5, 4, 2, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 2, 4, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 6, 5, 7, 6, 5, 4, 2, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 7, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 8, 1, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 6, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 3, 5, 4, 3, 6, 5, 4, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 7, 6, 5, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 4, 5, 6, 2, 4, 3, 4, 5, 6, 7, 1, 3, 4, 5, 6, 2, 4, 5, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 5, 4, 2, 3, 1, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 4, 5, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 6, 7, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 2, 4, 3, 4, 5, 2, 4, 1, 3, 4, 5, 6, 2, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 5, 6, 7, 4, 2, 4, 5, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 4, 5, 2, 7, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 6, 7, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 7, 6, 5, 4, 2, 3, 4, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 6, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 5, 4, 2, 3, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 3, 4, 5, 6, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 8, 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 6, 7, 4, 5, 3, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 4, 2, 3, 4, 5, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 3, 1, 4, 5, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 5, 4, 2, 3, 1, 4, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 4, 1, 5, 3, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 3, 1, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 7, 6, 2, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 1, 2, 3, 4, 2, 5, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 6, 2, 4, 5, 3, 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 7, 6, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 5, 4, 2, 3, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 5, 4, 2, 3, 4, 5, 6, 7, 1, 3, 4, 5, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 6, 2, 1, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 4, 2, 3, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 3, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 5, 4, 2, 3, 4, 5, 7, 6, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 6, 4, 5, 6, 3, 4, 5, 6, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 2, 4, 5, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 1, 4, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 6, 5, 4, 2, 3, 4, 5, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 5, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 7, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 5, 6, 5, 4, 2, 3, 4, 7, 6, 5, 4, 2, 3, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 6, 8, 1, 3, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 6, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7, 5, 4, 5, 2, 4, 5, 1, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 2, 5, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 7, 6, 5, 4, 2, 3, 4, 5, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 4, 2, 5, 4, 2, 3, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 4, 1, 2, 3, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 2, 5, 4, 3, 1, 6, 5, 7, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 7, 2, 4, 5, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 3, 4, 5, 6, 7, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 5, 6, 3, 4, 2, 1, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 6, 7, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 7, 4, 1, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 5, 6, 4, 2, 4, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 8, 4, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 7, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
-  theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 1, 6, 5, 4, 2, 3, 4, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 8, 6, 7, 8, 5, 6, 7, 8, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 8, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 6, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 2, 4, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 8, 6, 7, 5, 6, 7, 4, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 6, 4, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 1, 3, 4, 5, 6, 7, 8, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 5, 4, 2, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 2, 4, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 6, 5, 7, 6, 5, 4, 2, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 7, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 8, 1, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 6, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 3, 5, 4, 3, 6, 5, 4, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 7, 6, 5, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 4, 5, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 7, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 8, 2, 4, 5, 6, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 4, 5, 6, 2, 4, 3, 4, 5, 6, 7, 1, 3, 4, 5, 6, 2, 4, 5, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 5, 4, 2, 3, 1, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 4, 5, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 6, 7, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 6, 7, 5, 2, 4, 3, 4, 5, 2, 4, 1, 3, 4, 5, 6, 2, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 5, 6, 7, 4, 2, 4, 5, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, 8, 7, 6, 5, 4, 2, 3, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 4, 5, 2, 7, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 6, 7, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 7, 6, 5, 4, 2, 3, 4, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 6, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 5, 4, 2, 3, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 3, 4, 5, 6, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 8, 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 8, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 7, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 3, 1, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 6, 2, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 6, 7, 4, 5, 3, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 4, 2, 3, 4, 5, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 3, 1, 4, 5, 4, 3, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 2, 6, 5, 4, 3, 1, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 3, 1, 4, 3, 5, 4, 2, 3, 1, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 5, 4, 2, 3, 1, 4, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 4, 1, 5, 3, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 1, 4, 3, 5, 4, 3, 1, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 7, 6, 2, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 1, 2, 3, 4, 2, 5, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 6, 2, 4, 5, 3, 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 7, 6, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3, 4, 2, 3, 5, 4, 2, 3, 4, 6, 5, 4, 2, 3, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 5, 4, 2, 3, 4, 5, 6, 7, 1, 3, 4, 5, 2, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 6, 2, 1, 3, 4, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 1, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 4, 5, 6, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 4, 2, 3, 4, 2 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 3, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 3, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 5, 4, 2, 3, 4, 5, 7, 6, 8, 7, 6, 5, 4, 2, 3, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 6, 5, 4, 2, 3, 4, 5, 6, 7, 6, 5, 4, 2, 3, 1, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 6, 4, 5, 6, 3, 4, 5, 6, 2, 4, 3, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 2, 4, 5, 1, 3, 4, 5, 6, 2, 4, 5, 3, 4, 2, 1, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 5, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 1, 4, 5, 4, 2, 6, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 1, 4, 2, 3, 5, 4, 2, 3, 1, 4, 3, 5, 4, 6, 5, 4, 2, 3, 4, 5, 6, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 2, 3, 4, 2, 6, 5, 4, 2, 3, 4, 5, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 5, 2, 6, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 6 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 5, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 4, 5, 7, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 5, 6, 5, 4, 2, 3, 4, 7, 6, 5, 4, 2, 3, 1, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 6, 8, 1, 3, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 6, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7, 5, 4, 5, 2, 4, 5, 1, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 4, 2, 3, 1, 4, 5, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 2, 5, 4, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 6, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 3, 4, 2, 3, 4, 5, 7, 6, 5, 4, 2, 3, 4, 5, 6, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 1, 4, 2, 5, 4, 2, 3, 7, 8 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7, 8, 5, 4, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 4, 1, 2, 3, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 2, 5, 4, 3, 1, 6, 5, 7, 6, 5 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 7, 2, 4, 5, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 5, 3, 4, 5, 6, 7, 2, 4, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 5, 6, 3, 4, 2, 1, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 6, 7, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 7, 4, 1, 2, 3 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 5, 6, 4, 2, 4, 3, 4 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 7, 8, 4, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 4, 3, 5, 4, 2, 3, 4, 5, 6, 8, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 8, 6, 7, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
+  theClass.representative.makeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 1, 6, 5, 4, 2, 3, 4, 5, 7 ]"); output.theGroup.conjugacyClasses.addOnTop(theClass);
 
   output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "              );
@@ -695,7 +695,7 @@ bool LoadConjugacyClassesE1_8(WeylGroupData& output) {
   i ++; output.theGroup.conjugacyClasses[i].size = 14515200    ;
   i ++; output.theGroup.conjugacyClasses[i].size = 11612160    ;
   i ++; output.theGroup.conjugacyClasses[i].size = 11612160    ;
-  output.LoadConjugacyClassesHelper();
+  output.loadConjugacyClassesHelper();
   return true;
 }
 
@@ -1127,7 +1127,7 @@ bool LoadCharTableE1_8(WeylGroupData& output) {
 bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups) {
   MacroRegisterFunctionWithName("LoadOutputSubgroupsFromJSData");
   HashedList<Vector<Rational> > gapRootSystem;
-  if (!inputGroup.LoadGAPRootSystem(gapRootSystem)) {
+  if (!inputGroup.loadGAPRootSystem(gapRootSystem)) {
     return false;
   }
   SubgroupDataRootReflections readerSubgroup;
@@ -1169,12 +1169,12 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     }
     if (
       inputGroup.theGroup.characterTable.size <= 0 ||
-      inputGroup.theGroup.characterTable.size != inputGroup.theGroup.ConjugacyClassCount()
+      inputGroup.theGroup.characterTable.size != inputGroup.theGroup.conjugacyClassCount()
     ) {
       global.fatal << "Bad input group. " << global.fatal;
     }
     if (inputGroup.theDynkinType.toString() == "F^{1}_4") {
-      if (inputGroup.theGroup.ConjugacyClassCount() != 25) {
+      if (inputGroup.theGroup.conjugacyClassCount() != 25) {
         global.fatal << "Bad f4. " << global.fatal;
       }
     }
@@ -1216,16 +1216,16 @@ bool LoadSignSignatureE1_8(WeylGroupData& inputGroup, List<SubgroupDataRootRefle
 }
 
 bool LoadConjugacyClassesG1_2(WeylGroupData& output) {
-  output.ComputeRho(true);
+  output.computeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass emptyClass;
   emptyClass.flagRepresentativeComputed = true;
   output.theGroup.conjugacyClasses.initializeFillInObject(6, emptyClass);
-  output.theGroup.conjugacyClasses[0  ].representative.MakeFromReadableReflections(output, false, "");
-  output.theGroup.conjugacyClasses[1  ].representative.MakeFromReadableReflections(output, false, "1");
-  output.theGroup.conjugacyClasses[2  ].representative.MakeFromReadableReflections(output, false, "2");
-  output.theGroup.conjugacyClasses[3  ].representative.MakeFromReadableReflections(output, false, "2,1");
-  output.theGroup.conjugacyClasses[4  ].representative.MakeFromReadableReflections(output, false, "2,1,2,1");
-  output.theGroup.conjugacyClasses[5  ].representative.MakeFromReadableReflections(output, false, "1,2,1,2,1,2");
+  output.theGroup.conjugacyClasses[0  ].representative.makeFromReadableReflections(output, false, "");
+  output.theGroup.conjugacyClasses[1  ].representative.makeFromReadableReflections(output, false, "1");
+  output.theGroup.conjugacyClasses[2  ].representative.makeFromReadableReflections(output, false, "2");
+  output.theGroup.conjugacyClasses[3  ].representative.makeFromReadableReflections(output, false, "2,1");
+  output.theGroup.conjugacyClasses[4  ].representative.makeFromReadableReflections(output, false, "2,1,2,1");
+  output.theGroup.conjugacyClasses[5  ].representative.makeFromReadableReflections(output, false, "1,2,1,2,1,2");
   output.theGroup.conjugacyClasses[0  ].size = 1;
   output.theGroup.conjugacyClasses[1  ].size = 3;
   output.theGroup.conjugacyClasses[2  ].size = 3;
@@ -1239,7 +1239,7 @@ bool LoadConjugacyClassesG1_2(WeylGroupData& output) {
   output.ccCarterLabels.addOnTop("G_2");
   output.ccCarterLabels.addOnTop("A_2");
   output.ccCarterLabels.addOnTop("A^{3}_1+A_1");
-  output.LoadConjugacyClassesHelper();
+  output.loadConjugacyClassesHelper();
   return true;
 }
 
@@ -1265,35 +1265,35 @@ bool LoadCharTableG1_2(WeylGroupData& output) {
 }
 
 bool LoadConjugacyClassesE1_6(WeylGroupData& output) {
-  output.ComputeRho(true);
+  output.computeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass emptyClass;
   emptyClass.flagRepresentativeComputed = true;
   output.theGroup.conjugacyClasses.initializeFillInObject(25, emptyClass);
-  output.theGroup.conjugacyClasses[0  ].representative.MakeFromReadableReflections(output, false, "   ");
-  output.theGroup.conjugacyClasses[1  ].representative.MakeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
-  output.theGroup.conjugacyClasses[2  ].representative.MakeFromReadableReflections(output, false, "1, 4 ");
-  output.theGroup.conjugacyClasses[3  ].representative.MakeFromReadableReflections(output, false, "1, 3, 1, 4, 3, 1, 2, 4, 5, 4, 3, 1, 2, 4, 3, 5, 6, 5, 4, 3, 2, 4, 5, 6");
-  output.theGroup.conjugacyClasses[4  ].representative.MakeFromReadableReflections(output, false, "1, 3 ");
-  output.theGroup.conjugacyClasses[5  ].representative.MakeFromReadableReflections(output, false, "1, 3, 5, 6  ");
-  output.theGroup.conjugacyClasses[6  ].representative.MakeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 5  ");
-  output.theGroup.conjugacyClasses[7  ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 6 ");
-  output.theGroup.conjugacyClasses[8  ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 2  ");
-  output.theGroup.conjugacyClasses[9  ].representative.MakeFromReadableReflections(output, false, "1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ");
-  output.theGroup.conjugacyClasses[10 ].representative.MakeFromReadableReflections(output, false, "3, 4, 2, 5  ");
-  output.theGroup.conjugacyClasses[11 ].representative.MakeFromReadableReflections(output, false, "1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ");
-  output.theGroup.conjugacyClasses[12 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2, 5 ");
-  output.theGroup.conjugacyClasses[13 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 5, 6  ");
-  output.theGroup.conjugacyClasses[14 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6, 2, 3, 5 ");
-  output.theGroup.conjugacyClasses[15 ].representative.MakeFromReadableReflections(output, false, "1 ");
-  output.theGroup.conjugacyClasses[16 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6  ");
-  output.theGroup.conjugacyClasses[17 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
-  output.theGroup.conjugacyClasses[18 ].representative.MakeFromReadableReflections(output, false, "1, 4, 3  ");
-  output.theGroup.conjugacyClasses[19 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2  ");
-  output.theGroup.conjugacyClasses[20 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2, 5, 6  ");
-  output.theGroup.conjugacyClasses[21 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6, 3, 5  ");
-  output.theGroup.conjugacyClasses[22 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 2, 5  ");
-  output.theGroup.conjugacyClasses[23 ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 2, 6  ");
-  output.theGroup.conjugacyClasses[24 ].representative.MakeFromReadableReflections(output, false, "1, 4, 2, 5, 4, 2, 3 ");
+  output.theGroup.conjugacyClasses[0  ].representative.makeFromReadableReflections(output, false, "   ");
+  output.theGroup.conjugacyClasses[1  ].representative.makeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
+  output.theGroup.conjugacyClasses[2  ].representative.makeFromReadableReflections(output, false, "1, 4 ");
+  output.theGroup.conjugacyClasses[3  ].representative.makeFromReadableReflections(output, false, "1, 3, 1, 4, 3, 1, 2, 4, 5, 4, 3, 1, 2, 4, 3, 5, 6, 5, 4, 3, 2, 4, 5, 6");
+  output.theGroup.conjugacyClasses[4  ].representative.makeFromReadableReflections(output, false, "1, 3 ");
+  output.theGroup.conjugacyClasses[5  ].representative.makeFromReadableReflections(output, false, "1, 3, 5, 6  ");
+  output.theGroup.conjugacyClasses[6  ].representative.makeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 5  ");
+  output.theGroup.conjugacyClasses[7  ].representative.makeFromReadableReflections(output, false, "1, 4, 3, 6 ");
+  output.theGroup.conjugacyClasses[8  ].representative.makeFromReadableReflections(output, false, "1, 4, 3, 2  ");
+  output.theGroup.conjugacyClasses[9  ].representative.makeFromReadableReflections(output, false, "1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ");
+  output.theGroup.conjugacyClasses[10 ].representative.makeFromReadableReflections(output, false, "3, 4, 2, 5  ");
+  output.theGroup.conjugacyClasses[11 ].representative.makeFromReadableReflections(output, false, "1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ");
+  output.theGroup.conjugacyClasses[12 ].representative.makeFromReadableReflections(output, false, "1, 3, 2, 5 ");
+  output.theGroup.conjugacyClasses[13 ].representative.makeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 5, 6  ");
+  output.theGroup.conjugacyClasses[14 ].representative.makeFromReadableReflections(output, false, "1, 4, 6, 2, 3, 5 ");
+  output.theGroup.conjugacyClasses[15 ].representative.makeFromReadableReflections(output, false, "1 ");
+  output.theGroup.conjugacyClasses[16 ].representative.makeFromReadableReflections(output, false, "1, 4, 6  ");
+  output.theGroup.conjugacyClasses[17 ].representative.makeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
+  output.theGroup.conjugacyClasses[18 ].representative.makeFromReadableReflections(output, false, "1, 4, 3  ");
+  output.theGroup.conjugacyClasses[19 ].representative.makeFromReadableReflections(output, false, "1, 3, 2  ");
+  output.theGroup.conjugacyClasses[20 ].representative.makeFromReadableReflections(output, false, "1, 3, 2, 5, 6  ");
+  output.theGroup.conjugacyClasses[21 ].representative.makeFromReadableReflections(output, false, "1, 4, 6, 3, 5  ");
+  output.theGroup.conjugacyClasses[22 ].representative.makeFromReadableReflections(output, false, "1, 3, 4, 2, 5  ");
+  output.theGroup.conjugacyClasses[23 ].representative.makeFromReadableReflections(output, false, "1, 4, 3, 2, 6  ");
+  output.theGroup.conjugacyClasses[24 ].representative.makeFromReadableReflections(output, false, "1, 4, 2, 5, 4, 2, 3 ");
 
   output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop("0"        );
@@ -1347,7 +1347,7 @@ bool LoadConjugacyClassesE1_6(WeylGroupData& output) {
   output.theGroup.conjugacyClasses[22 ].size = 6480;
   output.theGroup.conjugacyClasses[23 ].size = 5184;
   output.theGroup.conjugacyClasses[24 ].size = 4320;
-  output.LoadConjugacyClassesHelper();
+  output.loadConjugacyClassesHelper();
   return true;
 }
 
@@ -1410,7 +1410,7 @@ bool LoadCharTableE1_6(WeylGroupData& output) {
   return true;
 }
 
-bool WeylGroupData::LoadConjugacyClassesHelper() {
+bool WeylGroupData::loadConjugacyClassesHelper() {
   this->theGroup.sizePrivate = 0;
   for (int i = 0; i < this->theGroup.conjugacyClasses.size; i ++) {
     this->theGroup.sizePrivate += this->theGroup.conjugacyClasses[i].size;
@@ -1425,11 +1425,11 @@ bool WeylGroupData::LoadConjugacyClassesHelper() {
   return true;
 }
 
-bool WeylGroupData::LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups) {
-  if (!this->LoadConjugacyClasses()) {
+bool WeylGroupData::loadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups) {
+  if (!this->loadConjugacyClasses()) {
     return false;
   }
-  if (!this->LoadCharTable()) {
+  if (!this->loadCharacterTable()) {
     return false;
   }
   if (this->theDynkinType.toString() == "F^{1}_4") {
@@ -1447,7 +1447,7 @@ bool WeylGroupData::LoadSignSignatures(List<SubgroupDataRootReflections>& output
   return false;
 }
 
-bool WeylGroupData::LoadConjugacyClasses() {
+bool WeylGroupData::loadConjugacyClasses() {
   if (this->theDynkinType.toString() == "G^{1}_2") {
     return LoadConjugacyClassesG1_2(*this);
   }
@@ -1466,7 +1466,7 @@ bool WeylGroupData::LoadConjugacyClasses() {
   return false;
 }
 
-bool WeylGroupData::LoadCharTable() {
+bool WeylGroupData::loadCharacterTable() {
   bool result = false;
   if (this->theDynkinType.toString() == "G^{1}_2") {
     result = LoadCharTableG1_2(*this);
@@ -1756,7 +1756,7 @@ bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem) {
   return true;
 }
 
-bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const {
+bool WeylGroupData::loadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const {
   bool result = false;
   if (this->theDynkinType.isOfSimpleType('F', 4)) {
     result = LoadGAPRootSystemF1_4(outputPositiveRootSystem);

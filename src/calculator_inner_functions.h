@@ -442,7 +442,7 @@ public:
   static bool innerDegreesToRadians(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEvaluateToDoublE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool functionEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2Init(

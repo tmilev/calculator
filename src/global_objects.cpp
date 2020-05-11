@@ -39,17 +39,17 @@ std::string GlobalVariables::getTimeLocal() {
   return now.toStringLocal();
 }
 
-void InitializeGlobalObjects() {
+void initializeGlobalObjects() {
   global.logs.logType = GlobalVariables::LogData::type::server;
   global.flagIsChildProcess = false;
-  InitializeTimeR();
+  initializeTimer();
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
   global.pointerExternalCommandReturnOutput = &externalCommandReturnStandartOut;
   global.pointerExternalCommandStream = &externalCommandStreamOutput;
-  global.pointerCallChDir = &CallChDirWrapper;
+  global.pointerCallChDir = &callChDirWrapper;
 }
 
-void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
+void HtmlRoutines::makeReportIndicatorFile(const std::string& input) {
   static int counter = - 1;
   counter ++;
   std::fstream theFile;
@@ -62,9 +62,9 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
   theFile.close();
 }
 
-void HtmlRoutines::MakeStdCoutReport(const std::string& input) {
+void HtmlRoutines::makeStdCoutReport(const std::string& input) {
   global.comments << input;
-  HtmlRoutines::MakeReportIndicatorFile(input);
+  HtmlRoutines::makeReportIndicatorFile(input);
 }
 
 

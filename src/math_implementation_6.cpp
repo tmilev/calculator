@@ -174,7 +174,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   LargeInteger hT, lT;
   hT = highestCoefficient.getNumerator();
   lT = lowestTerm.getNumerator();
-  if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
+  if (!hT.getDivisors(divisorsH, false) || !lT.getDivisors(divisorsS, true)) {
     return false;
   }
   for (int i = 0; i < divisorsH.size; i ++) {
@@ -331,7 +331,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       currentPointContribution = 1;
       for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
         currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
-        currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].SelectedMult);
+        currentPrimePowerContribution.raiseToPower(divisorSelection[j][k].amount);
         currentPointContribution *= currentPrimePowerContribution;
       }
       if (!isGood) {

@@ -238,7 +238,7 @@ void JSData::operator=(const List<JSData>& other) {
 
 void JSData::operator=(int64_t input) {
   this->theType = JSData::token::tokenLargeInteger;
-  this->theInteger.getElement().AssignInt64(input);
+  this->theInteger.getElement().assignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {

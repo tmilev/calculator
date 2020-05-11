@@ -823,7 +823,7 @@ bool Calculator::checkOperationHandlers() {
 
 bool Calculator::checkConsistencyAfterInitialization() {
   this->theExpressionContainer.grandMasterConsistencyCheck();
-  this->EvaluatedExpressionsStack.grandMasterConsistencyCheck();
+  this->evaluatedExpressionsStack.grandMasterConsistencyCheck();
   this->cachedExpressions.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
     this->numberExpectedExpressionsAtInitialization = this->theExpressionContainer.size;
@@ -842,7 +842,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
   if (
     this->cachedExpressions.size != 0 ||
     this->imagesCachedExpressions.size != 0 ||
-    this->EvaluatedExpressionsStack.size != 0
+    this->evaluatedExpressionsStack.size != 0
   ) {
     global.fatal << "This is a programming error: cached expressions, "
     << "images cached expressions, expression stack and "
@@ -850,7 +850,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
     << "instead they contain respectively "
     << this->cachedExpressions.size << ", "
     << this->imagesCachedExpressions.size << ", and "
-    << this->EvaluatedExpressionsStack.size
+    << this->evaluatedExpressionsStack.size
     << " elements. " << global.fatal;
   }
   return this->theObjectContainer.checkConsistencyAfterReset();
@@ -999,7 +999,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra.content->toStringLieAlgebraName();
-  KLpolys theKLpolys;
+  KazhdanLusztigPolynomials theKLpolys;
   theKLpolys.computeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
   out << theKLpolys.toString(&theFormat);
@@ -2573,43 +2573,43 @@ JSData Calculator::toJSONPerformance() {
     moreDetails << "<br>maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
-  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->NumListsStart))
+  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->numberOfListsStart))
   << ", total: " << GlobalStatistics::numListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->NumListResizesStart))
+  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->numberListResizesStart))
   << ", total: " << GlobalStatistics::numListResizesTotal
-  << "<br> # hash resizing: computation: " << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->NumHashResizesStart))
+  << "<br> # hash resizing: computation: " << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->numberHashResizesStart))
   << ", total: " << GlobalStatistics::numHashResizes;
-  if (Rational::TotalSmallAdditions > 0) {
+  if (Rational::totalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
-    << Rational::TotalSmallAdditions - static_cast<unsigned long long>(this->NumSmallAdditionsStart)
-    << ", total: " << Rational::TotalSmallAdditions;
+    << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->numberOfSmallAdditionsStart)
+    << ", total: " << Rational::totalSmallAdditions;
   }
-  if (Rational::TotalSmallMultiplications > 0) {
+  if (Rational::totalSmallMultiplications > 0) {
     moreDetails << "<br>Small rational multiplications: computation: "
-    << Rational::TotalSmallMultiplications - static_cast<unsigned long long>(this->NumSmallMultiplicationsStart)
-    << ", total: " << Rational::TotalSmallMultiplications;
+    << Rational::totalSmallMultiplications - static_cast<unsigned long long>(this->numberOfSmallMultiplicationsStart)
+    << ", total: " << Rational::totalSmallMultiplications;
   }
-  if (Rational::TotalSmallGCDcalls > 0) {
+  if (Rational::totalSmallGreatestCommonDivisors > 0) {
     moreDetails << "<br>Small gcd calls: computation: "
-    << Rational::TotalSmallGCDcalls - static_cast<unsigned long long>(this->NumSmallGCDcallsStart)
-    << ", total: " << Rational::TotalSmallGCDcalls;
+    << Rational::totalSmallGreatestCommonDivisors - static_cast<unsigned long long>(this->numberOfSmallGreatestCommonDivisorsStart)
+    << ", total: " << Rational::totalSmallGreatestCommonDivisors;
   }
-  if (Rational::TotalLargeAdditions > 0) {
+  if (Rational::totalLargeAdditions > 0) {
     moreDetails << "<br>Large integer additions: "
-    << Rational::TotalLargeAdditions - static_cast<unsigned long long>(this->NumLargeAdditionsStart)
+    << Rational::totalLargeAdditions - static_cast<unsigned long long>(this->numberOfLargeAdditionsStart)
     << ", total: "
-    << Rational::TotalLargeAdditions;
+    << Rational::totalLargeAdditions;
   }
-  if (Rational::TotalLargeMultiplications > 0) {
+  if (Rational::totalLargeMultiplications > 0) {
     moreDetails << "<br>Large integer multiplications: computation: "
-    << Rational::TotalLargeMultiplications - static_cast<unsigned long long>(this->NumLargeMultiplicationsStart)
-    << ", total: " << Rational::TotalLargeMultiplications;
+    << Rational::totalLargeMultiplications - static_cast<unsigned long long>(this->numberOfLargeMultiplicationsStart)
+    << ", total: " << Rational::totalLargeMultiplications;
   }
-  if (Rational::TotalLargeGCDcalls > 0) {
+  if (Rational::totalLargeGreatestCommonDivisors > 0) {
     moreDetails << "<br>Large gcd calls: "
-    << Rational::TotalLargeGCDcalls - static_cast<unsigned long long>(this->NumLargeGCDcallsStart)
-    << ", total: " << Rational::TotalLargeGCDcalls;
+    << Rational::totalLargeGreatestCommonDivisors - static_cast<unsigned long long>(this->numberOfLargeGreatestCommonDivisorsStart)
+    << ", total: " << Rational::totalLargeGreatestCommonDivisors;
   }
   std::stringstream millisecondsStream;
   millisecondsStream << computationMilliseconds << " ms";
@@ -2630,11 +2630,11 @@ std::string Calculator::toString() {
   } else {
     out2 << "No computation time limit.<hr> ";
   }
-  if (this->RuleStack.children.size > 1) {
+  if (this->ruleStack.children.size > 1) {
     out2 << "<b>Predefined rules.</b><br>";
-    for (int i = 1; i < this->RuleStack.children.size; i ++) {
-      out2 << this->RuleStack[i].toString();
-      if (i != this->RuleStack.children.size - 1) {
+    for (int i = 1; i < this->ruleStack.children.size; i ++) {
+      out2 << this->ruleStack[i].toString();
+      if (i != this->ruleStack.children.size - 1) {
         out2 << "<br>";
       }
     }
@@ -2670,8 +2670,8 @@ std::string Calculator::toString() {
     }
   }
   out << "<br>\n User or run-time defined atoms = " << this->operations.size() << " (= "
-  << this->NumPredefinedAtoms << " predefined + "
-  << this->operations.size() - this->NumPredefinedAtoms << " user-defined):<br>\n";
+  << this->numberOfPredefinedAtoms << " predefined + "
+  << this->operations.size() - this->numberOfPredefinedAtoms << " user-defined):<br>\n";
   for (int i = 0; i < this->operations.size(); i ++) {
     out << "\n" << i << ": " << openTag1 << this->operations.theKeys[i] << closeTag1;
     if (i != this->operations.size() - 1) {
@@ -2780,7 +2780,7 @@ SemisimpleLieAlgebra& ObjectContainer::getLieAlgebraCreateIfNotPresent(const Dyn
   SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.getValueCreateNoInit(input);
   if (needToInit) {
     this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
-    theLA.theWeyl.MakeFromDynkinType(input);
+    theLA.theWeyl.makeFromDynkinType(input);
   }
   return theLA;
 }

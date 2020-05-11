@@ -574,7 +574,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
 bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFailure) {
   LaTeXCrawler::Slides theSlides;
   std::string slideSpecification = global.webArguments.getValue(WebAPI::request::slides::content, "");
-  if (!theSlides.FromString(slideSpecification, commentsOnFailure)) {
+  if (!theSlides.fromString(slideSpecification, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to initialize slides from global inputs: key: " << WebAPI::request::slides::content << " is missing. ";
     }

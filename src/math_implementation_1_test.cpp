@@ -88,7 +88,7 @@ bool LargeIntegerUnsigned::Test::factorSmall(
 
 
 bool Rational::Test::all() {
-  Rational::Test::TestScale();
+  Rational::Test::testScale();
   return true;
 }
 
@@ -117,7 +117,7 @@ TestRationalScale::TestRationalScale(
   this->expected = inputExpected;
 }
 
-bool Rational::Test::TestScale() {
+bool Rational::Test::testScale() {
   List<TestRationalScale> toTest = {
     TestRationalScale({"1/2", "2/3"}, 0, "3, 4"),
     TestRationalScale({"-1/2", "2/3"}, 0, "3, -4")

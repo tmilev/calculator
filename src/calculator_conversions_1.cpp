@@ -106,7 +106,8 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << " is not a rational number.";
   }
   if (theScale <= 0) {
-    return theCommands << "<hr>Couldn't extract first co-root length: " << theScale.toString() << " is non-positive.";
+    return theCommands << "<hr>Couldn't extract first co-root length: "
+    << theScale.toString() << " is non-positive.";
   }
   std::string theTypeName;
   if (!typeLetterE.isOperation(&theTypeName)) {
@@ -114,7 +115,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
   }
   if (theTypeName.size() != 1) {
     return theCommands << "<hr>Error while extracting Dynkin simple type: "
-    << "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
+    << "the type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. "
     << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.toString();
   }
   char theWeylLetter = theTypeName[0];
@@ -390,16 +391,16 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
   return false;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementLisT(
+bool CalculatorConversions::innerLoadKeysFromStatementList(
   Calculator& theCommands,
   const Expression& input,
   MapList<std::string, Expression, MathRoutines::hashString>& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
   MapList<Expression, Expression> outputExpressionFormat;
-  if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(
     theCommands, input, outputExpressionFormat, commentsOnFailure, allowFailure
   )) {
     return false;
@@ -415,14 +416,14 @@ bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   return true;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementLisT(
+bool CalculatorConversions::innerLoadKeysFromStatementList(
   Calculator& theCommands,
   const Expression& input,
   MapList<Expression, Expression>& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
   output.clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].startsWith(theCommands.opDefine(), 3)) {
@@ -460,10 +461,10 @@ bool CalculatorConversions::innerLoadKey(
   << inputStatementList.toString() << ".";
 }
 
-bool CalculatorConversions::innerStoreCandidateSA(
+bool CalculatorConversions::innerStoreCandidateSubalgebra(
   Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerStoreCandidateSA");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerStoreCandidateSubalgebra");
   Expression currentE;
   List<std::string> keys;
   List<Expression> values;
@@ -497,14 +498,14 @@ bool CalculatorConversions::innerStoreCandidateSA(
   return output.makeSequenceCommands(theCommands, keys, values);
 }
 
-bool CalculatorConversions::innerCandidateSAPrecomputed(
+bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
   CandidateSemisimpleSubalgebra& outputSubalgebra,
   SemisimpleSubalgebras& owner
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSAPrecomputed");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSubalgebraPrecomputed");
   owner.checkInitialization();
   ProgressReport theReport;
   std::stringstream reportStream;
@@ -532,7 +533,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   theReport.report(reportStream.str());
   outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
-  outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
+  outputSubalgebra.theWeylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   theReport.report(reportStream.str());
@@ -592,8 +593,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
   owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
-  currentNonEmbededSA.theWeyl.ComputeRho(true);
-  outputSubalgebra.theWeylNonEmbedded->ComputeRho(true); //<- this line may be unnecessary, the
+  currentNonEmbededSA.theWeyl.computeRho(true);
+  outputSubalgebra.theWeylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
   //some time soon.
   outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
@@ -677,7 +678,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << theSAsE[i].toString() << ".";
     theReport.report(reportStream2.str());
     CandidateSemisimpleSubalgebra currentCandidate;
-    if (!CalculatorConversions::innerCandidateSAPrecomputed(
+    if (!CalculatorConversions::innerCandidateSubalgebraPrecomputed(
       theCommands, theSAsE[i], tempE, currentCandidate, theSAs
     )) {
       return theCommands
@@ -770,7 +771,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   subalgebrasListE.makeSequence(theCommands);
   subalgebrasListE.children.reserve(input.theSubalgebras.theValues.size + 1);
   for (int i = 0; i < input.theSubalgebras.theValues.size; i ++) {
-    if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras.theValues[i], candidateE)) {
+    if (!CalculatorConversions::innerStoreCandidateSubalgebra(theCommands, input.theSubalgebras.theValues[i], candidateE)) {
       return false;
     }
     subalgebrasListE.addChildOnTop(candidateE);
@@ -1362,7 +1363,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
     theElement.makeFromString(inputStringFormat);
     return output.assignValue(theElement, theCommands);
   }
-  if (input.children.size < 3) {
+  if (input.size() < 3) {
     return theCommands << "To make elements of hyperoctahedral group we need at least 3 inputs. ";
   }
   List<int> oneCycle;
@@ -1383,7 +1384,7 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
     }
   }
   theElement.h.addCycle(oneCycle);
-  for (int i = 2; i < input.children.size; i ++) {
+  for (int i = 2; i < input.size(); i ++) {
     if (input[i].isEqualToOne()) {
       theElement.k.toggleBit(i - 2);
     } else if (!input[i].isEqualToZero()) {

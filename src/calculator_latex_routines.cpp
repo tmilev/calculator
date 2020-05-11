@@ -142,7 +142,7 @@ void LaTeXCrawler::buildFreecalc() {
     bool recordingLectureNumber = false;
     for (unsigned i = 0; i < buffer.size(); i ++) {
       if (buffer[i] == '}') {
-        leftBracketsMinusRight--;
+        leftBracketsMinusRight --;
         if (leftBracketsMinusRight == 0) {
           numBallancedBracketGroups ++;
           if (recordingLectureNumber) {

@@ -11,7 +11,7 @@ class Selection {
 public:
   List<int> elements;
   List<bool> selected;
-  int MaxSize;
+  int maximumSize;
   int cardinalitySelection;
   void addSelectionAppendNewIndex(int index);
   void removeLastSelection();
@@ -24,14 +24,14 @@ public:
     this->makeFullSelection();
   }
   void makeFullSelection() {
-    for (int i = 0; i < this->MaxSize; i ++) {
+    for (int i = 0; i < this->maximumSize; i ++) {
       this->elements[i] = i;
       this->selected[i] = true;
     }
-    this->cardinalitySelection = this->MaxSize;
+    this->cardinalitySelection = this->maximumSize;
   }
-  bool IsSubset(const Selection& other) const {
-    if (this->MaxSize != other.MaxSize) {
+  bool isSubset(const Selection& other) const {
+    if (this->maximumSize != other.maximumSize) {
       return false;
     }
     for (int i = 0; i < this->cardinalitySelection; i ++) {
@@ -60,14 +60,14 @@ public:
   int selectionToIndex();
   void expandMaxSize();
   int getNumberOfCombinationsFixedCardinality(int theCardinality) {
-    return MathRoutines::nChooseK(this->MaxSize, theCardinality);
+    return MathRoutines::nChooseK(this->maximumSize, theCardinality);
   }
   void shrinkMaxSize();
   void makeSubSelection(Selection& theSelection, Selection& theSubSelection);
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
   void invertSelection() {
-    for (int i = 0; i < this->MaxSize; i ++) {
+    for (int i = 0; i < this->maximumSize; i ++) {
       this->selected[i] = !this->selected[i];
     }
     this->computeIndicesFromSelection();
@@ -78,7 +78,7 @@ public:
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
   bool operator==(const Selection& right) const {
-    if (this->MaxSize != right.MaxSize || this->cardinalitySelection != right.cardinalitySelection) {
+    if (this->maximumSize != right.maximumSize || this->cardinalitySelection != right.cardinalitySelection) {
       return false;
     }
     for (int i = 0; i < this->cardinalitySelection; i ++) {
@@ -93,7 +93,7 @@ public:
   Selection(const Vector<Rational>& other) {
     this->operator=(other);
   }
-  Selection(const Selection& other): MaxSize(0), cardinalitySelection(0) {
+  Selection(const Selection& other): maximumSize(0), cardinalitySelection(0) {
     *this = other;
   }
 };
@@ -107,11 +107,11 @@ public:
     return tempS;
   }
   List<int> elements;
-  List<int> Multiplicities;
+  List<int> multiplicities;
   static unsigned int hashFunction(const SelectionWithMultiplicities& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.elements.size; i ++) {
-      result += static_cast<unsigned int>(input.Multiplicities[input.elements[i]]) * someRandomPrimes[input.elements[i]];
+      result += static_cast<unsigned int>(input.multiplicities[input.elements[i]]) * someRandomPrimes[input.elements[i]];
     }
     return result;
   }
@@ -124,23 +124,23 @@ class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
   void initialize(int NumElements);
   void initWithMultiplicities(int NumElements);
 public:
-  int MaxMultiplicity;
+  int maximumMultiplicity;
   void initMaxMultiplicity(int NumElements, int MaxMult);
   int numberOfCombinationsOfCardinality(int cardinality);
   LargeInteger getTotalCombinationCount() const;
   int numberOfSelectionsTotal() {
-    return MathRoutines::kToTheNth(MaxMultiplicity, this->Multiplicities.size);
+    return MathRoutines::kToTheNth(maximumMultiplicity, this->multiplicities.size);
   }
   bool incrementReturnFalseIfPastLast();
   void incrementSubset();
   void incrementSubsetFixedCardinality(int Cardinality);
   bool hasMultiplicitiesZeroAndOneOnly();
   int maximumCardinalityWithMultiplicities() {
-    return this->MaxMultiplicity * this->Multiplicities.size;
+    return this->maximumMultiplicity * this->multiplicities.size;
   }
   int cardinalitySelectionWithMultiplicities();
   static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
-    return static_cast<unsigned int>(input.MaxMultiplicity) * someRandomPrimes[0] +
+    return static_cast<unsigned int>(input.maximumMultiplicity) * someRandomPrimes[0] +
     input.::SelectionWithMultiplicities::hashFunction(input);
   }
 };
@@ -148,8 +148,8 @@ public:
 class SelectionWithDifferentMaxMultiplicities {
 public:
   List<int> elements;
-  List<int> Multiplicities;
-  List<int> MaxMultiplicities;
+  List<int> multiplicities;
+  List<int> capacities;
   void initPart1(int NumElements);
   void clearNoMaxMultiplicitiesChange();
   bool incrementReturnFalseIfPastLast();
@@ -160,43 +160,43 @@ public:
   void initFromInts(int* theMaxMults, int NumberMaxMults);
   void initFromInts(const List<int>& theMaxMults);
   bool hasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other) {
-    return this->MaxMultiplicities.isEqualTo(other.MaxMultiplicities);
+    return this->capacities.isEqualTo(other.capacities);
   }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right) {
-    this->Multiplicities = right.Multiplicities;
-    this->MaxMultiplicities = right.MaxMultiplicities;
+    this->multiplicities = right.multiplicities;
+    this->capacities = right.capacities;
     this->elements = right.elements;
   }
 };
 
 class SelectionOneItem {
   public:
-  int MaxMultiplicity;
-  int SelectedMult;
-  SelectionOneItem(): MaxMultiplicity(0), SelectedMult(- 1) {
+  int maximumMultiplicity;
+  int amount;
+  SelectionOneItem(): maximumMultiplicity(0), amount(- 1) {
    
   }
   bool incrementReturnFalseIfPastLast() {
-    if (this->MaxMultiplicity == 0) {
+    if (this->maximumMultiplicity == 0) {
       return false;
     }
-    this->SelectedMult ++;
-    if (this->SelectedMult > this->MaxMultiplicity) {
-      this->SelectedMult = 0;
+    this->amount ++;
+    if (this->amount > this->maximumMultiplicity) {
+      this->amount = 0;
     }
-    return this->SelectedMult != 0;
+    return this->amount != 0;
   }
   void initFromMults(int theMult) {
-    this->MaxMultiplicity = theMult;
-    this->SelectedMult = 0;
+    this->maximumMultiplicity = theMult;
+    this->amount = 0;
   }
   std::string toString() const {
     std::stringstream out;
-    out << this->SelectedMult << " out of " << this->MaxMultiplicity;
+    out << this->amount << " out of " << this->maximumMultiplicity;
     return out.str();
   }
   LargeInteger totalCombinations() {
-    return this->MaxMultiplicity + 1;
+    return this->maximumMultiplicity + 1;
   }
 };
 
@@ -259,7 +259,7 @@ public:
   int DesiredSubsetSize;
   LargeInteger totalCombinations() {
     LargeInteger result;
-    MathRoutines::nChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
+    MathRoutines::nChooseK(theSelection.maximumSize, DesiredSubsetSize, result);
     return result;
   }
   void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
@@ -515,12 +515,12 @@ bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputTheLin
 
 template <class Coefficient>
 void Vector<Coefficient>::operator=(const Selection& other) {
-  if (other.MaxSize < 0) {
+  if (other.maximumSize < 0) {
     this->setSize(0);
     return;
   }
-  this->setSize(other.MaxSize);
-  for (int i = 0; i < other.MaxSize; i ++) {
+  this->setSize(other.maximumSize);
+  for (int i = 0; i < other.maximumSize; i ++) {
     if (other.selected[i]) {
       this->objects[i] = 1;
     } else {
@@ -531,9 +531,9 @@ void Vector<Coefficient>::operator=(const Selection& other) {
 
 template <class Coefficient>
 void Vector<Coefficient>::operator=(const SelectionWithMultiplicities& other) {
-  this->setSize(other.Multiplicities.size);
-  for (int i = 0; i < other.Multiplicities.size; i ++) {
-    this->objects[i] = other.Multiplicities[i];
+  this->setSize(other.multiplicities.size);
+  for (int i = 0; i < other.multiplicities.size; i ++) {
+    this->objects[i] = other.multiplicities[i];
   }
 }
 
@@ -542,7 +542,7 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   Selection& theSelection,
   Vector<Coefficient>& output,
   Matrix<Coefficient>& buffer,
-  Selection& NonPivotPointsBuffer
+  Selection& nonPivotPointsBuffer
 ) {
   if (this->size == 0) {
     return false;
@@ -555,12 +555,12 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   buffer.initialize(theDimension - 1, theDimension);
   for (int i = 0; i < theDimension - 1; i ++) {
     for (int j = 0; j < theDimension; j ++) {
-      buffer.elements[i][j] = (this->Externalwalls[theSelection.elements[i]].normal[j]);
+      buffer.elements[i][j] = (this->externalWalls[theSelection.elements[i]].normal[j]);
     }
   }
-  buffer.gaussianEliminationByRows(0, NonPivotPointsBuffer);
-  if (NonPivotPointsBuffer.cardinalitySelection == 1) {
-    buffer.nonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
+  buffer.gaussianEliminationByRows(0, nonPivotPointsBuffer);
+  if (nonPivotPointsBuffer.cardinalitySelection == 1) {
+    buffer.nonPivotPointsToEigenVector(nonPivotPointsBuffer, output);
     return true;
   }
   return false;

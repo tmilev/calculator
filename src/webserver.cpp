@@ -143,7 +143,7 @@ bool WebServer::sslServerSideHandShake(std::stringstream* commentsOnFailure) {
   if (!global.flagUsingSSLinCurrentConnection) {
     return false;
   }
-  return this->theTLS.HandShakeIamServer(this->getActiveWorker().connectedSocketID, commentsOnFailure);
+  return this->theTLS.handShakeIamServer(this->getActiveWorker().connectedSocketID, commentsOnFailure);
 }
 
 bool WebWorker::receiveAll() {
@@ -733,7 +733,7 @@ void WebWorker::writeAfterTimeoutProgress(const std::string& input, bool forceFi
   this->writeAfterTimeoutString(
     input,
     WebAPI::result::running,
-    global.RelativePhysicalNameOptionalProgressReport
+    global.relativePhysicalNameOptionalProgressReport
   );
 }
 
@@ -2290,7 +2290,7 @@ bool WebServer::checkConsistency() {
 }
 
 void WebServer::releaseEverything() {
-  this->theTLS.Free();
+  this->theTLS.free();
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].release();
   }
@@ -2628,7 +2628,7 @@ std::string WebServer::toStringStatusAll() {
 bool WebServer::restartIsNeeded() {
   MacroRegisterFunctionWithName("WebServer::restartIsNeeded");
   struct stat theFileStat;
-  if (stat(global.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+  if (stat(global.physicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
     return false;
   }
   if (this->timeLastExecutableModification == - 1) {
@@ -2737,7 +2737,7 @@ void WebServer::initListeningSockets() {
 void WebServer::initDates() {
   this->timeLastExecutableModification = - 1;
   struct stat theFileStat;
-  if (stat(global.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+  if (stat(global.physicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
     return;
   }
   this->timeLastExecutableModification = theFileStat.st_ctime;
@@ -3264,7 +3264,7 @@ int WebServer::daemon() {
   MacroRegisterFunctionWithName("WebServer::daemon");
   global.logs.logType = GlobalVariables::LogData::type::daemon;
   std::stringstream restartCommand;
-  restartCommand << global.PhysicalNameExecutableWithPath << " ";
+  restartCommand << global.physicalNameExecutableWithPath << " ";
   bool prependServer = false;;
   if (global.programArguments.size < 3) {
     prependServer = true;
@@ -3486,7 +3486,7 @@ int WebServer::run() {
   }
   // Cleanup, if ever needed:
   // this->releaseEverything();
-  // this->theTLS.FreeEverythingShutdown();
+  // this->theTLS.freeEverythingShutdown();
   // return 0;
 }
 
@@ -3513,7 +3513,7 @@ bool WebWorker::runInitialize() {
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
   global.flagServerforkedIntoWorker = true;
-  CreateTimerThread();
+  createTimerThread();
   // check web worker indices are initialized properly:
   global.server().getActiveWorker();
   if (global.flagUsingSSLinCurrentConnection) {
@@ -4392,7 +4392,7 @@ int WebServer::main(int argc, char **argv) {
   MacroRegisterFunctionWithName("main");
   try {
     // Initializations basic (timer, ...).
-    InitializeGlobalObjects();
+    initializeGlobalObjects();
     // Initializations of build flags.
     global.server().WebServer::initializeBuildFlags();
     // Process executable arguments.

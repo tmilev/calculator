@@ -58,7 +58,7 @@ bool ElementEllipticCurve<Coefficient>::operator*=(const ElementEllipticCurve& o
   // s = slope will be determined later
   // (the slope of secant line (two points) or tangent line (double point).
   // x_C = s^2 - x_A - x_B
-  // y_C = -s(x_C - x_A)-y_A
+  // y_C = - s(x_C - x_A) - y_A
   Coefficient slope;
   if (this->xCoordinate == other.xCoordinate) {
     if (this->yCoordinate == other.yCoordinate * (- 1)) {

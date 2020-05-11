@@ -170,14 +170,14 @@ std::string MutexProcess::toString() const {
   return out.str();
 }
 
-int Pipe::WriteWithTimeoutViaSelect(
+int Pipe::writeWithTimeoutViaSelect(
   int theFD,
   const std::string& input,
   int timeOutInSeconds,
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Pipe::WriteWithTimeoutViaSelect");
+  MacroRegisterFunctionWithName("Pipe::writeWithTimeoutViaSelect");
   fd_set theFDcontainer;
   FD_ZERO(&theFDcontainer);
   FD_SET(theFD, &theFDcontainer);
@@ -205,17 +205,17 @@ int Pipe::WriteWithTimeoutViaSelect(
     }
     return - 1;
   }
-  return Pipe::WriteNoInterrupts(theFD, input);
+  return Pipe::writeNoInterrupts(theFD, input);
 }
 
-int Pipe::ReadWithTimeOutViaSelect(
+int Pipe::readWithTimeOutViaSelect(
   int theFD,
   List<char>& output,
   int timeOutInSeconds,
   int maxNumTries,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
+  MacroRegisterFunctionWithName("Pipe::readWithTimeOutViaSelect");
   if (theFD < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Attempting to read from a negative file descriptor: " << theFD;
@@ -329,7 +329,7 @@ bool PipePrimitive::setWriteBlocking(bool dontCrashOnFail) {
   return result;
 }
 
-int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
+int Pipe::writeNoInterrupts(int theFD, const std::string& input) {
   int numAttempts = 0;
   for (;;) {
     int result = static_cast<int>(write(theFD, input.c_str(), input.size()));
@@ -354,8 +354,8 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   //  return - 1;
 }
 
-void Pipe::ReadLoop(List<char>& output) {
-  MacroRegisterFunctionWithName("Pipe::ReadLoop");
+void Pipe::readLoop(List<char>& output) {
+  MacroRegisterFunctionWithName("Pipe::readLoop");
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   safetyFirst.lockMe(); // Prevent threads from locking one another.
@@ -365,7 +365,7 @@ void Pipe::ReadLoop(List<char>& output) {
   int offset = 0;
   List<unsigned char> metaDataBuffer;
   metaDataBuffer = this->metaData.lastRead;
-  Serialization::readFourByteInt(
+  serialization::readFourByteInt(
     metaDataBuffer, offset, expectedBytes, nullptr
   );
   output.setSize(0);
@@ -430,7 +430,7 @@ bool PipePrimitive::writeOnceNoFailure(
   int offset,
   bool dontCrashOnFail
 ) {
-  MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
+  MacroRegisterFunctionWithName("PipePrimitive::writeNoFailure");
   if (this->pipeEnds[1] == - 1) {
     global << Logger::yellow << "WARNING: " << this->toString()
     << " writing on non-initialized pipe. ";
@@ -611,8 +611,8 @@ void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
   this->theMutexPipe.unlock();
 }
 
-void Pipe::ReadOnce(bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::ReadOnce");
+void Pipe::readOnce(bool dontCrashOnFail) {
+  MacroRegisterFunctionWithName("Pipe::readOnce");
   this->checkConsistency();
   MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
   MutexlockGuard guard(safetyFirst); // guard from other threads.

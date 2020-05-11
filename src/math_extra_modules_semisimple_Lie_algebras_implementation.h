@@ -51,7 +51,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
         RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
       RemainingWeight += this->theHWFDpartSimpleCoordS;
-      summand += theWeyl.GetScalarProdSimpleRoot(RemainingWeight, theSimpleIndex);
+      summand += theWeyl.getScalarProductSimpleRoot(RemainingWeight, theSimpleIndex);
       summand *= 2;
       summand /= theWeyl.cartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
       summand += 1;
@@ -181,11 +181,11 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionGeneratorIndex
     Vector<Coefficient> weightH;
     Coefficient tempCF, hwCFshift;
     weightH.makeEi(this->getOwner().getRank(), generatorIndex - this->getOwner().getNumberOfPositiveRoots());
-    hwCFshift = this->getOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
-    hwCFshift -= this->getOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
+    hwCFshift = this->getOwner().theWeyl.rootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
+    hwCFshift -= this->getOwner().theWeyl.rootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
     for (int i = 0; i < this->theGeneratingWordsNonReduced.size; i ++) {
       Vector<Rational>& theWeight = this->theGeneratingWordsWeightsPlusWeightFDpart[i];
-      tempCF = this->getOwner().theWeyl.RootScalarCartanRoot(weightH, theWeight);
+      tempCF = this->getOwner().theWeyl.rootScalarCartanRoot(weightH, theWeight);
       tempCF += hwCFshift;
       theMon.isIdentity = false;
       theMon.vIndex = i;
@@ -257,12 +257,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   this->checkNonZeroOwner();
   std::stringstream out;
   std::string tempS;
-  if (this->getOwner()->getRank() != splittingParSel.MaxSize) {
-    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
+  if (this->getOwner()->getRank() != splittingParSel.maximumSize) {
+    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.maximumSize
     << " elements while the weyl group is of rank " << this->getOwner()->getRank() << ". " << global.fatal;
   }
-  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, splittingParSel, 1);
-  outputWeylSub.ComputeRootSubsystem();
+  outputWeylSub.makeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, splittingParSel, 1);
+  outputWeylSub.computeRootSubsystem();
 
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms complementGroup, theFDWeyl;
   complementGroup.AmbientWeyl = outputWeylSub.AmbientWeyl;
@@ -271,11 +271,11 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   Selection invertedSel;
   invertedSel = splittingParSel;
   invertedSel.invertSelection();
-  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, invertedSel, 1);
-  complementGroup.ComputeRootSubsystem();
+  complementGroup.makeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, invertedSel, 1);
+  complementGroup.computeRootSubsystem();
   out << outputWeylSub.toString(false);
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl, remainingCharDominantLevi;
-  theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, ParSelFDInducingPart, 1);
+  theFDWeyl.makeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, ParSelFDInducingPart, 1);
   Weight<Coefficient> tempMon, localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
@@ -307,7 +307,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   tempMon.owner = this->getOwner();
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
-    if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated(
+    if (!theFDWeyl.generateOrbitReturnFalseIfTruncated(
       theWeyL.getSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, false, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
@@ -371,7 +371,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
-      outputWeylSub.DrawContour(tempRoot, theDV, "#a0a000", 1000);
+      outputWeylSub.drawContour(tempRoot, theDV, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
@@ -402,10 +402,10 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     }
     return;
   }
-  if (this->getOwner().getRank() != splittingParSel.MaxSize) {
+  if (this->getOwner().getRank() != splittingParSel.maximumSize) {
     global.fatal << "This is a programming error: semisimple rank is "
     << this->getOwner().getRank() << " but splitting parabolic selects "
-    << " out of " << splittingParSel.MaxSize << " simple roots. " << global.fatal;
+    << " out of " << splittingParSel.maximumSize << " simple roots. " << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
@@ -421,7 +421,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Selection splittingParSelectedInLevi;
   splittingParSelectedInLevi = splittingParSel;
   splittingParSelectedInLevi.invertSelection();
-  if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi)) {
+  if (!splittingParSelectedInLevi.isSubset(this->parabolicSelectionSelectedAreElementsLevi)) {
     out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
     << " The parabolic has root of Levi given by " << splittingParSel.toString()
     << " while the ambient parabolic subalgebra has root of Levi given by "
@@ -570,13 +570,13 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   SemisimpleLieAlgebra& theAlgebrA = inputAlgebra;
 
   int theRank = theAlgebrA.getRank();
-  if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.MaxSize != theRank) {
+  if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.maximumSize != theRank) {
     global.fatal << "This is a programming error. I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
     << theRank << " but the input highest weight, "
     << HWFundCoords.toString() << ", has " << HWFundCoords.size << " coordinates and "
     << " the parabolic section indicates rank of "
-    << selNonSelectedAreElementsLevi.MaxSize << ". " << global.fatal;
+    << selNonSelectedAreElementsLevi.maximumSize << ". " << global.fatal;
   }
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   this->cachedPairs.clear();
@@ -607,15 +607,15 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   }
 
   this->theHWFDpartSimpleCoordS = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
-  this->theHWFDpartDualCoords = theWeyl.GetDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
+  this->theHWFDpartDualCoords = theWeyl.getDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
   this->theHWSimpleCoordSBaseField = theWeyl.getSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
   this->theChaR.makeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
 
   unsigned long long startingNumRationalOperations =
-  Rational::TotalLargeAdditions +
-  Rational::TotalSmallAdditions +
-  Rational::TotalLargeMultiplications +
-  Rational::TotalSmallMultiplications;
+  Rational::totalLargeAdditions +
+  Rational::totalSmallAdditions +
+  Rational::totalLargeMultiplications +
+  Rational::totalSmallMultiplications;
   LittelmannPath startingPath;
   startingPath.makeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
   List<List<int> > generatorsIndices;
@@ -695,8 +695,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->intermediateStepForMakeFromHW(ringUnit, ringZero);
   this->NumCachedPairsBeforeSimpleGen = this->cachedPairs.size;
   this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen =
-  Rational::TotalLargeAdditions + Rational::TotalSmallAdditions +
-  Rational::TotalLargeMultiplications + Rational::TotalSmallMultiplications - startingNumRationalOperations;
+  Rational::totalLargeAdditions + Rational::totalSmallAdditions +
+  Rational::totalLargeMultiplications + Rational::totalSmallMultiplications - startingNumRationalOperations;
   bool isBad = false;
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& theBF = this->theBilinearFormsAtEachWeightLevel[k];
@@ -1259,7 +1259,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
   ElementWeylGroup tempWelt;
   int wordCounter = 0;
-  SimpleReflection aGen;
+  simpleReflection aGen;
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
@@ -1267,7 +1267,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
       wordCounter ++;
       tempWelt.generatorsLastAppliedFirst.setSize(currentListInt[j].generatorsIndices.size);
       for (int k = 0; k < currentListInt[j].generatorsIndices.size; k ++) {
-        aGen.MakeSimpleReflection(theWeyl.RootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
+        aGen.makeSimpleReflection(theWeyl.RootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"

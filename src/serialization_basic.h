@@ -3,7 +3,7 @@
 #include "general_lists.h"
 #include "json.h"
 
-class Serialization {
+class serialization {
 public:
   class JSLabels {
   public:
@@ -16,7 +16,7 @@ public:
   };
   class Marker {
   public:
-    friend std::ostream& operator << (std::ostream& output, const Serialization::Marker& theMarker) {
+    friend std::ostream& operator<<(std::ostream& output, const serialization::Marker& theMarker) {
       output << theMarker.toString();
       return output;
     }
@@ -36,7 +36,7 @@ public:
   class WriterIntegerWithMarker {
   public:
     List<unsigned char>* outputPointer;
-    List<Serialization::Marker>* outputMarkers;
+    List<serialization::Marker>* outputMarkers;
     int offset;
     int markerOffset;
     bool flagDeallocated;
@@ -45,7 +45,7 @@ public:
       int inputNumberOfBytes,
       int input,
       List<unsigned char>& output,
-      List<Serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* theOutputMarkers,
       const std::string& label
     ) {
       this->initialize(inputNumberOfBytes, static_cast<unsigned int>(input), output, theOutputMarkers, label);
@@ -54,7 +54,7 @@ public:
       int inputNumberOfBytes,
       unsigned int input,
       List<unsigned char>& output,
-      List<Serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* theOutputMarkers,
       const std::string& label
     ) {
       this->initialize(inputNumberOfBytes, input, output, theOutputMarkers, label);
@@ -63,7 +63,7 @@ public:
       int inputNumberOfBytes,
       unsigned int input,
       List<unsigned char>& output,
-      List<Serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* theOutputMarkers,
       const std::string& label
     ) {
       this->numberOfBytes  = inputNumberOfBytes;
@@ -71,15 +71,15 @@ public:
       this->outputMarkers = theOutputMarkers;
       this->outputPointer = nullptr;
       int notUsed = output.size;
-      Serialization::writeNByteUnsigned(this->numberOfBytes, input, output, notUsed);
+      serialization::writeNByteUnsigned(this->numberOfBytes, input, output, notUsed);
       if (this->outputMarkers == nullptr) {
         return;
       }
       this->offset = output.size - this->numberOfBytes;
       this->markerOffset = this->outputMarkers->size;
       this->outputPointer = &output;
-      this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, label));
-      this->outputMarkers->addOnTop(Serialization::Marker(this->offset, this->numberOfBytes, label));
+      this->outputMarkers->addOnTop(serialization::Marker(this->offset, - 1, label));
+      this->outputMarkers->addOnTop(serialization::Marker(this->offset, this->numberOfBytes, label));
     }
     ~WriterIntegerWithMarker() {
       if (this->flagDeallocated) {
@@ -102,13 +102,13 @@ public:
     WriterIntegerWithMarkerTemplate(
       int input,
       List<unsigned char>& output,
-      List<Serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* theOutputMarkers,
       const std::string& label
     ): WriterIntegerWithMarker(numberOfBytesTemplate, input, output, theOutputMarkers, label) {}
     WriterIntegerWithMarkerTemplate(
       unsigned int input,
       List<unsigned char>& output,
-      List<Serialization::Marker>* theOutputMarkers,
+      List<serialization::Marker>* theOutputMarkers,
       const std::string& label
     ): WriterIntegerWithMarker(numberOfBytes, input, output, theOutputMarkers, label) {}
   };
@@ -119,14 +119,14 @@ public:
   class LengthWriterNBytes {
   public:
     List<unsigned char>* outputPointer;
-    List<Serialization::Marker>* outputMarkers;
+    List<serialization::Marker>* outputMarkers;
     int offset;
     int markerOffset;
     int numberOfBytes;
     LengthWriterNBytes(
       int inputNumberOfBytes,
       List<unsigned char>& output,
-      List<Serialization::Marker>* markers,
+      List<serialization::Marker>* markers,
       const std::string& label
     ) {
       this->numberOfBytes = inputNumberOfBytes;
@@ -135,16 +135,16 @@ public:
       this->markerOffset = - 1;
       this->offset = output.size;
       int theSize = output.size;
-      Serialization::writeNByteUnsigned(numberOfBytes, 0, output, theSize);
+      serialization::writeNByteUnsigned(numberOfBytes, 0, output, theSize);
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
-        this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));
-        this->outputMarkers->addOnTop(Serialization::Marker(this->offset, numberOfBytes, label));
+        this->outputMarkers->addOnTop(serialization::Marker(this->offset, - 1, serialization::JSLabels::length));
+        this->outputMarkers->addOnTop(serialization::Marker(this->offset, numberOfBytes, label));
       }
     }
     ~LengthWriterNBytes() {
       int totalLength = this->outputPointer->size - this->offset - numberOfBytes;
-      Serialization::writeNByteUnsigned(
+      serialization::writeNByteUnsigned(
         this->numberOfBytes,
         static_cast<unsigned int>(totalLength),
         *this->outputPointer,
@@ -163,7 +163,7 @@ public:
   public:
     LengthWriterNBytesTemplated(
       List<unsigned char>& output,
-      List<Serialization::Marker>* markers,
+      List<serialization::Marker>* markers,
       const std::string& label
     ): LengthWriterNBytes(numberOfBytesTemplate, output, markers, label){}
   };
@@ -188,7 +188,7 @@ public:
   static void writeBytesAnnotated(
     const List<unsigned char>& input,
     List<unsigned char>& output,
-    List<Serialization::Marker>* annotations,
+    List<serialization::Marker>* annotations,
     const std::string& label
   );
   static bool readTwoByteLengthFollowedByBytesDontOutputOffset(
@@ -244,7 +244,7 @@ public:
   static void writeTwoByteUnsignedAnnotated(
     unsigned int input,
     List<unsigned char>& output,
-    List<Serialization::Marker>* annotations,
+    List<serialization::Marker>* annotations,
     const std::string &label
   );
   static void writeTwoByteUnsigned(
@@ -262,7 +262,7 @@ public:
   static void writeOneByteLengthFollowedByBytes(
     const List<unsigned char>& input,
     List<unsigned char>& output,
-    List<Serialization::Marker>* annotations,
+    List<serialization::Marker>* annotations,
     const std::string& label
   );
   static void writeTwoByteLengthFollowedByBytes(
@@ -275,7 +275,7 @@ public:
     int byteCountOfLength,
     const List<unsigned char>& input,
     List<unsigned char>& output,
-    List<Serialization::Marker>* annotations,
+    List<serialization::Marker>* annotations,
     const std::string &label
   );
   static std::string convertListUnsignedCharsToHex(const List<unsigned char>& input);

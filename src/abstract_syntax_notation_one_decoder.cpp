@@ -197,7 +197,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeNull(
   return true;
 }
 
-LargeInteger AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
+LargeInteger AbstractSyntaxNotationOneSubsetDecoder::variableLengthQuantityDecode(
   const List<unsigned char>& input, int& inputOutputDataPointer
 ) {
   LargeInteger result = 0;
@@ -216,20 +216,20 @@ LargeInteger AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecod
   return result;
 }
 
-std::string ASNElement::InterpretAsObjectIdentifierGetNameAndId() const {
+std::string ASNElement::interpretAsObjectIdentifierGetNameAndId() const {
   std::stringstream out;
-  out << "[" << this->InterpretAsObjectIdentifier();
+  out << "[" << this->interpretAsObjectIdentifier();
   out << "]: ";
-  if (!ASNObject::ObjectIdsToNames().contains(this->ASNAtom)) {
+  if (!ASNObject::objectIdsToNames().contains(this->ASNAtom)) {
     out << "[unknown]";
   } else {
-    out << ASNObject::ObjectIdsToNames().getValueCreate(this->ASNAtom).name;
+    out << ASNObject::objectIdsToNames().getValueCreate(this->ASNAtom).name;
   }
   return out.str();
 }
 
-std::string ASNElement::InterpretAsObjectIdentifier() const {
-  MacroRegisterFunctionWithName("ASNElement::InterpretAsObjectIdentifier");
+std::string ASNElement::interpretAsObjectIdentifier() const {
+  MacroRegisterFunctionWithName("ASNElement::interpretAsObjectIdentifier");
   if (this->ASNAtom.size <= 0) {
     return "not an object id";
   }
@@ -240,7 +240,7 @@ std::string ASNElement::InterpretAsObjectIdentifier() const {
   unsigned char secondEntry = firstByte % 40;
   resultStream << static_cast<int>(firstEntry) << "." << static_cast<int>(secondEntry);
   for (int i = 0; i < this->ASNAtom.size; i ++) {
-    LargeInteger nextInt = AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(this->ASNAtom, i);
+    LargeInteger nextInt = AbstractSyntaxNotationOneSubsetDecoder::variableLengthQuantityDecode(this->ASNAtom, i);
     resultStream << "." << nextInt.toString();
   }
   return resultStream.str();
@@ -487,7 +487,7 @@ std::string ASNElement::toString() const {
   return this->toJSON().toString(&JSData::PrintOptions::HexEncodeNonASCII());
 }
 
-void ASNElement::writeAnnotations(List<Serialization::Marker>& output) {
+void ASNElement::writeAnnotations(List<serialization::Marker>& output) {
   std::stringstream bodyStream, tagStream, lengthStream;
   tagStream << "Type: " << AbstractSyntaxNotationOneSubsetDecoder::getType(this->tag);
   lengthStream << "Content length: " << this->lengthPromised;
@@ -496,16 +496,16 @@ void ASNElement::writeAnnotations(List<Serialization::Marker>& output) {
     bodyStream << "<br>" << comment;
   }
   int lengthOfLengthEncoding = this->getLengthLengthEncoding();
-  output.addOnTop(Serialization::Marker(
+  output.addOnTop(serialization::Marker(
     this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()
   ));
-  output.addOnTop(Serialization::Marker(
+  output.addOnTop(serialization::Marker(
     this->offsetLastWrite, 1, tagStream.str()
   ));
-  output.addOnTop(Serialization::Marker(
+  output.addOnTop(serialization::Marker(
     this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()
   ));
-  output.addOnTop(Serialization::Marker(
+  output.addOnTop(serialization::Marker(
     this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()
   ));
   for (int i = 0; i < this->theElements.size; i ++) {
@@ -589,7 +589,7 @@ void ASNElement::toJSON(JSData& output) const {
       output[ASNElement::JSLabels::interpretation] = this->ASNAtom.toStringConcatenate();
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
-      output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
+      output[ASNElement::JSLabels::interpretation] = this->interpretAsObjectIdentifierGetNameAndId();
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04) {
       output[ASNElement::JSLabels::interpretation] = Crypto::convertListUnsignedCharsToHex(this->ASNAtom);
@@ -881,7 +881,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLengt
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
-  Serialization::writeNByteUnsigned(
+  serialization::writeNByteUnsigned(
     numBytes,
     static_cast<unsigned int>(input),
     output,
@@ -1024,7 +1024,7 @@ void ASNObject::initializeAddSample(
   container.setKeyValue(incoming.name, incoming);
 }
 
-MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& ASNObject::ObjectIdsToNames() {
+MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& ASNObject::objectIdsToNames() {
   static MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars> result;
   return result;
 }
@@ -1046,7 +1046,7 @@ std::string ASNObject::names::basicConstraints        = "basicConstraints"      
 std::string ASNObject::names::subjectKeyIdentifier    = "subjectKeyIdentifier"   ;
 std::string ASNObject::names::authorityKeyIdentifier  = "authorityKeyIdentifier" ;
 
-MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
+MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::namesToObjectIdsNonThreadSafe() {
   static MapList<std::string, ASNObject, MathRoutines::hashString> container;
   // Object ids of some hash functions are given in RFC4055.
   // Object ids of hash functions may be deduced from [Page 42, RFC 3447]
@@ -1152,7 +1152,7 @@ MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::NamesToObj
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
   MapList<List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars>& reverseMap =
-  ASNObject::ObjectIdsToNames();
+  ASNObject::objectIdsToNames();
   for (int i = 0; i < container.theValues.size; i ++) {
     ASNObject& current = container.theValues[i];
     reverseMap.setKeyValue(current.objectId.ASNAtom, current);
@@ -1163,7 +1163,7 @@ MapList<std::string, ASNObject, MathRoutines::hashString>& ASNObject::NamesToObj
 int ASNObject::loadField(
   const MapList<std::string, ASNObject, MathRoutines::hashString>& inputFields, const std::string& fieldName
 ) {
-  if (!ASNObject::NamesToObjectIdsNonThreadSafe().contains(fieldName)) {
+  if (!ASNObject::namesToObjectIdsNonThreadSafe().contains(fieldName)) {
     global.fatal << "Field " << fieldName << " is hard-coded but is yet unknown. " << global.fatal;
   }
   if (!inputFields.contains(fieldName)) {
@@ -1187,12 +1187,12 @@ std::string ASNObject::toString() const {
 std::string ASNObject::toStringAllRecognizedObjectIds() {
   MacroRegisterFunctionWithName("ASNObject::toStringAllRecognizedObjectIds");
   // This function is safe after the first run, which should have already happened, unless we are unit-testing.
-  ASNObject::NamesToObjectIdsNonThreadSafe();
+  ASNObject::namesToObjectIdsNonThreadSafe();
   std::stringstream out;
   out << "<table>";
-  for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {
-    ASNObject& current = ASNObject::ObjectIdsToNames().theValues[i];
-    const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
+  for (int i = 0; i < ASNObject::objectIdsToNames().size(); i ++) {
+    ASNObject& current = ASNObject::objectIdsToNames().theValues[i];
+    const List<unsigned char>& currentId = ASNObject::objectIdsToNames().theKeys[i];
     out << "<tr>"
     << "<td><small>" << i + 1 << "</small></td>"
     << "<td>" << Crypto::convertListUnsignedCharsToHexFormat(currentId, 50, false) << "</td>"
@@ -1204,7 +1204,7 @@ std::string ASNObject::toStringAllRecognizedObjectIds() {
 }
 
 const List<unsigned char>& ASNObject::objectIdFromNameNoFail(const std::string& input) {
-  return ASNObject::NamesToObjectIdsNonThreadSafe().getValueNoFail(input).objectId.ASNAtom;
+  return ASNObject::namesToObjectIdsNonThreadSafe().getValueNoFail(input).objectId.ASNAtom;
 }
 
 bool ASNObject::loadFieldsFromASNSequence(
@@ -1272,13 +1272,13 @@ bool ASNObject::loadFromASN(
     }
     return false;
   }
-  if (!ASNObject::ObjectIdsToNames().contains(this->objectId.ASNAtom)) {
+  if (!ASNObject::objectIdsToNames().contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::ObjectIdsToNames().theKeys.size;
+      *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::objectIdsToNames().theKeys.size;
     }
     return false;
   }
-  *this = ASNObject::ObjectIdsToNames().getValueCreateNoInit(this->objectId.ASNAtom);
+  *this = ASNObject::objectIdsToNames().getValueCreateNoInit(this->objectId.ASNAtom);
   const ASNElement& second = internal.theElements[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {
@@ -1292,7 +1292,7 @@ bool ASNObject::loadFromASN(
 
 void ASNObject::initializeNonThreadSafe() {
   MacroRegisterFunctionWithName("ASNObject::initializeNonThreadSafe");
-  ASNObject::NamesToObjectIdsNonThreadSafe();
+  ASNObject::namesToObjectIdsNonThreadSafe();
 }
 
 void ASNElement::makeObjectId(const List<unsigned char>& input) {
@@ -1337,13 +1337,13 @@ void ASNElement::makeSequence(int numberOfEmptyElements) {
   this->theElements.setSize(numberOfEmptyElements);
 }
 
-void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& output) {
+void TBSCertificateInfo::computeASNSignatureAlgorithmIdentifier(ASNElement& output) {
   output.makeSequence(2);
   output[0] = this->signatureAlgorithmIdentifier;
   output[1].makeNull();
 }
 
-void TBSCertificateInfo::ComputeASNValidityWrapper(ASNElement& output) {
+void TBSCertificateInfo::computeASNValidityWrapper(ASNElement& output) {
   output.makeSequence(2);
   output[0] = this->validityNotBefore;
   output[0].comment = "Validity not before";
@@ -1351,7 +1351,7 @@ void TBSCertificateInfo::ComputeASNValidityWrapper(ASNElement& output) {
   output[1].comment = "Validity not after";
 }
 
-void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
+void TBSCertificateInfo::computeASNVersionWrapper(ASNElement& output) {
   output.reset();
   output.tag = 0;
   output.startByte = 160;
@@ -1385,7 +1385,7 @@ void ASNElement::makeBitStringEmpty(
   this->theElements.setSize(0);
 }
 
-void ASNElement::mMakeBitString(const List<unsigned char>& input) {
+void ASNElement::makeBitString(const List<unsigned char>& input) {
   this->reset();
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->tag = this->startByte;
@@ -1399,7 +1399,7 @@ void ASNElement::makeOctetString(const List<unsigned char>& input) {
   this->ASNAtom = input;
 }
 
-void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
+void TBSCertificateInfo::computeASNSignature(ASNElement& output) {
   output.makeSequence(2);
   output.comment = "signature";
   output[0].makeSequence(2);
@@ -1418,19 +1418,19 @@ void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
 
 void TBSCertificateInfo::computeASN(ASNElement& output) {
   output.makeSequence(8);
-  this->ComputeASNVersionWrapper(output[0]);
+  this->computeASNVersionWrapper(output[0]);
   output[1].makeInteger(this->serialNumber);
   output[1].comment = "serial number";
-  this->ComputeASNSignatureAlgorithmIdentifier(output[2]);
+  this->computeASNSignatureAlgorithmIdentifier(output[2]);
   output[2].comment = "algorithm identifier";
   this->issuer.computeASN(output[3]);
   output[3].comment = "Issuer [entity that signed this certificate]";
-  this->ComputeASNValidityWrapper(output[4]);
+  this->computeASNValidityWrapper(output[4]);
   output[4].comment = "Validity";
   this->subject.computeASN(output[5]);
   output[5].comment = "Subject [entity advertising its public key identity]";
-  this->ComputeASNSignature(output[6]);
-  this->ComputeASNExtensions(output[7]);
+  this->computeASNSignature(output[6]);
+  this->computeASNExtensions(output[7]);
 }
 
 void ASNElement::makeBitStringSequence(const List<ASNElement>& input) {
@@ -1443,7 +1443,7 @@ void ASNElement::makeBitStringSequence(const List<ASNElement>& input) {
   this->lengthPromised = this->ASNAtom.size;
 }
 
-void TBSCertificateInfo::ComputeASNExtensions(ASNElement& output) {
+void TBSCertificateInfo::computeASNExtensions(ASNElement& output) {
   output.makeBitStringSequence(this->extensions);
 }
 
@@ -1485,20 +1485,20 @@ void X509Certificate::computeASN(ASNElement& output) {
   output.makeSequence(3);
   output.comment = "X509 certificate";
   this->information.computeASN(output[0]);
-  this->ComputeASNSignatureAlgorithm(output[1]);
+  this->computeASNSignatureAlgorithm(output[1]);
   output[2] = this->signatureValue;
 }
 
-void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
+void X509Certificate::computeASNSignatureAlgorithm(ASNElement& output) {
   output.makeSequence(2);
   output[0] = this->signatureAlgorithmId;
   output[1].makeNull();
 }
 
-void X509Certificate::WriteBytesASN1(
-  List<unsigned char>& output, List<Serialization::Marker>* annotations
+void X509Certificate::writeBytesASN1(
+  List<unsigned char>& output, List<serialization::Marker>* annotations
 ) {
-  MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
+  MacroRegisterFunctionWithName("X509Certificate::writeBytesASN1");
   this->computeASN(this->recodedASN);
   this->recodedASN.writeBytesUpdatePromisedLength(output);
   if (annotations != nullptr) {
@@ -1506,20 +1506,20 @@ void X509Certificate::WriteBytesASN1(
   }
 }
 
-std::string X509Certificate::ToStringTestEncode() {
+std::string X509Certificate::toStringTestEncode() {
   std::stringstream out;
   std::string sourceHex = Crypto::convertListUnsignedCharsToHex(this->sourceBinary);
   List<unsigned char> recoded;
-  this->WriteBytesASN1(recoded, nullptr);
+  this->writeBytesASN1(recoded, nullptr);
   std::string recodedHex = Crypto::convertListUnsignedCharsToHex(recoded);
   out << "Original, recoded binary source:<br>"
   << StringRoutines::Differ::differenceHTMLStatic(sourceHex, recodedHex, "sourceHex", "recodedHex");
   return out.str();
 }
 
-std::string X509Certificate::ToHex() {
+std::string X509Certificate::toHex() {
   List<unsigned char> bytes;
-  this->WriteBytesASN1(bytes, nullptr);
+  this->writeBytesASN1(bytes, nullptr);
   return Crypto::convertListUnsignedCharsToHex(bytes);
 }
 
@@ -1555,7 +1555,7 @@ std::string PrivateKeyRSA::toString() const {
   return out.str();
 }
 
-bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
+bool PrivateKeyRSA::basicChecks(std::stringstream* comments) {
   std::stringstream commentsContainer;
   if (comments == nullptr) {
     comments = &commentsContainer;
@@ -1580,22 +1580,22 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   return true;
 }
 
-bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEMFile");
+bool PrivateKeyRSA::loadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromPEMFile");
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's private key.
-  // For server's certificate, use TransportLayerSecurity::LoadPEMPrivateKey.
+  // For server's certificate, use TransportLayerSecurity::loadPEMPrivateKey.
   if (!FileOperations::loadFiletoStringVirtual(input, certificateContent, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }
     return false;
   }
-  return this->LoadFromPEM(certificateContent, commentsOnFailure);
+  return this->loadFromPEM(certificateContent, commentsOnFailure);
 }
 
-bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
+bool PrivateKeyRSA::loadFromPEM(const std::string& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromPEM");
   std::string certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
   if (!StringRoutines::stringBeginsWith(
     certificateContentStripped,
@@ -1618,7 +1618,7 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
     return false;
   }
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
-  if (!Crypto::ConvertBase64ToBitStream(
+  if (!Crypto::convertBase64ToBitStream(
     certificateContentStripped,
     this->sourceBinary,
     commentsOnFailure,
@@ -1626,21 +1626,21 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
   )) {
     return false;
   }
-  return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
+  return this->loadFromASNEncoded(this->sourceBinary, commentsOnFailure);
 }
 
 // Notes:
 // https://tools.ietf.org/html/rfc3447#page-23
 // Algorithm:
 // https://tools.ietf.org/html/rfc3447#page-29
-void PrivateKeyRSA::SignBytesPadPKCS1(
+void PrivateKeyRSA::signBytesPadPKCS1(
   List<unsigned char>& input,
   int hash,
   List<unsigned char>& output
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::SignBytesPadPKCS1");
+  MacroRegisterFunctionWithName("PrivateKeyRSA::signBytesPadPKCS1");
   List<unsigned char> inputHashedPadded;
-  this->HashAndPadPKCS1(input, hash, inputHashedPadded);
+  this->hashAndPadPKCS1(input, hash, inputHashedPadded);
   ElementZmodP theElement, theOne;
   if (this->thePublicKey.theModulus.isEqualToZero()) {
     global.fatal << "Public key modulus is zero. " << global.fatal;
@@ -1660,7 +1660,7 @@ PrivateKeyRSA::PrivateKeyRSA() {
   this->byteSize = 0;
 }
 
-void PrivateKeyRSA::ComputeBitSize() {
+void PrivateKeyRSA::computeBitSize() {
   this->bitSize = static_cast<signed>(this->thePublicKey.theModulus.logarithmBaseNCeiling(2));
   this->byteSize = this->bitSize / 8;
   if (this->byteSize * 8 < this->bitSize) {
@@ -1668,7 +1668,7 @@ void PrivateKeyRSA::ComputeBitSize() {
   }
 }
 
-bool PrivateKeyRSA::ComputeFromTwoPrimes(
+bool PrivateKeyRSA::computeFromTwoPrimes(
   LargeIntegerUnsigned& inputPrimeOne,
   LargeIntegerUnsigned& inputPrimeTwo,
   bool verifyInputsArePrime,
@@ -1692,17 +1692,17 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
   }
   this->thePublicKey.theExponent.assignUnsignedInt(this->thePublicKey.defaultExponent);
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
-  this->CarmichaelTotientOfModulus = MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
+  this->carmichaelTotientOfModulus = MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
   ElementZmodP inverter;
-  inverter.theModulus = this->CarmichaelTotientOfModulus;
+  inverter.theModulus = this->carmichaelTotientOfModulus;
   inverter.theValue = 1;
   inverter /= this->thePublicKey.theExponent;
   this->privateExponent = inverter.theValue;
-  this->ComputeBitSize();
+  this->computeBitSize();
   return true;
 }
 
-bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes) {
+bool PrivateKeyRSA::generateRandom(std::stringstream* commentsOnFailure, int numberOfBytes) {
   if (numberOfBytes < 1 || numberOfBytes > 1000) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Number of bytes must be "
@@ -1712,10 +1712,10 @@ bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int num
   }
   Crypto::Random::getRandomLargePrime(this->primeOne, numberOfBytes);
   Crypto::Random::getRandomLargePrime(this->primeTwo, numberOfBytes);
-  return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, false, commentsOnFailure);
+  return this->computeFromTwoPrimes(this->primeOne, this->primeTwo, false, commentsOnFailure);
 }
 
-void PrivateKeyRSA::HashAndPadPKCS1(
+void PrivateKeyRSA::hashAndPadPKCS1(
   List<unsigned char>& input, int hash, List<unsigned char>& output
 ) {
   List<unsigned char> inputHashed;
@@ -1725,7 +1725,7 @@ void PrivateKeyRSA::HashAndPadPKCS1(
   switch (hash) {
   case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
     Crypto::computeSha256(input, inputHashed);
-    hashObject = ASNObject::NamesToObjectIdsNonThreadSafe().getValueNoFail(ASNObject::names::sha256);
+    hashObject = ASNObject::namesToObjectIdsNonThreadSafe().getValueNoFail(ASNObject::names::sha256);
     break;
   default:
     global.fatal << "Non-allowed or non-implemented value for the hash algorithm. " << global.fatal;
@@ -1748,10 +1748,10 @@ void PrivateKeyRSA::HashAndPadPKCS1(
   output.addListOnTop(payload);
 }
 
-bool PrivateKeyRSA::LoadFromASNEncoded(
+bool PrivateKeyRSA::loadFromASNEncoded(
   List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromASNEncoded");
+  MacroRegisterFunctionWithName("PrivateKeyRSA::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
   if (!outerDecoder.decode(
     input, 0, this->sourceASNOuter, commentsOnFailure
@@ -1817,7 +1817,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(
   return true;
 }
 
-bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *commentsOnFailure) {
+bool X509Certificate::loadFromPEM(const std::string& input, std::stringstream *commentsOnFailure) {
   std::string certificateContentStripped;
   //see ASN1_item_d2i_bio for decoding.
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
@@ -1840,18 +1840,18 @@ bool X509Certificate::LoadFromPEM(const std::string& input, std::stringstream *c
     return false;
   }
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
-  if (!Crypto::ConvertBase64ToBitStream(
+  if (!Crypto::convertBase64ToBitStream(
     certificateContentStripped, this->sourceBinary, commentsOnFailure, nullptr
   )) {
     return false;
   }
-  return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
+  return this->loadFromASNEncoded(this->sourceBinary, commentsOnFailure);
 }
 
-bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
+bool X509Certificate::loadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure) {
   std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the server's certificate.
-  // For server's certificate, use TransportLayerSecurity::LoadPEMCertificate.
+  // For server's certificate, use TransportLayerSecurity::loadPEMCertificate.
   if (!FileOperations::loadFiletoStringVirtual(
     input, certificateContent, false, commentsOnFailure
   )) {
@@ -1860,7 +1860,7 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
     }
     return false;
   }
-  return this->LoadFromPEM(certificateContent, commentsOnFailure);
+  return this->loadFromPEM(certificateContent, commentsOnFailure);
 }
 
 std::string TBSCertificateInfo::Organization::toString() {
@@ -1884,7 +1884,7 @@ std::string TBSCertificateInfo::toString() {
   return out.str();
 }
 
-bool TBSCertificateInfo::LoadExtensions(
+bool TBSCertificateInfo::loadExtensions(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
   this->extensions.setSize(0);
@@ -1898,10 +1898,10 @@ bool TBSCertificateInfo::LoadExtensions(
   return true;
 }
 
-bool TBSCertificateInfo::LoadValidity(
+bool TBSCertificateInfo::loadValidity(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadValidity");
+  MacroRegisterFunctionWithName("TBSCertificateInfo::loadValidity");
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
     input.theElements.size != 2
@@ -1934,14 +1934,14 @@ bool TBSCertificateInfo::Organization::loadFromASN(
     }
     return false;
   }
-  return this->LoadFields(fields, commentsOnFailure);
+  return this->loadFields(fields, commentsOnFailure);
 }
 
-bool TBSCertificateInfo::Organization::LoadFields(
+bool TBSCertificateInfo::Organization::loadFields(
   const MapList<std::string, ASNObject, MathRoutines::hashString>& fields,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFields");
+  MacroRegisterFunctionWithName("TBSCertificateInfo::loadFields");
   int numberOfLoadedFields = 0;
   numberOfLoadedFields += this->commonName.loadField(
     fields, ASNObject::names::commonName
@@ -1975,7 +1975,7 @@ bool TBSCertificateInfo::Organization::LoadFields(
   return true;
 }
 
-bool TBSCertificateInfo::LoadASNAlgorithmIdentifier(
+bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
   const ASNElement &input,
   ASNElement& output,
   std::stringstream* commentsOnFailure
@@ -2040,7 +2040,7 @@ bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commen
     }
     return false;
   }
-  if (!this->LoadASNAlgorithmIdentifier(
+  if (!this->loadASNAlgorithmIdentifier(
     input.theElements[2], this->signatureAlgorithmIdentifier, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -2054,7 +2054,7 @@ bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commen
     }
     return false;
   }
-  if (!this->LoadValidity(input.theElements[4], commentsOnFailure)) {
+  if (!this->loadValidity(input.theElements[4], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load validity. ";
     }
@@ -2093,15 +2093,15 @@ bool TBSCertificateInfo::load(const ASNElement& input, std::stringstream* commen
     return false;
   }
   if (input.theElements.size >= 8) {
-    return this->LoadExtensions(input.theElements[7], commentsOnFailure);
+    return this->loadExtensions(input.theElements[7], commentsOnFailure);
   }
   return true;
 }
 
-bool X509Certificate::LoadFromASNEncoded(
+bool X509Certificate::loadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("X509Certificate::LoadFromASNEncoded");
+  MacroRegisterFunctionWithName("X509Certificate::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   if (!theDecoder.decode(input, 0, this->sourceASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -2124,7 +2124,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  if (!this->information.LoadASNAlgorithmIdentifier(
+  if (!this->information.loadASNAlgorithmIdentifier(
     this->sourceASN[1], this->signatureAlgorithmId, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

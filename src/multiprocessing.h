@@ -153,21 +153,21 @@ public:
   std::string getLastRead() {
     return this->thePipe.getLastRead();
   }
-  static void WriteIfFailThenCrash(
+  static void writeNoFailure(
     int theFD, const List<char>& input, bool dontCrashOnFail
   );
-  void ReadOnce(bool dontCrashOnFail);
+  void readOnce(bool dontCrashOnFail);
   void readOnceWithoutEmptying(bool dontCrashOnFail);
-  void ReadLoop(List<char>& output);
-  static int WriteNoInterrupts(int theFD, const std::string& input);
-  static int WriteWithTimeoutViaSelect(
+  void readLoop(List<char>& output);
+  static int writeNoInterrupts(int theFD, const std::string& input);
+  static int writeWithTimeoutViaSelect(
     int theFD,
     const std::string& input,
     int timeOutInSeconds,
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static int ReadWithTimeOutViaSelect(
+  static int readWithTimeOutViaSelect(
     int theFD,
     List<char>& output,
     int timeOutInSeconds,

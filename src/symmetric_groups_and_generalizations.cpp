@@ -1176,9 +1176,9 @@ void HyperoctahedralGroup::spechtModuleOfPartititons(const Partition &positive, 
   pxmr.generatorS = pozm;
   pxmr.generatorS.addListOnTop(negm);
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> snr;
-  PxM.InduceRepresentation(pxmr,snr);
+  PxM.induceRepresentation(pxmr,snr);
   GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
-  Sn.InduceRepresentation(snr,outreboxme);
+  Sn.induceRepresentation(snr,outreboxme);
 
   out.ownerGroup = this;
   out.generatorS = outreboxme.generatorS;
@@ -1230,7 +1230,7 @@ void HyperoctahedralGroup::spechtModuleOfPartititons(const Partition &positive, 
     }
   if (!pxmr.verifyRepresentation())
     global.fatal << "lol" << global.fatal;
-  auto outreboxme = PxM.InduceRepresentation(pxmr);
+  auto outreboxme = PxM.induceRepresentation(pxmr);
   out.ownerGroup = this;
   out.generatorS = outreboxme.generatorS;
   std::stringstream ids;
@@ -1256,8 +1256,8 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   if ((positive.n > 0) && (negative.n > 0)) {
     subgenids.removeIndexShiftDown(positive.n - 1);
   }
-  auto PxM = this->theGroup->ParabolicKindaSubgroupGeneratorSubset(subgenids);
-  auto pxmr = PxM.theSubgroup->GetEmptyRationalRepresentation();
+  auto PxM = this->theGroup->parabolicKindaSubgroupGeneratorSubset(subgenids);
+  auto pxmr = PxM.theSubgroup->getEmptyRationalRepresentation();
   pxmr.generatorS.setExpectedSize(PxM.theSubgroup->generators.size);
   pxmr.generatorS.addListOnTop(pozm);
   pxmr.generatorS.addListOnTop(negm);
@@ -1278,7 +1278,7 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   if (!pxmr.verifyRepresentation()) {
     global.fatal << "Representation not verified. " << global.fatal;
   }
-  out = PxM.InduceRepresentation(pxmr);
+  out = PxM.induceRepresentation(pxmr);
   out.ownerGroup = this->theGroup;
   std::stringstream ids;
   ids << negative << ", " << positive;
@@ -1323,7 +1323,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
              << PxM.superGeneratorSubWords[i].toStringCommaDelimited() << '\n';
   for (int i = 0; i < PxM.generators.size; i ++)
     global.Comments << i << " " << PxM.generators[i] << '\n';
-  //PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
+  //PxM.cosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
   PxM.GetWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
   GroupRepresentation<Subgroup<PermutationGroup, PermutationR2>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
@@ -1345,8 +1345,8 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
     pxmr.generatorS[i] *= - 1;
   }
   GroupRepresentation<PermutationGroup, Rational> subsnr;
-  PxM.InduceRepresentation(pxmr,subsnr);
-  subsnr.InduceRepresentation(subsnr,out);
+  PxM.induceRepresentation(pxmr,subsnr);
+  subsnr.induceRepresentation(subsnr,out);
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();

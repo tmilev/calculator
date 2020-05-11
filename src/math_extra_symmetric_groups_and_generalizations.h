@@ -1434,7 +1434,7 @@ void PermutationR2::actOnTensor(
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y) {
+bool FiniteGroup<elementSomeGroup>::possiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y) {
   (void) x, y;
   return true;
 }
@@ -1463,7 +1463,7 @@ bool FiniteGroup<elementSomeGroup>::areConjugate(const elementSomeGroup& x, cons
 /*
 template <typename elementSomeGroup>
 template <typename Coefficient>
-coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<Coefficient>& X1, const Vector<Coefficient>& X2) {
+coefficient FiniteGroup<elementSomeGroup>::getHermitianProduct(const Vector<Coefficient>& X1, const Vector<Coefficient>& X2) {
   if (!this->flagCCsComputed)
     this->computeConjugacyClassSizesAndRepresentatives(NULL);
   coefficient acc = 0;
@@ -1516,7 +1516,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesW
       conjugacygraph.addEdge(i, xi);
     }
   }
-  List<List<int> > components = conjugacygraph.DestructivelyGetConnectedComponents();
+  List<List<int> > components = conjugacygraph.destructivelyGetConnectedComponents();
   // boxing and unboxing...
   this->conjugacyClasses.setSize(components.size);
   for (int i = 0; i < components.size; i ++) {
@@ -1683,7 +1683,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
       }
       out << values[i][j];
     }
-    Rational x = this->irreps[i].theCharacter.Norm();
+    Rational x = this->irreps[i].theCharacter.norm();
     if (x != 1) {
       out << "][" << x;
     }
@@ -1698,7 +1698,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(bool andPri
   // print information about if anything's wrong
   for (int i = 0; i < this->irreps.size; i ++) {
     for (int j = i + 1; j < this->irreps.size; j ++) {
-      Rational x = this->irreps[i].theCharacter.InnerProduct(this->irreps[j].theCharacter);
+      Rational x = this->irreps[i].theCharacter.innerProduct(this->irreps[j].theCharacter);
       if (x != 0) {
         out << "characters " << i << ", " << j << " have inner product " << x << '\n';
       }
@@ -1769,7 +1769,7 @@ template <typename elementSomeGroup>
 JSData FiniteGroup<elementSomeGroup>::representationDataIntoJS() {
   JSData out;
   for (int i = 0; i < irreps.size; i ++) {
-    out[i] = irreps[i].JSOut();
+    out[i] = irreps[i].toJSON();
   }
   return out;
 }
@@ -1833,7 +1833,7 @@ void FiniteGroup<elementSomeGroup>::verifyCCSizesAndRepresentativesFormula() {
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::VerifyWords() {
+void FiniteGroup<elementSomeGroup>::verifyWords() {
   if (!this->flagAllElementsAreComputed) {
     this->ComputeAllElementsWordsConjugacyIfObvious(true);
   }
@@ -2019,7 +2019,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
-    x = this->theCharacter.InnerProduct(this->ownerGroup->irreps[i].theCharacter);
+    x = this->theCharacter.innerProduct(this->ownerGroup->irreps[i].theCharacter);
     if (x != 0) {
       if (firstone) {
         firstone = false;

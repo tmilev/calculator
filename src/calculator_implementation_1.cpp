@@ -496,7 +496,7 @@ bool Calculator::innerPrintSSSubalgebras(
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.toString();
-  global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
+  global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
@@ -1930,7 +1930,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     if (input.toString() == "\\pi") {
       return output.assignValue<std::string>(" 3.141592654 ", theCommands);
     }
-    if (input.theData >= theCommands.NumPredefinedAtoms) {
+    if (input.theData >= theCommands.numberOfPredefinedAtoms) {
       return output.assignValue(currentString, theCommands);
     }
     if (currentString == "|") {
@@ -2296,7 +2296,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   }
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
-  theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
+  theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
   theDiagram.AmbientBilinearForm = theWeyl.cartanSymmetric;
   theDiagram.AmbientRootSystem = theWeyl.RootSystem;
   theDiagram.computeDiagramInputIsSimple(outputRoots);

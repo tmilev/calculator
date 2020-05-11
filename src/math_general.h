@@ -1725,7 +1725,7 @@ bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
   Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution
 ) {
   if (
-    inputPivotPoints.MaxSize != this->numberOfColumns ||
+    inputPivotPoints.maximumSize != this->numberOfColumns ||
     inputRightHandSide.numberOfColumns != 1 ||
     inputRightHandSide.numberOfRows != this->numberOfRows
   ) {
@@ -3045,11 +3045,6 @@ public:
 };
 
 template<class Coefficient>
-class PolynomialSystemSolution {
-
-};
-
-template<class Coefficient>
 class GroebnerBasisComputation {
   public:
   PolynomialOrder<Coefficient> thePolynomialOrder;
@@ -3065,41 +3060,20 @@ class GroebnerBasisComputation {
     std::string toString(FormatExpressions* theFormat) const;
   };
   List<BasisElement> theBasis;
-  int recursionCounterSerreLikeSystem;
-  int numberOfVariablesToSolveForStart;
-  int numberOfVariablesToSolveForAfterReduction;
-  int numberOfSerreSystemComputations;
-  int numberOfSerreVariablesOneGenerator;
   int numberPolynomialDivisions;
   int numberMonomialOperations;
 
-  int maximumSerreSystemComputationsPreferred;
   int maximumPolynomialComputations;
   int maximumBasisReductionComputations;
   int numberOfIntermediateRemainders;
   int numberOfSymmetricDifferenceRounds;
   bool flagFoundNewBasisElements;
-  bool flagUseTheMonomialBranchingOptimization;
   bool flagDoProgressReport;
   bool flagDoLogDivision;
   bool flagStoreQuotients;
-  bool flagSystemProvenToHaveNoSolution;
-  bool flagSystemProvenToHaveSolution;
-  bool flagSystemSolvedOverBaseField;
-  bool flagUsingAlgebraicClosuRe;
-  bool flagTryDirectlySolutionOverAlgebraicClosure;
   MemorySaving<PolynomialDivisionReport<Coefficient> > divisionReport;
-
-  AlgebraicClosureRationals* theAlgebraicClosurE;
-  MemorySaving<GroebnerBasisComputation<Coefficient> > computationUsedInRecursiveCalls;
-  MemorySaving<List<Coefficient> > systemSolution;
-  MemorySaving<Selection> solutionsFound;
-  List<PolynomialSubstitution<Coefficient> > theImpliedSubS;
   FormatExpressions theFormat;
   void addBasisElementNoReduction(const Polynomial<Coefficient>& input);
-  void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
-  void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
-  std::string toStringSerreLikeSolution();
   bool limitsExceeded() const;
   bool addAndReducePolynomials();
   bool addAndReduceOnePolynomial();
@@ -3108,9 +3082,6 @@ class GroebnerBasisComputation {
     List<Polynomial<Coefficient> >& inputOutpuT, int upperLimitPolyComputations
   );
   bool transformToReducedGroebnerBasis(List<Polynomial<Coefficient> >& inputOutpuT);
-  void trySettingValueToVariable(
-    List<Polynomial<Coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
-  );
   void generateSymmetricDifferenceCandidates();
   void generateOneSymmetricDifferenceCandidate(
     GroebnerBasisComputation<Coefficient>::BasisElement& left,
@@ -3123,11 +3094,7 @@ class GroebnerBasisComputation {
   int minimalNumberOfVariables() const;
   std::string toStringLetterOrder(bool addDollars) const;
   std::string toStringPolynomialBasisStatus();
-  std::string toStringImpliedSubstitutions();
   static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(int theVarIndex, List<Polynomial<Coefficient> >& input);
-  static int getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input);
-  static void getVariablesToSolveFor(const List<Polynomial<Coefficient> >& input, Selection& output);
-  static bool isContradictoryReducedSystem(const List<Polynomial<Coefficient> >& input);
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
@@ -3147,15 +3114,44 @@ class GroebnerBasisComputation {
     ProgressReport* theReport
   );
   std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
-  std::string toStringCalculatorInputFromSystem(const List<Polynomial<Coefficient> >& inputSystem);
+  std::string toStringStatusGroebnerBasisTransformation();
+  void checkConsistency();
+  void initializeForGroebnerComputation();
+  // void initializeForDivision(const List<Polynomial<Coefficient> >& inputBasis);
+};
+
+template<class Coefficient>
+class PolynomialSystem {
+public:
+  int maximumSerreSystemComputationsPreferred;
+  int numberOfSerreSystemComputations;
+  int numberOfSerreVariablesOneGenerator;
+  int recursionCounterSerreLikeSystem;
+  int numberOfVariablesToSolveForStart;
+  int numberOfVariablesToSolveForAfterReduction;
+  bool flagTryDirectlySolutionOverAlgebraicClosure;
+  bool flagUseTheMonomialBranchingOptimization;
+  bool flagSystemProvenToHaveNoSolution;
+  bool flagSystemProvenToHaveSolution;
+  bool flagSystemSolvedOverBaseField;
+  bool flagUsingAlgebraicClosure;
+
+  AlgebraicClosureRationals* theAlgebraicClosure;
+  GroebnerBasisComputation<Coefficient> groebner;
+  MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
+  List<Coefficient> systemSolution;
+  Selection solutionsFound;
+  List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
+  PolynomialSystem();
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
+  std::string toStringCalculatorInputFromSystem(const List<Polynomial<Coefficient> >& inputSystem);
   bool hasImpliedSubstitutions(
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSub
   );
   bool hasSingleMonomialEquation(const List<Polynomial<Coefficient> >& inputSystem, MonomialP& outputMon);
-  void setUpRecursiveComputation(GroebnerBasisComputation& toBeModified);
-  void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(GroebnerBasisComputation& potentiallySolvedCase);
+  void setUpRecursiveComputation(PolynomialSystem<Coefficient>& toBeModified);
+  void processSolvedSubcaseIfSolvedOrProvenToHaveSolution(PolynomialSystem<Coefficient>& potentiallySolvedCase);
   void solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputSystem, const MonomialP& theMon);
   int getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem);
   void solveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
@@ -3165,12 +3161,21 @@ class GroebnerBasisComputation {
     Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
   );
   bool getOneVariablePolynomialSolution(const Polynomial<Coefficient>& thePoly, Coefficient& outputSolution);
-  std::string toStringStatusGroebnerBasisTransformation();
-  void checkConsistency();
+  void setSerreLikeSolutionIndex(int theIndex, const Coefficient& theConst);
+  void getSubstitutionFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<Coefficient>& outputSub);
+  std::string toStringSerreLikeSolution();
+  static int getNumberOfVariablesToSolveFor(const List<Polynomial<Coefficient> >& input);
+  static void getVariablesToSolveFor(const List<Polynomial<Coefficient> >& input, Selection& output);
+  void trySettingValueToVariable(
+    List<Polynomial<Coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
+  );
+  static bool isContradictoryReducedSystem(const List<Polynomial<Coefficient> >& input);
+  std::string toStringImpliedSubstitutions();
   void initializeForSystemSolution();
-  void initializeForGroebnerComputation();
-  // void initializeForDivision(const List<Polynomial<Coefficient> >& inputBasis);
+  bool shouldReport();
+  FormatExpressions& format();
 };
+
 
 template <class templateMonomial, class Coefficient>
 bool LinearCombination<templateMonomial, Coefficient>::operator==(int x) const {
@@ -3602,7 +3607,7 @@ class PartFractions;
 
 class OnePartialFractionDenominator {
 public:
-  List<int> Multiplicities;
+  List<int> multiplicities;
   List<int> Elongations;
   void addMultiplicity(int MultiplicityIncrement, int Elongation);
   int indexLargestElongation();
@@ -6750,7 +6755,7 @@ void Matrix<Coefficient>::getVectorFromColumn(int colIndex, Vector<Coefficient>&
   }
 }
 
-class KLpolys: public HashedList<Vector<Rational> > {
+class KazhdanLusztigPolynomials: public HashedList<Vector<Rational> > {
 public:
   WeylGroupData* TheWeylGroup;
   List<int> TheMultiplicities;
@@ -6788,7 +6793,7 @@ public:
   void writeKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int topIndex);
   //returns the topIndex of the KL coefficients
   int readKLCoeffsFromFile(std::fstream& input, List<int>& output);
-  KLpolys() {
+  KazhdanLusztigPolynomials() {
     this->TheWeylGroup = nullptr;
   }
   void generatePartialBruhatOrder();
@@ -7076,8 +7081,8 @@ void Vectors<Coefficient>::intersectTwoLinearSpaces(
 ) {
   Vectors<Coefficient> firstReduced, secondReduced;
   Selection tempSel;
-  Vectors<Coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel);
-  Vectors<Coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel);
+  Vectors<Coefficient>::selectBasisInSubspace(firstSpace, firstReduced, tempSel);
+  Vectors<Coefficient>::selectBasisInSubspace(secondSpace, secondReduced, tempSel);
   if (firstReduced.size == 0 || secondReduced.size == 0) {
     output.size = 0;
     return;

@@ -34,7 +34,7 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetRho() {
+Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getRho() {
   Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl->getDimension());
   result /= 2;
@@ -51,10 +51,10 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputMatrix.transpose();
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeSubGroupFromGeneratingReflections(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeSubGroupFromGeneratingReflections(
   Vectors<Rational>* inputRoots,
   List<Vectors<Rational> >* inputExternalAutos,
-  int UpperLimitNumElements,
+  int upperLimitNumberOfElements,
   bool recomputeAmbientRho
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphisms::SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms");
@@ -67,7 +67,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
     return false;
   }
   if (recomputeAmbientRho) {
-    this->AmbientWeyl->ComputeRho(false);
+    this->AmbientWeyl->computeRho(false);
   }
   this->simpleRootsInner.setSize(0);
   if (inputRoots != nullptr) {
@@ -76,8 +76,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   if (inputExternalAutos != nullptr) {
     this->ExternalAutomorphisms = *inputExternalAutos;
   }
-  this->AmbientWeyl->TransformToSimpleBasisGenerators(this->simpleRootsInner, this->AmbientWeyl->RootSystem);
-  this->ComputeRootSubsystem();
+  this->AmbientWeyl->transformToSimpleBasisGenerators(this->simpleRootsInner, this->AmbientWeyl->RootSystem);
+  this->computeRootSubsystem();
   ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms currentElement;
   currentElement.owner = this;
   Vector<Rational> vectorGeneratingFaithfulOrbit;
@@ -103,7 +103,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->allElements.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], orbitRho[i], false, currentRoot);
+      this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
@@ -120,8 +120,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
         this->allElements.addOnTop(currentElement);
       }
     }
-    if (UpperLimitNumElements > 0) {
-      if (this->allElements.size >= UpperLimitNumElements) {
+    if (upperLimitNumberOfElements > 0) {
+      if (this->allElements.size >= upperLimitNumberOfElements) {
         this->truncated = true;
         return false;
       }
@@ -566,7 +566,7 @@ void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
     Vector<Rational> tempRoot;
     tempRoot.makeEi(theDimension, i);
     for (int j = 0; j<weightSupport.size; j ++)
-      current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.objects[j]);
+      current.elements[j][j] = this->theWeyl.rootScalarCartanRoot(tempRoot, weightSupport.objects[j]);
   }*/
 }
 
@@ -589,8 +589,8 @@ int SemisimpleLieAlgebra::getLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return - 1;
 }
 
-bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators() {
-  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators");
+bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators() {
+  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleChevalleyGenerators");
   this->theDomain().computeChevalleyConstants();
   this->theRange().computeChevalleyConstants();
   int theDomainDimension = this->theDomain().theWeyl.cartanSymmetric.numberOfRows;
@@ -619,7 +619,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
     for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
-      for (int j = 0; j < NonExplored.MaxSize; j ++) {
+      for (int j = 0; j < NonExplored.maximumSize; j ++) {
         if (!NonExplored.selected[j]) {
           const Vector<Rational>& left = this->theDomain().theWeyl.RootSystem[j];
           right = current - left;
@@ -671,21 +671,21 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output) {
   output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
-    this->ProjectOntoSmallCartan(input[i], output[i]);
+    this->projectOntoSmallCartan(input[i], output[i]);
   }
 }
 
-void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output) {
   Matrix<Rational> invertedSmallCartan;
   invertedSmallCartan = this->theDomain().theWeyl.cartanSymmetric;
   invertedSmallCartan.invert();
   int theSmallDimension = this->theDomain().theWeyl.cartanSymmetric.numberOfRows;
   output.makeZero(theSmallDimension);
   for (int i = 0; i < theSmallDimension; i ++) {
-    output[i] = this->theRange().theWeyl.RootScalarCartanRoot(
+    output[i] = this->theRange().theWeyl.rootScalarCartanRoot(
       this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size + i].getCartanPart(), input
     );
   }
@@ -737,7 +737,7 @@ void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   }
 }
 
-void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(Matrix<Rational>& output) {
   output.initialize(this->theRange().getRank(), this->theDomain().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().getRank(); i ++) {
@@ -765,15 +765,15 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
+void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
   char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
 ) {
-  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
+  MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity");
   DynkinType theType;
   theType.makeSimpleType(theWeylLetter, theWeylDim);
   this->domainAlg = &ownerOfAlgebras.getValueCreateNoInit(theType);
   this->rangeAlg = this->domainAlg;
-  this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
+  this->domainAlg->theWeyl.makeArbitrarySimple(theWeylLetter, theWeylDim);
   this->theDomain().computeChevalleyConstants();
   int numPosRoots = this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
@@ -795,7 +795,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
 
 void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtml) {
   std::stringstream out;
-  if (this->CheckClosednessLieBracket()) {
+  if (this->checkClosednessLieBracket()) {
     out << "Lie bracket closes, everything is good!";
   } else {
     out << "The Lie bracket is incorrect!";
@@ -823,7 +823,7 @@ void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtm
 
 class SlTwoInSlN;
 
-void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
+void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
   List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.RootSystem;
   int rankSA = this->theDomain().theWeyl.getDimension();
   Matrix<Rational> tempMat;
@@ -836,7 +836,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   for (int i = 0; i < theRootSystem.size; i ++) {
     for (int j = 0; j < rankSA; j ++) {
       ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numPosRootsDomain];
-      theScalarProducts[j] = this->theRange().theWeyl.RootScalarCartanRoot(currentH.getCartanPart(), theRootSystem[i]);
+      theScalarProducts[j] = this->theRange().theWeyl.rootScalarCartanRoot(currentH.getCartanPart(), theRootSystem[i]);
     }
     tempMat.actOnVectorColumn(theScalarProducts, output[i]);
   }
@@ -846,7 +846,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   }
 }
 
-bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
+bool HomomorphismSemisimpleLieAlgebra::checkClosednessLieBracket() {
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   Vectors<Rational> tempRoots;
   Vector<Rational> tempRoot;
@@ -1269,7 +1269,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isCoefficientOneChevalleyGenerato
   return false;
 }
 
-void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
+void HomomorphismSemisimpleLieAlgebra::getWeightsWrtKInSimpleCoordinatesK(
   Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
 ) {
   outputWeights.setSize(inputElts.size);

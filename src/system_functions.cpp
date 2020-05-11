@@ -16,7 +16,7 @@ int64_t GlobalVariables::getElapsedMilliseconds() {
   (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
 }
 
-void InitializeTimeR() {
+void initializeTimer() {
   gettimeofday(&ComputationStartGlobal, nullptr);
 }
 
@@ -170,7 +170,7 @@ void RunTimerThread(int threadIndex) {
   theThread.run();
 }
 
-void CreateTimerThread() {
+void createTimerThread() {
   ThreadData::createThread(RunTimerThread, "timer");
 }
 
@@ -218,7 +218,7 @@ int externalCommandStreamOutput(const std::string& inputCommand) {
   return result;
 }
 
-void CallChDirWrapper(const std::string& theDir) {
+void callChDirWrapper(const std::string& theDir) {
   int systemOutput = chdir(theDir.c_str());
   if (systemOutput != 0) {
     global << Logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput

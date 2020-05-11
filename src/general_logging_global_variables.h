@@ -187,7 +187,7 @@ public:
   // When non-null, usually points to:
   // int externalCommandStream(const std::string& inputCommand)
   int (*pointerExternalCommandStream)(const std::string& theSystemCommand);
-  // When non-null, this usually points to: CallChDirWrapper.
+  // When non-null, this usually points to: callChDirWrapper.
   void (*pointerCallChDir)(const std::string& theDirectoryName);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
@@ -345,7 +345,7 @@ public:
   std::string userInputStringIfAvailable;
 
   std::string relativePhysicalNameCrashReport;
-  std::string RelativePhysicalNameOptionalProgressReport;
+  std::string relativePhysicalNameOptionalProgressReport;
   std::string relativePhysicalNameOptionalResult;
 
   std::string pathExecutableUserInputOrDeduced;
@@ -353,8 +353,8 @@ public:
   std::string physicalPathProjectBase;
   std::string physicalPathServerBase;
   std::string physicalNameFolderExecutable;
-  std::string PhysicalNameExecutableNoPath;
-  std::string PhysicalNameExecutableWithPath;
+  std::string physicalNameExecutableNoPath;
+  std::string physicalNameExecutableWithPath;
 
   std::string displayPathOutputFolder;
   // The backend URL, for example

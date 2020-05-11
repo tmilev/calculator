@@ -433,40 +433,33 @@ public:
   }
   HomomorphismSemisimpleLieAlgebra(): domainAlg(nullptr), rangeAlg(nullptr) {
   }
-  std::string DebugString;
-  void GetWeightsGmodKInSimpleCoordsK(Vectors<Rational>& outputWeights) {
-    this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK);
+  void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
+    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->GmodK);
   }
-  void GetWeightsKInSimpleCoordsK(Vectors<Rational>& outputWeights) {
-    this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->imagesAllChevalleyGenerators);
+  void getWeightsKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
+    this->getWeightsWrtKInSimpleCoordinatesK(outputWeights, this->imagesAllChevalleyGenerators);
   }
-  void GetWeightsWrtKInSimpleCoordsK(
+  void getWeightsWrtKInSimpleCoordinatesK(
     Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
   );
   void toString(std::string& output) {
     this->toString(output, false);
   }
   void toString(std::string& output, bool useHtml);
-  void MakeGinGWithId(
+  void makeGinGWithIdentity(
     char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
   );
-  void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
-  void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
-  void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
-  void ComputeDebugString() {
-    this->toString(this->DebugString);
-  }
-  void ComputeDebugString(bool useHtml) {
-    this->toString(this->DebugString, useHtml);
-  }
+  void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
+  void projectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
+  void getMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
   std::string toString() {
     std::string tempS;
     this->toString(tempS);
     return tempS;
   }
-  void GetRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
-  bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
-  bool CheckClosednessLieBracket();
+  void getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output);
+  bool computeHomomorphismFromImagesSimpleChevalleyGenerators();
+  bool checkClosednessLieBracket();
   void applyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   bool applyHomomorphism(
     const ElementUniversalEnveloping<RationalFunction<Rational> >& input,

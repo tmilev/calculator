@@ -67,12 +67,12 @@ bool PartFractions::flagMakingProgressReport = true;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
 
-unsigned long long int Rational::TotalLargeAdditions = 0;
-unsigned long long int Rational::TotalLargeGCDcalls = 0;
-unsigned long long int Rational::TotalLargeMultiplications = 0;
-unsigned long long int Rational::TotalSmallAdditions = 0;
-unsigned long long int Rational::TotalSmallGCDcalls = 0;
-unsigned long long int Rational::TotalSmallMultiplications = 0;
+unsigned long long int Rational::totalLargeAdditions = 0;
+unsigned long long int Rational::totalLargeGreatestCommonDivisors = 0;
+unsigned long long int Rational::totalLargeMultiplications = 0;
+unsigned long long int Rational::totalSmallAdditions = 0;
+unsigned long long int Rational::totalSmallGreatestCommonDivisors = 0;
+unsigned long long int Rational::totalSmallMultiplications = 0;
 
 int GlobalVariables::externalCommandNoOutput(
   const std::string& systemCommand, bool logErrors
@@ -117,7 +117,7 @@ std::string GlobalVariables::externalCommandReturnOutput(const std::string& syst
 }
 
 void GlobalVariables::changeDirectory(const std::string& systemCommand) {
-  // When not nullptr, this most likely points to: CallChDirWrapper.
+  // When not nullptr, this most likely points to: callChDirWrapper.
   if (this->pointerCallChDir != nullptr) {
     this->pointerCallChDir(FileOperations::convertStringToEscapedStringFileNameSafe(systemCommand));
   }
@@ -293,7 +293,7 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
   int r = (255 * (tempI % NumColorsBase)) / NumColorsBase;
   int g = (255 * (tempI % (NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase);
   int b = (255 * (tempI % (NumColorsBase * NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase * NumColorsBase);
-  return static_cast<int>(HtmlRoutines::RedGreenBlue(
+  return static_cast<int>(HtmlRoutines::redGreenBlue(
     static_cast<unsigned int>(r),
     static_cast<unsigned int>(g),
     static_cast<unsigned int>(b)
@@ -315,15 +315,15 @@ void DrawingVariables::initDrawingVariables() {
   this->flagDrawingInvisibles = false;
   this->flagDrawingLinkToOrigin = true;
   this->flagFillUserDefinedProjection = false;
-  this->ColorDashes = static_cast<int>(HtmlRoutines::RedGreenBlue(200, 200, 200));
+  this->ColorDashes = static_cast<int>(HtmlRoutines::redGreenBlue(200, 200, 200));
   this->flag2DprojectionDraw = true;
   this->flagIncludeExtraHtmlDescriptions = true;
   this->flagAllowMovingCoordinateSystemFromArbitraryClick = true;
-  this->ColorChamberIndicator = static_cast<int>(HtmlRoutines::RedGreenBlue(220, 220, 0));
-  this->ColorWeylChamberWalls = static_cast<int>(HtmlRoutines::RedGreenBlue(220, 220, 0));
-  this->ColorTextPermanentlyZeroChamber = static_cast<int>(HtmlRoutines::RedGreenBlue(250, 220, 220));
-  this->ColorTextZeroChamber = static_cast<int>(HtmlRoutines::RedGreenBlue(200, 100, 100));
-  this->ColorTextDefault = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
+  this->ColorChamberIndicator = static_cast<int>(HtmlRoutines::redGreenBlue(220, 220, 0));
+  this->ColorWeylChamberWalls = static_cast<int>(HtmlRoutines::redGreenBlue(220, 220, 0));
+  this->ColorTextPermanentlyZeroChamber = static_cast<int>(HtmlRoutines::redGreenBlue(250, 220, 220));
+  this->ColorTextZeroChamber = static_cast<int>(HtmlRoutines::redGreenBlue(200, 100, 100));
+  this->ColorTextDefault = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   this->Selected = - 2;
   this->textX = 0;
   this->textY = 15;
@@ -551,7 +551,7 @@ std::string HtmlRoutines::convertStringToHtmlString(
   return result;
 }
 
-uint32_t HtmlRoutines::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b) {
+uint32_t HtmlRoutines::redGreenBlue(unsigned int r, unsigned int g, unsigned int b) {
   r = r % 256;
   g = g % 256;
   b = b % 256;
@@ -1718,7 +1718,7 @@ bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
   Rational tempRat;
   for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < theSet.size; indexFirstNonZeroRoot ++) {
     Vector<Rational>& currentRoot = theSet[indexFirstNonZeroRoot];
-    tempRat = this->RootScalarCartanRoot(input, currentRoot)/this->RootScalarCartanRoot(currentRoot, currentRoot);
+    tempRat = this->rootScalarCartanRoot(input, currentRoot)/this->rootScalarCartanRoot(currentRoot, currentRoot);
     if (tempRat.isPositive()) {
       if (!IntegralCoefficientsOnly || tempRat.denominatorShort == 1) {
          theNewSet.size = 0;
@@ -2463,15 +2463,15 @@ int MathRoutines::binomialCoefficientMultivariate(int N, List<int>& theChoices) 
 void Selection::initialize(int maxNumElements) {
   this->selected.setSize(maxNumElements);
   this->elements.setSize(maxNumElements);
-  this->MaxSize = maxNumElements;
-  for (int i = 0; i < this->MaxSize; i ++) {
+  this->maximumSize = maxNumElements;
+  for (int i = 0; i < this->maximumSize; i ++) {
     this->selected[i] = false;
   }
   this->cardinalitySelection = 0;
 }
 
 void Selection::addSelectionAppendNewIndex(int index) {
-  if (index >= this->MaxSize || index < 0) {
+  if (index >= this->maximumSize || index < 0) {
     return;
   }
   if (this->selected[index]) {
@@ -2483,7 +2483,7 @@ void Selection::addSelectionAppendNewIndex(int index) {
 }
 
 Selection::Selection() {
-  this->MaxSize = - 1;
+  this->maximumSize = - 1;
   this->cardinalitySelection = 0;
 }
 
@@ -2502,7 +2502,7 @@ void Selection::removeLastSelection() {
 
 int Selection::selectionToIndex() {
   int result = 0;
-  for (int i = 0; i < MaxSize; i ++) {
+  for (int i = 0; i < maximumSize; i ++) {
     result *= 2;
     if (this->selected[i]) {
       result += 1;
@@ -2512,16 +2512,16 @@ int Selection::selectionToIndex() {
 }
 
 void Selection::shrinkMaxSize() {
-  MaxSize --;
-  if (selected[MaxSize]) {
+  maximumSize --;
+  if (selected[maximumSize]) {
     cardinalitySelection --;
   }
 }
 
 void Selection::expandMaxSize() {
-  this->elements[this->cardinalitySelection] = this->MaxSize;
-  this->selected[this->MaxSize] = true;
-  this->MaxSize ++;
+  this->elements[this->cardinalitySelection] = this->maximumSize;
+  this->selected[this->maximumSize] = true;
+  this->maximumSize ++;
   this->cardinalitySelection ++;
 }
 
@@ -2532,7 +2532,7 @@ std::string Selection::toString() const {
 }
 
 void Selection::incrementSelection() {
-  for (int i = this->MaxSize - 1; i >= 0; i --) {
+  for (int i = this->maximumSize - 1; i >= 0; i --) {
     this->selected[i] = !this->selected[i];
     if (this->selected[i]) {
       this->computeIndicesFromSelection();
@@ -2552,7 +2552,7 @@ void Selection::initSelectionFixedCardinality(int card) {
 }
 
 void Selection::incrementSelectionFixedCardinality(int card) {
-  //example of the order of generation of all combinations when card = 2 and MaxSize = 5. The second column indicates the
+  //example of the order of generation of all combinations when card = 2 and maximumSize = 5. The second column indicates the
   //state of the array at the point in code marked with *** below
   //11000     (->10000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
   //10100     (->10000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
@@ -2564,19 +2564,19 @@ void Selection::incrementSelectionFixedCardinality(int card) {
   //00110     (->00100) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
   //00101     (->00000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
   //00011
-  if (card > this->MaxSize) {
+  if (card > this->maximumSize) {
     return;
   }
   if (this->cardinalitySelection != card) {
     this->initSelectionFixedCardinality(card);
     return;
   }
-  if (card == this->MaxSize || card == 0) {
+  if (card == this->maximumSize || card == 0) {
     return;
   }
   int indexLastZeroWithOneBefore = - 1;
   int NumOnesAfterLastZeroWithOneBefore = 0;
-  for (int i = this->MaxSize - 1; i >= 0; i --) {
+  for (int i = this->maximumSize - 1; i >= 0; i --) {
     if (this->selected[i]) {
       if (indexLastZeroWithOneBefore == - 1) {
         NumOnesAfterLastZeroWithOneBefore ++;
@@ -2603,7 +2603,7 @@ void Selection::incrementSelectionFixedCardinality(int card) {
 
 void Selection::computeIndicesFromSelection() {
   this->cardinalitySelection = 0;
-  for (int i = 0; i < this->MaxSize; i ++) {
+  for (int i = 0; i < this->maximumSize; i ++) {
     if (this->selected[i]) {
       this->elements[cardinalitySelection] = i;
       this->cardinalitySelection ++;
@@ -2619,7 +2619,7 @@ void Selection::initNoMemoryAllocation() {
 }
 
 void Selection::makeSubSelection(Selection &theSelection, Selection &theSubSelection) {
-  this->initialize(theSelection.MaxSize);
+  this->initialize(theSelection.maximumSize);
   for (int i = 0; i < theSubSelection.cardinalitySelection; i ++) {
     this->addSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
   }
@@ -2629,8 +2629,8 @@ void Selection::operator=(const Selection& right) {
   if (this == &right) {
     return;
   }
-  if (this->MaxSize != right.MaxSize) {
-    this->initialize(right.MaxSize);
+  if (this->maximumSize != right.maximumSize) {
+    this->initialize(right.maximumSize);
   } else {
     this->initNoMemoryAllocation();
   }
@@ -2642,7 +2642,7 @@ void Selection::operator=(const Selection& right) {
 }
 
 unsigned int Selection::hashFunction() const {
-  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->MaxSize);
+  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->maximumSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
     if (this->selected[i]) {
@@ -2926,9 +2926,9 @@ void PartFraction::assignNoIndicesNonZeroMults(PartFraction& p) {
 void PartFraction::writeToFile(std::fstream& output) const {
   output << "Fraction_start: " << this->denominator.size << "\n";
   for (int j = 0; j < this->denominator.size; j ++) {
-    output << this->denominator[j].Multiplicities.size << " ";
-    for (int i = 0; i < this->denominator[j].Multiplicities.size; i ++) {
-      output << this->denominator[j].Multiplicities[i] << " " << this->denominator[j].Elongations[i] << " ";
+    output << this->denominator[j].multiplicities.size << " ";
+    for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
+      output << this->denominator[j].multiplicities[i] << " " << this->denominator[j].Elongations[i] << " ";
     }
   }
 }
@@ -2943,10 +2943,10 @@ void PartFraction::readFromFile(PartFractions& owner, std::fstream& input) {
   this->initialize(tempI);
   for (int j = 0; j < this->denominator.size; j ++) {
     input >> tempI;
-    this->denominator[j].Multiplicities.setSize(tempI);
+    this->denominator[j].multiplicities.setSize(tempI);
     this->denominator[j].Elongations.setSize(tempI);
-    for (int i = 0; i < this->denominator[j].Multiplicities.size; i ++) {
-      input >> this->denominator[j].Multiplicities[i] >> this->denominator[j].Elongations[i];
+    for (int i = 0; i < this->denominator[j].multiplicities.size; i ++) {
+      input >> this->denominator[j].multiplicities[i] >> this->denominator[j].Elongations[i];
     }
   }
   this->computeIndicesNonZeroMultiplicities();
@@ -3019,8 +3019,8 @@ void PartFraction::prepareFraction(
   Polynomial<LargeInteger>& outputCommonCoeff
 ) {
   output.assignNoIndicesNonZeroMults(*this);
-  int powerDropA = this->denominator[indexA].Multiplicities[0];
-  int powerDropB = this->denominator[indexB].Multiplicities[0];
+  int powerDropA = this->denominator[indexA].multiplicities[0];
+  int powerDropB = this->denominator[indexB].multiplicities[0];
   if (indexAisNullified) {
     powerDropB = 0;
   } else {
@@ -3041,7 +3041,7 @@ int PartFraction::getNumberProportionalVectorsClassicalRootSystems(PartFractions
     int tempI = owner.IndicesRedundantShortRoots.elements[i];
     int tempI2 = owner.getIndexDoubleOfARoot(owner.startingVectors[tempI]);
     if (tempI2 != - 1) {
-      if (this->denominator[tempI2].Multiplicities.size > 0) {
+      if (this->denominator[tempI2].multiplicities.size > 0) {
         result ++;
       }
     }
@@ -3053,7 +3053,7 @@ int PartFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& own
   int result = owner.startingVectors.size;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     int tempI = this->IndicesNonZeroMults[i];
-    if (this->denominator[tempI].Multiplicities.size > 0) {
+    if (this->denominator[tempI].multiplicities.size > 0) {
       if (tempI >= minIndex && tempI < result) {
         result = tempI;
       }
@@ -3178,7 +3178,7 @@ bool PartFraction::reduceMeOnce(
   while (hasImprovement) {
     hasImprovement = false;
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-      for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
+      for (int j = 0; j < this->denominator[IndicesNonZeroMults[i]].multiplicities.size; j ++) {
         this->denominator[IndicesNonZeroMults[i]].GetPolynomialDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
         outputCoeff.divideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
         if (remainderDivision.isEqualToZero()) {
@@ -3242,13 +3242,13 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
   totalMultiplicity = 0;
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     int tempI = this->denominator[theSelectedIndices[i]].getMultiplicityLargestElongation() - 1;
-    TheBigBadIndexingSet.MaxMultiplicities[i] = tempI;
+    TheBigBadIndexingSet.capacities[i] = tempI;
     totalMultiplicity += tempI;
   }
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
-    int oldMaxMultiplicity = TheBigBadIndexingSet.MaxMultiplicities[i];
-    TheBigBadIndexingSet.MaxMultiplicities[i] = 0;
+    int oldMaxMultiplicity = TheBigBadIndexingSet.capacities[i];
+    TheBigBadIndexingSet.capacities[i] = 0;
     int NumSubsets = TheBigBadIndexingSet.totalNumberSubsetsSmallInt();
     for (int j = 0; j < NumSubsets; j ++) {
       tempFrac.assign(*this);
@@ -3257,7 +3257,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
       for (int k = 0; k < theSelectedIndices.size; k ++) {
         int multiplicityChange;
         if (k != i) {
-          multiplicityChange = TheBigBadIndexingSet.Multiplicities[k];
+          multiplicityChange = TheBigBadIndexingSet.multiplicities[k];
         } else {
           multiplicityChange = oldMaxMultiplicity + 1;
         }
@@ -3286,7 +3286,7 @@ void PartFraction::applyGeneralizedSzenesVergneFormula(
       output.addMonomial(tempFrac, ComputationalBufferCoefficient);
       TheBigBadIndexingSet.incrementReturnFalseIfPastLast();
     }
-    TheBigBadIndexingSet.MaxMultiplicities[i] = oldMaxMultiplicity;
+    TheBigBadIndexingSet.capacities[i] = oldMaxMultiplicity;
   }
 }
 
@@ -3340,8 +3340,8 @@ void PartFraction::decomposeAMinusNB(
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> AminusNbetaPoly, commonPoly;
   this->getAlphaMinusNBetaPoly(owner, indexA, indexB, n, AminusNbetaPoly);
-  int powerA = this->denominator[indexA].Multiplicities[0];
-  int powerB = this->denominator[indexB].Multiplicities[0];
+  int powerA = this->denominator[indexA].multiplicities[0];
+  int powerB = this->denominator[indexB].multiplicities[0];
   output.makeZero();
   this->prepareFraction(indexA, indexB, indexAminusNB, true, tempFrac, AminusNbetaPoly, commonPoly);
   for (int i = powerB; i >= 1; i --) {
@@ -3377,7 +3377,7 @@ bool PartFraction::decreasePowerOneFraction(int index, int increment) {
 void PartFraction::computeIndicesNonZeroMultiplicities() {
   this->IndicesNonZeroMults.size = 0;
   for (int i = 0; i < this->denominator.size; i ++) {
-    if (this->denominator[i].Multiplicities.size > 0) {
+    if (this->denominator[i].multiplicities.size > 0) {
       this->IndicesNonZeroMults.addOnTop(i);
     }
   }
@@ -3489,7 +3489,7 @@ void PartFraction::initialize(int numRoots) {
   this->denominator.setSize(numRoots);
   for (int i = 0; i < this->denominator.size; i ++) {
     this->denominator[i].Elongations.setSize(0);
-    this->denominator[i].Multiplicities.setSize(0);
+    this->denominator[i].multiplicities.setSize(0);
   }
 }
 
@@ -3816,21 +3816,21 @@ void PartFraction::reduceMonomialByMonomial(PartFractions& owner, int myIndex, V
 
       }
       for (int i = 0; i <matLinComb.numberOfRows; i ++) {
-        thePowers.MaxMultiplicities[i] = 0;
+        thePowers.capacities[i] = 0;
         if (matLinComb.elements[i][0].isGreaterThanOrEqualTo(1) || matLinComb.elements[i][0].isNegative()) {
           int tempI = matLinComb.elements[i][0].floorIfSmall();
           thePowersSigned[i] = tempI;
           if (tempI<0)
-            thePowers.MaxMultiplicities[i] = this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
+            thePowers.capacities[i] = this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation();
           else
-            thePowers.MaxMultiplicities[i] =MathRoutines::minimum(tempI, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
+            thePowers.capacities[i] =MathRoutines::minimum(tempI, this->objects[this->IndicesNonZeroMults[i]].getMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
           tempRoot*=(thePowersSigned[i]*this->objects[this->IndicesNonZeroMults[i]].getLargestElongation());
           tempMon-= tempRoot;
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempMon.ComputeDebugString();
         } else {
-          thePowers.Multiplicities[i] = 0;
+          thePowers.multiplicities[i] = 0;
           thePowersSigned[i] = 0;
         }
       }
@@ -3894,15 +3894,15 @@ void PartFraction::reduceMonomialByMonomialModifyOneMonomial(
   Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.getElement();
   theNumerator.makeZero(Accum.AmbientDimension);
   theNumerator.addMonomial(input, inputCoeff);
-  if (thePowersSigned.size != thePowers.Multiplicities.size)
+  if (thePowersSigned.size != thePowers.multiplicities.size)
     global.fatal << global.fatal;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
    // theNumerator.ComputeDebugString();
   }
-  for (int j = 0; j < thePowers.Multiplicities.size; j ++) {
+  for (int j = 0; j < thePowers.multiplicities.size; j ++) {
     int currentIndexInFraction = this->IndicesNonZeroMults[j];
     int currentElongation = this->objects[currentIndexInFraction].getLargestElongation();
-    int MultChange = thePowers.Multiplicities[j];
+    int MultChange = thePowers.multiplicities[j];
     int MaxMultchange = this->objects[currentIndexInFraction].getMultiplicityLargestElongation();
     Vector<Rational> tempRoot;
     tempRoot = Accum.startingVectors[currentIndexInFraction];
@@ -4330,15 +4330,15 @@ void PartFractions::computeKostantFunctionFromWeylGroup(
   Vectors<Rational> theVPbasis;
   Vector<Rational> tempWeight; tempWeight.setSize(WeylGroupNumber);
   WeylGroupData tempW;
-  tempW.MakeArbitrarySimple(WeylGroupLetter, WeylGroupNumber);
-  tempW.ComputeRho(true);
+  tempW.makeArbitrarySimple(WeylGroupLetter, WeylGroupNumber);
+  tempW.computeRho(true);
   theVPbasis = tempW.RootsOfBorel;
   if (WeylGroupLetter == 'B') {
     for (int i = 0; i < theVPbasis.size; i ++) {
       Rational tempRat;
       Vector<Rational> tempRoot;
       tempRoot = theVPbasis[i];
-      tempW.RootScalarCartanRoot(tempRoot, tempRoot, tempRat);
+      tempW.rootScalarCartanRoot(tempRoot, tempRoot, tempRat);
       if (tempRat.isEqualToOne()) {
         theVPbasis.addOnTop(tempW.RootsOfBorel[i] * 2);
       }
@@ -4384,7 +4384,7 @@ void PartFractions::computeKostantFunctionFromWeylGroup(
 }
 
 void OnePartialFractionDenominator::operator=(OnePartialFractionDenominator& right) {
-  this->Multiplicities = right.Multiplicities;
+  this->multiplicities = right.multiplicities;
   this->Elongations = right.Elongations;
 }
 
@@ -4395,7 +4395,7 @@ unsigned int OnePartialFractionDenominator::hashFunction() const {
 void OnePartialFractionDenominator::GetPolynomialDenominator(
   Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent
 ) {
-  if (MultiplicityIndex >= this->Multiplicities.size) {
+  if (MultiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
   MonomialP tempM;
@@ -4434,7 +4434,7 @@ int OnePartialFractionDenominator::getLeastCommonMultipleElongations() {
 int OnePartialFractionDenominator::getTotalMultiplicity() const {
   int result = 0;
   for (int i = 0; i < this->Elongations.size; i ++) {
-    result += this->Multiplicities[i];
+    result += this->multiplicities[i];
   }
   return result;
 }
@@ -4451,7 +4451,7 @@ int OnePartialFractionDenominator::indexLargestElongation() {
 
 void OnePartialFractionDenominator::initialize() {
   this->Elongations.setSize(0);
-  this->Multiplicities.setSize(0);
+  this->multiplicities.setSize(0);
 }
 
 void OnePartialFractionDenominator::computeOneCheckSum(
@@ -4481,7 +4481,7 @@ void OnePartialFractionDenominator::computeOneCheckSum(
       tempS = tempRat.toString();
     }
     tempRat -= tempRat2;
-    tempRat.raiseToPower(this->Multiplicities[i]);
+    tempRat.raiseToPower(this->multiplicities[i]);
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
       tempS = tempRat.toString();
     }
@@ -4502,7 +4502,7 @@ int OnePartialFractionDenominator::getMultiplicityLargestElongation() {
   for (int i = 0; i < this->Elongations.size; i ++) {
     if (LargestElongationFound< this->Elongations[i]) {
       LargestElongationFound = this->Elongations[i];
-      result = this->Multiplicities[i];
+      result = this->multiplicities[i];
     }
   }
   return result;
@@ -4516,15 +4516,15 @@ void OnePartialFractionDenominator::addMultiplicity(int MultiplicityIncrement, i
   if (ElongationIndex == - 1) {
     this->Elongations.addOnTop(Elongation);
     int tempI = 0;
-    this->Multiplicities.addOnTop(tempI);
-    ElongationIndex = this->Multiplicities.size - 1;
+    this->multiplicities.addOnTop(tempI);
+    ElongationIndex = this->multiplicities.size - 1;
   }
-  this->Multiplicities[ElongationIndex] += MultiplicityIncrement;
-  if (!(this->Multiplicities[ElongationIndex] >= 0)) {
+  this->multiplicities[ElongationIndex] += MultiplicityIncrement;
+  if (!(this->multiplicities[ElongationIndex] >= 0)) {
     global.fatal << "Multiplicity is supposed to be positive. " << global.fatal;
   }
-  if (this->Multiplicities[ElongationIndex] == 0) {
-    this->Multiplicities.popIndexSwapWithLast(ElongationIndex);
+  if (this->multiplicities[ElongationIndex] == 0) {
+    this->multiplicities.popIndexSwapWithLast(ElongationIndex);
     this->Elongations.popIndexSwapWithLast(ElongationIndex);
   }
 }
@@ -4573,8 +4573,8 @@ void OnePartialFractionDenominator::oneFractionToStringBasisChange(
     }
   }
   out << ")";
-  if (this->Multiplicities[indexElongation] > 1) {
-    out << "^" << this->Multiplicities[indexElongation];
+  if (this->multiplicities[indexElongation] > 1) {
+    out << "^" << this->multiplicities[indexElongation];
   }
   if (LatexFormat) {
     out << "}";
@@ -4583,12 +4583,12 @@ void OnePartialFractionDenominator::oneFractionToStringBasisChange(
 }
 
 std::string OnePartialFractionDenominator::toString() {
-  if (this->Multiplicities.size == 0) {
+  if (this->multiplicities.size == 0) {
     return "";
   }
   std::stringstream out;
   std::string tempS;
-  for (int k = 0; k < this->Multiplicities.size; k ++) {
+  for (int k = 0; k < this->multiplicities.size; k ++) {
     //this->oneFractionToStringBasisChange(owner, k, VarChange, UsingVarChange, tempS, LatexFormat, index, theDimension, PolyFormatLocal);
     out << tempS;
   }
@@ -4604,7 +4604,7 @@ bool OnePartialFractionDenominator::operator==(OnePartialFractionDenominator& ri
     bool Found = false;
     for (int j = 0; j < right.Elongations.size; j ++) {
       if (this->Elongations[i] == right.Elongations[j]) {
-        if (this->Multiplicities[i] != right.Multiplicities[j]) {
+        if (this->multiplicities[i] != right.multiplicities[j]) {
           return false;
         } else {
           Found = true;
@@ -4692,16 +4692,16 @@ int PartFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot) {
 }
 
 void SelectionWithDifferentMaxMultiplicities::initPart1(int NumElements) {
-  this->Multiplicities.initializeFillInObject(NumElements, 0);
-  this->MaxMultiplicities.initializeFillInObject(NumElements,0);
+  this->multiplicities.initializeFillInObject(NumElements, 0);
+  this->capacities.initializeFillInObject(NumElements,0);
   this->elements.reserve(NumElements);
   this->elements.size = 0;
 }
 
 void SelectionWithMultiplicities::initWithMultiplicities(int NumElements) {
-  this->Multiplicities.setSize(NumElements);
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    this->Multiplicities[i] = 0;
+  this->multiplicities.setSize(NumElements);
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    this->multiplicities[i] = 0;
   }
   this->elements.reserve(NumElements);
   this->elements.size = 0;
@@ -4711,27 +4711,27 @@ void SelectionWithMultiplicities::toString(std::string& output) {
   std::stringstream out;
   for (int i = 0; i < this->elements.size; i ++) {
     out << "Index: " << this->elements[i] << "\nMultiplicity: "
-    << this->Multiplicities[this->elements[i]];
+    << this->multiplicities[this->elements[i]];
   }
   output = out.str();
 }
 
 void SelectionWithMaxMultiplicity::initMaxMultiplicity(int NumElements, int MaxMult) {
   this->::SelectionWithMultiplicities::initWithMultiplicities(NumElements);
-  this->MaxMultiplicity =MaxMult;
+  this->maximumMultiplicity =MaxMult;
 }
 
 int ::SelectionWithMaxMultiplicity::cardinalitySelectionWithMultiplicities() {
   int result = 0;
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    result += this->Multiplicities[i];
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    result += this->multiplicities[i];
   }
   return result;
 }
 
 bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
   for (int i = 0; i < this->elements.size; i ++) {
-    if (this->Multiplicities[elements[i]] > 1) {
+    if (this->multiplicities[elements[i]] > 1) {
       return false;
     }
   }
@@ -4739,70 +4739,70 @@ bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
 }
 
 void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(int Cardinality) {
-  if (Cardinality < 1 || Cardinality > this->MaxMultiplicity * this->Multiplicities.size) {
+  if (Cardinality < 1 || Cardinality > this->maximumMultiplicity * this->multiplicities.size) {
     return;
   }
   if (this->cardinalitySelectionWithMultiplicities() != Cardinality) {
-    this->Multiplicities.initializeFillInObject(this->Multiplicities.size, 0);
+    this->multiplicities.initializeFillInObject(this->multiplicities.size, 0);
   }
   if (this->cardinalitySelectionWithMultiplicities() == 0) {
-    for (int i = this->Multiplicities.size - 1; Cardinality > 0; i --) {
-      if (Cardinality >= this->MaxMultiplicity) {
-        this->Multiplicities[i] = this->MaxMultiplicity;
+    for (int i = this->multiplicities.size - 1; Cardinality > 0; i --) {
+      if (Cardinality >= this->maximumMultiplicity) {
+        this->multiplicities[i] = this->maximumMultiplicity;
       } else {
-        this->Multiplicities[i] = Cardinality;
+        this->multiplicities[i] = Cardinality;
       }
-      Cardinality -= this->Multiplicities[i];
+      Cardinality -= this->multiplicities[i];
     }
     this->computeElements();
     return;
   }
   int firstNonZeroMult;
   int currentCardinality = Cardinality;
-  for (firstNonZeroMult = this->Multiplicities.size - 1; firstNonZeroMult >= 0; firstNonZeroMult --) {
-    if (this->Multiplicities[firstNonZeroMult] > 0) {
+  for (firstNonZeroMult = this->multiplicities.size - 1; firstNonZeroMult >= 0; firstNonZeroMult --) {
+    if (this->multiplicities[firstNonZeroMult] > 0) {
       break;
     }
   }
   if (firstNonZeroMult == 0) {
     return;
   }
-  currentCardinality -= this->Multiplicities[firstNonZeroMult];
-  this->Multiplicities[firstNonZeroMult] = 0;
+  currentCardinality -= this->multiplicities[firstNonZeroMult];
+  this->multiplicities[firstNonZeroMult] = 0;
   for (int i = firstNonZeroMult - 1; i >= 0; i --) {
-    if (this->Multiplicities[i] < this->MaxMultiplicity) {
-      this->Multiplicities[i] ++;
+    if (this->multiplicities[i] < this->maximumMultiplicity) {
+      this->multiplicities[i] ++;
       currentCardinality ++;
       break;
     } else {
-      this->Multiplicities[i] = 0;
-      currentCardinality -= this->MaxMultiplicity;
+      this->multiplicities[i] = 0;
+      currentCardinality -= this->maximumMultiplicity;
     }
   }
-  for (int i = this->Multiplicities.size - 1; currentCardinality < Cardinality; i --) {
-    if (this->Multiplicities[i] != 0) {
+  for (int i = this->multiplicities.size - 1; currentCardinality < Cardinality; i --) {
+    if (this->multiplicities[i] != 0) {
       global.fatal << "Non-zero multiplicities not implemented here. " << global.fatal;
     }
-    if (Cardinality - currentCardinality >= this->MaxMultiplicity) {
-      this->Multiplicities[i] = this->MaxMultiplicity;
+    if (Cardinality - currentCardinality >= this->maximumMultiplicity) {
+      this->multiplicities[i] = this->maximumMultiplicity;
     } else {
-      this->Multiplicities[i] = Cardinality - currentCardinality;
+      this->multiplicities[i] = Cardinality - currentCardinality;
     }
-    currentCardinality += this->Multiplicities[i];
+    currentCardinality += this->multiplicities[i];
   }
   this->computeElements();
 }
 
 int ::SelectionWithMaxMultiplicity::numberOfCombinationsOfCardinality(int cardinality) {
   //this function needs a complete rewrite;
-  return ::MathRoutines::nChooseK(this->Multiplicities.size + cardinality - 1, cardinality);
+  return ::MathRoutines::nChooseK(this->multiplicities.size + cardinality - 1, cardinality);
 }
 
 LargeInteger SelectionWithMaxMultiplicity::getTotalCombinationCount() const {
-  //if (this->MaxMultiplicity == 0)
+  //if (this->maximumMultiplicity == 0)
   //  return 1;
   LargeInteger result;
-  MathRoutines::kToTheNth(this->MaxMultiplicity + 1, this->Multiplicities.size, result);
+  MathRoutines::kToTheNth(this->maximumMultiplicity + 1, this->multiplicities.size, result);
   return result;
 }
 
@@ -4812,15 +4812,15 @@ bool SelectionWithMaxMultiplicity::incrementReturnFalseIfPastLast() {
 }
 
 void SelectionWithMaxMultiplicity::incrementSubset() {
-  for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
-    if (this->Multiplicities[i] < this->MaxMultiplicity) {
-      if (this->Multiplicities[i] == 0) {
+  for (int i = this->multiplicities.size - 1; i >= 0; i --) {
+    if (this->multiplicities[i] < this->maximumMultiplicity) {
+      if (this->multiplicities[i] == 0) {
         this->elements.addOnTop(i);
       }
-      this->Multiplicities[i] ++;
+      this->multiplicities[i] ++;
       return;
     } else {
-      this->Multiplicities[i] = 0;
+      this->multiplicities[i] = 0;
       this->elements.removeFirstOccurenceSwapWithLast(i);
     }
   }
@@ -4828,8 +4828,8 @@ void SelectionWithMaxMultiplicity::incrementSubset() {
 
 void SelectionWithMultiplicities::computeElements() {
   this->elements.size = 0;
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    if (this->Multiplicities[i] > 0) {
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    if (this->multiplicities[i] > 0) {
       this->elements.addOnTop(i);
     }
   }
@@ -4841,8 +4841,8 @@ int SelectionWithMultiplicities::cardinalitySelectionWithoutMultiplicities() {
 
 int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
   int result = 1;
-  for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
-    result *= (this->MaxMultiplicities[i] + 1);
+  for (int i = 0; i < this->capacities.size; i ++) {
+    result *= (this->capacities[i] + 1);
     if (result < 0) {
       global.fatal << "This is a programming error: I was asked to enumerate "
       << "all subsets of a multi-set, however the number of subsets is larger than  "
@@ -4858,60 +4858,60 @@ int SelectionWithDifferentMaxMultiplicities::totalNumberSubsetsSmallInt() {
 
 LargeInteger SelectionWithDifferentMaxMultiplicities::totalNumberOfSubsets() {
   LargeInteger result = 1;
-  for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
-    result *= (this->MaxMultiplicities[i] + 1);
+  for (int i = 0; i < this->capacities.size; i ++) {
+    result *= (this->capacities[i] + 1);
   }
   return result;
 }
 
 void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int NumberMaxMults) {
-  this->Multiplicities.initializeFillInObject(NumberMaxMults, 0);
-  this->MaxMultiplicities.setSize(NumberMaxMults);
-  for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
-    this->MaxMultiplicities[i] = theMaxMults[i];
+  this->multiplicities.initializeFillInObject(NumberMaxMults, 0);
+  this->capacities.setSize(NumberMaxMults);
+  for (int i = 0; i < this->capacities.size; i ++) {
+    this->capacities[i] = theMaxMults[i];
   }
   this->elements.initializeFillInObject(NumberMaxMults, 0);
 }
 
 void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theMaxMults) {
-  this->Multiplicities.initializeFillInObject(theMaxMults.size, 0);
+  this->multiplicities.initializeFillInObject(theMaxMults.size, 0);
   this->elements.initializeFillInObject(theMaxMults.size, 0);
-  this->MaxMultiplicities = theMaxMults;
+  this->capacities = theMaxMults;
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::totalMultiplicity() {
   int result = 0;
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    result += this->Multiplicities[i];
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    result += this->multiplicities[i];
   }
   return result;
 }
 
 int ::SelectionWithDifferentMaxMultiplicities::maximumTotalMultiplicity() {
   int result = 0;
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    result += this->MaxMultiplicities[i];
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    result += this->capacities[i];
   }
   return result;
 }
 
 void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange() {
-  for (int i = 0; i < this->Multiplicities.size; i ++) {
-    this->Multiplicities[i] = 0;
+  for (int i = 0; i < this->multiplicities.size; i ++) {
+    this->multiplicities[i] = 0;
   }
 }
 
 bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast() {
   MacroRegisterFunctionWithName("SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast");
-  for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
-    if (this->Multiplicities[i] < this->MaxMultiplicities[i]) {
-      if (this->Multiplicities[i] == 0) {
+  for (int i = this->multiplicities.size - 1; i >= 0; i --) {
+    if (this->multiplicities[i] < this->capacities[i]) {
+      if (this->multiplicities[i] == 0) {
         this->elements.addOnTop(i);
       }
-      this->Multiplicities[i] ++;
+      this->multiplicities[i] ++;
       return true;
     } else {
-      this->Multiplicities[i] = 0;
+      this->multiplicities[i] = 0;
       this->elements.removeFirstOccurenceSwapWithLast(i);
     }
   }
@@ -5371,7 +5371,7 @@ LargeInteger DynkinType::getWeylGroupSizeByFormula() const {
   LargeInteger result = 1;
   LargeInteger tempLI;
   for (int i = 0; i < this->size(); i ++) {
-    tempLI = WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
+    tempLI = WeylGroupData::sizeByFormulaOrNegative1((*this)[i].theLetter, (*this)[i].theRank);
     tempLI.raiseToPower(this->getMultiplicity(i));
     result *= tempLI;
   }
@@ -6147,16 +6147,16 @@ void ElementWeylGroupAutomorphisms::multiplyOnTheRightByOuterAuto(int outerAutoI
   this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
-void ElementWeylGroupAutomorphisms::MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl) {
+void ElementWeylGroupAutomorphisms::makeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl) {
   this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.setSize(1);
-  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
+  this->generatorsLastAppliedFirst[0].makeSimpleReflection(simpleRootIndex);
 }
 
-void ElementWeylGroupAutomorphisms::MakeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl) {
+void ElementWeylGroupAutomorphisms::makeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl) {
   this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.setSize(1);
-  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
+  this->generatorsLastAppliedFirst[0].makeOuterAuto(outerAutoIndex);
 }
 
 
@@ -6234,7 +6234,7 @@ bool ElementWeylGroup::checkInitialization() const {
   return true;
 }
 
-int ElementWeylGroup::Sign() const {
+int ElementWeylGroup::sign() const {
   return this->generatorsLastAppliedFirst.size % 2 == 0 ? 1 : - 1;
 }
 
@@ -6306,26 +6306,26 @@ bool ElementWeylGroup::isIdentity() {
 void ElementWeylGroup::MakeRootReflection(
   const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
 ) {
-  *this = inputWeyl.GetRootReflection(inputWeyl.RootSystem.getIndexNoFail(mustBeRoot));
+  *this = inputWeyl.getRootReflection(inputWeyl.RootSystem.getIndexNoFail(mustBeRoot));
 }
 
-void ElementWeylGroup::MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {
+void ElementWeylGroup::makeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {
   this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.setSize(1);
-  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
+  this->generatorsLastAppliedFirst[0].makeSimpleReflection(simpleRootIndex);
 }
 
-void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
+void ElementWeylGroup::makeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl) {
   this->owner = &inputWeyl;
   int theRank = this->owner->getDimension();
   this->generatorsLastAppliedFirst.setSize(0);
   Vector<Rational> theVector = inputRhoImage;
-  SimpleReflection theGen;
+  simpleReflection theGen;
   while (theVector != this->owner->rho) {
     for (int i = 0; i < theRank; i ++) {
-      if (this->owner->GetScalarProdSimpleRoot(theVector, i) < 0) {
+      if (this->owner->getScalarProductSimpleRoot(theVector, i) < 0) {
         this->owner->reflectSimple(i, theVector);
-        theGen.MakeSimpleReflection(i);
+        theGen.makeSimpleReflection(i);
         this->generatorsLastAppliedFirst.addOnTop(theGen);
         break;
       }
@@ -6337,11 +6337,11 @@ void ElementWeylGroup::makeCanonical() {
   MacroRegisterFunctionWithName("ElementWeylGroup::makeCanonical");
   this->checkInitialization();
   if (this->owner->rho.size == 0) {
-    this->owner->ComputeRho(false);
+    this->owner->computeRho(false);
   }
   Vector<Rational> theVector;
   this->owner->actOn(*this, this->owner->rho, theVector);
-  this->MakeFromRhoImage(theVector, *this->owner);
+  this->makeFromRhoImage(theVector, *this->owner);
 }
 
 bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
@@ -6371,7 +6371,7 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
   return false;
 }
 
-std::string ElementWeylGroup::ToStringInvariants(FormatExpressions* theFormat) const {
+std::string ElementWeylGroup::toStringInvariants(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::getCycleStructure");
   (void) theFormat;
   VectorSparse<Rational> theCycleStructure;
@@ -6455,12 +6455,12 @@ bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
 }
 
 void ElementWeylGroup::multiplyOnTheRightBySimpleReflection(int reflectionIndex) {
-  SimpleReflection theGen;
-  theGen.MakeSimpleReflection(reflectionIndex);
+  simpleReflection theGen;
+  theGen.makeSimpleReflection(reflectionIndex);
   this->generatorsLastAppliedFirst.addOnTop(theGen);
 }
 
-void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
+void WeylGroupData::simpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
   Rational coefficient, tempRat;
   coefficient.assign(DualSpaceElement[index]);
   coefficient.divideBy(this->cartanSymmetric.elements[index][index]);
@@ -6471,14 +6471,14 @@ void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualS
   }
 }
 
-ElementWeylGroup WeylGroupData::GetRootReflection(int rootIndex) {
+ElementWeylGroup WeylGroupData::getRootReflection(int rootIndex) {
   if (this->rho.size == 0) {
-    this->ComputeRho(true);
+    this->computeRho(true);
   }
   Vector<Rational> rhoImage;
-  this->ReflectBetaWRTAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
+  this->reflectBetaWithRespectToAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
   ElementWeylGroup result;
-  result.MakeFromRhoImage(rhoImage, *this);
+  result.makeFromRhoImage(rhoImage, *this);
   return result;
 }
 
@@ -6503,7 +6503,7 @@ void WeylGroupData::reflectSimple(
   theRoot[index] += alphaShift;
 }
 
-void WeylGroupData::SimpleReflectionRootAlg(
+void WeylGroupData::simpleReflectionRootPolynomial(
   int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction
 ) {
   int lengthA = this->cartanSymmetric.elements[index][index].numeratorShort;
@@ -6532,7 +6532,7 @@ Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(int elementIndex
 void WeylGroupData::reset() {
   this->FundamentalToSimpleCoords.initialize(0, 0);
   this->SimpleToFundamentalCoords.initialize(0, 0);
-  this->MatrixSendsSimpleVectorsToEpsilonVectors.freeMemory();
+  this->matrixSendsSimpleVectorsToEpsilonVectors.freeMemory();
   this->flagFundamentalToSimpleMatricesAreComputed = false;
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
@@ -6556,7 +6556,7 @@ void WeylGroupData::reset() {
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
 }
 
-void WeylGroupData::ActOnAffineHyperplaneByGroupElement(
+void WeylGroupData::actOnAffineHyperplaneByGroupElement(
   int index, AffineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho
 ) {
   int numGens = this->theGroup.theElements[index].generatorsLastAppliedFirst.size;
@@ -6567,7 +6567,7 @@ void WeylGroupData::ActOnAffineHyperplaneByGroupElement(
       RhoAction,
       UseMinusRho
     );
-    this->SimpleReflectionDualSpace(
+    this->simpleReflectionDualSpace(
       this->theGroup.theElements[index].generatorsLastAppliedFirst[numGens - i - 1].index,
       output.normal
     );
@@ -6585,34 +6585,34 @@ bool WeylGroupData::getWordByFormulaImplementation(
   return true;
 }
 
-void WeylGroupData::GetSignCharacter(Vector<Rational>& out) {
+void WeylGroupData::getSignCharacter(Vector<Rational>& out) {
   if (!this->theGroup.flagCCRepresentativesComputed) {
     this->theGroup.computeConjugacyClassSizesAndRepresentatives();
   }
-  out.setSize(this->theGroup.ConjugacyClassCount());
-  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
-    out[i] = this->theGroup.conjugacyClasses[i].representative.Sign();
+  out.setSize(this->theGroup.conjugacyClassCount());
+  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
+    out[i] = this->theGroup.conjugacyClasses[i].representative.sign();
   }
 }
 
 /*
 // this is only used in one place.
-void SubgroupDataWeylGroup::GetSignCharacter(Vector<Rational>& out) {
-  MacroRegisterFunctionWithName("SubgroupRootReflections::GetSignCharacter");
-  this->theSubgroupData->theSubgroup->GetSignCharacter(out);
+void SubgroupDataWeylGroup::getSignCharacter(Vector<Rational>& out) {
+  MacroRegisterFunctionWithName("SubgroupRootReflections::getSignCharacter");
+  this->theSubgroupData->theSubgroup->getSignCharacter(out);
 //  if (!this->theSubgroup->flagCCRepresentativesComputed)
 //    this->theSubgroup->computeConjugacyClassSizesAndRepresentatives(0);
-//  out.setSize(this->theSubgroup->ConjugacyClassCount());
-//  for (int i = 0; i < this->theSubgroup->ConjugacyClassCount(); i ++)
+//  out.setSize(this->theSubgroup->conjugacyClassCount());
+//  for (int i = 0; i < this->theSubgroup->conjugacyClassCount(); i ++)
 //    out[i] = this->theSubgroup->conjugacyClasses[i].representative.Sign();
 }
 */
 
-void WeylGroupData::GetTrivialRepresentation(
+void WeylGroupData::getTrivialRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::GetTrivialRepresentation");
-  this->theGroup.CheckInitializationConjugacyClasses();
+  MacroRegisterFunctionWithName("WeylGroup::getTrivialRepresentation");
+  this->theGroup.checkInitializationConjugacyClasses();
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(1);
   for (int i = 0; i < this->getDimension(); i ++) {
@@ -6621,36 +6621,36 @@ void WeylGroupData::GetTrivialRepresentation(
   output.getCharacter();
 }
 
-void WeylGroupData::GetSignRepresentation(
+void WeylGroupData::getSignRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::GetSignRepresentation");
-  this->theGroup.CheckInitializationConjugacyClasses();
+  MacroRegisterFunctionWithName("WeylGroup::getSignRepresentation");
+  this->theGroup.checkInitializationConjugacyClasses();
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(1);
   ElementWeylGroup currentElt;
   for (int i = 0; i < this->getDimension(); i ++) {
-    currentElt.MakeSimpleReflection(i, *this);
+    currentElt.makeSimpleReflection(i, *this);
     output.generatorS[i].makeIdentityMatrix(1);
-    output.generatorS[i] *= currentElt.Sign();
+    output.generatorS[i] *= currentElt.sign();
   }
   output.getCharacter();
 }
 
-void WeylGroupData::GetStandardRepresentation(
+void WeylGroupData::getStandardRepresentation(
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational>& output
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
-  this->theGroup.CheckInitializationConjugacyClasses();
+  MacroRegisterFunctionWithName("WeylGroup::getStandardRepresentation");
+  this->theGroup.checkInitializationConjugacyClasses();
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(this->getDimension());
   for (int i = 0; i < this->getDimension(); i ++) {
-    this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
+    this->getSimpleReflectionMatrix(i, output.generatorS[i]);
   }
   output.getCharacter();
 }
 
-void WeylGroupData::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const {
+void WeylGroupData::getStandardRepresentationMatrix(int g, Matrix<Rational>& output) const {
   // the rank is the number of rows of the Cartan form
   output.initialize(this->cartanSymmetric.numberOfRows,this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
@@ -6663,7 +6663,7 @@ void WeylGroupData::GetStandardRepresentationMatrix(int g, Matrix<Rational>& out
   }
 }
 
-void WeylGroupData::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output) {
+void WeylGroupData::generateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output) {
   output = (input);
   Vector<Rational> tempRoot;
   for (int i = 0; i < output.size; i ++) {
@@ -6676,16 +6676,16 @@ void WeylGroupData::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vec
   }
 }
 
-void WeylGroupData::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational>& output) {
+void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(const Vector<Rational>& inputH, Vector<Rational>& output) {
   output = (inputH);
   int indexFirstNonRegular;
-  while (!this->IsRegular(output, &indexFirstNonRegular)) {
+  while (!this->isRegular(output, &indexFirstNonRegular)) {
     const Vector<Rational>& theBadRoot = this->RootSystem[indexFirstNonRegular];
     Rational maxMovement = 0;
     Rational tempRat1, tempRat2, tempMaxMovement;
     for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-      this->RootScalarCartanRoot(theBadRoot, this->RootsOfBorel[i], tempRat1);
-      this->RootScalarCartanRoot(output, this->RootsOfBorel[i], tempRat2);
+      this->rootScalarCartanRoot(theBadRoot, this->RootsOfBorel[i], tempRat1);
+      this->rootScalarCartanRoot(output, this->RootsOfBorel[i], tempRat2);
       if ((!tempRat1.isEqualToZero()) && (!tempRat2.isEqualToZero())) {
         tempMaxMovement = tempRat2 / tempRat1;
         tempMaxMovement.AssignAbsoluteValue();
@@ -6695,19 +6695,19 @@ void WeylGroupData::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& 
       }
     }
     int tempInt = 2;
-    if (this->RootScalarCartanRoot(theBadRoot, inputH).isNegative()) {
+    if (this->rootScalarCartanRoot(theBadRoot, inputH).isNegative()) {
       tempInt = - 2;
     }
     output += theBadRoot*maxMovement / tempInt;
   }
 }
 
-bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot) {
+bool WeylGroupData::isRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot) {
   if (indexFirstPerpendicularRoot != nullptr) {
     *indexFirstPerpendicularRoot = - 1;
   }
   for (int i = 0; i < this->RootSystem.size; i ++) {
-    if (this->RootScalarCartanRoot(input, this->RootSystem[i]).isEqualToZero()) {
+    if (this->rootScalarCartanRoot(input, this->RootSystem[i]).isEqualToZero()) {
       if (indexFirstPerpendicularRoot != nullptr) {
         *indexFirstPerpendicularRoot = i;
       }
@@ -6717,7 +6717,7 @@ bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicu
   return true;
 }
 
-LargeInteger WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
+LargeInteger WeylGroupData::sizeByFormulaOrNegative1(char weylLetter, int theDim) {
   //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
   if (
     weylLetter != 'A' &&
@@ -6728,7 +6728,7 @@ LargeInteger WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
     weylLetter != 'F' &&
     weylLetter != 'G'
   ) {
-    global.fatal << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << global.fatal;
+    global.fatal << "WeylGroupData::sizeByFormulaOrNegative1 called with impossible Weyl type: " << weylLetter << global.fatal;
   }
   LargeInteger theOutput = 1;
   if (weylLetter == 'A') {
@@ -6774,7 +6774,7 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
   return this->cartanSymmetric == other.cartanSymmetric && this->theDynkinType == other.theDynkinType;
 }
 
-void WeylGroupData::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
+void WeylGroupData::actOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
   const ElementWeylGroup& currentElt = this->theGroup.theElements[index];
   for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     this->reflectSimple(
@@ -6801,7 +6801,7 @@ void WeylGroupData::getCoCartanSymmetric(const Matrix<Rational>& input, Matrix<R
   }
 }
 
-void WeylGroupData::GenerateRootSystem() {
+void WeylGroupData::generateRootSystem() {
   Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.makeEiBasis(this->getDimension());
@@ -6825,13 +6825,13 @@ void WeylGroupData::GenerateRootSystem() {
   }
 }
 
-void WeylGroupData::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
+void WeylGroupData::actOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
   for (int i = this->theGroup.theElements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    this->SimpleReflectionRootAlg(this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
+    this->simpleReflectionRootPolynomial(this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
   }
 }
 
-void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
+void WeylGroupData::computeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
   this->theGroup.computeAllElements(false);
   output.size = 0;
   output.reserve(this->RootSystem.size / 2);
@@ -6842,7 +6842,7 @@ void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
   }
 }
 
-bool WeylGroupData::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right) {
+bool WeylGroupData::leftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right) {
   Vector<Rational> leftImage;
   leftImage = this->rho;
   Vector<Rational> rightImage;
@@ -6852,15 +6852,15 @@ bool WeylGroupData::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, E
   return (rightImage - leftImage).isPositiveOrZero() && !(rightImage - leftImage).isEqualToZero();
 }
 
-void WeylGroupData::ComputeRootsOfBorel(Vectors<Rational>& output) {
+void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
   output.size = 0;
   this->RootSystem.clear();
-  this->GenerateRootSystem();
+  this->generateRootSystem();
   output = this->RootsOfBorel;
 }
 
-std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
+std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
   (void) theFormat;//portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed) {
     return "<br>Conjugacy classes not computed";
@@ -6870,7 +6870,7 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool LoadCharTable" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  out << "bool loadCharacterTable" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << " output.characterTable.setExpectedSize(" << this->theGroup.getSize().toString() << "); output.characterTable.setSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G = &output;";
@@ -6900,8 +6900,8 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
   return out.str();
 }
 
-std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
+std::string WeylGroupData::toStringCppConjugacyClasses(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("WeylGroup::toStringCppConjugacyClasses");
   (void) theFormat;//portable way to avoid non-used parameter warning.
   if (!this->theGroup.flagCCRepresentativesComputed) {
     return "";
@@ -6911,19 +6911,19 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
-  out << "bool LoadConjugacyClasses" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
+  out << "bool loadConjugacyClasses" << this->theDynkinType.toString(&theFormatNoDynkinTypePlusesExponents)
   << "(WeylGroup& output)\n<br>{ ";
-  out << "output.ComputeRho(true);";
+  out << "output.computeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
   out << "\n<br>&nbsp;&nbsp;emptyClass.flagRepresentativeComputed = true;";
   out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses.initializeFillInObject("
   << this->theGroup.conjugacyClasses.size << ", emptyClass);";
-  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
+  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
     for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     }
-    out << "].representative.MakeFromReadableReflections(output, false, \"";
+    out << "].representative.makeFromReadableReflections(output, false, \"";
     for (int j = 0; j < this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size; j ++) {
       out << this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst[j].index + 1;
       if (j != this->theGroup.conjugacyClasses[i].representative.generatorsLastAppliedFirst.size - 1) {
@@ -6932,7 +6932,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
     }
     out << "\");";
   }
-  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
+  for (int i = 0; i < this->theGroup.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
     for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) { //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
@@ -6943,14 +6943,14 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   for (int i = 0; i < this->ccCarterLabels.size; i ++) {
     out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.addOnTop(\"" << this->ccCarterLabels[i] << "\");";
   }
-  out << "\n<br>&nbsp;&nbsp;output.LoadConjugacyClassesHelper();";
+  out << "\n<br>&nbsp;&nbsp;output.loadConjugacyClassesHelper();";
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
   return out.str();
 }
 
-std::string WeylGroupData::ToStringRootsAndRootReflections(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("WeylGroup::ToStringRootsAndRootReflections");
+std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("WeylGroup::toStringRootsAndRootReflections");
   (void) theFormat;//portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
   out << "<br>The root system has " << this->RootSystem.size << " elements.\n";
@@ -6983,7 +6983,7 @@ std::string WeylGroupData::toString(FormatExpressions* theFormat) {
   out << "<br>Size: " << this->theGroup.theElements.size << "\n";
   out << "Number of Vectors: " << this->RootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.toString() << "\n";
-  out << this->ToStringRootsAndRootReflections();
+  out << this->toStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->cartanSymmetric.toString();
   if (this->flagCharTableIsComputed) {
     out << "<br>Character table: ";
@@ -6991,12 +6991,12 @@ std::string WeylGroupData::toString(FormatExpressions* theFormat) {
   }
   out << this->theGroup.toStringConjugacyClasses(theFormat);
   out << this->theGroup.toStringElements(theFormat);
-  out << this->ToStringCppConjugacyClasses(theFormat);
-  out << this->ToStringCppCharTable(theFormat);
+  out << this->toStringCppConjugacyClasses(theFormat);
+  out << this->toStringCppCharTable(theFormat);
   return out.str();
 }
 
-bool WeylGroupData::IsAddmisibleDynkinType(char candidateLetter, int n) {
+bool WeylGroupData::isAddmisibleDynkinType(char candidateLetter, int n) {
   if (candidateLetter == 'A' && n > 0) {
     return true;
   }
@@ -7021,13 +7021,13 @@ bool WeylGroupData::IsAddmisibleDynkinType(char candidateLetter, int n) {
   return false;
 }
 
-void WeylGroupData::ComputeEpsilonMatrix() {
-  if (this->MatrixSendsSimpleVectorsToEpsilonVectors.isZeroPointer()) {
-    this->theDynkinType.getEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.getElement());
+void WeylGroupData::computeEpsilonMatrix() {
+  if (this->matrixSendsSimpleVectorsToEpsilonVectors.isZeroPointer()) {
+    this->theDynkinType.getEpsilonMatrix(this->matrixSendsSimpleVectorsToEpsilonVectors.getElement());
   }
 }
 
-void WeylGroupData::TransformToAdmissibleDynkinType(char inputLetter, int& outputRank) {
+void WeylGroupData::transformToAdmissibleDynkinType(char inputLetter, int& outputRank) {
   if (inputLetter == 'G') {
     outputRank = 2;
   }
@@ -7054,23 +7054,23 @@ void WeylGroupData::TransformToAdmissibleDynkinType(char inputLetter, int& outpu
   }
 }
 
-void WeylGroupData::ComputeCoCartanSymmetricFromCartanSymmetric() {
+void WeylGroupData::computeCoCartanSymmetricFromCartanSymmetric() {
   this->getCoCartanSymmetric(this->cartanSymmetric, this->coCartanSymmetric);
 }
 
-void WeylGroupData::MakeMeFromMyCartanSymmetric() {
+void WeylGroupData::makeMeFromMyCartanSymmetric() {
   this->reset();
-  this->GenerateRootSystem();
+  this->generateRootSystem();
   DynkinDiagramRootSubalgebra theDynkinTypeComputer;
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->cartanSymmetric.numberOfRows);
   theDynkinTypeComputer.computeDiagramTypeModifyInputRelative(simpleBasis, this->RootSystem, this->cartanSymmetric);
   theDynkinTypeComputer.getDynkinType(this->theDynkinType);
-  this->MakeFinalSteps();
+  this->makeFinalSteps();
 }
 
-void WeylGroupData::MakeFinalSteps() {
-  this->ComputeCoCartanSymmetricFromCartanSymmetric();
+void WeylGroupData::makeFinalSteps() {
+  this->computeCoCartanSymmetricFromCartanSymmetric();
 }
 
 void WeylGroupData::initializeGenerators() {
@@ -7080,16 +7080,16 @@ void WeylGroupData::initializeGenerators() {
     this->theGroup.generators[0].makeIdentity(*this);
   }
   for (int i = 0; i < this->getDimension(); i ++) {
-    this->theGroup.generators[i].MakeSimpleReflection(i, *this);
+    this->theGroup.generators[i].makeSimpleReflection(i, *this);
   }
 }
 
-void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
+void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
   this->reset();
   this->theDynkinType = inputType;
   this->theDynkinType.getCartanSymmetric(this->cartanSymmetric);
   this->theDynkinType.getCoCartanSymmetric(this->coCartanSymmetric);
-  this->MakeFinalSteps();
+  this->makeFinalSteps();
 
   // eventually, there will be formulas for all classical types
   List<char> letters;
@@ -7099,7 +7099,7 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
     if (ranks.size == 1) {
       if (letters[0] == 'A') {
         this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
-        this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
+        this->computeIrreducibleRepresentationsWithFormulasImplementation;
       }
     }
   }
@@ -7107,17 +7107,17 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
   this->theGroup.checkInitialization();
 }
 
-void WeylGroupData::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
+void WeylGroupData::makeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
   this->reset();
   this->theDynkinType = inputType;
   this->theDynkinType.getCartanSymmetricDefaultLengthKeepComponentOrder(this->cartanSymmetric);
-  this->MakeFinalSteps();
+  this->makeFinalSteps();
 }
 
-void WeylGroupData::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared) {
+void WeylGroupData::makeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared) {
   DynkinType inputType;
   inputType.makeSimpleType(WeylGroupLetter, n, firstCoRootLengthSquared);
-  this->MakeFromDynkinType(inputType);
+  this->makeFromDynkinType(inputType);
 }
 
 WeylGroupAutomorphisms::WeylGroupAutomorphisms() {
@@ -7132,19 +7132,19 @@ WeylGroupAutomorphisms::~WeylGroupAutomorphisms() {
   this->theWeyl = nullptr;
 }
 
-void WeylGroupAutomorphisms::ComputeOuterAutos() {
-  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::ComputeOuterAutos");
+void WeylGroupAutomorphisms::computeOuterAutomorphisms() {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::computeOuterAutomorphisms");
   this->checkInitialization();
   if (this->flagAllOuterAutosComputed) {
     return;
   }
-  this->ComputeOuterAutoGenerators();
-  this->theOuterAutos.GenerateElements(0);
+  this->computeOuterAutoGenerators();
+  this->theOuterAutos.generateElements(0);
   this->flagAllOuterAutosComputed = true;
 }
 
-void WeylGroupAutomorphisms::ComputeOuterAutoGenerators() {
-  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::ComputeOuterAutoGenerators");
+void WeylGroupAutomorphisms::computeOuterAutoGenerators() {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::computeOuterAutoGenerators");
   if (this->flagOuterAutosGeneratorsComputed) {
     return;
   }
@@ -7217,7 +7217,7 @@ LargeInteger WeylGroupData::getSizeByFormulaImplementation(FiniteGroup<ElementWe
   return W->theDynkinType.getWeylGroupSizeByFormula();
 }
 
-void WeylGroupData::GetWeylChamber(Cone& output) {
+void WeylGroupData::getWeylChamber(Cone& output) {
   Matrix<Rational> tempMat;
   tempMat = this->cartanSymmetric;
   tempMat.invert();
@@ -7226,7 +7226,7 @@ void WeylGroupData::GetWeylChamber(Cone& output) {
   output.createFromVertices(tempRoots);
 }
 
-void WeylGroupData::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output) {
+void WeylGroupData::getFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output) {
   Matrix<Rational> tempMat;
   tempMat = this->cartanSymmetric;
   Rational tempRat;
@@ -7239,12 +7239,12 @@ void WeylGroupData::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& 
   output.assignMatrixRows(tempMat);
 }
 
-void WeylGroupData::GetIntegralLatticeInSimpleCoordinates(Lattice& output) {
+void WeylGroupData::getIntegralLatticeInSimpleCoordinates(Lattice& output) {
   output.basisRationalForm= this->cartanSymmetric;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->getDimension(); i ++) {
     tempRoot.makeEi(this->getDimension(), i);
-    output.basisRationalForm.rowTimesScalar(i, 2 / this->RootScalarCartanRoot(tempRoot, tempRoot));
+    output.basisRationalForm.rowTimesScalar(i, 2 / this->rootScalarCartanRoot(tempRoot, tempRoot));
   }
   output.basisRationalForm.transpose();
   output.basisRationalForm.invert();
@@ -7252,26 +7252,26 @@ void WeylGroupData::GetIntegralLatticeInSimpleCoordinates(Lattice& output) {
   output.reduce();
 }
 
-Rational WeylGroupData::GetKillingDivTraceRatio() {
+Rational WeylGroupData::getKillingDividedByTraceRatio() {
   Rational result = 0;
   Rational tempRat;
   for (int i = 0; i < this->RootSystem.size; i ++) {
-    tempRat = this->RootScalarCartanRoot(this->RootSystem[i], this->RootSystem[0]);
+    tempRat = this->rootScalarCartanRoot(this->RootSystem[i], this->RootSystem[0]);
     result += tempRat * tempRat;
   }
-  result /= this->RootScalarCartanRoot(this->RootSystem[0], this->RootSystem[0]);
+  result /= this->rootScalarCartanRoot(this->RootSystem[0], this->RootSystem[0]);
   return result;
 }
 
-void WeylGroupData::GetLongestWeylElt(ElementWeylGroup& outputWeylElt) {
-  this->ComputeRho(false);
+void WeylGroupData::getLongestWeylElt(ElementWeylGroup& outputWeylElt) {
+  this->computeRho(false);
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> tempRoots;
   tempRoots.makeEiBasis(this->getDimension());
-  this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
+  this->getLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
 }
 
-void WeylGroupData::GetExtremeElementInOrbit(
+void WeylGroupData::getExtremeElementInOrbit(
   Vector<Rational>& inputOutput,
   ElementWeylGroup* outputWeylElt,
   Vectors<Rational>& bufferEiBAsis,
@@ -7297,7 +7297,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
     found = false;
     for (int i = 0; i < this->getDimension(); i ++) {
       bool shouldApplyReflection = false;
-      theScalarProd = this->RootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
+      theScalarProd = this->rootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
       if (findLowest) {
         shouldApplyReflection = theScalarProd.isPositive();
       } else {
@@ -7318,7 +7318,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
           this->reflectMinusRhoSimple(i, inputOutput);
         }
         if (outputWeylElt != nullptr) {
-          eltSimplReflection.MakeSimpleReflection(i, *this);
+          eltSimplReflection.makeSimpleReflection(i, *this);
           *outputWeylElt = eltSimplReflection*(*outputWeylElt);
         }
         if (sign != nullptr) {
@@ -7342,9 +7342,9 @@ LargeInteger WeylGroupAutomorphisms::getOrbitSize(Vector<Rational>& theWeight) {
   return this->theWeyl->getOrbitSize(theWeight) * highestWeights.size;
 }
 
-bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input) {
+bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(const MatrixTensor<Rational>& input) {
   MacroRegisterFunctionWithName("WeylGroup::IsElementGroupOrOuterAuto");
-  this->ComputeOuterAutos();
+  this->computeOuterAutomorphisms();
   Vector<Rational> theRhoImage;
   input.actOnVectorColumn(this->theWeyl->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
@@ -7363,12 +7363,12 @@ bool WeylGroupAutomorphisms::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Ra
   return false;
 }
 
-void WeylGroupData::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output) {
+void WeylGroupData::getMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output) {
   Vectors<Rational> basis;
   int theDim = this->getDimension();
   basis.makeEiBasis(theDim);
   for (int i = 0; i < theDim; i ++) {
-    this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
+    this->reflectBetaWithRespectToAlpha(reflectionRoot, basis[i], false, basis[i]);
   }
   output.assignVectorsToRows(basis);
   output.transpose();
@@ -7376,7 +7376,7 @@ void WeylGroupData::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix
 
 void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2) {
   MacroRegisterFunctionWithName("WeylGroup::getCoxeterPlane");
-  this->ComputeRho(true);
+  this->computeRho(true);
   Vector<Rational> ZeroRoot;
   int theDimension = this->getDimension();
   if (theDimension < 2) {
@@ -7462,7 +7462,7 @@ void WeylGroupData::drawRootSystem(
     }
     return;
   }
-  this->ComputeRho(true);
+  this->computeRho(true);
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(theDimension);
   output.initDimensions(theDimension);
@@ -7492,8 +7492,8 @@ void WeylGroupData::drawRootSystem(
     for (int j = 0; j < theDimension; j ++) {
       tempRoot[j] = this->RootSystem[i][j].getDoubleValue();
     }
-    double Length1 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0]);
-    double Length2 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[1]);
+    double Length1 = this->rootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0]);
+    double Length2 = this->rootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[1]);
     lengths[i] = FloatingPoint::sqrtFloating(Length1 * Length1 + Length2 * Length2);
   }
   for (int i = 0; i < RootSystemSorted.size; i ++) {
@@ -7506,11 +7506,11 @@ void WeylGroupData::drawRootSystem(
   }
   Vector<Rational> differenceRoot;
   differenceRoot = RootSystemSorted[0] - RootSystemSorted[1];
-  Rational minLength = this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+  Rational minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
   for (int i = 2; i < RootSystemSorted.size; i ++) {
     differenceRoot = RootSystemSorted[0] - RootSystemSorted[i];
-    if (minLength > this->RootScalarCartanRoot(differenceRoot, differenceRoot)) {
-      minLength = this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+    if (minLength > this->rootScalarCartanRoot(differenceRoot, differenceRoot)) {
+      minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
     }
   }
   Rational tempRat;
@@ -7521,7 +7521,7 @@ void WeylGroupData::drawRootSystem(
   }
   if (drawWeylChamber) {
     Cone theWeylChamber;
-    this->GetWeylChamber(theWeylChamber);
+    this->getWeylChamber(theWeylChamber);
     FormatExpressions tempFormat;
     theWeylChamber.drawMeProjective(nullptr, false, outputDV, tempFormat);
   }
@@ -7532,7 +7532,7 @@ void WeylGroupData::drawRootSystem(
     output.drawCircleAtVectorBufferRational(RootSystemSorted[i], "#ff00ff", 2);
     for (int j = i + 1; j < RootSystemSorted.size; j ++) {
       differenceRoot = RootSystemSorted[i] - RootSystemSorted[j];
-      tempRat = this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+      tempRat = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength == tempRat) {
         output.drawLineBetweenTwoVectorsBufferRational(RootSystemSorted[i], RootSystemSorted[j], "blue", 1);
       }
@@ -7577,12 +7577,12 @@ void WeylGroupData::drawRootSystem(
     0,
     tempStream.str(),
     10,
-    static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0)),
+    static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0)),
     DrawingVariables::TextStyleNormal
   );
 }
 
-std::string WeylGroupData::GenerateWeightSupportMethoD1(
+std::string WeylGroupData::generateWeightSupportMethod1(
   Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights
 ) {
   HashedList<Vector<Rational> > theDominantWeights;
@@ -7599,7 +7599,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
   }
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.toString() << ".<br>";
   std::string tempS;
-  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS);
+  bool isTrimmed = !this->getAllDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS);
   out << tempS << "<br>";
   if (isTrimmed) {
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
@@ -7628,7 +7628,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1(
   return out.str();
 }
 
-bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input) {
+bool WeylGroupData::isEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input) {
   ElementWeylGroup tempElt;
   this->getCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt;
@@ -7640,7 +7640,7 @@ bool WeylGroupData::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
   return tempRoot == input;
 }
 
-Rational WeylGroupData::GetLongestRootLengthSquared() const {
+Rational WeylGroupData::getLongestRootLengthSquared() const {
   Rational result;
   result = this->cartanSymmetric(0, 0);
   for (int i = 1; i < this->cartanSymmetric.numberOfRows; i ++) {
@@ -7649,8 +7649,8 @@ Rational WeylGroupData::GetLongestRootLengthSquared() const {
   return result;
 }
 
-bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
-  MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroup");
+bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& input) {
+  MacroRegisterFunctionWithName("WeylGroup::isElementWeylGroup");
   Vector<Rational> theRhoImage;
   input.actOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
@@ -7661,7 +7661,7 @@ bool WeylGroupData::IsElementWeylGroup(const MatrixTensor<Rational>& input) {
   return theCandidateMat == inputMat;
 }
 
-bool WeylGroupData::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
+bool WeylGroupData::containsRootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
   for (int i = 0; i < this->theGroup.theElements.size; i ++) {
     if (this->isARoot(theVectors[i] + input)) {
       return true;
@@ -7683,7 +7683,7 @@ void WeylGroupData::getMatrixStandardRepresentation(const ElementWeylGroup& inpu
   }
 }
 
-int WeylGroupData::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
+int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input) {
   int result = 0;
   for (int i = 0; i < this->theGroup.theElements.size; i ++) {
     if (!Vector<Rational>::scalarProduct(theVectors[i], input, this->cartanSymmetric).isEqualToZero()) {
@@ -7693,9 +7693,9 @@ int WeylGroupData::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rat
   return result;
 }
 
-void WeylGroupData::ComputeRho(bool Recompute) {
+void WeylGroupData::computeRho(bool Recompute) {
   if (this->RootSystem.size == 0 || Recompute) {
-    this->GenerateRootSystem();
+    this->generateRootSystem();
   }
   this->rho.makeZero(this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->RootSystem.size; i ++) {
@@ -7709,10 +7709,10 @@ void WeylGroupData::ComputeRho(bool Recompute) {
   this->flagFundamentalToSimpleMatricesAreComputed = false;
 }
 
-std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringFromLayersAndArrows(
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringFromLayersAndArrows(
   List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringFromLayersAndArrows");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringFromLayersAndArrows");
   this->checkInitialization();
   std::stringstream out;
   List<int> DisplayIndicesSimpleGenerators;
@@ -7780,8 +7780,8 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   return out.str();
 }
 
-std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringBruhatGraph");
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringBruhatGraph() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringBruhatGraph");
   this->checkInitialization();
   if (this->allElements.size < 1) {
     return "Error, non-initialized group";
@@ -7807,7 +7807,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   HashedList<Vector<Rational> > orbit;
   orbit.reserve(this->allElements.size);
   for (int i = 0; i < this->allElements.size; i ++) {
-    this->ActByNonSimpleElement(i, this->AmbientWeyl->rho, tempRoot);
+    this->actByNonSimpleElement(i, this->AmbientWeyl->rho, tempRoot);
     orbit.addOnTop(tempRoot);
   }
   arrows.setSize(Layers.size);
@@ -7816,7 +7816,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
     for (int j = 0; j < Layers[i].size; j ++) {
       int indexOther = Layers[i][j];
       for (int k = 0; k < this->simpleRootsInner.size; k ++) {
-        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[k], orbit[indexOther], false, tempRoot);
+        this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[k], orbit[indexOther], false, tempRoot);
         int index = orbit.getIndex(tempRoot);
         if (index == - 1) {
           global.fatal << "Negative index not allowed. " << global.fatal;
@@ -7828,7 +7828,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       }
     }
   }
-  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
+  return this->toStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString(std::string& output, bool displayElements) {
@@ -7878,7 +7878,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
     head2 << "\\end{array}";
     out << HtmlRoutines::getMathMouseHover(head2.str());
   }
-  out << "<br>Half sum of the positive roots: " << this->GetRho().toString();
+  out << "<br>Half sum of the positive roots: " << this->getRho().toString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
     out << this->RootsOfBorel[i].toString();
@@ -7897,31 +7897,31 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
   output = out.str();
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MakeParabolicFromSelectionSimpleRoots(
-  WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::makeParabolicFromSelectionSimpleRoots(
+  WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, int upperLimitNumberOfElements
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::makeParabolicFromSelectionSimpleRoots");
   this->AmbientWeyl = &inputWeyl;
   this->checkInitialization();
   Vectors<Rational> selectedRoots;
-  selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize - ZeroesMeanSimpleRootSpaceIsInParabolic.cardinalitySelection);
-  if (this->AmbientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize) {
+  selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize - ZeroesMeanSimpleRootSpaceIsInParabolic.cardinalitySelection);
+  if (this->AmbientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize) {
     global.fatal << "This is a programming error: parabolic selection selects out of "
-    << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
+    << ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize
     << " elements while the Weyl group is of rank " << this->AmbientWeyl->getDimension() << ". " << global.fatal;
   }
-  for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i ++) {
+  for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize; i ++) {
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
       selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
     }
   }
   List<Vectors<Rational> > tempRootsCol;
-  return this->ComputeSubGroupFromGeneratingReflections(&selectedRoots, &tempRootsCol, UpperLimitNumElements, true);
+  return this->computeSubGroupFromGeneratingReflections(&selectedRoots, &tempRootsCol, upperLimitNumberOfElements, true);
 }
 
-std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ElementToStringCosetGraph");
+std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringCosetGraph() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toStringCosetGraph");
   this->checkInitialization();
   if (this->allElements.size < 1) {
     return "Error, non-initialized group";
@@ -7945,7 +7945,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   }
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->AmbientWeyl->rho;
-    this->AmbientWeyl->ActOnRootByGroupElement(
+    this->AmbientWeyl->actOnRootByGroupElement(
       this->AmbientWeyl->theGroup.theElements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
     );
   }
@@ -7954,7 +7954,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
     arrows[i].setSize(Layers[i].size);
     for (int j = 0; j < Layers[i].size; j ++) {
       for (int k = 0; k < this->RepresentativesQuotientAmbientOrder.size; k ++) {
-        if (this->AmbientWeyl->LeftIsHigherInBruhatOrderThanRight(
+        if (this->AmbientWeyl->leftIsHigherInBruhatOrderThanRight(
           this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]
         )) {
           if (
@@ -7967,11 +7967,11 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       }
     }
   }
-  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
+  return this->toStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives(int UpperLimit) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::FindQuotientRepresentatives");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives(int UpperLimit) {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::findQuotientRepresentatives");
   this->checkInitialization();
   this->AmbientWeyl->theGroup.computeAllElements(UpperLimit);
   Vector<Rational> image1;
@@ -7979,10 +7979,10 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
   this->RepresentativesQuotientAmbientOrder.reserve(this->AmbientWeyl->theGroup.theElements.size);
   for (int i = 0; i < this->AmbientWeyl->theGroup.theElements.size; i ++) {
     image1 = this->AmbientWeyl->rho;
-    this->AmbientWeyl->ActOnRootByGroupElement(i, image1, false, false);
+    this->AmbientWeyl->actOnRootByGroupElement(i, image1, false, false);
     bool isGood = true;
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      if (this->AmbientWeyl->RootScalarCartanRoot(image1, this->simpleRootsInner[j]).isNegative()) {
+      if (this->AmbientWeyl->rootScalarCartanRoot(image1, this->simpleRootsInner[j]).isNegative()) {
         isGood = false;
         break;
       }
@@ -7993,13 +7993,13 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
   }
 }
 
-bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::DrawContour(
+bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::drawContour(
   const Vector<Rational>& highestWeightSimpleCoord,
   DrawingVariables& theDV,
   const std::string& color,
   int UpperBoundVertices
 ) {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::DrawContour");
+  MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::drawContour");
   HashedList<Vector<Rational> > theOrbit;
   theOrbit.addOnTop(highestWeightSimpleCoord);
   WeylGroupData& theWeyl = *this->AmbientWeyl;
@@ -8007,7 +8007,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::D
   for (int i = 0; i < theOrbit.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       tempRoot = theOrbit[i];
-      theWeyl.ReflectBetaWRTAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
+      theWeyl.reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], tempRoot, false, tempRoot);
       if (theOrbit.addOnTopNoRepetition(tempRoot)) {
         theDV.drawLineBetweenTwoVectorsBufferRational(theOrbit[i], tempRoot, color, 1);
       }
@@ -8044,8 +8044,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   return true;
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem() {
-  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem");
+void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeRootSubsystem() {
+  MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeRootSubsystem");
   this->RootSubsystem.clear();
   this->RootSubsystem.addOnTop(this->simpleRootsInner);
   this->RootSubsystem.setExpectedSize(100);
@@ -8053,7 +8053,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   for (int i = 0; i < this->RootSubsystem.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       currentRoot = this->RootSubsystem[i];
-      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], currentRoot, false, currentRoot);
+      this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], currentRoot, false, currentRoot);
       this->RootSubsystem.addOnTopNoRepetition(currentRoot);
     }
   }
@@ -8075,7 +8075,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   }
 }
 
-void KLpolys::writeKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int topIndex) {
+void KazhdanLusztigPolynomials::writeKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int topIndex) {
   output.clear();
   output << "Top_index: " << topIndex << "\n";
   std::string tempS;
@@ -8083,7 +8083,7 @@ void KLpolys::writeKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int 
   output << tempS;
 }
 
-int KLpolys::readKLCoeffsFromFile(std::fstream& input, List<int>& output) {
+int KazhdanLusztigPolynomials::readKLCoeffsFromFile(std::fstream& input, List<int>& output) {
   std::string tempS;
   int topIndex;
   input >> tempS >> topIndex;
@@ -8094,7 +8094,7 @@ int KLpolys::readKLCoeffsFromFile(std::fstream& input, List<int>& output) {
   return topIndex;
 }
 
-void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output) {
+void KazhdanLusztigPolynomials::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output) {
   std::stringstream out;
   for (int i = 0; i < theKLCoeffs.size; i ++) {
     out << i << ".  " << theKLCoeffs[i] << "\n";
@@ -8102,7 +8102,7 @@ void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output) {
   output = out.str();
 }
 
-void KLpolys::initTheMults() {
+void KazhdanLusztigPolynomials::initTheMults() {
   this->TheMultiplicities.setSize(this->size);
   this->Explored.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
@@ -8113,13 +8113,13 @@ void KLpolys::initTheMults() {
   this->LowestNonExplored = 0;
 }
 
-void KLpolys::check() {
+void KazhdanLusztigPolynomials::check() {
   for (int i = 0; i < this->size; i ++) {
     this->compute(i);
   }
 }
 
-void KLpolys::compute(int x) {
+void KazhdanLusztigPolynomials::compute(int x) {
   this->initTheMults();
   this->TheMultiplicities[x] = 1;
   while (this->NextToExplore != - 1) {
@@ -8132,7 +8132,7 @@ void KLpolys::compute(int x) {
   }
 }
 
-void KLpolys::findNextToExplore() {
+void KazhdanLusztigPolynomials::findNextToExplore() {
   bool foundNonExplored = false;
   for (int i = this->LowestNonExplored; i < this->size; i ++) {
     if (!this->Explored[i]) {
@@ -8149,7 +8149,7 @@ void KLpolys::findNextToExplore() {
   this->NextToExplore = - 1;
 }
 
-bool KLpolys::isMaximalNonExplored(int index) {
+bool KazhdanLusztigPolynomials::isMaximalNonExplored(int index) {
   for (int i = this->LowestNonExplored; i < this->size; i ++) {
     if (!this->Explored[i] && i != index) {
       Vector<Rational> tempRoot;
@@ -8163,8 +8163,8 @@ bool KLpolys::isMaximalNonExplored(int index) {
   return true;
 }
 
-std::string KLpolys::toString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("KLpolys::toString");
+std::string KazhdanLusztigPolynomials::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::toString");
   std::stringstream out;
   bool useHtml = false;
   if (theFormat != nullptr) {
@@ -8219,8 +8219,8 @@ std::string KLpolys::toString(FormatExpressions* theFormat) {
   return out.str();
 }
 
-void KLpolys::generatePartialBruhatOrder() {
-  MacroRegisterFunctionWithName("KLpolys::generatePartialBruhatOrder");
+void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::generatePartialBruhatOrder");
   int theDimension = this->TheWeylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> ZeroRoot;
   ZeroRoot.makeZero(theDimension);
@@ -8251,7 +8251,7 @@ void KLpolys::generatePartialBruhatOrder() {
   }
 }
 
-int KLpolys::findMinimalBruhatNonExplored(List<bool>& theExplored) {
+int KazhdanLusztigPolynomials::findMinimalBruhatNonExplored(List<bool>& theExplored) {
   int lowestIndex = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (!theExplored[i]) {
@@ -8267,7 +8267,7 @@ int KLpolys::findMinimalBruhatNonExplored(List<bool>& theExplored) {
   return lowestIndex;
 }
 
-int KLpolys::findMaximalBruhatNonExplored(List<bool>& theExplored) {
+int KazhdanLusztigPolynomials::findMaximalBruhatNonExplored(List<bool>& theExplored) {
   int highestIndex = - 1;
   for (int i = 0; i < this->size; i ++) {
     if (!theExplored[i]) {
@@ -8283,7 +8283,7 @@ int KLpolys::findMaximalBruhatNonExplored(List<bool>& theExplored) {
   return highestIndex;
 }
 
-void KLpolys::mergeBruhatLists(int fromList, int toList) {
+void KazhdanLusztigPolynomials::mergeBruhatLists(int fromList, int toList) {
   for (int i = 0; i < this->BruhatOrder[fromList].size; i ++) {
     bool found = false;
     for (int j = 0; j < this->BruhatOrder[toList].size; j ++) {
@@ -8298,7 +8298,7 @@ void KLpolys::mergeBruhatLists(int fromList, int toList) {
   }
 }
 
-int KLpolys::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
+int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
   int theDimension = this->TheWeylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> tempRoot;
   tempRoot.setSize(theDimension);
@@ -8310,10 +8310,10 @@ int KLpolys::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
     bool tempBool1, tempBool2;
     bool haveSameSigns = true;
     for (int j = 0; j < this->TheWeylGroup->RootSystem.size; j ++) {
-      this->TheWeylGroup->RootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem[j], tempRat1);
+      this->TheWeylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem[j], tempRat1);
       tempRoot = (*this)[i];
       tempRoot += (this->TheWeylGroup->rho);
-      this->TheWeylGroup->RootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
+      this->TheWeylGroup->rootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
       tempBool1 = tempRat1.isPositive();
       tempBool2 = tempRat2.isPositive();
       if (tempRat1.isEqualToZero() || tempRat2.isEqualToZero()) {
@@ -8331,8 +8331,8 @@ int KLpolys::chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
   return - 1;
 }
 
-void KLpolys::computeKLCoefficients() {
-  MacroRegisterFunctionWithName("KLpolys::computeKLCoefficients");
+void KazhdanLusztigPolynomials::computeKLCoefficients() {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLCoefficients");
   this->theKLcoeffs.setSize(this->theKLPolys.size);
   for (int i = 0; i < this->theKLPolys.size; i ++) {
     this->theKLcoeffs[i].setSize(this->theKLPolys[i].size);
@@ -8348,17 +8348,17 @@ void KLpolys::computeKLCoefficients() {
   }
 }
 
-void KLpolys::initFromWeyl(WeylGroupData* theWeylGroup) {
+void KazhdanLusztigPolynomials::initFromWeyl(WeylGroupData* theWeylGroup) {
   this->TheWeylGroup = theWeylGroup;
   Vectors<Rational> tempRoots;
-  this->TheWeylGroup->ComputeRho(true);
+  this->TheWeylGroup->computeRho(true);
   tempRoots.addOnTop(this->TheWeylGroup->rho);
   this->TheWeylGroup->generateOrbit(tempRoots, false, *this, false);
   this->initTheMults();
 }
 
-bool KLpolys::computeKLPolys(WeylGroupData* theWeylGroup) {
-  MacroRegisterFunctionWithName("KLpolys::computeKLPolys");
+bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* theWeylGroup) {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeKLPolys");
   theWeylGroup->theGroup.computeAllElements(- 1);
   this->initFromWeyl(theWeylGroup);
   this->generatePartialBruhatOrder();
@@ -8385,8 +8385,8 @@ bool KLpolys::computeKLPolys(WeylGroupData* theWeylGroup) {
   return true;
 }
 
-void KLpolys::computeRPolys() {
-  MacroRegisterFunctionWithName("KLpolys::computeRPolys");
+void KazhdanLusztigPolynomials::computeRPolys() {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRPolys");
   int theDimension = this->TheWeylGroup->getDimension();
   this->theRPolys.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
@@ -8421,21 +8421,21 @@ void KLpolys::computeRPolys() {
   //this->ComputeDebugString();
 }
 
-bool KLpolys::indexGEQIndex(int a, int b) {
+bool KazhdanLusztigPolynomials::indexGEQIndex(int a, int b) {
   Vector<Rational> tempV;
   tempV = (*this)[a];
   tempV -= (*this)[b];
   return tempV.isNegativeOrZero();
 }
 
-bool KLpolys::indexGreaterThanIndex(int a, int b) {
+bool KazhdanLusztigPolynomials::indexGreaterThanIndex(int a, int b) {
   if (a == b) {
     return false;
   }
   return this->indexGEQIndex(a, b);
 }
 
-int KLpolys::computeProductfromSimpleReflectionsActionList(int x, int y) {
+int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(int x, int y) {
   int start = y;
   const ElementWeylGroup& currentElement = this->TheWeylGroup->theGroup.theElements[x];
   for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
@@ -8446,7 +8446,7 @@ int KLpolys::computeProductfromSimpleReflectionsActionList(int x, int y) {
   return start;
 }
 
-void KLpolys::computeKLxy(int x, int y) {
+void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   Polynomial<Rational> Accum, tempP1, tempP2;
   if (x == y) {
     this->theKLPolys[x][y].makeOne();
@@ -8507,8 +8507,8 @@ void KLpolys::computeKLxy(int x, int y) {
   }
 }
 
-bool KLpolys::computeRxy(int x, int y, int SimpleReflectionIndex) {
-  MacroRegisterFunctionWithName("KLpolys::computeRxy");
+bool KazhdanLusztigPolynomials::computeRxy(int x, int y, int SimpleReflectionIndex) {
+  MacroRegisterFunctionWithName("KazhdanLusztigPolynomials::computeRxy");
   if (x == y) {
     this->theRPolys[x][y].makeOne();
     return true;
@@ -8543,7 +8543,7 @@ bool KLpolys::computeRxy(int x, int y, int SimpleReflectionIndex) {
   return false;
 }
 
-std::string KLpolys::KLPolysToString(FormatExpressions* theFormat) {
+std::string KazhdanLusztigPolynomials::KLPolysToString(FormatExpressions* theFormat) {
   std::stringstream out;
   out << "<table border =\"1\">";
   out << "<tr><td>Weyl elt.</td>";
@@ -8564,7 +8564,7 @@ std::string KLpolys::KLPolysToString(FormatExpressions* theFormat) {
   return out.str();
 }
 
-std::string KLpolys::rPolysToString(FormatExpressions* theFormat) {
+std::string KazhdanLusztigPolynomials::rPolysToString(FormatExpressions* theFormat) {
   std::stringstream out;
   out << "<table border =\"1\"><tr><td>Weyl elt.</td>";
   for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++) {
@@ -8703,10 +8703,10 @@ void LaTeXProcedures::drawline(
   << LaTeXProcedures::FigureCenterCoordSystemY - Y2 << ")\n";
 }
 
-void WeylGroupData::TransformToSimpleBasisGenerators(
+void WeylGroupData::transformToSimpleBasisGenerators(
   Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGenerators");
+  MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGenerators");
   for (int i = 0; i < theGens.size; i ++) {
     if (!theGens[i].isPositiveOrZero()) {
       theGens[i].minus();
@@ -8771,11 +8771,11 @@ void Vector<Coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<Coe
   }
 }
 
-void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem) {
+void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem) {
   if (theGens.size == 0) {
     return;
   }
-  MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
+  MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGeneratorsArbitraryCoordinates");
   Vector<Rational> theH;
   theH.makeZero(theGens[0].size);
   theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
@@ -8810,9 +8810,9 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rati
   }
 }
 
-void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH) {
+void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& theGens, const Vector<Rational>& theH) {
   for (int i = 0; i < theGens.size; i ++) {
-    if (!this->IsPositiveOrPerpWRTh(theGens[i], theH)) {
+    if (!this->isPositiveOrPerpWithRespectToH(theGens[i], theH)) {
       theGens[i].minus();
     }
   }
@@ -8829,7 +8829,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
           reductionOccured = true;
         }
         if (this->RootSystem.getIndex(tempRoot) != - 1) {
-          if (!this->IsPositiveOrPerpWRTh(tempRoot, theH)) {
+          if (!this->isPositiveOrPerpWithRespectToH(tempRoot, theH)) {
             tempRoot.minus();
             theGens[j] = tempRoot;
           } else {
@@ -8842,13 +8842,13 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
   }
 }
 
-void WeylGroupData::ComputeExtremeRootInTheSameKMod(
+void WeylGroupData::computeExtremeRootInTheSameKMod(
   const Vectors<Rational>& inputSimpleBasisK,
   const Vector<Rational>& inputRoot,
   Vector<Rational>& output,
   bool lookingForHighest
 ) {
-  MacroRegisterFunctionWithName("WeylGroup::ComputeExtremeRootInTheSameKMod");
+  MacroRegisterFunctionWithName("WeylGroup::computeExtremeRootInTheSameKMod");
   output = inputRoot;
   Vector<Rational> tempRoot;
   bool FoundHigher = true;
@@ -8914,8 +8914,8 @@ bool Lattice::getAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   output.setSize(NumCycles);
   for (int i = 0; i < NumCycles; i ++, theCoeffSelection.incrementReturnFalseIfPastLast()) {
     output[i].makeZero(theDim);
-    for (int j = 0; j < theCoeffSelection.Multiplicities.size; j ++) {
-      output[i] += thePeriodVectors[j] * theCoeffSelection.Multiplicities[j];
+    for (int j = 0; j < theCoeffSelection.multiplicities.size; j ++) {
+      output[i] += thePeriodVectors[j] * theCoeffSelection.multiplicities[j];
     }
   }
   return true;
@@ -9298,7 +9298,7 @@ void PartFraction::computePolynomialCorrespondingToOneMonomial(
     this->makePolynomialFromOneNormal(
       normals[i],
       theMon,
-      this->denominator[this->IndicesNonZeroMults[i]].Multiplicities[0],
+      this->denominator[this->IndicesNonZeroMults[i]].multiplicities[0],
       tempP
     );
     outputPolyPart *= tempP;
@@ -9705,7 +9705,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
   if (nonPivotPoints.cardinalitySelection != 0) {
     return false;
   }
-  int numNonZeroRows = nonPivotPoints.MaxSize;
+  int numNonZeroRows = nonPivotPoints.maximumSize;
   int numZeroRows = theMat.numberOfRows-numNonZeroRows;
   matRelationBetweenStartingVariables.initialize(numZeroRows, startingDim);
   for (int i = 0; i < numZeroRows; i ++) {
@@ -9840,8 +9840,8 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   return input.toString(nullptr);
 }
 
-std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables) {
-  MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTable");
+std::string HtmlRoutines::toHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables) {
+  MacroRegisterFunctionWithName("HtmlRoutines::toHtmlTable");
   std::stringstream out;
   out << "<table class =\"tableDatabase\">";
   out << "<tr>";
@@ -9987,10 +9987,10 @@ bool PartFractions::removeRedundantShortRootsIndex(int theIndex, Vector<Rational
           thePF.getNElongationPolynomial(
             this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension
           );
-          tempIP.raiseToPower(currentFrac.Multiplicities[i], 1);
+          tempIP.raiseToPower(currentFrac.multiplicities[i], 1);
           currentCoeff *= tempIP;
-          currentFrac.addMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
-          currentFrac.addMultiplicity(- currentFrac.Multiplicities[i], ElongationValue);
+          currentFrac.addMultiplicity(currentFrac.multiplicities[i], LCMElongations);
+          currentFrac.addMultiplicity(- currentFrac.multiplicities[i], ElongationValue);
           if (!localEndCheckSum.isEqualTo(localStartCheckSum)) {
             global.fatal << "Local end checksum must be zero. " << global.fatal;
           }
@@ -10078,7 +10078,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   Rational theMonCoeff = 1;
   for (int i = 0; i < numCycles; i ++, theSel.incrementSubsetFixedCardinality(theDegree)) {
     for (int j = 0; j < this->theDimension; j ++) {
-      theMon.setVariable(j, theSel.Multiplicities[j]);
+      theMon.setVariable(j, theSel.multiplicities[j]);
       theWeight[j] = theMon[j];
     }
     basisMonsAll.addMonomial(theMon, theMonCoeff);
@@ -10135,23 +10135,23 @@ std::string DrawingVariables::getColorPsTricksFromColorIndex(int colorIndex) {
 
 bool DrawingVariables::getColorIntFromColorString(const std::string& input, int& output) {
   if (input == "blue") {
-    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
+    output = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 255));
     return true;
   }
   if (input == "green") {
-    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 0));
+    output = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 0));
     return true;
   }
   if (input == "red") {
-    output = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
+    output = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
     return true;
   }
   if (input == "cyan") {
-    output = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 255));
+    output = static_cast<int>(HtmlRoutines::redGreenBlue(0, 255, 255));
     return true;
   }
   if (input == "orange") {
-    output = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 127, 0));
+    output = static_cast<int>(HtmlRoutines::redGreenBlue(255, 127, 0));
     return true;
   }
   return false;
@@ -11040,8 +11040,8 @@ bool Cone::getLatticePointsInCone(
     if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
     }
-    for (int j = 0; j < boundingBox.Multiplicities.size; j ++) {
-      candidatePoint += LatticeBasis[j] * (boundingBox.Multiplicities[j] - upperBoundPointsInEachDim);
+    for (int j = 0; j < boundingBox.multiplicities.size; j ++) {
+      candidatePoint += LatticeBasis[j] * (boundingBox.multiplicities[j] - upperBoundPointsInEachDim);
     }
     if (lastCoordinateIsOne) {
       candidatePoint.setSize(candidatePoint.size + 1);
@@ -11428,15 +11428,15 @@ void Cone::transformToWeylProjective(ConeComplex& owner) {
   (void) owner;
   global.fatal << "Not implemented yet. " << global.fatal;
 /*
-  for (int i = 0; i < this->Externalwalls.size; i ++)
-    this->Externalwalls[i].transformToWeylProjective();
+  for (int i = 0; i < this->externalWalls.size; i ++)
+    this->externalWalls[i].transformToWeylProjective();
   WallData newWall;
-  this->Externalwalls.reserve(owner.WeylChamber.size +this->Externalwalls.size);
+  this->externalWalls.reserve(owner.WeylChamber.size +this->externalWalls.size);
   Vectors<Rational> newExternalWalls;
   owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
   for (int i = 0; i < newExternalWalls.size; i ++) {
     newWall.normal = newExternalWalls[i];
-    this->Externalwalls.addOnTop(newWall);
+    this->externalWalls.addOnTop(newWall);
   }
   this->AllVertices.size = 0;
   this->ComputeVerticesFromNormals(owner);*/
@@ -11456,8 +11456,8 @@ void ConeComplex::transformToWeylProjective() {
   for (int k = 0; k< this->AmbientWeyl.getElement().size; k++)
     for (int i = 0; i < this->size; i ++)
       if (this->objects[i] != 0)
-        for (int j = 0; j < this->objects[i]->Externalwalls.size; j ++) {
-          this->GetAffineWallImage(k, this->objects[i]->Externalwalls[j], wallToSliceWith);
+        for (int j = 0; j < this->objects[i]->externalWalls.size; j ++) {
+          this->GetAffineWallImage(k, this->objects[i]->externalWalls[j], wallToSliceWith);
 //          if (k == 0)
 //            oldDirections.AddOnBottomNoRepetition(wallToSliceWith);
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();

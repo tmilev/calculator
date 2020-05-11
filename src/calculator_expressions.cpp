@@ -4746,7 +4746,7 @@ bool Expression::isBuiltInAtom(std::string* outputWhichOperation) const {
   if (this->theData < 0 || this->theData >= this->owner->getOperations().size) {
     return false;
   }
-  if (this->theData >= this->owner->NumPredefinedAtoms) {
+  if (this->theData >= this->owner->numberOfPredefinedAtoms) {
     return false;
   }
   if (outputWhichOperation != nullptr) {

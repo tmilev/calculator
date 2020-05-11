@@ -708,7 +708,7 @@ class Vectors: public List<Vector<Coefficient> > {
     Selection& theSelection,
     Vector<Coefficient>& output,
     Matrix<Coefficient>& buffer,
-    Selection& NonPivotPointsBuffer
+    Selection& nonPivotPointsBuffer
   );
   void getVectorsDouble(Vectors<double>& output) const {
     output.setSize(this->size);
@@ -794,7 +794,7 @@ class Vectors: public List<Vector<Coefficient> > {
     }
   }
   bool linearSpanContainsVector(const Vector<Coefficient>& input) const;
-  static void SelectABasisInSubspace(
+  static void selectBasisInSubspace(
     const List<Vector<Coefficient> >& input, List<Vector<Coefficient> >& output, Selection& outputSelectedPivots
   );
   int getRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;

@@ -20,7 +20,7 @@ bool Crypto::Test::sha256() {
   for (int i = 0; i < inputs.size; i ++) {
     std::string result, desiredResult;
     Crypto::computeSha256(inputs[i], result);
-    if (!Crypto::ConvertHexToString(outputs[i], desiredResult, &commentsOnFailure)) {
+    if (!Crypto::convertHexToString(outputs[i], desiredResult, &commentsOnFailure)) {
       global.fatal << "Conversion of hard-coded hex string failed. " << global.fatal;
     }
     if (result != desiredResult) {

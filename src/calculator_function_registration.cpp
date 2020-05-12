@@ -5042,7 +5042,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but the first argument gives upper limits "
     "to the number of polynomial computations that can be carried out. ",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 1001, "
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 301, "
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "
@@ -5732,13 +5732,13 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
+    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opRational(),
     "Adds double or rational to a double or rational approximately "
     "using the built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational",
     "AddDoubleToRational",
     innerStandard
   );
@@ -5813,134 +5813,134 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialRational(),
     "Adds a rational to a polynomial. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddRationalToPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opRational(),
     "Adds a polynomial to a rational. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialToRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialRational(),
     "Adds a polynomial to a polynomial. ",
     "x = 1 + Polynomial{} \\lambda;\n"
     "x + x",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialToPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + PolynomialAlgebraicNumbers(-\\sqrt{3}x)",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialOverAlgebraicNumbersToPolynomialOverAlgebraicNumbers",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opAlgNumber(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}) +PolynomialAlgebraicNumbers(\\sqrt{3}x)",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddAlgebraicNumberToPolynomialOverAlgebraicNumbers",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) +PolynomialAlgebraicNumbers(-\\sqrt{3})",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialOverAlgebraicNumbersToAlgebraicNumber",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opRational(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "1 + PolynomialAlgebraicNumbers(\\sqrt{12}x)",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddRationalToPolynomialAlgebraicNumbers",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + 1",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialAlgebraicNumbersToRational",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialToAlgebraicNumber",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialRational(),
     this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "Polynomial{}x + PolynomialAlgebraicNumbers(\\sqrt{2}x)",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialToPolynomialAlgebraicNumbers",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opPolynomialAlgebraicNumbers(),
     this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{2}x) + Polynomial{}x",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddPolynomialAlgebraicNumbersToPolynomial",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
+    CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial,
     this->opAlgNumber(),
     this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial",
     "AddAlgebraicNumberToPolynomial",
     innerStandard
   );
@@ -6005,25 +6005,25 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
+    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
     this->opRational(),
     this->opDouble(),
     "Adds double or rational to a double or rational approximately using the "
     "built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational",
     "AddRationalToDouble",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
+    CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opDouble(),
     "Adds double or rational to a double or rational approximately using the built-in cpp "
     "addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational",
     "AddDoubleToDouble",
     innerStandard
   );
@@ -7350,7 +7350,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat,
+    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational,
     this->opRational(),
     this->opDouble(),
     "Calls the built-in cpp functions to approximately raise a double to a power, "
@@ -7359,7 +7359,7 @@ void Calculator::initPredefinedStandardOperations() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q = DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
+    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational",
     "PowerDoubleToDouble",
     innerStandard
   );
@@ -7621,7 +7621,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
-    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat,
+    CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational,
     this->opDouble(),
     this->opRational(),
     "Calls the built-in cpp functions to approximately raise a double to a power, "
@@ -7631,7 +7631,7 @@ void Calculator::initPredefinedStandardOperations() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
+    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational",
     "PowerFloatingToPower",
     innerStandard
   );
@@ -8530,7 +8530,7 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(this->opQuote()                 , Expression::toStringQuote                       );
   this->addOneStringAtomHandler(this->opDefineConditional()     , Expression::toStringDefineConditional           );
   this->addOneStringAtomHandler(this->opDivide()                , Expression::toStringDivide                      );
-  this->addOneStringAtomHandler(this->opString()                , Expression::toStringTensor                      );
+  this->addOneStringAtomHandler(this->opTensor()                , Expression::toStringTensor                      );
   this->addOneStringAtomHandler(this->opIn()                    , Expression::toStringIn                          );
   this->addOneStringAtomHandler(this->opOr()                    , Expression::toStringOr                          );
   this->addOneStringAtomHandler(this->opAnd()                   , Expression::toStringAnd                         );

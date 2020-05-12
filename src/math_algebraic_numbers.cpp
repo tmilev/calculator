@@ -1017,15 +1017,15 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     theReport.report(reportStream.str());
   }
   this->checkCommonOwner(other);
-  MatrixTensor<Rational> leftMat, rightMat;
-  this->owner->getMultiplicationBy(*this, leftMat);
-  this->owner->getMultiplicationBy(other, rightMat);
-  leftMat.checkConsistencyGrandMaster();
-  rightMat.checkConsistencyGrandMaster();
-  leftMat *= rightMat;
+  MatrixTensor<Rational> leftMatrix, rightMatrix;
+  this->owner->getMultiplicationBy(*this, leftMatrix);
+  this->owner->getMultiplicationBy(other, rightMatrix);
+  leftMatrix.checkConsistencyGrandMaster();
+  rightMatrix.checkConsistencyGrandMaster();
+  leftMatrix *= rightMatrix;
   this->basisIndex = this->owner->basisInjections.size - 1;
   this->element.makeEi(0);
-  leftMat.actOnVectorColumn(this->element);
+  leftMatrix.actOnVectorColumn(this->element);
 }
 
 void AlgebraicNumber::squareRootDefault(std::stringstream* commentsOnError) {

@@ -144,16 +144,22 @@ std::string Calculator::toStringRuleStatusUser() {
   return out.str();
 }
 
-void Calculator::doLogEvaluationIfNeedBe(Function& inputF) {
-  if (!this->flagLogEvaluatioN) {
+void Calculator::logTime() {
+  int64_t currentMilliseconds = global.getElapsedMilliseconds();
+  *this << "<br>" << currentMilliseconds - this->millisecondsLastLog
+  << " ms since last log; " << currentMilliseconds - this->startTimeEvaluationMilliseconds
+  << " ms since start. ";
+  this->millisecondsLastLog = currentMilliseconds;
+}
+
+void Calculator::logFunctionWithTime(Function& inputF) {
+  if (!this->flagLogEvaluation) {
     return;
   }
-  *this << "<hr>Built-in substitution: " << inputF.toStringSummary()
-  << "<br>" << global.getElapsedSeconds() - this->lastLogEvaluationTime
-  << " second(s) since last log entry. "
-  << "Rule stack id: "
+  *this << "<hr>Built-in substitution: " << inputF.toStringSummary();
+  this->logTime();
+  *this << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->ruleStack.size();
-  this->lastLogEvaluationTime = global.getElapsedSeconds();
 }
 
 const List<Function>* Calculator::getOperationCompositeHandlers(int theOp) {
@@ -208,7 +214,7 @@ bool Calculator::outerStandardCompositeHandler(
       if (currentHandler.apply(
         theCommands, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        theCommands.doLogEvaluationIfNeedBe(currentHandler);
+        theCommands.logFunctionWithTime(currentHandler);
         return true;
       }
     }
@@ -240,7 +246,7 @@ bool Function::apply(
     if (this->theFunction(theCommands, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        theCommands.doLogEvaluationIfNeedBe(*this);
+        theCommands.logFunctionWithTime(*this);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -252,7 +258,7 @@ bool Function::apply(
   if (this->inputFitsMyInnerType(input)) {
     if (this->theFunction(theCommands, input, output)) {
       output.checkConsistency();
-      theCommands.doLogEvaluationIfNeedBe(*this);
+      theCommands.logFunctionWithTime(*this);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -802,7 +808,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
   ) {
     const Expression& currentPattern = this->owner->ruleStack[i];
     this->owner->totalPatternMatchesPerformed ++;
-    if (this->owner->flagLogEvaluatioN) {
+    if (this->owner->flagLogEvaluation) {
       beforepatternMatch = *this->outpuT;
     }
     MapList<Expression, Expression> bufferPairs;
@@ -817,7 +823,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
       }
       this->setOutput(afterpatternMatch, nullptr, substitutionComment.str());
       this->reductionOccurred = true;
-      if (this->owner->flagLogEvaluatioN) {
+      if (this->owner->flagLogEvaluation) {
         *this->owner
         << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
         << "<br>Rule: " << currentPattern.toString() << "<br>"
@@ -848,7 +854,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
     return false;
   }
   this->reductionOccurred = true;
-  if (this->owner->flagLogEvaluatioN) {
+  if (this->owner->flagLogEvaluation) {
     *(this->owner) << "<br>Rule context identifier: "
     << this->owner->RuleStackCacheIndex
     << "<br>" << HtmlRoutines::getMathMouseHover(this->outpuT->toString())
@@ -1131,11 +1137,12 @@ bool Calculator::parseAndExtractExpressions(
   return result;
 }
 
-void Calculator::initComputationStats() {
-  this->startTimeEvaluationMilliseconds = global.getElapsedMilliseconds();
+void Calculator::initializeComputationStatistics() {
+  this->startTimeEvaluationMilliseconds      = global.getElapsedMilliseconds();
+  this->millisecondsLastLog                  = this->startTimeEvaluationMilliseconds;
   this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
-  this->numberListResizesStart             = static_cast<signed>( GlobalStatistics::numListResizesTotal);
-  this->numberHashResizesStart             = static_cast<signed>( GlobalStatistics::numHashResizes     );
+  this->numberListResizesStart               = static_cast<signed>( GlobalStatistics::numListResizesTotal);
+  this->numberHashResizesStart               = static_cast<signed>( GlobalStatistics::numHashResizes     );
   this->numberOfSmallAdditionsStart          = static_cast<signed>( Rational::totalSmallAdditions         );
   this->numberOfSmallMultiplicationsStart    = static_cast<signed>( Rational::totalSmallMultiplications   );
   this->numberOfSmallGreatestCommonDivisorsStart           = static_cast<signed>( Rational::totalSmallGreatestCommonDivisors          );
@@ -1146,7 +1153,7 @@ void Calculator::initComputationStats() {
 
 void Calculator::evaluate(const std::string& theInput) {
   MacroRegisterFunctionWithName("Calculator::evaluate");
-  this->initComputationStats();
+  this->initializeComputationStatistics();
   this->inputString = theInput;
   this->parseAndExtractExpressions(
     theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStacK, &this->syntaxErrors

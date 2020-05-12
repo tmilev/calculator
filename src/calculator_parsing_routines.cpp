@@ -42,17 +42,12 @@ Calculator::EvaluationStats::EvaluationStats() {
   this->callsSinceReport = 0;
 }
 
-void Calculator::resetFrequentConstants() {
-
-}
-
 void Calculator::reset() {
   this->MaxAlgTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
   this->MaxCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
   this->RecursionDeptH = 0;
-  this->NumErrors = 0;
   this->numberOfListsStart               = - 1;
   this->numberListResizesStart         = - 1;
   this->numberHashResizesStart         = - 1;
@@ -62,11 +57,11 @@ void Calculator::reset() {
   this->numberOfLargeAdditionsStart      = - 1;
   this->numberOfLargeMultiplicationsStart = - 1;
   this->numberOfLargeGreatestCommonDivisorsStart       = - 1;
-  this->lastLogEvaluationTime = global.getElapsedSeconds();
+  this->millisecondsLastLog = - 1;
   this->DepthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
-  this->flagLogEvaluatioN = false;
+  this->flagLogEvaluation = false;
   this->flagUseNumberColors = false;
   this->flagLogRules = false;
   this->flagLogCache = false;
@@ -2037,7 +2032,9 @@ bool Calculator::applyOneRule() {
     return this->popTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "LogEvaluation") {
-    this->flagLogEvaluatioN = true;
+    this->flagLogEvaluation = true;
+    *this << "Log evaluation start. ";
+    this->logTime();
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }

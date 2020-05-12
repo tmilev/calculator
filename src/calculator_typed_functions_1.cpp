@@ -780,10 +780,10 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(
   );
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(
+bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial");
   if (input.size() < 3) {
     return false;
   }
@@ -1411,7 +1411,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRat");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRationalByInteger");
   theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1525,10 +1525,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   expectedNumTerms = theMat.numberOfColumns;
   expectedNumTerms.raiseToPower(thePower);
   if (expectedNumTerms > 10000) {
-    return theCommands << "The expected number terms in the result of the exponentiation "
-    << theMat.toString() << " to the power of " << thePower << " is approximately ("
-    << theMat.numberOfColumns << ")^" << thePower << "=" << expectedNumTerms
-    << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
+    return theCommands
+    << "The expected number terms in the result of the exponentiation "
+    << theMat.toString() << " to the power of "
+    << thePower << " is approximately ("
+    << theMat.numberOfColumns << ")^" << thePower
+    << "=" << expectedNumTerms
+    << ". I have been instructed to proceed only "
+    << "if the expected number of terms is fewer than 10000. ";
   }
   Matrix<Expression> idMatE;
   idMatE.makeIdentityMatrix(theMat.numberOfRows, theCommands.expressionOne(), theCommands.expressionZero());
@@ -1581,14 +1585,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   )) {
     return false;
   }
-  List<LargeIntegerUnsigned> numeratorPowerS, denominatorPowerS;
-  numeratorPowerS = numeratorPowersInt;
-  denominatorPowerS = denominatorPowersInt;
+  List<LargeIntegerUnsigned> numeratorPowers, denominatorPowers;
+  numeratorPowers = numeratorPowersInt;
+  denominatorPowers = denominatorPowersInt;
   for (int i = 0; i < numeratorFactors.size; i ++) {
-    numeratorPowerS[i] *= exponentNumeratorNoSign;
+    numeratorPowers[i] *= exponentNumeratorNoSign;
   }
   for (int i = 0; i < denominatorFactors.size; i ++) {
-    denominatorPowerS[i] *= exponentNumeratorNoSign;
+    denominatorPowers[i] *= exponentNumeratorNoSign;
   }
   exponentWorking /= exponentNumeratorNoSign;
   Rational outsideOfTheRadical = 1;
@@ -1596,7 +1600,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   LargeIntegerUnsigned currentPower;
   int currentInsidePowerInt = - 1, currentOutsidePowerInt = - 1;
   for (int k = 0; k < 2; k ++) {
-    List<LargeIntegerUnsigned>& currentPowers = (k == 0) ? numeratorPowerS : denominatorPowerS;
+    List<LargeIntegerUnsigned>& currentPowers = (k == 0) ? numeratorPowers : denominatorPowers;
     List<LargeInteger>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
     for (int i = 0; i < currentFactors.size; i ++) {
       currentPower = currentPowers[i];
@@ -1627,23 +1631,23 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     }
   }
   LargeIntegerUnsigned theGCD = 1;
-  if (numeratorPowerS.size > 0) {
-    theGCD = numeratorPowerS[0];
-  } else if (denominatorPowerS.size > 0) {
-    theGCD = denominatorPowerS[0];
+  if (numeratorPowers.size > 0) {
+    theGCD = numeratorPowers[0];
+  } else if (denominatorPowers.size > 0) {
+    theGCD = denominatorPowers[0];
   }
-  for (int i = 0; i < numeratorPowerS.size; i ++) {
-    theGCD = MathRoutines::greatestCommonDivisor(theGCD, numeratorPowerS[i]);
+  for (int i = 0; i < numeratorPowers.size; i ++) {
+    theGCD = MathRoutines::greatestCommonDivisor(theGCD, numeratorPowers[i]);
   }
-  for (int i = 0; i < denominatorPowerS.size; i ++) {
-    theGCD = MathRoutines::greatestCommonDivisor(theGCD, denominatorPowerS[i]);
+  for (int i = 0; i < denominatorPowers.size; i ++) {
+    theGCD = MathRoutines::greatestCommonDivisor(theGCD, denominatorPowers[i]);
   }
   if (theGCD > 0) {
-    for (int i = 0; i < numeratorPowerS.size; i ++) {
-      numeratorPowerS[i] /= theGCD;
+    for (int i = 0; i < numeratorPowers.size; i ++) {
+      numeratorPowers[i] /= theGCD;
     }
-    for (int i = 0; i < denominatorPowerS.size; i ++) {
-      denominatorPowerS[i] /= theGCD;
+    for (int i = 0; i < denominatorPowers.size; i ++) {
+      denominatorPowers[i] /= theGCD;
     }
     exponentWorking *= theGCD;
     exponentDenominator = exponentWorking.getDenominator();
@@ -1651,9 +1655,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   Rational insideTheRadical = 1;
   LargeInteger currentContribution, currentNumerator = 1, currentDenominator = 1;
   int currentExpSmallInt = - 1;
-  for (int i = 0; i < numeratorPowerS.size; i ++) {
+  for (int i = 0; i < numeratorPowers.size; i ++) {
     currentContribution = numeratorFactors[i];
-    if (!numeratorPowerS[i].isIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!numeratorPowers[i].isIntegerFittingInInt(&currentExpSmallInt)) {
       return false;
     }
     currentContribution.raiseToPower(currentExpSmallInt);
@@ -1662,9 +1666,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       return false;
     }
   }
-  for (int i = 0; i < denominatorPowerS.size; i ++) {
+  for (int i = 0; i < denominatorPowers.size; i ++) {
     currentContribution = denominatorFactors[i];
-    if (!denominatorPowerS[i].isIntegerFittingInInt(&currentExpSmallInt)) {
+    if (!denominatorPowers[i].isIntegerFittingInInt(&currentExpSmallInt)) {
       return false;
     }
     currentContribution.raiseToPower(currentExpSmallInt);
@@ -1698,10 +1702,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   return output.makeProduct(theCommands, theRadicalCFE, theRadicalE);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
+bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerDoubleOrRationalToDoubleOrRational");
   theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1743,7 +1747,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
 bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRational");
   theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1763,10 +1767,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRationalByDoubleOrRation
   return output.assignValue(leftD * rightD, theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(
+bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddDoubleOrRationalToDoubleOrRational");
   theCommands.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;
@@ -1912,27 +1916,27 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
       theCommands, input, output
     );
   }
-  Matrix<Expression> leftMat, rightMat;
-  if (!theCommands.getMatrixExpressions(left, leftMat)) {
+  Matrix<Expression> leftMatrix, rightMatrix;
+  if (!theCommands.getMatrixExpressions(left, leftMatrix)) {
     return false;
   }
-  if (!theCommands.getMatrixExpressions(input[2], rightMat, leftMat.numberOfColumns)) {
+  if (!theCommands.getMatrixExpressions(input[2], rightMatrix, leftMatrix.numberOfColumns)) {
     return false;
   }
-  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
     return false;
   }
   Matrix<Expression> outputMat;
-  outputMat.initialize(leftMat.numberOfRows, rightMat.numberOfColumns);
+  outputMat.initialize(leftMatrix.numberOfRows, rightMatrix.numberOfColumns);
   Expression leftSummand, rightSummand;
-  for (int i = 0; i < leftMat.numberOfRows; i ++) {
-    for (int j = 0; j < rightMat.numberOfColumns; j ++) {
-      for (int k = 0; k < leftMat.numberOfColumns; k ++) {
+  for (int i = 0; i < leftMatrix.numberOfRows; i ++) {
+    for (int j = 0; j < rightMatrix.numberOfColumns; j ++) {
+      for (int k = 0; k < leftMatrix.numberOfColumns; k ++) {
         if (k == 0) {
-          outputMat(i, j).makeProduct(theCommands, leftMat(i, k), rightMat(k, j));
+          outputMat(i, j).makeProduct(theCommands, leftMatrix(i, k), rightMatrix(k, j));
         } else {
           rightSummand = outputMat(i, j);
-          leftSummand.makeProduct(theCommands, leftMat(i, k), rightMat(k, j));
+          leftSummand.makeProduct(theCommands, leftMatrix(i, k), rightMatrix(k, j));
           outputMat(i, j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
       }
@@ -2114,26 +2118,26 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   if (!rightE.isMatrixOfType<Rational>()) {
     return false;
   }
-  Matrix<Rational> leftMat, rightMat;
-  if (!theCommands.functionGetMatrix(rightE, rightMat)) {
+  Matrix<Rational> leftMatrix, rightMatrix;
+  if (!theCommands.functionGetMatrix(rightE, rightMatrix)) {
     return false;
   }
   Rational theScalar;
   if (leftE.isOfType<Rational>(&theScalar)) {
-    leftMat *= theScalar;
-    return output.assignMatrix(leftMat, theCommands);
+    leftMatrix *= theScalar;
+    return output.assignMatrix(leftMatrix, theCommands);
   }
   if (!leftE.isMatrixOfType<Rational>()) {
     return false;
   }
-  if (!theCommands.functionGetMatrix(leftE, rightMat)) {
+  if (!theCommands.functionGetMatrix(leftE, rightMatrix)) {
     return false;
   }
-  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
     return false;
   }
-  leftMat.multiplyOnTheRight(rightMat);
-  return output.assignMatrix(leftMat, theCommands);
+  leftMatrix.multiplyOnTheRight(rightMatrix);
+  return output.assignMatrix(leftMatrix, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
@@ -2160,29 +2164,30 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     << leftE.toString() << " and " << rightE.toString()
     << " to common context. ";
   }
-  Matrix<RationalFunction<Rational> > leftMat, rightMat;
-  if (!theCommands.functionGetMatrix(rightE, rightMat)) {
+  Matrix<RationalFunction<Rational> > leftMatrix, rightMatrix;
+  if (!theCommands.functionGetMatrix(rightE, rightMatrix)) {
     return false;
   }
   if (!leftE.isMatrixOfType<RationalFunction<Rational> >()) {
     Expression leftErfForm;
     if (!leftE.convertInternally<RationalFunction<Rational> >(leftErfForm)) {
-      return theCommands << "Failed to convert " << leftE.toString() << " to rational function. ";
+      return theCommands << "Failed to convert "
+      << leftE.toString() << " to rational function. ";
     }
     RationalFunction<Rational> theScalar = leftErfForm.getValue<RationalFunction<Rational> >();
-    rightMat *= theScalar;
+    rightMatrix *= theScalar;
     ExpressionContext contextE = leftE.getContext();
-    return output.assignMatrix(rightMat, theCommands, &contextE);
+    return output.assignMatrix(rightMatrix, theCommands, &contextE);
   }
-  if (!theCommands.functionGetMatrix(leftE, leftMat)) {
+  if (!theCommands.functionGetMatrix(leftE, leftMatrix)) {
     return false;
   }
-  if (leftMat.numberOfColumns != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfColumns != rightMatrix.numberOfRows) {
     return false;
   }
-  leftMat.multiplyOnTheRight(rightMat);
+  leftMatrix.multiplyOnTheRight(rightMatrix);
   ExpressionContext contextE = leftE.getContext();
-  return output.assignMatrix(leftMat, theCommands, &contextE);
+  return output.assignMatrix(leftMatrix, theCommands, &contextE);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor(
@@ -2206,9 +2211,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
   if (!leftE.isOfType<MatrixTensor<Rational> >()) {
     return false;
   }
-  const MatrixTensor<Rational>& rightMat = rightE.getValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& rightMatrix = rightE.getValue<MatrixTensor<Rational> >();
   MatrixTensor<Rational> result = leftE.getValue<MatrixTensor<Rational> >();
-  result *= rightMat;
+  result *= rightMatrix;
   return output.assignValue(result, theCommands);
 }
 
@@ -2253,7 +2258,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketDistribute(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketDistribute");
   return theCommands.outerDistribute(
-    theCommands, input, output, theCommands.opPlus(),theCommands.opLieBracket()
+    theCommands, input, output, theCommands.opPlus(), theCommands.opLieBracket()
   );
 }
 
@@ -2397,22 +2402,22 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix(
   if ((leftNumRows != rightNumRows) || (leftNumCols != rightNumCols)) {
     return false;
   }
-  Matrix<Expression> leftMat, rightMat;
+  Matrix<Expression> leftMatrix, rightMatrix;
   if (
-    !theCommands.getMatrixExpressions(leftE, leftMat) ||
-    !theCommands.getMatrixExpressions(rightE, rightMat)
+    !theCommands.getMatrixExpressions(leftE, leftMatrix) ||
+    !theCommands.getMatrixExpressions(rightE, rightMatrix)
   ) {
     return false;
   }
-  if (leftMat.numberOfColumns != rightMat.numberOfColumns || leftMat.numberOfRows != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfColumns != rightMatrix.numberOfColumns || leftMatrix.numberOfRows != rightMatrix.numberOfRows) {
     return false;
   }
-  for (int i = 0; i < leftMat.numberOfRows; i ++) {
-    for (int j = 0; j < leftMat.numberOfColumns; j ++) {
-      leftMat(i, j) += rightMat(i, j);
+  for (int i = 0; i < leftMatrix.numberOfRows; i ++) {
+    for (int j = 0; j < leftMatrix.numberOfColumns; j ++) {
+      leftMatrix(i, j) += rightMatrix(i, j);
     }
   }
-  return output.assignMatrixExpressions(leftMat, theCommands, false, true);
+  return output.assignMatrixExpressions(leftMatrix, theCommands, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
@@ -2422,21 +2427,21 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
   if (input.size() != 3) {
     return false;
   }
-  Matrix<Expression> leftMat, rightMat;
+  Matrix<Expression> leftMatrix, rightMatrix;
   if (
-    !theCommands.getMatrixExpressions(input[1], leftMat) ||
-    !theCommands.getMatrixExpressions(input[2], rightMat)
+    !theCommands.getMatrixExpressions(input[1], leftMatrix) ||
+    !theCommands.getMatrixExpressions(input[2], rightMatrix)
   ) {
     return false;
   }
-  if (leftMat.numberOfRows != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfRows != rightMatrix.numberOfRows) {
     return theCommands << "Cannot augment the left matrix with: "
-    << leftMat.numberOfRows
+    << leftMatrix.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
-    << rightMat.numberOfRows << ". ";
+    << rightMatrix.numberOfRows << ". ";
   }
-  leftMat.appendMatrixOnTheRight(rightMat);
-  return output.assignMatrixExpressions(leftMat, theCommands, false, false);
+  leftMatrix.appendMatrixOnTheRight(rightMatrix);
+  return output.assignMatrixExpressions(leftMatrix, theCommands, false, false);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
@@ -2446,21 +2451,21 @@ bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
   if (input.size() != 3) {
     return false;
   }
-  Matrix<Expression> leftMat, rightMat;
+  Matrix<Expression> leftMatrix, rightMatrix;
   if (
-    !theCommands.getMatrixExpressions(input[1], leftMat) ||
-    !theCommands.getMatrixExpressions(input[2], rightMat)
+    !theCommands.getMatrixExpressions(input[1], leftMatrix) ||
+    !theCommands.getMatrixExpressions(input[2], rightMatrix)
   ) {
     return false;
   }
-  if (leftMat.numberOfRows != rightMat.numberOfRows) {
+  if (leftMatrix.numberOfRows != rightMatrix.numberOfRows) {
     return theCommands
-    << "Cannot augment the left matrix with: " << leftMat.numberOfRows
+    << "Cannot augment the left matrix with: " << leftMatrix.numberOfRows
     << " rows to the right by a matrix with a different number of rows: "
-    << rightMat.numberOfRows << ". ";
+    << rightMatrix.numberOfRows << ". ";
   }
-  leftMat.appendMatrixToTheBottom(rightMat);
-  return output.assignMatrixExpressions(leftMat, theCommands, false, false);
+  leftMatrix.appendMatrixToTheBottom(rightMatrix);
+  return output.assignMatrixExpressions(leftMatrix, theCommands, false, false);
 
 }
 
@@ -2476,15 +2481,15 @@ bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix(
   if (!leftE.isMatrix() || !rightE.isMatrix()) {
     return false;
   }
-  Matrix<Expression> leftMat, rightMat;
+  Matrix<Expression> leftMatrix, rightMatrix;
   if (
-    !theCommands.getMatrixExpressions(leftE, leftMat) ||
-    !theCommands.getMatrixExpressions(rightE, rightMat)
+    !theCommands.getMatrixExpressions(leftE, leftMatrix) ||
+    !theCommands.getMatrixExpressions(rightE, rightMatrix)
   ) {
     return false;
   }
-  leftMat.directSumWith(rightMat,theCommands.expressionZero());
-  return output.assignMatrixExpressions(leftMat, theCommands, false, true);
+  leftMatrix.directSumWith(rightMatrix,theCommands.expressionZero());
+  return output.assignMatrixExpressions(leftMatrix, theCommands, false, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
@@ -2608,22 +2613,22 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
   if (!leftE.mergeContexts(leftE, rightE)) {
     return false;
   }
-  Matrix<RationalFunction<Rational> > leftMat, rightMat;
-  if (!theCommands.functionGetMatrix(leftE, leftMat)) {
+  Matrix<RationalFunction<Rational> > leftMatrix, rightMatrix;
+  if (!theCommands.functionGetMatrix(leftE, leftMatrix)) {
     return false;
   }
-  if (!theCommands.functionGetMatrix(rightE, rightMat)) {
+  if (!theCommands.functionGetMatrix(rightE, rightMatrix)) {
     return false;
   }
   if (
-    rightMat.numberOfRows != leftMat.numberOfRows ||
-    rightMat.numberOfColumns != leftMat.numberOfColumns
+    rightMatrix.numberOfRows != leftMatrix.numberOfRows ||
+    rightMatrix.numberOfColumns != leftMatrix.numberOfColumns
   ) {
     return false;
   }
-  leftMat += rightMat;
+  leftMatrix += rightMatrix;
   ExpressionContext theContext = leftE.getContext();
-  return output.assignMatrix(leftMat, theCommands, &theContext);
+  return output.assignMatrix(leftMatrix, theCommands, &theContext);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(
@@ -2637,10 +2642,10 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(
   if (!rightE.isOfType<MatrixTensor<Rational> >()|| !leftE.isOfType<MatrixTensor<Rational> >()) {
     return false;
   }
-  const MatrixTensor<Rational>& rightMat = rightE.getValue<MatrixTensor<Rational> >();
-  const MatrixTensor<Rational>& leftMat = leftE.getValue<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result = leftMat;
-  result += rightMat;
+  const MatrixTensor<Rational>& rightMatrix = rightE.getValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& leftMatrix = leftE.getValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result = leftMatrix;
+  result += rightMatrix;
   return output.assignValue(result, theCommands);
 }
 

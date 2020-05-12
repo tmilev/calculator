@@ -3900,11 +3900,7 @@ bool Expression::toStringError(
     return false;
   }
   input.checkInitialization();
-  input.owner->NumErrors ++;
-  out << "\\text{Error number "
-  << input.owner->NumErrors
-  << ": " << input[1].toString(theFormat) << "}"
-  ;
+  out << "\\text{Error: " << input[1].toString(theFormat) << "}";
   return true;
 }
 

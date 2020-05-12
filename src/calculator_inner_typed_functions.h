@@ -14,12 +14,12 @@ public:
   template <class theType>
   static bool innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerAddDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddNumberOrPolyToNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
@@ -117,7 +117,7 @@ public:
   static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerElementZmodPByInteger(Calculator& theCommands, const Expression& input, Expression& output);
@@ -244,7 +244,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       );
     }
     if (input.isListStartingWithAtom(theCommands.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
+      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(theCommands, theComputed, output);
     }
     global.fatal << "Error, this line of code should never be reached. " << global.fatal;
   }
@@ -261,7 +261,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       }
       theComputed.addChildOnTop(theConverted);
     }
-    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
+    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(theCommands, theComputed, output);
   }
 
   int thePower = - 1;

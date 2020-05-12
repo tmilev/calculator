@@ -1365,16 +1365,21 @@ bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expr
 }
 
 bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(- 1, 3)) {
+  if (input.size() != 3) {
     return false;
   }
-  int theOperation = input[0].theData;
-  if (!input[1].startsWith(theOperation, 3)) {
+  int operation = input[0].theData;
+  if (!input[1].startsWith(operation) && !input[2].startsWith(operation)) {
     return false;
   }
-  Expression newRight;
-  newRight.MakeXOX(theCommands, theOperation, input[1][2], input[2]);
-  output.MakeXOX(theCommands, theOperation, input[1][1], newRight);
+  List<Expression> multiplicands;
+  theCommands.collectOpands(input, operation, multiplicands);
+  Expression result;
+  result.makeOXdotsX(theCommands, operation, multiplicands);
+  if (result == input) {
+    return false;
+  }
+  output = result;
   return true;
 }
 
@@ -1772,13 +1777,8 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     return true;
   }
   this->MakeXOX(owner, theOp, input[input.size - 2], *input.lastObject());
-  Expression result;
   for (int i = input.size - 3; i >= 0; i --) {
-    result.reset(owner, 3);
-    result.addChildAtomOnTop(theOp);
-    result.addChildOnTop(input[i]);
-    result.addChildOnTop(*this);
-    *this = result;
+    this->MakeXOX(owner, theOp, input[i], *this);
   }
   return true;
 }

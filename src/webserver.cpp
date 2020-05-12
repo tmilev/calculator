@@ -3584,7 +3584,6 @@ bool WebWorker::runOnce() {
   ) {
     return false;
   }
-  // The function call needs security audit.
   this->resetConnection();
   global << Logger::blue << "Received " << this->numberOfReceivesCurrentConnection
   << " times on this connection, waiting for more. "

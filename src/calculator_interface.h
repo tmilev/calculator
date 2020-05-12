@@ -1202,7 +1202,6 @@ public:
   int MaxLatexChars;
   int MaxCachedExpressionPerRuleStack;
   int MaxRuleStacksCached;
-  int NumErrors;
   int RuleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
   class EvaluationStats {
@@ -1229,7 +1228,7 @@ public:
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
   bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
-  bool flagLogEvaluatioN;
+  bool flagLogEvaluation;
   bool flagUseNumberColors;
   bool flagLogRules;
   bool flagUseBracketsForIntervals;
@@ -1253,7 +1252,7 @@ public:
 
   bool flagforkingprocessAllowed;
 
-  double lastLogEvaluationTime;
+  int64_t millisecondsLastLog;
   ///////////////////////////////////////////////////////////////////////////
   int numberOfListsStart;
   int numberListResizesStart;
@@ -1368,7 +1367,8 @@ public:
   Expression expressionMinusHalf();
   Expression expressionInfinity();
   Expression expressionMinusInfinity();
-  void doLogEvaluationIfNeedBe(Function& inputF);
+  void logFunctionWithTime(Function& inputF);
+  void logTime();
   void logPublicError(const std::string& theError);
   bool decreaseStackExceptLast(int decrease);
   bool decreaseStackExceptLastTwo(int decrease);
@@ -2554,8 +2554,6 @@ public:
     const Function::Options& options,
     const std::string& parentOpThatBansHandler = ""
   );
-  void initialize();
-  void initializeToStringHandlers();
   void addOneStringAtomHandler(
     int atom,
     Expression::ToStringHandler handler
@@ -2572,7 +2570,9 @@ public:
     MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
   );
   void reset();
-  void resetFrequentConstants();
+  void initialize();
+  void initializeToStringHandlers();
+  void initializeComputationStatistics();
   void initializePredefinedWordSplits();
   void initAtomsThatFreezeArguments();
   void initializeAtomsNonCacheable();
@@ -2590,7 +2590,6 @@ public:
   void initCalculusTestingFunctions();
   void initAdminFunctions();
   void initPredefinedOperationsComposite();
-  void initComputationStats();
   bool extractExpressions(Expression& outputExpression, std::string* outputErrors);
   void evaluateCommands();
   bool isTimedOut();

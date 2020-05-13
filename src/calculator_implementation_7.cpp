@@ -3133,27 +3133,27 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
   if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  if (leftE.isConstantNumber()) {
+  const Expression& leftExpression = input[1];
+  if (leftExpression.isConstantNumber()) {
     return false;
   }
   if (!input[2].startsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  const Expression& rightE = input[2][1];
+  const Expression& middleExpression = input[2][1];
   HashedListSpecialized<Expression> theList;
 
-  leftE.getBlocksOfCommutativity(theList);
-  rightE.getBlocksOfCommutativity(theList);
+  leftExpression.getBlocksOfCommutativity(theList);
+  middleExpression.getBlocksOfCommutativity(theList);
   if (theList.size != 1) {
     return false;
   }
-  if (rightE > leftE || leftE == rightE) {
+  if (middleExpression > leftExpression || middleExpression == leftExpression) {
     return false;
   }
-  Expression leftMultiplicand;
-  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), rightE, leftE);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), leftMultiplicand, input[2][2]);
+  Expression rightMultiplicand;
+  rightMultiplicand.makeProduct(theCommands,  leftExpression, input[2][2]);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), middleExpression, rightMultiplicand);
 }
 
 bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(

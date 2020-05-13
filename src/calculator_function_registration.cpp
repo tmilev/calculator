@@ -6667,7 +6667,8 @@ void Calculator::initPredefinedStandardOperations() {
     "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
     "Calculator::outerAssociate",
     "AssociativeRule",
-    outerStandard
+    outerStandard,
+    "*"
   );
   this->addOperationHandler(
     "*",

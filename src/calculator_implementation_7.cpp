@@ -810,7 +810,7 @@ bool CalculatorFunctions::innerConvertElementZmodPToInteger(
   if (!argument.isOfType<ElementZmodP>(&theElement)) {
     return false;
   }
-  return output.assignValue(theElement.theValue, theCommands);
+  return output.assignValue(theElement.value, theCommands);
 }
 
 bool CalculatorFunctions::innerUrlStringToNormalString(
@@ -939,7 +939,7 @@ bool CalculatorFunctions::innerLogBase(Calculator& theCommands, const Expression
   Expression numE, denE;
   numE.makeOX(theCommands, theCommands.opLog(), input[2]);
   denE.makeOX(theCommands, theCommands.opLog(), input[1]);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
+  return output.makeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
 bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -953,7 +953,7 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
   if (input[1].isEqualToOne()) {
     return output.assignValue(0, theCommands);
   }
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   double theArgument;
@@ -973,9 +973,9 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
   Expression iE, ipiE, piE, lnPart;
   iE.makeSqrt(theCommands, Rational(- 1), 2);
   piE.makeAtom(theCommands.opPi(), theCommands);
-  ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
+  ipiE.makeXOX(theCommands, theCommands.opTimes(), piE, iE);
   lnPart.assignValue(FloatingPoint::logFloating(theArgument), theCommands);
-  return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
+  return output.makeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
 }
 
 bool CalculatorFunctions::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1015,7 +1015,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
     output *= theCommands.expressionMinusOne();
     return true;
   }
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   double theArgument;
@@ -1027,7 +1027,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
 
 bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArccos");
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   if (input.size() != 2) {
@@ -1046,7 +1046,7 @@ bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression&
   if (input.size() != 2) {
     return false;
   }
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   double theArgument;
@@ -1111,7 +1111,7 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
       }
     }
   }
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   double theArgument = 0;
@@ -1148,7 +1148,7 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
       }
     }
   }
-  if (theCommands.flagNoApproximationS) {
+  if (theCommands.flagNoApproximations) {
     return false;
   }
   double theArgument = 0;
@@ -1167,7 +1167,7 @@ bool CalculatorFunctions::innerTan(Calculator& theCommands, const Expression& in
   Expression num, den;
   num.makeOX(theCommands, theCommands.opSin(), argument);
   den.makeOX(theCommands, theCommands.opCos(), argument);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+  return output.makeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerCot(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1179,7 +1179,7 @@ bool CalculatorFunctions::innerCot(Calculator& theCommands, const Expression& in
   Expression num, den;
   num.makeOX(theCommands, theCommands.opCos(), argument);
   den.makeOX(theCommands, theCommands.opSin(), argument);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+  return output.makeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerSec(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1191,7 +1191,7 @@ bool CalculatorFunctions::innerSec(Calculator& theCommands, const Expression& in
   Expression num, den;
   num.assignValue(1, theCommands);
   den.makeOX(theCommands, theCommands.opCos(), argument);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+  return output.makeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerCsc(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1203,7 +1203,7 @@ bool CalculatorFunctions::innerCsc(Calculator& theCommands, const Expression& in
   Expression num, den;
   num.assignValue(1, theCommands);
   den.makeOX(theCommands, theCommands.opSin(), argument);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+  return output.makeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool Calculator::getSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands) {
@@ -1234,7 +1234,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& theCommands, const Expr
     if (!CalculatorFunctions::innerCoefficientOf(theCommands, coefficientNumerator, output)) {
       return false;
     }
-    return output.MakeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
+    return output.makeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
   }
   if (!theCommands.getSumProductsExpressions(input[2], theSummands)) {
     return theCommands << "Failed to extract product of expressions from "
@@ -1518,7 +1518,7 @@ bool CalculatorFunctions::innerCompositeApowerBevaluatedAtC(
   for (int i = 1; i < input.children.size; i ++) {
     finalBase.addChildOnTop(input[i]);
   }
-  return output.MakeXOX(theCommands, theCommands.opThePower(), finalBase, input[0][2]);
+  return output.makeXOX(theCommands, theCommands.opThePower(), finalBase, input[0][2]);
 }
 
 bool CalculatorFunctions::innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1628,8 +1628,8 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
 }
 
 template <class Coefficient>
-Coefficient Polynomial<Coefficient>::GetDiscriminant() {
-  MacroRegisterFunctionWithName("Polynomial::GetDiscriminant");
+Coefficient Polynomial<Coefficient>::getDiscriminant() {
+  MacroRegisterFunctionWithName("Polynomial::getDiscriminant");
   if (this->minimalNumberOfVariables() > 1) {
     global.fatal
     << "I do not have a definition of discriminant "
@@ -1642,9 +1642,9 @@ Coefficient Polynomial<Coefficient>::GetDiscriminant() {
     << "of degree not equal to 1."
     << global.fatal;
   }
-  Coefficient a = this->getMonomialCoefficient(MonomialP(0, 2));
-  Coefficient b = this->getMonomialCoefficient(MonomialP(0, 1));
-  Coefficient c = this->getMonomialCoefficient(MonomialP(0, 0));
+  Coefficient a = this->getCoefficientOf(MonomialP(0, 2));
+  Coefficient b = this->getCoefficientOf(MonomialP(0, 1));
+  Coefficient c = this->getCoefficientOf(MonomialP(0, 0));
   return b * b - a * c * 4;
 }
 
@@ -1733,7 +1733,7 @@ bool IntegralRationalFunctionComputation::preparePartialFractionExpressionSumman
       }
       if (j != 0) {
         denExpE.assignValue(j + 1, *this->owner);
-        currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
+        currentDen.makeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
       } else {
         currentDen = currentDenNoPowerMonic;
       }
@@ -1805,7 +1805,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       }
       if (j != 0) {
         denExpE.assignValue(j + 1, *this->owner);
-        currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
+        currentDen.makeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
       } else {
         currentDen = currentDenNoPowerMonic;
       }
@@ -2137,7 +2137,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
       );
       continue;
     }
-    Rational theDiscriminant = currentSecondDegreePoly.GetDiscriminant();
+    Rational theDiscriminant = currentSecondDegreePoly.getDiscriminant();
     if (theDiscriminant < 0) {
       this->theDenominatorFactorsWithMults.addMonomial(
         currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
@@ -2157,8 +2157,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
       return false;
     }
     theDiscriminantSqrt.checkConsistency();
-    AlgebraicNumber a = currentSecondDegreePoly.getMonomialCoefficient(MonomialP(0, 2));
-    AlgebraicNumber b = currentSecondDegreePoly.getMonomialCoefficient(MonomialP(0, 1));
+    AlgebraicNumber a = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 2));
+    AlgebraicNumber b = currentSecondDegreePoly.getCoefficientOf(MonomialP(0, 1));
     a.checkConsistency();
     b.checkConsistency();
     currentLinPoly.makeMonomial(0, 1);
@@ -2340,7 +2340,7 @@ bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
   functionActsOnE.addChildOnTop(input[0][2]);
   functionActsOnE.addChildOnTop(input[1]);
   theCommands.checkInputNotSameAsOutput(input, output);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), input[0][1], functionActsOnE);
+  return output.makeXOX(theCommands, theCommands.opTimes(), input[0][1], functionActsOnE);
 }
 
 bool CalculatorFunctions::innerCompositeEWAactOnPoly(
@@ -2545,11 +2545,11 @@ bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& theCommands, 
   }
   Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
   minusOne.assignValue<Rational>(- 1, theCommands);
-  theExponent.MakeXOX(theCommands, theCommands.opPlus(), theArgument[2], minusOne);
-  theMonomial.MakeXOX(theCommands, theCommands.opThePower(), theArgument[1], theExponent);
-  basePrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  theTerm.MakeXOX(theCommands, theCommands.opTimes(), theArgument[2], theMonomial);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), theTerm, basePrime);
+  theExponent.makeXOX(theCommands, theCommands.opPlus(), theArgument[2], minusOne);
+  theMonomial.makeXOX(theCommands, theCommands.opThePower(), theArgument[1], theExponent);
+  basePrime.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  theTerm.makeXOX(theCommands, theCommands.opTimes(), theArgument[2], theMonomial);
+  return output.makeXOX(theCommands, theCommands.opTimes(), theTerm, basePrime);
 }
 
 bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2573,9 +2573,9 @@ bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& theCommands, con
   logBase.reset(theCommands, 2);
   logBase.addChildAtomOnTop(theCommands.opLog());
   logBase.addChildOnTop(theArgument[1]);
-  exponentTimesLogBase.MakeXOX(theCommands, theCommands.opTimes(), theArgument[2], logBase);
-  derivativeExponentTimesLogBase.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, exponentTimesLogBase);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), theArgument, derivativeExponentTimesLogBase);
+  exponentTimesLogBase.makeXOX(theCommands, theCommands.opTimes(), theArgument[2], logBase);
+  derivativeExponentTimesLogBase.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, exponentTimesLogBase);
+  return output.makeXOX(theCommands, theCommands.opTimes(), theArgument, derivativeExponentTimesLogBase);
 }
 
 bool CalculatorFunctions::innerDifferentiateConstant(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2635,35 +2635,35 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Expression mOneE, sinE;
     mOneE.assignValue<Rational>(- 1, theCommands);
     sinE.makeAtom(theCommands.opSin(), theCommands);
-    return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
+    return output.makeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
   }
   if (theArgument.isOperationGiven(theCommands.opTan())) {
     Expression secE, twoE;
     secE.makeAtom(theCommands.opSec(), theCommands);
     twoE.assignValue(2, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opThePower(), secE, twoE);
+    return output.makeXOX(theCommands, theCommands.opThePower(), secE, twoE);
   }
   if (theArgument.isOperationGiven(theCommands.opCot())) {
     Expression cscE, twoE, cscSquared, mOneE;
     cscE.makeAtom(theCommands.opCsc(), theCommands);
     twoE.assignValue(2, theCommands);
-    cscSquared.MakeXOX(theCommands, theCommands.opThePower(), cscE, twoE);
+    cscSquared.makeXOX(theCommands, theCommands.opThePower(), cscE, twoE);
     mOneE.assignValue(- 1, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
+    return output.makeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
   }
   if (theArgument.isOperationGiven(theCommands.opSec())) {
     Expression tanE, secE;
     tanE.makeAtom(theCommands.opTan(), theCommands);
     secE.makeAtom(theCommands.opSec(), theCommands);
-    return output.MakeXOX(theCommands, theCommands.opTimes(), tanE, secE);
+    return output.makeXOX(theCommands, theCommands.opTimes(), tanE, secE);
   }
   if (theArgument.isOperationGiven(theCommands.opCsc())) {
     Expression cotE, cscE, mOneE, cotTimesCscE;
     cotE.makeAtom(theCommands.opCot(), theCommands);
     cscE.makeAtom(theCommands.opCsc(), theCommands);
     mOneE.assignValue(- 1, theCommands);
-    cotTimesCscE.MakeXOX(theCommands, theCommands.opTimes(), cotE, cscE);
-    return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cotTimesCscE);
+    cotTimesCscE.makeXOX(theCommands, theCommands.opTimes(), cotE, cscE);
+    return output.makeXOX(theCommands, theCommands.opTimes(), mOneE, cotTimesCscE);
   }
   if (theArgument.isOperationGiven(theCommands.opArcTan())) {
     Polynomial<Rational> onePlusXsquared;
@@ -2685,7 +2685,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.assignValueWithContext(oneMinusXsquared, context, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.expressionMinusHalf());
+    return output.makeXOX(theCommands, theCommands.opThePower(), denE, theCommands.expressionMinusHalf());
   }
   if (theArgument.isOperationGiven(theCommands.opArcCos())) {
     Expression denE;
@@ -2696,7 +2696,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.assignValueWithContext(oneMinusXsquared, context, theCommands);
-    output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.expressionMinusHalf());
+    output.makeXOX(theCommands, theCommands.opThePower(), denE, theCommands.expressionMinusHalf());
     output *= - 1;
     return true;
   }
@@ -2721,7 +2721,7 @@ bool CalculatorFunctions::innerCompositeDifferentiateLog(
   Expression OneE;
   OneE.assignValue(1, theCommands);
   output.reset(theCommands, 2);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), OneE, input[1]);
+  return output.makeXOX(theCommands, theCommands.opDivide(), OneE, input[1]);
 }
 
 bool CalculatorFunctions::outerDivideByNumber(
@@ -2861,10 +2861,10 @@ bool CalculatorFunctions::outerAssociateAdivBdivCpowerD(
   theCommands.checkInputNotSameAsOutput(input, output);
   Expression numeratorE, numeratorLeftE, denominatorE;
   output.reset(theCommands, 3);
-  numeratorLeftE.MakeXOX(theCommands, theCommands.opThePower(), input[2][1][2], input[2][2]);
-  numeratorE.MakeXOX(theCommands, theCommands.opTimes(), input[1], numeratorLeftE);
-  denominatorE.MakeXOX(theCommands, theCommands.opThePower(), input[2][1][1], input[2][2]);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
+  numeratorLeftE.makeXOX(theCommands, theCommands.opThePower(), input[2][1][2], input[2][2]);
+  numeratorE.makeXOX(theCommands, theCommands.opTimes(), input[1], numeratorLeftE);
+  denominatorE.makeXOX(theCommands, theCommands.opThePower(), input[2][1][1], input[2][2]);
+  return output.makeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
 bool CalculatorFunctions::outerDivCancellations(
@@ -2881,10 +2881,10 @@ bool CalculatorFunctions::outerDivCancellations(
     return false;
   }
   if (input[1][2] == input[2][2]) {
-    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], input[2][1]);
+    return output.makeXOX(theCommands, theCommands.opDivide(), input[1][1], input[2][1]);
   }
   if (input[1][1] == input[2][1]) {
-    return output.MakeXOX(theCommands, theCommands.opDivide(), input[2][2], input[1][2]);
+    return output.makeXOX(theCommands, theCommands.opDivide(), input[2][2], input[1][2]);
   }
   return false;
 }
@@ -2898,13 +2898,13 @@ bool CalculatorFunctions::outerAssociateDivisionDivision(
   }
   if (input[1].startsWith(theCommands.opDivide(), 3)) {
     Expression newRightE;
-    newRightE.MakeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
-    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
+    newRightE.makeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
+    return output.makeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
   }
   if (input[2].startsWith(theCommands.opDivide(), 3)) {
     Expression newLeftE;
-    newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
-    return output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
+    newLeftE.makeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
+    return output.makeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
   }
   return false;
 }
@@ -2932,12 +2932,12 @@ bool CalculatorFunctions::innerDifferentiateChainRule(
   theCommands.checkInputNotSameAsOutput(input, output);
   output.reset(theCommands);
   Expression multiplicandleft, multiplicandleftFunction, multiplicandright;
-  multiplicandleftFunction.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[0]);
+  multiplicandleftFunction.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[0]);
   multiplicandleft.reset(theCommands);
   multiplicandleft.addChildOnTop(multiplicandleftFunction);
   multiplicandleft.addChildOnTop(theArgument[1]);
-  multiplicandright.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), multiplicandleft, multiplicandright);
+  multiplicandright.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  return output.makeXOX(theCommands, theCommands.opTimes(), multiplicandleft, multiplicandright);
 }
 
 bool CalculatorFunctions::innerDifferentiateAplusB(
@@ -2960,9 +2960,9 @@ bool CalculatorFunctions::innerDifferentiateAplusB(
   theCommands.checkInputNotSameAsOutput(input, output);
   output.reset(theCommands);
   Expression leftSummand, rightSummand;
-  leftSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  rightSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
-  return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+  leftSummand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  rightSummand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  return output.makeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
 }
 
 bool CalculatorFunctions::innerDifferentiateAtimesB(
@@ -2985,11 +2985,11 @@ bool CalculatorFunctions::innerDifferentiateAtimesB(
   theCommands.checkInputNotSameAsOutput(input, output);
   output.reset(theCommands);
   Expression changedMultiplicand, leftSummand, rightSummand;
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand );
-  return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+  changedMultiplicand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.makeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
+  changedMultiplicand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  rightSummand.makeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand );
+  return output.makeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
 }
 
 bool CalculatorFunctions::innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -3052,7 +3052,7 @@ bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
       denBaseFound = true;
       theDenominatorBase = theArgument[2][1];
       theDenominatorExponent = theArgument[2][2];
-      theDenominatorExponentPlusOne.MakeXOX(theCommands, theCommands.opPlus(), theDenominatorExponent, eOne);
+      theDenominatorExponentPlusOne.makeXOX(theCommands, theCommands.opPlus(), theDenominatorExponent, eOne);
     }
   }
   if (!denBaseFound) {
@@ -3060,14 +3060,14 @@ bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
     theDenominatorExponentPlusOne.assignValue(2, theCommands);
     theDenominatorExponent.assignValue(1, theCommands);
   }
-  theDenominatorFinal.MakeXOX(theCommands, theCommands.opThePower(), theDenominatorBase, theDenominatorExponentPlusOne);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theDenominatorBase);
-  rightSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theDenominatorBase);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], rightSummand);
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theDenominatorExponent, changedMultiplicand);
-  numerator.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, theDenominatorFinal);
+  theDenominatorFinal.makeXOX(theCommands, theCommands.opThePower(), theDenominatorBase, theDenominatorExponentPlusOne);
+  changedMultiplicand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.makeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theDenominatorBase);
+  rightSummand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theDenominatorBase);
+  changedMultiplicand.makeXOX(theCommands, theCommands.opTimes(), theArgument[1], rightSummand);
+  rightSummand.makeXOX(theCommands, theCommands.opTimes(), theDenominatorExponent, changedMultiplicand);
+  numerator.makeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
+  return output.makeXOX(theCommands, theCommands.opDivide(), numerator, theDenominatorFinal);
 }
 
 bool CalculatorFunctions::innerDifferentiateAdivideBNONCommutative(
@@ -3093,14 +3093,14 @@ bool CalculatorFunctions::innerDifferentiateAdivideBNONCommutative(
   Expression changedMultiplicand, leftSummand, rightSummand;
   Expression bInverse, bPrime, eMOne;
   eMOne.assignValue<Rational>(- 1, theCommands);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  leftSummand.MakeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
-  bPrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
-  bInverse.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], eMOne);
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand = b' b^{- 1}
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand = b^- 1 b' b^- 1
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
-  return output.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
+  changedMultiplicand.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.makeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
+  bPrime.makeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  bInverse.makeXOX(theCommands, theCommands.opThePower(), theArgument[2], eMOne);
+  rightSummand.makeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand = b' b^{- 1}
+  changedMultiplicand.makeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand = b^- 1 b' b^- 1
+  rightSummand.makeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
+  return output.makeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
 }
 
 bool CalculatorFunctions::outerCommuteAtimesBifUnivariate(
@@ -3153,7 +3153,7 @@ bool CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate(
   }
   Expression rightMultiplicand;
   rightMultiplicand.makeProduct(theCommands,  leftExpression, input[2][2]);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), middleExpression, rightMultiplicand);
+  return output.makeXOX(theCommands, theCommands.opTimes(), middleExpression, rightMultiplicand);
 }
 
 bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(
@@ -3201,7 +3201,7 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   if (theVars.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(0, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+    return output.makeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   if (theVars.size > 1) {
     return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
@@ -3257,7 +3257,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   if (theFreeVars.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(0, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+    return output.makeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   double tolerance = 0.0001;
   if (!input[3].evaluatesToDouble(&tolerance)) {
@@ -3352,7 +3352,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   if (theVars.size <= 0) {
     Expression zeroE;
     zeroE.assignValue(0, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+    return output.makeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   List<double> leftBoundaries;
   List<double> rightBoundaries;
@@ -3480,7 +3480,7 @@ bool CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument(
   leftE.addChildOnTop(input[1]);
   rightE.addChildOnTop(input[0][2]);
   rightE.addChildOnTop(input[1]);
-  return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
+  return output.makeXOX(theCommands, input[0][0].theData, leftE, rightE);
 }
 
 bool CalculatorFunctions::innerIsEven(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -3652,12 +3652,12 @@ bool CalculatorFunctions::innerIntegralOperator(
   Expression newIntegrand;
   Expression newFun;
   if (incomingIntegrand.isDifferentialOneFormOneVariable()) {
-    newFun.MakeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand[2]);
-    newIntegrand.MakeXOX(theCommands, theCommands.opDifferential(), incomingIntegrand[1], newFun);
+    newFun.makeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand[2]);
+    newIntegrand.makeXOX(theCommands, theCommands.opDifferential(), incomingIntegrand[1], newFun);
     output = integralE;
     return output.setChild(2, newIntegrand);
   }
-  newIntegrand.MakeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand);
+  newIntegrand.makeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand);
   output = integralE;
   return output.setChild(2, newIntegrand);
 }
@@ -4176,7 +4176,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb(
   OneMinusN = N;
   OneMinusN += - 1;
   OneMinusN *= - 1;
-  base.MakeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
+  base.makeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
   output = A;
   output /= a;
   output /= OneMinusN;
@@ -4209,13 +4209,13 @@ bool CalculatorFunctions::extractQuadraticCoeffsWRTvariable(
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
   if (theCoeffs.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.getCoefficientOf(MonomialVector(0));
   }
   if (theCoeffs.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.getCoefficientOf(MonomialVector(1));
   }
   if (theCoeffs.monomials.contains(MonomialVector(2))) {
-    outputCoeffVarSquared = theCoeffs.getMonomialCoefficient(MonomialVector(2));
+    outputCoeffVarSquared = theCoeffs.getCoefficientOf(MonomialVector(2));
   }
   return true;
 }
@@ -4239,10 +4239,10 @@ bool CalculatorFunctions::extractLinearCoeffsWRTvariable(
   outputCoeffLinTerm.assignValue(0, theCommands);
   outputConstTerm.assignValue(0, theCommands);
   if (theCoeffs.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = theCoeffs.getMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.getCoefficientOf(MonomialVector(1));
   }
   if (theCoeffs.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = theCoeffs.getMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.getCoefficientOf(MonomialVector(0));
   }
   return true;
 }
@@ -4287,9 +4287,9 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
   oneE.assignValue(1, theCommands);
   twoE.assignValue(2, theCommands);
   fourE.assignValue(4, theCommands);
-  xSquared.MakeXOX(theCommands, theCommands.opThePower(), x, twoE);
-  bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
-  aSquared.MakeXOX(theCommands, theCommands.opThePower(), a, twoE);
+  xSquared.makeXOX(theCommands, theCommands.opThePower(), x, twoE);
+  bSquared.makeXOX(theCommands, theCommands.opThePower(), b, twoE);
+  aSquared.makeXOX(theCommands, theCommands.opThePower(), a, twoE);
 
   Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
   Expression xplusbdiv2a = x + b / (twoE * a);
@@ -4361,14 +4361,14 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   threeE.assignValue(3, theCommands);
   fourE.assignValue(4, theCommands);
 
-  xSquared.MakeXOX(theCommands, theCommands.opThePower(), x, twoE);
-  bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
+  xSquared.makeXOX(theCommands, theCommands.opThePower(), x, twoE);
+  bSquared.makeXOX(theCommands, theCommands.opThePower(), b, twoE);
 
   Expression theMonicQuadratic = xSquared + b * x + c;
   Expression D = c - bSquared / fourE;
   Expression remainingIntegral, functionRemainingToIntegrate, theQuadraticPowerOneMinusN, theQuadraticPowerNMinusOne;
-  theQuadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE - numPowerE);
-  theQuadraticPowerNMinusOne.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE - oneE);
+  theQuadraticPowerOneMinusN.makeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE - numPowerE);
+  theQuadraticPowerNMinusOne.makeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE - oneE);
   functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(theCommands, integrationSetE, functionRemainingToIntegrate, x);
   output = oneE / D *
@@ -4436,13 +4436,13 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
   oneE.assignValue(1, theCommands);
   twoE.assignValue(2, theCommands);
   fourE.assignValue(4, theCommands);
-  apowerN.MakeXOX(theCommands, theCommands.opThePower(), a, nE);
-  xSquared.MakeXOX(theCommands, theCommands.opThePower(), x, twoE);
-  bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
-  aSquared.MakeXOX(theCommands, theCommands.opThePower(), a, twoE);
+  apowerN.makeXOX(theCommands, theCommands.opThePower(), a, nE);
+  xSquared.makeXOX(theCommands, theCommands.opThePower(), x, twoE);
+  bSquared.makeXOX(theCommands, theCommands.opThePower(), b, twoE);
+  aSquared.makeXOX(theCommands, theCommands.opThePower(), a, twoE);
   Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
-  quadraticPowerN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, nE);
-  quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE - nE);
+  quadraticPowerN.makeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, nE);
+  quadraticPowerOneMinusN.makeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE - nE);
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.makeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
   Expression C = B - (A * b) / (twoE * a);
@@ -4503,7 +4503,7 @@ bool Expression::makeIntegral(
     return this->makeIntegral(theCommands, integrationSetCopy, theFunCopy, theVarCopy);
   }
   Expression theDiffForm;
-  theDiffForm.MakeXOX(theCommands, theCommands.opDifferential(), theVariable, theFunction);
+  theDiffForm.makeXOX(theCommands, theCommands.opDifferential(), theVariable, theFunction);
   this->reset(theCommands);
   this->addChildAtomOnTop(theCommands.opIntegral());
   this->addChildOnTop(integrationSet);
@@ -4609,7 +4609,7 @@ bool CalculatorFunctions::innerIntegrateXnDiffX(Calculator& theCommands, const E
   }
   Expression outputPower = theFunNoCoeff[2];
   outputPower += 1;
-  outputNoCoeff.MakeXOX(theCommands, theCommands.opThePower(), theVariableE, outputPower);
+  outputNoCoeff.makeXOX(theCommands, theCommands.opThePower(), theVariableE, outputPower);
   outputNoCoeff /= outputPower;
   output = theFunCoeff * outputNoCoeff;
   output.checkConsistency();
@@ -4703,28 +4703,28 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
     if (powerSine % 2 == 1) {
       currentE = oneE - newVarE * newVarE;
       powerE.assignValue((powerSine - 1) / 2, theCommands);
-      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandSinePart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.assignValue(powerCosine, theCommands);
-      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentIntegrandCosinePart.makeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.assignValue(- theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theCosE);
+      currentSubE.makeXOX(theCommands, theCommands.opDefine(), newVarE, theCosE);
     } else if (powerCosine % 2 == 1) {
       currentE = oneE - newVarE * newVarE;
       powerE.assignValue((powerCosine - 1) / 2, theCommands);
-      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandCosinePart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.assignValue(powerSine, theCommands);
-      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentIntegrandSinePart.makeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSinE);
+      currentSubE.makeXOX(theCommands, theCommands.opDefine(), newVarE, theSinE);
     } else {
       currentE = (oneE - theCosDoubleE) / twoE;
       powerE.assignValue(powerSine / 2, theCommands);
-      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandSinePart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       currentE = (oneE + theCosDoubleE) / twoE;
       powerE.assignValue(powerCosine / 2, theCommands);
-      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandCosinePart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], theCommands);
       currentIntegrandNonPolynomializedE = currentCF * currentIntegrandSinePart * currentIntegrandCosinePart;
       currentIntegrandE.reset(theCommands);
@@ -4740,7 +4740,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
     currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
     currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
 
-    currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
+    currentIntegralComputation.makeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(theCommands);
     currentCommandListE.addChildAtomOnTop(theCommands.opEndStatement());
     currentCommandListE.addChildOnTop(currentIntegralComputation);
@@ -4840,30 +4840,30 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
     if (powerTan % 2 == 1 && powerSec > 0) {
       currentE = newVarE * newVarE - oneE;
       powerE.assignValue((powerTan - 1) / 2, theCommands);
-      currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandTanPart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.assignValue(powerSec - 1, theCommands);
-      currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentIntegrandSecPart.makeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSecE);
+      currentSubE.makeXOX(theCommands, theCommands.opDefine(), newVarE, theSecE);
     } else if (powerSec % 2 == 0) {
       currentE = oneE + newVarE * newVarE;
       powerE.assignValue((powerSec - 2) / 2, theCommands);
-      currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandSecPart.makeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.assignValue(powerTan, theCommands);
-      currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentIntegrandTanPart.makeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.assignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theTanE);
+      currentSubE.makeXOX(theCommands, theCommands.opDefine(), newVarE, theTanE);
     } else {
       return false;
       /*currentE= (oneE-theCosDoubleE)/twoE;
       powerE.assignValue(powerSine/2, theCommands);
-      currentIntegrandSinePart.MakeXOX
+      currentIntegrandSinePart.makeXOX
       (theCommands, theCommands.opThePower(),currentE, powerE);
       currentE= (oneE+theCosDoubleE)/twoE;
       powerE.assignValue(powerCosine/2, theCommands);
-      currentIntegrandCosinePart.MakeXOX
+      currentIntegrandCosinePart.makeXOX
       (theCommands, theCommands.opThePower(),currentE, powerE);
       currentCF.assignValue(theTrigPoly.theCoeffs[i], theCommands);
       currentIntegrandNonPolynomializedE=
@@ -4881,7 +4881,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
     currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
     currentIntegral.makeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
 
-    currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
+    currentIntegralComputation.makeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(theCommands);
     currentCommandListE.addChildAtomOnTop(theCommands.opEndStatement());
     currentCommandListE.addChildOnTop(currentIntegralComputation);
@@ -4957,8 +4957,8 @@ bool CalculatorFunctions::innerConvertSinToExponent(
   iE.makeAtom(theCommands.opImaginaryUnit(), theCommands);
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
-  leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
-  rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
+  leftE.makeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
+  rightE.makeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
   output = (iE * (- 1)) * (leftE - rightE) / 2;
   return true;
 }
@@ -4976,8 +4976,8 @@ bool CalculatorFunctions::innerConvertCosToExponent(
   iE.makeAtom(theCommands.opImaginaryUnit(), theCommands);
   exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
-  leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
-  rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
+  leftE.makeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
+  rightE.makeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
   output = (leftE + rightE) / 2;
   return true;
 }
@@ -5100,7 +5100,7 @@ bool CalculatorFunctions::innerDifferentiateSqrt(Calculator& theCommands, const 
   twoE = Rational(1, 2);
   oneOverSqrtE = 1;
   oneOverSqrtE /= theArgument;
-  return output.MakeXOX(theCommands, theCommands.opTimes(), twoE, oneOverSqrtE);
+  return output.makeXOX(theCommands, theCommands.opTimes(), twoE, oneOverSqrtE);
 }
 
 bool CalculatorFunctions::outerDifferentiateWRTxTimesAny(
@@ -5195,7 +5195,7 @@ bool CalculatorFunctions::innerDdivDxToDiffDivDiffx(Calculator& theCommands, con
   rightDenE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst(denominatorString), theCommands);
   denominatorE.addChildOnTop(numeratorE);
   denominatorE.addChildOnTop(rightDenE);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
+  return output.makeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
 bool CalculatorFunctions::outerMergeConstantRadicals(
@@ -5229,7 +5229,7 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
   }
   Expression theProduct;
   theProduct.makeProduct(theCommands, input[1][1], input[2][1]);
-  return output.MakeXOX(theCommands, theCommands.opThePower(), theProduct, input[1][2]);
+  return output.makeXOX(theCommands, theCommands.opThePower(), theProduct, input[1][2]);
 }
 
 bool CalculatorFunctions::outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -5267,9 +5267,9 @@ bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
   }
   theCommands.checkInputNotSameAsOutput(input, output);
   Expression rightMultiplicand, rightMultiplicandExponent;
-  rightMultiplicandExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponent, denominatorExponent);
-  rightMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, rightMultiplicandExponent);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), input[1][1], rightMultiplicand);
+  rightMultiplicandExponent.makeXOX(theCommands, theCommands.opMinus(), numeratorExponent, denominatorExponent);
+  rightMultiplicand.makeXOX(theCommands, theCommands.opThePower(), denominatorBase, rightMultiplicandExponent);
+  return output.makeXOX(theCommands, theCommands.opTimes(), input[1][1], rightMultiplicand);
 }
 
 bool Expression::splitProduct(
@@ -5317,7 +5317,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   mOneE.assignValue(- 1, theCommands);
   for (int i = 0; i < numerators.size(); i ++) {
     if (numerators[i].isConstantNumber()) {
-      newNumSummandRightPart.MakeXOX(
+      newNumSummandRightPart.makeXOX(
         theCommands,
         theCommands.opThePower(),
         denominatorBase,
@@ -5329,8 +5329,8 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
     }
     numerators[i].getBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
     if (numeratorBaseRight == denominatorBase) {
-      newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
-      newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+      newNumExponent.makeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
+      newNumSummand.makeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
       numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
@@ -5340,9 +5340,9 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
       if (numeratorBaseRight != denominatorBase) {
         continue;
       }
-      newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
-      newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
-      newNumSummand.MakeXOX(theCommands, theCommands.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
+      newNumExponent.makeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
+      newNumSummandRightPart.makeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+      newNumSummand.makeXOX(theCommands, theCommands.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
       numeratorsNew.addMonomial(newNumSummand, numerators.coefficients[i]);
       isGood = true;
       break;
@@ -5488,7 +5488,7 @@ bool Expression::makeSequenceCommands(Calculator& owner, List<std::string>& inpu
   }
   for (int i = 0; i < inputValues.size; i ++) {
     currentKey.makeAtom(inputKeys[i], owner);
-    currentStatement.MakeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
+    currentStatement.makeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
     theStatements.addOnTop(currentStatement);
   }
   return this->makeSequenceStatements(owner, &theStatements);
@@ -5770,7 +5770,7 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
 bool ElementZmodP::operator==(int other) const {
   this->checkIamInitialized();
   ElementZmodP tempElt;
-  tempElt.theModulus = this->theModulus;
+  tempElt.modulus = this->modulus;
   tempElt = LargeInteger(other);
   return *this == tempElt;
 }
@@ -5778,7 +5778,7 @@ bool ElementZmodP::operator==(int other) const {
 bool ElementZmodP::operator==(const ElementZmodP& other) const {
   this->checkIamInitialized();
   other.checkIamInitialized();
-  return this->theModulus == other.theModulus && this->theValue == other.theValue;
+  return this->modulus == other.modulus && this->value == other.value;
 }
 
 void ElementZmodP::operator*=(const ElementZmodP& other) {
@@ -5788,8 +5788,8 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
     return;
   }
   this->checkEqualModuli(other);
-  this->theValue *= other.theValue;
-  this->theValue %= this->theModulus;
+  this->value *= other.value;
+  this->value %= this->modulus;
 }
 
 bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -6657,7 +6657,7 @@ bool CalculatorFunctions::innerPlotPolarRfunctionThetaExtended(
   if (!theCommands.callCalculatorFunction(CalculatorFunctions::innerPlot2D, input, plotRthetaE)) {
     return false;
   }
-  return output.MakeXOX(theCommands, theCommands.opSequence(), plotXYE, plotRthetaE);
+  return output.makeXOX(theCommands, theCommands.opSequence(), plotXYE, plotRthetaE);
 }
 
 bool CalculatorFunctions::innerPlotParametricCurve(
@@ -9627,19 +9627,22 @@ bool CalculatorFunctions::innerDrawWeightSupport(
 bool CalculatorFunctions::innerSetRandomSeed(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRandomInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerSetRandomSeed");
   if (input.size() != 2) {
     return false;
   }
   const Expression& argument = input[1];
-  int theInt = - 1;
-  if (!argument.isIntegerFittingInInt(& theInt)) {
-    return theCommands << "Failed to extract small integer";
+  LargeInteger seedLarge;
+  if (!argument.isInteger(&seedLarge)) {
+    return theCommands << "Failed to extract integer random seed. ";
   }
+  seedLarge /= LargeInteger(global.unsecurePseudoRandomGenerator.maximumRandomSeed);
+  int32_t seed = 0;
+  seedLarge.isIntegerFittingInInt(&seed);
   std::stringstream out;
-  theCommands.theObjectContainer.currentRandomSeed = theInt;
-  global.unsecurePseudoRandomGenerator.setRandomSeed(theInt);
-  out << "Successfully set random seed to: " << static_cast<unsigned>(theInt);
+  theCommands.theObjectContainer.currentRandomSeed = seed;
+  global.unsecurePseudoRandomGenerator.setRandomSeed(seed);
+  out << "Successfully set random seed to: " << static_cast<unsigned>(seed) << "[" << seedLarge << "].";
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -9794,7 +9797,7 @@ bool CalculatorFunctions::innerTurnOnApproximations(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOnApproximations");
   (void) input;
-  theCommands.flagNoApproximationS = false;
+  theCommands.flagNoApproximations = false;
   return output.assignValue(std::string("Approximations have been turned on. "), theCommands);
 }
 
@@ -9803,7 +9806,7 @@ bool CalculatorFunctions::innerTurnOffApproximations(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOffApproximations");
   (void) input;
-  theCommands.flagNoApproximationS = true;
+  theCommands.flagNoApproximations = true;
   return output.assignValue(std::string("Approximations have been turned off. "), theCommands);
 }
 
@@ -9839,7 +9842,7 @@ bool CalculatorFunctions::functionEqualityToArithmeticExpression(
   if (!input.startsWith(theCommands.opDefine(), 3)) {
     return false;
   }
-  return output.MakeXOX(theCommands, theCommands.opMinus(), input[1], input[2]);
+  return output.makeXOX(theCommands, theCommands.opMinus(), input[1], input[2]);
 }
 
 bool CalculatorFunctions::innerRandomInteger(

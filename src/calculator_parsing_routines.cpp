@@ -73,7 +73,7 @@ void Calculator::reset() {
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
   this->flagforkingprocessAllowed = true;
-  this->flagNoApproximationS = false;
+  this->flagNoApproximations = false;
   this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
   this->flagPlotNoControls = true;

@@ -101,7 +101,7 @@ class AlgebraicNumber {
   );
   AlgebraicNumber one();
   bool assignRationalQuadraticRadical(
-    const Rational& inpuT,
+    const Rational& input,
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
@@ -265,8 +265,8 @@ public:
     output << input.toString();
     return output;
   }
-  LargeIntegerUnsigned theModulus;
-  LargeIntegerUnsigned theValue;
+  LargeIntegerUnsigned modulus;
+  LargeIntegerUnsigned value;
   bool flagDeallocated;
   friend ElementZmodP operator*(int left, const ElementZmodP& right);
   unsigned int hashFunction() const;
@@ -286,7 +286,7 @@ public:
   void checkIamInitialized() const;
   bool invert();
   bool isEqualToZero() const {
-    return this->theValue.isEqualToZero();
+    return this->value.isEqualToZero();
   }
   // Returns the number by which the vector was multiplied.
   static ElementZmodP scaleNormalizeIndex(

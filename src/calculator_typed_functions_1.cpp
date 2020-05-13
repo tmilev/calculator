@@ -64,14 +64,14 @@ bool Calculator::outerExtractBaseMultiplication(
     // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)
     if (output[2][1].isOfType<Rational>()) {
       Expression tempRight;
-      tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
-      output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
+      tempRight.makeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
+      output.makeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
       result = true;
     }
     // <- handle a * (b * anything)
     // on condition that a*b has an inner handler
     Expression tempExp, newExpr;
-    tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
+    tempExp.makeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
     if (theCommands.innerTimes(theCommands, tempExp, newExpr)) {
       output.makeProduct(theCommands, newExpr, output[2][2]);
       result = true;
@@ -99,7 +99,7 @@ bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPO
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&theElt1)) {
       if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulus != theElt2.theModulus) {
+        if (theElt1.modulus != theElt2.modulus) {
           return false;
         }
       } else {
@@ -107,7 +107,7 @@ bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPO
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulus = theElt1.theModulus;
+        theElt2.modulus = theElt1.modulus;
         if (!theElt2.assignRational(tempRat)) {
           return false;
         }
@@ -134,7 +134,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&theElt1)) {
       if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulus != theElt2.theModulus) {
+        if (theElt1.modulus != theElt2.modulus) {
           return false;
         }
       } else {
@@ -142,7 +142,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulus = theElt1.theModulus;
+        theElt2.modulus = theElt1.modulus;
         if (!theElt2.assignRational(tempRat)) {
           return false;
         }
@@ -169,7 +169,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&theElt1)) {
       if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulus != theElt2.theModulus) {
+        if (theElt1.modulus != theElt2.modulus) {
           return false;
         }
       } else {
@@ -177,7 +177,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulus = theElt1.theModulus;
+        theElt2.modulus = theElt1.modulus;
         if (!theElt2.assignRational(tempRat)) {
           return false;
         }
@@ -528,7 +528,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
     return false;
   }
   if (!left.flagInfinity && !right.flagInfinity) {
-    if (left.xCoordinate.theModulus != right.xCoordinate.theModulus) {
+    if (left.xCoordinate.modulus != right.xCoordinate.modulus) {
       return theCommands << "Attempt to multiply elliptic curve elements over Z mod p "
       << "for different moduli p. Possible bad user input?";
     }
@@ -840,7 +840,7 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP(
   Polynomial<ElementZmodP> left = inputContextsMerged[1].getValue<Polynomial<ElementZmodP> >();
   Polynomial<ElementZmodP> right = inputContextsMerged[2].getValue<Polynomial<ElementZmodP> >();
   if (!left.isEqualToZero() && !right.isEqualToZero()) {
-    if (left.coefficients[0].theModulus != right.coefficients[0].theModulus) {
+    if (left.coefficients[0].modulus != right.coefficients[0].modulus) {
       return theCommands << "Attempt to add polynomials with different moduli. ";
     }
   }
@@ -866,10 +866,10 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
   if (right.isEqualToZero()) {
     return output.makeError("Division by zero.", theCommands);
   }
-  LargeIntegerUnsigned modulus = right.coefficients[0].theModulus;
+  LargeIntegerUnsigned modulus = right.coefficients[0].modulus;
   int maximumModulusForDivision = 1000;
   if (!left.isEqualToZero()) {
-    if (left.coefficients[0].theModulus != modulus) {
+    if (left.coefficients[0].modulus != modulus) {
       return theCommands << "Attempt to multiply polynomials with different moduli. ";
     }
   }
@@ -902,7 +902,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyPolynomialModPByPolynomialModP(
   Polynomial<ElementZmodP> left = inputContextsMerged[1].getValue<Polynomial<ElementZmodP> >();
   Polynomial<ElementZmodP> right = inputContextsMerged[2].getValue<Polynomial<ElementZmodP> >();
   if (!left.isEqualToZero() && !right.isEqualToZero()) {
-    if (left.coefficients[0].theModulus != right.coefficients[0].theModulus) {
+    if (left.coefficients[0].modulus != right.coefficients[0].modulus) {
       return theCommands << "Attempt to multiply polynomials with different moduli. ";
     }
   }
@@ -1320,7 +1320,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
           Expression newPower, newBase;
           newPower.assignValue(powerRat * 2, theCommands);
           newBase.assignValue(base, theCommands);
-          return output.MakeXOX(
+          return output.makeXOX(
             theCommands,
             theCommands.opThePower(),
             newBase,
@@ -1564,7 +1564,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     if (base.getNumerator() == 1) {
       Expression theDenBase, theDenominator;
       theDenBase.assignValue(Rational(base.getDenominator()), theCommands);
-      theDenominator.MakeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
+      theDenominator.makeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
       output = theCommands.expressionOne() / theDenominator;
       return true;
     }
@@ -1698,7 +1698,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   theRadicalCFE.assignValue(outsideOfTheRadical, theCommands);
   insideTheRadicalE.assignValue(insideTheRadical, theCommands);
   exponentE.assignValue(exponentWorking, theCommands);
-  theRadicalE.MakeXOX(theCommands, theCommands.opThePower(), insideTheRadicalE, exponentE);
+  theRadicalE.makeXOX(theCommands, theCommands.opThePower(), insideTheRadicalE, exponentE);
   return output.makeProduct(theCommands, theRadicalCFE, theRadicalE);
 }
 
@@ -1937,7 +1937,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
         } else {
           rightSummand = outputMat(i, j);
           leftSummand.makeProduct(theCommands, leftMatrix(i, k), rightMatrix(k, j));
-          outputMat(i, j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+          outputMat(i, j).makeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
       }
     }
@@ -2247,7 +2247,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant(
     return false;
   }
   Expression theBracket;
-  theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), leftE, rightE);
+  theBracket.makeXOX(theCommands, theCommands.opLieBracket(), leftE, rightE);
   output.assignValue(theCF, theCommands);
   output *= theBracket;
   return true;
@@ -2308,10 +2308,10 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded(
   }
   Expression leftE, rightE;
   Expression lieBracket;
-  lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2],input[1]);
-  leftE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][1], lieBracket);
-  lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[1],input[2][1]);
-  rightE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2], lieBracket);
+  lieBracket.makeXOX(theCommands, theCommands.opLieBracket(), input[2][2],input[1]);
+  leftE.makeXOX(theCommands, theCommands.opLieBracket(), input[2][1], lieBracket);
+  lieBracket.makeXOX(theCommands, theCommands.opLieBracket(), input[1],input[2][1]);
+  rightE.makeXOX(theCommands, theCommands.opLieBracket(), input[2][2], lieBracket);
   leftE = theCommands.expressionMinusOne() * leftE;
   rightE = theCommands.expressionMinusOne() * rightE;
   output = leftE + rightE;
@@ -2335,7 +2335,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
     return output.assignValue(0, theCommands);
   }
   Expression theBracket;
-  theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2], input[1]);
+  theBracket.makeXOX(theCommands, theCommands.opLieBracket(), input[2], input[1]);
   output = theCommands.expressionMinusOne() * theBracket;
   return true;
 }
@@ -2684,7 +2684,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
   output.addChildAtomOnTop(theCommands.opSequence());
   Expression tempSum;
   for (int i = 1; i < input[2].size(); i ++) {
-    tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
+    tempSum.makeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
     output.addChildOnTop(tempSum);
   }
   return true;
@@ -2738,12 +2738,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   }
   if (thePower < 0) {
     ElementZmodP copy = theElt;
-    theElt.makeOne(theElt.theModulus);
+    theElt.makeOne(theElt.modulus);
     theElt /= copy;
     thePower *= - 1;
   }
   ElementZmodP unit;
-  unit.makeOne(theElt.theModulus);
+  unit.makeOne(theElt.modulus);
   MathRoutines::raiseToPower(theElt, thePower, unit);
   return output.assignValue(theElt, theCommands);
 }
@@ -2831,14 +2831,14 @@ bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
   if (right.content.isEqualToZero()) {
     return output.makeError("Division by zero", theCommands);
   }
-  LargeIntegerUnsigned modulus = right.content.coefficients[0].theModulus;
+  LargeIntegerUnsigned modulus = right.content.coefficients[0].modulus;
   if (!left.content.isEqualToZero()) {
-    if (left.content.coefficients[0].theModulus != modulus) {
+    if (left.content.coefficients[0].modulus != modulus) {
       return theCommands
       << "Attempt to perform operations with "
       << "modular polynomials with different moduli: "
       << modulus << " and "
-      << left.content.coefficients[0].theModulus;
+      << left.content.coefficients[0].modulus;
     }
   }
   ElementZmodP rightLeadingCoefficient = right.content.getLeadingCoefficient(&MonomialP::orderDefault());

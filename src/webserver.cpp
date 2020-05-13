@@ -2818,7 +2818,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
-    this->currentlyConnectedAddresses.getMonomialCoefficient(incomingAddress) >
+    this->currentlyConnectedAddresses.getCoefficientOf(incomingAddress) >
     this->MaxNumWorkersPerIPAdress
   );
   if (!purgeIncomingAddress) {

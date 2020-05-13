@@ -2208,7 +2208,7 @@ Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
     tempElt.simplify();
     this->adjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.simplify();
-    result += adadAppliedToMon.getMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.getCoefficientOf(baseGen);
   }
   return result;
 }
@@ -2227,7 +2227,7 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
     adadAppliedToMon.addMonomial(baseGen, 1);
     this->lieBracket(right, adadAppliedToMon, tempElt);
     this->lieBracket(left, tempElt, adadAppliedToMon);
-    result += adadAppliedToMon.getMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.getCoefficientOf(baseGen);
   }
   return result;
 }

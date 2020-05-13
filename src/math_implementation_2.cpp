@@ -256,10 +256,10 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
     return true;
   }
   ElementZmodP thePower, theOne;
-  thePower.theModulus = *this;
-  thePower.theValue = theBase;
-  theOne.theModulus = *this;
-  theOne.theValue = 1;
+  thePower.modulus = *this;
+  thePower.value = theBase;
+  theOne.modulus = *this;
+  theOne.value = 1;
   MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
   if (thePower == 1) {
     return true;
@@ -283,7 +283,7 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
         }
         *comments << this->toString() << " is not prime because \\(" << theBase << "^{"
         << theTwoPowerContraStream.str()
-        << theOddFactorOfNminusOne.toString() << "} = " << thePower.theValue.toString() << " ~ mod ~"
+        << theOddFactorOfNminusOne.toString() << "} = " << thePower.value.toString() << " ~ mod ~"
         << this->toString() << " \\)"
         << "<br>If " << this->toString() << " were prime, we'd have to have that \\("
         << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
@@ -304,33 +304,33 @@ bool LargeIntegerUnsigned::tryIsPower(
   bool& outputIsPower, LargeInteger& outputBase, int& outputPower
 ) const {
   MacroRegisterFunctionWithName("LargeIntUnsigned::tryIsPower");
-  List<LargeInteger> theFactors;
-  List<int> theMults;
-  if (!this->factor(theFactors, theMults, 0, 4, nullptr)) {
+  List<LargeInteger> factors;
+  List<int> multiplicities;
+  if (!this->factor(factors, multiplicities, 0, 4, nullptr)) {
     return false;
   }
-  if (theMults.size == 0) {
+  if (multiplicities.size == 0) {
     outputIsPower = true;
     outputBase = 1;
     outputPower = 0;
     return true;
   }
-  if (theMults[0] <= 1) {
+  if (multiplicities[0] <= 1) {
     outputIsPower = false;
     return true;
   }
-  for (int i = 1; i < theFactors.size; i ++) {
-    if (theMults[i] != theMults[0]) {
+  for (int i = 1; i < factors.size; i ++) {
+    if (multiplicities[i] != multiplicities[0]) {
       outputIsPower = false;
       return true;
     }
   }
   outputIsPower = true;
   outputBase = 1;
-  for (int i = 0; i < theFactors.size; i ++) {
-    outputBase *= theFactors[i];
+  for (int i = 0; i < factors.size; i ++) {
+    outputBase *= factors[i];
   }
-  outputPower = theMults[0];
+  outputPower = multiplicities[0];
   return true;
 }
 

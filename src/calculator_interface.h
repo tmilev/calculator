@@ -380,7 +380,7 @@ private:
   bool makeSequenceStatements(Calculator& owner, List<Expression>* inputStatements = nullptr);
   bool makeMatrix(Calculator& owner, Matrix<Expression>* inputMat = nullptr);
   bool makeSequence(Calculator& owner, List<Expression>* inputSequence = nullptr);
-  bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
+  bool makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool makeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex = 2);
   bool makeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex = 2);
 
@@ -401,7 +401,7 @@ private:
     const Expression& right
   ) {
     Expression tempE;
-    tempE.MakeXOX(owner, theOp, left, right);
+    tempE.makeXOX(owner, theOp, left, right);
     this->setChild(childIndex, tempE);
   }
   std::string lispify() const;
@@ -584,7 +584,7 @@ private:
   // The following function creates an expression by parsing a calculator-like string.
   // The purpose of this function is to reduce the number of lines needed to create an Expression using C++.
   // Consider creating the expression f{}{{a}}={{a}}+ 1; f{}b;
-  // We would need to create a large expression tree, so many calls of Expression::MakeXOX.
+  // We would need to create a large expression tree, so many calls of Expression::makeXOX.
   // Instead, we can simply parse the expression from a string.
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
@@ -1104,6 +1104,7 @@ public:
     static std::string setRandomSeed;
     static std::string commandEnclosure;
     static std::string setInputBox;
+    static std::string sort;
   };
 
   // Operations parametrize the expression elements.
@@ -1246,7 +1247,7 @@ public:
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
 
-  bool flagNoApproximationS;
+  bool flagNoApproximations;
 
   // bool flagReplaceInputBoxesByValues;
 
@@ -2015,7 +2016,7 @@ public:
   bool appendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {
     return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
-  bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
+  bool appendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output) {
     return this->appendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
   void specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs);
@@ -3302,7 +3303,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
           currentMultTermE = currentBase;
         } else {
           currentPower.assignValue(input[i](j), theCommands);
-          currentMultTermE.MakeXOX(
+          currentMultTermE.makeXOX(
             theCommands, theCommands.opThePower(), currentBase, currentPower
           );
         }

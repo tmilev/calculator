@@ -15,6 +15,7 @@
 std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
 std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
 std::string Calculator::Atoms::setInputBox = "CommandEnclosure";
+std::string Calculator::Atoms::sort = "Sort";
 
 void Calculator::initAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
@@ -4266,16 +4267,16 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "sort",
+    Calculator::Atoms::sort,
     CalculatorFunctions::innerSort,
     "",
     "Sorts a sequence. ",
-    "sort(x^2, x^3, x^1, x^{- 1});\n"
-    "sort(3,2,1,4,3);\n"
-    "sort((3,2,3,1));\n"
-    "sort{}((3,2,3,1));\n",
+    "Sort(x^2, x^3, x^1, x^{- 1});\n"
+    "Sort(3,2,1,4,3);\n"
+    "Sort((3,2,3,1));\n"
+    "Sort{}((3,2,3,1));\n",
     "CalculatorFunctions::innerSort",
-    "sort",
+    Calculator::Atoms::sort,
     innerStandard
   );
   this->addOperationHandler(
@@ -4979,7 +4980,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "The solutions of the equation are "
     "returned in a list (empty list for no solution). "
     "Solutions with multiplicity higher than one are repeated. ",
-    "SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)",
+    "SolveFor(x, a x^2 + b x + c);\n"
+    "SolveFor(x, a x + b);\n"
+    "SolveFor(x, x^3 - 3x^2 - x/2 + 5);",
     "CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT",
     "SolveFor",
     innerStandard

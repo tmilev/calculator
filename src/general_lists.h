@@ -163,6 +163,7 @@ typedef void (*drawClearScreenFunction)();
 // generate random numbers for mathematical problems/education.
 class UnsecurePseudoRandomGenerator {
 public:
+  const int maximumRandomSeed = 1000000000;
   int randomSeed;
   int64_t randomNumbersGenerated;
   int bytesConsumed;

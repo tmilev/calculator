@@ -26,7 +26,7 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
     generatorLetterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   }
   generatorIndexE.assignValue(input.owner->getDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-  return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
+  return output.makeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
 bool CalculatorConversions::functionSemisimpleLieAlgebra(
@@ -260,8 +260,8 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   letterE.makeAtom(theCommands.addOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
   indexE.assignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.assignValue(input.theRank, theCommands);
-  letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
-  return output.MakeXOX(theCommands, theCommands.opUnderscore(), letterAndIndexE, rankE);
+  letterAndIndexE.makeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
+  return output.makeXOX(theCommands, theCommands.opUnderscore(), letterAndIndexE, rankE);
 }
 
 template < >
@@ -799,7 +799,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
     theGen.theGeneratorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, theGen, chevGenE);
     CalculatorConversions::innerExpressionFromRF(theCommands, input.powers[i], powerE, inputContext);
-    termE.MakeXOX(theCommands, theCommands.opThePower(), chevGenE, powerE);
+    termE.makeXOX(theCommands, theCommands.opThePower(), chevGenE, powerE);
     theTerms.addOnTop(termE);
   }
   return output.makeProduct(theCommands, theTerms);
@@ -1103,7 +1103,7 @@ bool CalculatorConversions::innerExpressionFromRF(
   denRescaled *= multipleTopBottom.getDenominator();
   CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numRescaled, numE, inputContext);
   CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, denRescaled, denE, inputContext);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
+  return output.makeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
 bool CalculatorConversions::innerRationalFunctioN(

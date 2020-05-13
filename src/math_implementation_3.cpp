@@ -5286,7 +5286,7 @@ void DynkinType::sortDynkinTypes() {
   DynkinType finalMe;
   finalMe.makeZero();
   for (int i = 0; i < sortedTypes.size; i ++) {
-    finalMe.addMonomial(sortedTypes[i], this->getMonomialCoefficient(sortedTypes[i]));
+    finalMe.addMonomial(sortedTypes[i], this->getCoefficientOf(sortedTypes[i]));
   }
   *this = finalMe;
 }

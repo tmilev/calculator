@@ -620,7 +620,7 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   std::stringstream shouldNotBeNeeded;
   List<unsigned char> publicKeyBytes;
   bool mustBeTrue =
-  this->ephemerealPublicKey.xCoordinate.theValue.writeBigEndianFixedNumberOfBytes(
+  this->ephemerealPublicKey.xCoordinate.value.writeBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
   serialization::writeOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");

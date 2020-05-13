@@ -29,10 +29,10 @@ template < >
 void ElementEllipticCurve<ElementZmodP>::makeGeneratorSecp256k1() {
   LargeIntegerUnsigned theModulo;
   theModulo.assignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
-  this->xCoordinate.theModulus = theModulo;
-  this->yCoordinate.theModulus = theModulo;
-  this->xCoordinate.theValue.assignString("55066263022277343669578718895168534326250603453777594175500187360389116729240");
-  this->yCoordinate.theValue.assignString("32670510020758816978083085130507043184471273380659243275938904335757337482424");
+  this->xCoordinate.modulus = theModulo;
+  this->yCoordinate.modulus = theModulo;
+  this->xCoordinate.value.assignString("55066263022277343669578718895168534326250603453777594175500187360389116729240");
+  this->yCoordinate.value.assignString("32670510020758816978083085130507043184471273380659243275938904335757337482424");
   this->flagInfinity = false;
   this->owner.constantTerm = 7;
   this->owner.linearCoefficient = 0;

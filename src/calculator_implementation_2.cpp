@@ -597,7 +597,7 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
   }
   Expression incomingHistory, indexE;
   indexE.assignValue(childIndex, *this->owner);
-  incomingHistory.MakeXOX(
+  incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySetChild(),
     indexE,
@@ -636,7 +636,7 @@ void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::stri
   }
   Expression extraInformation;
   extraInformation.assignValue(description.str(), *this->owner);
-  incomingHistory.MakeXOX(
+  incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySet(),
     *(this->outpuT),

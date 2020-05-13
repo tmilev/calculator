@@ -1571,12 +1571,12 @@ bool PrivateKeyRSA::basicChecks(std::stringstream* comments) {
   ElementZmodP mustBeZeroModP;
   // theExponent.theModulo = EulerPhi.value;
   // theExponent.theValue = this->exponent;
-  mustBeZeroModP.theModulus = EulerPhi.value;
-  mustBeZeroModP.theValue = 1;
+  mustBeZeroModP.modulus = EulerPhi.value;
+  mustBeZeroModP.value = 1;
   mustBeZeroModP /= this->thePublicKey.theExponent;
   mustBeZeroModP -= this->privateExponent;
   *comments << "<br>Difference between private "
-  << "exponent and computed one: " << mustBeZeroModP.theValue.toString();
+  << "exponent and computed one: " << mustBeZeroModP.value.toString();
   return true;
 }
 
@@ -1645,14 +1645,14 @@ void PrivateKeyRSA::signBytesPadPKCS1(
   if (this->thePublicKey.theModulus.isEqualToZero()) {
     global.fatal << "Public key modulus is zero. " << global.fatal;
   }
-  theElement.theModulus = this->thePublicKey.theModulus;
+  theElement.modulus = this->thePublicKey.theModulus;
   theOne.makeOne(this->thePublicKey.theModulus);
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
-    inputHashedPadded, theElement.theValue
+    inputHashedPadded, theElement.value
   );
   MathRoutines::raiseToPower(theElement, this->privateExponent, theOne);
   output.setSize(0);
-  theElement.theValue.writeBigEndianBytes(output, false);
+  theElement.value.writeBigEndianBytes(output, false);
 }
 
 PrivateKeyRSA::PrivateKeyRSA() {
@@ -1694,10 +1694,10 @@ bool PrivateKeyRSA::computeFromTwoPrimes(
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
   this->carmichaelTotientOfModulus = MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
   ElementZmodP inverter;
-  inverter.theModulus = this->carmichaelTotientOfModulus;
-  inverter.theValue = 1;
+  inverter.modulus = this->carmichaelTotientOfModulus;
+  inverter.value = 1;
   inverter /= this->thePublicKey.theExponent;
-  this->privateExponent = inverter.theValue;
+  this->privateExponent = inverter.value;
   this->computeBitSize();
   return true;
 }

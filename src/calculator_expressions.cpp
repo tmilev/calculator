@@ -17,28 +17,28 @@ Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");
   left.checkInitialization();
   Expression result;
-  result.MakeXOX(*left.owner, left.owner->opTimes(), left, right);
+  result.makeXOX(*left.owner, left.owner->opTimes(), left, right);
   return result;
 }
 
 Expression operator/(const Expression& left, const Expression& right) {
   left.checkInitialization();
   Expression result;
-  result.MakeXOX(*left.owner, left.owner->opDivide(), left, right);
+  result.makeXOX(*left.owner, left.owner->opDivide(), left, right);
   return result;
 }
 
 Expression operator+(const Expression& left, const Expression& right) {
   left.checkInitialization();
   Expression result;
-  result.MakeXOX(*left.owner, left.owner->opPlus(), left, right);
+  result.makeXOX(*left.owner, left.owner->opPlus(), left, right);
   return result;
 }
 
 Expression operator-(const Expression& left, const Expression& right) {
   left.checkInitialization();
   Expression result;
-  result.MakeXOX(*left.owner, left.owner->opMinus(), left, right);
+  result.makeXOX(*left.owner, left.owner->opMinus(), left, right);
   return result;
 }
 
@@ -1668,13 +1668,13 @@ bool Expression::isKnownToBeNonNegative() const {
   }
   Expression testInequality, testResult;
   Calculator& theCommands = *(this->owner);
-  testInequality.MakeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.expressionZero());
+  testInequality.makeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.expressionZero());
   if (this->owner->evaluateExpression(theCommands, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
     }
   }
-  testInequality.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.expressionZero());
+  testInequality.makeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.expressionZero());
   if (theCommands.evaluateExpression(theCommands, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
@@ -2288,7 +2288,7 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   out << polynomial.toString(&format);
   if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
     if (!polynomial.isEqualToZero()) {
-      out << "," << polynomial.coefficients[0].theModulus;
+      out << "," << polynomial.coefficients[0].modulus;
     }
     out << ")";
   }
@@ -2344,7 +2344,7 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   LargeIntegerUnsigned modulus;
   if (!element.value.isEqualToZero()) {
-    modulus = element.value.coefficients[0].theModulus;
+    modulus = element.value.coefficients[0].modulus;
   }
   format.flagSuppressModP = true;
   out
@@ -3304,7 +3304,7 @@ bool Expression::toStringPower(
     if (shouldProceed) {
       involvesExponentsInterpretedAsFunctions = true;
       Expression newFunE;
-      newFunE.MakeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
+      newFunE.makeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
       newFunE.checkConsistency();
       out << "{" << newFunE.toString(theFormat) << "}{}";
       if (
@@ -4855,7 +4855,7 @@ bool Expression::isBuiltInType(int* outputWhichType) const {
 }
 
 bool Expression::makeProduct(Calculator& owner, const Expression& left, const Expression& right) {
-  return this->MakeXOX(owner, owner.opTimes(), left, right);
+  return this->makeXOX(owner, owner.opTimes(), left, right);
 }
 
 bool Expression::makeProduct(Calculator& owner, const List<Expression>& theMultiplicands) {
@@ -4884,7 +4884,7 @@ bool Expression::makeOXdotsX(Calculator& owner, int theOp, const List<Expression
   }
   *this = *theOpands.lastObject();
   for (int i = theOpands.size - 2; i >= 0; i --) {
-    this->MakeXOX(owner, theOp, theOpands[i], *this);
+    this->makeXOX(owner, theOp, theOpands[i], *this);
   }
   this->checkConsistencyRecursively();
   return true;
@@ -4941,12 +4941,12 @@ bool Expression::makeSqrt(Calculator& owner, const Expression& argument, const R
   return this->addChildOnTop(argument);
 }
 
-bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right) {
-  MacroRegisterFunctionWithName("Expression::MakeXOX");
+bool Expression::makeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right) {
+  MacroRegisterFunctionWithName("Expression::makeXOX");
   if (&left == this || &right == this) {
     Expression leftCopy = left;
     Expression rightCopy = right;
-    return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
+    return this->makeXOX(owner, theOp, leftCopy, rightCopy);
   }
   if (right.owner == nullptr && left.owner == nullptr) {
     global.fatal << "Cannot build an expression from two non-initialized expressions. " << global.fatal;
@@ -4954,12 +4954,12 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
   if (right.owner == nullptr) {
     Expression rightCopy;
     rightCopy.assignValue(right.theData, *left.owner);
-    return this->MakeXOX(owner, theOp, left, rightCopy);
+    return this->makeXOX(owner, theOp, left, rightCopy);
   }
  if (left.owner == nullptr) {
     Expression leftCopy;
     leftCopy.assignValue(left.theData, *right.owner);
-    return this->MakeXOX(owner, theOp, leftCopy, right);
+    return this->makeXOX(owner, theOp, leftCopy, right);
   }
   left.checkInitialization();
   right.checkInitialization();

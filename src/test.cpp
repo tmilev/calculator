@@ -72,17 +72,17 @@ void Test::run() {
     MonomialP::Test::all();
     Polynomial<Rational>::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::calculator)) {
-    Calculator::Test::all();
-  }
-  if (this->ShouldTest(Test::Suites::problems)) {
-    CalculatorHTML::Test::all();
-  }
   if (
     this->ShouldTest(Test::Suites::topicLists) ||
     this->ShouldTest(Test::Suites::topiclists)
   ) {
     TopicElementParser::Test::all();
+  }
+  if (this->ShouldTest(Test::Suites::calculator)) {
+    Calculator::Test::all();
+  }
+  if (this->ShouldTest(Test::Suites::problems)) {
+    CalculatorHTML::Test::all();
   }
   if (this->ShouldTest(Test::Suites::build)) {
     GlobalVariables::Test::all();

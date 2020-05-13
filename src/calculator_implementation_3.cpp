@@ -1446,7 +1446,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
     return false;
   }
   ElementZmodP outputElt;
-  outputElt.theModulus = base.value;
+  outputElt.modulus = base.value;
   outputElt = left.getNumerator();
   return output.assignValue(outputElt, theCommands);
 }

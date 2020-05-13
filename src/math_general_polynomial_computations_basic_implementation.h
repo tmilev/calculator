@@ -1050,8 +1050,8 @@ bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
     if (rightMonomial > leftMonomial) {
       return false;
     }
-    Coefficient leftCoefficient = left.getMonomialCoefficient(leftMonomial);
-    Coefficient rightCoefficient = right.getMonomialCoefficient(rightMonomial);
+    Coefficient leftCoefficient = left.getCoefficientOf(leftMonomial);
+    Coefficient rightCoefficient = right.getCoefficientOf(rightMonomial);
     if (leftCoefficient > rightCoefficient) {
       return true;
     }

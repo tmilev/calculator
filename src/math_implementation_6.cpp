@@ -40,8 +40,8 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
     }
     return false;
   }
-  this->one.makeOne(this->current.coefficients[0].theModulus);
-  if (this->one.theModulus == 2) {
+  this->one.makeOne(this->current.coefficients[0].modulus);
+  if (this->one.modulus == 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only odd primes allowed. ";
     }
@@ -78,7 +78,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
   oneQuotientRing.modulus = this->current;
   oneQuotientRing.value.makeConstant(this->one);
-  LargeInteger modulus = this->one.theModulus;
+  LargeInteger modulus = this->one.modulus;
   int degree = this->current.totalDegreeInt();
   PolynomialModuloPolynomial<ElementZmodP> xPower;
   std::stringstream commentsGeneral;
@@ -373,3 +373,70 @@ bool PolynomialFactorizationKronecker::oneFactor(
   } while (divisorSelection.incrementReturnFalseIfPastLast());
   return this->output->accountReducedFactor(this->current);
 }
+
+bool PolynomialFactorizationKronecker::solvePolynomial(
+  const Polynomial<Rational>& input,
+  List<AlgebraicNumber>& output,
+  AlgebraicClosureRationals& closure,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationKronecker::solvePolynomial");
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  if (input.totalDegree() < 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Polynomial is of degree below 1. ";
+    }
+    return false;
+  }
+  if (input.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Polynomial is not univariate. ";
+    }
+    return false;
+  }
+  if (!factorization.factor(input, nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to factor polynomial. ";
+    }
+    return false;
+  }
+  MonomialP x(0, 1);
+  MonomialP xSquared(0, 2);
+  Rational a, b, c;
+  for (int i = 0; i < factorization.reduced.size; i ++) {
+    Polynomial<Rational>& factor = factorization.reduced[i];
+    c = factor.getConstantTerm(0);
+    b = factor.getCoefficientOf(x);
+    a = factor.getCoefficientOf(xSquared);
+    if (factor.totalDegree() > 2 || factor.totalDegree() < 1) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Degree of factor "
+        << factor.toString() << " is not 1 or 2. ";
+      }
+      return false;
+    }
+    if (factor.totalDegree() == 1) {
+      output.addOnTop(- c / b);
+    }
+    if (factor.totalDegree() == 2) {
+      AlgebraicNumber squareRootOfDiscriminant;
+      Rational discriminant = factor.getDiscriminant();
+      if (!squareRootOfDiscriminant.assignRationalQuadraticRadical(
+        discriminant, closure, nullptr
+      )) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure
+          << "Failed to extract the square root of the discriminant: "
+          << discriminant.toString() << ".";
+        }
+        return false;
+      }
+      AlgebraicNumber xOne = (squareRootOfDiscriminant - b) / (2 * a);
+      AlgebraicNumber xTwo = (squareRootOfDiscriminant * (- 1) - b) / (2 * a);
+      output.addOnTop(xOne);
+      output.addOnTop(xTwo);
+    }
+  }
+  return true;
+}
+

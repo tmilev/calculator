@@ -606,7 +606,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
     return false;
   }
   Expression remainingIntegrand, integralPart;
-  remainingIntegrand.MakeXOX(
+  remainingIntegrand.makeXOX(
     theCommands, theCommands.opThePower(), theVariableE, powerOfXE - theCommands.expressionOne()
   );
   remainingIntegrand *= exponentPartE;
@@ -719,8 +719,8 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   theTopCommands.addChildOnTop(solvedIntegral);
   theBottomCommands.addChildOnTop(solvedIntegral);
   Expression theTop, theBottom;
-  theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.expressionTwo());
-  theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.expressionTwo());
+  theTop.makeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.expressionTwo());
+  theBottom.makeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.expressionTwo());
   output = theTop - theBottom;
   return true;
 }
@@ -918,14 +918,14 @@ bool CalculatorFunctions::innerMultiplySequence(
   if (input.size() < 1) {
     return false;
   }
-  if (input.size() == 1) {
-    return output.assignValue(1, theCommands);
+  if (input.size() == 2 && input[1].isSequenceNElements()) {
+    return CalculatorFunctions::innerMultiplySequence(theCommands, input[1], output);
   }
-  List<Expression> theTerms;
+  List<Expression> terms;
   for (int i = 1; i < input.size(); i ++) {
-    theTerms.addOnTop(input[i]);
+    terms.addOnTop(input[i]);
   }
-  return output.makeProduct(theCommands, theTerms);
+  return output.makeProduct(theCommands, terms);
 }
 
 bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
@@ -986,11 +986,6 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
 
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
-  if (!input.isListStartingWithAtom(
-    theCommands.operations.getIndexNoFail("sort")
-  )) {
-    return false;
-  }
   List<Expression> sortedExpressions;
   const Expression* toBeSorted = &input;
   if (input.size() == 2) {
@@ -1252,7 +1247,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     output /= thePowers[2];
     return true;
   }
-  if (thePowers.children.size == 4) {
+  if (thePowers.size() == 4) {
     const Expression& a = thePowers[3];
     const Expression& b = thePowers[2];
     const Expression& c = thePowers[1];
@@ -1266,6 +1261,29 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     output.addChildOnTop(currentRoot);
     currentRoot = (b * (- 1) + sqrtDiscriminant) / (a * 2);
     output.addChildOnTop(currentRoot);
+    return true;
+  }
+  Polynomial<Rational> polynomial;
+  for (int i = thePowers.size() - 1; i >= 1; i --) {
+    MonomialP oneVariable(0, 1);
+    polynomial *= oneVariable;
+    Rational coefficient;
+    if (!thePowers[i].isRational(&coefficient)) {
+      return false;
+    }
+    polynomial += coefficient;
+  }
+  List<AlgebraicNumber> solutions;
+  if (PolynomialFactorizationKronecker::solvePolynomial(
+    polynomial,
+    solutions,
+    theCommands.theObjectContainer.theAlgebraicClosure,
+    &theCommands.comments
+  )) {
+    output.makeSequence(theCommands);
+    for (int i = 0; i < solutions.size; i ++) {
+      output.addChildValueOnTop(solutions[i]);
+    }
     return true;
   }
   return false;
@@ -1373,9 +1391,9 @@ bool CalculatorFunctions::innerDistributeExponent(
     return false;
   }
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theCommands.opThePower(), input[1][1], input[2]);
-  rightE.MakeXOX(theCommands, theCommands.opThePower(), input[1][2], input[2]);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+  leftE.makeXOX(theCommands, theCommands.opThePower(), input[1][1], input[2]);
+  rightE.makeXOX(theCommands, theCommands.opThePower(), input[1][2], input[2]);
+  return output.makeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
 }
 
 bool CalculatorFunctions::innerSqrt(
@@ -1391,7 +1409,7 @@ bool CalculatorFunctions::innerSqrt(
       Expression powerE, powerEreduced, theExponentE;
       ratPower.invert();
       theExponentE.assignValue(ratPower, theCommands);
-      powerE.MakeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
+      powerE.makeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
       if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
         theCommands, powerE, powerEreduced
       )) {
@@ -1414,7 +1432,7 @@ bool CalculatorFunctions::innerSqrt(
     Expression theExponent;
     Rational thePowerRat(1, thePower);
     theExponent.assignValue(thePowerRat, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
+    return output.makeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
   }
   if (thePower > 0 && input[2].isEqualToZero()) {
     return output.assignValue(0, theCommands);
@@ -1596,10 +1614,10 @@ bool CalculatorFunctions::innerPlotMarkSegment(
   Expression theVector = (rightE - leftE);
   Expression midPt = (rightE + leftE) / 2;
   Expression theVectorX, theVectorY;
-  theVectorX.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionOne());
-  theVectorY.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionTwo());
+  theVectorX.makeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionOne());
+  theVectorY.makeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.expressionTwo());
   Expression theOrthoV;
-  theOrthoV.MakeXOX(theCommands, theCommands.opSequence(), theVectorY * (- 1), theVectorX);
+  theOrthoV.makeXOX(theCommands, theCommands.opSequence(), theVectorY * (- 1), theVectorX);
   Expression leftPt = midPt - theOrthoV / 25;
   Expression rightPt = midPt + theOrthoV / 25;
   output.reset(theCommands);
@@ -1788,14 +1806,14 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   if (theBase < 1) {
     theBase.invert();
     newBaseE.assignValue(theBase, theCommands);
-    output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+    output.makeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
     output *= - 1;
     return true;
   }
   if (theArg < 1) {
     theArg.invert();
     newArgE.assignValue(theArg, theCommands);
-    output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+    output.makeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
     output *= - 1;
     return true;
   }
@@ -1809,7 +1827,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   if (baseInt.tryIsPower(isPower, simplerBase, simplerPower)) {
     if (isPower) {
       newBaseE.assignValue(Rational(simplerBase), theCommands);
-      output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+      output.makeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
       output /= simplerPower;
       return true;
     }
@@ -1840,7 +1858,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   theArg /= argDen;
   newBaseE.assignValue(theBase, theCommands);
   newArgE.assignValue(theArg, theCommands);
-  output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+  output.makeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
   if (intPart == 0) {
     return true;
   }
@@ -2968,7 +2986,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   if (polynomial.content.isEqualToZero()) {
     return theCommands << "Factoring zero not allowed. ";
   }
-  LargeInteger thePrime = polynomial.content.coefficients[0].theModulus;
+  LargeInteger thePrime = polynomial.content.coefficients[0].modulus;
   if (!input[2].isInteger(&thePrime)) {
     return false;
   }

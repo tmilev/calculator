@@ -4724,7 +4724,7 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
   Weight<Rational> zeroWeight;
   zeroWeight.weightFundamentalCoordS.makeZero(1);
   if (
-    !this->moduleDecompositionAmbientSA.getMonomialCoefficient(zeroWeight).isSmallInteger(
+    !this->moduleDecompositionAmbientSA.getCoefficientOf(zeroWeight).isSmallInteger(
       &this->dimensionCentralizer
   )) {
     global.fatal << "Dimension of centralizer of sl(2) subalgebra is not a small integer. This shouldn't happen. " << global.fatal;
@@ -6287,7 +6287,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
   Weight<Rational> theZeroWeight;
   theZeroWeight.owner = nullptr;
   theZeroWeight.weightFundamentalCoordS.makeZero(this->theHs.size);
-  this->centralizerDimension = this->theCharNonPrimalFundCoords.getMonomialCoefficient(theZeroWeight);
+  this->centralizerDimension = this->theCharNonPrimalFundCoords.getCoefficientOf(theZeroWeight);
   this->centralizerRank = this->centralizerDimension;
   if (this->centralizerRank == 0) {
     this->flagCentralizerIsWellChosen = true;
@@ -6798,7 +6798,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
   List<List<Vectors<Rational> > > theHsScaledToActByTwoByType;
   other.GetHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
   for (int i = 0; i < isoTypes.size; i ++) {
-    Rational ratMult = this->theWeylNonEmbedded->theDynkinType.getMonomialCoefficient(isoTypes[i]);
+    Rational ratMult = this->theWeylNonEmbedded->theDynkinType.getCoefficientOf(isoTypes[i]);
     int intMult = 0;
     if (!ratMult.isSmallInteger(&intMult)) {
       return false;

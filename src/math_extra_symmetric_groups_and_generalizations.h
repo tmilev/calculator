@@ -60,7 +60,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasi
   basisMatrix.initialize(this->involvedMonomials.size, basis.size);
   for (int j = 0; j < basis.size; j ++) {
     for (int i = 0; i < involvedMonomials.size; i ++) {
-      basisMatrix.elements[i][j] = basis[j].getMonomialCoefficient(involvedMonomials[i]);
+      basisMatrix.elements[i][j] = basis[j].getCoefficientOf(involvedMonomials[i]);
     }
   }
   Matrix<Coefficient> basisMatrixT = basisMatrix;
@@ -78,7 +78,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::denseVe
   Vector<Coefficient> inDense;
   inDense.setSize(this->involvedMonomials.size);
   for (int i = 0; i < involvedMonomials.size; i ++) {
-    inDense[i] = in.getMonomialCoefficient(involvedMonomials[i]);
+    inDense[i] = in.getCoefficientOf(involvedMonomials[i]);
   }
   out = this->projectionOperator * inDense;
 }

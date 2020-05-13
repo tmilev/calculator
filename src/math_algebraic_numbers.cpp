@@ -375,7 +375,7 @@ bool AlgebraicClosureRationals::reduceMe(
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
     }
     termInLastColumn.makeEij(i, smallestFactorDegree - 1);
-    Rational coefficientLastColumn = - smallestFactor.getMonomialCoefficient(MonomialP(0, i));
+    Rational coefficientLastColumn = - smallestFactor.getCoefficientOf(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.addMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.isEqualToZero()) {
@@ -1002,7 +1002,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     if (this->element.isEqualToZero()) {
       return;
     }
-    Rational tempRat = this->element.getMonomialCoefficient(MonomialVector(0));
+    Rational tempRat = this->element.getCoefficientOf(MonomialVector(0));
     *this = other;
     *this *= tempRat;
     return;
@@ -1139,19 +1139,19 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
 }
 
 bool AlgebraicNumber::assignRationalQuadraticRadical(
-  const Rational& inpuT,
+  const Rational& input,
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
   this->checkConsistency();
-  if (inpuT == 0) {
+  if (input == 0) {
     return false;
   }
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals) {
     Polynomial<AlgebraicNumber> minPoly;
     minPoly.makeMonomial(0, 2);
-    minPoly -= inpuT;
+    minPoly -= input;
     bool result = this->constructFromMinimalPolynomial(minPoly, inputOwner, commentsOnFailure);
     if (result) {
       this->checkConsistency();
@@ -1159,7 +1159,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
     return result;
   }
   List<LargeInteger> theFactors;
-  Rational absoluteInput = inpuT;
+  Rational absoluteInput = input;
   if (absoluteInput < 0) {
     theFactors.addOnTop(- 1);
     absoluteInput *= - 1;
@@ -1477,7 +1477,7 @@ bool ElementZmodP::needsParenthesisForMultiplication(
 }
 
 std::string ElementZmodP::toStringModP() const {
-  return ElementZmodP::toStringModP(this->theModulus);
+  return ElementZmodP::toStringModP(this->modulus);
 }
 
 std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
@@ -1493,9 +1493,9 @@ std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
   }
   std::stringstream out;
   if (suppressModulus) {
-    out << this->theValue.toString();
+    out << this->value.toString();
   } else {
-    out << "(" << this->theValue.toString() << " "
+    out << "(" << this->value.toString() << " "
     << this->toStringModP() << ")";
   }
   return out.str();
@@ -1503,7 +1503,7 @@ std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
 
 bool ElementZmodP::operator*=(const Rational& other) {
   ElementZmodP otherElement;
-  otherElement.theModulus = this->theModulus;
+  otherElement.modulus = this->modulus;
   if (!otherElement.assignRational(other)) {
     return false;
   }
@@ -1513,7 +1513,7 @@ bool ElementZmodP::operator*=(const Rational& other) {
 
 ElementZmodP ElementZmodP::operator*(const Rational& other) const {
   ElementZmodP otherElt;
-  otherElt.theModulus = this->theModulus;
+  otherElt.modulus = this->modulus;
   otherElt.assignRational(other);
   ElementZmodP result = *this;
   result *= otherElt;
@@ -1521,15 +1521,15 @@ ElementZmodP ElementZmodP::operator*(const Rational& other) const {
 }
 
 unsigned int ElementZmodP::hashFunction() const {
-  if (this->theValue.isEqualToZero()) {
+  if (this->value.isEqualToZero()) {
     return 0;
   }
-  return this->theValue.hashFunction() * someRandomPrimes[0] +
-  this->theModulus.hashFunction() * someRandomPrimes[1];
+  return this->value.hashFunction() * someRandomPrimes[0] +
+  this->modulus.hashFunction() * someRandomPrimes[1];
 }
 
 void ElementZmodP::checkIamInitialized() const {
-  if (this->theModulus.isEqualToZero()) {
+  if (this->modulus.isEqualToZero()) {
     global.fatal << "Programming error: computing with non-initialized "
     << "element the ring Z mod p (the number p has not been initialized!)."
     << global.fatal;
@@ -1542,35 +1542,35 @@ void ElementZmodP::checkIamInitialized() const {
 
 void ElementZmodP::operator=(const LargeInteger& other) {
   this->checkIamInitialized();
-  this->theValue = other.value;
-  this->theValue %= this->theModulus;
+  this->value = other.value;
+  this->value %= this->modulus;
   if (other.sign == - 1) {
     ElementZmodP mOne;
-    mOne.makeMinusOne(this->theModulus);
+    mOne.makeMinusOne(this->modulus);
     *this *= mOne;
   }
 }
 
 bool ElementZmodP::operator>(const ElementZmodP& other) const {
-  if (this->theModulus > other.theModulus) {
+  if (this->modulus > other.modulus) {
     return true;
   }
-  if (other.theModulus > this->theModulus) {
+  if (other.modulus > this->modulus) {
     return false;
   }
-  return this->theValue > other.theValue;
+  return this->value > other.value;
 }
 
 ElementZmodP ElementZmodP::zeroStatic() {
   ElementZmodP result;
-  result.theModulus = 1;
+  result.modulus = 1;
   return result;
 }
 
 ElementZmodP ElementZmodP::zero() const {
   ElementZmodP result;
-  result.theModulus = this->theModulus;
-  if (this->theModulus == 0) {
+  result.modulus = this->modulus;
+  if (this->modulus == 0) {
     global.fatal << "Extracting constant one from non-initialized element not allowed. " << global.fatal;
   }
   return result;
@@ -1578,9 +1578,9 @@ ElementZmodP ElementZmodP::zero() const {
 
 ElementZmodP ElementZmodP::one() const {
   ElementZmodP result;
-  result.theModulus = this->theModulus;
-  result.theValue = 1;
-  if (this->theModulus == 0) {
+  result.modulus = this->modulus;
+  result.value = 1;
+  if (this->modulus == 0) {
     global.fatal << "Extracting zero constant from non-initialized element not allowed. " << global.fatal;
   }
   return result;
@@ -1596,7 +1596,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   rescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   output.setExpectedSize(input.size());
   ElementZmodP theCF;
-  theCF.theModulus = newModulo;
+  theCF.modulus = newModulo;
   output.makeZero();
   for (int i = 0; i < input.size(); i ++) {
     theCF = input.coefficients[i];
@@ -1605,25 +1605,25 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
 }
 
 void ElementZmodP::operator=(const ElementZmodP& other) {
-  this->theModulus = other.theModulus;
-  this->theValue = other.theValue;
+  this->modulus = other.modulus;
+  this->value = other.value;
 }
 
 void ElementZmodP::operator=(const LargeIntegerUnsigned& other) {
   this->checkIamInitialized();
-  this->theValue = other;
-  this->theValue %= this->theModulus;
+  this->value = other;
+  this->value %= this->modulus;
 }
 
 bool ElementZmodP::invert() {
   ElementZmodP copy = *this;
-  this->makeOne(this->theModulus);
+  this->makeOne(this->modulus);
   bool result = (*this /= copy);
   return result;
 }
 
 void ElementZmodP::makeZero() {
-  this->theValue = 0;
+  this->value = 0;
   this->checkIamInitialized();
 }
 
@@ -1636,22 +1636,22 @@ ElementZmodP ElementZmodP::getDenominator() const {
 }
 
 void ElementZmodP::makeOne(const LargeIntegerUnsigned& newModulo) {
-  this->theModulus = newModulo;
-  this->theValue = 1;
+  this->modulus = newModulo;
+  this->value = 1;
 }
 
 void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
-  this->theModulus = newModulo;
-  this->theValue = newModulo;
-  this->theValue --;
+  this->modulus = newModulo;
+  this->value = newModulo;
+  this->value --;
 }
 
 void ElementZmodP::checkEqualModuli(const ElementZmodP& other) {
-  if (this->theModulus != other.theModulus) {
+  if (this->modulus != other.modulus) {
     global.fatal << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->theModulus.toString() << " and "
-    << other.theModulus.toString() << ". " << global.fatal;
+    << this->modulus.toString() << " and "
+    << other.modulus.toString() << ". " << global.fatal;
   }
 }
 
@@ -1702,16 +1702,16 @@ void ElementZmodP::operator*=(int other) {
 }
 
 void ElementZmodP::operator*=(const LargeInteger& other) {
-  this->theValue *= other.value;
+  this->value *= other.value;
    if (other.isNegative()) {
-     this->theValue *= this->theModulus - 1;
+     this->value *= this->modulus - 1;
    }
-   this->theValue %= this->theModulus;
+   this->value %= this->modulus;
  }
 
 bool ElementZmodP::operator+=(const Rational& other) {
   ElementZmodP otherElt;
-  otherElt.theModulus = this->theModulus;
+  otherElt.modulus = this->modulus;
   if (!otherElt.assignRational(other)) {
     return false;
   }
@@ -1726,8 +1726,8 @@ void ElementZmodP::operator+=(const ElementZmodP& other) {
     return;
   }
   this->checkEqualModuli(other);
-  this->theValue += other.theValue;
-  this->theValue %= this->theModulus;
+  this->value += other.value;
+  this->value %= this->modulus;
 }
 
 void ElementZmodP::operator-=(const ElementZmodP& other) {
@@ -1758,7 +1758,7 @@ void ElementZmodP::operator=(const int other) {
 
 void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
   ElementZmodP otherElt;
-  otherElt.theModulus = this->theModulus;
+  otherElt.modulus = this->modulus;
   otherElt = other;
   (*this) -= otherElt;
 }
@@ -1767,8 +1767,8 @@ bool ElementZmodP::assignRational(const Rational& other) {
   this->checkIamInitialized();
   *this = other.getNumerator();
   ElementZmodP denominator;
-  denominator.theModulus = this->theModulus;
-  denominator.theValue = other.getDenominator();
+  denominator.modulus = this->modulus;
+  denominator.value = other.getDenominator();
   if (denominator.isEqualToZero()) {
     return false;
   }
@@ -1777,7 +1777,7 @@ bool ElementZmodP::assignRational(const Rational& other) {
 
 bool ElementZmodP::operator/=(const LargeInteger& other) {
   ElementZmodP divisor;
-  divisor.theModulus = this->theModulus;
+  divisor.modulus = this->modulus;
   if (!divisor.assignRational(Rational(other))) {
     return false;
   }
@@ -1792,8 +1792,8 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
     global.fatal << "Division by zero in ElementZmodP." << global.fatal;
   }
   LargeInteger theInverted, otherValue, theMod;
-  theMod = this->theModulus;
-  otherValue = other.theValue;
+  theMod = this->modulus;
+  otherValue = other.value;
   if (!MathRoutines::invertXModN(otherValue, theMod, theInverted)) {
     return false;
   }

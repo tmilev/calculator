@@ -144,13 +144,13 @@ bool ElementZmodP::Test::all() {
 
 bool ElementZmodP::Test::basicOperations() {
   ElementZmodP x, y;
-  x.theModulus = 5;
-  y.theModulus = 5;
+  x.modulus = 5;
+  y.modulus = 5;
   x.assignRational(Rational("-1/2"));
   y.assignRational(Rational("3"));
   ElementZmodP z = y;
   z *= x;
-  if (!(z.theValue == 1)) {
+  if (!(z.value == 1)) {
     global.fatal << "Bad arithmetic: " << x.toString() << " * "
     << y.toString() << " equals: " << z.toString() << ". " << global.fatal;
   }
@@ -173,8 +173,8 @@ bool ElementZmodP::Test::scale() {
   if (scaled != expected) {
     global.fatal << "Bad scaling, got: " << scaled << ", expected: " << expected << ". " << global.fatal;
   }
-  if (scale.theModulus != 4) {
-    global.fatal << "Bad scaling, scale expected to be 4. ";
+  if (scale.value != 4) {
+    global.fatal << "Bad scaling, scale expected to be 4. " << global.fatal;
   }
   return true;
 }

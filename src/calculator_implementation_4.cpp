@@ -1235,7 +1235,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   const Expression* right = &input[2];
   if (*left == *right) {
     constPower.assignValue(2, theCommands);
-    output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
+    output.makeXOX(theCommands, theCommands.opThePower(), *left, constPower);
     return true;
   }
   for (int i = 0; i < 2; i ++, MathRoutines::swap(left, right)) {
@@ -1253,8 +1253,8 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           }
         }
         if (isGood) {
-          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.expressionOne());
-          return output.MakeXOX(theCommands, theCommands.opThePower(), *left, thePower);
+          thePower.makeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.expressionOne());
+          return output.makeXOX(theCommands, theCommands.opThePower(), *left, thePower);
         }
       }
       if (left->startsWith(theCommands.opThePower(), 3)) {
@@ -1280,8 +1280,8 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           if (!isGood) {
             continue;
           }
-          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
-          return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+          thePower.makeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
+          return output.makeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
         }
       }
     }
@@ -1307,9 +1307,9 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
   const Expression& quotientNumeratorE = (*quotientE)[1];
   const Expression& quotientDenominatorE = (*quotientE)[2];
   Expression outputSummandE, outputNumE;
-  outputSummandE.MakeXOX(theCommands, theCommands.opTimes(), *summandE, quotientDenominatorE);
-  outputNumE.MakeXOX(theCommands, theCommands.opPlus(), quotientNumeratorE, outputSummandE);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
+  outputSummandE.makeXOX(theCommands, theCommands.opTimes(), *summandE, quotientDenominatorE);
+  outputNumE.makeXOX(theCommands, theCommands.opPlus(), quotientNumeratorE, outputSummandE);
+  return output.makeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
 }
 
 bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1359,8 +1359,8 @@ bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expr
     return false;
   }
   Expression newLeftE;
-  newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
-  output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][2]);
+  newLeftE.makeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
+  output.makeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][2]);
   return true;
 }
 
@@ -1552,9 +1552,9 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
     }
   }
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
-  rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
-  return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
+  rightE.makeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
+  return output.makeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
 bool Calculator::outerRightDistributeBracketIsOnTheRight(
@@ -1585,9 +1585,9 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
   }
 //  int theFormat = input.format;
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
-  rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][2]);
-  return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
+  rightE.makeXOX(theCommands, theMultiplicativeOp, input[1], input[2][2]);
+  return output.makeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
 bool Calculator::collectCoefficientsPowersVariables(
@@ -1661,7 +1661,7 @@ bool Calculator::functionCollectSummands(
 ) {
   MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
   List<Expression> summands;
-  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  theCommands.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.makeZero();
   LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   LinearCombination<Expression, double> sumOverDoubles;
@@ -1743,7 +1743,7 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
   }
   Expression tempE;
   tempE.makeProduct(theCommands, input[1][2], input[2]);
-  output.MakeXOX(theCommands, opPower, input[1][1], tempE);
+  output.makeXOX(theCommands, opPower, input[1][1], tempE);
   return true;
 }
 
@@ -1776,9 +1776,9 @@ bool Expression::makeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     *this = input[0];
     return true;
   }
-  this->MakeXOX(owner, theOp, input[input.size - 2], *input.lastObject());
+  this->makeXOX(owner, theOp, input[input.size - 2], *input.lastObject());
   for (int i = input.size - 3; i >= 0; i --) {
-    this->MakeXOX(owner, theOp, input[i], *this);
+    this->makeXOX(owner, theOp, input[i], *this);
   }
   return true;
 }
@@ -1850,10 +1850,10 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
   Expression tempE, minusOne;
   minusOne.assignValue(- 1, theCommands);
   if (input.size() == 2) {
-    output.MakeXOX(theCommands, theCommands.opTimes(), minusOne, input[1]);
+    output.makeXOX(theCommands, theCommands.opTimes(), minusOne, input[1]);
   } else {
-    tempE.MakeXOX(theCommands, theCommands.opTimes(), minusOne, input[2]);
-    output.MakeXOX(theCommands, theCommands.opPlus(), input[1], tempE);
+    tempE.makeXOX(theCommands, theCommands.opTimes(), minusOne, input[2]);
+    output.makeXOX(theCommands, theCommands.opPlus(), input[1], tempE);
   }
   return true;
 }
@@ -1880,7 +1880,7 @@ void Expression::operator+=(const Expression& other) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
   }
   Expression resultE;
-  resultE.MakeXOX(*this->owner, this->owner->opPlus(), *this, other);
+  resultE.makeXOX(*this->owner, this->owner->opPlus(), *this, other);
   *this = resultE;
 }
 
@@ -1906,7 +1906,7 @@ void Expression::operator-=(const Expression& other) {
     global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
   }
   Expression resultE;
-  resultE.MakeXOX(*this->owner, this->owner->opMinus(), *this, other);
+  resultE.makeXOX(*this->owner, this->owner->opMinus(), *this, other);
   *this = resultE;
 }
 
@@ -1999,7 +1999,7 @@ void Expression::operator/=(const Expression& other) {
     global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
   }
   Expression resultE;
-  resultE.MakeXOX(*this->owner, this->owner->opDivide(), *this, other);
+  resultE.makeXOX(*this->owner, this->owner->opDivide(), *this, other);
   *this = resultE;
 }
 
@@ -2025,7 +2025,7 @@ void Expression::operator*=(const Expression& other) {
     global.fatal << "Error: adding expressions with different owners. " << global.fatal;
   }
   Expression resultE;
-  resultE.MakeXOX(*this->owner, this->owner->opTimes(), *this, other);
+  resultE.makeXOX(*this->owner, this->owner->opTimes(), *this, other);
   *this = resultE;
 }
 

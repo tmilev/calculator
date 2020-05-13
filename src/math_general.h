@@ -2261,7 +2261,7 @@ public:
   void subtractMonomial(const templateMonomial& inputMon, const Coefficient& inputCoeff) {
     this->cleanupMonomialIndex(this->subtractMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff));
   }
-  Coefficient getMonomialCoefficient(const templateMonomial& inputMon) const {
+  Coefficient getCoefficientOf(const templateMonomial& inputMon) const {
     int theIndex = this->monomials.getIndex(inputMon);
     if (theIndex == - 1) {
       if (this->coefficients.size > 0) {
@@ -2631,7 +2631,7 @@ public:
   }
   void assignMinPoly(const Matrix<Coefficient>& input);
   void assignCharacteristicPoly(const Matrix<Coefficient>& input);
-  void AssignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
+  void assignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
     this->makeZero();
     this->addMonomial(r, theCoeff);
   }
@@ -2665,7 +2665,7 @@ public:
   ) const;
   void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
-  Coefficient GetDiscriminant();
+  Coefficient getDiscriminant();
   void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
   void makeMonomial(
     int letterIndex,
@@ -2907,6 +2907,11 @@ class PolynomialFactorizationKronecker {
   PolynomialFactorizationKronecker() {
     this->output = nullptr;
   }
+  static bool solvePolynomial(
+    const Polynomial<Rational>& input,
+    List<AlgebraicNumber>& output,
+    AlgebraicClosureRationals& closure
+  , std::stringstream* commentsOnFailure);
 };
 
 template <class Coefficient>
@@ -3375,7 +3380,7 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
       break;
     }
     listCopy[i].getMinimalMonomial(currentMon, CFminMon);
-    CFinRemainder = remainderFromInput.getMonomialCoefficient(currentMon);
+    CFinRemainder = remainderFromInput.getCoefficientOf(currentMon);
     outputFirstLinearCombination[i] = CFinRemainder;
     outputFirstLinearCombination[i] /= CFminMon;
     remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];

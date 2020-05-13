@@ -1596,12 +1596,12 @@ LargeIntegerUnsigned Crypto::rsaEncrypt(
     << "The modulus: " << theModulus.toString() << "; the exponent: " << theExponent.toString() << global.fatal;
   }
   ElementZmodP theElt, theOne;
-  theElt.theModulus = theModulus;
-  theOne.theValue = 1;
-  theOne.theModulus = theModulus;
+  theElt.modulus = theModulus;
+  theOne.value = 1;
+  theOne.modulus = theModulus;
   theElt.assignRational(theMessage);
   MathRoutines::raiseToPower(theElt, theExponent, theOne);
-  return theElt.theValue;
+  return theElt.value;
 }
 
 std::string JSONWebToken::toString() {
@@ -1732,7 +1732,7 @@ void UnsecurePseudoRandomGenerator::setRandomSeed(int32_t inputRandomSeed) {
   if (inputRandomSeed < 0) {
     inputRandomSeed *= - 1;
   }
-  inputRandomSeed %= 1000000000;
+  inputRandomSeed %= this->maximumRandomSeed;
   this->randomSeed = inputRandomSeed;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
@@ -1760,7 +1760,7 @@ unsigned int UnsecurePseudoRandomGenerator::getRandomLessThanBillion() {
     result += this->state()[this->bytesConsumed + i];
   }
   this->bytesConsumed += 4;
-  result %= 1000000000;
+  result %= this->maximumRandomSeed;
   return result;
 }
 

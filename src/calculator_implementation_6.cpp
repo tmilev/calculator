@@ -684,7 +684,7 @@ bool CalculatorFunctions::innerGetSummand(
   theCommandSequence.addChildAtomOnTop(theCommands.opEndStatement());
   theCommandSequence.addChildOnTop(theSub);
   theCommandSequence.addChildOnTop(theCoeff * theSum[2]);
-  return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.expressionTwo());
+  return output.makeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, theCommands.expressionTwo());
 }
 
 bool CalculatorFunctions::innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1018,17 +1018,17 @@ bool CalculatorFunctions::innerTestRSASign(
   out << "<br>Padded message digest:<br>" << Crypto::convertListUnsignedCharsToHex(paddedMessage);
   out << "<br>Signature:<br>" << Crypto::convertListUnsignedCharsToHex(signature);
   ElementZmodP theElement, theOne;
-  theElement.theModulus = theKey.thePublicKey.theModulus;
-  theOne.makeOne(theElement.theModulus);
-  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.theValue);
-  out << "<br>Signature integer:<br>" << theElement.theValue.toString();
+  theElement.modulus = theKey.thePublicKey.theModulus;
+  theOne.makeOne(theElement.modulus);
+  Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.value);
+  out << "<br>Signature integer:<br>" << theElement.value.toString();
   MathRoutines::raiseToPower(theElement, theKey.thePublicKey.theExponent, theOne);
   out << "<br>Signature power e mod n [e = "
   << theKey.thePublicKey.theExponent << ", n = "
   << theKey.thePublicKey.theModulus << "]"
-  << ":<br>" << theElement.theValue.toString();
+  << ":<br>" << theElement.value.toString();
   std::string theHex;
-  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theElement.theValue, 0, theHex);
+  Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(theElement.value, 0, theHex);
   out << "<br>Converted to hex:<br>" << theHex;
   return output.assignValue(out.str(), theCommands);
 }
@@ -1266,7 +1266,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
     factorNext.addChildAtomOnTop(opFactorInteger);
     numberLast.assignValue(Rational(primeFactors[primeFactors.size - 1]), theCommands);
     factorNext.addChildOnTop(numberLast);
-    return output.MakeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
+    return output.makeXOX(theCommands, theCommands.opUnion(), factorsSoFar, factorNext);
   }
 }
 
@@ -1557,7 +1557,7 @@ bool CalculatorFunctions::innerMatchesPattern(
       << " does not start with the bind atom. ";
       return output.makeError(errorStream.str(), theCommands);
     }
-    currentCommand.MakeXOX(
+    currentCommand.makeXOX(
       theCommands,
       theCommands.opDefine(),
       matchedExpressions.theKeys[i][1],
@@ -1699,7 +1699,7 @@ bool CalculatorFunctions::innerCollectSummands(
     return false;
   }
   List<Expression> theList;
-  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input[1], theList);
+  theCommands.appendSummandsReturnTrueIfOrderNonCanonical(input[1], theList);
   return output.makeSequence(theCommands, &theList);
 }
 
@@ -1868,16 +1868,16 @@ bool CalculatorFunctions::innerIntersectIntervals(
     return output.makeAtom("\\emptyset", theCommands);
   }
   if (leftIsClosed && rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
   }
   if (!leftIsClosed && rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
   }
   if (leftIsClosed && !rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
   }
   if (!leftIsClosed && !rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opSequence(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opSequence(), leftFinal, rightFinal);
   }
   return false;
 }
@@ -1896,11 +1896,11 @@ bool CalculatorFunctions::innerUnionUnionIntervals(
   }
   const Expression& rightE = input[2][1];
   Expression theMiddleUnion, middleUnionReduced;
-  theMiddleUnion.MakeXOX(theCommands, theCommands.opUnion(), leftE, rightE);
+  theMiddleUnion.makeXOX(theCommands, theCommands.opUnion(), leftE, rightE);
   if (!CalculatorFunctions::innerUnionIntervals(theCommands, theMiddleUnion, middleUnionReduced)) {
     return false;
   }
-  return output.MakeXOX(theCommands, theCommands.opUnion(), middleUnionReduced, rightComposite[2]);
+  return output.makeXOX(theCommands, theCommands.opUnion(), middleUnionReduced, rightComposite[2]);
 }
 
 bool CalculatorFunctions::innerUnionIntervals(
@@ -2005,16 +2005,16 @@ bool CalculatorFunctions::innerUnionIntervals(
     }
   }
   if (leftIsClosed && rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
   }
   if (!leftIsClosed && rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
   }
   if (leftIsClosed && !rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
   }
   if (!leftIsClosed && !rightIsClosed) {
-    return output.MakeXOX(theCommands, theCommands.opIntervalOpen(), leftFinal, rightFinal);
+    return output.makeXOX(theCommands, theCommands.opIntervalOpen(), leftFinal, rightFinal);
   }
   return false;
 }
@@ -2350,9 +2350,9 @@ bool CalculatorFunctions::innerDistributeSqrt(Calculator& theCommands, const Exp
     return false;
   }
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[1]);
-  rightE.MakeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[2]);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+  leftE.makeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[1]);
+  rightE.makeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[2]);
+  return output.makeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
 }
 
 bool CalculatorFunctions::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2478,7 +2478,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
     return false;
   }
   Expression theRadical, reduced;
-  theRadical.MakeXOX(theCommands, theCommands.opSqrt(), theCommands.expressionTwo(), input[1]);
+  theRadical.makeXOX(theCommands, theCommands.opSqrt(), theCommands.expressionTwo(), input[1]);
   if (!CalculatorFunctions::innerSqrt(theCommands, theRadical, reduced)) {
     return false;
   }
@@ -2487,7 +2487,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(
   }
   Expression theIntegerPower;
   theIntegerPower.assignValue(Rational(exponent.getNumerator()), theCommands);
-  return output.MakeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
+  return output.makeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
 }
 
 bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2552,13 +2552,13 @@ bool CalculatorFunctions::innerValueOfModularExpression(
   }
   ElementZmodP candidateZmodP;
   if (input[1].isOfType(&candidateZmodP)) {
-    return output.assignValue(candidateZmodP.theValue, theCommands);
+    return output.assignValue(candidateZmodP.value, theCommands);
   }
   Polynomial<ElementZmodP> candidatePolynomial;
   if (input[1].isOfType(&candidatePolynomial)) {
     Polynomial<Rational> rationalConversion;
     for (int i = 0; i < candidatePolynomial.size(); i ++) {
-      rationalConversion.addMonomial(candidatePolynomial.monomials[i], candidatePolynomial.coefficients[i].theValue);
+      rationalConversion.addMonomial(candidatePolynomial.monomials[i], candidatePolynomial.coefficients[i].value);
     }
     return output.assignValueWithContext(rationalConversion, input[1].getContext(), theCommands);
   }
@@ -2617,7 +2617,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << xDefE[2].toString() << ", " << yDefE[2].toString();
   }
   if (isElementZmodP) {
-    if (eltZmodP.xCoordinate.theModulus != eltZmodP.yCoordinate.theModulus) {
+    if (eltZmodP.xCoordinate.modulus != eltZmodP.yCoordinate.modulus) {
       return theCommands << "The two base coordinates have different moduli. ";
     }
   }
@@ -2669,15 +2669,15 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);
-  Rational coefficientY = thePoly.getMonomialCoefficient(ySquared);
-  Rational coefficientXcubed = - thePoly.getMonomialCoefficient(xCubed);
+  Rational coefficientY = thePoly.getCoefficientOf(ySquared);
+  Rational coefficientXcubed = - thePoly.getCoefficientOf(xCubed);
   if (coefficientY == 0) {
     return theCommands << "Did not find square term in your curve.";
   }
   if (coefficientXcubed == 0) {
     return theCommands << "Did not find cube term in your curve.";
   }
-  Rational coefficientXlinear = - thePoly.getMonomialCoefficient(xLinear);
+  Rational coefficientXlinear = - thePoly.getCoefficientOf(xLinear);
   Rational constCoefficient = - thePoly.getConstantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants = isRational ? eltRational.owner : eltZmodP.owner;
   if (

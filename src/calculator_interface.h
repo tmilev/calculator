@@ -534,7 +534,7 @@ private:
   const Expression& getLastChild() const {
     return (*this)[this->children.size - 1];
   }
-  bool makeError (const std::string& theError, Calculator& owner);
+  bool makeError(const std::string& theError, Calculator& owner);
   Expression(const Expression& other): flagDeallocated(false) {
     this->operator=(other);
   }

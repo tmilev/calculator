@@ -432,8 +432,8 @@ private:
   friend bool operator<(int left, const Rational& right) {
     return Rational(left) < right;
   }
-  bool tryToAddQuickly(int OtherNum, int OtherDen);
-  bool tryToMultiplyQuickly(int OtherNum, int OtherDen);
+  bool tryToAddQuickly(int otherNumerator, int otherDenominator);
+  bool tryToMultiplyQuickly(int otherNumerator, int otherDenominator);
   void allocateExtended() {
     if (this->extended != nullptr) {
       return;

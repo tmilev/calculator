@@ -1423,7 +1423,8 @@ void LargeInteger::makeZero() {
 
 void LargeInteger::operator=(const Rational& other) {
   if (!other.isInteger(this)) {
-    global.fatal << "This is a programming error: converting implicitly rational number " << other.toString()
+    global.fatal << "Attempt to convert implicitly rational number "
+    << other.toString()
     << " to integer is not possible as the Rational number is not integral. " << global.fatal;
   }
 }
@@ -1760,17 +1761,17 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
   return true;
 }
 
-bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
-  int OtherNumAbs, thisNumAbs;
-  if (this->denominatorShort <= 0 || OtherDen <= 0) {
+bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
+  int otherNumeratorAbsoluteValue, thisNumAbs;
+  if (this->denominatorShort <= 0 || otherDenominator <= 0) {
     global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
-    << this->denominatorShort << " and " << OtherDen
+    << this->denominatorShort << " and " << otherDenominator
     << ". The cause of the error should be in some of the calling functions. " << global.fatal;
   }
-  if (OtherNum < 0) {
-    OtherNumAbs = - OtherNum;
+  if (otherNumerator < 0) {
+    otherNumeratorAbsoluteValue = - otherNumerator;
   } else {
-    OtherNumAbs = OtherNum;
+    otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
     thisNumAbs = - this->numeratorShort;
@@ -1781,13 +1782,13 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
     this->extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->numeratorShort * OtherDen + this->denominatorShort * OtherNum;
-  int D = this->denominatorShort * OtherDen;
+  int N = this->numeratorShort * otherDenominator + this->denominatorShort * otherNumerator;
+  int D = this->denominatorShort * otherDenominator;
   if (N == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
@@ -1806,10 +1807,10 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
   return true;
 }
 
-bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
-  int OtherNumAbs, thisNumAbs;
-  if (this->denominatorShort <= 0 || OtherDen <= 0) {
-    if (denominatorShort == 0 || OtherDen == 0) {
+bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
+  int otherNumeratorAbsoluteValue, thisNumAbs;
+  if (this->denominatorShort <= 0 || otherDenominator <= 0) {
+    if (denominatorShort == 0 || otherDenominator == 0) {
       global.fatal << "This is a programming error: division by zero. ";
     } else {
       global.fatal << "This is a programming error during rational number multiplication: "
@@ -1817,10 +1818,10 @@ bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
     }
     global.fatal << global.fatal;
   }
-  if (OtherNum < 0) {
-    OtherNumAbs = - OtherNum;
+  if (otherNumerator < 0) {
+    otherNumeratorAbsoluteValue = - otherNumerator;
   } else {
-    OtherNumAbs = OtherNum;
+    otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
     thisNumAbs = - this->numeratorShort;
@@ -1831,13 +1832,13 @@ bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
     this->extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->numeratorShort * OtherNum;
-  int D = this->denominatorShort * OtherDen;
+  int N = this->numeratorShort * otherNumerator;
+  int D = this->denominatorShort * otherDenominator;
   if (N == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;

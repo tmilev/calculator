@@ -566,7 +566,7 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(For
 
 std::string SemisimpleSubalgebras::toString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::toString");
-  HtmlRoutines::GlobalMathSpanID = 0;
+  HtmlRoutines::globalMathSpanID = 0;
   bool writingToHD = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
   std::stringstream out;
   int candidatesRealized = 0;

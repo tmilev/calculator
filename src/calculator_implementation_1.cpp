@@ -846,12 +846,12 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   if (
     !input.isSequenceNElements() &&
     !input.isMatrix() &&
-    !input.startsWithGivenOperation("Transpose")
+    !input.startsWithGivenOperation(Calculator::Atoms::transpose)
   ) {
     return false;
   }
   Matrix<Expression> theMat;
-  if (input.startsWithGivenOperation("Transpose")) {
+  if (input.startsWithGivenOperation(Calculator::Atoms::transpose)) {
     theCommands.getMatrixExpressionsFromArguments(input, theMat);
   } else {
     theCommands.getMatrixExpressions(input, theMat);
@@ -896,14 +896,14 @@ void Plot::operator+=(const Plot& other) {
   }
   this->thePlots.addListOnTop(other.thePlots);
   if (other.priorityWindow > this->priorityWindow) {
-    this->DesiredHtmlHeightInPixels = other.DesiredHtmlHeightInPixels;
-    this->DesiredHtmlWidthInPixels = other.DesiredHtmlWidthInPixels;
+    this->desiredHtmlHeightInPixels = other.desiredHtmlHeightInPixels;
+    this->desiredHtmlWidthInPixels = other.desiredHtmlWidthInPixels;
   } else if (this->priorityWindow == other.priorityWindow) {
-    if (this->DesiredHtmlHeightInPixels < other.DesiredHtmlHeightInPixels) {
-      this->DesiredHtmlHeightInPixels = other.DesiredHtmlHeightInPixels;
+    if (this->desiredHtmlHeightInPixels < other.desiredHtmlHeightInPixels) {
+      this->desiredHtmlHeightInPixels = other.desiredHtmlHeightInPixels;
     }
-    if (this->DesiredHtmlWidthInPixels < other.DesiredHtmlWidthInPixels) {
-      this->DesiredHtmlWidthInPixels = other.DesiredHtmlWidthInPixels;
+    if (this->desiredHtmlWidthInPixels < other.desiredHtmlWidthInPixels) {
+      this->desiredHtmlWidthInPixels = other.desiredHtmlWidthInPixels;
     }
   }
   if (!other.flagIncludeCoordinateSystem) {
@@ -919,8 +919,8 @@ bool Plot::operator==(const Plot& other) const {
   this->priorityWindow == other.priorityWindow &&
   this->priorityCanvasName == other.priorityCanvasName &&
   this->priorityViewRectangle == other.priorityViewRectangle &&
-  this->DesiredHtmlHeightInPixels == other.DesiredHtmlHeightInPixels &&
-  this->DesiredHtmlWidthInPixels == other.DesiredHtmlWidthInPixels &&
+  this->desiredHtmlHeightInPixels == other.desiredHtmlHeightInPixels &&
+  this->desiredHtmlWidthInPixels == other.desiredHtmlWidthInPixels &&
   ((this->highBoundY        - other.highBoundY       ) == 0.0) &&
   ((this->lowBoundY         - other.lowBoundY        ) == 0.0) &&
   ((this->theLowerBoundAxes - other.theLowerBoundAxes) == 0.0) &&
@@ -1042,8 +1042,8 @@ Plot::Plot() {
   this->lowBoundY = - 0.5;
   this->highBoundY = 0.5;
   this->flagIncludeExtraHtmlDescriptions = true;
-  this->DesiredHtmlHeightInPixels = 350;
-  this->DesiredHtmlWidthInPixels = 350;
+  this->desiredHtmlHeightInPixels = 350;
+  this->desiredHtmlWidthInPixels = 350;
   this->defaultLineColor = 0;
   this->flagPlotShowJavascriptOnly = false;
   this->priorityWindow = 0;
@@ -1153,8 +1153,8 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   std::stringstream outContent, outScript;
   this->computeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
   if (!owner.flagPlotShowJavascriptOnly) {
-    outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
-    << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
+    outContent << "<canvas width =\"" << this->desiredHtmlWidthInPixels
+    << "\" height =\"" << this->desiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
     << this->getCanvasName()
     << "\" "
@@ -1356,7 +1356,8 @@ std::string PlotObject::getJavascriptSurfaceImmersion(
     << this->coordinateFunctionsJS.size
     << " elements instead of 3 (expected).\n";
   if (this->theVarRangesJS.size != 2) {
-    out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 2 (expected).";
+    out << "//this->theVarRangesJS has "
+    << this->theVarRangesJS.size << " elements instead of 2 (expected).";
   } else if (this->theVarRangesJS[0].size != 2 || this->theVarRangesJS[1].size != 2) {
     out << "//this->theVarRangesJS had unexpected value: "
     << this->theVarRangesJS.size;
@@ -1622,8 +1623,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     this->computeAxesAndBoundingBox();
   }
   if (!this->flagPlotShowJavascriptOnly) {
-    out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
-    << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
+    out << "<canvas width =\"" << this->desiredHtmlWidthInPixels
+    << "\" height =\"" << this->desiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
     << this->getCanvasName()
     << "\" "
@@ -1918,7 +1919,7 @@ void Expression::substituteRecursivelyInChildren(const Expression& toBeSubbed, c
 
 bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theCounter(&theCommands.recursionDepth);
   if (*theCounter.theCounter == theCommands.maximumRecursionDepth - 2) {
     return output.assignValue(std::string("..."), theCommands);
   }
@@ -2325,30 +2326,30 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
     return output.makeError("Failed to extract normal from first argument. ", theCommands);
   }
   Matrix<Rational> theMat;
-  Vectors<Rational> NonStrictCone, VectorsToPerturbRelativeTo;
+  Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
   if (!theCommands.functionGetMatrix(
     input[2], theMat, nullptr, splittingNormal.size, nullptr
   )) {
     return output.makeError("Failed to extract matrix from second argument. ", theCommands);
   }
-  NonStrictCone.assignMatrixRows(theMat);
+  nonStrictCone.assignMatrixRows(theMat);
   if (!theCommands.functionGetMatrix(
     input[3], theMat, nullptr, splittingNormal.size, nullptr
   )) {
     return output.makeError("Failed to extract matrix from third argument. ", theCommands);
   }
-  VectorsToPerturbRelativeTo.assignMatrixRows(theMat);
-  for (int i = 0; i < NonStrictCone.size; i ++) {
-    if (splittingNormal.ScalarEuclidean(NonStrictCone[i]) < 0) {
+  vectorsToPerturbRelativeTo.assignMatrixRows(theMat);
+  for (int i = 0; i < nonStrictCone.size; i ++) {
+    if (splittingNormal.ScalarEuclidean(nonStrictCone[i]) < 0) {
       std::stringstream out;
       out << "The normal vector " << splittingNormal.toString()
-      << " is has negative scalar product with " << NonStrictCone[i].toString();
+      << " is has negative scalar product with " << nonStrictCone[i].toString();
       return output.makeError(out.str(), theCommands);
     }
   }
   out << "Perturbing " << splittingNormal.toString() << " relative to cone "
-  << NonStrictCone.toString() << " and vectors " << VectorsToPerturbRelativeTo.toString();
-  splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
+  << nonStrictCone.toString() << " and vectors " << vectorsToPerturbRelativeTo.toString();
+  splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(nonStrictCone, vectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.toString();
   return output.assignValue(out.str(), theCommands);
 }
@@ -2372,7 +2373,7 @@ public:
   }
 };
 
-class ExpressionHistoryEnumerator{
+class ExpressionHistoryEnumerator {
 public:
   Calculator* owner;
   int recursionDepth;
@@ -2387,9 +2388,7 @@ public:
   bool processTransformation(const Expression& current, std::stringstream* commentsOnFailure);
   bool processChildrenTransformations(int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure);
   void initializeComputation();
-  const Expression* getCurrentE(const List<Expression>& input);
   ExpressionHistoryEnumerator();
-  bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
   bool checkInitialization() {
     if (this->owner == nullptr) {
       global.fatal << "Expression history enumerator has zero owner. " << global.fatal;
@@ -2583,7 +2582,7 @@ bool ExpressionHistoryEnumerator::processTransformation(
 ) {
   if (!current.startsWith(this->owner->opExpressionHistorySet())) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Bad first atom in history child : " << current.toString();
+      *commentsOnFailure << "Bad first atom in history child: " << current.toString();
     }
     return false;
   }

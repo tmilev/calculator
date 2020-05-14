@@ -412,6 +412,7 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processApp");
   this->owner->setHeaderOKNoContentLength("", "text/html");
   if (global.server().restartIsNeeded()) {
+    this->owner->sendPending();
     return true;
   }
   this->owner->writeToBody(WebAPIResponse::getApp(appendBuildHash));

@@ -48,7 +48,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
 }
 
-bool PartFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
+bool PartialFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
   if (theArguments.size < 1) {
     return false;
   }

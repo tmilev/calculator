@@ -741,7 +741,7 @@ bool Calculator::innerHWVCommon(
   bool Verbose
 ) {
   MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
-  RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter therecursionIncrementer(&theCommands.recursionDepth);
   RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
@@ -789,7 +789,7 @@ bool Calculator::innerHWVCommon(
 }
 
 bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
-  if (this->RecursionDeptH <= this->maximumRecursionDepth) {
+  if (this->recursionDepth <= this->maximumRecursionDepth) {
     return false;
   }
   if (!this->flagMaxRecursionErrorEncountered) {
@@ -975,7 +975,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     return theCommands
     << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
   }
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!theCommands.convert(
     input[1],
@@ -1089,8 +1089,8 @@ bool Expression::hasInputBoxVariables(HashedList<std::string, MathRoutines::hash
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->maximumRecursionDepth) {
+  RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
+  if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     global.fatal << "This is a programming error: "
     << "function hasInputBoxVariables has exceeded "
     << "recursion depth limit. " << global.fatal;
@@ -1122,9 +1122,9 @@ bool Expression::hasBoundVariables() const {
     global.fatal << "This is a programming error: calling function "
     << "hasBoundVariables on non-initialized expression. " << global.fatal;
   }
-  RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&this->owner->recursionDepth);
   MacroRegisterFunctionWithName("Expression::hasBoundVariables");
-  if (this->owner->RecursionDeptH>this->owner->maximumRecursionDepth) {
+  if (this->owner->recursionDepth>this->owner->maximumRecursionDepth) {
     global.fatal << "This is a programming error: function hasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
   if (this->isListOfTwoAtomsStartingWith(this->owner->opBind())) {
@@ -1188,8 +1188,8 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
 bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   const Expression& input, List<Expression>& output, int theOp
 ) {
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH > this->maximumRecursionDepth) {
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
+  if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }
   bool result = false;
@@ -1209,7 +1209,7 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
 }
 
 bool Calculator::outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
   if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor())) {
     return true;
@@ -1385,7 +1385,7 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
 
 bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   if (!input.startsWith(theCommands.opIsDenotedBy(), 3)) {
     return false;
   }
@@ -2955,7 +2955,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   bool ascending
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.setSize(1);
   Selection theParSel;
@@ -3173,7 +3173,7 @@ bool Calculator::convertExpressionsToCommonContext(
 
 bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theCounter(&theCommands.recursionDepth);
   if (!input.startsWith(theCommands.opEndStatement())) {
     return false;
   }

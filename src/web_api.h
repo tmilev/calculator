@@ -147,8 +147,7 @@ public:
 public:
   static MapList<std::string, std::string, MathRoutines::hashString>& preLoadedFiles();
   static std::stringstream outputStream;
-  static int GlobalMathSpanID;
-  static int GlobalCanvasID;
+  static int globalMathSpanID;
   static int GlobalGeneralPurposeID;
   static int numLinesAll;
   static int numRegularLines;

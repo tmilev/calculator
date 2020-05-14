@@ -906,7 +906,7 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCasimir");
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -6081,8 +6081,8 @@ bool CalculatorFunctions::innerPlotViewWindow(
     return theCommands << "Failed to extract a pair of positive numbers from: "
     << input.toString();
   }
-  emptyPlot.DesiredHtmlWidthInPixels = static_cast<int>(widthHeight[0]);
-  emptyPlot.DesiredHtmlHeightInPixels = static_cast<int>(widthHeight[1]);
+  emptyPlot.desiredHtmlWidthInPixels = static_cast<int>(widthHeight[0]);
+  emptyPlot.desiredHtmlHeightInPixels = static_cast<int>(widthHeight[1]);
   return output.assignValue(emptyPlot, theCommands);
 }
 
@@ -6092,8 +6092,8 @@ bool CalculatorFunctions::innerPlotSetId(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotSetId");
   Plot emptyPlot;
   emptyPlot.priorityCanvasName = 1;
-  emptyPlot.DesiredHtmlHeightInPixels = 100;
-  emptyPlot.DesiredHtmlWidthInPixels = 100;
+  emptyPlot.desiredHtmlHeightInPixels = 100;
+  emptyPlot.desiredHtmlWidthInPixels = 100;
   std::string incomingName;
   if (!input.isOfType(&incomingName)) {
    incomingName = input.toString();
@@ -6124,8 +6124,8 @@ bool CalculatorFunctions::innerPlotViewRectangle(
   emptyPlot.theUpperBoundAxes = upperRight[0];
   emptyPlot.highBoundY = upperRight[1];
   emptyPlot.priorityViewRectangle = 1;
-  emptyPlot.DesiredHtmlHeightInPixels = 100;
-  emptyPlot.DesiredHtmlWidthInPixels = 100;
+  emptyPlot.desiredHtmlHeightInPixels = 100;
+  emptyPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(emptyPlot, theCommands);
 }
 
@@ -6155,8 +6155,8 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
   }
   theFilledPlot.fillStyle = "filled";
   theFilledPlot.thePlotType = "plotFillStart";
-  outputPlot.DesiredHtmlHeightInPixels = startPlot.DesiredHtmlHeightInPixels;
-  outputPlot.DesiredHtmlWidthInPixels = startPlot.DesiredHtmlWidthInPixels;
+  outputPlot.desiredHtmlHeightInPixels = startPlot.desiredHtmlHeightInPixels;
+  outputPlot.desiredHtmlWidthInPixels = startPlot.desiredHtmlWidthInPixels;
   outputPlot.thePlots.addOnTop(theFilledPlot);
   outputPlot += startPlot;
   theFilledPlot.thePlotType = "plotFillFinish";
@@ -6409,8 +6409,8 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   thePlot.colorJS = input[2].toString();
   thePlot.thePlotType = "points";
   theFinalPlot.thePlots.addOnTop(thePlot);
-  theFinalPlot.DesiredHtmlHeightInPixels = 100;
-  theFinalPlot.DesiredHtmlWidthInPixels = 100;
+  theFinalPlot.desiredHtmlHeightInPixels = 100;
+  theFinalPlot.desiredHtmlWidthInPixels = 100;
   return output.assignValue(theFinalPlot, theCommands);
 }
 
@@ -7058,7 +7058,7 @@ bool CalculatorFunctions::innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calcula
 }
 
 bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   if (input.size() != 3) {
     return output.makeError("This function takes 2 arguments", theCommands);
   }
@@ -7099,7 +7099,7 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
 bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   if (!input.isListNElements(5)) {
     return output.makeError(
       "Function decompose finite-dimensional part of "
@@ -7221,7 +7221,7 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
 
 bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursion(&theCommands.recursionDepth);
   Selection parabolicSel;
   Vector<RationalFunction<Rational> > theHWfundcoords, tempRoot, theHWsimplecoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgPointer;
@@ -7487,7 +7487,7 @@ bool CalculatorFunctions::innerDeterminant(
 bool CalculatorFunctions::innerDecomposeCharGenVerma(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDecomposeCharGenVerma");
   Vector<RationalFunction<Rational> > theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
@@ -7646,7 +7646,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.makeError(
       "Function innerSplitGenericGenVermaTensorFD is expected "
@@ -7768,7 +7768,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitGenericGenVermaTensorFD");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   if (!input.isListNElements(4))
     return output.makeError(
       "Function innerSplitGenericGenVermaTensorFD is expected to "
@@ -8030,7 +8030,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
 
 bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHWTAABF");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionCounter(&theCommands.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.makeError("Function expects three arguments.", theCommands);
   }
@@ -8370,8 +8370,8 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
       return true;
     }
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH >this->owner->maximumRecursionDepth) {
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  if (this->owner->recursionDepth >this->owner->maximumRecursionDepth) {
     return *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble."
     << " This may be a programming error. ";
   }

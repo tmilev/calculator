@@ -16,6 +16,7 @@ std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
 std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
 std::string Calculator::Atoms::setInputBox = "CommandEnclosure";
 std::string Calculator::Atoms::sort = "Sort";
+std::string Calculator::Atoms::transpose = "Transpose";
 
 void Calculator::initAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
@@ -4049,13 +4050,13 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "Transpose",
+    Calculator::Atoms::transpose,
     Calculator::innerTranspose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
     "Calculator::innerTranspose",
-    "Transpose",
+    Calculator::Atoms::transpose,
     innerStandard
   );
   this->addOperationHandler(

@@ -199,8 +199,8 @@ bool CalculatorConversions::innerPolynomial(
 template <class Coefficient>
 bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDeptH > theCommands.maximumRecursionDepth) {
+  RecursionDepthCounter theRecursionCounter(&theCommands.recursionDepth);
+  if (theCommands.recursionDepth > theCommands.maximumRecursionDepth) {
     return theCommands << "Max recursion depth of " << theCommands.maximumRecursionDepth
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   }

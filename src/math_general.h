@@ -1273,7 +1273,7 @@ public:
 template <class Coefficient>
 bool Vectors<Coefficient>::conesIntersect(
   List<Vector<Rational> >& StrictCone,
-  List<Vector<Rational> >& NonStrictCone,
+  List<Vector<Rational> >& nonStrictCone,
   Vector<Rational>* outputLinearCombo,
   Vector<Rational>* outputSplittingNormal
 ) {
@@ -1281,14 +1281,14 @@ bool Vectors<Coefficient>::conesIntersect(
   Matrix<Rational> matb;
   if (StrictCone.size == 0) {
     if (outputSplittingNormal != nullptr) {
-      if (NonStrictCone.size > 0) {
-        outputSplittingNormal->makeZero(NonStrictCone[0].size);
+      if (nonStrictCone.size > 0) {
+        outputSplittingNormal->makeZero(nonStrictCone[0].size);
       }
     }
     return false;
   }
   int theDimension = StrictCone[0].size;
-  int numCols = StrictCone.size + NonStrictCone.size;
+  int numCols = StrictCone.size + nonStrictCone.size;
   matA.initialize(theDimension + 1, numCols);
   matb.initialize(theDimension + 1, 1);
   matb.makeZero(); matb.elements[theDimension][0].makeOne();
@@ -1298,10 +1298,10 @@ bool Vectors<Coefficient>::conesIntersect(
     }
     matA.elements[theDimension][i].makeOne();
   }
-  for (int i = 0; i < NonStrictCone.size; i ++) {
+  for (int i = 0; i < nonStrictCone.size; i ++) {
     int currentCol = i + StrictCone.size;
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][currentCol].assign(NonStrictCone[i][k]);
+      matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
       matA.elements[k][currentCol].minus();
     }
     matA.elements[theDimension][currentCol].makeZero();
@@ -1310,14 +1310,14 @@ bool Vectors<Coefficient>::conesIntersect(
     matA, matb, outputLinearCombo
   )) {
     if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
+      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, nonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
         global.fatal << "This is an algorithmic/mathematical (hence also programming) error. "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
         << StrictCone.toString() << "<br>Non-strict cone: <br>"
-        << NonStrictCone.toString() << "<br>" << global.fatal;
+        << nonStrictCone.toString() << "<br>" << global.fatal;
       }
     }
     return false;
@@ -2364,7 +2364,7 @@ public:
     this->monomials.setExpectedSize(theSize);
     this->coefficients.setExpectedSize(theSize);
   }
-  bool hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex);
+  bool hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& whichIndex);
   void writeToFile(std::fstream& output);
   void clearDenominators(Rational& output) {
     output.makeOne();
@@ -3312,13 +3312,13 @@ void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoeffic
     return;
   }
   this->setExpectedSize(other.size() + this->size());
-  Coefficient tempCF;
+  Coefficient product;
   for (int i = 0; i < other.size(); i ++) {
-    tempCF = other.coefficients[i];
+    product = other.coefficients[i];
     if (inputcf != nullptr) {
-      tempCF *= *inputcf;
+      product *= *inputcf;
     }
-    this->subtractMonomial(other[i], tempCF);
+    this->subtractMonomial(other[i], product);
   }
 }
 
@@ -3327,11 +3327,11 @@ void LinearCombination<templateMonomial, Coefficient>::addOtherTimesConst(
   LinearCombination<templateMonomial, Coefficient>& other, const Coefficient& theConst
 ) {
   this->setExpectedSize(other.size() + this->size());
-  Coefficient tempCF;
+  Coefficient product;
   for (int i = 0; i < other.size(); i ++) {
-    tempCF = theConst;
-    tempCF *= other.coefficients[i];
-    this->addMonomial(other[i], tempCF);
+    product = theConst;
+    product *= other.coefficients[i];
+    this->addMonomial(other[i], product);
   }
 }
 
@@ -3346,14 +3346,14 @@ void LinearCombination<templateMonomial, Coefficient>::operator+=(
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex) {
+bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& whichIndex) {
   for (int i = 0; i < this->size; i ++) {
     if (this->objects[i].IsGEQpartialOrder(m)) {
-      WhichIndex = i;
+      whichIndex = i;
       return true;
     }
   }
-  WhichIndex = - 1;
+  whichIndex = - 1;
   return false;
 }
 
@@ -3373,16 +3373,16 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
   );
   LinearCombinationTemplate remainderFromInput = input;
   templateMonomial currentMon;
-  Coefficient CFminMon, CFinRemainder;
+  Coefficient coefficientMinimialMonomial, coefficientInRemainder;
   outputFirstLinearCombination.makeZero(listCopy.size);
   for (int i = 0; i < listCopy.size; i ++) {
     if (listCopy[i].isEqualToZero()) {
       break;
     }
-    listCopy[i].getMinimalMonomial(currentMon, CFminMon);
-    CFinRemainder = remainderFromInput.getCoefficientOf(currentMon);
-    outputFirstLinearCombination[i] = CFinRemainder;
-    outputFirstLinearCombination[i] /= CFminMon;
+    listCopy[i].getMinimalMonomial(currentMon, coefficientMinimialMonomial);
+    coefficientInRemainder = remainderFromInput.getCoefficientOf(currentMon);
+    outputFirstLinearCombination[i] = coefficientInRemainder;
+    outputFirstLinearCombination[i] /= coefficientMinimialMonomial;
     remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];
   }
   if (!remainderFromInput.isEqualToZero()) {
@@ -3608,7 +3608,7 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeI
   }
 }
 
-class PartFractions;
+class PartialFractions;
 
 class OnePartialFractionDenominator {
 public:
@@ -3633,7 +3633,7 @@ public:
   bool operator==(OnePartialFractionDenominator& right);
   std::string toString();
   void oneFractionToStringBasisChange(
-    PartFractions& owner,
+    PartialFractions& owner,
     int indexElongation,
     Matrix<LargeInteger>& VarChange,
     bool UsingVarChange,
@@ -4971,8 +4971,8 @@ class PartFraction {
 private:
   void findPivot();
   void findInitialPivot();
-  bool rootIsInFractionCone (PartFractions& owner, Vector<Rational>* theRoot) const;
-  friend class PartFractions;
+  bool rootIsInFractionCone (PartialFractions& owner, Vector<Rational>* theRoot) const;
+  friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
   std::string DebugString;
@@ -4989,9 +4989,9 @@ public:
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(
-    PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
+    PartialFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
   );
-  bool removeRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
+  bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
   static std::fstream TheBigDump;
@@ -5015,16 +5015,16 @@ public:
     Polynomial<Rational>& output
   );
   void computeNormals(
-    PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
+    PartialFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
     bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
   );
   void getRootsFromDenominator(
-    PartFractions& owner, Vectors<Rational>& output
+    PartialFractions& owner, Vectors<Rational>& output
   ) const;
   void getVectorPartitionFunction(
-    PartFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
+    PartialFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
   ) const;
   void decomposeAMinusNB(
     int indexA,
@@ -5032,7 +5032,7 @@ public:
     int n,
     int indexAminusNB,
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
-    PartFractions& owner
+    PartialFractions& owner
   );
   bool decomposeFromLinearRelation(
     Matrix<Rational>& theLinearRelation,
@@ -5041,14 +5041,14 @@ public:
     List<Vector<Rational> >& startingVectors
   );
   void computeOneCheckSum(
-    PartFractions& owner, Rational& output, int theDimension
+    PartialFractions& owner, Rational& output, int theDimension
   ) const;
   bool reduceMeOnce(
     const Polynomial<LargeInteger>& myCoeff,
     Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
-  void reduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
+  void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator);
   void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5069,17 +5069,17 @@ public:
   );
   bool checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
   );
   bool reduceOnceGeneralMethodNoOSBasis(
-    PartFractions& owner,
+    PartialFractions& owner,
     LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   bool reduceOnceGeneralMethod(
-    PartFractions& owner,
+    PartialFractions& owner,
     LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
@@ -5104,14 +5104,14 @@ public:
   void assign(const PartFraction& p);
   void assignDenominatorOnly(const PartFraction& p);
   void assignNoIndicesNonZeroMults(PartFraction& p);
-  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
+  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex);
   int controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
   int controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
   PartFraction();
   ~PartFraction();
   void getPolyReduceMonomialByMonomial(
-    PartFractions& owner,
+    PartialFractions& owner,
     Vector<Rational>& theExponent,
     int StartMonomialPower,
     int DenPowerReduction,
@@ -5119,13 +5119,13 @@ public:
     Polynomial<LargeInteger>& output
   );
   void reduceMonomialByMonomialModifyOneMonomial(
-    PartFractions& Accum,
+    PartialFractions& Accum,
     SelectionWithDifferentMaxMultiplicities& thePowers,
     List<int>& thePowersSigned,
     MonomialP& input,
     LargeInteger& inputCoeff
   );
-  void getAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
+  void getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
   void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5144,12 +5144,12 @@ public:
     int theDimension
   );
   static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
-  int getNumberProportionalVectorsClassicalRootSystems(PartFractions& owner);
+  int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
   bool operator==(const PartFraction& right) const;
   void operator=(const PartFraction& right);
-  bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
+  bool initFromRoots(PartialFractions& owner, Vectors<Rational>& input);
   std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
-  void readFromFile(PartFractions& owner, std::fstream& input);
+  void readFromFile(PartialFractions& owner, std::fstream& input);
   void writeToFile(std::fstream& output) const;
   int sizeWithoutDebugString() const;
 };
@@ -5435,7 +5435,7 @@ public:
   }
 };
 
-class PartFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
+class PartialFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
 public:
@@ -5522,7 +5522,7 @@ public:
   void computeOneCheckSum(Rational& output);
   void popIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational>* Indicator);
   void prepareIndicatorVariables();
-  void initFromOtherPartFractions(PartFractions& input);
+  void initFromOtherPartialFractions(PartialFractions& input);
   std::string toString(FormatExpressions& theFormat) {
     std::string tempS;
     this->toString(tempS, theFormat);
@@ -5544,7 +5544,7 @@ public:
   void resetRelevanceIsComputed() {
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
-  PartFractions();
+  PartialFractions();
   int sizeWithoutDebugString();
   bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot);
   void makeProgressReportSplittingMainPart();

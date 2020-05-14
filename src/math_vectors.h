@@ -800,7 +800,7 @@ class Vectors: public List<Vector<Coefficient> > {
   int getRankOfSpanOfElements(Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr) const;
   static bool conesIntersect(
     List<Vector<Rational> >& StrictCone,
-    List<Vector<Rational> >& NonStrictCone,
+    List<Vector<Rational> >& nonStrictCone,
     Vector<Rational>* outputLinearCombo = nullptr,
     Vector<Rational>* outputSplittingNormal = nullptr
   );

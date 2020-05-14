@@ -934,8 +934,8 @@ public:
   double theUpperBoundAxes;
   double lowBoundY;
   double highBoundY;
-  int DesiredHtmlHeightInPixels;
-  int DesiredHtmlWidthInPixels;
+  int desiredHtmlHeightInPixels;
+  int desiredHtmlWidthInPixels;
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
@@ -1101,10 +1101,11 @@ public:
   };
   class Atoms {
   public:
-    static std::string setRandomSeed;
     static std::string commandEnclosure;
     static std::string setInputBox;
+    static std::string setRandomSeed;
     static std::string sort;
+    static std::string transpose;
   };
 
   // Operations parametrize the expression elements.
@@ -1197,9 +1198,9 @@ public:
   List<double> knownDoubleConstantValues;
 
   int maximumRecursionDepth;
-  int RecursionDeptH;
+  int recursionDepth;
   int DepthRecursionReached;
-  int MaxAlgTransformationsPerExpression;
+  int maximumAlgebraicTransformationsPerExpression;
   int MaxLatexChars;
   int MaxCachedExpressionPerRuleStack;
   int MaxRuleStacksCached;
@@ -2602,7 +2603,7 @@ public:
     Expression& outpuT,
     bool& outputIsCacheable,
     int opIndexParentIfAvailable,
-    Expression *outputHistory
+    Expression* outputHistory
   );
   class EvaluateLoop {
   public:
@@ -2613,7 +2614,7 @@ public:
     int indexInCache;
     ProgressReport theReport;
     bool reductionOccurred;
-    Expression* outpuT;
+    Expression* output;
     Expression* history;
     Expression currentChild;
     bool reduceOnce();

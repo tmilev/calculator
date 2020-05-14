@@ -129,7 +129,7 @@ public:
   List<Rational> theCoeffs;
   Vectors<Rational> theTranslationS;
   Vectors<Rational> theTranslationsProjectedBasisChanged;
-  PartFractions thePfs;
+  PartialFractions thePfs;
   // List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation theMaxComputation;

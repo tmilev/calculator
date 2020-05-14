@@ -41,7 +41,7 @@ bool Calculator::innerOperationBinary(
 bool Calculator::outerExtractBaseMultiplication(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
   if (!input.startsWith(theCommands.opTimes(), 3)) {
     return false;

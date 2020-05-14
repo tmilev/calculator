@@ -193,10 +193,10 @@ std::string HtmlRoutines::getMathMouseHover(const std::string& input, int upperN
     return out.str();
   }
 //  std::stringstream idSpanStream;
-  HtmlRoutines::GlobalMathSpanID ++;
-//  if (HtmlRoutines::GlobalMathSpanID==1)
+  HtmlRoutines::globalMathSpanID ++;
+//  if (HtmlRoutines::globalMathSpanID==1)
 //    out << "<span class =\"math\"></span>"; //<- empty math span class forces jsMath to load.
-//  idSpanStream << "mathFormula" << HtmlRoutines::GlobalMathSpanID;
+//  idSpanStream << "mathFormula" << HtmlRoutines::globalMathSpanID;
 //  std::string containterString="container"+ idSpanStream.str();
 //  out << "<span id =\"" << containterString << "\">"  << "<span id =\"" << idSpanStream.str()
 //  out << "<span><span onmouseover =\"if (this.parentNode.className == 'math') return; "

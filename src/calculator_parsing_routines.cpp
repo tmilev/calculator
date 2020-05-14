@@ -43,11 +43,11 @@ Calculator::EvaluationStats::EvaluationStats() {
 }
 
 void Calculator::reset() {
-  this->MaxAlgTransformationsPerExpression = 100;
+  this->maximumAlgebraicTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
   this->MaxCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
-  this->RecursionDeptH = 0;
+  this->recursionDepth = 0;
   this->numberOfListsStart               = - 1;
   this->numberListResizesStart         = - 1;
   this->numberHashResizesStart         = - 1;

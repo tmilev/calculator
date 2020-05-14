@@ -173,7 +173,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
 
 bool CalculatorConversions::innerDynkinTypE(Calculator& theCommands, const Expression& input, DynkinType& output) {
   MacroRegisterFunctionWithName("Calculator::innerDynkinTypE");
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   if (input.size() != 2) {
     return theCommands << "Dynkin type takes as input one argument. ";
   }
@@ -216,7 +216,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   Expression& output,
   SemisimpleLieAlgebra*& outputPointer
 ) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::functionSemisimpleLieAlgebra");
   DynkinType theDynkinType;
   outputPointer = nullptr;

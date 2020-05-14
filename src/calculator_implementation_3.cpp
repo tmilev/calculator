@@ -185,7 +185,7 @@ bool Calculator::innerAnimateLittelmannPaths(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   if (!input.isListNElements(3)) {
     return output.makeError("This function takes 2 arguments", theCommands);
   }
@@ -1067,7 +1067,7 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
 
 bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursion(&theCommands.recursionDepth);
   if (input.size() != 3) {
     return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
   }
@@ -1164,7 +1164,7 @@ void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualT
 
 bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursion(&theCommands.recursionDepth);
   if (!input.isListNElements(3)) {
     return output.makeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
   }
@@ -1333,7 +1333,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 
 bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerLittelmannOperator");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
   if (input.hasBoundVariables()) {
     return false;
   }
@@ -1353,7 +1353,7 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
 }
 
 bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecutionIncrementer(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::innerLSPath");
   if (input.size() < 3) {
     return output.makeError("LSPath needs at least two arguments.", theCommands);

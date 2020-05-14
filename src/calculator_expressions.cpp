@@ -1365,7 +1365,7 @@ bool Expression::getExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getExpressionLeafs:")) {
     return false;
   }
@@ -1386,7 +1386,7 @@ bool Expression::getBoundVariables(HashedList<Expression>& outputAccumulateBound
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
@@ -1434,7 +1434,7 @@ bool Expression::getFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
@@ -1540,7 +1540,7 @@ bool Expression::containsAsSubExpressionNoBuiltInTypes(const Expression& input) 
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::ContainsAsSubExpression: ")) {
     return false;
   }
@@ -1766,7 +1766,7 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly()) {
     return false;
   }
@@ -1807,7 +1807,7 @@ bool Expression::isConstantNumber() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isConstantNumber: ")) {
     return false;
   }
@@ -1836,7 +1836,7 @@ bool Expression::isAlgebraicRadical() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isAlgebraicRadical: ")) {
     return false;
   }
@@ -2030,7 +2030,7 @@ int Expression::getExpressionTreeSize() const {
     return 1;
   }
   this->checkInitialization();
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("While computing Expression::getExpressionTreeSize: ")) {
     return 1;
   }
@@ -4452,13 +4452,13 @@ std::string Expression::toString(
     theFormat->flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
-    if (this->owner->RecursionDeptH + 1 > this->owner->maximumRecursionDepth) {
+    if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
       return "(...)";
     }
   } else {
     return "(Error:NoOwner)";
   }
-  RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theRecursionCounter(&this->owner->recursionDepth);
   this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
@@ -4512,8 +4512,8 @@ std::string Expression::lispify() const {
   if (this->owner == nullptr) {
     return "Error: not initialized";
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->maximumRecursionDepth) {
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     return "(error: max recursion depth ...)";
   }
   std::stringstream dataStream;

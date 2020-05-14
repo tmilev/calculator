@@ -28,8 +28,8 @@ public:
   X509* peer_certificate;
   SSL_CTX* context;
   const SSL_METHOD* theSSLMethod;
-  std::string name;
   TransportLayerSecurity* owner;
+  std::string name;
   int errorCode;
   static bool flagSSLlibraryInitialized;
   bool flagSSLHandshakeSuccessful;

@@ -1902,7 +1902,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theCounter(&theCommands.recursionDepth);
   if (theCommands.recursionDepthExceededHandleRoughly()) {
     return false;
   }

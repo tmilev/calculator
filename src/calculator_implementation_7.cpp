@@ -8815,13 +8815,16 @@ bool CalculatorFunctions::innerBuildFreecalc(
     out << "Command available to logged-in admins only. ";
     return output.assignValue(out.str(), theCommands);
   }
-  if (!input.isOfType<std::string>()) {
+  if (input.size() != 2) {
+    return theCommands << "<hr>Building freecalc requires exactly one argument. ";
+  }
+  if (!input[1].isOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = false;
   theCrawler.ownerCalculator = &theCommands;
-  theCrawler.theFileNameToCrawlRelative = input.getValue<std::string>();
+  theCrawler.theFileNameToCrawlRelative = input[1].getValue<std::string>();
   std::string startingFolder = FileOperations::getCurrentFolder();
   theCrawler.buildFreecalc();
   global.changeDirectory(startingFolder);

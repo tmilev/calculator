@@ -180,13 +180,15 @@ void LaTeXCrawler::buildFreecalc() {
     }
     if (desiredName == "") {
       this->displayResult << "Failed to extract desired homework/lecture name from: " << buffer
-      << "<br>This is the line immediately after the \\lect command. It should begin with the string \"%DesiredLectureName: \""
+      << "<br>This is the line immediately after the \\lect command. "
+      << "It should begin with the string \"%DesiredLectureName: \""
       << "(<-has space bar in the end). The name itself should not contain the characters . / or \\. "
       << "I am assigning an automatic file name. <br>";
     }
     theLectureDesiredNames.addOnTop(desiredName);
   }
-  reportStream << " done. Extracted: " << theLectureNumbers.size << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
+  reportStream << " done. Extracted: " << theLectureNumbers.size
+  << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
   theReport.report(reportStream.str());
   if (isLecturE && isHW) {
     this->displayResult << "I was not able to determine whether the file is a homework or a lecture file. Aborting.";

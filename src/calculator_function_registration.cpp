@@ -2626,12 +2626,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
+    "BuildFreecalc(\"freecalc/lectures/referencelectures/precalculus.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusiiimultivariable.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiiimasterproblemsheet.tex\");",
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/precalculus.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusii.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiii.tex\");\n",
     "CalculatorFunctions::innerBuildFreecalc",
     "BuildFreecalc",
     innerAdminNoTest

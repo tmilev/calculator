@@ -978,9 +978,9 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
 
 void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
-  this->AmbientRootSystem = theWeyl.RootSystem;
+  this->AmbientRootSystem = theWeyl.rootSystem;
   this->AmbientBilinearForm = theWeyl.cartanSymmetric;
-  theWeyl.transformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
+  theWeyl.transformToSimpleBasisGenerators(inputRoots, theWeyl.rootSystem);
   this->computeDiagramInputIsSimple(inputRoots);
 }
 
@@ -1269,11 +1269,11 @@ void Permutation::getPermutationLthElementIsTheImageofLthIndex(List<int>& output
 bool WeylGroupData::areMaximallyDominantGroupInner(List<Vector<Rational> >& theWeights) {
   MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominantInner");
   for (int i = 0; i < theWeights.size; i ++) {
-    for (int j = 0; j < this->RootsOfBorel.size; j ++) {
-      if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
+    for (int j = 0; j < this->rootsOfBorel.size; j ++) {
+      if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }
@@ -1305,11 +1305,11 @@ bool WeylGroupAutomorphisms::areMaximallyDominantGroupOuter(List<Vector<Rational
   this->computeOuterAutomorphisms();
   zeroWeight.makeZero(this->theWeyl->getDimension());
   for (int i = 0; i < theWeights.size; i ++) {
-    for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
-      if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
+    for (int j = 0; j < this->theWeyl->rootsOfBorel.size; j ++) {
+      if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
+          if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[k]) > 0) {
             reflectionDoesRaise = false;
             break;
           }

@@ -98,9 +98,9 @@ void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
   this->SimpleBasisK = this->genK;
   this->theDynkinDiagram.computeDiagramTypeModifyInput(this->SimpleBasisK, this->getAmbientWeyl());
   this->SimpleBasisCentralizerRoots.size = 0;
-  for (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
-    if (this->rootIsInCentralizer(this->getAmbientWeyl().RootsOfBorel[i])) {
-      this->SimpleBasisCentralizerRoots.addOnTop(this->getAmbientWeyl().RootsOfBorel[i]);
+  for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
+    if (this->rootIsInCentralizer(this->getAmbientWeyl().rootsOfBorel[i])) {
+      this->SimpleBasisCentralizerRoots.addOnTop(this->getAmbientWeyl().rootsOfBorel[i]);
     }
   }
   this->theCentralizerDiagram.computeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->getAmbientWeyl());
@@ -486,7 +486,7 @@ bool RootSubalgebra::isARoot(const Vector<Rational>& input) {
   if (input.size != this->getOwnerLieAlgebra().getRank()) {
     return false;
   }
-  return this->getAmbientWeyl().RootSystem.contains(input);
+  return this->getAmbientWeyl().rootSystem.contains(input);
 }
 
 bool RootSubalgebra::isARootOrZero(const Vector<Rational>& input) {
@@ -555,7 +555,7 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   this->highestVectors.setSize(0);
   this->HighestWeightsNONPrimalFundamental.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> currentElt;
-  List<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().RootSystem;
+  List<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().rootSystem;
   for (int i = 0; i <ambientRootSystem.size; i ++) {
     if (this->isSubalgebraBorelHighest(ambientRootSystem[i])) {
       currentElt.makeGGenerator(ambientRootSystem[i], this->getOwnerLieAlgebra());
@@ -593,7 +593,7 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   HashedList<Vector<Rational> > currentWeights;
   Vectors<Rational> zeroSpace;
   Vector<Rational> currentWeight;
-  currentWeights.setExpectedSize(this->getAmbientWeyl().RootSystem.size);
+  currentWeights.setExpectedSize(this->getAmbientWeyl().rootSystem.size);
   currentWeights.addOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
   if (this->HighestWeightsPrimalSimple[moduleIndex].isEqualToZero()) {
     zeroSpace.addOnTop(this->highestVectors[moduleIndex].getCartanPart());
@@ -1233,8 +1233,8 @@ bool RootSubalgebra::isAnIsomorphism(
       }
     }
   }
-  for (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
-    this->getAmbientWeyl().RootsOfBorel[i].getCoordinatesInBasis(tempRoots, tempRoot);
+  for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
+    this->getAmbientWeyl().rootsOfBorel[i].getCoordinatesInBasis(tempRoots, tempRoot);
     if (!this->isARoot(tempRoot)) {
       return false;
     }
@@ -1423,7 +1423,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   this->SimpleBasisK.getMatrixRootsToRows(tempMat);
   tempMat.invert();
   int counter = 0;
-  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().RootSystem;
+  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
   for (int i = 0; i <AllRoots.size; i ++) {
     Vector<Rational> linComb;
     if (this->AllRootsK.getIndex(AllRoots[i]) == - 1) {
@@ -1465,7 +1465,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   Vector<Rational> tempRoot;
   tempRoot = this->SimpleBasisK[0];
   this->computeHighestWeightInTheSameKModule(tempRoot, tempRoot);
-  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().RootSystem;
+  HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
   for (int l = 0; l < this->SimpleBasisK.size; l ++) {
     Rational tempRat;
     this->getAmbientWeyl().rootScalarCartanRoot(tempRoot, this->SimpleBasisK[l], tempRat);
@@ -2245,7 +2245,7 @@ void RootSubalgebra::computeEssentials() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeEssentials");
   this->SimpleBasisK = this->genK;
   this->SimpleBasisK.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
-  this->theDynkinDiagram.AmbientRootSystem= this->getAmbientWeyl().RootSystem;
+  this->theDynkinDiagram.AmbientRootSystem= this->getAmbientWeyl().rootSystem;
   this->theDynkinDiagram.AmbientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
   this->theDynkinDiagram.computeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.getDynkinType(this->theDynkinType);
@@ -2334,7 +2334,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     theReport.report(reportStream.str());
   }
   this->theDynkinDiagram.AmbientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
-  this->theDynkinDiagram.AmbientRootSystem = this->getAmbientWeyl().RootSystem;
+  this->theDynkinDiagram.AmbientRootSystem = this->getAmbientWeyl().rootSystem;
   this->theDynkinDiagram.computeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.getDynkinType(this->theDynkinType);
   this->computeKModules();
@@ -2506,7 +2506,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
   MonomialP tempM;
   Rational tempRat;
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
-  RootSpacesThatNeedToBeKilled.setExpectedSize(this->getOwnerWeyl().RootSystem.size);
+  RootSpacesThatNeedToBeKilled.setExpectedSize(this->getOwnerWeyl().rootSystem.size);
   outputSystemToBeSolved.size = 0;
   outputMatrixSystemToBeSolved.initialize(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
@@ -2810,7 +2810,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
     } while (parSel.incrementReturnFalseIfPastLast());
     currentList.quickSortAscending();
     this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.addListOnTop(currentList);
-    basis.addOnTop(this->owner->theWeyl.RootSystem[0]);
+    basis.addOnTop(this->owner->theWeyl.rootSystem[0]);
     parSel.initialize(this->owner->getRank() + 1);
   }
   this->NumNonPseudoParabolic = this->theSubalgebras.size - this->NumParabolic - this->NumPseudoParabolicNonParabolic;
@@ -2835,7 +2835,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   currentSA.ownEr = this;
   currentSA.computeEssentialsIfNew();
   currentSA.computePotentialExtensions();
-  this->theSubalgebras.reserve(this->getOwnerWeyl().RootsOfBorel.size);
+  this->theSubalgebras.reserve(this->getOwnerWeyl().rootsOfBorel.size);
   this->theSubalgebras.addOnTop(currentSA);
   std::string reportString;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
@@ -3868,7 +3868,7 @@ bool RootSubalgebras::isNewSubalgebra(RootSubalgebra& input) {
 void RootSubalgebra::computeRootsOfK() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeRootsOfK");
   this->AllRootsK.clear();
-  HashedList<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().RootSystem;
+  HashedList<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().rootSystem;
   this->AllRootsK.setExpectedSize(ambientRootSystem.size);
   Vector<Rational> currentRoot;
   this->AllRootsK.addOnTop(this->SimpleBasisK);
@@ -4201,7 +4201,7 @@ void ConeRelation::FixRightHandSide(RootSubalgebra& owner, Vectors<Rational>& Ni
       for (int j = i + 1; j < this->Betas.size; j ++) {
         tempRoot = this->Betas[i];
         tempRoot += this->Betas[j];
-        if (owner.getAmbientWeyl().RootSystem.contains(tempRoot)) {
+        if (owner.getAmbientWeyl().rootSystem.contains(tempRoot)) {
           int leavingIndex = j; int remainingIndex = i;
           if (this->BetaCoeffs[j].isGreaterThan(this->BetaCoeffs[i])) {
             leavingIndex = i;

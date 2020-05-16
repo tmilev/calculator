@@ -959,7 +959,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     return output.makeError("Bad Cartan subalgebra generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
+  Vector<Rational> theH = theSSalg.content->theWeyl.rootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
   theElt.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
@@ -2915,29 +2915,22 @@ void ObjectContainer::reset() {
   this->expressionNotation.clear();
   this->expressionWithNotation.clear();
   this->theLSpaths.clear();
-  //this->theMatRats.clear();
   this->theMatTensorRats.clear();
-  //this->theMatRFs.clear();
   this->theEltsModP.clear();
   this->thePlots.setSize(0);
   this->theAlgebraicClosure.reset();
   this->theAlgebraicNumbers.clear();
   this->theLittelmannOperators.clear();
   this->theSltwoSAs.setSize(0);
-  //this->theMatDoubles.setSize(0);
-  //this->theMatsAlgebraic.clear();
-  //this->theMatPolyRational.clear();
   this->theWeights.clear();
   this->theWeightsPoly.clear();
   this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.clear();
-  this->currentRandomSeed = static_cast<int>(time(nullptr));
+  this->pseudoRandom.setRandomSeedSmall(static_cast<int>(time(nullptr)));
   this->theUserInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();
   this->ellipticCurveElementsRational.clear();
-   //Setting up a random seed.
-  global.unsecurePseudoRandomGenerator.setRandomSeed(this->currentRandomSeed);
   this->canvasPlotCounter = 0;
   this->resetPlots();
   this->resetSliders();

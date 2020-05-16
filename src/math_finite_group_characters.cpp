@@ -260,10 +260,10 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   }
   GM.invert();
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> out;
-  out.generatorS.setSize(this->generatorS.size);
-  for (int i = 0; i < this->generatorS.size; i ++) {
-  //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
-    matrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
+  out.generators.setSize(this->generators.size);
+  for (int i = 0; i < this->generators.size; i ++) {
+  //     MatrixInBasisFast(out.generators[i], this->generators[i], BM);
+    matrixInBasis(out.generators[i], this->generators[i], this->basis, GM);
   }
   out.ownerGroup = ownerGroup;
   out.basis.makeEiBasis(d);
@@ -283,7 +283,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
 }
 
 template <typename somegroup, typename Coefficient>
-VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::FindDecentBasis() const {
+VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::findBasis() const {
   VectorSpace<Coefficient> V;
   int d = this->generators[0].numberOfColumns;
   for (int geni = 0; geni < this->generators.size; geni ++) {
@@ -339,7 +339,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     global.comments << "calculating remaining subrep... ";
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> V;
     V.ownerGroup = this->ownerGroup;
-    V.generatorS = this->generatorS;
+    V.generators = this->generators;
     V.basis = Vb;
     V = V.reduced();
     global.comments << "done\n";
@@ -399,7 +399,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   for (int i = 0; i < es.size; i ++) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> outeme;
     outeme.ownerGroup = this->ownerGroup;
-    outeme.generatorS = this->generatorS;
+    outeme.generators = this->generators;
     outeme.basis = es[i];
     out.addOnTop(outeme.reduced());
   }
@@ -1191,7 +1191,7 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   parSelrootsAreInLevi.initialize(this->getDimension() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.makeEiBasis(this->getDimension());
-  extendedBasis.addOnTop(this->RootSystem[0]);
+  extendedBasis.addOnTop(this->rootSystem[0]);
   outputSubgroups.setExpectedSize(MathRoutines::twoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;

@@ -1680,7 +1680,7 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
 }
 
 bool WeylGroupData::isStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other) {
-  return !this->RootSystem.contains(input + other) && !this->RootSystem.contains(input - other);
+  return !this->rootSystem.contains(input + other) && !this->rootSystem.contains(input - other);
 }
 
 bool WeylGroupData::hasStronglyPerpendicularDecompositionWRT(
@@ -4331,7 +4331,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   WeylGroupData tempW;
   tempW.makeArbitrarySimple(WeylGroupLetter, WeylGroupNumber);
   tempW.computeRho(true);
-  theVPbasis = tempW.RootsOfBorel;
+  theVPbasis = tempW.rootsOfBorel;
   if (WeylGroupLetter == 'B') {
     for (int i = 0; i < theVPbasis.size; i ++) {
       Rational tempRat;
@@ -4339,7 +4339,7 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
       tempRoot = theVPbasis[i];
       tempW.rootScalarCartanRoot(tempRoot, tempRoot, tempRat);
       if (tempRat.isEqualToOne()) {
-        theVPbasis.addOnTop(tempW.RootsOfBorel[i] * 2);
+        theVPbasis.addOnTop(tempW.rootsOfBorel[i] * 2);
       }
     }
   }
@@ -6305,7 +6305,7 @@ bool ElementWeylGroup::isIdentity() {
 void ElementWeylGroup::MakeRootReflection(
   const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
 ) {
-  *this = inputWeyl.getRootReflection(inputWeyl.RootSystem.getIndexNoFail(mustBeRoot));
+  *this = inputWeyl.getRootReflection(inputWeyl.rootSystem.getIndexNoFail(mustBeRoot));
 }
 
 void ElementWeylGroup::makeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {
@@ -6389,7 +6389,7 @@ void ElementWeylGroup::getCycleStructure(
   this->checkInitialization();
   outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
   List<bool> Explored;
-  HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
+  HashedList<Vector<Rational> >& theRootSystem = this->owner->rootSystem;
   Explored.initializeFillInObject(theRootSystem.size, false);
   Vector<Rational> currentRoot;
   for (int i = 0; i < Explored.size; i ++) {
@@ -6475,7 +6475,7 @@ ElementWeylGroup WeylGroupData::getRootReflection(int rootIndex) {
     this->computeRho(true);
   }
   Vector<Rational> rhoImage;
-  this->reflectBetaWithRespectToAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
+  this->reflectBetaWithRespectToAlpha(this->rootSystem[rootIndex], this->rho, false, rhoImage);
   ElementWeylGroup result;
   result.makeFromRhoImage(rhoImage, *this);
   return result;
@@ -6529,8 +6529,8 @@ Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(int elementIndex
 }
 
 void WeylGroupData::reset() {
-  this->FundamentalToSimpleCoords.initialize(0, 0);
-  this->SimpleToFundamentalCoords.initialize(0, 0);
+  this->fundamentalToSimpleCoords.initialize(0, 0);
+  this->simpleToFundamentalCoords.initialize(0, 0);
   this->matrixSendsSimpleVectorsToEpsilonVectors.freeMemory();
   this->flagFundamentalToSimpleMatricesAreComputed = false;
   this->flagIrrepsAreComputed = false;
@@ -6541,15 +6541,15 @@ void WeylGroupData::reset() {
   this->coCartanSymmetric.initialize(0, 0);
   this->rho.setSize(0);
   this->rhoOrbit.clear();
-  this->RootSystem.clear();
-  this->RootsOfBorel.setSize(0);
+  this->rootSystem.clear();
+  this->rootsOfBorel.setSize(0);
   this->ccCarterLabels.setSize(0);
   this->irrepsCarterLabels.setSize(0);
 
   this->theGroup.initialize();
   this->theGroup.specificDataPointer = this;
-  this->theGroup.GetWordByFormula = this->getWordByFormulaImplementation;
-  this->theGroup.GetSizeByFormula = this->getSizeByFormulaImplementation;
+  this->theGroup.getWordByFormula = this->getWordByFormulaImplementation;
+  this->theGroup.getSizeByFormula = this->getSizeByFormulaImplementation;
   this->theGroup.computeConjugacyClassSizesAndRepresentativesByFormula = nullptr;
   this->theGroup.areConjugateByFormula = nullptr;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
@@ -6615,7 +6615,7 @@ void WeylGroupData::getTrivialRepresentation(
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(1);
   for (int i = 0; i < this->getDimension(); i ++) {
-    output.generatorS[i].makeIdentityMatrix(1);
+    output.generators[i].makeIdentityMatrix(1);
   }
   output.getCharacter();
 }
@@ -6630,8 +6630,8 @@ void WeylGroupData::getSignRepresentation(
   ElementWeylGroup currentElt;
   for (int i = 0; i < this->getDimension(); i ++) {
     currentElt.makeSimpleReflection(i, *this);
-    output.generatorS[i].makeIdentityMatrix(1);
-    output.generatorS[i] *= currentElt.sign();
+    output.generators[i].makeIdentityMatrix(1);
+    output.generators[i] *= currentElt.sign();
   }
   output.getCharacter();
 }
@@ -6644,7 +6644,7 @@ void WeylGroupData::getStandardRepresentation(
   output.initialize(this->theGroup);
   output.basis.makeEiBasis(this->getDimension());
   for (int i = 0; i < this->getDimension(); i ++) {
-    this->getSimpleReflectionMatrix(i, output.generatorS[i]);
+    this->getSimpleReflectionMatrix(i, output.generators[i]);
   }
   output.getCharacter();
 }
@@ -6679,12 +6679,12 @@ void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(const Vector<R
   output = (inputH);
   int indexFirstNonRegular;
   while (!this->isRegular(output, &indexFirstNonRegular)) {
-    const Vector<Rational>& theBadRoot = this->RootSystem[indexFirstNonRegular];
+    const Vector<Rational>& theBadRoot = this->rootSystem[indexFirstNonRegular];
     Rational maxMovement = 0;
     Rational tempRat1, tempRat2, tempMaxMovement;
-    for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-      this->rootScalarCartanRoot(theBadRoot, this->RootsOfBorel[i], tempRat1);
-      this->rootScalarCartanRoot(output, this->RootsOfBorel[i], tempRat2);
+    for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+      this->rootScalarCartanRoot(theBadRoot, this->rootsOfBorel[i], tempRat1);
+      this->rootScalarCartanRoot(output, this->rootsOfBorel[i], tempRat2);
       if ((!tempRat1.isEqualToZero()) && (!tempRat2.isEqualToZero())) {
         tempMaxMovement = tempRat2 / tempRat1;
         tempMaxMovement.AssignAbsoluteValue();
@@ -6705,8 +6705,8 @@ bool WeylGroupData::isRegular(Vector<Rational>& input, int* indexFirstPerpendicu
   if (indexFirstPerpendicularRoot != nullptr) {
     *indexFirstPerpendicularRoot = - 1;
   }
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    if (this->rootScalarCartanRoot(input, this->RootSystem[i]).isEqualToZero()) {
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    if (this->rootScalarCartanRoot(input, this->rootSystem[i]).isEqualToZero()) {
       if (indexFirstPerpendicularRoot != nullptr) {
         *indexFirstPerpendicularRoot = i;
       }
@@ -6806,21 +6806,21 @@ void WeylGroupData::generateRootSystem() {
   startRoots.makeEiBasis(this->getDimension());
   int estimatedNumRoots = this->theDynkinType.getRootSystemSize();
   this->generateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
-  this->RootSystem.clear();
-  this->RootSystem.setExpectedSize(theRootsFinder.size);
-  this->RootsOfBorel.setSize(0);
-  this->RootsOfBorel.reserve(theRootsFinder.size / 2);
+  this->rootSystem.clear();
+  this->rootSystem.setExpectedSize(theRootsFinder.size);
+  this->rootsOfBorel.setSize(0);
+  this->rootsOfBorel.reserve(theRootsFinder.size / 2);
   for (int i = 0; i < theRootsFinder.size; i ++) {
     if (theRootsFinder[i].isPositiveOrZero()) {
-      this->RootsOfBorel.addOnTop(theRootsFinder[i]);
+      this->rootsOfBorel.addOnTop(theRootsFinder[i]);
     }
   }
-  this->RootsOfBorel.quickSortAscending();
-  for (int i = this->RootsOfBorel.size - 1; i >= 0; i --) {
-    this->RootSystem.addOnTop(- this->RootsOfBorel[i]);
+  this->rootsOfBorel.quickSortAscending();
+  for (int i = this->rootsOfBorel.size - 1; i >= 0; i --) {
+    this->rootSystem.addOnTop(- this->rootsOfBorel[i]);
   }
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    this->RootSystem.addOnTop(this->RootsOfBorel[i]);
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    this->rootSystem.addOnTop(this->rootsOfBorel[i]);
   }
 }
 
@@ -6833,10 +6833,10 @@ void WeylGroupData::actOnRootAlgByGroupElement(int index, PolynomialSubstitution
 void WeylGroupData::computeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
   this->theGroup.computeAllElements(false);
   output.size = 0;
-  output.reserve(this->RootSystem.size / 2);
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    if (this->RootSystem[i].isPositiveOrZero()) {
-      output.addOnTop(this->RootSystem[i]);
+  output.reserve(this->rootSystem.size / 2);
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    if (this->rootSystem[i].isPositiveOrZero()) {
+      output.addOnTop(this->rootSystem[i]);
     }
   }
 }
@@ -6853,9 +6853,9 @@ bool WeylGroupData::leftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, E
 
 void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
   output.size = 0;
-  this->RootSystem.clear();
+  this->rootSystem.clear();
   this->generateRootSystem();
-  output = this->RootsOfBorel;
+  output = this->rootsOfBorel;
 }
 
 std::string WeylGroupData::toStringCppCharTable(FormatExpressions* theFormat) {
@@ -6952,23 +6952,23 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* th
   MacroRegisterFunctionWithName("WeylGroup::toStringRootsAndRootReflections");
   (void) theFormat;//portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
-  out << "<br>The root system has " << this->RootSystem.size << " elements.\n";
+  out << "<br>The root system has " << this->rootSystem.size << " elements.\n";
   out << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
   << "<td>Reflection w.r.t. root</td></tr>";
   Vectors<Rational> rootSystemEpsCoords;
-  this->getEpsilonCoordinates(this->RootSystem, rootSystemEpsCoords);
+  this->getEpsilonCoordinates(this->rootSystem, rootSystemEpsCoords);
   ElementWeylGroup currentRootReflection;
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    const Vector<Rational>& current = this->RootSystem[i];
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    const Vector<Rational>& current = this->rootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
     out << "<tr><td>" << current.toString() << "</td><td>" << rootSystemEpsCoords[i].toStringLetterFormat("e") << "</td>"
     << "<td>" << HtmlRoutines::getMathMouseHover(currentRootReflection.toString()) << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    out << this->RootSystem[i].toString();
-    if (i != this->RootSystem.size - 1) {
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    out << this->rootSystem[i].toString();
+    if (i != this->rootSystem.size - 1) {
       out << ", ";
     }
   }
@@ -6980,7 +6980,7 @@ std::string WeylGroupData::toString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("WeylGroup::toString");
   std::stringstream out;
   out << "<br>Size: " << this->theGroup.theElements.size << "\n";
-  out << "Number of Vectors: " << this->RootSystem.size << "\n";
+  out << "Number of Vectors: " << this->rootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.toString() << "\n";
   out << this->toStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->cartanSymmetric.toString();
@@ -7063,7 +7063,7 @@ void WeylGroupData::makeMeFromMyCartanSymmetric() {
   DynkinDiagramRootSubalgebra theDynkinTypeComputer;
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->cartanSymmetric.numberOfRows);
-  theDynkinTypeComputer.computeDiagramTypeModifyInputRelative(simpleBasis, this->RootSystem, this->cartanSymmetric);
+  theDynkinTypeComputer.computeDiagramTypeModifyInputRelative(simpleBasis, this->rootSystem, this->cartanSymmetric);
   theDynkinTypeComputer.getDynkinType(this->theDynkinType);
   this->makeFinalSteps();
 }
@@ -7254,11 +7254,11 @@ void WeylGroupData::getIntegralLatticeInSimpleCoordinates(Lattice& output) {
 Rational WeylGroupData::getKillingDividedByTraceRatio() {
   Rational result = 0;
   Rational tempRat;
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    tempRat = this->rootScalarCartanRoot(this->RootSystem[i], this->RootSystem[0]);
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    tempRat = this->rootScalarCartanRoot(this->rootSystem[i], this->rootSystem[0]);
     result += tempRat * tempRat;
   }
-  result /= this->rootScalarCartanRoot(this->RootSystem[0], this->RootSystem[0]);
+  result /= this->rootScalarCartanRoot(this->rootSystem[0], this->rootSystem[0]);
   return result;
 }
 
@@ -7387,7 +7387,7 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   Matrix<Rational> matCoxeterElt, tempMat;
   this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   tempMat = matCoxeterElt;
-  int coxeterNumber = this->RootSystem.lastObject()->SumCoords().numeratorShort + 1;
+  int coxeterNumber = this->rootSystem.lastObject()->SumCoords().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
     tempMat.multiplyOnTheLeft(matCoxeterElt);
   }
@@ -7483,13 +7483,13 @@ void WeylGroupData::drawRootSystem(
     << theTwoPlane.size << ". " << global.fatal;
   }
   Vectors<Rational> RootSystemSorted;
-  RootSystemSorted = this->RootSystem;
+  RootSystemSorted = this->rootSystem;
   List<double> lengths;
   lengths.setSize(RootSystemSorted.size);
-  for (int i = 0; i < this->RootSystem.size; i ++) {
+  for (int i = 0; i < this->rootSystem.size; i ++) {
     tempRoot.setSize(theDimension);
     for (int j = 0; j < theDimension; j ++) {
-      tempRoot[j] = this->RootSystem[i][j].getDoubleValue();
+      tempRoot[j] = this->rootSystem[i][j].getDoubleValue();
     }
     double Length1 = this->rootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0]);
     double Length2 = this->rootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[1]);
@@ -7555,11 +7555,11 @@ void WeylGroupData::drawRootSystem(
   List<std::string> highlightLabels;
   highlightGroup.setSize(2);
   highlightLabels.setSize(2);
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    highlightGroup[0] = this->RootsOfBorel[i].getVectorDouble();
-    highlightGroup[1] = - this->RootsOfBorel[i].getVectorDouble();
-    highlightLabels[0] = this->RootsOfBorel[i].toString();
-    highlightLabels[1] = (- this->RootsOfBorel[i]).toString();
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    highlightGroup[0] = this->rootsOfBorel[i].getVectorDouble();
+    highlightGroup[1] = - this->rootsOfBorel[i].getVectorDouble();
+    highlightLabels[0] = this->rootsOfBorel[i].toString();
+    highlightLabels[1] = (- this->rootsOfBorel[i]).toString();
     output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
   }
   std::stringstream tempStream;
@@ -7692,14 +7692,14 @@ int WeylGroupData::numberOfRootsConnectedTo(Vectors<Rational>& theVectors, Vecto
   return result;
 }
 
-void WeylGroupData::computeRho(bool Recompute) {
-  if (this->RootSystem.size == 0 || Recompute) {
+void WeylGroupData::computeRho(bool recompute) {
+  if (this->rootSystem.size == 0 || recompute) {
     this->generateRootSystem();
   }
   this->rho.makeZero(this->cartanSymmetric.numberOfRows);
-  for (int i = 0; i < this->RootSystem.size; i ++) {
-    if (this->RootSystem[i].isPositiveOrZero()) {
-      this->rho += RootSystem[i];
+  for (int i = 0; i < this->rootSystem.size; i ++) {
+    if (this->rootSystem[i].isPositiveOrZero()) {
+      this->rho += rootSystem[i];
     }
   }
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
@@ -7718,7 +7718,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   if (!useAmbientIndices) {
     DisplayIndicesSimpleGenerators.setSize(this->simpleRootsInner.size);
     for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
+      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->rootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
     }
   }
   out << "\\xymatrix{";
@@ -7841,7 +7841,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
   latexFormat.flagUseLatex = true;
   bool isGood = true;
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
+    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->rootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
     if (DisplayIndicesSimpleGenerators[i] == 0) {
       isGood = false;
       break;
@@ -7853,7 +7853,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
     }
   }
   DynkinDiagramRootSubalgebra tempDyn;
-  tempDyn.AmbientRootSystem = this->AmbientWeyl->RootSystem;
+  tempDyn.AmbientRootSystem = this->AmbientWeyl->rootSystem;
   tempDyn.AmbientBilinearForm = this->AmbientWeyl->cartanSymmetric;
   tempDyn.computeDiagramInputIsSimple(this->simpleRootsInner);
   out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
@@ -8308,11 +8308,11 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(Vector<Rational>& Chamber
     Rational tempRat1, tempRat2;
     bool tempBool1, tempBool2;
     bool haveSameSigns = true;
-    for (int j = 0; j < this->TheWeylGroup->RootSystem.size; j ++) {
-      this->TheWeylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem[j], tempRat1);
+    for (int j = 0; j < this->TheWeylGroup->rootSystem.size; j ++) {
+      this->TheWeylGroup->rootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->rootSystem[j], tempRat1);
       tempRoot = (*this)[i];
       tempRoot += (this->TheWeylGroup->rho);
-      this->TheWeylGroup->rootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
+      this->TheWeylGroup->rootScalarCartanRoot(tempRoot, this->TheWeylGroup->rootSystem[j], tempRat2);
       tempBool1 = tempRat1.isPositive();
       tempBool2 = tempRat2.isPositive();
       if (tempRat1.isEqualToZero() || tempRat2.isEqualToZero()) {
@@ -8827,7 +8827,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Ratio
           theGens.removeIndexSwapWithLast(j);
           reductionOccured = true;
         }
-        if (this->RootSystem.getIndex(tempRoot) != - 1) {
+        if (this->rootSystem.getIndex(tempRoot) != - 1) {
           if (!this->isPositiveOrPerpWithRespectToH(tempRoot, theH)) {
             tempRoot.minus();
             theGens[j] = tempRoot;
@@ -8860,7 +8860,7 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
       } else {
         tempRoot -= inputSimpleBasisK[i];
       }
-      if (this->RootSystem.getIndex(tempRoot) != - 1) {
+      if (this->rootSystem.getIndex(tempRoot) != - 1) {
         output = tempRoot;
         FoundHigher = true;
       }

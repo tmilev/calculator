@@ -908,7 +908,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       if (theRootIndex < 0) {
         isGood = false;
       } else {
-        currentElt.makeCartanGenerator(owner.theWeyl.RootSystem[theRootIndex], owner);
+        currentElt.makeCartanGenerator(owner.theWeyl.rootSystem[theRootIndex], owner);
         currentElt *= polyForm.coefficients[j];
         output += currentElt;
       }

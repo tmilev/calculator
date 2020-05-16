@@ -34,7 +34,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
         int theIndex = this->getGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
-          int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
+          int currentIndex = this->theWeyl.rootSystem.getIndex(theWeight);
           theIndex = this->getRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal << "This is a programming error. "
@@ -114,7 +114,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   WeylGroupData& theWeyl = *this->owner;
   theWeyl.computeRho(true);
-  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = theWeyl.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
@@ -189,7 +189,7 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Rational theMin = 0;
   int minIndex = - 1;
   WeylGroupData& theWeyl = *this->owner;
-  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
@@ -449,7 +449,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
       return false;
     }
     int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
-    const Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
+    const Vector<Rational>& currentRoot = theWeyl.rootSystem[rootIndex];
     for (int j = 0; j < thePower; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
@@ -771,7 +771,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   int numB3NegGenerators = this->theHmm.theRange().getNumberOfPositiveRoots();
   int numG2NegGenerators = this->theHmm.theDomain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
+    const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selInducing.cardinalitySelection; k ++) {
       if (!currentWeight[this->selInducing.elements[k]].isEqualToZero()) {
@@ -787,7 +787,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
   }
   for (int i = 0; i < numG2NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theSmallWeyl.RootSystem[i];
+    const Vector<Rational>& currentWeight = theSmallWeyl.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selSmallParSel.cardinalitySelection; k ++) {
       if (!currentWeight[this->selSmallParSel.elements[k]].isEqualToZero()) {

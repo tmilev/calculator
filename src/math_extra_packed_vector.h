@@ -646,7 +646,7 @@ void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
   if (pseudo) {
     global.comments << "pseudo-parabolics" << "\n";
-    ElementWeylGroup hr = G->getRootReflection(G->RootSystem.size- 1);
+    ElementWeylGroup hr = G->getRootReflection(G->rootSystem.size- 1);
     sel.initialize(G->cartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
       theGenerators.setSize(sel.cardinalitySelection);

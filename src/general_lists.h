@@ -158,22 +158,6 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
-// Do not use for cryptographic purposes.
-// Intended use:
-// generate random numbers for mathematical problems/education.
-class UnsecurePseudoRandomGenerator {
-public:
-  const int maximumRandomSeed = 1000000000;
-  int randomSeed;
-  int64_t randomNumbersGenerated;
-  int bytesConsumed;
-  List<unsigned char>& state();
-  UnsecurePseudoRandomGenerator();
-  void setRandomSeed(int32_t inputRandomSeed);
-  unsigned int getRandomLessThanBillion();
-  signed getRandomPositiveLessThanBillion();
-};
-
 class MathRoutines {
 public:
   template <class Coefficient>
@@ -1621,6 +1605,25 @@ public:
     this->reportType = inputReportType;
   }
   ~ProgressReport();
+};
+
+// Do not use for cryptographic purposes.
+// Intended use:
+// generate random numbers for mathematical problems/education.
+class UnsecurePseudoRandomGenerator {
+private:
+  uint32_t randomSeed;
+public:
+  const unsigned int maximumRandomSeed = 1000000000;
+  int64_t randomNumbersGenerated;
+  int bytesConsumed;
+  List<unsigned char> state;
+  UnsecurePseudoRandomGenerator();
+  uint32_t getRandomSeed();
+  void setRandomSeedSmall(uint32_t inputRandomSeed);
+  void setRandomSeedLarge(const LargeInteger& inputRandomSeed, std::stringstream* comments);
+  unsigned int getRandomNonNegativeLessThanMaximumSeed();
+  signed getRandom();
 };
 
 template<class Base>

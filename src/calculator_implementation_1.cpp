@@ -9,7 +9,6 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
-#include "math_extra_tree.h"
 #include "math_rational_function_implementation.h"
 
 #include <cmath>
@@ -2290,16 +2289,16 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     if (!theCommands.getVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
       return false;
     }
-    if (!theWeyl.RootSystem.contains(currentRoot)) {
+    if (!theWeyl.rootSystem.contains(currentRoot)) {
       return output.makeError("Input vector " + currentRoot.toString() + " is not a root. ", theCommands);
     }
     outputRoots.addOnTop(currentRoot);
   }
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
-  theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
+  theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.rootSystem);
   theDiagram.AmbientBilinearForm = theWeyl.cartanSymmetric;
-  theDiagram.AmbientRootSystem = theWeyl.RootSystem;
+  theDiagram.AmbientRootSystem = theWeyl.rootSystem;
   theDiagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.toString()
   << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.toString();
@@ -2357,19 +2356,19 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
 class HistorySubExpression {
 public:
   friend std::ostream& operator << (
-    std::ostream& output, const HistorySubExpression& theH
+    std::ostream& output, const HistorySubExpression& history
   ) {
-    if (theH.currentE == nullptr) {
+    if (history.current == nullptr) {
       output << "(no expression)";
     } else {
-      output << theH.currentE->toString();
+      output << history.current->toString();
     }
-    output << " active: " << theH.lastActiveSubexpression;
+    output << " active: " << history.lastActiveSubexpression;
     return output;
   }
-  const Expression* currentE;
+  const Expression* current;
   int lastActiveSubexpression;
-  HistorySubExpression(): currentE(nullptr), lastActiveSubexpression(- 1) {
+  HistorySubExpression(): current(nullptr), lastActiveSubexpression(- 1) {
   }
 };
 
@@ -2397,10 +2396,6 @@ public:
   }
   std::string toStringExpressionHistoryMerged();
   std::string toStringDebug();
-  Expression getExpression(
-    const TreeNode<HistorySubExpression>& currentNode,
-    List<std::string>& outputRuleNames
-  );
 };
 
 void ExpressionHistoryEnumerator::initializeComputation() {
@@ -2418,42 +2413,6 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesDisplayNamesMap.setKeyValue("MultiplyByOne", "");
   // this->rulesDisplayNamesMap.setKeyValue("AddTerms", "");
   // this->rulesDisplayNamesMap.setKeyValue("AssociativeRule", "");
-}
-
-Expression ExpressionHistoryEnumerator::getExpression(
-  const TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames
-) {
-  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::getExpression");
-  Expression result;
-  if (
-    currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() &&
-    currentNode.theData.lastActiveSubexpression >= 0
-  ) {
-    const Expression& currentRuleSequence = (*currentNode.theData.currentE)[
-      currentNode.theData.lastActiveSubexpression
-    ];
-    if (currentRuleSequence.size() > 3) {
-      std::string ruleName = currentRuleSequence[3].toString();
-      if (ruleName != "" && ruleName != "Sub-expression simplification") {
-        outputRuleNames.addOnTop(ruleName);
-      }
-    }
-  }
-
-  if (currentNode.children.size == 0) {
-    result = *currentNode.theData.currentE;
-    return result;
-  }
-  if (currentNode.children.size == 1) {
-    result = this->getExpression(currentNode.getChild(0), outputRuleNames);
-    return result;
-  }
-  result.reset(*this->owner);
-  for (int i = 0; i < currentNode.children.size; i ++) {
-    Expression currentE = this->getExpression(currentNode.getChild(i), outputRuleNames);
-    result.addChildOnTop(currentE);
-  }
-  return result;
 }
 
 ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {

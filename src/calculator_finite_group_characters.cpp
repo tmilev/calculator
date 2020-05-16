@@ -25,7 +25,7 @@ bool WeylGroupData::checkConsistency() const {
   for (int i = 0; i < this->theGroup.generators.size; i ++) {
     this->theGroup.generators[i].checkConsistency();
   }
-  this->RootsOfBorel.checkConsistency();
+  this->rootsOfBorel.checkConsistency();
   return true;
 }
 
@@ -45,7 +45,7 @@ template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::checkAllSimpleGeneratorsAreOK() const {
   this->checkInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
-    if (this->generatorS[i].numberOfRows == 0) {
+    if (this->generators[i].numberOfRows == 0) {
       global.fatal << "This is a programming error: working with a "
       << "representation in which the action of the simple generators is not computed. " << global.fatal;
       return false;
@@ -86,7 +86,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
   ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].makeIdentityMatrix(this->getDimension());
+  this->theElementImages[0].makeIdentityMatrix(this->getDimension());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->getDimension();
   currentElt.makeIdentity(*this->ownerGroup);
@@ -102,7 +102,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::ComputeAllGe
       if (!ElementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
-        this->theElementImageS[indexParentElement].multiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
+        this->theElementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->theElementImages[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
       }
     }
@@ -122,25 +122,25 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::computeAllEl
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->checkInitialization();
   this->ownerGroup->checkInitializationFiniteDimensionalRepresentationComputation();
-  auto ElementsExplored = this->ownerGroup->theElements;
-  ElementsExplored.clear();
-  ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImageS[0].makeIdentityMatrix(this->getDimension());
+  auto elementsExplored = this->ownerGroup->theElements;
+  elementsExplored.clear();
+  elementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
+  this->theElementImages[0].makeIdentityMatrix(this->getDimension());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
   auto& theGens = this->ownerGroup->generators;
 
-  ElementsExplored.addOnTop(currentElt);
-  for (int i = 0; i < ElementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
+  elementsExplored.addOnTop(currentElt);
+  for (int i = 0; i < elementsExplored.size; i ++) {
+    int indexParentElement = this->ownerGroup->theElements.getIndex(elementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
-      currentElt = theGens[j] * ElementsExplored[i];
-      if (!ElementsExplored.contains(currentElt)) {
+      currentElt = theGens[j] * elementsExplored[i];
+      if (!elementsExplored.contains(currentElt)) {
         int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
-        this->theElementImageS[indexParentElement].multiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
-        ElementsExplored.addOnTop(currentElt);
+        this->theElementImages[indexParentElement].multiplyOnTheLeft(this->generators[j], this->theElementImages[indexCurrentElt]);
+        elementsExplored.addOnTop(currentElt);
       }
     }
   }
@@ -174,12 +174,12 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::operator*=(
   output.initialize(*this->ownerGroup);
   output.theCharacter = this->theCharacter;
   output.theCharacter *= other.theCharacter;
-  for (int i = 0; i < output.generatorS.size; i ++) {
-    output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
+  for (int i = 0; i < output.generators.size; i ++) {
+    output.generators[i].assignTensorProduct(this->generators[i], other.generators[i]);
   }
-  for (int i = 0; i < output.theElementImageS.size; i ++) {
+  for (int i = 0; i < output.theElementImages.size; i ++) {
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i]) {
-      output.theElementImageS[i].assignTensorProduct(this->theElementImageS[i], other.theElementImageS[i]);
+      output.theElementImages[i].assignTensorProduct(this->theElementImages[i], other.theElementImages[i]);
       output.theElementIsComputed[i] = true;
     }
   }
@@ -207,8 +207,8 @@ void GroupRepresentation<somegroup, Coefficient>::operator*=(const GroupRepresen
   output.ownerGroup = this->ownerGroup;
   output.theCharacter = this->theCharacter;
   output.theCharacter *= other.theCharacter;
-  for (int i = 0; i < output.generatorS.size; i ++) {
-    output.generatorS[i].assignTensorProduct(this->generatorS[i], other.generatorS[i]);
+  for (int i = 0; i < output.generators.size; i ++) {
+    output.generators[i].assignTensorProduct(this->generators[i], other.generators[i]);
   }
   *this = output;
 }
@@ -222,8 +222,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   MacroRegisterFunctionWithName("WeylGroupRepresentation::restrict");
   this->checkAllSimpleGeneratorsAreOK();
   if (vectorSpaceBasisSubrep.size == 0) {
-    global.fatal << "This is a programming error: restriction of "
-    << "representation to a zero subspace is not allowed. " << global.fatal;
+    global.fatal << "Restriction of representation to a zero subspace is not allowed. " << global.fatal;
   }
   output.initialize(*this->ownerGroup);
   output.basis = vectorSpaceBasisSubrep;
@@ -231,29 +230,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::restrictRepr
   output.gramMatrixInverted.invert();
   output.theCharacter = remainingCharacter;
   ProgressReport theReport;
-  for (int i = 0; i < this->generatorS.size; i ++) {
+  for (int i = 0; i < this->generators.size; i ++) {
     if (theReport.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
       theReport.report(reportStream.str());
     }
-    Matrix<Coefficient>::matrixInBasis(this->generatorS[i], output.generatorS[i], output.basis, output.gramMatrixInverted);
+    Matrix<Coefficient>::matrixInBasis(this->generators[i], output.generators[i], output.basis, output.gramMatrixInverted);
   }
-  /*
-  for (int i = 0; i < this->classFunctionMatrices.size; i ++)
-    if (this->classFunctionMatricesComputed[i]) {
-      output.classFunctionMatricesComputed[i] = true;
-      if (global != 0) {
-        std::stringstream reportStream;
-        reportStream << "Restricting class function matrix " << i + 1 << " out of "
-        << this->classFunctionMatrices.size;
-        theReport.report(reportStream.str());
-      }
-      Matrix<Coefficient>::matrixInBasis
-      (this->classFunctionMatrices[i], output.classFunctionMatrices[i], output.vectorSpaceBasis,
-       output.gramMatrixInverted);
-    }
-  */
   output.checkAllSimpleGeneratorsAreOK();
 }
 
@@ -321,7 +305,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation(
     Partition::GetPartitions(thePartitions,theRank + 1);
     for (int i = 0; i < thePartitions.size; i ++) {
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
-      thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
+      thePartitions[i].spechtModuleMatricesOfTranspositionsjjplusone(irrep.generators);
       irrep.ownerGroup = &G;
       irrep.identifyingString = thePartitions[i].toString();
       irrep.computeCharacter();
@@ -391,11 +375,11 @@ void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeig
   for (int i = 0; i < theWeights.size; i ++) {
     do {
       found = false;
-      for (int j = 0; j < this->RootsOfBorel.size; j ++) {
-        if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i]) < 0) {
+      for (int j = 0; j < this->rootsOfBorel.size; j ++) {
+        if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[i]) < 0) {
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
-            if (this->rootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k]) > 0) {
+            if (this->rootScalarCartanRoot(this->rootsOfBorel[j], theWeights[k]) > 0) {
               isGood = false;
               break;
             }
@@ -404,7 +388,7 @@ void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeig
             continue;
           }
           for (int k = 0; k < theWeights.size; k ++) {
-            this->reflectBetaWithRespectToAlpha(this->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
+            this->reflectBetaWithRespectToAlpha(this->rootsOfBorel[j], theWeights[k], false, theWeights[k]);
           }
           found = true;
         }
@@ -467,7 +451,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   out << "<br>Maximally dominant output: " << theHWs.toString();
   return output.assignValue(out.str(), theCommands);
 }
-
 
 template <>
 bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
@@ -654,9 +637,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   Vector<Polynomial<Rational> > differenceVector;
   Rational currentCoordDifference;
   for (int i = 0; i <outputOrbit.size; i ++) {
-    for (int j = 0; j < theWeyl.RootsOfBorel.size; j ++) {
+    for (int j = 0; j < theWeyl.rootsOfBorel.size; j ++) {
       currentWeight = outputOrbit[i];
-      currentElt.MakeRootReflection(theWeyl.RootsOfBorel[j], theWeyl);
+      currentElt.MakeRootReflection(theWeyl.rootsOfBorel[j], theWeyl);
       if (useRho) {
         currentWeight += theWeyl.rho;
       }
@@ -2062,14 +2045,14 @@ void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
 void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner) {
   MacroRegisterFunctionWithName("MonomialMacdonald::MakeFromRootSubsystem");
   this->owner = &inputOwner;
-  this->rootSel.initialize(inputOwner.theWeyl.RootSystem.size);
+  this->rootSel.initialize(inputOwner.theWeyl.rootSystem.size);
   Vector<Rational> currentV;
   for (int i = 0; i < inputRoots.size; i ++) {
     currentV = inputRoots[i];
     if (currentV.isNegative()) {
       currentV *= - 1;
     }
-    int indexInRoots = inputOwner.theWeyl.RootSystem.getIndex(currentV);
+    int indexInRoots = inputOwner.theWeyl.rootSystem.getIndex(currentV);
     if (indexInRoots < 0) {
       global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.toString()
       << ": the vector " << currentV.toString()
@@ -2083,17 +2066,17 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
 void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple) {
   Selection originalSel;
   originalSel = this->rootSel;
-  this->rootSel.initialize(this->owner->theWeyl.RootSystem.size);
+  this->rootSel.initialize(this->owner->theWeyl.rootSystem.size);
   Vector<Rational> currentV;
   outputMultiple = 1;
   for (int i = 0; i <originalSel.cardinalitySelection; i ++) {
-    currentV = this->owner->theWeyl.RootSystem[originalSel.elements[i]];
+    currentV = this->owner->theWeyl.rootSystem[originalSel.elements[i]];
     this->owner->theWeyl.reflectSimple(indexSimpleReflection, currentV);
     if (currentV.isNegative()) {
       currentV *= - 1;
       outputMultiple *= - 1;
     }
-    this->rootSel.addSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.getIndex(currentV));
+    this->rootSel.addSelectionAppendNewIndex(this->owner->theWeyl.rootSystem.getIndex(currentV));
   }
 }
 
@@ -2517,7 +2500,7 @@ void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepr
 }
 
 template <typename somegroup, typename Coefficient>
-void VirtualRepresentation<somegroup, Coefficient>::AssignRep(
+void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(
   const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other
 ) {
   global.fatal << " not implemented " << global.fatal;
@@ -2527,7 +2510,7 @@ void VirtualRepresentation<somegroup, Coefficient>::AssignRep(
 }
 
 template <typename somegroup, typename Coefficient>
-void VirtualRepresentation<somegroup, Coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
+void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(const GroupRepresentation<somegroup, Rational>& other) {
   VirtualRepresentation<somegroup, Coefficient> out;
   out.addMonomial(other.theCharacter, 1);
 //  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
@@ -2558,7 +2541,7 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(
     theWeylData->theGroup.computeIrreducibleRepresentationsTodorsVersion();
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
-  outputRep.AssignRep(inputRep);
+  outputRep.assignRepresentation(inputRep);
   return output.assignValue(outputRep, theCommands);
 }
 

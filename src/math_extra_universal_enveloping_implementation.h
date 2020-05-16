@@ -239,7 +239,7 @@ bool MonomialUniversalEnveloping<Coefficient>::commutingABntoBnAPlusLowerOrderAl
       return true;
     }
   }
-  int numPosRoots = this->getOwner().theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->getOwner().theWeyl.rootsOfBorel.size;
   int theDimension = this->getOwner().theWeyl.cartanSymmetric.numberOfRows;
   if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
     return this->getOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].isEqualToZero();
@@ -672,7 +672,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
   }
   //Rational tempRat;
   //Vector<Rational> theSum;
-  for (int i = 0; i < theWeyl.RootSystem.size; i ++) {
+  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
     //Implementation without the ninja formula:
 //    tempRat = 0;
 //    Vector<Rational> & theRoot = theWeyl.RootSystem.objects[i];
@@ -697,11 +697,11 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(SemisimpleLieAlgebra& 
 //     tempElt2*= tempRat;
 //     *this+= tempElt2;
     //The ninja formula alternative implementation:
-    const Vector<Rational>& theRoot = theWeyl.RootSystem[i];
+    const Vector<Rational>& theRoot = theWeyl.rootSystem[i];
     tempElt2.makeOneGeneratorCoefficientOne(- theRoot, theOwner);
     tempElt1.makeOneGeneratorCoefficientOne(theRoot, theOwner);
     tempElt2 *= tempElt1;
-    tempElt2 *= theWeyl.rootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[i]) / 2;
+    tempElt2 *= theWeyl.rootScalarCartanRoot(theWeyl.rootSystem[i], theWeyl.rootSystem[i]) / 2;
     *this += tempElt2;
   }
   *this /= theWeyl.getKillingDividedByTraceRatio();
@@ -869,7 +869,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCartanGenerator(
   this->makeZero(inputOwner);
   tempMon.makeOne(inputOwner);
   int theDimension = this->getOwner().theWeyl.cartanSymmetric.numberOfRows;
-  int numPosRoots = this->getOwner().theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->getOwner().theWeyl.rootsOfBorel.size;
   tempMon.generatorsIndices.setSize(1);
   tempMon.powers.setSize(1);
   Coefficient tempCF;
@@ -1672,7 +1672,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::commutingLeftIndexAroundRi
     if (theRightPower.isSmallInteger(&tempInt)) {
       return true;
     }
-    int numPosRoots = this->owner->theOwner->theWeyl.RootsOfBorel.size;
+    int numPosRoots = this->owner->theOwner->theWeyl.rootsOfBorel.size;
     int theDimension = this->owner->theOwner->theWeyl.cartanSymmetric.numberOfRows;
     if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension) {
       ElementSemisimpleLieAlgebra<Rational> tempElt;

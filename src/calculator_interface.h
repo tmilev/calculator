@@ -1031,7 +1031,7 @@ public:
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
-  int currentRandomSeed;
+  UnsecurePseudoRandomGenerator pseudoRandom;
   int canvasPlotCounter;
   void reset();
   void resetSliders();

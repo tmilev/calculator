@@ -48,7 +48,7 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
       RemainingWeight.makeZero(theWeyl.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
         newRight.multiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.powers[j]);
-        RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
+        RemainingWeight += theWeyl.rootSystem[oldRight.generatorsIndices[j]] * oldRight.powers[j];
       }
       RemainingWeight += this->theHWFDpartSimpleCoordS;
       summand += theWeyl.getScalarProductSimpleRoot(RemainingWeight, theSimpleIndex);
@@ -1267,7 +1267,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
       wordCounter ++;
       tempWelt.generatorsLastAppliedFirst.setSize(currentListInt[j].generatorsIndices.size);
       for (int k = 0; k < currentListInt[j].generatorsIndices.size; k ++) {
-        aGen.makeSimpleReflection(theWeyl.RootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
+        aGen.makeSimpleReflection(theWeyl.rootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"

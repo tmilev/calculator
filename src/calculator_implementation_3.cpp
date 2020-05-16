@@ -124,7 +124,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->SumCoords().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -134,7 +134,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
-  int numPosRoots = this->AmbientWeyl->RootsOfBorel.size;
+  int numPosRoots = this->AmbientWeyl->rootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
     int lowestUnexploredHeightDiff = 0;
@@ -150,13 +150,13 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
-        currentWeight -= this->AmbientWeyl->RootsOfBorel[i];
+        currentWeight -= this->AmbientWeyl->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
           this->AmbientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().numeratorShort;
+            int currentIndexShift = this->AmbientWeyl->rootsOfBorel[i].SumCoords().numeratorShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
@@ -1104,7 +1104,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
     thePartition[i] = 0;
   }
   Vector<Rational> theWeight, tmpWt;
-  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.RootsOfBorel;
+  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
   theWeight.makeZero(theSSalgebra.getRank());

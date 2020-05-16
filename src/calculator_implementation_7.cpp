@@ -9632,17 +9632,12 @@ bool CalculatorFunctions::innerSetRandomSeed(
     return false;
   }
   const Expression& argument = input[1];
-  LargeInteger seedLarge;
-  if (!argument.isInteger(&seedLarge)) {
+  LargeInteger seedOriginal;
+  if (!argument.isInteger(&seedOriginal)) {
     return theCommands << "Failed to extract integer random seed. ";
   }
-  seedLarge /= LargeInteger(global.unsecurePseudoRandomGenerator.maximumRandomSeed);
-  int32_t seed = 0;
-  seedLarge.isIntegerFittingInInt(&seed);
   std::stringstream out;
-  theCommands.theObjectContainer.currentRandomSeed = seed;
-  global.unsecurePseudoRandomGenerator.setRandomSeed(seed);
-  out << "Successfully set random seed to: " << static_cast<unsigned>(seed) << "[" << seedLarge << "].";
+  theCommands.theObjectContainer.pseudoRandom.setRandomSeedLarge(seedOriginal, &out);
   return output.assignValue(out.str(), theCommands);
 }
 
@@ -9878,7 +9873,10 @@ bool CalculatorFunctions::innerRandomInteger(
   if (accum == 0) {
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
-  int generatedRandomInt = static_cast<signed>(global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % accum;
+  int generatedRandomInt = static_cast<signed>(
+    theCommands.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+  );
+  generatedRandomInt %= accum;
   int resultRandomValue = theIntervals[0][0];
   bool found = false;
   accum = 0;
@@ -9921,7 +9919,7 @@ bool CalculatorFunctions::innerSelectAtRandom(
     output = input[1]; // only one item to select from: return that item
     return true;
   }
-  int randomIndex = (global.unsecurePseudoRandomGenerator.getRandomPositiveLessThanBillion() % (input.size() - 1)) + 1;
+  int randomIndex = (theCommands.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed() % (input.size() - 1)) + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }

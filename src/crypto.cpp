@@ -1716,50 +1716,69 @@ bool JSONWebToken::assignString(const std::string& other, std::stringstream* com
   return true;
 }
 
-List<unsigned char>& UnsecurePseudoRandomGenerator::state() {
-  static List<unsigned char> stateContainer;
-  return stateContainer;
-}
-
 UnsecurePseudoRandomGenerator::UnsecurePseudoRandomGenerator() {
   this->randomSeed = 0;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
-  this->setRandomSeed(0);
+  this->setRandomSeedSmall(0);
 }
 
-void UnsecurePseudoRandomGenerator::setRandomSeed(int32_t inputRandomSeed) {
-  if (inputRandomSeed < 0) {
-    inputRandomSeed *= - 1;
+void UnsecurePseudoRandomGenerator::setRandomSeedLarge(
+  const LargeInteger& inputRandomSeed, std::stringstream* comments
+) {
+  LargeInteger seedReduced = inputRandomSeed;
+  if (seedReduced < 0) {
+    seedReduced *= - 1;
   }
+  seedReduced %= LargeInteger(static_cast<int>(this->maximumRandomSeed));
+  int32_t seed = 0;
+  seedReduced.isIntegerFittingInInt(&seed);
+  this->setRandomSeedSmall(static_cast<uint32_t>(seed));
+  if (comments != nullptr) {
+    *comments << "Successfully set random seed to: " << this->randomSeed;
+    if (seedReduced != inputRandomSeed) {
+      *comments << "[original seed " << inputRandomSeed
+      << " reduced modulo " << this->maximumRandomSeed << "]";
+    }
+    *comments << ". ";
+  }
+}
+
+uint32_t UnsecurePseudoRandomGenerator::getRandomSeed() {
+  return this->randomSeed;
+}
+
+void UnsecurePseudoRandomGenerator::setRandomSeedSmall(uint32_t inputRandomSeed) {
   inputRandomSeed %= this->maximumRandomSeed;
   this->randomSeed = inputRandomSeed;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
-  this->state().setSize(4);
+  this->state.setSize(4);
   unsigned int randomSeedUnsigned = static_cast<unsigned int>(this->randomSeed);
-  this->state()[0] = static_cast<unsigned char>( randomSeedUnsigned / 16777216    );
-  this->state()[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) % 256);
-  this->state()[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) % 256  );
-  this->state()[3] = static_cast<unsigned char>( randomSeedUnsigned % 256         );
-  Crypto::computeSha256(this->state(), this->state());
+  this->state[0] = static_cast<unsigned char>( randomSeedUnsigned / 16777216    );
+  this->state[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) % 256);
+  this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) % 256  );
+  this->state[3] = static_cast<unsigned char>( randomSeedUnsigned % 256         );
+  Crypto::computeSha256(this->state, this->state);
 }
 
-signed UnsecurePseudoRandomGenerator::getRandomPositiveLessThanBillion() {
-  return static_cast<signed>(this->getRandomLessThanBillion());
-}
-
-unsigned int UnsecurePseudoRandomGenerator::getRandomLessThanBillion() {
-  if (this->bytesConsumed + 4 >= this->state().size) {
-    Crypto::computeSha256(this->state(), this->state());
+signed UnsecurePseudoRandomGenerator::getRandom() {
+  if (this->bytesConsumed + 4 >= this->state.size) {
+    Crypto::computeSha256(this->state, this->state);
     this->bytesConsumed = 0;
   }
   unsigned int result = 0;
   for (int i = 0; i < 4; i ++) {
     result *= 256;
-    result += this->state()[this->bytesConsumed + i];
+    result += this->state[this->bytesConsumed + i];
   }
   this->bytesConsumed += 4;
+  // Expected to generate negative result ~ 50% of the time.
+  return static_cast<signed int>(result);
+}
+
+unsigned int UnsecurePseudoRandomGenerator::getRandomNonNegativeLessThanMaximumSeed() {
+  unsigned int result = static_cast<unsigned int>(this->getRandom());
   result %= this->maximumRandomSeed;
   return result;
 }

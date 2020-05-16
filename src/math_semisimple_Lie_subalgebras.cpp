@@ -1867,7 +1867,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
       newCandidate
     );
     List<int> indicesModulesNewComponentExtensionMod;
-    indicesModulesNewComponentExtensionMod.reserve(this->owner->theWeyl.RootSystem.size);
+    indicesModulesNewComponentExtensionMod.reserve(this->owner->theWeyl.rootSystem.size);
     indicesModulesNewComponentExtensionMod.setSize(0);
     for (int j = 0; j < this->baseSubalgebra().HighestWeightsNONPrimal.size; j ++) {
       if (this->baseSubalgebra().HighestWeightsNONPrimal[j] == weightHElementWeAreLookingFor) {
@@ -2287,7 +2287,7 @@ void CandidateSemisimpleSubalgebra::addHIncomplete(const Vector<Rational>& theH)
   this->checkBasicInitialization();
   if (this->cartanSubalgebrasByComponentScaledToActByTwo.size == 1) {
     if (this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->size == 0) {
-      this->PosRootsPerpendicularPrecedingWeights = this->getAmbientWeyl().RootsOfBorel;
+      this->PosRootsPerpendicularPrecedingWeights = this->getAmbientWeyl().rootsOfBorel;
     }
   }
   for (int i = 0; i < this->PosRootsPerpendicularPrecedingWeights.size; i ++) {
@@ -2306,8 +2306,8 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
   //check if input weight is maximally dominant:
   Rational theScalarProd;
   int indexHneW = *theRootInjections.lastObject();
-  for  (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
-    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().RootsOfBorel[i];
+  for  (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
+    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
     for (int l = 0; l< this->theHsScaledToActByTwoInOrderOfCreation.size && canBeRaisingReflection; l ++) {
       theScalarProd = this->getAmbientWeyl().rootScalarCartanRoot(
@@ -2354,8 +2354,8 @@ int CharacterSemisimpleLieAlgebraModule<Coefficient>::getIndexExtremeWeightRelat
   }
   for (int i = 0; i <weightsSimpleCoords.size; i ++) {
     bool isGood = true;
-    for (int j = 0; j < theWeyl.RootsOfBorel.size; j ++) {
-      if (weightsSimpleCoords.contains((weightsSimpleCoords[i] + theWeyl.RootsOfBorel[j]))) {
+    for (int j = 0; j < theWeyl.rootsOfBorel.size; j ++) {
+      if (weightsSimpleCoords.contains((weightsSimpleCoords[i] + theWeyl.rootsOfBorel[j]))) {
         isGood = false;
         break;
       }
@@ -2391,12 +2391,12 @@ bool CandidateSemisimpleSubalgebra::computeSystem(bool AttemptToChooseCentalizer
     currentInvolvedPosGens.setExpectedSize(this->getAmbientWeyl().getDimension() * 2);
     currentInvolvedNegGens.setSize(0);
     currentInvolvedPosGens.setSize(0);
-    for (int j = 0; j < this->getAmbientWeyl().RootSystem.size; j ++) {
+    for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
       int indexCurGen = this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
-      int opIndex = this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRoot(- this->getAmbientWeyl().RootSystem[j]);
+      int opIndex = this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRoot(- this->getAmbientWeyl().rootSystem[j]);
       currentGen.makeGenerator(*this->owner->owner, indexCurGen);
       currentOpGen.makeGenerator(*this->owner->owner, opIndex);
-      if (this->isWeightSystemSpaceIndex(i, this->getAmbientWeyl().RootSystem[j])) {
+      if (this->isWeightSystemSpaceIndex(i, this->getAmbientWeyl().rootSystem[j])) {
         currentInvolvedPosGens.addOnTop(currentGen);
         currentInvolvedNegGens.addOnTop(currentOpGen);
       }
@@ -2450,7 +2450,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(bool AttemptToChooseCenta
   for (int i = 0; i < this->theInvolvedNegGenerators.size; i ++) {
     this->totalNumUnknownsNoCentralizer += this->theInvolvedNegGenerators[i].size;
   }
-  if (this->theWeylNonEmbedded->RootSystem.size == 0) {
+  if (this->theWeylNonEmbedded->rootSystem.size == 0) {
     global.fatal << "This is a programming error: the root system of the candidate subalgebra has not been computed " << global.fatal;
   }
   this->totalNumUnknownsNoCentralizer *= 2;
@@ -3191,23 +3191,23 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   MacroRegisterFunctionWithName("NilradicalCandidate::computeParabolicACExtendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroupData& theWeyl = this->owner->owner->owner->theWeyl;
-  this->leviRootsAmbienT.reserve(theWeyl.RootSystem.size);
-  this->leviRootsSmallPrimalFundCoords.reserve(theWeyl.RootSystem.size);
+  this->leviRootsAmbienT.reserve(theWeyl.rootSystem.size);
+  this->leviRootsSmallPrimalFundCoords.reserve(theWeyl.rootSystem.size);
   Vectors<Rational> rootSystemProjections;
   Vectors<Rational> conesCombination;
-  rootSystemProjections.setSize(theWeyl.RootSystem.size);
-  for (int i = 0; i < theWeyl.RootSystem.size; i ++) {
-    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.RootSystem[i], rootSystemProjections[i]);
+  rootSystemProjections.setSize(theWeyl.rootSystem.size);
+  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
+    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.rootSystem[i], rootSystemProjections[i]);
   }
   conesCombination = this->theNilradicalWeights;
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
     conesCombination.addOnTop(-this->theNonFKhws[i]);
   }
   this->ConeSeparatingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
-  for (int i = 0; i < theWeyl.RootSystem.size; i ++) {
-    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.RootSystem[i], projectionRoot);
+  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
+    this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.rootSystem[i], projectionRoot);
     if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal) == 0) {
-      this->leviRootsAmbienT.addOnTop(theWeyl.RootSystem[i]);
+      this->leviRootsAmbienT.addOnTop(theWeyl.rootSystem[i]);
       if (this->owner->RootSystemCentralizerPrimalCoords.contains(projectionRoot)) {
         this->leviRootsSmallPrimalFundCoords.addOnTop(projectionRoot);
       }
@@ -4212,13 +4212,13 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       << " is different, namely, " << coCartanCandidate.toString();
     }
   }
-  for (int k = 0; k < this->getAmbientWeyl().RootSystem.size; k ++) {
+  for (int k = 0; k < this->getAmbientWeyl().rootSystem.size; k ++) {
     int counter = - 1;
     for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
       for (int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].size; j ++) {
         counter ++;
         tempMon.weightFundamentalCoordS[counter] = (
-          this->getAmbientWeyl().rootScalarCartanRoot(this->getAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter])
+          this->getAmbientWeyl().rootScalarCartanRoot(this->getAmbientWeyl().rootSystem[k], this->theHsScaledToActByTwo[counter])
         );
         if (!tempMon.weightFundamentalCoordS[counter].isInteger()) {
           if (!allowBadCharacter) {
@@ -4465,10 +4465,10 @@ void SlTwoSubalgebra::computeDynkinsEpsilon(WeylGroupData& theWeyl) {
     }
   }
   this->DynkinsEpsilon += r;
-  for (int i = 0; i < theWeyl.RootSystem.size; i ++) {
+  for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
     int NumNonZeroFound = 0;
     for (int j = 0; j < this->hCharacteristic.size; j ++) {
-      if (theWeyl.RootSystem[i][j] == 1) {
+      if (theWeyl.rootSystem[i][j] == 1) {
         NumNonZeroFound ++;
       }
       if (NumNonZeroFound > 1) {
@@ -4634,8 +4634,8 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
   MacroRegisterFunctionWithName("CandidateSemisimpleSubalgebra::checkMaximalDominance");
   this->checkBasicInitialization();
   Rational theScalarProd;
-  for (int i = 0; i < this->getAmbientWeyl().RootsOfBorel.size; i ++) {
-    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().RootsOfBorel[i];
+  for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
+    Vector<Rational>& currentPosRoot = this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
     for (int k = 0; k < this->cartanSubalgebrasByComponentScaledToActByTwo.size && canBeRaisingReflection; k ++) {
       for (int l = 0; l < this->cartanSubalgebrasByComponentScaledToActByTwo[k].size && canBeRaisingReflection; l ++) {
@@ -4755,7 +4755,7 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
 void SlTwoSubalgebra::computeModuleDecompositionsitionAmbientLieAlgebra() {
   this->checkConsistency();
   this->computeModuleDecompositionsition(
-    this->getOwnerWeyl().RootsOfBorel,
+    this->getOwnerWeyl().rootsOfBorel,
     this->getOwnerWeyl().cartanSymmetric.numberOfRows,
     this->moduleDecompositionAmbientSA,
     this->moduleDimensions
@@ -4789,14 +4789,14 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   this->getOwnerSemisimpleAlgebra().theWeyl.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->theH.getCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.AmbientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
-  theDiagram.AmbientRootSystem = this->getOwnerWeyl().RootSystem;
+  theDiagram.AmbientRootSystem = this->getOwnerWeyl().rootSystem;
   theDiagram.computeDiagramInputIsSimple(tempRoots);
   this->IndicesContainingRootSAs.addOnTop(indexMinimalContainingRegularSA);
   tempRoots.makeEiBasis(theDimension);
   this->getOwnerSemisimpleAlgebra().theWeyl.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->theH.getCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.AmbientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
-  tempDiagram.AmbientRootSystem = this->getOwnerWeyl().RootSystem;
+  tempDiagram.AmbientRootSystem = this->getOwnerWeyl().rootSystem;
   tempDiagram.computeDiagramInputIsSimple(tempRoots);
   this->preferredAmbientSimpleBasis = tempRoots;
   this->hCharacteristic.setSize(theDimension);
@@ -6385,7 +6385,7 @@ std::string CandidateSemisimpleSubalgebra::toStringSystem(FormatExpressions* the
       out << ", involved negative generators unknown.";
     }
   }
-  out << "Positive weight subsystem: " << this->theWeylNonEmbedded->RootsOfBorel.toString();
+  out << "Positive weight subsystem: " << this->theWeylNonEmbedded->rootsOfBorel.toString();
   if (this->PosRootsPerpendicularPrecedingWeights.size > 0) {
     out << " Positive roots that commute with the weight subsystem: "
     << this->PosRootsPerpendicularPrecedingWeights.toString();

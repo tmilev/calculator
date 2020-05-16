@@ -22,7 +22,7 @@ public:
   List<templateMonomial> involvedMonomials;
   Matrix<Coefficient> projectionOperator;
 
-  void SetBasis(const List<templateVector>& basis);
+  void setBasis(const List<templateVector>& basis);
   void denseVectorInBasis(Vector<Coefficient>& out, const templateVector& in);
   bool checkConsistency() const {
     if (this->flagDeallocated) {
@@ -46,7 +46,7 @@ public:
 };
 
 template <class templateVector, class templateMonomial, class Coefficient>
-void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::SetBasis(const List<templateVector>& basis) {
+void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::setBasis(const List<templateVector>& basis) {
   this->checkConsistency();
   if (basis.size == 0) {
     return;
@@ -257,13 +257,13 @@ public:
 
   template <typename Coefficient>
   void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& out) {
-    Matrix<Coefficient> M;
+    Matrix<Coefficient> matrix;
     int n = this->largestOccurringNumber() + 1;
-    M.makeZeroMatrix(n);
+    matrix.makeZeroMatrix(n);
     for (int i = 0; i < n; i ++) {
-      M(i, (*this) * i) = 1;
+      matrix(i, (*this) * i) = 1;
     }
-    out.assignCharacteristicPoly(M);
+    out.assignCharacteristicPoly(matrix);
   }
 
   bool hasDifferentConjugacyInvariantsFrom(PermutationR2& other) {
@@ -664,8 +664,8 @@ public:
       this->theGroup->generators[n - 1 + i].k.toggleBit(i);
     }
     this->flagIsEntireHyperoctahedralGroup = true;
-    this->theGroup->GetWordByFormula = this->getWordByFormulaImplementation;
-    this->theGroup->GetSizeByFormula = this->getSizeByFormulaImplementation;
+    this->theGroup->getWordByFormula = this->getWordByFormulaImplementation;
+    this->theGroup->getSizeByFormula = this->getSizeByFormulaImplementation;
   }
 
   static bool getWordByFormulaImplementation(
@@ -692,68 +692,25 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
 
 
 // superseded by SemidirectProductGroup<PermutationR2, ElementZ2N, HyperoctahedralBitsAutomorphism>
-// a hyperoctahedral group is a semidirect product of a symmetric group and
-// a group of bits.  is there a better name for the group of bits than s?
-// false and true are 0 and 1 by convention, which is kinda backwards lol
-// false is 1, true is - 1.
-// an unallocated ElementHyperoctahedralGroup does not have a bits field
-// having no bits field is always acceptable and it simply means the bits
+// A hyperoctahedral group is a semidirect product of a symmetric group and
+// a group of bits.
+// An unallocated ElementHyperoctahedralGroup does not have a bits field.
+// Having no bits field is always acceptable and it simply means the bits
 // are all unset.
-// Multiplication is as folows: (p1,s1)*(p2,s2) = (p1*p2,(p2*s1)*s2)
+// Multiplication is as folows: (p1, s1) * (p2, s2) = (p1 * p2, (p2 * s1) * s2)
 // where the action of p on s comes from conjugation p⁻¹sp in the standard
-// representation, fortuitously (0,1,2) conjugated with xyz gives yzx
-// an ElementHyperoctahedralGroup is not an element of any particular
+// representation. For example, (0,1,2) conjugated with xyz gives yzx.
+// An ElementHyperoctahedralGroup is not an element of any particular
 // hyperoctahedral group, but rather of the direct limit of the hyperoctahedral
 // groups.  It is the responsibility of the caller, of course, to ensure that
 // all requested operations are defined.
-/*class ElementHyperoctahedralGroup
-{ public:
-  PermutationR2 p;
-  List<bool> s;
-
-  void MakeFromPermutation(const PermutationR2& in);
-  void MakeFromBits(const List<bool>& in);
-  void addTransposition(int i, int j);
-  void toggleBit(int i);
-  void makeFromMultiplicities(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right);
-  // for compatibility with element classes that need a prototype to be able to
-  // turn themselves into the identity element
-  void makeIdentity(const ElementHyperoctahedralGroup& unused);
-  bool isIdentity() const;
-  void invert();
-
-  ElementHyperoctahedralGroup operator*(const ElementHyperoctahedralGroup& right) const;
-
-  int SmallestN() const;
-  int CountSetBits() const;
-  ElementHyperoctahedralGroup operator^(const ElementHyperoctahedralGroup& right) const;
-  static void conjugationAction(const ElementHyperoctahedralGroup& conjugateWith, const ElementHyperoctahedralGroup& conjugateOn, ElementHyperoctahedralGroup& out);
-  bool hasDifferentConjugacyInvariantsFrom(const ElementHyperoctahedralGroup& other) const;
-  static bool areConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
-  void getCharacteristicPolynomialStandardRepresentation(Polynomial<Rational>& out) const;
-  bool operator== (const ElementHyperoctahedralGroup& right) const;
-  bool operator>(const ElementHyperoctahedralGroup& right) const;
-  unsigned int hashFunction() const;
-  static  unsigned int hashFunction(const ElementHyperoctahedralGroup& in) {
-                                        return in.hashFunction();}
-
-  template <typename somestream>
-  somestream& intoStream(somestream& out) const;
-
-  std::string toString(FormatExpressions* unused = 0) const;
-
-  friend std::ostream& operator<<(std::ostream& out, const ElementHyperoctahedralGroup& data) {
-    return data.intoStream(out);
-  }
-};*/
+// class ElementHyperoctahedralGroup
 
 template <typename elementSomeGroup>
 class ConjugacyClassR2 {
 public:
   elementSomeGroup representative;
   int size;
-  // why is there a flagRepresentativeComputed, how is it meaningful to have a
-  // conjugacy class without a representative?
   bool flagRepresentativeComputed;
   bool flagHaveRepresentativeWord;
   List<int> representativeWord;
@@ -904,7 +861,7 @@ public:
 
   GeneratorPermutationR2sOnIndices& operator++() {
     ++ pads;
-    return *this; // what the f*** does this even mean how the hell
+    return *this;
   }
 
   // this method name needs improvement
@@ -937,106 +894,6 @@ public:
   }
 };
 
-template <typename TElementGenerator, typename TElement>
-class GeneratorProductOfGenerators {
-public:
-  List<TElementGenerator > generators;
-
-  enum pcpositions {beginning, loop, midloop, end};
-  struct frame {
-    int program_counter;
-    TElement subprod;
-  };
-  List<struct frame> stack;
-  int frame_pointer;
-  void initialize(List<TElementGenerator> theGenerators) {
-    generators = theGenerators;
-    stack.setSize(generators.size);
-    frame_pointer = 0;
-    stack[frame_pointer].program_counter = pcpositions::beginning;
-    ++ (*this);
-  }
-
-  /* This program is too confusing to write without writing it in python first
-  def operator++(frame_pointer):
-    permgens[frame_pointer].initialize(indiceses[frame_pointer])
-    for permi in permgens[frame_pointer]:
-      if (frame_pointer > 0):
-        subprods[frame_pointer] = subprods[frame_pointer- 1]*permi
-      else:
-        subprods[frame_pointer] = permi
-      if (frame_pointer == len(permgens)- 1):
-        yield subprods[frame_pointer]
-      else
-        self.operator++(frame_pointer+ 1)
-      ++permgens[frame_pointer]
-  */
-
-  GeneratorProductOfGenerators& operator++() {
-    while (true) {
-      if (this->frame_pointer == - 1) {
-        return *this;
-      }
-      switch(stack[frame_pointer].program_counter) {
-        case pcpositions::beginning:
-        generators[frame_pointer].ResetIteration();
-        case pcpositions::loop:
-        if (generators[frame_pointer].doneIterating()) {
-          stack[frame_pointer].program_counter = pcpositions::end;
-          break;
-        }
-        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
-        TElement permi = *(generators[frame_pointer]);
-        if (frame_pointer == 0) {
-          stack[frame_pointer].subprod = permi;
-        } else {
-          stack[frame_pointer].subprod.makeFromMultiplicities(stack[frame_pointer - 1].subprod, permi);
-        }
-        if (frame_pointer == generators.size - 1) {
-          stack[frame_pointer].program_counter = pcpositions::midloop;
-          return *this;
-        } else {
-          stack[frame_pointer].program_counter = pcpositions::midloop;
-          frame_pointer ++;
-          stack[frame_pointer].program_counter = pcpositions::beginning;
-          break;
-        }
-        }
-        case pcpositions::midloop:
-        ++ generators[frame_pointer];
-        stack[frame_pointer].program_counter = pcpositions::loop;
-        break;
-        case pcpositions::end:
-        frame_pointer --;
-      }
-    }
-  }
-
-  TElement operator*() {
-    return stack.lastObject()->subprod;
-  }
-
-  bool doneIterating() {
-    if (frame_pointer == - 1)
-      return true;
-    return false;
-  }
-};
-
-/* Apparently, parametric polymorphism doesn't work well with inheritance and templates.
-class GeneratorElementsSnxSnOnIndicesAndIndices: public GeneratorProductOfGenerators<GeneratorPermutationR2sOnIndices, PermutationR2>
-{ public:
-  void initialize(List<List<int> > indiceses) {
-    List<GeneratorPermutationR2sOnIndices> gens;
-    gens.setSize(indiceses.size);
-    for (int i = 0; i < indiceses.size; i ++) {
-      gens[i].initialize(indiceses[i]);
-    }
-    this->initialize(gens);
-  }
-};
-*/
-
 class GeneratorElementsSnxSnOnIndicesAndIndices {
 public:
   List<GeneratorPermutationR2sOnIndices> generators;
@@ -1059,21 +916,6 @@ public:
     stack[frame_pointer].program_counter = pcpositions::beginning;
     ++ (*this);
   }
-
-  /* This program is too confusing to write without writing it in python first
-  def operator++(frame_pointer):
-    permgens[frame_pointer].initialize(indiceses[frame_pointer])
-    for permi in permgens[frame_pointer]:
-      if (frame_pointer > 0):
-        subprods[frame_pointer] = subprods[frame_pointer- 1]*permi
-      else:
-        subprods[frame_pointer] = permi
-      if (frame_pointer == len(permgens)- 1):
-        yield subprods[frame_pointer]
-      else
-        self.operator++(frame_pointer+ 1)
-      ++permgens[frame_pointer]
-  */
 
   GeneratorElementsSnxSnOnIndicesAndIndices& operator++() {
     while (true) {
@@ -1225,48 +1067,6 @@ public:
   }
 };
 
-/*
-// the int N field may or may not be meaningful
-class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
-{ public:
-  bool isEntireHyperoctahedralGroup;
-  bool isEntireDn ;
-  int N;
-
-  HyperoctahedralGroup() {
-    this->isEntireHyperoctahedralGroup = false;
-    this->isEntireDn = false;
-    this->N = - 1;
-  }
-  void makeHyperoctahedralGroup(int n);
-  void MakeBn(int n);
-
-  static void computeCCSizesAndRepresentativesByFormulaImplementation(void* G);
-  static bool getWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
-  static LargeInt getSizeByFormulaImplementation(void* G);
-
-
-  int GetN();
-
-
-  void allSpechtModules();
-  void spechtModuleOfPartititons(const Partition& positive, const Partition& negative,
-                               GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out);
-  void SomeModuleOfPartititons(const Partition& positive, const Partition& negative,
-                               GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out,
-                               Subgroup<ElementHyperoctahedralGroup>* subsn);
-
-
-  template <typename somestream>
-  somestream& intoStream(somestream& out) const;
-
-  std::string toString() const;
-  friend std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroup& data) {
-    return data.intoStream(out);
-  }
-};
-*/
-
 template <typename scalar>
 void Partition::spechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const {
   List<PermutationR2> perms;
@@ -1327,7 +1127,7 @@ void Partition::spechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
     p.makeFromActionDescription(standardTableaux[i].turnIntoList());
     p.actOnTensor(basisvs[i], t2);
   }
-  basis.SetBasis(basisvs);
+  basis.setBasis(basisvs);
   out.setSize(perms.size);
   for (int permi = 0; permi < perms.size; permi ++) {
     out[permi].initialize(basis.rank, basis.rank);
@@ -1492,7 +1292,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeConjugacyClassesSizesRepresentativesWords() {
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassesSizesRepresentativesWords");
   this->checkConsistency();
-  if (this->GetWordByFormula != 0) {
+  if (this->getWordByFormula != 0) {
     this->flagWordsComputed = true;
   }
   if (this->flagCCsComputed && this->flagWordsComputed) {
@@ -1906,7 +1706,7 @@ template <typename Coefficient>
 void PermutationGroupData::spechtModuleOfPartition(
   const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, Coefficient>& rep
 ) {
-  p.spechtModuleMatricesOfPermutations(rep.generatorS, this->theGroup->generators);
+  p.spechtModuleMatricesOfPermutations(rep.generators, this->theGroup->generators);
   rep.ownerGroup = this->theGroup;
 }
 
@@ -1967,15 +1767,15 @@ std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGr
 template <typename someGroup, typename Coefficient>
 bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
   bool badrep = false;
-  if (this->generatorS.size != this->ownerGroup->generatorCommutationRelations.numberOfRows) {
+  if (this->generators.size != this->ownerGroup->generatorCommutationRelations.numberOfRows) {
     this->ownerGroup->computeGeneratorCommutationRelations();
-    for (int i = 0; i < this->generatorS.size; i ++) {
-      for (int j = i; j < this->generatorS.size; j ++) {
+    for (int i = 0; i < this->generators.size; i ++) {
+      for (int j = i; j < this->generators.size; j ++) {
         Matrix<Rational> M1;
         if (i != j) {
-          M1 = this->generatorS[i] * this->generatorS[j];
+          M1 = this->generators[i] * this->generators[j];
         } else {
-          M1 = this->generatorS[i];
+          M1 = this->generators[i];
         }
         Matrix<Rational> Mi = M1;
         for (int n = 1; n < this->ownerGroup->generatorCommutationRelations(i, j); n ++) {
@@ -1986,8 +1786,8 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
           global.comments << this->ownerGroup->generators[i] << ", " << this->ownerGroup->generators[j];
           global.comments << " are assigned matrices which fail to have commutation relations ";
           global.comments << this->ownerGroup->generatorCommutationRelations(i, j) << "\n";
-          global.comments << this->generatorS[i].toStringPlainText() << ",\n";
-          global.comments << this->generatorS[j].toStringPlainText() << "\n\n";
+          global.comments << this->generators[i].toStringPlainText() << ",\n";
+          global.comments << this->generators[j].toStringPlainText() << "\n\n";
           badrep = true;
         }
       }
@@ -1995,7 +1795,7 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
   }
   if (badrep) {
     FiniteGroup<Matrix<Rational> > RG;
-    RG.generators = this->generatorS;
+    RG.generators = this->generators;
     LargeInteger GS = this->ownerGroup->getSize();
     LargeInteger RGS = RG.getSize();
     if ((GS % RGS) != 0) {
@@ -2035,9 +1835,9 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum() {
 template <typename somestream>
 somestream& HyperoctahedralGroupData::intoStream(somestream& out) const {
   if (this->flagIsEntireHyperoctahedralGroup) {
-    out << "Hyperoctahedral group with " << this->theGroup->GetSizeByFormula(*(this->theGroup)) << " elements";
+    out << "Hyperoctahedral group with " << this->theGroup->getSizeByFormula(*(this->theGroup)) << " elements";
   } else if (this->flagIsEntireDn) {
-    out << "Half hyperoctahedral group with " << this->theGroup->GetSizeByFormula(*(this->theGroup)) << " elemets";
+    out << "Half hyperoctahedral group with " << this->theGroup->getSizeByFormula(*(this->theGroup)) << " elemets";
   } else {
     out << this->theGroup;
   }

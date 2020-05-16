@@ -59,8 +59,8 @@ void Weight<Coefficient>::accountSingleWeight(
   dominant += theWeyl.rho;
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
-  for (int i = 0; i < theWeyl.RootsOfBorel.size; i ++) {
-    if (theWeyl.rootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).isEqualToZero()) {
+  for (int i = 0; i < theWeyl.rootsOfBorel.size; i ++) {
+    if (theWeyl.rootScalarCartanRoot(dominant, theWeyl.rootsOfBorel[i]).isEqualToZero()) {
       return;
     }
   }

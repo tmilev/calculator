@@ -437,13 +437,10 @@ bool CalculatorHTML::loadMe(
     }
   }
   this->theProblemData.checkConsistency();
-  if (!this->flagIsForReal) {
-    std::string randString = inputRandomSeed;
-    if (randString != "") {
-      std::stringstream randSeedStream(randString);
-      randSeedStream >> this->theProblemData.randomSeed;
-      this->theProblemData.flagRandomSeedGiven = true;
-    }
+  if (!this->flagIsForReal && inputRandomSeed != "") {
+    std::stringstream randSeedStream(inputRandomSeed);
+    randSeedStream >> this->theProblemData.randomSeed;
+    this->theProblemData.flagRandomSeedGiven = true;
   }
   return true;
 }
@@ -464,7 +461,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << this->MaxInterpretationAttempts << " for performance reasons; "
     << "with bad luck, some finicky problems require more. "
     << "Random seeds tried: "
-    << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
+    << this->randomSeedPerAttempt.toStringCommaDelimited()
     << "<br> <b>Please refresh the page.</b><br>";
     if (!this->flagIsForReal) {
       out
@@ -698,7 +695,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
-  theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.currentRandomSeed);
+  theProblem.theProblemData.randomSeed = theCommands.theObjectContainer.pseudoRandom.getRandomSeed();
   theProblem.interpretHtml(&theCommands.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
@@ -1787,17 +1784,17 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   }
   this->timeToParseHtml = global.getElapsedSeconds() - startTime;
   this->MaxInterpretationAttempts = 25;
-  this->randomSeedsIfInterpretationFails.setSize(this->MaxInterpretationAttempts);
+  this->randomSeedPerAttempt.setSize(this->MaxInterpretationAttempts);
+  this->randomSeedCurrent = 0;
+  UnsecurePseudoRandomGenerator generator;
   if (!this->theProblemData.flagRandomSeedGiven) {
-    int randomSeedFromTime = static_cast<signed>(time(nullptr));
-    global.unsecurePseudoRandomGenerator.setRandomSeed(103 + randomSeedFromTime);
-    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
+    generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
+    generator.setRandomSeedSmall(this->theProblemData.randomSeed);
   }
-  global.unsecurePseudoRandomGenerator.setRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
-  for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
+  this->randomSeedPerAttempt[0] = generator.getRandomSeed();
+  for (int i = 1; i < this->randomSeedPerAttempt.size; i ++) {
+    this->randomSeedPerAttempt[i] = generator.getRandomNonNegativeLessThanMaximumSeed();
   }
   this->timePerAttempt.setSize(0);
   this->timeIntermediatePerAttempt.setSize(0);
@@ -1821,7 +1818,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     if (this->numberOfInterpretationAttempts >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->numberOfInterpretationAttempts
       << " to interpret your file. Attempted random seeds: "
-      << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
+      << this->randomSeedPerAttempt.toStringCommaDelimited()
       << "Last interpretation failure follows. <br>"
       << commentsOnLastFailure.str();
     }
@@ -2766,9 +2763,9 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->flagIsExamHome =
   global.requestType == "template" ||
   global.requestType == "templateNoLogin";
-  this->theProblemData.randomSeed = static_cast<unsigned>(this->randomSeedsIfInterpretationFails[
+  this->theProblemData.randomSeed = this->randomSeedPerAttempt[
     this->numberOfInterpretationAttempts - 1
-  ]);
+  ];
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");

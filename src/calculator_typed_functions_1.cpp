@@ -800,10 +800,10 @@ bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomia
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP(
+bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -824,10 +824,42 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomi
   return output.assignValueWithContext(left, inputContextsMerged[1].getContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP(
+bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger");
+  if (input.size() != 3) {
+    return false;
+  }
+  Polynomial<ElementZmodP> polynomial;
+  if (!input[1].isOfType(&polynomial)) {
+    return false;
+  }
+  if (polynomial.isEqualToZero()) {
+    return false;
+  }
+  LargeIntegerUnsigned modulus = polynomial.coefficients[0].modulus;
+  LargeInteger constantInteger;
+  ElementZmodP constant;
+  if (input[2].isInteger(&constantInteger)) {
+    constant.makeOne(modulus);
+    constant = constantInteger;
+  } else if (input.isOfType(&constant)) {
+    if (constant.modulus != modulus) {
+      return theCommands << "Attempt to add polynomial modulo "
+      << modulus << " to integer modulo " << constant.modulus << ". ";
+    }
+  } else {
+    return false;
+  }
+  polynomial += constant;
+  return output.assignValueWithContext(polynomial, input[1].getContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger");
   if (input.size() != 3) {
     return false;
   }
@@ -867,14 +899,16 @@ bool CalculatorFunctionsBinaryOps::innerDividePolynomialModuloIntegerByPolynomia
     return output.makeError("Division by zero.", theCommands);
   }
   LargeIntegerUnsigned modulus = right.coefficients[0].modulus;
-  int maximumModulusForDivision = 1000;
+  int maximumModulusForDivision = 10000;
   if (!left.isEqualToZero()) {
     if (left.coefficients[0].modulus != modulus) {
-      return theCommands << "Attempt to multiply polynomials with different moduli. ";
+      return theCommands
+      << "Attempt to multiply polynomials with different moduli. ";
     }
   }
   if (modulus > maximumModulusForDivision) {
-    return theCommands << "Division of modular polynomials not allowed for modulus larger than " << maximumModulusForDivision << ". ";
+    return theCommands << "Division of modular polynomials not "
+    << "allowed for modulus larger than " << maximumModulusForDivision << ". ";
   }
   if (!modulus.isPossiblyPrime(0, true, &theCommands.comments)) {
     return theCommands

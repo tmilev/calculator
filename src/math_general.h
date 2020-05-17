@@ -2910,8 +2910,8 @@ class PolynomialFactorizationKronecker {
   static bool solvePolynomial(
     const Polynomial<Rational>& input,
     List<AlgebraicNumber>& output,
-    AlgebraicClosureRationals& closure
-  , std::stringstream* commentsOnFailure);
+    AlgebraicClosureRationals& closure,
+    std::stringstream* commentsOnFailure);
 };
 
 template <class Coefficient>

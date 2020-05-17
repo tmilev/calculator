@@ -1059,42 +1059,42 @@ class Pair {
   friend std::ostream& operator << (
     std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair
   ) {
-    output << "("  << thePair.Object1 << ", " <<  thePair.Object2 << ")";
+    output << "("  << thePair.object1 << ", " <<  thePair.object2 << ")";
     return output;
   }
 public:
-  ObjectType1 Object1;
-  ObjectType2 Object2;
+  ObjectType1 object1;
+  ObjectType2 object2;
   Pair(){}
-  Pair(const ObjectType1& o1, const ObjectType2& o2): Object1(o1), Object2(o2) {}
+  Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2) {}
   static unsigned int hashFunction(
     const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
   ) {
     return
-      someRandomPrimes[0] * hashFunction1(input.Object1) +
-      someRandomPrimes[1] * hashFunction2(input.Object2);
+      someRandomPrimes[0] * hashFunction1(input.object1) +
+      someRandomPrimes[1] * hashFunction2(input.object2);
   }
   unsigned int hashFunction() const {
     return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(*this);
   }
   void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
-    this->Object1 = other.Object1;
-    this->Object2 = other.Object2;
+    this->object1 = other.object1;
+    this->object2 = other.object2;
   }
   bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) const {
-    return this->Object1 == other.Object1 && this->Object2 == other.Object2;
+    return this->object1 == other.object1 && this->object2 == other.object2;
   }
   bool operator>(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
-    if (this->Object1 > other.Object1) {
+    if (this->object1 > other.object1) {
       return true;
     }
-    if (other.Object1 > this->Object1) {
+    if (other.object1 > this->object1) {
       return false;
     }
-    if (this->Object2 > other.Object2) {
+    if (this->object2 > other.object2) {
       return true;
     }
-    if (other.Object2 > this->Object2) {
+    if (other.object2 > this->object2) {
       return false;
     }
     return false;
@@ -1448,21 +1448,21 @@ public:
   std::string toString() const {
     return this->::List<Object>::toString();
   }
-  void operator=(const HashedList<Object, hashFunction>& From) {
-    if (&From == this) {
+  void operator=(const HashedList<Object, hashFunction>& from) {
+    if (&from == this) {
       return;
     }
     this->clear();
-    this->setHashSize(From.theHashedArrays.size);
-    this->::List<Object>::operator=(From);
-    if (From.isSparse()) {
+    this->setHashSize(from.theHashedArrays.size);
+    this->::List<Object>::operator=(from);
+    if (from.isSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->getHash(this->objects[i]);
-        this->theHashedArrays[hashIndex].reserve(From.theHashedArrays[hashIndex].size);
+        this->theHashedArrays[hashIndex].reserve(from.theHashedArrays[hashIndex].size);
         this->theHashedArrays[hashIndex].addOnTop(i);
       }
     } else {
-      this->theHashedArrays = From.theHashedArrays;
+      this->theHashedArrays = from.theHashedArrays;
     }
   }
   const Object& operator[](int i) const {

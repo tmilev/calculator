@@ -1486,6 +1486,14 @@ std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   return out.str();
 }
 
+std::string ElementZmodP::toStringPolynomial(
+  const Polynomial<ElementZmodP>& input, FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "PolynomialModP{}(" << input.toString(format) << ", " << this->modulus << ")";
+  return out.str();
+}
+
 std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
   bool suppressModulus = false;
   if (theFormat != nullptr) {

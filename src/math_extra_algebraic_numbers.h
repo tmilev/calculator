@@ -336,6 +336,10 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
+  // Format a polynomial with modular coefficients.
+  // The modulo information will not be repeated for all coefficients, but will be put
+  // at the end of the expression.
+  std::string toStringPolynomial(const Polynomial<ElementZmodP>& input, FormatExpressions* format) const;
   ElementZmodP zero() const;
   static ElementZmodP zeroStatic();
   ElementZmodP one() const;

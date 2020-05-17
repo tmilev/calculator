@@ -5676,20 +5676,33 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP,
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger,
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
     "a = PolynomialModP(x^2 + x + 7, 5);\n"
     "b = PolynomialModP(x^2 + 1, 5);\n"
     "a + b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger",
     "AddPolynomialZmodPToPolynomialZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP,
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger,
+    this->opPolynomialModuloInteger(),
+    this->opRational(),
+    "Adds polynomials modulo integers. ",
+    "a = PolynomialModP(x^2 + x + 7, 5);\n"
+    "b = PolynomialModP(x^2 + 1, 5);\n"
+    "a + b",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger",
+    "AddPolynomialZmodPToPolynomialZmodP",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opPolynomialModuloPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
@@ -5699,7 +5712,7 @@ void Calculator::initPredefinedStandardOperations() {
     "a mod p;\n"
     "b mod p;\n"
     "a+b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger",
     "AddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
     innerStandard
   );

@@ -2278,19 +2278,14 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   (void) theFormat;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
   FormatExpressions format;
-  format.flagSuppressModP = !input.owner->flagHidePolynomialBuiltInTypeIndicator;
   const Polynomial<ElementZmodP>& polynomial = input.getValue<Polynomial<ElementZmodP> >();
   input.getContext().getFormat(format);
+  format.flagSuppressModP = true;
   format.flagUseFrac = true;
-  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
-    out << "PolynomialModP{}(";
-  }
-  out << polynomial.toString(&format);
-  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
-    if (!polynomial.isEqualToZero()) {
-      out << "," << polynomial.coefficients[0].modulus;
-    }
-    out << ")";
+  if (!polynomial.isEqualToZero()) {
+    out << polynomial.coefficients[0].toStringPolynomial(polynomial, &format);
+  } else {
+    out << "PolynomialModP(0)";
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2342,20 +2337,15 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   input.getContext().getFormat(format);
   format.flagUseFrac = true;
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
-  LargeIntegerUnsigned modulus;
-  if (!element.value.isEqualToZero()) {
-    modulus = element.value.coefficients[0].modulus;
+  ElementZmodP sample;
+  if (!element.modulus.isEqualToZero()) {
+    sample = element.modulus.coefficients[0].modulus;
   }
   format.flagSuppressModP = true;
   out
-  << "PolynomialModP{}(" << element.value.toString(&format)
-  << ", "
-  << modulus
-  << ") mod "
-  << "PolynomialModP{}(" << element.modulus.toString(&format)
-  << ", "
-  << modulus
-  << ") ";
+  << sample.toStringPolynomial(element.value, theFormat)
+  << " mod "
+  << sample.toStringPolynomial(element.modulus, theFormat);
   return true;
 }
 
@@ -2391,10 +2381,20 @@ bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
   format.flagSuppressModP = true;
   format.flagUseFrac = true;
   const RationalFunction<ElementZmodP>& data = input.getValue<RationalFunction<ElementZmodP> >();
-  if (!data.isEqualToZero()) {
-    format.suffixLinearCombination = data.constantValue.toStringModP();
+  if (data.expressionType == data.typeRationalFunction) {
+    ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
+    out << "\\frac{"
+    << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format)
+    << "} {"
+    << constantSample.toStringPolynomial(data.denominator.getElementConst(), &format)
+    << "}";
+  } else if (data.expressionType == data.typePolynomial) {
+    ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
+    out << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format);
+  } else {
+    Polynomial<ElementZmodP> zero;
+    out << data.constantValue.toStringPolynomial(zero, &format);
   }
-  out << data.toString(&format);
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }

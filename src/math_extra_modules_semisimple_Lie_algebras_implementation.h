@@ -16,15 +16,15 @@ Rational ModuleSSalgebra<Coefficient>::hwTrace(
   if (indexInCache != - 1) {
     return this->cachedTraces[indexInCache];
   }
-  if (thePair.Object1.generatorsIndices.size == 0) {
+  if (thePair.object1.generatorsIndices.size == 0) {
     return 1;
   }
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> > newPair;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft = newPair.Object1;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight = newPair.Object2;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight = thePair.Object2;
-  newLeft = thePair.Object1;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft = newPair.object1;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight = newPair.object2;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight = thePair.object2;
+  newLeft = thePair.object1;
   (*newLeft.powers.lastObject()) -= 1;
   int theIndex = *newLeft.generatorsIndices.lastObject();
   if (*newLeft.powers.lastObject() == 0) {
@@ -103,9 +103,9 @@ Rational ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly(
     MathRoutines::swap(left, right);
   }
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
-  thePair.Object1 = *left;
-  thePair.Object2 = *right;
-  this->applyTAA(thePair.Object1);
+  thePair.object1 = *left;
+  thePair.object2 = *right;
+  this->applyTAA(thePair.object1);
   Rational result = this->hwTrace(thePair, theProgressReport);
   if (theProgressReport != nullptr) {
     std::stringstream tempStream;
@@ -531,15 +531,15 @@ MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::getActionSimpleGenerato
         theScalarProds.setSize(otherWordList.size);
         for (int k = 0; k < otherWordList.size; k ++) {
           if (generatorIndex > this->getOwner().getNumberOfPositiveRoots()) {
-            currentPair.Object1 = currentWordList[j];
-            this->applyTAA(currentPair.Object1);
-            currentPair.Object2 = otherWordList[k];
-            currentPair.Object2.multiplyByGeneratorPowerOnTheLeft(this->getOwner().getOppositeGeneratorIndex(generatorIndex), 1);
+            currentPair.object1 = currentWordList[j];
+            this->applyTAA(currentPair.object1);
+            currentPair.object2 = otherWordList[k];
+            currentPair.object2.multiplyByGeneratorPowerOnTheLeft(this->getOwner().getOppositeGeneratorIndex(generatorIndex), 1);
           } else {
-            currentPair.Object1 = currentWordList[j];
-            currentPair.Object1.multiplyByGeneratorPowerOnTheLeft(generatorIndex, 1);
-            this->applyTAA(currentPair.Object1);
-            currentPair.Object2 = otherWordList[k];
+            currentPair.object1 = currentWordList[j];
+            currentPair.object1.multiplyByGeneratorPowerOnTheLeft(generatorIndex, 1);
+            this->applyTAA(currentPair.object1);
+            currentPair.object2 = otherWordList[k];
           }
           ProgressReport theReport;
           theScalarProds[k] = this->hwTrace(currentPair, &theReport);

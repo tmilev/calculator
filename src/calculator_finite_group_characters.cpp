@@ -1515,16 +1515,16 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
     partitionsParabolics.addListOnTop(partitionsRight);
     for (int j = 0; j < partitionsLeft.size; j ++) {
       for (int k = 0; k < partitionsRight.size; k ++) {
-        currentPartition.Object1 = partitionsLeft[j];
-        currentPartition.Object2 = partitionsRight[k];
+        currentPartition.object1 = partitionsLeft[j];
+        currentPartition.object2 = partitionsRight[k];
         partitionPairs.addOnTop(currentPartition);
       }
     }
   }
   out << partitionPairs.size << " partition pairs. <br>";
   for (int i = 0; i < partitionPairs.size; i ++) {
-    out << partitionPairs[i].Object1.toString()
-    << "," << partitionPairs[i].Object2.toString() << "<br>";
+    out << partitionPairs[i].object1.toString()
+    << "," << partitionPairs[i].object2.toString() << "<br>";
   }
   partitionPairs.quickSortAscending();
   partitionsParabolics.quickSortAscending();
@@ -1532,13 +1532,13 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   theMultTable.initialize(partitionPairs.size, partitionsParabolics.size);
   for (int j = 0; j < partitionPairs.size; j ++) {
     out << "V_{\\lambda, \\mu}, "
-    << "<br>\\lambda =" << partitionPairs[j].Object1.p
-    << "<br>\\mu=" << partitionPairs[j].Object2.p;
+    << "<br>\\lambda =" << partitionPairs[j].object1.p
+    << "<br>\\mu=" << partitionPairs[j].object2.p;
     for (int i = 0; i < partitionsParabolics.size; i ++) {
       theMultTable(j, i) = KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
         partitionsParabolics[i],
-        partitionPairs[j].Object1,
-        partitionPairs[j].Object2,
+        partitionPairs[j].object1,
+        partitionPairs[j].object2,
         &out
       );
     }
@@ -1616,9 +1616,9 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   for (int i = 0; i < partitionPairs.size; i ++) {
     std::stringstream Vstream;
     Vstream << "V_{"
-    << partitionPairs[i].Object1.toStringForArticles("[", "]")
+    << partitionPairs[i].object1.toStringForArticles("[", "]")
     << ", "
-    << partitionPairs[i].Object2.toStringForArticles("[", "]")
+    << partitionPairs[i].object2.toStringForArticles("[", "]")
     << "}";
     out << "<tr><td>";
     out << Vstream.str();
@@ -1895,8 +1895,8 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
         currentSGs = &allRootSubgroups;
       }
       for (int i = 0; i < currentSGs->size; i ++) {
-        currentTauSig.Object1 = (*currentSGs)[i].theDynkinType.toString();
-        currentTauSig.Object2 = (*currentSGs)[i].tauSignature;
+        currentTauSig.object1 = (*currentSGs)[i].theDynkinType.toString();
+        currentTauSig.object2 = (*currentSGs)[i].tauSignature;
         if (!tauSigPairs.contains(currentTauSig)) {
           tauSigPairs.addOnTop(currentTauSig);
           finalSubGroups.addOnTop((*currentSGs)[i]);

@@ -35,8 +35,13 @@ public:
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPolynomialModPToPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP(
+  static bool innerAddPolynomialModuloIntegerToPolynomialModuloInteger(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerAddPolynomialModuloIntegerToInteger(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
     Calculator& theCommands, const Expression& input, Expression& output
   );
 

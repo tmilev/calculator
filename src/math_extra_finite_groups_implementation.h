@@ -1055,7 +1055,7 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromEpsilon(const Vector<
   Vector<Coefficient> result;
   result.setSize(this->getDimension());
   for (int i = 0; i < simpleBasisEpsCoords.size; i ++) {
-    result[i] = simpleBasisEpsCoords[i].ScalarEuclidean(inputInEpsCoords);
+    result[i] = simpleBasisEpsCoords[i].scalarEuclidean(inputInEpsCoords);
   }
   Matrix<Rational> invertedCartanSymmetric = this->cartanSymmetric;
   invertedCartanSymmetric.invert();
@@ -1193,7 +1193,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   highestWeightTrue = highestWeightSimpleCoords;
   this->raiseToDominantWeight(highestWeightTrue);
   Vector<Coefficient> highestWeightFundCoords = this->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
+  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     if (outputDetails != nullptr) {
       out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.toString()
       << " which equals " << highestWeightFundCoords.toString()
@@ -1202,12 +1202,12 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     }
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->rootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1235,7 +1235,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
         currentWeight = currentHashes[lowest];
         currentWeight -= this->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
-          int currentIndexShift = this->rootsOfBorel[i].SumCoords().numeratorShort;
+          int currentIndexShift = this->rootsOfBorel[i].sumCoordinates().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
@@ -1629,12 +1629,12 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Coefficient> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1660,7 +1660,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
+          int currentIndexShift = this->RootsOfBorel[i].sumCoordinates().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;

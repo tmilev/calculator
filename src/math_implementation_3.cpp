@@ -1668,8 +1668,8 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
     basepoint.minus();
   }
   //////////////////////////////////////////////////
-  output.ScalarEuclidean(normal, tempRat2);
-  basepoint.ScalarEuclidean(normal, tempRat);
+  output.scalarEuclidean(normal, tempRat2);
+  basepoint.scalarEuclidean(normal, tempRat);
   if (!tempRat2.isEqualToZero()) {
     tempRat3 = tempRat;
     tempRat3.divideBy(tempRat2);
@@ -3438,7 +3438,7 @@ void PartFraction::makePolynomialFromOneNormal(
   for (int i = 0; i < normal.size; i ++) {
     shiftRationalVector[i] = shiftRational(i);
   }
-  tempRat = normal.ScalarEuclidean(shiftRationalVector);
+  tempRat = normal.scalarEuclidean(shiftRationalVector);
   for (int j = 0; j < theMult - 1; j ++) {
     tempP.makeLinearNoConstant(normal);
     tempRat2.AssignNumeratorAndDenominator(- 1, j + 1);
@@ -3465,7 +3465,7 @@ void PartFraction::computeNormals(PartialFractions& owner, Vectors<Rational>& ou
   Rational tempRat;
   for (int i = 0; i < theDimension; i ++) {
     dens.computeNormalExcludingIndex(tempRoot, i, buffer);
-    tempRat = tempRoot.ScalarEuclidean(dens[i]);
+    tempRat = tempRoot.scalarEuclidean(dens[i]);
     if (tempRat.isEqualToZero()) {
       global.fatal << "Scalar product is equal to zero. " << global.fatal;
     }
@@ -7387,7 +7387,7 @@ void WeylGroupData::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   Matrix<Rational> matCoxeterElt, tempMat;
   this->getMatrixStandardRepresentation(tempElt, matCoxeterElt);
   tempMat = matCoxeterElt;
-  int coxeterNumber = this->rootSystem.lastObject()->SumCoords().numeratorShort + 1;
+  int coxeterNumber = this->rootSystem.lastObject()->sumCoordinates().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
     tempMat.multiplyOnTheLeft(matCoxeterElt);
   }
@@ -8738,15 +8738,15 @@ void WeylGroupData::transformToSimpleBasisGenerators(
 }
 
 template <class Coefficient>
-void Vector<Coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<Coefficient> >& inputVectors) {
-  MacroRegisterFunctionWithName("Vector::PerturbNoZeroScalarProductWithMe");
+void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(const List<Vector<Coefficient> >& inputVectors) {
+  MacroRegisterFunctionWithName("Vector::perturbNoZeroScalarProductWithMe");
   Coefficient theScalarProdInverted;
   for (int i = 0; i < inputVectors.size; i ++) {
-    if (this->ScalarEuclidean(inputVectors[i]) == 0) {
+    if (this->scalarEuclidean(inputVectors[i]) == 0) {
       Coefficient theScale = 1;
       for (int j = 0; j < i; j ++) {
-        if (inputVectors[i].ScalarEuclidean(inputVectors[j]) != 0) {
-          theScalarProdInverted = (this->ScalarEuclidean(inputVectors[j]) / inputVectors[i].ScalarEuclidean(inputVectors[j])) / 2;
+        if (inputVectors[i].scalarEuclidean(inputVectors[j]) != 0) {
+          theScalarProdInverted = (this->scalarEuclidean(inputVectors[j]) / inputVectors[i].scalarEuclidean(inputVectors[j])) / 2;
           if (theScalarProdInverted < 0) {
             theScalarProdInverted *= - 1;
           }
@@ -8761,8 +8761,8 @@ void Vector<Coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<Coe
     }
   }
   for (int i = 0; i < inputVectors.size; i ++) {
-    if (this->ScalarEuclidean(inputVectors[i]) == 0) {
-      global.fatal << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
+    if (this->scalarEuclidean(inputVectors[i]) == 0) {
+      global.fatal << "This is a programming error: the vector produced by perturbNoZeroScalarProductWithMe, namely, "
       << this->toString() << " is orthogonal to input vector "
       << inputVectors[i].toString() << ". The full list of vectors is "
       << inputVectors.toString() << global.fatal;
@@ -8777,9 +8777,9 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
   MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGeneratorsArbitraryCoordinates");
   Vector<Rational> theH;
   theH.makeZero(theGens[0].size);
-  theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
+  theH.perturbNoZeroScalarProductWithMe(inputRootSystem);
   for (int i = 0; i < theGens.size; i ++) {
-    if (theGens[i].ScalarEuclidean(theH) < 0) {
+    if (theGens[i].scalarEuclidean(theH) < 0) {
       theGens[i].minus();
     }
   }
@@ -8796,7 +8796,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
           reductionOccured = true;
         }
         if (inputRootSystem.contains(tempRoot)) {
-          if (tempRoot.ScalarEuclidean(theH) < 0) {
+          if (tempRoot.scalarEuclidean(theH) < 0) {
             tempRoot.minus();
             theGens[j] = tempRoot;
           } else {
@@ -8929,21 +8929,21 @@ bool Lattice::getClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
   Vector<Rational> theNormal = theAffineHyperplane;
   theNormal.setSize(theAffineHyperplane.size - 1);
   Rational theShift = - (*theAffineHyperplane.lastObject());
-  if (theNormal.ScalarEuclidean(startingPoint) == theShift) {
+  if (theNormal.scalarEuclidean(startingPoint) == theShift) {
     outputPoint = startingPoint;
     return true;
   }
-  if (theDirection.ScalarEuclidean(theNormal).isEqualToZero()) {
+  if (theDirection.scalarEuclidean(theNormal).isEqualToZero()) {
     return false;
   }
-  Rational theMovement = (theShift - startingPoint.ScalarEuclidean(theNormal)) / theDirection.ScalarEuclidean(theNormal);
+  Rational theMovement = (theShift - startingPoint.scalarEuclidean(theNormal)) / theDirection.scalarEuclidean(theNormal);
   global.comments << "<br>the movement: " << theMovement.toString() << ", (" << theShift.toString()
-  << " - " << startingPoint.ScalarEuclidean(theNormal).toString() << ")/ "
-  << theDirection.ScalarEuclidean(theNormal).toString() << ", ";
+  << " - " << startingPoint.scalarEuclidean(theNormal).toString() << ")/ "
+  << theDirection.scalarEuclidean(theNormal).toString() << ", ";
   if (!theMovement.isInteger()) {
     global.comments << "the movement is not integral; ";
     theMovement.assignFloor();
-    if (theDirection.ScalarEuclidean(theNormal).isPositive()) {
+    if (theDirection.scalarEuclidean(theNormal).isPositive()) {
       theMovement += 1;
     }
   }
@@ -9562,7 +9562,7 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
     shiftMatForm.assignVectorColumn(this->LatticeShifts[i]);
     shiftMatForm -= theSubLatticeShift;
     if (theLatticeSub.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage)) {
-      tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
+      tempRoot.assignMatrixDetectRowOrColumn(theShiftImage);
       tempP = this->valueOnEachLatticeShift[i];
       bool tempB = tempP.substitution(theSub);
       if (!tempB) {
@@ -9613,7 +9613,7 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   Vector<Rational> theScalarProducts;
   theScalarProducts.setSize(startingBasis.size);
   for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
-    theScalarProducts[i] = theNormal.ScalarEuclidean(startingBasis[i]);
+    theScalarProducts[i] = theNormal.scalarEuclidean(startingBasis[i]);
   }
   if (theScalarProducts.isEqualToZero()) {
     return;
@@ -9641,7 +9641,7 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i = 0; i < theZnLattice.basisRationalForm.numberOfRows; i ++) {
     theZnLattice.basisRationalForm.getVectorFromRow(i, tempRoot);
-    orthogonalComponent = tempRoot.ScalarEuclidean(theScalarProducts) / theScalarProducts.ScalarEuclidean(theScalarProducts);
+    orthogonalComponent = tempRoot.scalarEuclidean(theScalarProducts) / theScalarProducts.scalarEuclidean(theScalarProducts);
     tempRoot -= theScalarProducts * orthogonalComponent;
     if (!orthogonalComponent.isInteger()) {
       global.fatal << "Orthogonal component is supposed to be an integer. " << global.fatal;
@@ -10012,7 +10012,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
 ) {
   Vector<Rational> theNormal = theAffineHyperplane;
   theNormal.setSize(theNormal.size - 1);
-  if (theDirection.ScalarEuclidean(theNormal).isEqualToZero()) {
+  if (theDirection.scalarEuclidean(theNormal).isEqualToZero()) {
     return;
   }
   Rational theConstOnTheOtherSide = - *theAffineHyperplane.lastObject();
@@ -10035,10 +10035,10 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
     outputRougherLattice.reduceVector(outputRepresentatives[i]);
   }
   Rational theShiftedConst, unitMovement, tempRat;
-  unitMovement = theNormal.ScalarEuclidean(outputDirectionMultipleOnLattice);
+  unitMovement = theNormal.scalarEuclidean(outputDirectionMultipleOnLattice);
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
-    tempRat = (theNormal.ScalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
+    tempRat = (theNormal.scalarEuclidean(outputRepresentatives[i]) - theConstOnTheOtherSide) / unitMovement;
     tempRat.assignFractionalValue();
     theShiftedConst = theConstOnTheOtherSide + tempRat;
     Vector<Rational>& currentMovement =movementInDirectionPerRepresentative[i];
@@ -10081,7 +10081,7 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
       theWeight[j] = theMon[j];
     }
     basisMonsAll.addMonomial(theMon, theMonCoeff);
-    if (theWeight.ScalarEuclidean(theCartanAction).isEqualToZero()) {
+    if (theWeight.scalarEuclidean(theCartanAction).isEqualToZero()) {
       basisMonsZeroWeight.addMonomial(theMon, theMonCoeff);
     }
   }
@@ -10272,7 +10272,7 @@ bool ConeComplex::drawMeLastCoordinateAffine(
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->objects[i].getInternalPoint();
-    tempRoot.MakeAffineUsingLastCoordinate();
+    tempRoot.makeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
   }
   return result;
@@ -10325,7 +10325,7 @@ bool Cone::isRegularToBasis(
   for (int i = 0; i < x; i ++) {
     WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
     if (basis.computeNormalFromSelection(candidate, WallSelection, bufferMat, theDimension)) {
-      candidate.ScalarEuclidean(input, theScalarProduct);
+      candidate.scalarEuclidean(input, theScalarProduct);
       if (theScalarProduct.isEqualToZero()) {
         outputFailingNormal = candidate;
         return false;
@@ -10387,9 +10387,9 @@ bool Cone::drawMeLastCoordinateAffine(
   }
   for (int k = 0; k < this->Normals.size; k ++) {
     for (int i = 0; i < VerticesScaled.size; i ++) {
-      if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).isEqualToZero()) {
+      if (DrawVertex[i] && this->Normals[k].scalarEuclidean(this->Vertices[i]).isEqualToZero()) {
         for (int j = i + 1; j < VerticesScaled.size; j ++) {
-          if (DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).isEqualToZero()) {
+          if (DrawVertex[j] && this->Normals[k].scalarEuclidean(this->Vertices[j]).isEqualToZero()) {
             if (this->isHonest1DEdgeAffine(i, j)) {
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
                 VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1
@@ -10468,9 +10468,9 @@ bool Cone::drawMeProjective(
   }
   for (int k = 0; k < this->Normals.size; k ++) {
     for (int i = 0; i < this->Vertices.size; i ++) {
-      if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).isEqualToZero()) {
+      if (this->Normals[k].scalarEuclidean(this->Vertices[i]).isEqualToZero()) {
         for (int j = i + 1; j < this->Vertices.size; j ++) {
-          if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).isEqualToZero()) {
+          if (this->Normals[k].scalarEuclidean(this->Vertices[j]).isEqualToZero()) {
             if (this->isHonest1DEdgeAffine(i, j)) {
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
                 VerticesScaled[i] + coordCenter, VerticesScaled[j] + coordCenter, "black", 1
@@ -10979,7 +10979,7 @@ template<class Coefficient>
 Vector<Coefficient> Vector<Coefficient>::GetProjectivizedNormal(Vector<Coefficient>& affinePoint) {
   Vector<Coefficient> result = *this;
   result.setSize(this->size + 1);
-  *result.lastObject()= - affinePoint.ScalarEuclidean(*this);
+  *result.lastObject()= - affinePoint.scalarEuclidean(*this);
   return result;
 }
 
@@ -11146,7 +11146,7 @@ void Cone::translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslat
   for (int i = 0; i < this->Normals.size; i ++) {
     tempRoot = this->Normals[i];
     tempRoot.size --;
-    (*this->Normals[i].lastObject()) -= tempRoot.ScalarEuclidean(theTranslationVector);
+    (*this->Normals[i].lastObject()) -= tempRoot.scalarEuclidean(theTranslationVector);
   }
   tempRoot = theTranslationVector;
   tempRoot.setSize(theTranslationVector.size + 1);
@@ -11205,7 +11205,7 @@ void ConeComplex::translateMeMyLastCoordinateAffinization(Vector<Rational>& theT
     normalNoAffinePart = myCopy.splittingNormals[j];
     newNormal = normalNoAffinePart;
     normalNoAffinePart.size --;
-    (*newNormal.lastObject()) -= normalNoAffinePart.ScalarEuclidean(theTranslationVector);
+    (*newNormal.lastObject()) -= normalNoAffinePart.scalarEuclidean(theTranslationVector);
     this->splittingNormals.addOnTop(newNormal);
   }
 }
@@ -11268,7 +11268,7 @@ void PiecewiseQuasipolynomial::drawMe(
     std::stringstream tempStream;
     tempStream << i + 1;
     Vector<Rational> tempRoot = this->theProjectivizedComplex[i].getInternalPoint();
-    tempRoot.MakeAffineUsingLastCoordinate();
+    tempRoot.makeAffineUsingLastCoordinate();
     for (int j = 0; j < this->theQPs[i].LatticeShifts.size; j ++) {
       this->theProjectivizedComplex[i].getLatticePointsInCone(
         this->theQPs[i].AmbientLatticeReduced,
@@ -11282,7 +11282,7 @@ void PiecewiseQuasipolynomial::drawMe(
       if (RestrictingChamber != nullptr) {
         for (int k = 0; k < latticePoints.size; k ++) {
           tempRoot = latticePoints[k];
-          tempRoot.MakeAffineUsingLastCoordinate();
+          tempRoot.makeAffineUsingLastCoordinate();
           if (!RestrictingChamber->isInCone(tempRoot)) {
             tempList[k] = ZeroColor;
           }
@@ -11784,7 +11784,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.initialize();
   complexBeforeProjection.addNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
-  if (direction.ScalarEuclidean(theLPToMaximizeAffine).isNegative()) {
+  if (direction.scalarEuclidean(theLPToMaximizeAffine).isNegative()) {
     direction.minus();
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
@@ -11816,7 +11816,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         if (numNonPerpWalls >= 3) {
           global.fatal << "Number of non-perpendicular walls is larger than 3. " << global.fatal;
         }
-        if (!currentNormal.ScalarEuclidean(direction).isPositive() && !foundExitNormal) {
+        if (!currentNormal.scalarEuclidean(direction).isPositive() && !foundExitNormal) {
           theLattice.getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
             directionSmallerDim,
             directionSmallerDimOnLattice,
@@ -11854,7 +11854,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     for (int j = 0; j < exitRepresentatives.size; j ++) {
       tempCLS.theProjectivizedCone.Normals = theNewNormals;
       exitNormalShiftedAffineProjected = exitNormalAffine.getshiftToTheLeftOnePositionition();
-      *exitNormalShiftedAffineProjected.lastObject() = - exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
+      *exitNormalShiftedAffineProjected.lastObject() = - exitNormalLatticeLevel.scalarEuclidean(exitRepresentatives[j]);
       global.comments << exitNormalShiftedAffineProjected.toString() << ", ";
       if (foundEnteringNormal) {
         extraEquation = enteringNormalAffine.getshiftToTheLeftOnePositionition();
@@ -11973,7 +11973,7 @@ bool ConeComplex::splitChamber(
   HashedList<Vector<Rational> > ZeroVertices;
   Rational tempRat;
   for (int i = 0; i < myDyingCone.Vertices.size; i ++) {
-    killerNormal.ScalarEuclidean(myDyingCone.Vertices[i], tempRat);
+    killerNormal.scalarEuclidean(myDyingCone.Vertices[i], tempRat);
     if (tempRat.isPositive()) {
       newPlusCone.Vertices.addOnTop(myDyingCone.Vertices[i]);
     }
@@ -12061,12 +12061,12 @@ void ConeComplex::refineOneStep() {
     currentCone.LowestIndexNotCheckedForSlicingInDirection ++
   ) {
     for (int i = 0; i < currentCone.Normals.size; i ++) {
-      if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(
+      if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].scalarEuclidean(
           currentCone.Normals[i]
         ).isPositive()
       ) {
         for (int j = i + 1; j < currentCone.Normals.size; j ++) {
-          if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(
+          if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].scalarEuclidean(
               currentCone.Normals[j]
             ).isPositive()
           ) {
@@ -12231,7 +12231,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       verticesOnWall.size = 0;
       bool wallIsGood = false;
       for (int j = 0; j < this->Vertices.size; j ++) {
-        if (currentNormal.ScalarEuclidean(this->Vertices[j]).isEqualToZero()) {
+        if (currentNormal.scalarEuclidean(this->Vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->Vertices[j]);
           int theRank = verticesOnWall.getRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank < verticesOnWall.size) {
@@ -12280,13 +12280,13 @@ bool Cone::produceNormalFromTwoNormalsAndSlicingDirection(
 ) {
   // We are looking for a normal n of the form n = t1 * normal1 + t2 * normal2
   // such that <t1 * normal1 + t2 * normal2, slicingDirection> = 0
-  Rational normal1ScalarDirection = normal1.ScalarEuclidean(SlicingDirection);
+  Rational normal1ScalarDirection = normal1.scalarEuclidean(SlicingDirection);
   if (normal1ScalarDirection.isEqualToZero()) {
     output = normal1;
     return false;
   }
   //from now on we assume t2=1;
-  Rational t1 = - normal2.ScalarEuclidean(SlicingDirection) / normal1ScalarDirection;
+  Rational t1 = - normal2.scalarEuclidean(SlicingDirection) / normal1ScalarDirection;
   output = normal2;
   output += normal1 * t1;
   Cone::scaleNormalizeByPositive(output);
@@ -12343,7 +12343,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
       bool hasPositive = false;
       bool hasNegative = false;
       for (int j = 0; j < inputVertices.size; j ++) {
-        Rational tempRat = normalCandidate.ScalarEuclidean(inputVertices[j]);
+        Rational tempRat = normalCandidate.scalarEuclidean(inputVertices[j]);
         if (tempRat.isNegative()) {
           hasNegative = true;
         }
@@ -12594,8 +12594,8 @@ bool ConeComplex::findMaxLFOverConeProjective(
     this->objects[i].getInternalPoint(tempRoot);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
-      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]) > theMax) {
-        theMax = tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]);
+      if (!isInitialized || tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]) > theMax) {
+        theMax = tempRoot.scalarEuclidean(inputLFsLastCoordConst[j]);
         outputMaximumOverEeachSubChamber[i] = j;
         isInitialized = true;
       }

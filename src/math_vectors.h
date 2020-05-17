@@ -45,7 +45,7 @@ public:
     out << ")";
     return out.str();
   }
-  void ToListStringsBasicType(List<std::string>& output) const {
+  void toListStringsBasicType(List<std::string>& output) const {
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
       std::stringstream out;
@@ -54,7 +54,7 @@ public:
       output[i] = out.str();
     }
   }
-  std::string ToStringSquareBrackets(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringSquareBrackets(FormatExpressions* theFormat = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "[";
@@ -67,7 +67,7 @@ public:
     out << "]";
     return out.str();
   }
-  std::string ToStringSquareBracketsBasicType(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringSquareBracketsBasicType(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;
     std::stringstream out;
     out.precision(5);
@@ -84,30 +84,30 @@ public:
   std::string toStringLetterFormat(
     const std::string& inputLetter, FormatExpressions* theFormat = nullptr, bool DontIncludeLastVar = false
   ) const;
-  std::string ToStringEpsilonFormat(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringEpsilonFormat(FormatExpressions* theFormat = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
   static void scalarProduct(
     const Vector<Coefficient>& r1,
     const Vector<Coefficient>& r2,
-    const Matrix<otherType>& TheBilinearForm,
+    const Matrix<otherType>& bilinearForm,
     Coefficient& result
   ) {
-    if (r1.size != TheBilinearForm.numberOfRows || r1.size != r2.size || r1.size != TheBilinearForm.numberOfColumns) {
+    if (r1.size != bilinearForm.numberOfRows || r1.size != r2.size || r1.size != bilinearForm.numberOfColumns) {
       global.fatal << "This is a programming error: attempting to take "
-      << "a bilinear form represented by matrix with " << TheBilinearForm.numberOfRows
-      << " rows and " << TheBilinearForm.numberOfColumns << " columns "
-      << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
+      << "a bilinear form represented by matrix with " << bilinearForm.numberOfRows
+      << " rows and " << bilinearForm.numberOfColumns << " columns "
+      << "of vectors of dimension " << r1.size << " and " << r2.size << ". "
       << global.fatal;
     }
     Coefficient tempRat, accumRow;
     result = 0;
-    for (int i = 0; i < TheBilinearForm.numberOfRows; i ++) {
+    for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
       accumRow = 0;
-      for (int j = 0; j < TheBilinearForm.numberOfColumns; j ++) {
+      for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
         tempRat = r2[j];
-        tempRat *= TheBilinearForm.elements[i][j];
+        tempRat *= bilinearForm.elements[i][j];
         accumRow += tempRat;
       }
       accumRow *= r1[i];
@@ -116,16 +116,16 @@ public:
   }
   template <class otherType>
   static Coefficient scalarProduct(
-    const Vector<Coefficient>& r1, const Vector<Coefficient>& r2, const Matrix<otherType>& TheBilinearForm
+    const Vector<Coefficient>& r1, const Vector<Coefficient>& r2, const Matrix<otherType>& bilinearForm
   ) {
     Coefficient result;
-    Vector<Coefficient>::scalarProduct(r1, r2, TheBilinearForm, result);
+    Vector<Coefficient>::scalarProduct(r1, r2, bilinearForm, result);
     return result;
   }
-  void PerturbNoZeroScalarProductWithMe(const List<Vector<Coefficient> >& inputVectors);
-  void PerturbNormalRelativeToVectorsInGeneralPosition(
-    const Vectors<Rational>& NonStrictConeNonPositiveScalar,
-    const List<Vector<Rational> >& VectorsToBeInGeneralPosition
+  void perturbNoZeroScalarProductWithMe(const List<Vector<Coefficient> >& inputVectors);
+  void perturbNormalRelativeToVectorsInGeneralPosition(
+    const Vectors<Rational>& nonStrictConeNonPositiveScalar,
+    const List<Vector<Rational> >& vectorsToBeInGeneralPosition
   );
   Coefficient scalarProduct (const Vector<Coefficient>& r2, const Matrix<Coefficient>& form) const {
     return scalarProduct(*this, r2, form);
@@ -136,7 +136,7 @@ public:
   bool isNegative() {
     return this->isNegativeOrZero() && !this->isEqualToZero();
   }
-  Vector<Rational> GetVectorRational() const {
+  Vector<Rational> getVectorRational() const {
     Vector<Rational> result;
     result.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
@@ -160,7 +160,7 @@ public:
     }
     return true;
   }
-  static Vector<Coefficient> GetEi(int theDimension, int theIndex) {
+  static Vector<Coefficient> getEi(int theDimension, int theIndex) {
     Vector<Coefficient> output;
     output.makeEi(theDimension, theIndex);
     return output;
@@ -181,7 +181,7 @@ public:
     }
     return true;
   }
-  Coefficient SumCoords() const {
+  Coefficient sumCoordinates() const {
     Coefficient result = 0;
     for (int i = 0; i < this->size; i ++) {
       result += this->objects[i];
@@ -189,17 +189,17 @@ public:
     return result;
   }
   template <class otherType>
-  otherType ScalarEuclidean(const Vector<otherType>& other) const {
+  otherType scalarEuclidean(const Vector<otherType>& other) const {
     otherType output;
-    this->ScalarEuclidean(other, output);
+    this->scalarEuclidean(other, output);
     return output;
   }
   template <class otherType>
-  void ScalarEuclidean(const Vector<otherType>& other, otherType& output) const {
+  void scalarEuclidean(const Vector<otherType>& other, otherType& output) const {
     if (this->size != other.size) {
-      global.fatal << "This is a programming error: taking scalar product of elements of different dimensions: "
-      << *this << " and " << other << ". ";
-      global.fatal << global.fatal;
+      global.fatal << "Attempt to take scalar product of elements of different dimensions: "
+      << *this << " and " << other << ". "
+      << global.fatal;
     }
     otherType tempElt;
     output = 0;
@@ -209,21 +209,21 @@ public:
       output += tempElt;
     }
   }
-  static void ProjectOntoHyperPlane(
+  static void projectOntoHyperPlane(
     Vector<Coefficient>& input,
     Vector<Coefficient>& normal,
-    Vector<Coefficient>& ProjectionDirection,
+    Vector<Coefficient>& projectionDirection,
     Vector<Coefficient>& output
   ) {
     Coefficient t;
     Coefficient tempRat;
-    input.ScalarEuclidean(normal, t);
-    ProjectionDirection.ScalarEuclidean(normal, tempRat);
+    input.scalarEuclidean(normal, t);
+    projectionDirection.scalarEuclidean(normal, tempRat);
     t /= tempRat;
     t.minus();
-    Vector<Coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
+    Vector<Coefficient>::vectorPlusVectorTimesScalar(input, projectionDirection, t, output);
   }
-  static void VectorPlusVectorTimesScalar(
+  static void vectorPlusVectorTimesScalar(
     const Vector<Coefficient>& r1,
     const Vector<Coefficient>& r2,
     const Coefficient& theCoeff,
@@ -263,13 +263,13 @@ public:
   void scaleToFirstNonZeroCoordinatePositive();
   // Returns the number by which the vector was multiplied.
   void scaleNormalizeFirstNonZero();
-  void MakeAffineUsingLastCoordinate() {
+  void makeAffineUsingLastCoordinate() {
     Coefficient theElt;
     theElt = *this->lastObject();
     this->size --;
     this->operator/=(theElt);
   }
-  bool AssignMatDetectRowOrColumn(const Matrix<Coefficient>& input) {
+  bool assignMatrixDetectRowOrColumn(const Matrix<Coefficient>& input) {
     if (input.numberOfColumns == 1) {
       this->setSize(input.numberOfRows);
       for (int i = 0; i < this->size; i ++) {
@@ -667,7 +667,7 @@ class Vectors: public List<Vector<Coefficient> > {
       out << "\\begin{array}{l}";
     }
     for (int i = 0; i < this->size; i ++) {
-      tempS = this->objects[i].ToStringEpsilonFormat();
+      tempS = this->objects[i].toStringEpsilonFormat();
       if (useHtml && makeTable) {
         out << "<tr><td>";
       }
@@ -756,7 +756,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementWithPositiveScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->objects[i]).isPositive()) {
+      if (input.scalarEuclidean(this->objects[i]).isPositive()) {
         return true;
       }
     }
@@ -764,7 +764,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementWithNegativeScalarProduct(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->objects[i]).isNegative()) {
+      if (input.scalarEuclidean(this->objects[i]).isNegative()) {
         return true;
       }
     }
@@ -772,7 +772,7 @@ class Vectors: public List<Vector<Coefficient> > {
   }
   bool hasAnElementPerpendicularTo(const Vector<Coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
-      if (input.ScalarEuclidean(this->objects[i]).isEqualToZero()) {
+      if (input.scalarEuclidean(this->objects[i]).isEqualToZero()) {
         return true;
       }
     }
@@ -1099,10 +1099,10 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   const Coefficient& theRingMinusUnit,
   const Coefficient& ringZero
 ) {
-  int theDim = this->size;
-  bufferMatGaussianElimination.initialize(inputBasis.size, theDim);
+  int dimension = this->size;
+  bufferMatGaussianElimination.initialize(inputBasis.size, dimension);
   for (int i = 0; i < inputBasis.size; i ++) {
-    for (int j = 0; j < theDim; j ++) {
+    for (int j = 0; j < dimension; j ++) {
       bufferMatGaussianElimination.elements[i][j] = inputBasis[i][j];
     }
   }
@@ -1112,23 +1112,23 @@ bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
   );
   Vector<Coefficient> tempRoot, theCombination;
   if (this == &output) {
-    global.fatal << "Output not allowed to coincide with this object" << global.fatal;
+    global.fatal << "Output not allowed to coincide with this object." << global.fatal;
   }
   output.makeZero(inputBasis.size);
   theCombination = *this;
-  int col = 0;
+  int column = 0;
   for (int i = 0; i < inputBasis.size; i ++) {
-    for (; col < theDim; col ++) {
-      if (!bufferMatGaussianElimination.elements[i][col].isEqualToZero()) {
+    for (; column < dimension; column ++) {
+      if (!bufferMatGaussianElimination.elements[i][column].isEqualToZero()) {
         break;
       }
     }
-    if (col >= theDim) {
+    if (column >= dimension) {
       break;
     }
     bufferMatGaussianElimination.getVectorFromRow(i, tempRoot);
-    output[i] = this->objects[col];
-    output[i] /= bufferMatGaussianElimination.elements[i][col];
+    output[i] = this->objects[column];
+    output[i] /= bufferMatGaussianElimination.elements[i][column];
     tempRoot *= output[i];
     theCombination -= tempRoot;
   }
@@ -1147,7 +1147,7 @@ void Vectors<Coefficient>::getGramMatrix(Matrix<Coefficient>& output, const Matr
       if (theBilinearForm != nullptr) {
         Vector<Coefficient>::scalarProduct(this->objects[i], this->objects[j], *theBilinearForm, output.elements[i][j]);
       } else {
-        output(i, j) = (*this)[i].ScalarEuclidean((*this)[j]);
+        output(i, j) = (*this)[i].scalarEuclidean((*this)[j]);
       }
       if (i != j) {
         output(j, i) = output(i, j);
@@ -1210,7 +1210,7 @@ public:
   Vector<Coefficient> projectOnMe(Vector<Coefficient>& input) const;
   bool containsPoint(Vector<Coefficient> & thePoint);
   void makeFromNormalAndPoint(Vector<Coefficient>& inputPoint, Vector<Coefficient>& inputNormal);
-  bool hasACommonPointWithPositiveTwoToTheNthQudrant();
+  bool hasCommonPointWithPositiveTwoToTheNthQuadrant();
   bool operator==(const AffineHyperplane& right);
 };
 
@@ -1225,8 +1225,8 @@ bool AffineHyperplane<Coefficient>::operator==(const AffineHyperplane& right) {
     return false;
   }
   Rational tempRat1, tempRat2;
-  tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
-  tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
+  tempRoot1.scalarEuclidean(this->affinePoint, tempRat1);
+  tempRoot1.scalarEuclidean(right.affinePoint, tempRat2);
   return tempRat1.isEqualTo(tempRat2);
 }
 
@@ -1234,7 +1234,7 @@ template <class Coefficient>
 Vector<Coefficient> AffineHyperplane<Coefficient>::projectOnMe(Vector<Coefficient>& input) const {
   // output = input + x * normal  and <input + x * normal, normal> = 0 =>
   // x = -<input, normal> / <normal, normal>
-  Coefficient theNormalCoeff = - input.ScalarEuclidean(this->normal) / this->normal.ScalarEuclidean(this->normal);
+  Coefficient theNormalCoeff = - input.scalarEuclidean(this->normal) / this->normal.scalarEuclidean(this->normal);
   Vector<Coefficient> output;
   output = input + this->normal * theNormalCoeff;
   return output;
@@ -1262,15 +1262,15 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& 
 template <class Coefficient>
 bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& thePoint) {
   Rational tempRat1, tempRat2;
-  tempRat1 = this->normal.ScalarEuclidean(thePoint);
-  tempRat2 = this->normal.ScalarEuclidean(this->affinePoint);
+  tempRat1 = this->normal.scalarEuclidean(thePoint);
+  tempRat2 = this->normal.scalarEuclidean(this->affinePoint);
   return tempRat2.isEqualTo(tempRat1);
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::hasACommonPointWithPositiveTwoToTheNthQudrant() {
+bool AffineHyperplane<Coefficient>::hasCommonPointWithPositiveTwoToTheNthQuadrant() {
   Rational tempRat;
-  tempRat = this->normal.ScalarEuclidean(this->affinePoint);
+  tempRat = this->normal.scalarEuclidean(this->affinePoint);
   if (tempRat.isEqualToZero()) {
     return true;
   }
@@ -1307,7 +1307,7 @@ unsigned int AffineHyperplane<Coefficient>::hashFunction() const {
   Vector<Rational> tempNormal;
   tempNormal = this->normal;
   tempNormal.scaleNormalizeFirstNonZero();
-  Rational tempRat = this->normal.ScalarEuclidean(this->affinePoint);
+  Rational tempRat = this->normal.scalarEuclidean(this->affinePoint);
   return this->normal.hashFunction() + tempRat.hashFunction();
 }
 

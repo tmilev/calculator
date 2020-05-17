@@ -64,7 +64,7 @@ public:
   typedef uint8_t state_t[4][4];
 
   AESContext();
-  void SetNumBits(int inputNumBits);
+  void setNumberOfBits(int inputNumBits);
   // buffer size MUST be multiple of blockLength;
   // Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
   // NOTES: you need to set IV in ctx via AES_init_ctx_iv() or AES_ctx_set_iv()
@@ -113,7 +113,7 @@ public:
   void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key);
 };
 
-void AESContext::SetNumBits(int inputNumBits) {
+void AESContext::setNumberOfBits(int inputNumBits) {
   this->numBits = inputNumBits;
   if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128) {
     global.fatal << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << global.fatal;
@@ -145,7 +145,7 @@ AESContext::AESContext() {
   for (int i = 0; i < 16; i ++) {
     this->initializationVector[i] = static_cast<uint8_t>(i);
   }
-  this->SetNumBits(256);
+  this->setNumberOfBits(256);
 }
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM

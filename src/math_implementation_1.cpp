@@ -260,9 +260,9 @@ void LittelmannPath::simplify() {
     Vector<Rational>& right = this->Waypoints[rightIndex];
     d1 = left - middle;
     d2 = right - middle;
-    d11 = d1.ScalarEuclidean(d1);
-    d12 = d1.ScalarEuclidean(d2);
-    d22 = d2.ScalarEuclidean(d2);
+    d11 = d1.scalarEuclidean(d1);
+    d12 = d1.scalarEuclidean(d2);
+    d22 = d2.scalarEuclidean(d2);
     bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0));
     if (!isBad) {
       leftIndex ++;

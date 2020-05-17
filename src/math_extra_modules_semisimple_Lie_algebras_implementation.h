@@ -370,7 +370,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     << "simple reflections of one another, "
     << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
-      tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
+      tempRoot = theWeyL.getSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).getVectorRational();
       outputWeylSub.drawContour(tempRoot, theDV, "#a0a000", 1000);
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();

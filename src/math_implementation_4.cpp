@@ -1709,7 +1709,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->ParabolicSelectionSmallerAlgebra.initialize(input.theDomain().getRank());
   for (int i = 0; i < input.theDomain().getRank(); i ++) {
     DualCartanEmbedding.getVectorFromColumn(i, tempRoot);
-    if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).isPositive()) {
+    if (ParabolicEvaluationRootImage.scalarEuclidean(tempRoot).isPositive()) {
       this->ParabolicSelectionSmallerAlgebra.addSelectionAppendNewIndex(i);
     }
   }
@@ -1854,7 +1854,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   ParabolicEvaluationRootSmallerAlgebra = this->ParabolicSelectionSmallerAlgebra;
   for (int i = 0; i < tempMat.numberOfRows; i ++) {
     input.theDomain().theWeyl.cartanSymmetric.getVectorFromRow(i, tempRoot);
-    if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
+    if (tempRoot.scalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).isEqualToZero()) {
       tempRoots.setSize(tempRoots.size + 1);
       tempMat.getVectorFromRow(i, *tempRoots.lastObject());
     }
@@ -2139,7 +2139,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   Vector<Rational>& theTranslation = this->theTranslationsProjectedBasisChanged[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
   Rational theConst;
-  startingNormal.ScalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, theConst);
+  startingNormal.scalarEuclidean(this->NonIntegralOriginModificationBasisChanged + theTranslation, theConst);
   theOperatorExtended.transpose();
   outputNormal = startingNormal;
   theOperatorExtended.actOnVectorColumn(outputNormal);
@@ -2187,7 +2187,7 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     const Cone& currentCone = projectivizedChamberFinal[i];
     bool isNonDominant = false;
     for (int j = 0; j < this->PreimageWeylChamberSmallerAlgebra.Normals.size; j ++) {
-      if (currentCone.getInternalPoint().ScalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).isNegative()) {
+      if (currentCone.getInternalPoint().scalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).isNegative()) {
         isNonDominant = true;
         break;
       }

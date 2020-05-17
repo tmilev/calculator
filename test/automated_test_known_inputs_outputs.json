@@ -945,7 +945,7 @@
   },
   {
     "input":"SetRandomSeed(123);\nRandomInteger(- 100, 100);\nRandomInteger(- 100, 100)",
-    "output":"(\"Successfully set random seed to: 123\";-30;-26)"
+    "output":"(\"Successfully set random seed to: 123. \";-30;-26)"
   },
   {
     "input":"TurnOffRules(\"sqrt\");\na = \\sqrt[4]{t};\nTurnOnRules(\"sqrt\");\na;\nTurnOffRules(\"ConvertShortDenominatorToNegativePower\");\nb=1/t^3;TurnOnRules(\"ConvertShortDenominatorToNegativePower\");b",
@@ -1221,7 +1221,7 @@
   },
   {
     "input":"Product(a, b);\nProduct{}(Sequence{}a);\nProduct(Sequence{}a);\nProduct(a)",
-    "output":"(a b;{Sequence{}\\left(a\\right)};a;a)"
+    "output":"(a b;a;a;a)"
   },
   {
     "input":"\\sum(a, b);\n\\sum();\n\\sum{}(Sequence{}a);\n\\sum(Sequence{}a);\n\\sum(a)",
@@ -1908,7 +1908,7 @@
     "output":"\\left(a, c, b, d\\right)"
   },
   {
-    "input":"sort(x^2, x^3, x^1, x^{- 1});\nsort(3,2,1,4,3);\nsort((3,2,3,1));\nsort{}((3,2,3,1));\n",
+    "input":"Sort(x^2, x^3, x^1, x^{- 1});\nSort(3,2,1,4,3);\nSort((3,2,3,1));\nSort{}((3,2,3,1));\n",
     "output":"(\\left(x, x^{-1}, x^{2}, x^{3}\\right);\\left(1, 2, 3, 3, 4\\right);\\left(1, 2, 3, 3\\right);\\left(1, 2, 3, 3\\right))"
   },
   {
@@ -2052,8 +2052,8 @@
     "output":"{1}_{s} {2}_{s} {3}_{s} {2}_{s} {1}_{s} {4}_{s} {3}_{s} {2}_{s} {1}_{s} {3}_{s} {2}_{s} {4}_{s} {3}_{s} {2}_{s} {1}_{s}"
   },
   {
-    "input":"SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)",
-    "output":"(\\left(\\frac{-\\sqrt{b^{2}-4 a c}-b}{2 a}, \\frac{\\sqrt{b^{2}-4 a c}-b}{2 a}\\right);\\frac{-b}{a})"
+    "input":"SolveFor(x, a x^2 + b x + c);\nSolveFor(x, a x + b);\nSolveFor(x, x^3 - 3x^2 - x/2 + 5);",
+    "output":"(\\left(\\frac{-\\sqrt{b^{2}-4 a c}-b}{2 a}, \\frac{\\sqrt{b^{2}-4 a c}-b}{2 a}\\right);\\frac{-b}{a};\\left(2, \\frac{\\sqrt{11}}{2}+\\frac{1}{2}, -\\frac{\\sqrt{11}}{2}+\\frac{1}{2}\\right))"
   },
   {
     "input":"FindOneSolutionSerreLikePolynomialSystem{}(x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}- 1, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}- 1, x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14} - x_{1}x_{13} + 1, x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",

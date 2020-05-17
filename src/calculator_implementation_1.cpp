@@ -1211,9 +1211,9 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       outScript
       << "theCanvas.screenBasisUserDefault = "
       << "["
-      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
       << ","
-      << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[1].toStringSquareBracketsBasicType()
       << "];\n";
       outScript << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
     }
@@ -1221,7 +1221,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
       outScript
       << "theCanvas.drawText({"
       << "location: "
-      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
       << ", "
       << "text:"
       << "'" << currentPlot.thePlotString << "'"
@@ -1235,9 +1235,9 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     if (currentPlot.thePlotType == "segment" && currentPlot.thePointsDouble.size >= 2) {
       outScript
       << "theCanvas.drawLine("
-      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
       << ", "
-      << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[1].toStringSquareBracketsBasicType()
       << ", "
       << "'"
       << currentPlot.colorJS
@@ -1589,7 +1589,7 @@ std::string PlotObject::toStringPointsList() {
   std::stringstream out;
   out << "[";
   for (int j = 0; j < this->thePointsDouble.size; j ++) {
-    out << this->thePointsDouble[j].ToStringSquareBracketsBasicType();
+    out << this->thePointsDouble[j].toStringSquareBracketsBasicType();
     if (j != this->thePointsDouble.size - 1) {
       out << ",";
     }
@@ -1700,7 +1700,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     if (currentPlot.thePlotType == "label") {
       if (currentPlot.thePointsDouble.size > 0) {
         outScript << "theCanvas.drawText("
-        << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
+        << currentPlot.thePointsDouble[0].toStringSquareBracketsBasicType()
         << ", "
         << "'" << currentPlot.thePlotString << "'"
         << ", "
@@ -2118,11 +2118,11 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.toString() << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).toString();
+      << outputSeparatingNormal.scalarEuclidean(coneStrictGens[i]).toString();
     }
     for (int i = 0; i < coneNonStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 + coneStrictGens.size << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).toString();
+      << outputSeparatingNormal.scalarEuclidean(coneNonStrictGens[i]).toString();
     }
   }
   return output.assignValue(out.str(), theCommands);
@@ -2306,9 +2306,9 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
 }
 
 template <>
-void Vector<Rational>::PerturbNormalRelativeToVectorsInGeneralPosition(
-  const Vectors<Rational>& NonStrictConeNonPositiveScalar,
-  const List<Vector<Rational> >& VectorsToBeInGeneralPosition
+void Vector<Rational>::perturbNormalRelativeToVectorsInGeneralPosition(
+  const Vectors<Rational>& nonStrictConeNonPositiveScalar,
+  const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 );
 
 bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2339,7 +2339,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   }
   vectorsToPerturbRelativeTo.assignMatrixRows(theMat);
   for (int i = 0; i < nonStrictCone.size; i ++) {
-    if (splittingNormal.ScalarEuclidean(nonStrictCone[i]) < 0) {
+    if (splittingNormal.scalarEuclidean(nonStrictCone[i]) < 0) {
       std::stringstream out;
       out << "The normal vector " << splittingNormal.toString()
       << " is has negative scalar product with " << nonStrictCone[i].toString();
@@ -2348,7 +2348,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   }
   out << "Perturbing " << splittingNormal.toString() << " relative to cone "
   << nonStrictCone.toString() << " and vectors " << vectorsToPerturbRelativeTo.toString();
-  splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(nonStrictCone, vectorsToPerturbRelativeTo);
+  splittingNormal.perturbNormalRelativeToVectorsInGeneralPosition(nonStrictCone, vectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.toString();
   return output.assignValue(out.str(), theCommands);
 }

@@ -433,7 +433,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
       break;
     }
     for (int j = 0; j < finalWeights.size; j ++) {
-      convertor = finalWeights[j].GetVectorRational();
+      convertor = finalWeights[j].getVectorRational();
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMults) {
         theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
@@ -463,7 +463,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCar
   actualAmbientWeyl.drawRootSystem(theDrawingVars, true, false, nullptr, false);
   for (int j = 0; j < this->size(); j ++) {
     actualWeight = actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
-    actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
+    actualWeightRationalPart = actualWeight.getVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
     theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
   }
@@ -652,7 +652,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordS
-      ).GetVectorRational();
+      ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");

@@ -630,7 +630,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   theFormat.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
-    "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
+    "$" + theWeyl.getEpsilonCoordinates(outputOrbit[i]).toStringEpsilonFormat(&theFormat) + "$ = $" +
     theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat("\\psi") + "$";
   }
   ElementWeylGroup currentElt;
@@ -2281,7 +2281,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
         << " is outside of the allowed input range.";
       }
     }
-    if (currentInput->SumCoords() > maxPartitionSize) {
+    if (currentInput->sumCoordinates() > maxPartitionSize) {
       return theCommands << "The coordinates of vector " << (*currentInput) << " have sum that is too large. ";
     }
   }
@@ -2339,7 +2339,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
       return theCommands <<  "Entry: " << inputInt[i] << " of " << inputInt << " is outside of the allowed input range.";
     }
   }
-  if (inputInt.SumCoords() > maxPartitionSize) {
+  if (inputInt.sumCoordinates() > maxPartitionSize) {
     return theCommands << "The coordinates of vector " << inputInt << " have sum that is too large. ";
   }
   Partition p;

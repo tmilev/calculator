@@ -247,7 +247,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < fundamentalWeights.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].toString()
     << "</td><td> =</td><td style =\"white-space: nowrap\"> "
-    << HtmlRoutines::getMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+    << HtmlRoutines::getMathSpanPure(fundamentalWeightsEpsForm[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -263,7 +263,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()
     << " </td><td>=</td> <td style =\"white-space: nowrap\">"
-    << HtmlRoutines::getMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+    << HtmlRoutines::getMathSpanPure(simplebasisEpsCoords[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -431,9 +431,9 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   Rational tempRat;
   while (nonExploredRoots.cardinalitySelection > 0) {
     int theBorelIndex = nonExploredRoots.elements[0];
-    Rational theHeight = posRoots[theBorelIndex].SumCoords();
+    Rational theHeight = posRoots[theBorelIndex].sumCoordinates();
     for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
-      tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
+      tempRat = posRoots[nonExploredRoots.elements[i]].sumCoordinates();
       if (theHeight.isGreaterThan(tempRat)) {
         theHeight = tempRat;
         theBorelIndex = nonExploredRoots.elements[i];
@@ -447,7 +447,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     Rational CurrentHeight;
     for (int i = 0; i < this->theWeyl.rootsOfBorel.size; i ++) {
       Vector<Rational>& smallRoot1 = this->theWeyl.rootsOfBorel[i];
-      CurrentHeight = smallRoot1.SumCoords();
+      CurrentHeight = smallRoot1.sumCoordinates();
       int FirstPosIndex = this->theWeyl.rootSystem.getIndex(smallRoot1);
       int FirstNegIndex = this->theWeyl.rootSystem.getIndex(- smallRoot1);
       if (theHeight.isGreaterThan(CurrentHeight)) {

@@ -105,7 +105,7 @@ void matrixInBasis(
   out.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
-      out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
+      out.elements[i][j] = basis[i].scalarEuclidean(in * basis[j]);
     }
   }
   out.multiplyOnTheLeft(gramMatrix);
@@ -255,7 +255,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   GM.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
-      GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
+      GM.elements[i][j] = this->basis[i].scalarEuclidean(this->basis[j]);
     }
   }
   GM.invert();
@@ -645,7 +645,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   GM.initialize(W.size, W.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < W.size; j ++) {
-      GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
+      GM.elements[i][j] = W[i].scalarEuclidean(W[j]);
     }
   }
   GM.invert();
@@ -653,7 +653,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   VM.initialize(W.size,V.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < V.size; j ++) {
-      VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
+      VM.elements[i][j] = W[i].scalarEuclidean(V[j]);
     }
   }
   VM.multiplyOnTheLeft(GM);

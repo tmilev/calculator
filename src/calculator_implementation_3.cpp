@@ -25,7 +25,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
   this->checkInitialization();
   Vector<RationalFunction<Rational> > tempVect;
   RationalFunction<Rational> tempRF;
-  tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
+  tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
   tempRF = this->AmbientWeyl->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
@@ -116,15 +116,15 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
+  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -156,7 +156,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
           this->AmbientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->AmbientWeyl->rootsOfBorel[i].SumCoords().numeratorShort;
+            int currentIndexShift = this->AmbientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;

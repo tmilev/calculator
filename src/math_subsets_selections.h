@@ -296,7 +296,7 @@ class SelectionPositiveIntegers {
     return this->theInts.toString();
   }
   LargeIntegerUnsigned getGrading() {
-    return this->theInts.SumCoords();
+    return this->theInts.sumCoordinates();
   }
   void initialize(int numIntegers) {
     this->theInts.makeZero(numIntegers);

@@ -18,7 +18,7 @@ Coefficient SemisimpleLieAlgebra::getKillingFormProductWRTLevi(
   Vector<Rational> theWeight;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     theWeight = this->getWeightOfGenerator(i);
-    if (theWeight.ScalarEuclidean(rootsNotInLeviVectorForm) != 0) {
+    if (theWeight.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
       continue;
     }
     baseGen.makeGenerator(*this, i);
@@ -53,7 +53,7 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   //Coefficient theCFconverted;
   for (int i = 0; i < theOwner.getNumberOfGenerators(); i ++) {
     theWeightLeft = theOwner.getWeightOfGenerator(i);
-    if (theWeightLeft.ScalarEuclidean(rootsNotInLeviVectorForm) != 0) {
+    if (theWeightLeft.scalarEuclidean(rootsNotInLeviVectorForm) != 0) {
       continue;
     }
     if (theWeightLeft.isEqualToZero()) {

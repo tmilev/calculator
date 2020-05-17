@@ -611,7 +611,7 @@ public:
     for (int j = 0; j < d; j ++) {
       input.actOnVectorColumn(basis[j], tempV);
       for (int i = 0; i < d; i ++) {
-        output.elements[i][j] = basis[i].ScalarEuclidean(tempV);
+        output.elements[i][j] = basis[i].scalarEuclidean(tempV);
       }
     }
     output.multiplyOnTheLeft(gramMatrixInverted);
@@ -4045,7 +4045,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
   Vector<Coefficient>& direction, Vector<Coefficient>& normal, Coefficient& Correction
 ) {
-  Rational tempRat2 = Vector<Coefficient>::ScalarEuclidean(direction, normal);
+  Rational tempRat2 = Vector<Coefficient>::scalarEuclidean(direction, normal);
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < direction.size; i ++) {
@@ -4104,13 +4104,13 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
   if (result) {
     Rational tempRat;
     for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
-      coneStrictlyPositiveCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
+      coneStrictlyPositiveCoeffs[i].scalarEuclidean(outputNormal, tempRat);
       if (!tempRat.isPositive()) {
         global.fatal << "Unexpected non-positive value. " << global.fatal;
       }
     }
     for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
-      coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
+      coneNonNegativeCoeffs[i].scalarEuclidean(outputNormal, tempRat);
       if (!tempRat.isNonPositive()) {
         global.fatal << "Unexpected positive value. " << global.fatal;
       }
@@ -5177,8 +5177,8 @@ public:
     int numCommonWalls = 0;
     for (int i = 0; i < this->Normals.size; i ++) {
       if (
-        vertex1.ScalarEuclidean(this->Normals[i]).isEqualToZero() &&
-        vertex2.ScalarEuclidean(this->Normals[i]).isEqualToZero()
+        vertex1.scalarEuclidean(this->Normals[i]).isEqualToZero() &&
+        vertex2.scalarEuclidean(this->Normals[i]).isEqualToZero()
       ) {
         numCommonWalls ++;
         if (numCommonWalls == this->getDimension() - 2) {

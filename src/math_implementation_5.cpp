@@ -741,7 +741,7 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(Ma
   output.initialize(this->theRange().getRank(), this->theDomain().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().getRank(); i ++) {
-    domainElt.makeCartanGenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
+    domainElt.makeCartanGenerator(Vector<Rational>::getEi(this->theDomain().getRank(), i), this->theDomain());
     this->applyHomomorphism(domainElt, imageElt);
     output.assignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.getCartanPart());
   }
@@ -916,7 +916,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(const Selec
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = - i - this->getNumberOfGenerators() * 5;
     }
   }
@@ -927,7 +927,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(const Select
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = i - this->getNumberOfGenerators() * 5;
     }
   }
@@ -937,7 +937,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(const Selection& pa
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff = this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
+    Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
@@ -948,7 +948,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(const Selection& p
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff = this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
+    Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = - i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
@@ -1979,7 +1979,7 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   }
   Rational tempRat;
   for (int i = 0; i < this->Normals.size; i ++) {
-    tempRat = point.ScalarEuclidean(this->Normals[i]);
+    tempRat = point.scalarEuclidean(this->Normals[i]);
     if (tempRat.isNegative()) {
       return false;
     }

@@ -3203,10 +3203,10 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
     conesCombination.addOnTop(-this->theNonFKhws[i]);
   }
-  this->ConeSeparatingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
+  this->ConeSeparatingNormal.perturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
   for (int i = 0; i < theWeyl.rootSystem.size; i ++) {
     this->owner->getPrimalWeightProjectionFundamentalCoordinates(theWeyl.rootSystem[i], projectionRoot);
-    if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal) == 0) {
+    if (projectionRoot.scalarEuclidean(this->ConeSeparatingNormal) == 0) {
       this->leviRootsAmbienT.addOnTop(theWeyl.rootSystem[i]);
       if (this->owner->RootSystemCentralizerPrimalCoords.contains(projectionRoot)) {
         this->leviRootsSmallPrimalFundCoords.addOnTop(projectionRoot);
@@ -3515,31 +3515,31 @@ void Cone::getLinesContainedInCone(Vectors<Rational>& output) {
 }
 
 template<class Coefficient>
-void Vector<Coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
-  const Vectors<Rational>& NonStrictConeNonPositiveScalar, const List<Vector<Rational> >& VectorsToBeInGeneralPosition
+void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
+  const Vectors<Rational>& nonStrictConeNonPositiveScalar, const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 ) {
   MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
-  for (int i = 0; i < NonStrictConeNonPositiveScalar.size; i ++) {
-    if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) < 0) {
+  for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
+    if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
       global.fatal << "This is a programming error: the splitting normal " << this->toString()
       << " is supposed to have non-negative scalar product with the vector "
-      << NonStrictConeNonPositiveScalar[i].toString() << ", but it doesn't." << global.fatal;
+      << nonStrictConeNonPositiveScalar[i].toString() << ", but it doesn't." << global.fatal;
     }
   }
   Vector<Rational> oldThis =*this;
   Cone theCone;
-  theCone.createFromVertices(NonStrictConeNonPositiveScalar);
+  theCone.createFromVertices(nonStrictConeNonPositiveScalar);
   Coefficient scalarThis;
   Coefficient scalarOther;
   Coefficient theScale;
   Vector<Rational> currentModifier;
   Vectors<Rational> allVectors = theCone.Vertices;
-  allVectors.addListOnTop(VectorsToBeInGeneralPosition);
-  for (int i = 0; i < VectorsToBeInGeneralPosition.size; i ++) {
-    if (this->ScalarEuclidean(VectorsToBeInGeneralPosition[i]) == 0) {
+  allVectors.addListOnTop(vectorsToBeInGeneralPosition);
+  for (int i = 0; i < vectorsToBeInGeneralPosition.size; i ++) {
+    if (this->scalarEuclidean(vectorsToBeInGeneralPosition[i]) == 0) {
       bool foundModifier = false;
       for (int j = 0; j < theCone.Normals.size; j ++) {
-        if (theCone.Normals[j].ScalarEuclidean(VectorsToBeInGeneralPosition[i]) != 0) {
+        if (theCone.Normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0) {
           foundModifier = true;
           currentModifier = theCone.Normals[j];
           break;
@@ -3549,27 +3549,27 @@ void Vector<Coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
         continue;
       }
       theScale = 1;
-      for (int j = 0; j < VectorsToBeInGeneralPosition.size; j ++) {
-        scalarThis = this->ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
-        scalarOther = currentModifier.ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
+      for (int j = 0; j < vectorsToBeInGeneralPosition.size; j ++) {
+        scalarThis = this->scalarEuclidean(vectorsToBeInGeneralPosition[j]);
+        scalarOther = currentModifier.scalarEuclidean(vectorsToBeInGeneralPosition[j]);
         if (scalarOther * scalarThis < 0) {
           theScale = MathRoutines::minimum(theScale, - (scalarThis / scalarOther) / 2);
         }
       }
     }
     *this += currentModifier * theScale;
-    for (int i = 0; i < NonStrictConeNonPositiveScalar.size; i ++) {
-      if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) < 0) {
+    for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
+      if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
         global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->toString()
-        << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].toString()
+        << " is supposed to have non-negative scalar product with the vector " << nonStrictConeNonPositiveScalar[i].toString()
         << ", but it doesn't." << global.fatal;
       } else {
         if (
-          this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) == 0 &&
-          oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) > 0
+          this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) == 0 &&
+          oldThis.scalarEuclidean(nonStrictConeNonPositiveScalar[i]) > 0
         ) {
           global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->toString()
-          << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].toString() << "." << global.fatal;
+          << " lost  positive scalar product with " << nonStrictConeNonPositiveScalar[i].toString() << "." << global.fatal;
         }
       }
     }
@@ -4840,7 +4840,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
     this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis
   );
   for (int k = 0; k < positiveRootsContainingRegularSA.size; k ++) {
-    tempRat = this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
+    tempRat = this->hCharacteristic.scalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if (tempRat.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }

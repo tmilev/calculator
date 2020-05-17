@@ -741,8 +741,8 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   thePlotObj.xHigh = upRight[0];
   thePlotObj.xLow = lowLeft[0];
   List<std::string> lowLeftStrings, upRightStrings;
-  lowLeft.ToListStringsBasicType(lowLeftStrings);
-  upRight.ToListStringsBasicType(upRightStrings);
+  lowLeft.toListStringsBasicType(lowLeftStrings);
+  upRight.toListStringsBasicType(upRightStrings);
   thePlotObj.theVarRangesJS.setSize(2);
   thePlotObj.theVarRangesJS[0].setSize(2);
   thePlotObj.theVarRangesJS[1].setSize(2);

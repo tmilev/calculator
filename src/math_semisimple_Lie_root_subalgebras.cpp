@@ -48,7 +48,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.lastObject();
     Vector<Rational> lastRootInSimpleCoords;
     lastRoot.getCoordinatesInBasis(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
-    coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.SumCoords().numeratorShort, coxeterNumber);
+    coxeterNumber = MathRoutines::maximum(lastRootInSimpleCoords.sumCoordinates().numeratorShort, coxeterNumber);
   }
   Complex<double> theEigenValue;
   theEigenValue.realPart = FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
@@ -1319,7 +1319,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
     out << "</td><td>";
     this->getAmbientWeyl().getEpsilonCoordinates(this->WeightsModulesPrimalSimple[i], this->kModulesgEpsCoords[i]);
     for (int j = 0; j < this->modules[i].size; j ++) {
-      out << this->kModulesgEpsCoords[i][j].ToStringEpsilonFormat();
+      out << this->kModulesgEpsCoords[i][j].toStringEpsilonFormat();
       if (j != this->modules[i].size - 1) {
         out << "<br>";
       }
@@ -2632,7 +2632,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     Vector<Rational> simpleRootsChar2Vect;
     simpleRootsChar2Vect = simpleRootsChar2;
     for (int j = 0; j < relativeRootSystem.size; j ++) {
-      if (simpleRootsChar2Vect.ScalarEuclidean(relativeRootSystem[j]) == 1) {
+      if (simpleRootsChar2Vect.scalarEuclidean(relativeRootSystem[j]) == 1) {
         theSlack ++;
         rootsScalarProduct2HnonRaised.addOnTop(this->PositiveRootsK[j]);
       }
@@ -3772,7 +3772,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
   int numNilradicalRootSpaces = 0;
   for (int i = 0; i < epsCoords.size; i ++) {
     Vector<Rational>& currentRoot = epsCoords[i];
-    tempS = currentRoot.ToStringEpsilonFormat();
+    tempS = currentRoot.toStringEpsilonFormat();
     if (!epsCoords.contains(- currentRoot)) {
       out << tempS << ", ";
       numNilradicalRootSpaces++;
@@ -3911,7 +3911,7 @@ void ConeRelation::RelationOneSideToStringCoordForm(
     if (!EpsilonForm) {
       tempS = theRoots[i].toString();
     } else {
-      tempS = theRoots[i].ToStringEpsilonFormat();
+      tempS = theRoots[i].toStringEpsilonFormat();
     }
     out << "(" << tempS << ")";
     if (i != theRoots.size - 1) {

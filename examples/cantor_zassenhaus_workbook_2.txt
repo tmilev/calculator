@@ -1,5 +1,7 @@
-q=PolynomialModP(x^5+x^4+2x^3-x^2-x-1, 1009);
-p=PolynomialModP( 203x^{4}+24x^{3}+93x^{2}+625x +932, 1009);
+prime = 1009;
+r = x^5+x^4+2x^3-x^2-x-1;
+q=PolynomialModP(r, prime);
+p=PolynomialModP( 203x^{4}+24x^{3}+93x^{2}+625x +932, prime);
 p-1;
 GCDPoly(p-1,q);
 GCDPoly(p+1,q);

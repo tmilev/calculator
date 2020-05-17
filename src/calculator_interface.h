@@ -2319,8 +2319,13 @@ public:
   static bool innerFreudenthalFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
-  template<class Coefficient>
-  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,

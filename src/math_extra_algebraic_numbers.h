@@ -265,6 +265,7 @@ public:
     output << input.toString();
     return output;
   }
+  static const int maximumModulusForUserFacingPolynomialDivision;
   LargeIntegerUnsigned modulus;
   LargeIntegerUnsigned value;
   bool flagDeallocated;

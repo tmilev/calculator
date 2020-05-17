@@ -909,6 +909,27 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
 }
 
 template <class Coefficient>
+void Polynomial<Coefficient>::interpolate(
+  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints
+) {
+  Polynomial<Coefficient> theLagrangeInterpolator, accumulator;
+  this->makeZero();
+  for (int i = 0; i < thePoints.size; i ++) {
+    theLagrangeInterpolator.makeConstant(1);
+    for (int j = 0; j < thePoints.size; j ++) {
+      if (i == j) {
+        continue;
+      }
+      accumulator.makeDegreeOne(1, 0, 1, - thePoints[j]);
+      accumulator /= thePoints[i] - thePoints[j];
+      theLagrangeInterpolator *= accumulator;
+    }
+    theLagrangeInterpolator *= ValuesAtThePoints[i];
+    *this += theLagrangeInterpolator;
+  }
+}
+
+template <class Coefficient>
 void Polynomial<Coefficient>::getConstantTerm(Coefficient& output, const Coefficient& ringZero) const {
   MonomialP tempM;
   tempM.makeOne();

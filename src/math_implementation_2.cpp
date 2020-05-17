@@ -1063,6 +1063,8 @@ int LargeIntegerUnsigned::maximumDivisorToTryWhenFactoring(int desiredByUser) co
       result = 10;
     } else if (*this < 1000) {
       result = 32;
+    } else if (*this < 10000) {
+      result = 100;
     } else {
       this->isIntegerFittingInInt(&result);
     }

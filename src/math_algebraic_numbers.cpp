@@ -5,6 +5,8 @@
 #include "math_subsets_selections.h"
 #include "math_general_implementation.h"
 
+const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
+
 std::string MonomialVector::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {

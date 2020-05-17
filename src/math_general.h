@@ -2605,9 +2605,6 @@ class PolynomialOrder {
   bool compareLeftGreaterThanRight(const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right) const;
 };
 
-template <class Coefficient, class oneFactorFinder>
-class PolynomialFactorization;
-
 template<class Coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
 public:

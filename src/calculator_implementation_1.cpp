@@ -172,8 +172,7 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePa
   return output.assignValueWithContext(outputPolynomial, context, theCommands);
 }
 
-template <class Coefficient>
-bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
+bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
@@ -187,9 +186,47 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
   if (!input.mergeContexts(left, right)) {
     return false;
   }
-  Polynomial<Coefficient> leftPolynomial, rightPolynomial;
+  Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
   if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
     return false;
+  }
+  return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    theCommands, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.mergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<ElementZmodP> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  if (leftPolynomial.isEqualToZero() || rightPolynomial.isEqualToZero()) {
+    theCommands
+    << "Greatest common divisor / "
+    << "least common multiple with zero not allowed. ";
+    return output.makeError("Error in least common multiple / greatest common divisor.", theCommands);
+  }
+  LargeIntegerUnsigned modulus = leftPolynomial.coefficients[0].modulus;
+
+  if (modulus > static_cast<unsigned>(ElementZmodP::maximumModulusForUserFacingPolynomialDivision)) {
+    return theCommands << "Polynomial modulus exceeds the maximum allowed for user-facing polynomial division: "
+    << ElementZmodP::maximumModulusForUserFacingPolynomialDivision << ". ";
+  }
+  if (!modulus.isPossiblyPrime(0, true)) {
+    return theCommands << "Cannot do GCD / lcm: modulus " << modulus << " is not prime. ";
   }
   return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     theCommands, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
@@ -208,10 +245,10 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
   }
   const Expression& left = input[1];
   if (left.isOfType<Polynomial<ElementZmodP> >()) {
-    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType<ElementZmodP>(theCommands, input, output, doGCD);
+    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultipleModular(theCommands, input, output, doGCD);
   }
   if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
-    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType<AlgebraicNumber>(theCommands, input, output, doGCD);
+    return Calculator::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(theCommands, input, output, doGCD);
   }
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext theContext(theCommands);

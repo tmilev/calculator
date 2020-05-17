@@ -9922,7 +9922,9 @@ bool CalculatorFunctions::innerSelectAtRandom(
     output = input[1]; // only one item to select from: return that item
     return true;
   }
-  int randomIndex = (theCommands.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed() % (input.size() - 1)) + 1;
+  int randomIndex = static_cast<signed>(
+    (theCommands.theObjectContainer.pseudoRandom.getRandomNonNegativeLessThanMaximumSeed()
+  )) % (input.size() - 1)  + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }

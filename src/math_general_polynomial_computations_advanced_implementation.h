@@ -1379,6 +1379,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
 template <class Coefficient, class oneFactorFinder>
 bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   const Polynomial<Coefficient>& input,
+  std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorization::factor");
@@ -1390,11 +1391,12 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
+  oneFactorFinder algorithm;
+  algorithm.output = this;
   while (this->nonReduced.size > 0) {
     this->current = this->nonReduced.popLastObject();
-    oneFactorFinder algorithm;
-    algorithm.output = this;
-    if (!algorithm.oneFactor(commentsOnFailure)) {
+    // The algorithm is allowed to store state between factorization attempts.
+    if (!algorithm.oneFactor(comments, commentsOnFailure)) {
       return false;
     }
   }

@@ -70,6 +70,7 @@ bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   bool success = factorization.factor(
     toBeFactored,
+    nullptr,
     nullptr
   );
   if (!success) {

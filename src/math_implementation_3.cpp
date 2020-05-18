@@ -2776,7 +2776,7 @@ FormatExpressions::FormatExpressions() {
   this->monomialOrder.leftGreaterThanRight = MonomialP::orderDefault().leftGreaterThanRight;
 }
 
-std::string FormatExpressions::GetPolyLetter(int index) const {
+std::string FormatExpressions::getPolynomialLetter(int index) const {
   if (index < this->polynomialAlphabet.size) {
     return this->polynomialAlphabet[index];
   }
@@ -4279,7 +4279,7 @@ void PartialFractions::writeToFile(std::fstream& output) {
   }
   output << "Alphabet_used:\n";
   for (int i = 0; i < this->AmbientDimension; i ++) {
-    output << PolyFormatLocal.GetPolyLetter(i) << " ";
+    output << PolyFormatLocal.getPolynomialLetter(i) << " ";
   }
   output << "\n" << "Number_of_fractions: " << this->size() << "\n";
   for (int i = 0; i < this->size(); i ++) {
@@ -4565,7 +4565,7 @@ void OnePartialFractionDenominator::oneFractionToStringBasisChange(
   }
   for (int i = 0; i < NumCoords; i ++) {
     if (tempRoot[i] != 0) {
-      out << PolyFormatLocal.GetPolyLetter(i);
+      out << PolyFormatLocal.getPolynomialLetter(i);
       if (tempRoot[i] != 1) {
         out << "^{" << tempRoot[i].toString() << "}";
       }

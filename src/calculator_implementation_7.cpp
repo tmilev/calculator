@@ -1627,27 +1627,6 @@ bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
   return true;
 }
 
-template <class Coefficient>
-Coefficient Polynomial<Coefficient>::getDiscriminant() {
-  MacroRegisterFunctionWithName("Polynomial::getDiscriminant");
-  if (this->minimalNumberOfVariables() > 1) {
-    global.fatal
-    << "I do not have a definition of discriminant "
-    << "for more than one variable. "
-    << global.fatal;
-  }
-  if (this->totalDegree() != 2) {
-    global.fatal
-    << "Discriminant not implemented for polynomial "
-    << "of degree not equal to 1."
-    << global.fatal;
-  }
-  Coefficient a = this->getCoefficientOf(MonomialP(0, 2));
-  Coefficient b = this->getCoefficientOf(MonomialP(0, 1));
-  Coefficient c = this->getCoefficientOf(MonomialP(0, 0));
-  return b * b - a * c * 4;
-}
-
 class IntegralRationalFunctionComputation {
 public:
   RationalFunction<Rational> theRF;
@@ -2054,6 +2033,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->theDen,
+    &this->printoutPFsHtml,
     &this->printoutPFsHtml
   )) {
     this->printoutPFsHtml

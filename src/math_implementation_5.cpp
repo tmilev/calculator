@@ -1998,7 +1998,7 @@ std::string MonomialP::toString(FormatExpressions* theFormat) const {
   }
   for (int i = 0; i < this->monBody.size; i ++) {
     if (!(this->monBody[i].isEqualToZero())) {
-      out << theFormat->GetPolyLetter(i);
+      out << theFormat->getPolynomialLetter(i);
       if (!(this->monBody[i] == 1)) {
         out << "^{" << this->monBody[i] << "}";
       } else {

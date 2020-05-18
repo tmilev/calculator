@@ -1402,6 +1402,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     polynomial.content,
+    &theCommands.comments,
     &theCommands.comments
   )) {
     return false;

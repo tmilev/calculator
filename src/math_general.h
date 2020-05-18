@@ -1879,7 +1879,7 @@ public:
   List<MonomialP>::Comparator monomialOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::Comparator* getMonomialOrder();
-  std::string GetPolyLetter(int index) const;
+  std::string getPolynomialLetter(int index) const;
   FormatExpressions();
 };
 
@@ -2866,6 +2866,7 @@ public:
   void reduce();
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
+  void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* theFormat = nullptr);
   PolynomialModuloPolynomial<Coefficient> one();
   static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
@@ -2885,11 +2886,11 @@ public:
   FormatExpressions format;
   bool factor(
     const Polynomial<Coefficient>& input,
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
   bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
   bool accountReducedFactor(Polynomial<Coefficient>& incoming);
-  bool oneFactor(std::stringstream* comments);
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* theFormat) const;
 };
@@ -2899,6 +2900,7 @@ class PolynomialFactorizationKronecker {
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker>* output;
   Polynomial<Rational> current;
   bool oneFactor(
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
   PolynomialFactorizationKronecker() {

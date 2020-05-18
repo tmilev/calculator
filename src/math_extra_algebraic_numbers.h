@@ -360,14 +360,18 @@ public:
   int degreeUnknownFactor;
   static const int maximumtotalDegree;
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialModuloPolynomial<ElementZmodP> baseLetter;
+  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
+
   Polynomial<ElementZmodP> current;
+  List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
   bool oneFactor(
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
-  bool oneFactorGo(std::stringstream* commentsOnFailure);
-  PolynomialFactorizationCantorZassenhaus() {
-    this->output = nullptr;
-  }
+  bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
+  bool hasFactorsOfDifferentDegree(std::stringstream* comments);
+  PolynomialFactorizationCantorZassenhaus();
 };
 
 #endif

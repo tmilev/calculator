@@ -3004,7 +3004,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   result.format.flagSuppressModP = true;
   out << "Converted polynomial: \\("
   << polynomial.content.toString(&result.format) << "\\)<br>";
-  if (!result.factor(polynomial.content, &out)) {
+  if (!result.factor(polynomial.content, &out, &out)) {
     return output.assignValue(out.str(), theCommands);
   }
   return output.assignValue(out.str(), theCommands);

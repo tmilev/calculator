@@ -930,6 +930,27 @@ void Polynomial<Coefficient>::interpolate(
 }
 
 template <class Coefficient>
+Coefficient Polynomial<Coefficient>::getDiscriminant() {
+  MacroRegisterFunctionWithName("Polynomial::getDiscriminant");
+  if (this->minimalNumberOfVariables() > 1) {
+    global.fatal
+    << "I do not have a definition of discriminant "
+    << "for more than one variable. "
+    << global.fatal;
+  }
+  if (this->totalDegree() != 2) {
+    global.fatal
+    << "Discriminant not implemented for polynomial "
+    << "of degree not equal to 1."
+    << global.fatal;
+  }
+  Coefficient a = this->getCoefficientOf(MonomialP(0, 2));
+  Coefficient b = this->getCoefficientOf(MonomialP(0, 1));
+  Coefficient c = this->getCoefficientOf(MonomialP(0, 0));
+  return b * b - a * c * 4;
+}
+
+template <class Coefficient>
 void Polynomial<Coefficient>::getConstantTerm(Coefficient& output, const Coefficient& ringZero) const {
   MonomialP tempM;
   tempM.makeOne();
@@ -1367,11 +1388,24 @@ void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to multiply quotient-ring "
+    global.fatal << "Not allowed to add quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
     << this->modulus << ", " << other.modulus << global.fatal;
   }
   this->value += other.value;
+  this->reduce();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::operator-=(
+  const PolynomialModuloPolynomial& other
+) {
+  if (other.modulus != this->modulus) {
+    global.fatal << "Not allowed to subtract quotient-ring "
+    << "elements of different rings. [This modulus, other modulus]: "
+    << this->modulus << ", " << other.modulus << global.fatal;
+  }
+  this->value -= other.value;
   this->reduce();
 }
 

@@ -55,9 +55,10 @@ void Basis<Coefficient>::addVector(const Vector<Coefficient>& v) {
     basis.numberOfRows = 0;
   }
   if (basis.numberOfRows == basis.numberOfColumns) {
-    global.fatal << "Programming error: attempting to add the " << basis.numberOfRows
-    << " vector to a Basis of degree " << basis.numberOfColumns;
-    global.fatal << global.fatal;
+    global.fatal << "Programming error: attempting to add the "
+    << basis.numberOfRows
+    << " vector to a Basis of degree " << basis.numberOfColumns
+    << global.fatal;
   }
   haveGramMatrix = false;
   for (int i = 0; i < v.size; i ++) {

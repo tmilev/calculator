@@ -302,9 +302,9 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<Coefficient>;
 public:
   void toString(std::string& output, FormatExpressions* PolyFormatLocal) const;
-  std::string toString(FormatExpressions* PolyFormatLocal) const {
+  std::string toString(FormatExpressions* format) const {
     std::string tempS;
-    this->toString(tempS, PolyFormatLocal);
+    this->toString(tempS, format);
     return tempS;
   }
   bool needsParenthesisForMultiplication() const {

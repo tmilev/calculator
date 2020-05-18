@@ -1807,7 +1807,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
   if (this->size == 0) {
     out << "0";
   }
-  int IndexCharAtLastLineBreak = 0;
+  int indexCharacterAtLastLineBreak = 0;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnvelopingOrdered<Coefficient>& current = this->objects[i];
     tempS = current.toString(PolyFormatLocal);
@@ -1819,8 +1819,8 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
       }
     }
     out << tempS;
-    if ((static_cast<int>(out.tellp())) - IndexCharAtLastLineBreak > 150) {
-      IndexCharAtLastLineBreak = out.tellp();
+    if ((static_cast<int>(out.tellp())) - indexCharacterAtLastLineBreak > 150) {
+      indexCharacterAtLastLineBreak = out.tellp();
       out << "\\\\&&";
     }
   }
@@ -1886,18 +1886,18 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
   SemisimpleLieAlgebraOrdered& theOwner
 ) {
   this->makeZero(theOwner);
-  Vector<Rational> ElementRootForm;
-  input.elementToVectorNegativeRootSpacesFirst(ElementRootForm);
-  theOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(ElementRootForm);
+  Vector<Rational> elementRootForm;
+  input.elementToVectorNegativeRootSpacesFirst(elementRootForm);
+  theOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(elementRootForm);
   MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
   tempMon.makeZero(ringZero, theOwner);
   tempMon.generatorsIndices.setSize(1);
   tempMon.powers.setSize(1);
   tempMon.powers.objects[0] = ringUnit;
-  for (int theIndex = 0; theIndex < ElementRootForm.size; theIndex ++) {
-    if (ElementRootForm.objects[theIndex] != 0) {
+  for (int theIndex = 0; theIndex < elementRootForm.size; theIndex ++) {
+    if (elementRootForm.objects[theIndex] != 0) {
       tempMon.theCoefficient = ringUnit;
-      tempMon.theCoefficient *= ElementRootForm.objects[theIndex];
+      tempMon.theCoefficient *= elementRootForm.objects[theIndex];
       tempMon.generatorsIndices[0] = theIndex;
       this->addOnTop(tempMon);
     }
@@ -1919,7 +1919,9 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::raiseToPower(int thePower, 
 
 template <class Coefficient>
 void ElementUniversalEnvelopingOrdered<Coefficient>::lieBracketOnTheRight(
-  const ElementSemisimpleLieAlgebra<Rational>& right, const Coefficient& ringUnit, const Coefficient& ringZero
+  const ElementSemisimpleLieAlgebra<Rational>& right,
+  const Coefficient& ringUnit,
+  const Coefficient& ringZero
 ) {
   ElementUniversalEnvelopingOrdered<Coefficient> tempElt;
   tempElt.assignElementLieAlgebra(right, ringUnit, ringZero, *this->owner);

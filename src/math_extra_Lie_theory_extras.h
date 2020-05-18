@@ -72,7 +72,7 @@ public:
   // The weights are in increasing order
   // The i^th column of the matrix gives the coordinates of the i^th Chevalley generator
   // in the current coordinates
-  Matrix<Rational> ChevalleyGeneratorsInCurrentCoords;
+  Matrix<Rational> chevalleyGeneratorsInCurrentCoordinates;
   void assignGeneratorCoefficientOne(int theIndex, ElementSemisimpleLieAlgebra<Rational>& output) {
     output.operator=(this->theOrder[theIndex]);
   }
@@ -136,8 +136,8 @@ public:
   ConeComplex smallerAlgebraChamber;
   ConeComplex projectivizedChambeR;
   std::stringstream log;
-  WeylGroupData* WeylSmaller;
-  WeylGroupData* WeylLarger;
+  WeylGroupData* weylSmaller;
+  WeylGroupData* weylLarger;
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
@@ -320,7 +320,7 @@ public:
     SemisimpleLieAlgebraOrdered& theOwner
   );
   void makeZero(SemisimpleLieAlgebraOrdered& theOwner);
-  bool AssignElementUniversalEnveloping(
+  bool assignElementUniversalEnveloping(
     ElementUniversalEnveloping<Coefficient>& input,
     SemisimpleLieAlgebraOrdered& owner,
     const Coefficient& ringUnit,
@@ -420,7 +420,9 @@ public:
   void actOnMe(const ElementSemisimpleLieAlgebra<Rational>& theElt, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
   void lieBracketOnTheRight(
-    const ElementSemisimpleLieAlgebra<Rational>& right, const Coefficient& ringUnit, const Coefficient& ringZero
+    const ElementSemisimpleLieAlgebra<Rational>& right,
+    const Coefficient& ringUnit,
+    const Coefficient& ringZero
   );
   void operator=(const ElementUniversalEnvelopingOrdered& other) {
     this->::HashedList<MonomialUniversalEnvelopingOrdered<Coefficient> >::operator=(other);
@@ -476,12 +478,7 @@ template <class Coefficient>
 class ElementVermaModuleOrdered {
 public:
   ElementUniversalEnvelopingOrdered<Coefficient> theElT;
-  std::string DebugString;
   PolynomialSubstitution<Coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
-  void ComputeDebugString() {
-    FormatExpressions tempFormat;
-    this->DebugString = this->toString(tempFormat);
-  }
   std::string toString(const FormatExpressions& theFormat) const;
   bool isEqualToZero() const {
     return this->theElT.isEqualToZero();

@@ -235,8 +235,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
   theSel.initialize(DimensionOverRationals);
   this->theGeneratingElementPowersBasis.setSize(0);
   Vector<Rational> currentVect;
-  this->GeneratingElemenT.owner = this;
-  this->GeneratingElemenT.basisIndex = this->basisInjections.size - 1;
+  this->generatingElement.owner = this;
+  this->generatingElement.basisIndex = this->basisInjections.size - 1;
   int attemptsSoFar = 0;
   if (this->basisInjections.size > 1) {
     int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
@@ -255,19 +255,19 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
       return false;
     }
-    this->GeneratingElemenT.element.makeZero();
+    this->generatingElement.element.makeZero();
     for (int i = 0; i < theSel.theInts.size; i ++) {
       MonomialVector tempV;
       tempV.makeEi(i);
-      this->GeneratingElemenT.element.addMonomial(tempV, theSel.theInts[i]);
+      this->generatingElement.element.addMonomial(tempV, theSel.theInts[i]);
     }
-    this->getMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-    this->GeneratingElementTensorForm.getMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
+    this->getMultiplicationBy(this->generatingElement, this->generatingElementTensorForm);
+    this->generatingElementTensorForm.getMatrix(this->generatingElementMatrixForm, DimensionOverRationals);
     this->theGeneratingElementPowersBasis.setSize(0);
     currentVect.makeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
-      this->GeneratingElementMatForm.actOnVectorColumn(currentVect);
+      this->generatingElementMatrixForm.actOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
@@ -320,7 +320,7 @@ bool AlgebraicClosureRationals::reduceMe(
     return true;
   }
   Polynomial<Rational> theMinPoly, smallestFactor;
-  theMinPoly.assignMinPoly(this->GeneratingElementMatForm);
+  theMinPoly.assignMinPoly(this->generatingElementMatrixForm);
   int theDim = this->latestBasis.size;
   PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
   bool mustBeTrue = factorization.factor(
@@ -404,10 +404,10 @@ bool AlgebraicClosureRationals::reduceMe(
     return false;
   }
   this->getMultiplicationBy(
-    this->GeneratingElemenT, this->GeneratingElementTensorForm
+    this->generatingElement, this->generatingElementTensorForm
   );
-  this->GeneratingElementTensorForm.getMatrix(
-    this->GeneratingElementMatForm, this->latestBasis.size
+  this->generatingElementTensorForm.getMatrix(
+    this->generatingElementMatrixForm, this->latestBasis.size
   );
   return true;
 }
@@ -640,10 +640,10 @@ void AlgebraicClosureRationals::reset() {
   this->theQuadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
   this->displayNamesBasisElements[0] = "";
-  this->GeneratingElementTensorForm.makeIdentity(1);
-  this->GeneratingElementMatForm.makeIdentityMatrix(1);
-  this->GeneratingElemenT.owner = this;
-  this->GeneratingElemenT.element.makeEi(0);
+  this->generatingElementTensorForm.makeIdentity(1);
+  this->generatingElementMatrixForm.makeIdentityMatrix(1);
+  this->generatingElement.owner = this;
+  this->generatingElement.element.makeEi(0);
 }
 
 bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
@@ -1293,7 +1293,7 @@ std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat
     out << "<br>Generating element not selected. ";
   } else {
     out << "<br>Generating element: "
-    << HtmlRoutines::getMathSpanPure(this->GeneratingElementMatForm.toString(theFormat));
+    << HtmlRoutines::getMathSpanPure(this->generatingElementMatrixForm.toString(theFormat));
   }
   out << "<br>There are " << this->basisInjections.size << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {

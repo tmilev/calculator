@@ -200,9 +200,9 @@ public:
   // coordinates relative to the latest basis e_{n, 1}, ..., e_{n, n}.
   List<List<VectorSparse<Rational> > > basisInjections;
 
-  MatrixTensor<Rational> GeneratingElementTensorForm;
-  Matrix<Rational> GeneratingElementMatForm;
-  AlgebraicNumber GeneratingElemenT;
+  MatrixTensor<Rational> generatingElementTensorForm;
+  Matrix<Rational> generatingElementMatrixForm;
+  AlgebraicNumber generatingElement;
   Vectors<Rational> theGeneratingElementPowersBasis;
 
   bool flagIsQuadraticRadicalExtensionRationals;

@@ -1543,8 +1543,8 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits");
   this->checkInitialization();
   std::stringstream out;
-  int totalDimAffine = this->WeylLarger->getDimension() + this->WeylSmaller->getDimension();
-  int smallDim = this->WeylSmaller->getDimension();
+  int totalDimAffine = this->weylLarger->getDimension() + this->weylSmaller->getDimension();
+  int smallDim = this->weylSmaller->getDimension();
   Vector<Rational> normal;
   normal.makeZero(totalDimAffine + 1);
   Vectors<Rational> newWalls;
@@ -1623,15 +1623,15 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
   this->NumProcessedConesParam = 0;
   this->NumProcessedExtremaEqualOne = 0;
   this->numNonZeroMults = 0;
-  this->WeylLarger = nullptr;
-  this->WeylSmaller = nullptr;
+  this->weylLarger = nullptr;
+  this->weylSmaller = nullptr;
 }
 
 bool GeneralizedVermaModuleCharacters::checkInitialization() const {
-  if (this->WeylLarger == nullptr || this->WeylSmaller == nullptr) {
+  if (this->weylLarger == nullptr || this->weylSmaller == nullptr) {
     global.fatal << "Use of non-initialized Weyl group within generalized Verma module characters. " << global.fatal;
   }
-  if (this->WeylLarger->flagDeallocated || this->WeylSmaller->flagDeallocated) {
+  if (this->weylLarger->flagDeallocated || this->weylSmaller->flagDeallocated) {
     global.fatal << "Use after free of Weyl group within Verma module characters. " << global.fatal;
   }
   return true;
@@ -1642,8 +1642,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
 ) {
   MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
   Vectors<Rational> tempRoots;
-  this->WeylLarger = &input.theRange().theWeyl;
-  this->WeylSmaller = &input.theDomain().theWeyl;
+  this->weylLarger = &input.theRange().theWeyl;
+  this->weylSmaller = &input.theDomain().theWeyl;
   WeylGroupData& theWeYl = input.theRange().theWeyl;
 //  input.projectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.toString();

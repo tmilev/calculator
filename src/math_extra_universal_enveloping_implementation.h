@@ -1828,7 +1828,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
 }
 
 template <class Coefficient>
-bool ElementUniversalEnvelopingOrdered<Coefficient>::AssignElementUniversalEnveloping(
+bool ElementUniversalEnvelopingOrdered<Coefficient>::assignElementUniversalEnveloping(
   ElementUniversalEnveloping<Coefficient>& input,
   SemisimpleLieAlgebraOrdered& owner,
   const Coefficient& ringUnit,
@@ -1888,7 +1888,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
   this->makeZero(theOwner);
   Vector<Rational> ElementRootForm;
   input.elementToVectorNegativeRootSpacesFirst(ElementRootForm);
-  theOwner.ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(ElementRootForm);
+  theOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(ElementRootForm);
   MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
   tempMon.makeZero(ringZero, theOwner);
   tempMon.generatorsIndices.setSize(1);

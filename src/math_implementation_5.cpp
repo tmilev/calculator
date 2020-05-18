@@ -1214,7 +1214,7 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   for (int i = 0; i < this->theOwner->getRank(); i ++) {
     theCoeffs[numPosRoots + i] = tempH[i];
   }
-  this->ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(theCoeffs);
+  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(theCoeffs);
 }
 
 int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
@@ -1238,15 +1238,15 @@ void SemisimpleLieAlgebraOrdered::initialize(
   }
   this->theOwner = &owner;
   this->theOrder = inputOrder;
-  this->ChevalleyGeneratorsInCurrentCoords.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
-  this->ChevalleyGeneratorsInCurrentCoords.makeZero();
+  this->chevalleyGeneratorsInCurrentCoordinates.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
+  this->chevalleyGeneratorsInCurrentCoordinates.makeZero();
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
     currentElt.makeGenerator(i, owner);
     currentElt.getCoordinatesInBasis(this->theOrder, coordsInCurrentBasis);
     for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
-      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i] = coordsInCurrentBasis[j];
+      this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] = coordsInCurrentBasis[j];
     }
   }
 }

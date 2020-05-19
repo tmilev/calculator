@@ -10889,7 +10889,7 @@ class ImpreciseDouble {
   static ImpreciseDouble GetMinusOne() {
     return - 1;
   }
-  static ImpreciseDouble GetOne() {
+  static ImpreciseDouble getOne() {
     return 1;
   }
   static ImpreciseDouble GetZero() {
@@ -10910,7 +10910,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   ProgressReport theReport;
   std::stringstream out;
   out << "before elimination:\n" << theMat.toString();
-  theMat.gaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  theMat.gaussianEliminationEuclideanDomain(nullptr, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::getOne());
   out << "after elimination:\n" << theMat.toString();
   theReport.report(out.str());
 }

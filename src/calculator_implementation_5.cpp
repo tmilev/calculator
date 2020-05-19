@@ -2998,14 +2998,16 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     theCommands << "The modulus: " << thePrime
     << " appears not to be prime. " << commentsOnFailure.str();
   }
-  std::stringstream out;
+  std::stringstream comments, out;
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
   polynomial.context.getFormat(result.format);
   result.format.flagSuppressModP = true;
-  out << "Converted polynomial: \\("
+  comments << "Converted polynomial: \\("
   << polynomial.content.toString(&result.format) << "\\)<br>";
-  if (!result.factor(polynomial.content, &out, &out)) {
+  if (!result.factor(polynomial.content, &comments, &comments)) {
+    out << "Failed to factor. " << comments.str();
     return output.assignValue(out.str(), theCommands);
   }
+  out << "Factorization success: " << result.toStringResult(&result.format);
   return output.assignValue(out.str(), theCommands);
 }

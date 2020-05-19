@@ -371,6 +371,16 @@ public:
   );
   bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
   bool hasFactorsOfDifferentDegree(std::stringstream* comments);
+  bool oneFactorProbabilityHalf(
+    int constant,
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  bool divisorFromCandidate(
+    const Polynomial<ElementZmodP>& candidate,
+    const std::string& candidateDisplayName,
+    std::stringstream* comments
+  );
   PolynomialFactorizationCantorZassenhaus();
 };
 

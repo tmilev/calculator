@@ -255,7 +255,8 @@ std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML) 
 }
 
 std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
-  MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlNoThreadData");
+  MacroRegisterFunctionWithName("GlobalVariables::toStringProgressReportNoThreadData");
+
   std::stringstream reportStream;
   for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     int currentThreadID = ThreadData::getCurrentThreadId();
@@ -500,9 +501,11 @@ std::string GlobalVariables::getWebInput(const std::string& inputName) {
 
 void GlobalVariables::makeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::makeReport");
+  global << "DEBUG: Calling makeReport" << Logger::endL;
   if (!global.theResponse.monitoringAllowed()) {
     return;
   }
+  global << "DEBUG: monitor allowed" << Logger::endL;
   std::string reportString;
   if (this->flagRunningConsoleRegular || this->flagRunningConsoleTest) {
     reportString = this->toStringProgressReportConsole();

@@ -255,11 +255,15 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   if (*this == theBase) {
     return true;
   }
+  if (this->isEqualToOne()) {
+    return false;
+  }
   ElementZmodP thePower, theOne;
   thePower.modulus = *this;
-  thePower.value = theBase;
+  thePower = theBase;
   theOne.modulus = *this;
   theOne.value = 1;
+  global << "DEBUG: here I am!" << Logger::endL;
   MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
   if (thePower == 1) {
     return true;
@@ -345,6 +349,9 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
   if (this->isEven()) {
     return *this == 2;
   }
+  if (this->isEqualToOne()) {
+    return false;
+  }
   int maximumDivisor = this->maximumDivisorToTryWhenFactoring(- 1);
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(
     static_cast<unsigned>(maximumDivisor), primesGenerated
@@ -372,6 +379,13 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
+  global << "DEBUG: Is possibly prime on " << this->toString() << Logger::endL;
+  if (this->isEqualToOne()) {
+    if (comments != nullptr) {
+      *comments << "1 is not prime by definition. ";
+    }
+    return false;
+  }
   if (this->isEven()) {
     if (*this != 2 && comments != nullptr) {
       *comments << "Number " << *this << " is even but not two. ";
@@ -392,9 +406,11 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
   theOddFactorOfNminusOne --;
+  global << "DEBUG: got to hereeee!!!!!" << Logger::endL;
   while (theOddFactorOfNminusOne.isEven()) {
     theOddFactorOfNminusOne /= 2;
     theExponentOfThePowerTwoFactorOfNminusOne ++;
+    global << "DEBUG: in da loop!!!!!" << Logger::endL;
   }
   ProgressReport theReport;
   for (int i = 0; i < millerRabinTries; i ++) {
@@ -435,7 +451,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   }
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::GetOne() {
+LargeIntegerUnsigned LargeIntegerUnsigned::getOne() {
   LargeIntegerUnsigned tempI;
   tempI.makeOne();
   return tempI;

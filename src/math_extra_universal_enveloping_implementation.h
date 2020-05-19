@@ -925,14 +925,14 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::getElementUniversalEnvelop
       tempMon.assignElementLieAlgebra(
         this->owner->theOrder[this->generatorsIndices[i]],
         inputOwner,
-        this->Coefficient.GetOne(),
+        this->Coefficient.getOne(),
         this->Coefficient.GetZero()
       );
       tempMon.raiseToPower(theDegree);
       Accum *= tempMon;
     } else {
       if (this->owner->theOrder[this->generatorsIndices[i]].isCoefficientOneChevalleyGenerator()) {
-        tempMon.makeOneGeneratorCoefficientOne(theIndex, inputOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
+        tempMon.makeOneGeneratorCoefficientOne(theIndex, inputOwner, this->Coefficient.getOne(), this->Coefficient.GetZero());
         tempMon[0].powers[0] = this->powers[i];
         Accum *= tempMon;
       } else {

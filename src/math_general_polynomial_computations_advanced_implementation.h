@@ -1400,9 +1400,12 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
       return false;
     }
   }
+  global << "DEBUG: got to before sort!" << Logger::endL;
   this->nonReduced.quickSortAscending();
   this->reduced.quickSortAscending();
+  global << "DEBUG: got to after sort!" << Logger::endL;
   this->checkFactorization();
+  global << "DEBUG: check factorization done!" << Logger::endL;
   return true;
 }
 

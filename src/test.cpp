@@ -19,12 +19,13 @@ public:
     static const std::string topiclists;
     static const std::string calculator;
     static const std::string polynomial;
+    static const std::string basic;
   };
   HashedList<std::string, MathRoutines::hashString> inputs;
   bool flagTestAll;
   void initialize(List<std::string>& inputArguments);
   void run();
-  bool ShouldTest(const std::string& testSuite);
+  bool shouldTest(const std::string& testSuite);
 };
 
 int mainTest(List<std::string>& inputArguments) {
@@ -44,15 +45,16 @@ const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
+const std::string Test::Suites::basic = "basic";
 
 void Test::run() {
   MacroRegisterFunctionWithName("Test::run");
   global << "Testing ..." << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
-  if (this->ShouldTest(Test::Suites::database)) {
+  if (this->shouldTest(Test::Suites::database)) {
     Database::Test::all();
   }
-  if (this->flagTestAll) {
+  if (this->shouldTest(Test::Suites::basic)) {
     JSData::Test::all();
     Expression::Test::all();
     LargeIntegerUnsigned::Test::all();
@@ -60,7 +62,7 @@ void Test::run() {
     ElementZmodP::Test::all();
     RationalFunction<Rational>::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::crypto)) {
+  if (this->shouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
     Crypto::Random::initializeRandomBytes();
     PrivateKeyRSA::Test::all();
@@ -68,29 +70,29 @@ void Test::run() {
     X509Certificate::Test::all();
     SSLRecord::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::polynomial)) {
+  if (this->shouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::all();
     Polynomial<Rational>::Test::all();
   }
   if (
-    this->ShouldTest(Test::Suites::topicLists) ||
-    this->ShouldTest(Test::Suites::topiclists)
+    this->shouldTest(Test::Suites::topicLists) ||
+    this->shouldTest(Test::Suites::topiclists)
   ) {
     TopicElementParser::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::calculator)) {
+  if (this->shouldTest(Test::Suites::calculator)) {
     Calculator::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::problems)) {
+  if (this->shouldTest(Test::Suites::problems)) {
     CalculatorHTML::Test::all();
   }
-  if (this->ShouldTest(Test::Suites::build)) {
+  if (this->shouldTest(Test::Suites::build)) {
     GlobalVariables::Test::all();
   }
   global << Logger::green << "All tests passed. " << Logger::endL;
 }
 
-bool Test::ShouldTest(const std::string& testSuite) {
+bool Test::shouldTest(const std::string& testSuite) {
   if (this->flagTestAll) {
     return true;
   }

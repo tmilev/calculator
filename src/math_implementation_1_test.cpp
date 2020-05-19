@@ -28,6 +28,7 @@ bool LargeIntegerUnsigned::Test::all() {
   LargeIntegerUnsigned::Test::serializationToHex(LargeIntegerUnsigned(100));
   LargeIntegerUnsigned::Test::comparisons();
   LargeIntegerUnsigned::Test::factor();
+  LargeIntegerUnsigned::Test::isPossiblyPrime();
   return true;
 }
 
@@ -39,7 +40,50 @@ bool LargeIntegerUnsigned::Test::comparisons() {
     LargeIntegerUnsigned& current = toTest[i];
     if (!current.isGreaterThanOrEqualTo(current)) {
       global.fatal << "Number: " << current
-      << " not greater than or equal to itself. " << global.fatal;
+      << " not greater than or equal to itself. "
+      << global.fatal;
+    }
+  }
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
+  List<LargeIntegerUnsigned> mustReturnTrue, mustReturnFalse;
+  mustReturnTrue.addOnTop(2);
+  mustReturnTrue.addOnTop(3);
+  mustReturnTrue.addOnTop(5);
+  mustReturnTrue.addOnTop(7);
+  mustReturnTrue.addOnTop(1009);
+  mustReturnFalse.addOnTop(0);
+  mustReturnFalse.addOnTop(1);
+  mustReturnFalse.addOnTop(4);
+  mustReturnFalse.addOnTop(6);
+  mustReturnFalse.addOnTop(9989);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 100, 3);
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+  const List<LargeIntegerUnsigned>& input,
+  bool mustBeTrue,
+  int millerRabinTries,
+  int64_t maximumRunningTimeMilliseconds
+) {
+  for (int i = 0; i < input.size; i ++) {
+    int64_t millisecondsStart = global.getElapsedMilliseconds();
+    bool result = input[i].isPossiblyPrime(millerRabinTries, true, nullptr);
+    if (result != mustBeTrue) {
+      global.fatal << "Input " << input[i] << " is incorrectly computed, expected: "
+      << mustBeTrue << ". " << global.fatal;
+    }
+    int64_t ellapsed = global.getElapsedMilliseconds() - millisecondsStart;
+    if (ellapsed > maximumRunningTimeMilliseconds) {
+      global.fatal << "It took longer than " << maximumRunningTimeMilliseconds
+      << " to determine " << input[i] << " is prime."
+      << global.fatal;
     }
   }
   return true;

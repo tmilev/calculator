@@ -38,22 +38,6 @@ public:
     output << theLIU.toString();
     return output;
   }
-  class Test {
-    public:
-    static bool all();
-    static bool serializationToHex(const LargeIntegerUnsigned& input);
-    static bool serializationToHex();
-    static bool comparisons();
-    static bool factor();
-    static bool factorSmall(
-      const LargeIntegerUnsigned& input,
-      const std::string& expectedFactors,
-      const std::string& expectedMultiplicities,
-      int maximumDivisorToTry,
-      int numberMillerRabinRuns,
-      int64_t maximumRunningTime
-    );
-  };
   void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
   void subtractSmallerPositive(const LargeIntegerUnsigned& x);
@@ -148,7 +132,7 @@ public:
   LargeIntegerUnsigned();
   // LargeIntUnsigned(unsigned int value){this->operator=(value); }
   // LargeIntUnsigned(unsigned int x) {this->assignShiftedUInt(x,0);}
-  static LargeIntegerUnsigned GetOne();
+  static LargeIntegerUnsigned getOne();
   bool operator<(int other) const;
   bool operator>(int other) const;
   bool operator<(const LargeIntegerUnsigned& other) const;
@@ -163,6 +147,29 @@ public:
   void getHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output) const;
   //must be rewritten:
   double getDoubleValue() const;
+  class Test {
+    public:
+    static bool all();
+    static bool serializationToHex(const LargeIntegerUnsigned& input);
+    static bool serializationToHex();
+    static bool comparisons();
+    static bool isPossiblyPrime();
+    static bool isPossiblyPrimeFast(
+      const List<LargeIntegerUnsigned>& input,
+      bool mustBeTrue,
+      int millerRabinTries,
+      int64_t maximumRunningTimeMilliseconds
+    );
+    static bool factor();
+    static bool factorSmall(
+      const LargeIntegerUnsigned& input,
+      const std::string& expectedFactors,
+      const std::string& expectedMultiplicities,
+      int maximumDivisorToTry,
+      int numberMillerRabinRuns,
+      int64_t maximumRunningTime
+    );
+  };
 };
 
 class LargeInteger {

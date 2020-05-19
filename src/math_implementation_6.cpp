@@ -14,6 +14,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
+  global << "DEBUG: HERE I AM!!!" << Logger::endL;
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
@@ -52,10 +53,18 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
     }
     return false;
   }
+  ProgressReport report;
+  std::stringstream out;
+  out << "Find one factor of " << this->current.toString(&this->output->format);
+  out << "Factorization so far: " << this->output->toStringResult(&this->output->format);
+  report.report(out.str());
   Vector<Polynomial<ElementZmodP> > derivative;
+  global << "DEBUG: HERE I AM before differential!!!" << Logger::endL;
   if (!this->current.differential(derivative, commentsOnFailure)) {
+    global << "DEBUG: HERE I AM AAAFTER differential!!!" << Logger::endL;
     return false;
   }
+  global << "DEBUG: HERE I AM AAAFTER differential!!!" << Logger::endL;
   Polynomial<ElementZmodP> greatestCommonDivisor;
   derivative[0].greatestCommonDivisor(
     derivative[0],
@@ -99,7 +108,7 @@ bool PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree(std::s
     }
     if (comments != nullptr) {
       std::string xLetter = this->output->format.getPolynomialLetter(0);
-      *comments << "GCD: "
+      *comments << "<br>GCD: "
       << candidateDivisor.toString(&this->output->format)
       << " of: \\(" << xLetter
       << "^{" << this->one.modulus << "^{" << degree << "}} - "
@@ -112,7 +121,7 @@ bool PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree(std::s
     ) {
       if (comments != nullptr) {
         std::string xLetter = this->output->format.getPolynomialLetter(0);
-        *comments << "Found factor: "
+        *comments << "<br>Found factor: "
         << candidateDivisor.toString(&this->output->format)
         << " by gcd between \\(" << xLetter
         << "^{" << this->one.modulus << "^{" << degree << "}} - "
@@ -126,56 +135,115 @@ bool PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree(std::s
   return false;
 }
 
+bool PolynomialFactorizationCantorZassenhaus::divisorFromCandidate(
+  const Polynomial<ElementZmodP>& candidate,
+  const std::string& candidateDisplayName,
+  std::stringstream* comments
+) {
+  if (candidate.isEqualToZero()) {
+    return false;
+  }
+  Polynomial<ElementZmodP> divisor;
+  bool mustBeTrue = candidate.greatestCommonDivisor(
+    candidate, this->current, divisor, this->one, comments
+  );
+  if (!mustBeTrue) {
+    global.fatal << "Failure to find gcd not allowed here. " << global.fatal;
+  }
+  if (divisor.totalDegree() <= 0 || divisor.totalDegree() >= this->current.totalDegree()) {
+    return false;
+  }
+  if (comments != nullptr) {
+    *comments << "Found divisor \\("
+    << this->one.toStringPolynomial(divisor, &this->output->format)
+    << "\\) by taking gcd with \\(" << candidateDisplayName << "\\). ";
+  }
+  this->output->accountNonReducedFactor(divisor);
+  return true;
+}
+
+
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
+  (void) commentsOnFailure;
+  global << "DEBUG: start of one factor go!!!" << Logger::endL;
   this->baseLetter.modulus = this->output->current;
   this->baseLetter.value.makeDegreeOne(1, 0, this->one, this->one.zero());
   this->oneQuotientRing.modulus = this->current;
   this->oneQuotientRing.value.makeConstant(this->one);
+  global << "DEBUG: before diff deg factors..." << Logger::endL;
+
   if (this->hasFactorsOfDifferentDegree(comments)) {
+    global << "DEBUG: FOUND diff deg factors..." << Logger::endL;
     return true;
   }
+  global << "DEBUG: after diff deg factors..." << Logger::endL;
   if (comments != nullptr) {
-    *comments << "All divisors of " << this->current.toString(&this->output->format)
+    *comments << "<br>All divisors of " << this->current.toString(&this->output->format)
     << " are of equal degree. ";
   }
-  LargeInteger modulus = this->one.modulus;
-  int degree = this->current.totalDegreeInt();
-  PolynomialModuloPolynomial<ElementZmodP> xPower;
-  HashedList<PolynomialModuloPolynomial<ElementZmodP> > powers;
-  powers.addOnTop(xPower);
-  for (int i = 0; i < degree; i ++) {
-    xPower = this->baseLetter;
-    LargeInteger power = modulus;
+  if (
+    this->current.totalDegree().getNumerator().value.isPossiblyPrime(0, true, comments) ||
+    this->current.totalDegree() == 1
+  ) {
+    return this->output->accountReducedFactor(this->current);
+  }
+  global << "DEBUG: after is possibly prime..." << Logger::endL;
+  int maximumDivisors = 10;
+  if (this->one.modulus < maximumDivisors) {
+    this->one.modulus.isIntegerFittingInInt(&maximumDivisors);
+  }
+  global << "DEBUG: diving in max divisionrs..." << Logger::endL;
+  ProgressReport report;
+  for (int i = 0; i < maximumDivisors; i ++) {
+    std::stringstream reportStream;
+    reportStream << "Looking for factors round " << i + 1 << " out of " << maximumDivisors;
+    global << "DEBUG: in the loop" << Logger::endL;
+    report.report(reportStream.str());
+    if (this->oneFactorProbabilityHalf(i, comments, commentsOnFailure)) {
+      return true;
+    }
+  }
+  global << "DEBUG: out of the loop. " << Logger::endL;
+  return this->output->accountReducedFactor(this->current);
+}
 
+bool PolynomialFactorizationCantorZassenhaus::oneFactorProbabilityHalf(
+  int constant,
+  std::stringstream *comments,
+  std::stringstream *commentsOnFailure
+) {
+  LargeIntegerUnsigned modulus = this->one.modulus;
+  int degree = this->current.totalDegreeInt();
+  PolynomialModuloPolynomial<ElementZmodP> startingPolynomial;
+  startingPolynomial = this->baseLetter;
+  ElementZmodP constantModular;
+  constantModular.modulus = modulus;
+  constantModular.value = constant;
+  startingPolynomial.value += constantModular;
+  PolynomialModuloPolynomial<ElementZmodP> currentPolynomial;
+  for (int i = 0; i < degree; i ++) {
+    currentPolynomial = startingPolynomial;
+    LargeInteger power = modulus;
     power.raiseToPower(i + 1);
     power -= 1;
     power /= 2;
-    MathRoutines::raiseToPower(xPower, power, oneQuotientRing);
-    powers.addOnTop(xPower);
+    MathRoutines::raiseToPower(currentPolynomial, power, oneQuotientRing);
     if (comments != nullptr) {
-      *comments << "\\(x^{\\frac{" << modulus << "^{" << i + 1 << "} - 1}{2}} \\)=\\( "
-      << xPower.toString(&this->output->format) << "\\)";
+      *comments << "<br>\\(A=x^{\\frac{" << modulus << "^{" << i + 1 << "} - 1}{2}} \\)=\\( "
+      << this->one.toStringPolynomial(currentPolynomial.value, &this->output->format) << "\\)";
     }
-    Polynomial<ElementZmodP> gcd, gcdWithPlusOne, gcdWithMinusOne;
-    xPower.value.greatestCommonDivisor(xPower.value, xPower.modulus, gcd, this->one, commentsOnFailure);
-    Polynomial<ElementZmodP> valuePlusOne = xPower.value + oneQuotientRing.value;
-    Polynomial<ElementZmodP> valueMinusOne = xPower.value - oneQuotientRing.value;
-    if (!valuePlusOne.isEqualToZero()) {
-      xPower.value.greatestCommonDivisor(valuePlusOne, xPower.modulus, gcdWithPlusOne, this->one, commentsOnFailure);
+    if (this->divisorFromCandidate(currentPolynomial.value, "A", comments)) {
+      return true;
     }
-    if (!valueMinusOne.isEqualToZero()) {
-      xPower.value.greatestCommonDivisor(valueMinusOne, xPower.modulus, gcdWithMinusOne, this->one, commentsOnFailure);
+    if (this->divisorFromCandidate(currentPolynomial.value + oneQuotientRing.value, "A + 1", comments)) {
+      return true;
     }
-    if (comments != nullptr) {
-      *comments
-      << ", gcd: " << gcd.toString(&this->output->format)
-      << ", gcdWithPlusOne: " << gcdWithPlusOne.toString(&this->output->format)
-      << ", gcdWithMinusOne: " << gcdWithMinusOne.toString(&this->output->format)
-      << "<br>";
+    if (this->divisorFromCandidate(currentPolynomial.value + oneQuotientRing.value, "A - 1", comments)) {
+      return true;
     }
   }
   return false;

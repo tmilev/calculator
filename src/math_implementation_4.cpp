@@ -501,11 +501,9 @@ std::string GlobalVariables::getWebInput(const std::string& inputName) {
 
 void GlobalVariables::makeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::makeReport");
-  global << "DEBUG: Calling makeReport" << Logger::endL;
   if (!global.theResponse.monitoringAllowed()) {
     return;
   }
-  global << "DEBUG: monitor allowed" << Logger::endL;
   std::string reportString;
   if (this->flagRunningConsoleRegular || this->flagRunningConsoleTest) {
     reportString = this->toStringProgressReportConsole();

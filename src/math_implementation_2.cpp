@@ -263,7 +263,6 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   thePower = theBase;
   theOne.modulus = *this;
   theOne.value = 1;
-  global << "DEBUG: here I am!" << Logger::endL;
   MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
   if (thePower == 1) {
     return true;
@@ -379,7 +378,6 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
-  global << "DEBUG: Is possibly prime on " << this->toString() << Logger::endL;
   if (this->isEqualToOne()) {
     if (comments != nullptr) {
       *comments << "1 is not prime by definition. ";
@@ -406,11 +404,9 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
   theOddFactorOfNminusOne --;
-  global << "DEBUG: got to hereeee!!!!!" << Logger::endL;
   while (theOddFactorOfNminusOne.isEven()) {
     theOddFactorOfNminusOne /= 2;
     theExponentOfThePowerTwoFactorOfNminusOne ++;
-    global << "DEBUG: in da loop!!!!!" << Logger::endL;
   }
   ProgressReport theReport;
   for (int i = 0; i < millerRabinTries; i ++) {

@@ -14,7 +14,6 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
-  global << "DEBUG: HERE I AM!!!" << Logger::endL;
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
@@ -59,12 +58,9 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   out << "Factorization so far: " << this->output->toStringResult(&this->output->format);
   report.report(out.str());
   Vector<Polynomial<ElementZmodP> > derivative;
-  global << "DEBUG: HERE I AM before differential!!!" << Logger::endL;
   if (!this->current.differential(derivative, commentsOnFailure)) {
-    global << "DEBUG: HERE I AM AAAFTER differential!!!" << Logger::endL;
     return false;
   }
-  global << "DEBUG: HERE I AM AAAFTER differential!!!" << Logger::endL;
   Polynomial<ElementZmodP> greatestCommonDivisor;
   derivative[0].greatestCommonDivisor(
     derivative[0],
@@ -169,18 +165,14 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactorGo");
   (void) commentsOnFailure;
-  global << "DEBUG: start of one factor go!!!" << Logger::endL;
   this->baseLetter.modulus = this->output->current;
   this->baseLetter.value.makeDegreeOne(1, 0, this->one, this->one.zero());
   this->oneQuotientRing.modulus = this->current;
   this->oneQuotientRing.value.makeConstant(this->one);
-  global << "DEBUG: before diff deg factors..." << Logger::endL;
 
   if (this->hasFactorsOfDifferentDegree(comments)) {
-    global << "DEBUG: FOUND diff deg factors..." << Logger::endL;
     return true;
   }
-  global << "DEBUG: after diff deg factors..." << Logger::endL;
   if (comments != nullptr) {
     *comments << "<br>All divisors of " << this->current.toString(&this->output->format)
     << " are of equal degree. ";
@@ -191,23 +183,19 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   ) {
     return this->output->accountReducedFactor(this->current);
   }
-  global << "DEBUG: after is possibly prime..." << Logger::endL;
   int maximumDivisors = 10;
   if (this->one.modulus < maximumDivisors) {
     this->one.modulus.isIntegerFittingInInt(&maximumDivisors);
   }
-  global << "DEBUG: diving in max divisionrs..." << Logger::endL;
   ProgressReport report;
   for (int i = 0; i < maximumDivisors; i ++) {
     std::stringstream reportStream;
     reportStream << "Looking for factors round " << i + 1 << " out of " << maximumDivisors;
-    global << "DEBUG: in the loop" << Logger::endL;
     report.report(reportStream.str());
     if (this->oneFactorProbabilityHalf(i, comments, commentsOnFailure)) {
       return true;
     }
   }
-  global << "DEBUG: out of the loop. " << Logger::endL;
   return this->output->accountReducedFactor(this->current);
 }
 

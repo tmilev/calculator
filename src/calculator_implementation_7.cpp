@@ -2474,12 +2474,12 @@ bool CalculatorFunctions::innerUnionNoRepetition(Calculator& theCommands, const 
   }
   theIndices.setSize(theList.size);
   for (int i = 0; i < theList.size; i ++) {
-    theIndices[i] = theCommands.theExpressionContainer.addNoRepetitionOrReturnIndexFirst(theList[i]);
+    theIndices[i] = theCommands.expressionContainer.addNoRepetitionOrReturnIndexFirst(theList[i]);
   }
   output.children.reserve(numElts);
   output.reset(theCommands, theIndices.size + 1);
   output.addChildAtomOnTop(theCommands.opSequence());
-  output.children.addOnTop(theIndices);
+  output.children.addListOnTop(theIndices);
   return true;
 }
 
@@ -5894,7 +5894,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   }
   HashedList<Expression> knownConsts;
   List<double> knownValues;
-  knownConsts.addOnTop(theCommands.knownDoubleConstants);
+  knownConsts.addListOnTop(theCommands.knownDoubleConstants);
   knownValues.addListOnTop(theCommands.knownDoubleConstantValues);
   Expression xE, yE;
   xE.makeAtom("x", theCommands);

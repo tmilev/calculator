@@ -166,7 +166,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }

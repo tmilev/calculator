@@ -214,8 +214,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline void addOnTop(const Object& o) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);
   }
-  inline void addOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(theList);
+  inline void addListOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addListOnTop(theList);
   }
   inline bool contains(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(o);

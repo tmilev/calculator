@@ -131,7 +131,7 @@ void Calculator::reset() {
   this->ruleStack.reset(*this,this->MaxRuleStacksCached);
   this->cachedRuleStacks.clear();
   // The expression container must be cleared last!
-  this->theExpressionContainer.clear();
+  this->expressionContainer.clear();
 }
 
 void Calculator::initialize() {
@@ -239,7 +239,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
-  this->controlSequences.addOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addListOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");

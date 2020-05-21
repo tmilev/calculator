@@ -1058,7 +1058,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   } else {
     mandatoryFreeVars.addOnTop(input[2]);
   }
-  allowedFreeVars.addOnTop(mandatoryFreeVars);
+  allowedFreeVars.addListOnTop(mandatoryFreeVars);
   if (input.size() > 3) {
     if (input[3].isSequenceNElements()) {
       for (int i = 1; i < input[3].size(); i ++) {

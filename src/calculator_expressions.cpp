@@ -1210,7 +1210,7 @@ const Expression& Expression::operator[](int n) const {
     << n << " out of " << this->children.size - 1
     << " is not contained in the expression container. " << global.fatal;
   }
-  return this->owner->theExpressionContainer[childIndex];
+  return this->owner->expressionContainer[childIndex];
 }
 
 Expression Expression::zero() {
@@ -1236,7 +1236,7 @@ bool Expression::addChildRationalOnTop(const Rational& inputRat) {
 bool Expression::addChildOnTop(const Expression& inputChild) {
   this->checkInitialization();
   this->children.addOnTop(
-    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
+    this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
   );
   return true;
 }
@@ -1247,7 +1247,7 @@ bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
   tempE.makeAtom(TheAtomValue, *this->owner);
   this->children.setObjectAtIndex(
     childIndex,
-    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
@@ -1257,14 +1257,14 @@ bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
   Expression tempE;
   tempE.makeAtom(theAtom, *this->owner);
   this->children.setObjectAtIndex(
-    childIndex, this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    childIndex, this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->checkInitialization();
-  int theIndexOfTheExpression = this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
+  int theIndexOfTheExpression = this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
   this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
   return true;
 }
@@ -2338,14 +2338,19 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   format.flagUseFrac = true;
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
   ElementZmodP sample;
-  if (!element.modulus.isEqualToZero()) {
-    sample = element.modulus.coefficients[0].modulus;
-  }
   format.flagSuppressModP = true;
-  out
-  << sample.toStringPolynomial(element.value, theFormat)
-  << " mod "
-  << sample.toStringPolynomial(element.modulus, theFormat);
+  if (!element.modulus.isEqualToZero()) {
+    sample = element.modulus.coefficients[0];
+    out
+    << sample.toStringPolynomial(element.value, &format)
+    << " mod "
+    << sample.toStringPolynomial(element.modulus, &format);
+  } else {
+    out
+    << element.value.toString(&format)
+    << " mod "
+    << element.modulus.toString(&format);
+  }
   return true;
 }
 

@@ -153,7 +153,7 @@ public:
   Vectors<Rational> SimpleBasisKScaledToActByTwo;
   Vectors<Rational> SimpleBasisKinOrderOfGeneration;
   Vectors<Rational> PositiveRootsK;
-  HashedList<Vector<Rational> > AllRootsK;
+  HashedList<Vector<Rational> > allRootsSubalgebra;
   Selection NilradicalKmods;
   Selection CentralizerKmods;
   Vectors<Rational> HighestRootsK;

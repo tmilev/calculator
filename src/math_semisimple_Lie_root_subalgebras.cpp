@@ -1426,7 +1426,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   HashedList<Vector<Rational> >& AllRoots = this->getAmbientWeyl().rootSystem;
   for (int i = 0; i <AllRoots.size; i ++) {
     Vector<Rational> linComb;
-    if (this->AllRootsK.getIndex(AllRoots[i]) == - 1) {
+    if (this->allRootsSubalgebra.getIndex(AllRoots[i]) == - 1) {
       for (int j = 0; j < theDimension; j ++) {
         linComb[j].makeZero();
         for (int k = 0; k < theDimension; k++) {
@@ -1479,7 +1479,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       tempMat.invert();
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
-        if (this->AllRootsK.getIndex(AllRoots.objects[i]) == - 1) {
+        if (this->allRootsSubalgebra.getIndex(AllRoots.objects[i]) == - 1) {
           for (int j = 0; j < theDimension; j ++) {
             linComb[j].makeZero();
             for (int k = 0; k < theDimension; k++) {
@@ -3867,25 +3867,25 @@ bool RootSubalgebras::isNewSubalgebra(RootSubalgebra& input) {
 
 void RootSubalgebra::computeRootsOfK() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeRootsOfK");
-  this->AllRootsK.clear();
+  this->allRootsSubalgebra.clear();
   HashedList<Vector<Rational> >& ambientRootSystem= this->getAmbientWeyl().rootSystem;
-  this->AllRootsK.setExpectedSize(ambientRootSystem.size);
+  this->allRootsSubalgebra.setExpectedSize(ambientRootSystem.size);
   Vector<Rational> currentRoot;
-  this->AllRootsK.addOnTop(this->SimpleBasisK);
-  for (int i = 0; i < this->AllRootsK.size; i ++) {
+  this->allRootsSubalgebra.addListOnTop(this->SimpleBasisK);
+  for (int i = 0; i < this->allRootsSubalgebra.size; i ++) {
     for (int j = 0; j < this->SimpleBasisK.size; j ++) {
-      currentRoot = this->AllRootsK[i] + this->SimpleBasisK[j];
+      currentRoot = this->allRootsSubalgebra[i] + this->SimpleBasisK[j];
       if (ambientRootSystem.contains(currentRoot)) {
-        this->AllRootsK.addOnTopNoRepetition(currentRoot);
+        this->allRootsSubalgebra.addOnTopNoRepetition(currentRoot);
       }
     }
   }
-  this->PositiveRootsK = this->AllRootsK;
+  this->PositiveRootsK = this->allRootsSubalgebra;
   for (int i = 0; i < this->PositiveRootsK.size; i ++) {
-    this->AllRootsK.addOnTop(- this->PositiveRootsK[i]);
+    this->allRootsSubalgebra.addOnTop(- this->PositiveRootsK[i]);
   }
   if (this->SimpleBasisK.size == 0) {
-    if (this->AllRootsK.size != 0) {
+    if (this->allRootsSubalgebra.size != 0) {
       global.fatal << "Internal check went bad. " << global.fatal;
     }
   }

@@ -536,7 +536,14 @@ public:
     }
     this->setSize(newSize);
   }
-  void setSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void setSize(int theSize); // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void clear() {
+    // <-Registering stack trace forbidden! Multithreading deadlock alert.
+    this->setSize(0);
+  }
+  void setObjectAtIndex(int index, const Object& o) {
+    (*this)[index] = o;
+  }
   void setSizeMakeMatrix(int numRows, int numCols) {
     this->setSize(numRows);
     for (int i = 0; i < numRows; i ++) {
@@ -1105,7 +1112,6 @@ typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignI
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {
 private:
-  void addListOnTop(List<Object>& theList);
   Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int StartingIndex);
@@ -1164,7 +1170,7 @@ public:
       this->adjustHashes();
     }
   }
-  void addOnTop(const List<Object>& theList) {
+  void addListOnTop(const List<Object>& theList) {
     this->setExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
       this->addOnTop(theList[i]);
@@ -1509,8 +1515,8 @@ public:
   void addOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
   }
-  void addOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(theList);
+  void addListOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(theList);
   }
   bool contains(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);

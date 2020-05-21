@@ -1244,7 +1244,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
     if (numTotalWeightsFound > upperBoundDominantWeights && upperBoundDominantWeights > 0) {
@@ -1669,7 +1669,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }

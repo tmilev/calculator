@@ -8046,7 +8046,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeRootSubsystem() {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::computeRootSubsystem");
   this->RootSubsystem.clear();
-  this->RootSubsystem.addOnTop(this->simpleRootsInner);
+  this->RootSubsystem.addListOnTop(this->simpleRootsInner);
   this->RootSubsystem.setExpectedSize(100);
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->RootSubsystem.size; i ++) {
@@ -11288,7 +11288,7 @@ void PiecewiseQuasipolynomial::drawMe(
           }
         }
       }
-      theLatticePointsFinal.addOnTop(latticePoints);
+      theLatticePointsFinal.addListOnTop(latticePoints);
       theLatticePointColors.addListOnTop(tempList);
     }
   }

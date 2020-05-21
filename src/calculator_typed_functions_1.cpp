@@ -841,8 +841,8 @@ bool CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger(
   LargeIntegerUnsigned modulus = polynomial.coefficients[0].modulus;
   LargeInteger constantInteger;
   ElementZmodP constant;
+  constant.makeOne(modulus);
   if (input[2].isInteger(&constantInteger)) {
-    constant.makeOne(modulus);
     constant = constantInteger;
   } else if (input.isOfType(&constant)) {
     if (constant.modulus != modulus) {

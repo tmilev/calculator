@@ -1542,13 +1542,12 @@ unsigned int ElementZmodP::hashFunction() const {
 
 void ElementZmodP::checkIamInitialized() const {
   if (this->modulus.isEqualToZero()) {
-    global.fatal << "Programming error: computing with non-initialized "
-    << "element the ring Z mod p (the number p has not been initialized!)."
+    global.fatal << "Element of Z mod p has non-initialized modulus. "
     << global.fatal;
   }
   if (this->flagDeallocated) {
     global.fatal
-    << "Programming error: use after free of element z mod p. " << global.fatal;
+    << "Use after free of element of Z mod p. " << global.fatal;
   }
 }
 

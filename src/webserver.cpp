@@ -4025,7 +4025,7 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   }
   ArgumentAnalyzer arguments;
   arguments.currentIndex = 1;
-  arguments.commandLineConfigurations.addOnTop(List<std::string> ({
+  arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
     Configuration::portHTTPSOpenSSL
   }));

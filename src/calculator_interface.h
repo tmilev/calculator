@@ -89,8 +89,8 @@ private:
   // are implementation specific and are subject to change.
   // The i^th child of an expression can be accessed as const using operator[](i).
   // The children of an expression are kept as a list of integers indicating the children's
-  // position in Calculator::theExpressionContainer.
-  // Calculator::theExpressionContainer is a Hashed List of references and must not be modified
+  // position in Calculator::expressionContainer.
+  // Calculator::expressionContainer is a Hashed List of references and must not be modified
   // directly in any way.
   // Motivation for this implementation choice. The original implementation
   // had Expression contain all of its children as List<Expression>, making the copy operator=
@@ -99,12 +99,10 @@ private:
   // When processing an expression, one must traverse all of its subtrees.
   // Making temporary copies of all subtrees is then approximately O(n^2),
   // where n^2 is the number of nodes of the tree.
+  // For a tree with 1k nodes this is already unacceptably slow.
   //
-  // For a tree with 1k nodes this is already
-  // unacceptably slow, if it could be avoided.
-  //
-  // If change is to be applied to
-  // most subtrees, then the approximate cost of O(n^2) operations obviously cannot be avoided.
+  // If most subtrees are subject to change, then the
+  // approximate cost of O(n^2) operations seems justified.
   // However, in most computations, subtrees need not be changed - in reality, most expression
   // will arrive to the calculator in reduced or close-to-reduced form.
   //
@@ -120,6 +118,7 @@ private:
   public:
   Calculator* owner;
   int theData;
+  // List<int> children;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
   bool flagDeallocated;
 //////
@@ -1287,7 +1286,7 @@ public:
   Expression ruleStack;
   HashedList<Expression> cachedRuleStacks;
 
-  HashedListReferences<Expression> theExpressionContainer;
+  HashedListReferences<Expression> expressionContainer;
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;

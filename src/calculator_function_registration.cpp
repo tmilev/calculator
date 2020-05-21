@@ -5694,10 +5694,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds polynomials modulo integers. ",
     "a = PolynomialModP(x^2 + x + 7, 5);\n"
-    "b = PolynomialModP(x^2 + 1, 5);\n"
+    "b = 3;\n"
     "a + b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger",
-    "AddPolynomialZmodPToPolynomialZmodP",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger",
+    "AddPolynomialZmodPToInteger",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -8648,7 +8648,7 @@ void Calculator::initializePredefinedWordSplits() {
 void Calculator::initAtomsThatFreezeArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(this->builtInTypes.size + 100);
-  this->atomsThatFreezeArguments.addOnTop(this->builtInTypes);
+  this->atomsThatFreezeArguments.addListOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");

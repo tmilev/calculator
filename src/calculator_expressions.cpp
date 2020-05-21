@@ -1176,8 +1176,8 @@ bool Expression::checkConsistency() const {
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.startsWith(this->owner->opContext())) {
-      global.fatal << "This is a programming error. At the moment of writing, "
-      << "the second child of a built-in type must be a context. It is instead "
+      global.fatal
+      << "The second child of a built-in type must be a context. It is instead "
       << mustBeTheContext.toStringFull() << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
@@ -1207,10 +1207,13 @@ unsigned int Expression::hashFunction(const Expression& input) {
 }
 
 unsigned int Expression::hashFunction() const {
+  unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
   if (this->owner == nullptr) {
+    if (this->children.size == 0) {
+      return result;
+    }
     global.fatal << "Uninitialized expression. " << global.fatal;
   }
-  unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
   int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize - 1);
   for (int i = 0; i < numCycles; i ++) {
     result += this->owner->allChildExpressionHashes[this->children[i]] * someRandomPrimes[i + 1];
@@ -1255,8 +1258,10 @@ int Calculator::addChildExpression(const Expression& child) {
   if (index != - 1) {
     return index;
   }
+  index = this->allChildExpressions.size;
   this->allChildExpressions.addOnTop(child);
   this->allChildExpressionHashes.addOnTop(child.hashFunction());
+  return index;
 }
 
 bool Expression::addChildOnTop(const Expression& inputChild) {

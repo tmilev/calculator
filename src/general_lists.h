@@ -161,18 +161,18 @@ typedef void (*drawClearScreenFunction)();
 class MathRoutines {
 public:
   template <class Coefficient>
-  static bool invertXModN(const Coefficient& X, const Coefficient& N, Coefficient& output) {
+  static bool invertXModN(const Coefficient& x, const Coefficient& n, Coefficient& output) {
     Coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     Coefficient vD[2], vP[2], temp;
     vP[0] = 1;
     vP[1] = 0; // at any given moment, p = vP[0] * N + vP[1] * X
     vD[0] = 0;
     vD[1] = 1; // at any given moment, d = vD[0] * N + vD[1] * X
-    p = N;
-    d = X;
-    d %= N;
+    p = n;
+    d = x;
+    d %= n;
     if (d < 0) {
-      d += N;
+      d += n;
     }
     while (d > 0) {
       q = p / d;
@@ -188,9 +188,9 @@ public:
     if (!(p == 1)) {
       return false;//d and p were not relatively prime.
     }
-    p = vP[1] % N;
+    p = vP[1] % n;
     if (p < 0) {
-      p += N;
+      p += n;
     }
     output = p;
     return true;
@@ -349,8 +349,8 @@ public:
 
 class DrawElementInputOutput {
 public:
-  int TopLeftCornerX;
-  int TopLeftCornerY;
+  int topLeftCornerX;
+  int topLeftCornerY;
   int outputWidth;
   int outputHeight;
 };

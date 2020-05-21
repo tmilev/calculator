@@ -1587,7 +1587,7 @@ StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {
   global.changeDirectory(this->currentFolderPhysicalAbsolute);
 }
 
-void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension) {
+void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& variables, int theDimension) {
   MacroRegisterFunctionWithName("DrawingVariables::drawCoordSystemBuffer");
   Vector<Rational> tempRoot;
   Vector<Rational> zeroRoot;
@@ -1597,19 +1597,19 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     tempRoot.makeEi(theDimension, i);
     std::string tempS;
     tempS = tempRoot.toString();
-    TDV.drawLineBetweenTwoVectorsBufferRational(zeroRoot, tempRoot, "gray", 1);
-    TDV.drawTextAtVectorBufferRational(tempRoot, tempS, "#94c894");
-    TDV.drawCircleAtVectorBufferRational(tempRoot, colorText, 2);
+    variables.drawLineBetweenTwoVectorsBufferRational(zeroRoot, tempRoot, "gray", 1);
+    variables.drawTextAtVectorBufferRational(tempRoot, tempS, "#94c894");
+    variables.drawCircleAtVectorBufferRational(tempRoot, colorText, 2);
   }
-  TDV.theBuffer.basisToDrawCirclesAt.makeEiBasis(theDimension);
+  variables.theBuffer.basisToDrawCirclesAt.makeEiBasis(theDimension);
 }
 
 void DrawingVariables::drawLineBufferOld(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile
+  double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, std::fstream* latexOutFile
 ) {
-  this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, 1);
-  if (LatexOutFile != nullptr) {
-    LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
+  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, 1);
+  if (latexOutFile != nullptr) {
+    LaTeXProcedures::drawline(x1, y1, x2, y2, thePenStyle, colorIndex, *latexOutFile, *this);
   }
 }
 
@@ -1638,15 +1638,15 @@ void DrawingVariables::drawCircleAtVectorBufferDouble(
 }
 
 void DrawingVariables::drawTextDirectly(
-  double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile
+  double x1, double y1, const std::string& inputText, int color, std::fstream* latexOutFile
 ) {
   if (this->theDrawTextFunction != nullptr) {
     this->theDrawTextFunction(
-      X1 - 7, Y1 - 7, inputText.c_str(), static_cast<int>(inputText.length()), color, this->fontSizeNormal
+      x1 - 7, y1 - 7, inputText.c_str(), static_cast<int>(inputText.length()), color, this->fontSizeNormal
     );
   }
-  if (LatexOutFile != nullptr) {
-    LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
+  if (latexOutFile != nullptr) {
+    LaTeXProcedures::drawTextDirectly(x1, y1, inputText, color, *latexOutFile);
   }
 }
 
@@ -10612,8 +10612,8 @@ void DrawOperations::initialize() {
   this->centerX = 300;
   this->centerY = 300;
   this->graphicsUnit = DrawOperations::GraphicsUnitDefault;
-  this->ClickToleranceX = 5;
-  this->ClickToleranceY = 5;
+  this->clickToleranceX = 5;
+  this->clickToleranceY = 5;
   this->SelectedCircleMinus2noneMinus1Center = - 2;
   this->flagRotatingPreservingAngles = true;
   this->flagAnimatingMovingCoordSystem = false;

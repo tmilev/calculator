@@ -2457,7 +2457,7 @@ public:
     bool ascending
   );
   template<class Coefficient>
-  static bool TypeHighestWeightParabolic(
+  static bool typeHighestWeightParabolic(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
@@ -3092,7 +3092,7 @@ bool Calculator::getTypeWeight(
   MacroRegisterFunctionWithName("Calculator::getTypeWeight");
   if (input.size() != 3) {
     return theCommands
-    << "Function TypeHighestWeightParabolic is expected to have two arguments: "
+    << "Function typeHighestWeightParabolic is expected to have two arguments: "
     << "Semisimple algebra type, highest weight in simple coordinates. ";
   }
   const Expression& leftE = input[1];
@@ -3155,7 +3155,7 @@ bool Calculator::getTypeHighestWeightParabolic(
 ) {
   if (!input.isListNElements(4) && !input.isListNElements(3)) {
     return output.makeError(
-      "Function TypeHighestWeightParabolic is "
+      "Function typeHighestWeightParabolic is "
       "expected to have two or three arguments: "
       "SS algebra type, highest weight, [optional] parabolic selection. ",
       theCommands

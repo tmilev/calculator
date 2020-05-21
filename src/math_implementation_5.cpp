@@ -269,9 +269,15 @@ void DrawOperations::drawTextAtVectorBufferDouble(
 }
 
 void DrawingVariables::drawLineDirectly(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawOperations::drawHighlightGroup(
@@ -287,23 +293,29 @@ void DrawOperations::drawHighlightGroup(
 }
 
 void DrawOperations::drawLineBuffer(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
   (void) thePenStyle;
-  (void) ColorIndex;
+  (void) colorIndex;
   (void) lineWidth;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
   theOperation[DrawOperations::fieldPoints].theType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldPoints][0][0] = X1;
-  theOperation[DrawOperations::fieldPoints][0][1] = Y1;
-  theOperation[DrawOperations::fieldPoints][1][0] = X2;
-  theOperation[DrawOperations::fieldPoints][1][1] = Y2;
+  theOperation[DrawOperations::fieldPoints][0][0] = x1;
+  theOperation[DrawOperations::fieldPoints][0][1] = y1;
+  theOperation[DrawOperations::fieldPoints][1][0] = x2;
+  theOperation[DrawOperations::fieldPoints][1][1] = y2;
   this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawTextBuffer(
-  double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
+  double x1, double y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
 ) {
   (void) theFontSize;
   (void) ColorIndex;
@@ -311,8 +323,8 @@ void DrawOperations::drawTextBuffer(
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
   theOperation[DrawOperations::fieldLocation].theType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldLocation][0] = X1;
-  theOperation[DrawOperations::fieldLocation][1] = Y1;
+  theOperation[DrawOperations::fieldLocation][0] = x1;
+  theOperation[DrawOperations::fieldLocation][1] = y1;
   theOperation[DrawOperations::fieldText] = inputText;
   this->theOperations.addOnTop(theOperation);
 }
@@ -380,9 +392,15 @@ int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
 }
 
 void DrawingVariables::drawLineBuffer(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color) {
@@ -400,8 +418,8 @@ void DrawingVariables::drawString(
     std::string tempS;
     tempS = input.at(i);
     this->theBuffer.drawTextBuffer(
-      theDrawData.outputWidth + theDrawData.TopLeftCornerX,
-      theDrawData.outputHeight + theDrawData.TopLeftCornerY,
+      theDrawData.outputWidth + theDrawData.topLeftCornerX,
+      theDrawData.outputHeight + theDrawData.topLeftCornerY,
       tempS,
       0,
       theFontSize,

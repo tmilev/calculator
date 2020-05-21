@@ -822,20 +822,20 @@ bool Calculator::checkOperationHandlers() {
 }
 
 bool Calculator::checkConsistencyAfterInitialization() {
-  this->expressionContainer.grandMasterConsistencyCheck();
+  this->allChildExpressions.grandMasterConsistencyCheck();
   this->evaluatedExpressionsStack.grandMasterConsistencyCheck();
   this->cachedExpressions.grandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
-    this->numberExpectedExpressionsAtInitialization = this->expressionContainer.size;
+    this->numberExpectedExpressionsAtInitialization = this->allChildExpressions.size;
   } else if (
-    this->expressionContainer.size != this->numberExpectedExpressionsAtInitialization
+    this->allChildExpressions.size != this->numberExpectedExpressionsAtInitialization
   ) {
     global.fatal << "Expression container expected to have "
     << this->numberExpectedExpressionsAtInitialization
-    << " elements but instead it has " << this->expressionContainer.size
+    << " elements but instead it has " << this->allChildExpressions.size
     << ". Expression container: ";
-    for (int i = 0; i < this->expressionContainer.size; i ++) {
-      global.fatal << this->expressionContainer[i].toString() << ", ";
+    for (int i = 0; i < this->allChildExpressions.size; i ++) {
+      global.fatal << this->allChildExpressions[i].toString() << ", ";
     }
     global.fatal << global.fatal;
   }
@@ -2565,7 +2565,7 @@ JSData Calculator::toJSONPerformance() {
   << waitingMilliseconds << " ms (~"
   << ( static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
-  moreDetails << "<br>Expressions generated: " << this->expressionContainer.size << ". ";
+  moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->totalPatternMatchesPerformed << "";
@@ -2680,14 +2680,14 @@ std::string Calculator::toString() {
     }
   }
   out << "<hr>";
-  out << "Children expressions (" << this->expressionContainer.size << " total): <br>";
-  int numExpressionsToDisplay = this->expressionContainer.size;
-  if (this->expressionContainer.size > 1000) {
+  out << "Children expressions (" << this->allChildExpressions.size << " total): <br>";
+  int numExpressionsToDisplay = this->allChildExpressions.size;
+  if (this->allChildExpressions.size > 1000) {
     numExpressionsToDisplay = 1000;
     out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->expressionContainer[i].toString() << ", ";
+    out << this->allChildExpressions[i].toString() << ", ";
   }
   out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";

@@ -125,22 +125,7 @@ private:
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
   typedef bool (*ToStringHandler) (const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
 //////
-  void operator=(const Expression& other) {
-    this->theData = other.theData;
-    this->children = other.children;
-    this->owner = other.owner;
-  }
-  void operator=(const Rational& other) {
-    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
-    this->checkInitialization();
-    this->assignValue(other, *this->owner);
-  }
-  void operator=(int other) {
-    MacroRegisterFunctionWithName("Expression::operator=(int)");
-    this->checkInitialization();
-    this->assignValue(other, *this->owner);
-  }
-  friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const Expression& theMon) {
     output << theMon.toString();
     return output;
   }
@@ -242,7 +227,6 @@ private:
   bool isElementaryObject() const;
   bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInType(int* outputWhichType) const;
-  const Expression& operator[](int n) const;
   bool isIntervalRealLine() const;
   bool isSequenceDoubleButNotTripleNested() const;
   bool isSequenceNElements(int N = - 2) const;
@@ -505,23 +489,8 @@ private:
   ) const;
 
   JSData toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
-  static unsigned int hashFunction(const Expression& input) {
-    return input.hashFunction();
-  }
-  unsigned int hashFunction() const {
-    return this->hashFunctionRecursive(0, 1000);
-  }
-  unsigned int hashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
-    if (RecursionDepth > MaxRecursionDepth) {
-      return 0;
-    }
-    unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
-    int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize);
-    for (int i = 0; i < numCycles; i ++) {
-      result += (*this)[i].hashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
-    }
-    return result;
-  }
+  static unsigned int hashFunction(const Expression& input);
+  unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
     this->reset();
   }
@@ -591,7 +560,22 @@ private:
     MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
     Calculator& owner
   );
-  void operator/=(const Expression& other);
+  const Expression& operator[](int n) const;
+  void operator=(const Expression& other) {
+    this->theData = other.theData;
+    this->children = other.children;
+    this->owner = other.owner;
+  }
+  void operator=(const Rational& other) {
+    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
+    this->checkInitialization();
+    this->assignValue(other, *this->owner);
+  }
+  void operator=(int other) {
+    MacroRegisterFunctionWithName("Expression::operator=(int)");
+    this->checkInitialization();
+    this->assignValue(other, *this->owner);
+  }  void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
   Expression operator+(int other);
@@ -1286,7 +1270,8 @@ public:
   Expression ruleStack;
   HashedList<Expression> cachedRuleStacks;
 
-  HashedListReferences<Expression> expressionContainer;
+  HashedListReferences<Expression> allChildExpressions;
+  List<unsigned int> allChildExpressionHashes;
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
@@ -1321,7 +1306,8 @@ public:
   operator bool() const {
     return false;
   }
-
+  // Adds an expression to the global list of expressions that are children of another expression.
+  int addChildExpression(const Expression& child);
   void registerCalculatorFunction(Function& theFun, int indexOp);
   std::string toStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr

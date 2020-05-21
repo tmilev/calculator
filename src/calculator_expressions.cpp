@@ -1202,6 +1202,23 @@ bool Expression::checkConsistency() const {
   return true;
 }
 
+unsigned int Expression::hashFunction(const Expression& input) {
+  return input.hashFunction();
+}
+
+unsigned int Expression::hashFunction() const {
+  if (this->owner == nullptr) {
+    global.fatal << "Uninitialized expression. " << global.fatal;
+  }
+  unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
+  int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize - 1);
+  for (int i = 0; i < numCycles; i ++) {
+    result += this->owner->allChildExpressionHashes[this->children[i]] * someRandomPrimes[i + 1];
+  }
+  return result;
+
+}
+
 const Expression& Expression::operator[](int n) const {
   this->checkInitialization();
   int childIndex = this->children[n];
@@ -1210,7 +1227,7 @@ const Expression& Expression::operator[](int n) const {
     << n << " out of " << this->children.size - 1
     << " is not contained in the expression container. " << global.fatal;
   }
-  return this->owner->expressionContainer[childIndex];
+  return this->owner->allChildExpressions[childIndex];
 }
 
 Expression Expression::zero() {
@@ -1233,10 +1250,19 @@ bool Expression::addChildRationalOnTop(const Rational& inputRat) {
   return this->addChildOnTop(ratE);
 }
 
+int Calculator::addChildExpression(const Expression& child) {
+  int index = this->allChildExpressions.getIndex(child);
+  if (index != - 1) {
+    return index;
+  }
+  this->allChildExpressions.addOnTop(child);
+  this->allChildExpressionHashes.addOnTop(child.hashFunction());
+}
+
 bool Expression::addChildOnTop(const Expression& inputChild) {
   this->checkInitialization();
   this->children.addOnTop(
-    this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
+    this->owner->addChildExpression(inputChild)
   );
   return true;
 }
@@ -1247,7 +1273,7 @@ bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
   tempE.makeAtom(TheAtomValue, *this->owner);
   this->children.setObjectAtIndex(
     childIndex,
-    this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
@@ -1257,14 +1283,14 @@ bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
   Expression tempE;
   tempE.makeAtom(theAtom, *this->owner);
   this->children.setObjectAtIndex(
-    childIndex, this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    childIndex, this->owner->addChildExpression(tempE)
   );
   return true;
 }
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->checkInitialization();
-  int theIndexOfTheExpression = this->owner->expressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
+  int theIndexOfTheExpression = this->owner->addChildExpression(inputChild);
   this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
   return true;
 }

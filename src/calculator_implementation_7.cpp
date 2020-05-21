@@ -2474,7 +2474,7 @@ bool CalculatorFunctions::innerUnionNoRepetition(Calculator& theCommands, const 
   }
   theIndices.setSize(theList.size);
   for (int i = 0; i < theList.size; i ++) {
-    theIndices[i] = theCommands.expressionContainer.addNoRepetitionOrReturnIndexFirst(theList[i]);
+    theIndices[i] = theCommands.addChildExpression(theList[i]);
   }
   output.children.reserve(numElts);
   output.reset(theCommands, theIndices.size + 1);

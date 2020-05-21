@@ -130,8 +130,11 @@ void Calculator::reset() {
   this->RuleStackCacheIndex = - 1;
   this->ruleStack.reset(*this,this->MaxRuleStacksCached);
   this->cachedRuleStacks.clear();
-  // The expression container must be cleared last!
-  this->expressionContainer.clear();
+  // The expression container must be cleared second to last.
+  this->allChildExpressions.clear();
+  // The hashes list below is used in computing the hashes of the list above.
+  // It must therefore be cleared last.
+  this->allChildExpressionHashes.clear();
 }
 
 void Calculator::initialize() {

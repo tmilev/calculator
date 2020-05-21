@@ -1206,14 +1206,28 @@ public:
   int MaxRuleStacksCached;
   int RuleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
-  class EvaluationStats {
+  class EvaluationStatistics {
   public:
-    int expressionEvaluated;
+    int expressionsEvaluated;
     int callsSinceReport;
     int maximumCallsBeforeReportGeneration;
-    EvaluationStats();
+    int totalSubstitutions;
+    int numberOfListsStart;
+    int numberListResizesStart;
+    int numberHashResizesStart;
+    long long int numberOfSmallAdditionsStart;
+    long long int numberOfSmallMultiplicationsStart;
+    long long int numberOfSmallGreatestCommonDivisorsStart;
+    long long int numberOfLargeAdditionsStart;
+    long long int numberOfLargeMultiplicationsStart;
+    long long int numberOfLargeGreatestCommonDivisorsStart;
+    int64_t millisecondsLastLog;
+    int64_t startTimeEvaluationMilliseconds;
+    EvaluationStatistics();
+    void initialize();
+    void reset();
   };
-  EvaluationStats stats;
+  EvaluationStatistics statistics;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
@@ -1250,27 +1264,12 @@ public:
 
   bool flagNoApproximations;
 
-  // bool flagReplaceInputBoxesByValues;
+  bool flagForkingprocessAllowed;
 
-  bool flagforkingprocessAllowed;
-
-  int64_t millisecondsLastLog;
-  ///////////////////////////////////////////////////////////////////////////
-  int numberOfListsStart;
-  int numberListResizesStart;
-  int numberHashResizesStart;
-  long long int numberOfSmallAdditionsStart;
-  long long int numberOfSmallMultiplicationsStart;
-  long long int numberOfSmallGreatestCommonDivisorsStart;
-  long long int numberOfLargeAdditionsStart;
-  long long int numberOfLargeMultiplicationsStart;
-  long long int numberOfLargeGreatestCommonDivisorsStart;
-  ////////////////////////////////////////////////
   int totalPatternMatchesPerformed;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
-  // std::vector<std::stringstream> theLogs;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStacK;
@@ -1301,7 +1300,6 @@ public:
   std::string outputCommentsString;
   std::string parsingLog;
   ObjectContainer theObjectContainer;
-  int64_t startTimeEvaluationMilliseconds;
 
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
@@ -2579,7 +2577,6 @@ public:
   void reset();
   void initialize();
   void initializeToStringHandlers();
-  void initializeComputationStatistics();
   void initializePredefinedWordSplits();
   void initAtomsThatFreezeArguments();
   void initializeAtomsNonCacheable();

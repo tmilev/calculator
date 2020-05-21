@@ -2547,7 +2547,7 @@ void Calculator::computeAutoCompleteKeyWords() {
 JSData Calculator::toJSONPerformance() {
   MacroRegisterFunctionWithName("Calculator::toStringPerformance");
   int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
-  int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
+  int64_t computationMilliseconds = elapsedMilliseconds - this->statistics.startTimeEvaluationMilliseconds;
   int64_t requestMilliseconds = elapsedMilliseconds - global.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
   JSData result;
@@ -2566,49 +2566,50 @@ JSData Calculator::toJSONPerformance() {
   << ( static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
   moreDetails << "<br>Expressions generated: " << this->theExpressionContainer.size << ". ";
-  moreDetails << "<br>Expressions evaluated: " << this->stats.expressionEvaluated << ". ";
+  moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->totalPatternMatchesPerformed << "";
   if (this->DepthRecursionReached > 0) {
     moreDetails << "<br>maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
-  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->numberOfListsStart))
+  << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))
   << ", total: " << GlobalStatistics::numListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->numberListResizesStart))
+  << (GlobalStatistics::numListResizesTotal - static_cast<unsigned>(this->statistics.numberListResizesStart))
   << ", total: " << GlobalStatistics::numListResizesTotal
-  << "<br> # hash resizing: computation: " << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->numberHashResizesStart))
+  << "<br> # hash resizing: computation: "
+  << (GlobalStatistics::numHashResizes - static_cast<unsigned>(this->statistics.numberHashResizesStart))
   << ", total: " << GlobalStatistics::numHashResizes;
   if (Rational::totalSmallAdditions > 0) {
     moreDetails << "<br>Small rational additions: computation: "
-    << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->numberOfSmallAdditionsStart)
+    << Rational::totalSmallAdditions - static_cast<unsigned long long>(this->statistics.numberOfSmallAdditionsStart)
     << ", total: " << Rational::totalSmallAdditions;
   }
   if (Rational::totalSmallMultiplications > 0) {
     moreDetails << "<br>Small rational multiplications: computation: "
-    << Rational::totalSmallMultiplications - static_cast<unsigned long long>(this->numberOfSmallMultiplicationsStart)
+    << Rational::totalSmallMultiplications - static_cast<unsigned long long>(this->statistics.numberOfSmallMultiplicationsStart)
     << ", total: " << Rational::totalSmallMultiplications;
   }
   if (Rational::totalSmallGreatestCommonDivisors > 0) {
     moreDetails << "<br>Small gcd calls: computation: "
-    << Rational::totalSmallGreatestCommonDivisors - static_cast<unsigned long long>(this->numberOfSmallGreatestCommonDivisorsStart)
+    << Rational::totalSmallGreatestCommonDivisors - static_cast<unsigned long long>(this->statistics.numberOfSmallGreatestCommonDivisorsStart)
     << ", total: " << Rational::totalSmallGreatestCommonDivisors;
   }
   if (Rational::totalLargeAdditions > 0) {
     moreDetails << "<br>Large integer additions: "
-    << Rational::totalLargeAdditions - static_cast<unsigned long long>(this->numberOfLargeAdditionsStart)
+    << Rational::totalLargeAdditions - static_cast<unsigned long long>(this->statistics.numberOfLargeAdditionsStart)
     << ", total: "
     << Rational::totalLargeAdditions;
   }
   if (Rational::totalLargeMultiplications > 0) {
     moreDetails << "<br>Large integer multiplications: computation: "
-    << Rational::totalLargeMultiplications - static_cast<unsigned long long>(this->numberOfLargeMultiplicationsStart)
+    << Rational::totalLargeMultiplications - static_cast<unsigned long long>(this->statistics.numberOfLargeMultiplicationsStart)
     << ", total: " << Rational::totalLargeMultiplications;
   }
   if (Rational::totalLargeGreatestCommonDivisors > 0) {
     moreDetails << "<br>Large gcd calls: "
-    << Rational::totalLargeGreatestCommonDivisors - static_cast<unsigned long long>(this->numberOfLargeGreatestCommonDivisorsStart)
+    << Rational::totalLargeGreatestCommonDivisors - static_cast<unsigned long long>(this->statistics.numberOfLargeGreatestCommonDivisorsStart)
     << ", total: " << Rational::totalLargeGreatestCommonDivisors;
   }
   std::stringstream millisecondsStream;
@@ -2926,7 +2927,7 @@ void ObjectContainer::reset() {
   this->theWeightsPoly.clear();
   this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.clear();
-  this->pseudoRandom.setRandomSeedSmall(static_cast<int>(time(nullptr)));
+  this->pseudoRandom.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   this->theUserInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();

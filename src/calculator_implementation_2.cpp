@@ -146,17 +146,19 @@ std::string Calculator::toStringRuleStatusUser() {
 
 void Calculator::logTime() {
   int64_t currentMilliseconds = global.getElapsedMilliseconds();
-  *this << "<br>" << currentMilliseconds - this->millisecondsLastLog
-  << " ms since last log; " << currentMilliseconds - this->startTimeEvaluationMilliseconds
+  *this << "<br>" << currentMilliseconds - this->statistics.millisecondsLastLog
+  << " ms since last log; " << currentMilliseconds - this->statistics.startTimeEvaluationMilliseconds
   << " ms since start. ";
-  this->millisecondsLastLog = currentMilliseconds;
+  this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
 void Calculator::logFunctionWithTime(Function& inputF) {
+  this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
     return;
   }
-  *this << "<hr>Built-in substitution: " << inputF.toStringSummary();
+  *this << "<hr>Built-in substitution " << this->statistics.totalSubstitutions
+  << ": " << inputF.toStringSummary();
   this->logTime();
   *this << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->ruleStack.size();
@@ -934,8 +936,8 @@ bool Calculator::evaluateExpression(
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
-  theCommands.stats.expressionEvaluated ++;
-  theCommands.stats.callsSinceReport ++;
+  theCommands.statistics.expressionsEvaluated ++;
+  theCommands.statistics.callsSinceReport ++;
   Calculator::EvaluateLoop state(theCommands);
   state.output = &outpuT;
   state.history = outputHistory;
@@ -944,10 +946,10 @@ bool Calculator::evaluateExpression(
   }
   state.opIndexParent = opIndexParentIfAvailable;
   if (
-    theCommands.stats.callsSinceReport >=
-    theCommands.stats.maximumCallsBeforeReportGeneration
+    theCommands.statistics.callsSinceReport >=
+    theCommands.statistics.maximumCallsBeforeReportGeneration
   ) {
-    theCommands.stats.callsSinceReport = 0;
+    theCommands.statistics.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
     state.theReport.report(reportStream.str());
@@ -1137,7 +1139,7 @@ bool Calculator::parseAndExtractExpressions(
   return result;
 }
 
-void Calculator::initializeComputationStatistics() {
+void Calculator::EvaluationStatistics::initialize() {
   this->startTimeEvaluationMilliseconds      = global.getElapsedMilliseconds();
   this->millisecondsLastLog                  = this->startTimeEvaluationMilliseconds;
   this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
@@ -1153,7 +1155,7 @@ void Calculator::initializeComputationStatistics() {
 
 void Calculator::evaluate(const std::string& theInput) {
   MacroRegisterFunctionWithName("Calculator::evaluate");
-  this->initializeComputationStatistics();
+  this->statistics.initialize();
   this->inputString = theInput;
   this->parseAndExtractExpressions(
     theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStacK, &this->syntaxErrors

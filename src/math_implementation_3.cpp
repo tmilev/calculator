@@ -6319,7 +6319,7 @@ void ElementWeylGroup::makeFromRhoImage(const Vector<Rational>& inputRhoImage, W
   int theRank = this->owner->getDimension();
   this->generatorsLastAppliedFirst.setSize(0);
   Vector<Rational> theVector = inputRhoImage;
-  simpleReflection theGen;
+  SimpleReflection theGen;
   while (theVector != this->owner->rho) {
     for (int i = 0; i < theRank; i ++) {
       if (this->owner->getScalarProductSimpleRoot(theVector, i) < 0) {
@@ -6454,7 +6454,7 @@ bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
 }
 
 void ElementWeylGroup::multiplyOnTheRightBySimpleReflection(int reflectionIndex) {
-  simpleReflection theGen;
+  SimpleReflection theGen;
   theGen.makeSimpleReflection(reflectionIndex);
   this->generatorsLastAppliedFirst.addOnTop(theGen);
 }

@@ -850,7 +850,7 @@ void WeylGroupData::raiseToDominantWeight(
   }
   Coefficient theScalarProd;
   int theDim = this->getDimension();
-  simpleReflection theGen;
+  SimpleReflection theGen;
   if (raisingElt != nullptr) {
     raisingElt->makeIdentity(*this);
   }
@@ -937,7 +937,7 @@ bool WeylGroupData::generateOrbit(
     outputSubset->addOnTop(currentElt);
   }
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
-  simpleReflection theGen;
+  SimpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {
       currentRoot = output[i];

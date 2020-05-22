@@ -1376,8 +1376,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorization<Coefficient, OneFactorFinder>::factor(
   const Polynomial<Coefficient>& input,
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
@@ -1391,7 +1391,7 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
-  oneFactorFinder algorithm;
+  OneFactorFinder algorithm;
   algorithm.output = this;
   while (this->nonReduced.size > 0) {
     this->current = this->nonReduced.popLastObject();
@@ -1406,8 +1406,8 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountNonReducedFactor(
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountNonReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorization::accountNonReducedFactor");
@@ -1427,8 +1427,8 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountNonReducedFac
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor(
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorization::accountReducedFactor");
@@ -1453,8 +1453,8 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::checkFactorization() const {
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorization<Coefficient, OneFactorFinder>::checkFactorization() const {
   MacroRegisterFunctionWithName("Polynomial::checkFactorization");
   Polynomial<Coefficient> checkComputations;
   checkComputations.makeConstant(this->constantFactor);
@@ -1473,8 +1473,8 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::checkFactorization()
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-std::string PolynomialFactorization<Coefficient, oneFactorFinder>::toStringResult(
+template <class Coefficient, class OneFactorFinder>
+std::string PolynomialFactorization<Coefficient, OneFactorFinder>::toStringResult(
   FormatExpressions *theFormat
 ) const {
   std::stringstream out;

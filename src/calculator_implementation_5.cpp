@@ -2987,9 +2987,6 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     return theCommands << "Factoring zero not allowed. ";
   }
   LargeInteger thePrime = polynomial.content.coefficients[0].modulus;
-  if (!input[2].isInteger(&thePrime)) {
-    return false;
-  }
   if (thePrime < 0) {
     return theCommands << "The modulus: " << thePrime << " is not positive. ";
   }
@@ -3005,9 +3002,19 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   comments << "Converted polynomial: \\("
   << polynomial.content.toString(&result.format) << "\\)<br>";
   if (!result.factor(polynomial.content, &comments, &comments)) {
-    out << "Failed to factor. " << comments.str();
+    out << "Failed to factor. " << comments.str()
+    << "Factorization so far: " << result.toStringResult(&result.format);
     return output.assignValue(out.str(), theCommands);
   }
-  out << "Factorization success: " << result.toStringResult(&result.format);
-  return output.assignValue(out.str(), theCommands);
+  theCommands << "Factorization success: " << result.toStringResult(&result.format);
+  List<Expression> factorsList;
+  Expression constant;
+  constant.assignValue(result.constantFactor, theCommands);
+  factorsList.addOnTop(constant);
+  for (int i = 0; i < result.reduced.size; i ++) {
+    Expression next;
+    next.assignValueWithContext(result.reduced[i], polynomial.context, theCommands);
+    factorsList.addOnTop(next);
+  }
+  return output.makeSequence(theCommands, &factorsList);
 }

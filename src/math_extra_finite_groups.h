@@ -383,9 +383,9 @@ struct SimpleReflectionOrOuterAutomorphism {
   }
 };
 
-struct simpleReflection {
+struct SimpleReflection {
   int index;
-  simpleReflection() {
+  SimpleReflection() {
     this->index = - 1;
   }
   std::string toString() const;
@@ -395,10 +395,10 @@ struct simpleReflection {
   unsigned int hashFunction() const {
     return static_cast<unsigned>(index);
   }
-  bool operator==(const simpleReflection& other) const {
+  bool operator==(const SimpleReflection& other) const {
     return this->index == other.index;
   }
-  bool operator>(const simpleReflection& right) const {
+  bool operator>(const SimpleReflection& right) const {
     return this->index > right.index;
   }
 };
@@ -422,7 +422,7 @@ class ElementWeylGroup {
   }
 public:
   WeylGroupData* owner;
-  List<simpleReflection> generatorsLastAppliedFirst;
+  List<SimpleReflection> generatorsLastAppliedFirst;
   bool flagDeallocated;
   ElementWeylGroup(const ElementWeylGroup& other) {
     this->flagDeallocated = false;

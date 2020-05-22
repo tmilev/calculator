@@ -2875,7 +2875,7 @@ public:
   bool isEqualToZero() const;
 };
 
-template <class Coefficient, class oneFactorFinder>
+template <class Coefficient, class OneFactorFinder>
 class PolynomialFactorization {
 public:
   Polynomial<Coefficient> original;

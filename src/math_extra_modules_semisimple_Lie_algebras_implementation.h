@@ -1259,7 +1259,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
   ElementWeylGroup tempWelt;
   int wordCounter = 0;
-  simpleReflection aGen;
+  SimpleReflection aGen;
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];

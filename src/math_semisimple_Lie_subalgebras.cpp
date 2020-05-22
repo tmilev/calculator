@@ -6771,7 +6771,7 @@ std::string SimpleReflectionOrOuterAutomorphism::toString() const {
   return out.str();
 }
 
-std::string simpleReflection::toString() const {
+std::string SimpleReflection::toString() const {
   std::stringstream out;
   out << "s_{";
   out << this->index + 1;

@@ -291,14 +291,16 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
   int* whichtotalDegree
 ) const {
-  int whichtotalDegreeContainer = 0;
+  int maximum = 0;
+  int current = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->monomials[i].hasSmallIntegralPositivePowers(&whichtotalDegreeContainer)) {
+    if (!this->monomials[i].hasSmallIntegralPositivePowers(&current)) {
       return false;
     }
+    maximum = MathRoutines::maximum(maximum, current);
   }
   if (whichtotalDegree != nullptr) {
-    *whichtotalDegree = whichtotalDegreeContainer;
+    *whichtotalDegree = maximum;
   }
   return true;
 }
@@ -391,6 +393,24 @@ bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
 }
 
 template <class Coefficient>
+void Polynomial<Coefficient>::fillSylvesterMatrix(
+  const Polynomial<Coefficient>& polynomial,
+  int columnOffset,
+  Matrix<Coefficient>& output
+) {
+  int totalPower = polynomial.totalDegreeInt();
+  for (int i = 0; i < polynomial.size(); i ++) {
+    int power = polynomial.monomials[i].totalDegreeInt();
+    const Coefficient& coefficient = polynomial.coefficients[i];
+    for (int j = 0; j < totalPower + 1; j ++) {
+      int row = totalPower - power + j;
+      int column = j + columnOffset;
+      output(row, column) = coefficient;
+    }
+  }
+}
+
+template <class Coefficient>
 bool Polynomial<Coefficient>::sylvesterMatrix(
   const Polynomial& left,
   const Polynomial& right,
@@ -414,6 +434,29 @@ bool Polynomial<Coefficient>::sylvesterMatrix(
     }
     return false;
   }
+  int leftPower, rightPower;
+  if (!left.hasSmallIntegralPositivePowers(&leftPower) || !right.hasSmallIntegralPositivePowers(&rightPower)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Polynomial powers are not small, positive or integral. ";
+    }
+    return false;
+  }
+  int maximumDimension = 1000;
+  int dimension = leftPower + rightPower + 2;
+  if (dimension > maximumDimension) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The sylvester matrix is too large: "
+      << dimension << " by " << dimension
+      << ", the maximum allowed is: " << maximumDimension << " by "
+      << maximumDimension << ". ";
+    }
+    return false;
+  }
+  output.initialize(dimension, dimension);
+  output.makeZero(left.coefficients[0].zero());
+  Polynomial<Coefficient>::fillSylvesterMatrix(left, 0, output);
+  Polynomial<Coefficient>::fillSylvesterMatrix(right, leftPower + 1, output);
+  return true;
 }
 
 template <class Coefficient>

@@ -33,6 +33,7 @@ testFileWritePermissionsSSsas.txt
 *.aux
 *.out
 *.pdf
+*.gz
 results/*
 
 src/calculator.pro.user

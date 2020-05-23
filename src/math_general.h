@@ -493,12 +493,13 @@ class Matrix {
   friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Matrix<Coefficient>& theMat);
   //friend std::iostream& operator>> <Coefficient>(std::iostream& input, Matrix<Coefficient>& theMat);
 public:
-  int numberOfRows; int ActualNumRows;
-  int numberOfColumns; int ActualNumCols;
+  int numberOfRows;
+  int actualNumberOfRows;
+  int numberOfColumns;
+  int actualNumberOfColumns;
   Coefficient** elements;
-  static bool flagComputingDebugInfo;
   bool flagDeallocated;
-  void initialize(int r, int c);
+  void initialize(int desiredNumberOfRows, int desiredNumberOfColumns);
   void releaseMemory();
   bool isPositiveDefinite();
   bool isNonNegativeAllEntries() {
@@ -511,11 +512,11 @@ public:
     }
     return true;
   }
-  void resize(int r, int c, bool PReserveValues, const Coefficient* ringZero = nullptr);
-  Matrix(): numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(nullptr), flagDeallocated(false) {
+  void resize(int desiredRows, int desiredColumns, bool preserveValues, const Coefficient* ringZero = nullptr);
+  Matrix(): numberOfRows(0), actualNumberOfRows(0), numberOfColumns(0), actualNumberOfColumns(0), elements(nullptr), flagDeallocated(false) {
   }
   Matrix(const Matrix<Coefficient>& other):
-    numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(0), flagDeallocated(false) {
+    numberOfRows(0), actualNumberOfRows(0), numberOfColumns(0), actualNumberOfColumns(0), elements(0), flagDeallocated(false) {
     *this = other;
   }
   ~Matrix() {
@@ -831,8 +832,8 @@ public:
   Coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->numberOfRows || j < 0 || j >= this->numberOfColumns) {
       global.fatal
-      << "This is a programming error: requesting row, column indexed by "
-      << i << " and " << j << " but I am a matrix with "
+      << "Request of (row, column) with index ("
+      << i << ", " << j << "), but the present matrix has "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " colums. " << global.fatal;
     }
@@ -1335,7 +1336,7 @@ bool Vectors<Coefficient>::conesIntersect(
 }
 
 template <typename Element>
-void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* const ringZero) {
+void Matrix<Element>::resize(int r, int c, bool preserveValues, const Element* const ringZero) {
   if (r < 0) {
     r = 0;
   }
@@ -1351,9 +1352,9 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
     return;
   }
   Element** newElements = nullptr;
-  int newActualNumCols = MathRoutines::maximum(this->ActualNumCols, c);
-  int newActualNumRows = MathRoutines::maximum(this->ActualNumRows, r);
-  if (r > this->ActualNumRows || c > this->ActualNumCols) {
+  int newActualNumCols = MathRoutines::maximum(this->actualNumberOfColumns, c);
+  int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
+  if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
     newElements  = new Element * [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter += newActualNumRows;
@@ -1369,7 +1370,7 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
   }
   int firstInvalidRow = MathRoutines::minimum(this->numberOfRows, r);
   int firstInvalidCol = MathRoutines::minimum(this->numberOfColumns, c);
-  if (PReserveValues && newElements != nullptr) {
+  if (preserveValues && newElements != nullptr) {
     for (int j = 0; j < firstInvalidRow; j ++) {
       for (int i = 0; i < firstInvalidCol; i ++) {
         newElements[j][i] = this->elements[j][i];
@@ -1377,7 +1378,7 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
     }
   }
   if (ringZero != nullptr) {
-    if (!PReserveValues) {
+    if (!preserveValues) {
       firstInvalidRow = 0;
       firstInvalidCol = 0;
     }
@@ -1391,8 +1392,8 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
   if (newElements != nullptr) {
     this->releaseMemory();
     this->elements = newElements;
-    this->ActualNumCols = newActualNumCols;
-    this->ActualNumRows = newActualNumRows;
+    this->actualNumberOfColumns = newActualNumCols;
+    this->actualNumberOfRows = newActualNumRows;
   }
   this->numberOfColumns = c;
   this->numberOfRows = r;
@@ -1467,19 +1468,19 @@ void Matrix<Element>::operator=(const Matrix<Element>& m) {
 
 template <typename Element>
 void Matrix<Element>::releaseMemory() {
-  for (int i = 0; i < this->ActualNumRows; i ++) {
+  for (int i = 0; i < this->actualNumberOfRows; i ++) {
     delete [] this->elements[i];
   }
   delete [] this->elements;
 #ifdef AllocationLimitsSafeguard
-GlobalStatistics::globalPointerCounter -= this->ActualNumRows * this->ActualNumCols + this->ActualNumRows;
+GlobalStatistics::globalPointerCounter -= this->actualNumberOfRows * this->actualNumberOfColumns + this->actualNumberOfRows;
   GlobalStatistics::checkPointerCounters();
 #endif
   this->elements = nullptr;
   this->numberOfColumns = 0;
   this->numberOfRows = 0;
-  this->ActualNumRows = 0;
-  this->ActualNumCols = 0;
+  this->actualNumberOfRows = 0;
+  this->actualNumberOfColumns = 0;
 }
 
 template <typename Coefficient>
@@ -1821,8 +1822,10 @@ void Matrix<Element>::makeIdentity(
 }
 
 template <typename Element>
-void Matrix<Element>::initialize(int r, int c) {
-  this->resize(r, c, false);
+void Matrix<Element>::initialize(
+  int desiredNumberOfRows, int desiredNumberOfColumns
+) {
+  this->resize(desiredNumberOfRows, desiredNumberOfColumns, false);
 }
 
 class FormatExpressions {
@@ -2611,6 +2614,12 @@ class PolynomialOrder {
 
 template<class Coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
+private:
+  static void fillSylvesterMatrix(
+    const Polynomial<Coefficient>& polynomial,
+    int columnOffset,
+    Matrix<Coefficient>& output
+  );
 public:
   friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Polynomial<Coefficient>& input);
   Polynomial(int x) {
@@ -2785,6 +2794,13 @@ public:
   void operator=(const Polynomial<otherType>& other);
   void operator=(const Coefficient& other);
   void operator=(int other);
+  // For polynomials A = a_0 x^n + ..., B = b_0 x^m + ...,
+  // we define the Sylvester matrix as the matrix:
+  // ( a_0  0  0 ...  0  b_1  0  0 ...  0  )
+  // ( a_1 a_0 0 ...  0  b_2 b_1 0 ...  0  )
+  // (               ...                   )
+  // ( 0    0  0 ... a_n  0   0  0 ... b_m ).
+  // See https://en.wikipedia.org/wiki/Resultant.
   static bool sylvesterMatrix(
     const Polynomial& left,
     const Polynomial& right,

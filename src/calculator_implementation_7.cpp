@@ -9374,23 +9374,28 @@ public:
     }
     return false;
   }
-  std::string GetDisplayString(const Expression& input) {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetDisplayString");
+  std::string getDisplayString(const Expression& input) {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::getDisplayString");
     std::stringstream out;
     if (this->flagUseFullTree) {
       std::string atomName;
-      if (input.isOperation(&atomName)) {
+       global.comments << "DEBUG Here I am 0.";
+       if (input.isOperation(&atomName)) {
+        global.comments << "DEBUG Here I am 1.";
         if (atomName != "...") {
           out << input.theData;
         } else {
           out << "...";
         }
       } else {
+       global.comments << "DEBUG Here I am 0.5.";
         out << input.toString();
       }
     } else {
+        global.comments << "DEBUG Here I am 2.";
       out << input.toString();
     }
+       global.comments << "DEBUG Here I am 3.";
     return out.str();
   }
   void ComputeCurrentEContributionToNextLayer() {
@@ -9401,7 +9406,7 @@ public:
     for (int i = 0; i < this->currentEchildrenTruncated.size; i ++) {
       this->arrows[this->indexCurrentChild].addOnTop(this->DisplayedEstrings.size);
       this->AddStringTruncate(
-        this->GetDisplayString(this->currentEchildrenTruncated[i]),
+        this->getDisplayString(this->currentEchildrenTruncated[i]),
         this->isLeaf(this->currentEchildrenTruncated[i])
       );
       this->arrows.addOnTop(emptyArrows);

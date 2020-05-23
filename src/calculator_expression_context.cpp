@@ -66,6 +66,9 @@ Expression ExpressionContext::toExpression() const {
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     result.addChildOnTop(this->toExpressionSemisimpleLieAlgebra());
   }
+  if (this->defaultModulus != 0) {
+    result.addChildOnTop(this->toExpressionDefaultModulus());
+  }
   if (this->variables.size > 0) {
     result.addChildOnTop(this->toExpressionPolynomialVariables());
   }
@@ -73,6 +76,13 @@ Expression ExpressionContext::toExpression() const {
     result.addChildOnTop(this->toExpressionDifferntialOperators());
   }
   return result;
+}
+
+Expression ExpressionContext::toExpressionDefaultModulus() const {
+  Expression modularContext(*this->owner);
+  modularContext.addChildAtomOnTop(this->owner->opMod());
+  modularContext.addChildRationalOnTop(this->defaultModulus);
+  return modularContext;
 }
 
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
@@ -188,6 +198,10 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
   return this->variables[variableIndex];
 }
 
+void ExpressionContext::setDefaultModulus(const LargeIntegerUnsigned& input) {
+  this->defaultModulus = input;
+}
+
 void ExpressionContext::setIndexAmbientSemisimpleLieAlgebra(
   int index
 ) {
@@ -254,6 +268,9 @@ bool ExpressionContext::fromExpressionOneContext(
   if (input.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
     return this->fromExpressionSemisimpleLieAlgebra(input);
   }
+  if (input.startsWith(this->owner->opMod())) {
+    return this->fromExpressionDefaultModulus(input);
+  }
   return *this->owner << "Uknown context type. ";
 }
 
@@ -303,6 +320,34 @@ bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   }
   this->indexAmbientSemisimpleLieAlgebra = input[1].theData;
   return true;
+}
+
+bool ExpressionContext::fromExpressionDefaultModulus(
+  const Expression& input
+) {
+  MacroRegisterFunctionWithName("Expression::fromExpressionSemisimpleLieAlgebra");
+  if (input.size() != 2) {
+    return *this->owner << "Corrupt modulus " << input.toString();
+  }
+  if (!input[1].isIntegerNonNegative(&this->defaultModulus)) {
+    return *this->owner
+    << "Corrupt modulus: modulus needs to be a non-negative integer: "
+    << input.toString();
+  }
+  return true;
+}
+
+bool ExpressionContext::mergeModuli(
+  const ExpressionContext& other, ExpressionContext& outputContext
+) {
+  outputContext.defaultModulus = this->defaultModulus;
+  if (outputContext.defaultModulus == 0) {
+    outputContext.defaultModulus = other.defaultModulus;
+  }
+  if (other.defaultModulus == 0 || this->defaultModulus == 0) {
+    return true;
+  }
+  return outputContext.defaultModulus == other.defaultModulus;
 }
 
 bool ExpressionContext::mergeSemisimpleLieAlgebraContexts(
@@ -428,6 +473,9 @@ bool ExpressionContext::mergeContexts(
     return false;
   }
   outputContext.owner = this->owner;
+  if (!this->mergeModuli(other, outputContext)) {
+    return false;
+  }
   if (!this->mergeSemisimpleLieAlgebraContexts(other, outputContext)) {
     return false;
   }

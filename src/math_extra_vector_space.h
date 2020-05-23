@@ -147,7 +147,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
     int j = i;
     for (; (j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++);
     if (jj < j) {
-      if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
+      if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
         fastbasis.numberOfRows ++;
       } else {
         fastbasis.resize(fastbasis.numberOfRows + 1,fastbasis.numberOfColumns, true);
@@ -176,7 +176,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
     return false;
   }
   // this should take the same amount of time either way
-  if (fastbasis.ActualNumRows >= fastbasis.numberOfRows + 1) {
+  if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
     fastbasis.numberOfRows ++;
   } else {
     fastbasis.resize(fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true);

@@ -21,6 +21,13 @@ public:
   static bool factorPolynomialModPrime(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   static bool sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  template<class Coefficient>
+  static bool sylvesterMatrixFromPolynomials(
+    Calculator& calculator,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Expression& output
+  );
 };
 
 #endif // vpfHeaderCalculatorFunctionsPolynomial

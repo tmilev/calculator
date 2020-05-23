@@ -620,7 +620,14 @@ private:
 
 class ExpressionContext {
 private:
+  HashedList<Expression> variables;
+  List<Expression> differentialOperatorVariables;
+  LargeIntegerUnsigned defaultModulus;
   bool mergeSemisimpleLieAlgebraContexts(
+    const ExpressionContext& other,
+    ExpressionContext& outputContext
+  );
+  bool mergeModuli(
     const ExpressionContext& other,
     ExpressionContext& outputContext
   );
@@ -636,8 +643,6 @@ private:
     Selection &differentialOperatorVariablesFound,
     ExpressionContext& outputContext
   ) const;
-  HashedList<Expression> variables;
-  List<Expression> differentialOperatorVariables;
 public:
   Calculator* owner;
   int indexAmbientSemisimpleLieAlgebra;
@@ -663,6 +668,7 @@ public:
   bool setVariablesFromStrings(const List<std::string>& inputVariables);
   bool setAmbientSemisimpleLieAlgebra(SemisimpleLieAlgebra& input);
   void setIndexAmbientSemisimpleLieAlgebra(int index);
+  void setDefaultModulus(const LargeIntegerUnsigned& input);
   void getFormat(FormatExpressions& output) const;
   FormatExpressions getFormat() const;
   Expression getVariable(int variableIndex) const;
@@ -700,6 +706,8 @@ public:
   bool fromExpressionPolynomialVariables(const Expression& input);
   bool fromExpressionDifferentialOperatorVariables(const Expression& input);
   bool fromExpressionSemisimpleLieAlgebra(const Expression& input);
+  bool fromExpressionDefaultModulus(const Expression& input);
+  Expression toExpressionDefaultModulus() const;
   Expression toExpressionSemisimpleLieAlgebra() const;
   Expression toExpressionPolynomialVariables() const;
   Expression toExpressionDifferntialOperators() const;

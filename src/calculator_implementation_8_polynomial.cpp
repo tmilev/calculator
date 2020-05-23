@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
+#include "calculator_inner_typed_functions.h"
 #include "calculator_functions_polynomial.h"
 
 template <>
@@ -319,6 +320,23 @@ bool CalculatorFunctionsPolynomial::factorPolynomial(Calculator& calculator, con
   return output.makeSequence(calculator, &resultSequence);
 }
 
+template <class Coefficient>
+bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+  Calculator& calculator,
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  Expression& output
+) {
+  Matrix<Coefficient> result;
+  std::stringstream commentsOnFailure;
+  if (!Polynomial<Coefficient>::sylvesterMatrix(
+    left, right, result, &commentsOnFailure
+  )) {
+    return output.makeError(commentsOnFailure.str(), calculator);
+  }
+  return output.assignMatrix(result, calculator, nullptr, false);
+}
+
 bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::sylvesterMatrix");
   if (input.size() != 3) {
@@ -336,7 +354,36 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     )) {
       return false;
     }
-
+    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+      calculator,
+      leftPolynomialModular.content,
+      rightPolynomialModular.content,
+      output
+    );
+  }
+  Vector<Polynomial<Rational> > inputs;
+  if (calculator.getVectorFromFunctionArguments(
+    input,
+    inputs,
+    nullptr,
+    2,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+      calculator, inputs[0], inputs[1], output
+    );
+  }
+  Vector<Polynomial<AlgebraicNumber> > inputsAlgebraic;
+  if (calculator.getVectorFromFunctionArguments(
+    input,
+    inputsAlgebraic,
+    nullptr,
+    2,
+    CalculatorConversions::functionPolynomial<AlgebraicNumber>
+  )) {
+    return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
+      calculator, inputs[0], inputs[1], output
+    );
   }
   return false;
 }

@@ -1411,16 +1411,17 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
   )) {
     return false;
   }
-  LargeInteger theModulus;
-  if (!input[2].isInteger(&theModulus)) {
+  LargeInteger modulus;
+  if (!input[2].isInteger(&modulus)) {
     return false;
   }
-  if (theModulus <= 0) {
-    return calculator << "The modulus: " << theModulus << " is not positive. ";
+  if (modulus <= 0) {
+    return calculator << "The modulus: " << modulus << " must be non-negative. ";
   }
   Polynomial<ElementZmodP> converted;
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
-    polynomial.content, converted, theModulus.value
+    polynomial.content, converted, modulus.value
   );
+  polynomial.context.setDefaultModulus(modulus.value);
   return output.assignValueWithContext(converted, polynomial.context, calculator);
 }

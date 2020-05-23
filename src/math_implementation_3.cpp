@@ -38,7 +38,6 @@ Rational PartFraction::CheckSum2;
 int HtmlRoutines::globalMathSpanID = 0;
 int HtmlRoutines::GlobalGeneralPurposeID = 0;
 
-template < > bool Matrix<Rational>::flagComputingDebugInfo = true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic = true;
 
 template < > bool Complex<double>::flagEqualityIsApproximate = true;

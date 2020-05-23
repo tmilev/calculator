@@ -6,6 +6,7 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_universal_enveloping.h"
+#include "math_rational_function_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
@@ -718,7 +719,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   ElementUniversalEnveloping<RationalFunction<Rational> > tempElt;
   output.makeZero(this->theRange());
   RationalFunction<Rational> polyOne;
-  polyOne = theCoeff.one();
+  polyOne.makeOne();
   output.makeConstant(theCoeff, this->theRange());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {

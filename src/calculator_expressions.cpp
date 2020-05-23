@@ -1158,7 +1158,7 @@ bool Expression::checkConsistencyRecursively() const {
 
 bool Expression::checkConsistency() const {
   MacroRegisterFunctionWithName("Expression::checkConsistency");
-  // warning: do not use toString method from here: toString itself calls CheckConosistency,
+  // warning: do not use toString method from here: toString itself calls CheckConsistency,
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
   if (this->flagDeallocated) {
@@ -1190,6 +1190,9 @@ bool Expression::checkConsistency() const {
         isGood = true;
       }
       if (currentE.startsWith(this->owner->opWeylAlgebraVariables())) {
+        isGood = true;
+      }
+      if (currentE.startsWith(this->owner->opMod())) {
         isGood = true;
       }
       if (!isGood) {
@@ -4400,8 +4403,15 @@ bool Expression::toStringMod(
   if (!input.isListStartingWithAtom(input.owner->opMod())) {
     return false;
   }
-  out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
-  return true;
+  if (input.size() == 2) {
+    out << " mod " << input[1].toString(theFormat);
+    return true;
+  }
+  if (input.size() == 3) {
+    out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
+    return true;
+  }
+  return false;
 }
 
 bool Expression::toStringLieBracket(

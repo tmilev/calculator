@@ -2785,6 +2785,12 @@ public:
   void operator=(const Polynomial<otherType>& other);
   void operator=(const Coefficient& other);
   void operator=(int other);
+  static bool sylvesterMatrix(
+    const Polynomial& left,
+    const Polynomial& right,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
   template <class otherType>
   void assignOtherType(const Polynomial<otherType>& other);
   static bool greatestCommonDivisor(

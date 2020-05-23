@@ -331,11 +331,12 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     left.isOfTypeWithContext(&leftPolynomialModular) &&
     right.isOfTypeWithContext(&rightPolynomialModular)
   ) {
-    //if (!leftPolynomialModular.mergeContexts(
-    //  leftPolynomialModular, rightPolynomialModular, &calculator.comments
-    //)) {
-    //  return false;
-    //}
+    if (!leftPolynomialModular.mergeContexts(
+      leftPolynomialModular, rightPolynomialModular, &calculator.comments
+    )) {
+      return false;
+    }
+
   }
   return false;
 }

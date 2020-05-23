@@ -391,6 +391,32 @@ bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
 }
 
 template <class Coefficient>
+bool Polynomial<Coefficient>::sylvesterMatrix(
+  const Polynomial& left,
+  const Polynomial& right,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::sylvesterMatrix");
+  if (left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "I know how to compute Sylvester "
+      << "matrix only for univariate polynomials. Your polynomials have "
+      << "respectively " << left.minimalNumberOfVariables() << ", "
+      << right.minimalNumberOfVariables() << " variables.";
+    }
+    return false;
+  }
+  if (left.isEqualToZero() || right.isEqualToZero()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "I don't have a Sylvester matrix "
+      << "definition when one of the inputs is the zero polynomial. ";
+    }
+    return false;
+  }
+}
+
+template <class Coefficient>
 bool Polynomial<Coefficient>::isLinear() {
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].isLinear()) {

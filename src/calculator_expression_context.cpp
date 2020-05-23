@@ -736,7 +736,6 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   WithContext<RationalFunction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
-    global.comments << "DEBUG: rational function conversion.";
     return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
   WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
@@ -749,7 +748,6 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   WithContext<Weight<Polynomial<Rational> > > weightPolynomial;
   if (this->isOfTypeWithContext(&weightPolynomial)) {
-    global.comments << "DEBUG: got to here.";
     return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
   if (this->isMatrixOfType<RationalFunction<Rational> >()) {

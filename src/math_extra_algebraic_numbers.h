@@ -232,7 +232,7 @@ public:
   );
   void getMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
   void getAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
-  void convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
+  void convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
@@ -288,6 +288,9 @@ public:
   bool invert();
   bool isEqualToZero() const {
     return this->value.isEqualToZero();
+  }
+  bool isEqualToOne() const {
+    return this->value.isEqualToOne();
   }
   // Returns the number by which the vector was multiplied.
   static ElementZmodP scaleNormalizeIndex(

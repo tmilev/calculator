@@ -671,12 +671,14 @@ public:
   template <class Coefficient>
   bool polynomialSubstitution(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<Coefficient>& output
+    PolynomialSubstitution<Coefficient>& output,
+    const Coefficient& one
   ) const;
   template <class Coefficient>
   void polynomialSubstitutionNoFailure(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<Coefficient>& output
+    PolynomialSubstitution<Coefficient>& output,
+    const Coefficient& one
   ) const;
   template <class Coefficient>
   bool polynomialAndWeylAlgebraSubstitution(
@@ -2819,7 +2821,9 @@ bool Calculator::getVector(const Expression& input,
   List<Expression> convertedEs;
   convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!this->convertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
+    if (!this->convertToTypeUsingFunction<theType>(
+      conversionFunction, nonConvertedEs[i], convertedEs[i]
+    )) {
       return false;
     }
   }
@@ -3172,7 +3176,8 @@ bool Calculator::getTypeHighestWeightParabolic(
     return output.makeError(
       "Function typeHighestWeightParabolic is "
       "expected to have two or three arguments: "
-      "SS algebra type, highest weight, [optional] parabolic selection. ",
+      "semisimple Lie algebra type, highest weight, "
+      "[optional] parabolic selection. ",
       theCommands
     );
   }
@@ -3195,7 +3200,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   )) {
     std::stringstream tempStream;
     tempStream
-    << "Failed to convert the second argument of HWV to a list of "
+    << "Failed to convert the second argument of highest weight vector to a list of "
     << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
@@ -3213,7 +3218,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     )) {
       std::stringstream tempStream;
       tempStream
-      << "Failed to convert the third argument of HWV to a list of "
+      << "Failed to convert the third argument of highest weight vector to a list of "
       << ambientSSalgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString() << ".";

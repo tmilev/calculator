@@ -397,7 +397,11 @@ public:
     return true;
   }
   template <class Coefficient>
-  bool substitution(const List<Polynomial<Coefficient> >& theSubstitution, Polynomial<Coefficient>& output) const;
+  bool substitution(
+    const List<Polynomial<Coefficient> >& theSubstitution,
+    Polynomial<Coefficient>& output,
+    const Coefficient& one
+  ) const;
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGreatestCommonDivisor();
@@ -2249,7 +2253,7 @@ public:
     Coefficient newCoeff;
     for (int i = 0; i < this->size(); i ++) {
       newCoeff = this->coefficients[i];
-      newCoeff.substitution(theSub);
+      newCoeff.substitution(theSub, 1);
       if (newCoeff.isEqualToZero()) {
         this->popMonomial(i);
         i --;
@@ -2660,7 +2664,7 @@ public:
   bool differential(
     Vector<Polynomial<Coefficient> >& output, std::stringstream* comments
   ) const;
-  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
+  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient getDiscriminant();
   void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
@@ -2730,7 +2734,7 @@ public:
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
   void scaleToPositiveMonomialExponents(MonomialP& outputScale);
-  bool substitution(const List<Polynomial<Coefficient> >& TheSubstitution);
+  bool substitution(const List<Polynomial<Coefficient> >& substitution, const Coefficient& one);
   Rational totalDegree() const;
   int totalDegreeInt() const;
   bool isEqualToOne() const;
@@ -3160,7 +3164,7 @@ public:
   int getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem);
   void solveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
   void polynomialSystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
-  void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& theImpliedSubs);
+  void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions);
   void backSubstituteIntoSinglePolynomial(
     Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
   );
@@ -6251,11 +6255,11 @@ public:
   void substitution(const PolynomialSubstitution<Rational>& theSub) {
     MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
-    Coefficient tempCF;
+    Coefficient coefficient;
     for (int i = 0; i < thisCopy.size(); i ++) {
-      tempCF = thisCopy.coefficients[i];
-      tempCF.substitution(theSub);
-      this->addMonomial(thisCopy[i], tempCF);
+      coefficient = thisCopy.coefficients[i];
+      coefficient.substitution(theSub, Rational::one());
+      this->addMonomial(thisCopy[i], coefficient);
     }
   }
   void transpose() {
@@ -6809,7 +6813,7 @@ template<class Coefficient>
 void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j].substitution(theSub);
+      this->elements[i][j].substitution(theSub, 1);
     }
   }
 }

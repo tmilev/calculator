@@ -606,7 +606,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f = \\sin {}x / \\cos {}x;\n"
-    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
+    "Plot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f))",
     "CalculatorFunctions::innerExpressiontoUTF8String",
     "ToUTF8String",
     innerStandard
@@ -4319,7 +4319,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HeighestWeightVector",
-    CalculatorFunctions::innerHWV,
+    CalculatorFunctions::innerHighestWeightVector,
     "",
     "Highest weight vector in a generalized Verma module. "
     "The first argument gives the semisimple Lie algebra. "
@@ -4336,7 +4336,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
     "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
     "h_1g_{- 1}v_\\lambda",
-    "CalculatorFunctions::innerHWV",
+    "CalculatorFunctions::innerHighestWeightVector",
     "HeighestWeightVector",
     innerStandard
   );
@@ -4365,7 +4365,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HighestWeightTAAbf",
-    CalculatorFunctions::innerHWTAABF,
+    CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm,
     "",
     "Highest weight transpose anti-automorphism bilinear form, a.k.a. "
     "Shapovalov form. Let M be a Verma module "
@@ -4582,7 +4582,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "negative root space is not in the parabolic. "
     "The expression given in that coordinate "
     "is used as the corresponding highest weight. ",
-    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
+    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); "
+    "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
     "Calculator::innerPrintB3G2branchingTableCharsOnly",
     "PrintB3G2branchingTableCharsOnly",
     innerInvisibleExperimental

@@ -600,7 +600,8 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
-  List<Polynomial<Coefficient> >& inputSystem, PolynomialSubstitution<Coefficient>& outputSub
+  List<Polynomial<Coefficient> >& inputSystem,
+  PolynomialSubstitution<Coefficient>& outputSub
 ) {
   int numVars = this->systemSolution.size;
   MonomialP tempM;
@@ -640,11 +641,15 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
           outputSub.makeIdentitySubstitution(numVars);
           outputSub[oneVarIndex].makeConstant(theCF);
           //check our work:
-          tempP.substitution(outputSub);
+          tempP.substitution(outputSub, 1);
           if (!tempP.isEqualToZero()) {
-            global.fatal << "I was solving the polynomial equation " << inputSystem[i].toString()
-            << ", which resulted in the substitution " << outputSub.toString()
-            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.toString() << ". "
+            global.fatal << "I was solving the polynomial equation "
+            << inputSystem[i].toString()
+            << ", which resulted in the substitution "
+            << outputSub.toString()
+            << ". However, after carrying out the "
+            << "substitution in the polynomial, I got "
+            << tempP.toString() << ". "
             << global.fatal;
           }
           //
@@ -703,7 +708,9 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
-  Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
+  Polynomial<Coefficient>& thePoly,
+  int theIndex,
+  PolynomialSubstitution<Coefficient>& theFinalSub
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::backSubstituteIntoSinglePolynomial");
   Polynomial<Coefficient> tempP;
@@ -711,7 +718,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   if (thePoly == tempP) {
     return;
   }
-  thePoly.substitution(theFinalSub);
+  thePoly.substitution(theFinalSub, 1);
   bool changed = false;
   for (int i = 0; i < thePoly.size(); i ++) {
     for (int j = 0; j < thePoly[i].minimalNumberOfVariables(); j ++) {
@@ -720,8 +727,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
           this->setSerreLikeSolutionIndex(j, 0);
         } else {
           if (this->systemSolution[j] != 0) {
-            global.fatal << "This is a programming error: variable index " << j + 1
-            << " is supposed to be a free parameter, i.e., be set to zero, but "
+            global.fatal << "Variable index " << j + 1
+            << " is supposed to be a free parameter, "
+            << "i.e., be set to zero, but "
             << "instead it has a non-zero value. " << global.fatal;
           }
         }
@@ -731,11 +739,11 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
     }
   }
   if (changed) {
-    thePoly.substitution(theFinalSub);
+    thePoly.substitution(theFinalSub, 1);
   }
   Coefficient tempCF;
   if (!thePoly.isConstant(&tempCF)) {
-    global.fatal << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
+    global.fatal << "After carrying all implied substitutions "
     << "the polynomial is not a constant, rather equals "
     << thePoly.toString() << ". " << global.fatal;
   }
@@ -745,14 +753,14 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
-  List<PolynomialSubstitution<Coefficient> >& theImpliedSubs
+  List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::backSubstituteIntoPolynomialSystem");
-  PolynomialSubstitution<Coefficient> FinalSub;
-  this->getSubstitutionFromPartialSolutionSerreLikeSystem(FinalSub);
-  for (int i = theImpliedSubs.size - 1; i >= 0; i --) {
-    for (int j = 0; j < theImpliedSubs[i].size; j ++) {
-      this->backSubstituteIntoSinglePolynomial(theImpliedSubs[i][j], j, FinalSub);
+  MacroRegisterFunctionWithName("PolynomialSystem::backSubstituteIntoPolynomialSystem");
+  PolynomialSubstitution<Coefficient> finalSubstitution;
+  this->getSubstitutionFromPartialSolutionSerreLikeSystem(finalSubstitution);
+  for (int i = impliedSubstitutions.size - 1; i >= 0; i --) {
+    for (int j = 0; j < impliedSubstitutions[i].size; j ++) {
+      this->backSubstituteIntoSinglePolynomial(impliedSubstitutions[i][j], j, finalSubstitution);
     }
   }
 }
@@ -797,7 +805,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::polynomialSystemSolutionSimplificationPhase");
+  MacroRegisterFunctionWithName("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
   ProgressReport theReport1, theReport2, theReport3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -870,7 +878,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
       }
       this->impliedSubstitutions.addOnTop(theSub);
       for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(theSub);
+        inputSystem[i].substitution(theSub, 1);
       }
     }
   }
@@ -983,7 +991,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   }
   theHeuristicAttempt.setSerreLikeSolutionIndex(theVarIndex, aValueToTryOnPreferredVariable);
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitution(theSub);
+    inputSystem[i].substitution(theSub, 1);
   }
   theHeuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations += theHeuristicAttempt.numberOfSerreSystemComputations;
@@ -1023,32 +1031,33 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
   List<Polynomial<Coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
   for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
-    if (theMon(i) != 0) {
-      if (this->shouldReport()) {
-        std::stringstream out;
-        MonomialP tempMon(i);
-        out << "The system has the single monomial: " << theMon.toString(&this->format())
-        << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
-        theReport1.report(out.str());
-      }
-      PolynomialSubstitution<Coefficient> theSub;
-      theSub.makeIdentitySubstitution(this->systemSolution.size);
-      theSub[i] = 0;
-      PolynomialSystem<Coefficient>& theCase = this->computationUsedInRecursiveCalls.getElement();
-      this->setUpRecursiveComputation(theCase);
-      theCase.setSerreLikeSolutionIndex(i, 0);
-      inputSystem = inputSystemCopy;
-      for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(theSub);
-      }
-      theCase.solveSerreLikeSystemRecursively(inputSystem);
-      this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theCase);
-      if (!theCase.flagSystemProvenToHaveNoSolution) {
-        allProvenToHaveNoSolution = false;
-      }
-      if (this->flagSystemSolvedOverBaseField) {
-        return;
-      }
+    if (theMon(i) == 0) {
+      continue;
+    }
+    if (this->shouldReport()) {
+      std::stringstream out;
+      MonomialP tempMon(i);
+      out << "The system has the single monomial: " << theMon.toString(&this->format())
+      << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
+      theReport1.report(out.str());
+    }
+    PolynomialSubstitution<Coefficient> theSub;
+    theSub.makeIdentitySubstitution(this->systemSolution.size);
+    theSub[i] = 0;
+    PolynomialSystem<Coefficient>& theCase = this->computationUsedInRecursiveCalls.getElement();
+    this->setUpRecursiveComputation(theCase);
+    theCase.setSerreLikeSolutionIndex(i, 0);
+    inputSystem = inputSystemCopy;
+    for (int i = 0; i < inputSystem.size; i ++) {
+      inputSystem[i].substitution(theSub, 1);
+    }
+    theCase.solveSerreLikeSystemRecursively(inputSystem);
+    this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theCase);
+    if (!theCase.flagSystemProvenToHaveNoSolution) {
+      allProvenToHaveNoSolution = false;
+    }
+    if (this->flagSystemSolvedOverBaseField) {
+      return;
     }
   }
   if (allProvenToHaveNoSolution) {
@@ -1067,8 +1076,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   this->numberOfVariablesToSolveForStart = this->getNumberOfVariablesToSolveFor(inputSystem);
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
-    out << "Solving Serre-like polynomial system with " << this->numberOfVariablesToSolveForStart
-    << " variables at recursion depth: " << this->recursionCounterSerreLikeSystem << ". ";
+    out << "Solving Serre-like polynomial system with "
+    << this->numberOfVariablesToSolveForStart
+    << " variables at recursion depth: "
+    << this->recursionCounterSerreLikeSystem << ". ";
     theReport1.report(out.str());
   }
   this->polynomialSystemSolutionSimplificationPhase(inputSystem);
@@ -1203,9 +1214,9 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->getSubstitutionFromPartialSolutionSerreLikeSystem(theSub);
     workingSystem = inputSystem;
     for (int i = 0; i < workingSystem.size; i ++) {
-      workingSystem[i].substitution(theSub);
+      workingSystem[i].substitution(theSub, 1);
       if (!workingSystem[i].isEqualToZero()) {
-        global.fatal << "<br>This is a programming error. "
+        global.fatal << "<br>"
         << "Function solveSerreLikeSystem reports to have found a solution over the base field, "
         << "but substituting the solution back to the original "
         << "system does not yield a zero system of equations. More precisely, "

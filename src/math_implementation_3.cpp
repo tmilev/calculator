@@ -9447,19 +9447,21 @@ void QuasiPolynomial::addLatticeShift(
 }
 
 void QuasiPolynomial::substitution(
-  const Matrix<Rational>& mapFromNewSpaceToOldSpace, const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output
+  const Matrix<Rational>& mapFromNewSpaceToOldSpace,
+  const Lattice& ambientLatticeNewSpace,
+  QuasiPolynomial& output
 ) {
   MacroRegisterFunctionWithName("QuasiPolynomial::substitution");
-  //Format of the substitution.
-  //If we want to carry out a substitution in P(y_1, ..., y_m),
+  // Format of the substitution.
+  // If we want to carry out a substitution in P(y_1, ..., y_m),
   // of the form
-  //y_1=a_11 x_1+...+a_1nx_n
-  //...
-  //y_m=a_m1 x_1+...+a_mnx_n
-  // then the mapFromNewSpaceToOldSpace shouldbe the matrix
-  //a_11 ... a_1n
-  //...
-  //a_m1 ... a_mn
+  // y_1 = a_11 x_1+...+a_1n x_n
+  // ...
+  // y_m = a_m1 x_1+...+a_mn x_n
+  // then the mapFromNewSpaceToOldSpace should be the matrix
+  // a_11 ... a_1n
+  // ...
+  // a_m1 ... a_mn
   if (
     this == &output || mapFromNewSpaceToOldSpace.numberOfRows != this->minimalNumberOfVariables() ||
     ambientLatticeNewSpace.getDimension() != mapFromNewSpaceToOldSpace.numberOfColumns
@@ -9485,7 +9487,7 @@ void QuasiPolynomial::substitution(
   Polynomial<Rational> tempP;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitution(theSub);
+    bool tempB = tempP.substitution(theSub, Rational::one());
     if (!tempB) {
       global.fatal << "This is a programming error: substitution "
       << theSub.toString() << " into polynomial " << tempP.toString()
@@ -9516,7 +9518,7 @@ void QuasiPolynomial::substitution(
   output.AmbientLatticeReduced = this->AmbientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
     tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitution(theSub);
+    bool tempB = tempP.substitution(theSub, Rational::one());
     if (!tempB) {
       global.fatal << "This is a programming error: substitution "
       << theSub.toString() << " into polynomial " << tempP.toString()
@@ -9564,7 +9566,7 @@ bool QuasiPolynomial::substitutionFewerVariables(const PolynomialSubstitution<Ra
     if (theLatticeSub.solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage)) {
       tempRoot.assignMatrixDetectRowOrColumn(theShiftImage);
       tempP = this->valueOnEachLatticeShift[i];
-      bool tempB = tempP.substitution(theSub);
+      bool tempB = tempP.substitution(theSub, Rational::one());
       if (!tempB) {
         global.fatal << "This is a programming error: substitution "
         << theSub.toString() << " into polynomial " << tempP.toString()

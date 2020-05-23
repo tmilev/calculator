@@ -2183,14 +2183,17 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   theSystemHomogeneous.gaussianEliminationByRows(&theConstTerms, nullptr, nullptr, &this->printoutPFsHtml, &this->currentFormaT);
   this->currentFormaT.flagUseHTML = false;
   theSystemHomogeneousForLaTeX.gaussianEliminationByRows(&theConstTermsForLaTeX, nullptr, nullptr, &this->printoutPFsLatex, &this->currentFormaT);
-  PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
-  for (int i = 1; i < theSub.size; i ++) {
-    theSub[i].makeConstant(theConstTerms(i - 1, 0));
+  PolynomialSubstitution<AlgebraicNumber> substitution;
+  substitution.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
+  for (int i = 1; i < substitution.size; i ++) {
+    substitution[i].makeConstant(theConstTerms(i - 1, 0));
   }
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      this->theNumerators[i][k].substitution(theSub);
+      this->theNumerators[i][k].substitution(
+        substitution,
+        this->owner->theObjectContainer.theAlgebraicClosure.one()
+      );
     }
   }
   this->prepareFinalAnswer();
@@ -7715,7 +7718,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   );
 }
 
-bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerHighestWeightVector(Calculator& theCommands, const Expression& input, Expression& output) {
   Selection selectionParSel;
   Vector<RationalFunction<Rational> > theHWfundcoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
@@ -8008,8 +8011,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   return output.assignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHWTAABF");
+bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm");
   RecursionDepthCounter theRecursionCounter(&theCommands.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.makeError("Function expects three arguments.", theCommands);

@@ -656,7 +656,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
     return false;
   }
   Polynomial<AlgebraicNumber> algNumPoly;
-  this->convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, algNumPoly);
+  this->convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(thePoly, algNumPoly);
   Polynomial<Rational> minPoly;
   minPoly.makeZero();
   Rational currentCF, theLinearTermCFdividedByTwo, theConstTermShifted;
@@ -684,7 +684,7 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
   PolynomialSubstitution<AlgebraicNumber> checkSub;
   checkSub.setSize(1);
   checkSub[0].makeConstant(outputRoot);
-  algNumPoly.substitution(checkSub);
+  algNumPoly.substitution(checkSub, this->one());
   if (!algNumPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
     << " was just adjoined to a quadratic radical extension of the rationals; z "
@@ -695,10 +695,10 @@ bool AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalE
   return true;
 }
 
-void AlgebraicClosureRationals::convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
+void AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(
   const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail");
   int indexVar = - 1;
   if (!input.isOneVariableNonConstantPolynomial(&indexVar)) {
     global.fatal << "This is a programming error: "
@@ -710,7 +710,7 @@ void AlgebraicClosureRationals::convertPolyDependingOneVariableToPolyDependingOn
   theSub.makeIdentitySubstitution(indexVar + 1);
   theSub[indexVar].makeMonomial(0, 1, 1);
   output = input;
-  output.substitution(theSub);
+  output.substitution(theSub, this->one());
 }
 
 bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
@@ -718,14 +718,14 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::adjoinRootMinimalPolynomial");
   if (this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
     thePoly, outputRoot, commentsOnFailure
   )) {
     return true;
   }
   Polynomial<AlgebraicNumber> minPoly;
-  this->convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
+  this->convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(thePoly, minPoly);
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   AlgebraicNumber leadingCoefficient = minPoly.getLeadingCoefficient(monomialOrder);
   minPoly /= leadingCoefficient;
@@ -840,7 +840,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   theSub[0].makeConstant(outputRoot);
   Polynomial<AlgebraicNumber> substitutedMinPoly;
   substitutedMinPoly = minPoly;
-  substitutedMinPoly.substitution(theSub);
+  substitutedMinPoly.substitution(theSub, this->one());
   if (!substitutedMinPoly.isEqualToZero()) {
     global.fatal << "This is a programming error. The number z = "
     << outputRoot.toString() << " was just adjoined to the base field; z "

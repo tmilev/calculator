@@ -565,7 +565,9 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
 }
 
 template <class Coefficient>
-void ElementUniversalEnveloping<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
+void ElementUniversalEnveloping<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& theSub
+) {
   ElementUniversalEnveloping<Coefficient> output;
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Coefficient> theMon;
@@ -574,16 +576,18 @@ void ElementUniversalEnveloping<Coefficient>::substitution(const PolynomialSubst
     theMon = (*this)[i];
     theMon.substitution(theSub);
     tempCF = this->coefficients[i];
-    tempCF.substitution(theSub);
+    tempCF.substitution(theSub, 1, nullptr);
     output.addMonomial(theMon, tempCF);
   }
   *this = output;
 }
 
 template <class Coefficient>
-void MonomialUniversalEnveloping<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
+void MonomialUniversalEnveloping<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& theSub
+) {
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
-    this->powers[i].substitution(theSub);
+    this->powers[i].substitution(theSub, 1, nullptr);
   }
   this->simplifyEqualConsecutiveGenerators(0);
 }

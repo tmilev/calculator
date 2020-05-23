@@ -304,10 +304,14 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   Coefficient theNewCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!currentMon.polynomialPart.substitution(substitutionPolynomialPart, polyPart)) {
+    if (!currentMon.polynomialPart.substitution(
+      substitutionPolynomialPart, polyPart, Rational::one()
+    )) {
       return false;
     }
-    if (!currentMon.differentialPart.substitution(substitutionDifferentialPart, differentialOperatorPart)) {
+    if (!currentMon.differentialPart.substitution(
+      substitutionDifferentialPart, differentialOperatorPart, Rational::one()
+    )) {
       return false;
     }
     for (int j = 0; j < polyPart.size(); j ++) {

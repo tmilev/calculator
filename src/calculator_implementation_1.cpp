@@ -294,17 +294,18 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   theVars.quickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.setSize(numVars);
+  const AlgebraicNumber& one = this->theObjectContainer.theAlgebraicClosure.one();
   for (int i = 0; i < theSub.size; i ++) {
     int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
     theSub[i].makeMonomial(
       currentIndex,
       1,
-      this->theObjectContainer.theAlgebraicClosure.one()
+      one
     );
   }
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
-    currentP.substitution(theSub);
+    currentP.substitution(theSub, one);
   }
   return outputContext.setVariables(theVars);
 }

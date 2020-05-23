@@ -8,10 +8,11 @@
 template <class Coefficient>
 bool MonomialP::substitution(
   const List<Polynomial<Coefficient> >& theSubstitution,
-  Polynomial<Coefficient>& output
+  Polynomial<Coefficient>& output,
+  const Coefficient& one
 ) const {
   MacroRegisterFunctionWithName("MonomialP::substitution");
-  output.makeConstant(1);
+  output.makeConstant(one);
   if (this->isConstant()) {
     return true;
   }
@@ -21,9 +22,10 @@ bool MonomialP::substitution(
       continue;
     }
     if (i >= theSubstitution.size) {
-      global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
+      global.fatal << "Attempt to carry out a substitution in the monomial "
       << this->toString()
-      << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
+      << " which does have non-zero exponent of variable x_{"
+      << i + 1 << "}; however, the input substitution has "
       << theSubstitution.size
       << " variable images. More precisely, the input substitution is:  "
       << theSubstitution.toString() << ". " << global.fatal;
@@ -43,7 +45,7 @@ bool MonomialP::substitution(
       return false;
     }
     tempPoly = theSubstitution[i];
-    tempPoly.raiseToPower(theExponent, 1);
+    tempPoly.raiseToPower(theExponent, one);
     output *= tempPoly;
   }
   return true;
@@ -164,18 +166,19 @@ Rational Polynomial<Coefficient>::totalDegree() const {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::substitution(
-  const List<Polynomial<Coefficient> >& TheSubstitution
+  const List<Polynomial<Coefficient> >& substitution,
+  const Coefficient& one
 ) {
   MacroRegisterFunctionWithName("Polynomial::substitution");
-  Polynomial<Coefficient> Accum, TempPoly;
+  Polynomial<Coefficient> sum, monomialContribution;
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].substitution(TheSubstitution, TempPoly)) {
+    if (!(*this)[i].substitution(substitution, monomialContribution, one)) {
       return false;
     }
-    TempPoly *= this->coefficients[i];
-    Accum += TempPoly;
+    monomialContribution *= this->coefficients[i];
+    sum += monomialContribution;
   }
-  *this = Accum;
+  *this = sum;
   return true;
 }
 
@@ -899,8 +902,8 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::maximum(result, (*this)[i](VariableIndex).numeratorShort);
     if (!(*this)[i](VariableIndex).isSmallInteger()) {
-      global.fatal << " This is a programming error: "
-      << "getMaximumPowerOfVariableIndex called on a polynomial whose monomials "
+      global.fatal << "Function getMaximumPowerOfVariableIndex "
+      << "called on a polynomial whose monomials "
       << "have degrees that are not small integers. "
       << "This needs to be fixed! " << global.fatal;
     }
@@ -910,22 +913,22 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
 
 template <class Coefficient>
 void Polynomial<Coefficient>::interpolate(
-  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints
+  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints
 ) {
-  Polynomial<Coefficient> theLagrangeInterpolator, accumulator;
+  Polynomial<Coefficient> lagrangeInterpolator, accumulator;
   this->makeZero();
   for (int i = 0; i < thePoints.size; i ++) {
-    theLagrangeInterpolator.makeConstant(1);
+    lagrangeInterpolator.makeConstant(1);
     for (int j = 0; j < thePoints.size; j ++) {
       if (i == j) {
         continue;
       }
       accumulator.makeDegreeOne(1, 0, 1, - thePoints[j]);
       accumulator /= thePoints[i] - thePoints[j];
-      theLagrangeInterpolator *= accumulator;
+      lagrangeInterpolator *= accumulator;
     }
-    theLagrangeInterpolator *= ValuesAtThePoints[i];
-    *this += theLagrangeInterpolator;
+    lagrangeInterpolator *= valuesAtThePoints[i];
+    *this += lagrangeInterpolator;
   }
 }
 

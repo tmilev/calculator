@@ -144,9 +144,9 @@ void ModuleSSalgebra<Coefficient>::substitution(const PolynomialSubstitution<Rat
     this->theBilinearFormsInverted[i].substitution(theSub);
   }
   for (int i = 0; i < this->theHWDualCoordsBaseFielD.size; i ++) {
-    this->theHWDualCoordsBaseFielD[i].substitution(theSub);
-    this->theHWFundamentalCoordsBaseField[i].substitution(theSub);
-    this->theHWSimpleCoordSBaseField[i].substitution(theSub);
+    this->theHWDualCoordsBaseFielD[i].substitution(theSub, Rational::one(), nullptr);
+    this->theHWFundamentalCoordsBaseField[i].substitution(theSub, Rational::one(), nullptr);
+    this->theHWSimpleCoordSBaseField[i].substitution(theSub, Rational::one(), nullptr);
   }
 }
 
@@ -1067,7 +1067,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::substitution(
     currentMon = (*this)[i];
     currentMon.substitution(theSub, theMods);
     tempCF = this->coefficients[i];
-    tempCF.substitution(theSub);
+    tempCF.substitution(theSub, 1, nullptr);
     output.addMonomial(currentMon, tempCF);
   }
   *this = output;

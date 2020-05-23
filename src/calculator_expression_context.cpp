@@ -34,9 +34,10 @@ bool ExpressionContext::operator==(const ExpressionContext& other) const {
 template <class Coefficient>
 void ExpressionContext::polynomialSubstitutionNoFailure(
   const ExpressionContext& largerContext,
-  PolynomialSubstitution<Coefficient>& output
+  PolynomialSubstitution<Coefficient>& output,
+  const Coefficient& one
 ) const {
-  bool mustBeTrue = this->polynomialSubstitution(largerContext, output);
+  bool mustBeTrue = this->polynomialSubstitution(largerContext, output, one);
   if (!mustBeTrue) {
     global.fatal << "This is a programming error: I was not able to "
     << "extract a polynomial substitution from smaller context "
@@ -465,7 +466,9 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
 
 template <class Coefficient>
 bool ExpressionContext::polynomialSubstitution(
-  const ExpressionContext& largerContext, PolynomialSubstitution<Coefficient>& output
+  const ExpressionContext& largerContext,
+  PolynomialSubstitution<Coefficient>& output,
+  const Coefficient& one
 ) const {
   output.setSize(this->variables.size);
   for (int i = 0; i < this->variables.size; i ++) {
@@ -473,7 +476,7 @@ bool ExpressionContext::polynomialSubstitution(
     if (theNewIndex == - 1) {
       return false;
     }
-    output[i].makeMonomial(theNewIndex, 1, 1);
+    output[i].makeMonomial(theNewIndex, 1, one);
   }
   return true;
 }
@@ -502,7 +505,9 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   PolynomialSubstitution<Coefficient>& outputPolynomialPart,
   PolynomialSubstitution<Coefficient>& outputDifferentialPart
 ) const {
-  if (!this->polynomialSubstitution(largerContext, outputPolynomialPart)) {
+  if (!this->polynomialSubstitution(
+    largerContext, outputPolynomialPart, Rational::one()
+  )) {
     return false;
   }
   outputDifferentialPart.setSize(this->differentialOperatorVariables.size);
@@ -546,12 +551,21 @@ bool WithContext<AlgebraicNumber>::extendContext(
 }
 
 template<>
+bool WithContext<double>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
 bool WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
   (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure<Rational>(newContext, substitution);
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
   this->content.substitution(substitution);
   this->context = newContext;
   return true;
@@ -561,10 +575,30 @@ template<>
 bool WithContext<Polynomial<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
+  (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure<Rational>(newContext, substitution);
-  if (!this->content.substitution(substitution)) {
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  if (!this->content.substitution(substitution, Rational::one())) {
     return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<Polynomial<ElementZmodP> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  if (!this->content.isEqualToZero()) {
+    PolynomialSubstitution<ElementZmodP> substitution;
+    const ElementZmodP& one = this->content.coefficients[0].one();
+    this->context.polynomialSubstitutionNoFailure(
+      newContext, substitution, one
+    );
+    if (!this->content.substitution(substitution, one)) {
+      return false;
+    }
   }
   this->context = newContext;
   return true;
@@ -574,9 +608,14 @@ template<>
 bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
+  (void) commentsOnFailure;
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(newContext, substitution);
-  if (!this->content.substitution(substitution)) {
+  this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
+    newContext,
+    substitution,
+    this->context.owner->theObjectContainer.theAlgebraicClosure.one()
+  );
+  if (!this->content.substitution(substitution, Rational::one())) {
     return false;
   }
   this->context = newContext;
@@ -612,11 +651,11 @@ bool WithContext<RationalFunction<Rational> >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution);
-  if (!this->content.substitution(substitution)) {
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  if (!this->content.substitution(substitution, Rational::one(), commentsOnFailure)) {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<hr>Failed to apply"
+      *commentsOnFailure << "<hr>Failed to apply substitution: "
       << substitution.toString()
       << " to " << this->content.toString();
     }
@@ -630,8 +669,9 @@ template<>
 bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
+  (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitutionNoFailure(newContext, substitution);
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
   this->content.substitution(substitution, this->context.owner->theObjectContainer.theCategoryOmodules);
   this->context = newContext;
   return true;
@@ -641,10 +681,11 @@ template<>
 bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ){
+  (void) commentsOnFailure;
   PolynomialSubstitution<Rational> substitution;
-  this->context.polynomialSubstitution(newContext, substitution);
+  this->context.polynomialSubstitution(newContext, substitution, Rational::one());
   for (int i = 0; i < this->content.weightFundamentalCoordS.size; i ++) {
-    this->content.weightFundamentalCoordS[i].substitution(substitution);
+    this->content.weightFundamentalCoordS[i].substitution(substitution, Rational::one());
   }
   this->context = newContext;
   return true;
@@ -663,6 +704,12 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   if (this->isOfTypeWithContext(&rational)) {
     return rational.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
+  WithContext<double> floatingPointNumber;
+  if (this->isOfTypeWithContext(&floatingPointNumber)) {
+    return floatingPointNumber.setContextAndSerialize(
+      inputOutputMinContext, *this, &this->owner->comments
+    );
+  }
   WithContext<ElementWeylGroup> elementWeylGroup;
   if (this->isOfTypeWithContext(&elementWeylGroup)) {
     return elementWeylGroup.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
@@ -679,12 +726,17 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   if (this->isOfTypeWithContext(&polynomial)) {
     return polynomial.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
+  WithContext<Polynomial<ElementZmodP> > polynomialModular;
+  if (this->isOfTypeWithContext(&polynomialModular)) {
+    return polynomialModular.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+  }
   WithContext<Polynomial<AlgebraicNumber> > polynomialAlgebraic;
   if (this->isOfTypeWithContext(&polynomialAlgebraic)) {
     return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
   WithContext<RationalFunction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
+    global.comments << "DEBUG: rational function conversion.";
     return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
   WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
@@ -697,6 +749,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   WithContext<Weight<Polynomial<Rational> > > weightPolynomial;
   if (this->isOfTypeWithContext(&weightPolynomial)) {
+    global.comments << "DEBUG: got to here.";
     return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
   }
   if (this->isMatrixOfType<RationalFunction<Rational> >()) {
@@ -711,13 +764,13 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     inputOutputMinContext = newContext;
     Matrix<RationalFunction<Rational> > newMat;
     this->owner->functionGetMatrix(*this, newMat, &newContext);
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
+    PolynomialSubstitution<Rational> substitution;
+    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
     for (int i = 0; i < newMat.numberOfRows; i ++) {
       for (int j = 0; j < newMat.numberOfColumns; j ++) {
-        if (!newMat(i, j).substitution(subPolyPart)) {
+        if (!newMat(i, j).substitution(substitution, Rational::one(), &this->owner->comments)) {
           return *this->owner << "Failed to carry out the substitution "
-          << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";
+          << substitution.toString() << " in the matrix " << this->toString() << ". ";
         }
       }
     }

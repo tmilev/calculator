@@ -448,9 +448,9 @@ public:
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHWV(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHighestWeightVector(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHighestWeightTransposeAntiAutomorphismBilinearForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2CharsOutput(
     Calculator& theCommands, const Expression& input, Expression& output, BranchingData& theG2B3Data
   );

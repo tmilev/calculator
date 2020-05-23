@@ -5,22 +5,22 @@
 #include "calculator_interface.h"
 class CalculatorFunctionsPolynomial {
 public:
-  static bool polynomialDivisionSlidesGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool polynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool polynomialDivisionQuotient(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool polynomialDivisionSlidesGrLex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionRemainder(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionQuotient(Calculator& calculator, const Expression& input, Expression& output);
   static bool polynomialDivisionVerbose(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     List<MonomialP>::Comparator* monomialOrder
   );
-  static bool polynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseLexicographicOpposite(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool polynomialDivisionVerboseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool factorPolynomialModPrime(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool factorPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool sylvesterMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool polynomialDivisionVerboseGrLex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionVerboseGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionVerboseLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialDivisionVerboseLexicographic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorPolynomialModPrime(Calculator& calculator, const Expression& input, Expression& output);
+  static bool factorPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif // vpfHeaderCalculatorFunctionsPolynomial

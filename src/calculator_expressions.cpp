@@ -1698,15 +1698,15 @@ bool Expression::isKnownToBeNonNegative() const {
     return false;
   }
   Expression testInequality, testResult;
-  Calculator& theCommands = *(this->owner);
-  testInequality.makeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.expressionZero());
-  if (this->owner->evaluateExpression(theCommands, testInequality, testResult)) {
+  Calculator& calculator = *(this->owner);
+  testInequality.makeXOX(calculator, calculator.opGreaterThan(), *this, calculator.expressionZero());
+  if (this->owner->evaluateExpression(calculator, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
     }
   }
-  testInequality.makeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.expressionZero());
-  if (theCommands.evaluateExpression(theCommands, testInequality, testResult)) {
+  testInequality.makeXOX(calculator, calculator.opGreaterThanOrEqualTo(), *this, calculator.expressionZero());
+  if (calculator.evaluateExpression(calculator, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
     }
@@ -2963,49 +2963,49 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
 }
 
 bool Calculator::innerFlattenCommandEnclosuresOneLayeR(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
     return false;
   }
   return Calculator::functionFlattenCommandEnclosuresOneLayer(
-    theCommands, input[1], output
+    calculator, input[1], output
   );
 }
 
 bool Calculator::functionFlattenCommandEnclosuresOneLayer(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
-  if (input.startsWith(theCommands.opCommandEnclosure())) {
+  if (input.startsWith(calculator.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;
     }
-    Expression result(theCommands);
-    result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+    Expression result(calculator);
+    result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
     if (input.size() == 2) {
       result.addChildOnTop(input[1]);
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
       output = result;
       return true;
     }
     for (int i = 1; i < input.size(); i ++) {
       result.addChildOnTop(input[i]);
     }
-    result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     output = result;
     return true;
   }
-  if (!input.startsWith(theCommands.opEndStatement())) {
+  if (!input.startsWith(calculator.opEndStatement())) {
     return false;
   }
-  Expression result(theCommands);
+  Expression result(calculator);
   for (int i = 0; i < input.size(); i ++) {
-    if (input[i].startsWith(theCommands.opCommandEnclosure())) {
+    if (input[i].startsWith(calculator.opCommandEnclosure())) {
       bool processed = false;
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
       if (input[i].size() == 2) {
-        if (input[i][1].startsWith(theCommands.opEndStatement())) {
+        if (input[i][1].startsWith(calculator.opEndStatement())) {
           for (int j = 1; j < input[i][1].size(); j ++) {
             result.addChildOnTop(input[i][1][j]);
           }
@@ -3017,11 +3017,11 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
           result.addChildOnTop(input[i][j]);
         }
       }
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     } else if (input[i].startsWithGivenOperation("MatchesPattern")) {
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
       result.addChildOnTop(input[i]);
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     } else {
       result.addChildOnTop(input[i]);
     }

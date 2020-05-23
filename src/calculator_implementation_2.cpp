@@ -193,7 +193,7 @@ const List<Function>* Calculator::getOperationHandlers(int theOp) {
 }
 
 bool Calculator::outerStandardCompositeHandler(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -206,7 +206,7 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = theCommands.getOperationCompositeHandlers(functionNameNode[0].theData);
+  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].theData);
   if (theHandlers == nullptr) {
     return false;
   }
@@ -214,9 +214,9 @@ bool Calculator::outerStandardCompositeHandler(
     Function& currentHandler = (*theHandlers)[i];
     if (currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
       if (currentHandler.apply(
-        theCommands, input, output, opIndexParentIfAvailable, outputHandler
+        calculator, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        theCommands.logFunctionWithTime(currentHandler);
+        calculator.logFunctionWithTime(currentHandler);
         return true;
       }
     }
@@ -232,7 +232,7 @@ bool Function::checkConsistency() const {
 }
 
 bool Function::apply(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -245,10 +245,10 @@ bool Function::apply(
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
   if (!this->options.flagIsInner) {
-    if (this->theFunction(theCommands, input, output)) {
+    if (this->theFunction(calculator, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        theCommands.logFunctionWithTime(*this);
+        calculator.logFunctionWithTime(*this);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -258,9 +258,9 @@ bool Function::apply(
     return false;
   }
   if (this->inputFitsMyInnerType(input)) {
-    if (this->theFunction(theCommands, input, output)) {
+    if (this->theFunction(calculator, input, output)) {
       output.checkConsistency();
-      theCommands.logFunctionWithTime(*this);
+      calculator.logFunctionWithTime(*this);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -271,7 +271,7 @@ bool Function::apply(
 }
 
 bool Calculator::outerStandardHandler(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -282,14 +282,14 @@ bool Calculator::outerStandardHandler(
   if (!functionNameNode.isOperation(operationIndex)) {
     return false;
   }
-  if (theCommands.operations.theValues[operationIndex].isZeroPointer()) {
+  if (calculator.operations.theValues[operationIndex].isZeroPointer()) {
     return false;
   }
-  const List<Function>& handlers = theCommands.operations.theValues[operationIndex].getElement().handlers;
+  const List<Function>& handlers = calculator.operations.theValues[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.apply(
-      theCommands, input, output, opIndexParentIfAvailable, outputHandler
+      calculator, input, output, opIndexParentIfAvailable, outputHandler
     )) {
       return true;
     }
@@ -298,25 +298,25 @@ bool Calculator::outerStandardHandler(
 }
 
 bool Calculator::outerStandardFunction(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
-  RecursionDepthCounter theCounter(&theCommands.recursionDepth);
-  theCommands.checkInputNotSameAsOutput(input, output);
+  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
     return false;
   }
-  if (theCommands.outerStandardCompositeHandler(
-    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  if (calculator.outerStandardCompositeHandler(
+    calculator, input, output, opIndexParentIfAvailable, outputHandler
   )) {
     return true;
   }
-  if (theCommands.outerStandardHandler(
-    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  if (calculator.outerStandardHandler(
+    calculator, input, output, opIndexParentIfAvailable, outputHandler
   )) {
     return true;
   }
@@ -547,11 +547,11 @@ bool Calculator::accountRule(
 }
 
 bool Calculator::evaluateExpression(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
   bool notUsed = false;
-  return theCommands.evaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
+  return calculator.evaluateExpression(calculator, input, output, notUsed, - 1, nullptr);
 }
 
 bool Calculator::isTimedOut() {
@@ -927,61 +927,61 @@ void Calculator::EvaluateLoop::lookUpCache() {
 }
 
 bool Calculator::evaluateExpression(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& outpuT,
   bool& outputIsNonCacheable,
   int opIndexParentIfAvailable,
   Expression* outputHistory
 ) {
-  RecursionDepthCounter recursionCounter(&theCommands.recursionDepth);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
-  theCommands.statistics.expressionsEvaluated ++;
-  theCommands.statistics.callsSinceReport ++;
-  Calculator::EvaluateLoop state(theCommands);
+  calculator.statistics.expressionsEvaluated ++;
+  calculator.statistics.callsSinceReport ++;
+  Calculator::EvaluateLoop state(calculator);
   state.output = &outpuT;
   state.history = outputHistory;
   if (state.history != nullptr) {
-    state.history->reset(theCommands);
+    state.history->reset(calculator);
   }
   state.opIndexParent = opIndexParentIfAvailable;
   if (
-    theCommands.statistics.callsSinceReport >=
-    theCommands.statistics.maximumCallsBeforeReportGeneration
+    calculator.statistics.callsSinceReport >=
+    calculator.statistics.maximumCallsBeforeReportGeneration
   ) {
-    theCommands.statistics.callsSinceReport = 0;
+    calculator.statistics.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
     state.theReport.report(reportStream.str());
   }
-  if (theCommands.flagLogFullTreeCrunching && theCommands.recursionDepth < 3) {
-    theCommands << "<br>";
-    for (int i = 0; i < theCommands.recursionDepth; i ++) {
-      theCommands << "&nbsp&nbsp&nbsp&nbsp";
+  if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
+    calculator << "<br>";
+    for (int i = 0; i < calculator.recursionDepth; i ++) {
+      calculator << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "Evaluating " << input.lispify()
+    calculator << "Evaluating " << input.lispify()
     << " with rule stack cache index "
-    << theCommands.RuleStackCacheIndex; // << this->ruleStack.toString();
+    << calculator.RuleStackCacheIndex; // << this->ruleStack.toString();
   }
-  if (theCommands.recursionDepthExceededHandleRoughly()) {
-    return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
+  if (calculator.recursionDepthExceededHandleRoughly()) {
+    return calculator << " Evaluating expression: " << input.toString() << " aborted. ";
   }
   state.setOutput(input, nullptr, "");
   if (state.output->isError()) {
-    theCommands.flagAbortComputationASAP = true;
+    calculator.flagAbortComputationASAP = true;
     return true;
   }
-  if (theCommands.evaluatedExpressionsStack.contains(input)) {
+  if (calculator.evaluatedExpressionsStack.contains(input)) {
     std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
     << input.toString()
     << " but I have already seen that expression in the expression stack. ";
-    theCommands.flagAbortComputationASAP = true;
+    calculator.flagAbortComputationASAP = true;
     Expression errorE;
-    errorE.makeError(errorStream.str(), theCommands);
+    errorE.makeError(errorStream.str(), calculator);
     return state.setOutput(errorE, nullptr, "Error");
   }
-  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
+  //bool logEvaluationStepsRequested = calculator.logEvaluationSteps.size > 0;
   state.lookUpCache();
   // reduction phase:
   //////////////////////////////////
@@ -991,13 +991,13 @@ bool Calculator::evaluateExpression(
   while (state.reduceOnce()) {
   }
   outputIsNonCacheable = state.flagIsNonCacheable;
-  theCommands.evaluatedExpressionsStack.removeLastObject();
-  if (theCommands.flagLogFullTreeCrunching && theCommands.recursionDepth < 3) {
-    theCommands << "<br>";
-    for (int i = 0; i < theCommands.recursionDepth; i ++) {
-      theCommands << "&nbsp&nbsp&nbsp&nbsp";
+  calculator.evaluatedExpressionsStack.removeLastObject();
+  if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
+    calculator << "<br>";
+    for (int i = 0; i < calculator.recursionDepth; i ++) {
+      calculator << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "to get: " << state.output->lispify();
+    calculator << "to get: " << state.output->lispify();
   }
   return true;
 }

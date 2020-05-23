@@ -664,11 +664,11 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblemGiveUp");
   if (input.size() != 4) {
-    return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
+    return calculator << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
   std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
   std::string testedProblem = input[1].toString();
@@ -683,20 +683,20 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
   out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].theString;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblem");
   CalculatorHTML theProblem;
   if (!input.isOfType<std::string>(&theProblem.inputHtml)) {
-    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+    return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
-  theProblem.theProblemData.randomSeed = theCommands.theObjectContainer.pseudoRandom.getRandomSeed();
-  theProblem.interpretHtml(&theCommands.comments);
+  theProblem.theProblemData.randomSeed = calculator.theObjectContainer.pseudoRandom.getRandomSeed();
+  theProblem.interpretHtml(&calculator.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
@@ -709,7 +709,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
   }
   out << "<br>Interpretation times (per attempt): "
   << theProblem.timePerAttempt.toStringCommaDelimited();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 std::string CalculatorHTML::ToStringExtractedCommands() {
@@ -2619,17 +2619,17 @@ std::string CalculatorHTML::cleanUpCommandString(const std::string& inputCommand
 }
 
 bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
   if (!input.isOfType<std::string>(&theFile.inputHtml)) {
-    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+    return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.parseHTML(&theCommands.comments)) {
+  if (!theFile.parseHTML(&calculator.comments)) {
     return false;
   }
-  return output.assignValue(theFile.ToStringExtractedCommands(), theCommands);
+  return output.assignValue(theFile.ToStringExtractedCommands(), calculator);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";

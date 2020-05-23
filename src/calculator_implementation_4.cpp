@@ -503,7 +503,7 @@ bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferential
 }
 
 bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vectors<Polynomial<Rational> >& theHws,
@@ -582,7 +582,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     ModuleSSalgebra<RationalFunction<Rational> >& theMod = theMods[i];
     tempV = theHws[i];
     if (!theMod.makeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
-      return output.makeError("Failed to create module.", theCommands);
+      return output.makeError("Failed to create module.", calculator);
     }
     if (i == 0) {
       theMod.getElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
@@ -613,7 +613,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
             "Error: the variable " +
             tempstream2.str() +
             " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ",
-            theCommands
+            calculator
           );
         }
         theWeylFormat.polynomialAlphabet[k] = tempstream2.str();
@@ -719,7 +719,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   out << "<br>Performance notes: see comments. ";
   //please keep this report in the comments section for reasons of reproducibility of the
   //string output!
-  theCommands << "<hr>"
+  calculator << "<hr>"
   << "Multiplications needed to embed generators: " << totalMultiplications << ".<br>"
   << "Additions needed to embed generators: " << totalAdditions << ".<br>"
   << "Total time to embed generators invoked by command: " << input.toString()
@@ -728,11 +728,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   out << reportfourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();
-  return output.assignValue<std::string>(out.str(), theCommands);
+  return output.assignValue<std::string>(out.str(), calculator);
 }
 
 bool Calculator::innerHWVCommon(
-  Calculator& theCommands,
+  Calculator& calculator,
   Expression& output,
   Vector<RationalFunction<Rational> >& highestWeightFundCoords,
   Selection& selectionParSel,
@@ -741,14 +741,14 @@ bool Calculator::innerHWVCommon(
   bool Verbose
 ) {
   MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
-  RecursionDepthCounter therecursionIncrementer(&theCommands.recursionDepth);
+  RecursionDepthCounter therecursionIncrementer(&calculator.recursionDepth);
   RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
   RFZero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction<Rational> > theElt;
   //= theElementData.theElementTensorGenVermas.getElement();
-  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction<Rational> > >& theMods = calculator.theObjectContainer.theCategoryOmodules;
   int indexOfModule = - 1;
 
   for (int i = 0; i < theMods.size; i ++) {
@@ -771,10 +771,10 @@ bool Calculator::innerHWVCommon(
   if (!theMod.flagIsInitialized) {
     bool isGood = theMod.makeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
-      theCommands << theMod.toString();
+      calculator << theMod.toString();
     }
     if (!isGood) {
-      return output.makeError("Error while generating highest weight module. See comments for details. ", theCommands);
+      return output.makeError("Error while generating highest weight module. See comments for details. ", calculator);
     }
   }
   if (&theMod.getOwner() != owner) {
@@ -785,7 +785,7 @@ bool Calculator::innerHWVCommon(
     global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
-  return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(theElt, hwContext, theCommands);
+  return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(theElt, hwContext, calculator);
 }
 
 bool Calculator::recursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
@@ -856,7 +856,7 @@ bool Calculator::checkConsistencyAfterInitialization() {
   return this->theObjectContainer.checkConsistencyAfterReset();
 }
 
-bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
   if (!input.isListNElements(4)) {
     return false;
@@ -874,7 +874,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   LargeInteger numRowsTimesCols = numRows;
   numRowsTimesCols *= numCols ;
   if (numRowsTimesCols > 10000) {
-    theCommands << "Max number of matrix entries is 10000. You requested " << numRows
+    calculator << "Max number of matrix entries is 10000. You requested " << numRows
     << " rows and " << numCols
     << " columns, total: " << numRowsTimesCols.toString() << " entries<br>";
     return false;
@@ -884,36 +884,36 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   Expression leftIE, rightIE;
   for (int i = 0; i < numRows; i ++) {
     for (int j = 0; j < numCols; j ++) {
-      leftIE.assignValue(i + 1, theCommands);
-      rightIE.assignValue(j + 1, theCommands);
-      resultMat.elements[i][j].reset(theCommands, 3);
+      leftIE.assignValue(i + 1, calculator);
+      rightIE.assignValue(j + 1, calculator);
+      resultMat.elements[i][j].reset(calculator, 3);
       resultMat.elements[i][j].addChildOnTop(leftE);
       resultMat.elements[i][j].addChildOnTop(leftIE);
       resultMat.elements[i][j].addChildOnTop(rightIE);
     }
   }
-  return output.assignMatrixExpressions(resultMat, theCommands, true, true);
+  return output.assignMatrixExpressions(resultMat, calculator, true, true);
 }
 
 bool Calculator::innerGetChevGen(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGetChevGen");
   if (input.size() != 3) {
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   int theIndex;
   if (!input[2].isSmallInteger(&theIndex)) {
     return false;
   }
   if (theIndex > theSSalg.content->getNumberOfPositiveRoots() || theIndex == 0 || theIndex < - theSSalg.content->getNumberOfPositiveRoots()) {
-    return output.makeError("Bad Chevalley-Weyl generator index.", theCommands);
+    return output.makeError("Bad Chevalley-Weyl generator index.", calculator);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex > 0) {
@@ -923,24 +923,24 @@ bool Calculator::innerGetChevGen(
   theElt.makeGenerator(theIndex, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
-  ExpressionContext context(theCommands);
-  int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  ExpressionContext context(calculator);
+  int indexInOwner = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
     theSSalg.content->theWeyl.theDynkinType
   );
   context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
-  return output.assignValueWithContext(theUE, context, theCommands);
+  return output.assignValueWithContext(theUE, context, calculator);
 }
 
-bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerGetCartanGen(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerGetCartanGen");
   if (input.size() != 3) {
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   if (theSSalg.content == nullptr) {
     global.fatal << "This is a programming error: called conversion function successfully, "
@@ -956,33 +956,33 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     theIndex > theSSalg.content->getNumberOfPositiveRoots() ||
     theIndex < - theSSalg.content->getNumberOfPositiveRoots()
   ) {
-    return output.makeError("Bad Cartan subalgebra generator index.", theCommands);
+    return output.makeError("Bad Cartan subalgebra generator index.", calculator);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg.content->theWeyl.rootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
   theElt.makeCartanGenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
   theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
-  ExpressionContext theContext(theCommands);
-  int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
+  ExpressionContext theContext(calculator);
+  int theAlgIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
   theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
-  return output.assignValueWithContext(theUE, theContext, theCommands);
+  return output.assignValueWithContext(theUE, theContext, calculator);
 }
 
-bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
   if (input.size() != 2) {
-    return theCommands
+    return calculator
     << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
   }
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1],
     CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   std::stringstream out;
   WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
@@ -991,7 +991,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     << " have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.content->toStringLieAlgebraName()
     << " has " << theWeyl.theGroup.getSize().toString() << ".";
-    return output.assignValue(out.str(), theCommands);
+    return output.assignValue(out.str(), calculator);
   }
   FormatExpressions theFormat;
   theFormat.polynomialAlphabet.setSize(1);
@@ -1003,30 +1003,30 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   theKLpolys.computeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
   out << theKLpolys.toString(&theFormat);
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool Calculator::innerPrintSSLieAlgebra(
-  Calculator& theCommands, const Expression& input, Expression& output, bool Verbose
+  Calculator& calculator, const Expression& input, Expression& output, bool Verbose
 ) {
-  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, Verbose, false);
+  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(calculator, input, output, Verbose, false);
 }
 
 bool Calculator::innerWriteSSLieAlgebraToHD(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
-  theCommands.checkInputNotSameAsOutput(input, output);
+  calculator.checkInputNotSameAsOutput(input, output);
   if (!global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
     return output.makeError(
       "Caching structure constants to HD available to admins only. ",
-      theCommands);
+      calculator);
   }
-  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, true, true);
+  return Calculator::innerWriteToHDOrPrintSSLieAlgebra(calculator, input, output, true, true);
 }
 
 bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool Verbose,
@@ -1034,15 +1034,15 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteToHDOrPrintSSLieAlgebra");
   if (input.size() != 2) {
-    return theCommands << "Print semisimple Lie algebras expects 1 argument. ";
+    return calculator << "Print semisimple Lie algebras expects 1 argument. ";
   }
   return Calculator::functionWriteToHDOrPrintSSLieAlgebra(
-    theCommands, input[1], output, Verbose, writeToHD
+    calculator, input[1], output, Verbose, writeToHD
   );
 }
 
 bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool Verbose,
@@ -1051,20 +1051,20 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   MacroRegisterFunctionWithName("Calculator::functionWriteToHDOrPrintSSLieAlgebra");
   WithContext<SemisimpleLieAlgebra*> tempSSpointer;
   input.checkInitialization();
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     tempSSpointer
   )) {
 
-    theCommands << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    calculator << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   tempSSpointer.content->checkConsistency();
   tempSSpointer.context.checkInitialization();
   SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
-  std::string result = theSSalgebra.toHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
-  return output.assignValue(result, theCommands);
+  std::string result = theSSalgebra.toHTMLCalculator(Verbose, writeToHD, calculator.flagWriteLatexPlots);
+  return output.assignValue(result, calculator);
 }
 
 bool Expression::checkInitializationRecursively() const {
@@ -1138,7 +1138,7 @@ bool Expression::hasBoundVariables() const {
   return false;
 }
 
-bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerNot(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -1148,12 +1148,12 @@ bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expr
     return false;
   }
   if (theInt == 0) {
-    return output.assignValue(1, theCommands);
+    return output.assignValue(1, calculator);
   }
-  return output.assignValue(0, theCommands);
+  return output.assignValue(0, calculator);
 }
 
-bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerIsInteger(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -1162,14 +1162,14 @@ bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input
     return false;
   }
   if (argument.isInteger()) {
-    output.assignValue(1, theCommands);
+    output.assignValue(1, calculator);
   } else {
-    output.assignValue(0, theCommands);
+    output.assignValue(0, calculator);
   }
   return true;
 }
 
-bool Calculator::innerIsRational(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerIsRational(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
@@ -1178,9 +1178,9 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
     return false;
   }
   if (argument.isRational()) {
-    output.assignValue(1, theCommands);
+    output.assignValue(1, calculator);
   } else {
-    output.assignValue(0, theCommands);
+    output.assignValue(0, calculator);
   }
   return true;
 }
@@ -1208,38 +1208,38 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   return result;
 }
 
-bool Calculator::outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
+bool Calculator::outerTensorProductStandard(Calculator& calculator, const Expression& input, Expression& output) {
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
-  if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor())) {
+  if (calculator.outerDistribute(calculator, input, output, calculator.opPlus(), calculator.opTensor())) {
     return true;
   }
-  if (theCommands.outerAssociate(theCommands, input, output)) {
+  if (calculator.outerAssociate(calculator, input, output)) {
     return true;
   }
-  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output)) {
+  if (calculator.outerExtractBaseMultiplication(calculator, input, output)) {
     return true;
   }
   return false;
 }
 
 bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
-  if (!input.startsWith(theCommands.opTimes(), 3)) {
+  if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
   Expression constPower, thePower;
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
-    constPower.assignValue(2, theCommands);
-    output.makeXOX(theCommands, theCommands.opThePower(), *left, constPower);
+    constPower.assignValue(2, calculator);
+    output.makeXOX(calculator, calculator.opThePower(), *left, constPower);
     return true;
   }
   for (int i = 0; i < 2; i ++, MathRoutines::swap(left, right)) {
-    if (right->startsWith(theCommands.opThePower(), 3)) {
+    if (right->startsWith(calculator.opThePower(), 3)) {
       if ((*right)[1] == (*left)) {
         bool isGood = true;
         if ((*right)[2].isOfType<Rational>()) {
@@ -1253,11 +1253,11 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           }
         }
         if (isGood) {
-          thePower.makeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.expressionOne());
-          return output.makeXOX(theCommands, theCommands.opThePower(), *left, thePower);
+          thePower.makeXOX(calculator, calculator.opPlus(), (*right)[2], calculator.expressionOne());
+          return output.makeXOX(calculator, calculator.opThePower(), *left, thePower);
         }
       }
-      if (left->startsWith(theCommands.opThePower(), 3)) {
+      if (left->startsWith(calculator.opThePower(), 3)) {
         if ((*left)[1] == (*right)[1]) {
           bool isGood = (*left)[2].isInteger() || (*right)[2].isInteger();
           if (!isGood) {
@@ -1280,8 +1280,8 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
           if (!isGood) {
             continue;
           }
-          thePower.makeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
-          return output.makeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+          thePower.makeXOX(calculator, calculator.opPlus(), (*left)[2], (*right)[2]);
+          return output.makeXOX(calculator, calculator.opThePower(), (*left)[1], thePower);
         }
       }
     }
@@ -1289,16 +1289,16 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   return false;
 }
 
-bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opPlus(), 3)) {
+bool Calculator::outerCombineFractions(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
   const Expression* quotientE = nullptr;
   const Expression* summandE = nullptr;
-  if (input[1].startsWith(theCommands.opDivide(), 3)) {
+  if (input[1].startsWith(calculator.opDivide(), 3)) {
     quotientE = &input[1];
     summandE = &input[2];
-  } else if (input[2].startsWith(theCommands.opDivide(), 3)) {
+  } else if (input[2].startsWith(calculator.opDivide(), 3)) {
     quotientE = &input[2];
     summandE = &input[1];
   } else {
@@ -1307,13 +1307,13 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
   const Expression& quotientNumeratorE = (*quotientE)[1];
   const Expression& quotientDenominatorE = (*quotientE)[2];
   Expression outputSummandE, outputNumE;
-  outputSummandE.makeXOX(theCommands, theCommands.opTimes(), *summandE, quotientDenominatorE);
-  outputNumE.makeXOX(theCommands, theCommands.opPlus(), quotientNumeratorE, outputSummandE);
-  return output.makeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
+  outputSummandE.makeXOX(calculator, calculator.opTimes(), *summandE, quotientDenominatorE);
+  outputNumE.makeXOX(calculator, calculator.opPlus(), quotientNumeratorE, outputSummandE);
+  return output.makeXOX(calculator, calculator.opDivide(), outputNumE, quotientDenominatorE);
 }
 
-bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opDefine(), 3)) {
+bool Calculator::outerCheckRule(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
   if (input[1] != input[2]) {
@@ -1322,26 +1322,26 @@ bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input
   std::stringstream out;
   out << "Bad rule: you are asking me to substitute " << input[1] << " by itself ("
   << input[2] << ")" << " which is an infinite substitution cycle. ";
-  return output.makeError(out.str(), theCommands);
+  return output.makeError(out.str(), calculator);
 }
 
-bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opDivide(), 3)) {
+bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
   if (input[1].isEqualToZero()) {
     if (!input[2].isEqualToZero()) {
-      return output.assignValue(0, theCommands);
+      return output.assignValue(0, calculator);
     }
   }
   return false;
 }
 
-bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opTimes(), 3)) {
+bool Calculator::innerCancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  if (!input[1].startsWith(theCommands.opDivide(), 3)) {
+  if (!input[1].startsWith(calculator.opDivide(), 3)) {
     return false;
   }
   if (input[1][2] == input[2]) {
@@ -1351,20 +1351,20 @@ bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const
   return false;
 }
 
-bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opTimes(), 3)) {
+bool Calculator::outerAssociateTimesDivision(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  if (!input[2].startsWith(theCommands.opDivide(), 3)) {
+  if (!input[2].startsWith(calculator.opDivide(), 3)) {
     return false;
   }
   Expression newLeftE;
-  newLeftE.makeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
-  output.makeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][2]);
+  newLeftE.makeXOX(calculator, calculator.opTimes(), input[1], input[2][1]);
+  output.makeXOX(calculator, calculator.opDivide(), newLeftE, input[2][2]);
   return true;
 }
 
-bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerAssociate(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 3) {
     return false;
   }
@@ -1373,9 +1373,9 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
     return false;
   }
   List<Expression> multiplicands;
-  theCommands.collectOpands(input, operation, multiplicands);
+  calculator.collectOpands(input, operation, multiplicands);
   Expression result;
-  result.makeOXdotsX(theCommands, operation, multiplicands);
+  result.makeOXdotsX(calculator, operation, multiplicands);
   if (result == input) {
     return false;
   }
@@ -1383,20 +1383,20 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
   return true;
 }
 
-bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
-  if (!input.startsWith(theCommands.opIsDenotedBy(), 3)) {
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
+  if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
     return false;
   }
   const Expression& withNotation = input[2];
   const Expression& theNotation = input[1];
-  theCommands << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
+  calculator << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
-  theCommands.theObjectContainer.expressionNotation.addOnTop(theNotation.toString());
-  theCommands.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
+  calculator.theObjectContainer.expressionNotation.addOnTop(theNotation.toString());
+  calculator.theObjectContainer.expressionWithNotation.addOnTop(withNotation);
   output = input;
-  output.setChildAtomValue(0, theCommands.opDefine());
+  output.setChildAtomValue(0, calculator.opDefine());
   ////
   if (withNotation.isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
     if (withNotation.getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >().isHWV()) {
@@ -1408,9 +1408,9 @@ bool Calculator::standardIsDenotedBy(Calculator& theCommands, const Expression& 
   return true;
 }
 
-bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerMultiplyByOne(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyByOne");
-  if (!input.isListStartingWithAtom(theCommands.opTimes()) || input.size() != 3) {
+  if (!input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3) {
     return false;
   }
   if (!input[1].isEqualToOne()) {
@@ -1452,9 +1452,9 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   return true;
 }
 
-bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerTimesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
-  if (!input.startsWith(theCommands.opTimes())) {
+  if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
   if (input.size() < 2) {
@@ -1462,7 +1462,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   }
   const Expression& firstElt = input[1];
   if (!firstElt.isBuiltInAtom()) {
-    if (!firstElt.startsWith(theCommands.opThePower(), 3)) {
+    if (!firstElt.startsWith(calculator.opThePower(), 3)) {
       return false;
     }
     if (!firstElt[1].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -1473,7 +1473,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
     return false;
   }
   const Expression& secondElt = input[2];
-  if (secondElt.isSequenceNElements() || secondElt.startsWith(theCommands.opIntervalOpen())) {
+  if (secondElt.isSequenceNElements() || secondElt.startsWith(calculator.opIntervalOpen())) {
     output = secondElt;
     return output.setChild(0, firstElt);
   }
@@ -1483,15 +1483,15 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
 }
 
 bool Calculator::outerDistribute(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int theAdditiveOp,
   int theMultiplicativeOp,
   bool constantsOnly
 ) {
-  if (theCommands.outerLeftDistributeBracketIsOnTheLeft(
-    theCommands,
+  if (calculator.outerLeftDistributeBracketIsOnTheLeft(
+    calculator,
     input,
     output,
     theAdditiveOp,
@@ -1500,8 +1500,8 @@ bool Calculator::outerDistribute(
   )) {
     return true;
   }
-  return theCommands.outerRightDistributeBracketIsOnTheRight(
-    theCommands,
+  return calculator.outerRightDistributeBracketIsOnTheRight(
+    calculator,
     input,
     output,
     theAdditiveOp,
@@ -1510,23 +1510,23 @@ bool Calculator::outerDistribute(
   );
 }
 
-bool Calculator::outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerDistributeTimes(Calculator& calculator, const Expression& input, Expression& output) {
   return Calculator::outerDistribute(
-    theCommands,
+    calculator,
     input,
     output,
-    theCommands.opPlus(),
-    theCommands.opTimes(),
+    calculator.opPlus(),
+    calculator.opTimes(),
     false
   );
 }
 
-bool Calculator::outerDistributeTimesConstant(Calculator& theCommands, const Expression& input, Expression& output) {
-  return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes(), true);
+bool Calculator::outerDistributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output) {
+  return Calculator::outerDistribute(calculator, input, output,calculator.opPlus(), calculator.opTimes(), true);
 }
 
 bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int theAdditiveOp,
@@ -1535,10 +1535,10 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
 ) {
   MacroRegisterFunctionWithName("Calculator::outerLeftDistributeBracketIsOnTheLeft");
   if (theAdditiveOp == - 1) {
-    theAdditiveOp = theCommands.opPlus();
+    theAdditiveOp = calculator.opPlus();
   }
   if (theMultiplicativeOp == - 1) {
-    theMultiplicativeOp = theCommands.opTimes();
+    theMultiplicativeOp = calculator.opTimes();
   }
   if (!input.startsWith(theMultiplicativeOp, 3)) {
     return false;
@@ -1552,13 +1552,13 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
     }
   }
   Expression leftE, rightE;
-  leftE.makeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
-  rightE.makeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
-  return output.makeXOX(theCommands, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(calculator, theMultiplicativeOp, input[1][1], input[2]);
+  rightE.makeXOX(calculator, theMultiplicativeOp, input[1][2], input[2]);
+  return output.makeXOX(calculator, theAdditiveOp, leftE, rightE);
 }
 
 bool Calculator::outerRightDistributeBracketIsOnTheRight(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int theAdditiveOp,
@@ -1567,10 +1567,10 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
 ) {
   MacroRegisterFunctionWithName("Calculator::outerRightDistributeBracketIsOnTheRight");
   if (theAdditiveOp == - 1) {
-    theAdditiveOp = theCommands.opPlus();
+    theAdditiveOp = calculator.opPlus();
   }
   if (theMultiplicativeOp == - 1) {
-    theMultiplicativeOp = theCommands.opTimes();
+    theMultiplicativeOp = calculator.opTimes();
   }
   if (!input.startsWith(theMultiplicativeOp, 3)) {
     return false;
@@ -1585,9 +1585,9 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(
   }
 //  int theFormat = input.format;
   Expression leftE, rightE;
-  leftE.makeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
-  rightE.makeXOX(theCommands, theMultiplicativeOp, input[1], input[2][2]);
-  return output.makeXOX(theCommands, theAdditiveOp, leftE, rightE);
+  leftE.makeXOX(calculator, theMultiplicativeOp, input[1], input[2][1]);
+  rightE.makeXOX(calculator, theMultiplicativeOp, input[1], input[2][2]);
+  return output.makeXOX(calculator, theAdditiveOp, leftE, rightE);
 }
 
 bool Calculator::collectCoefficientsPowersVariables(
@@ -1595,28 +1595,28 @@ bool Calculator::collectCoefficientsPowersVariables(
 ) {
   MacroRegisterFunctionWithName("Calculator::collectCoefficientsPowersVariables");
   List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
-  Calculator& theCommands = *input.owner;
-  theCommands.collectOpands(input, theCommands.opPlus(), theSummands);
+  Calculator& calculator = *input.owner;
+  calculator.collectOpands(input, calculator.opPlus(), theSummands);
   Expression currentCoeff;
   outputPositionIiscoeffXtoIth.makeZero();
   for (int i = 0; i < theSummands.size; i ++) {
-    theCommands.collectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
+    calculator.collectOpands(theSummands[i], calculator.opTimes(), currentMultiplicands);
     bool found = false;
     for (int j = 0; j < currentMultiplicands.size; j ++) {
       const Expression& currentE = currentMultiplicands[j];
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
-        currentCoeff.assignValue(1, theCommands);
+        currentCoeff.assignValue(1, calculator);
       } else {
-        currentCoeff.makeProduct(theCommands, remainingMultiplicands);
+        currentCoeff.makeProduct(calculator, remainingMultiplicands);
       }
       if (currentE == theVariable) {
         outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(1), currentCoeff);
         found = true;
         break;
       }
-      if (currentE.startsWith(theCommands.opThePower(), 3)) {
+      if (currentE.startsWith(calculator.opThePower(), 3)) {
         int thePower;
         if (currentE[1] == theVariable) {
           if (currentE[2].isSmallInteger(&thePower)) {
@@ -1655,13 +1655,13 @@ bool Calculator::collectOpandsAccumulate(
 }
 
 bool Calculator::functionCollectSummands(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   LinearCombination<Expression, Rational>& outputSum
 ) {
   MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
   List<Expression> summands;
-  theCommands.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.makeZero();
   LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   LinearCombination<Expression, double> sumOverDoubles;
@@ -1673,7 +1673,7 @@ bool Calculator::functionCollectSummands(
     if (summands[i].isEqualToZero()) {
       continue;
     }
-    if (summands[i].startsWith(theCommands.opTimes(), 3)) {
+    if (summands[i].startsWith(calculator.opTimes(), 3)) {
       if (summands[i][1].isOfType<Rational>(&coeffRat)) {
         outputSum.addMonomial(summands[i][2], coeffRat);
         continue;
@@ -1693,7 +1693,7 @@ bool Calculator::functionCollectSummands(
       }
     }
     if (summands[i].isRational(&coeffRat)) {
-      outputSum.addMonomial(theCommands.expressionOne(), coeffRat);
+      outputSum.addMonomial(calculator.expressionOne(), coeffRat);
     } else {
       outputSum.addMonomial(summands[i], 1);
     }
@@ -1701,22 +1701,22 @@ bool Calculator::functionCollectSummands(
   if (!sumOverDoubles.isEqualToZero() && !hasNAN) {
     sumOverDoubles.quickSortDescending();
     Expression doubleSum;
-    doubleSum.makeSum(theCommands, sumOverDoubles);
+    doubleSum.makeSum(calculator, sumOverDoubles);
     outputSum.addMonomial(doubleSum, 1);
   }
   if (!sumOverAlgebraicNumbers.isEqualToZero()) {
     sumOverAlgebraicNumbers.quickSortDescending();
     Expression algebraicSum;
-    algebraicSum.makeSum(theCommands, sumOverAlgebraicNumbers);
+    algebraicSum.makeSum(calculator, sumOverAlgebraicNumbers);
     outputSum.addMonomial(algebraicSum, 1);
   }
   outputSum.quickSortDescending();
   return !hasNAN;
 }
 
-bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerAssociateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
-  int opPower = theCommands.opThePower();
+  int opPower = calculator.opThePower();
   if (!input.startsWith(opPower, 3)) {
     return false;
   }
@@ -1742,19 +1742,19 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
     return false;
   }
   Expression tempE;
-  tempE.makeProduct(theCommands, input[1][2], input[2]);
-  output.makeXOX(theCommands, opPower, input[1][1], tempE);
+  tempE.makeProduct(calculator, input[1][2], input[2]);
+  output.makeXOX(calculator, opPower, input[1][1], tempE);
   return true;
 }
 
-bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
-  if (!input.startsWith(theCommands.opThePower(), 3)) {
+  if (!input.startsWith(calculator.opThePower(), 3)) {
     return false;
   }
   if (
-    input[1].startsWith(theCommands.opIntegral(), 2) ||
-    input[1].isOperationGiven(theCommands.opIntegral())
+    input[1].startsWith(calculator.opIntegral(), 2) ||
+    input[1].isOperationGiven(calculator.opIntegral())
   ) {
     return false;
   }
@@ -1795,14 +1795,14 @@ bool Expression::makeIdentityMatrixExpressions(int theDim, Calculator& inputBoss
   return this->assignMatrixExpressions(theMat, inputBoss, false, true);
 }
 
-bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerPlus(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerPlus");
-  theCommands.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(theCommands.opPlus())) {
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!input.startsWith(calculator.opPlus())) {
     return false;
   }
   LinearCombination<Expression, Rational> theSum;
-  if (!theCommands.functionCollectSummands(theCommands, input, theSum)) {
+  if (!calculator.functionCollectSummands(calculator, input, theSum)) {
     return false;
   }
   theSum.quickSortDescending();
@@ -1817,16 +1817,16 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
       }
     }
   }
-  output.makeSum(theCommands, theSum);
+  output.makeSum(calculator, theSum);
   if (output == input) {
     return false;
   }
   return true;
 }
 
-bool Calculator::evaluateIf(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.startsWith(theCommands.opDefineConditional(), 4)) {
-    return output.makeError("Error: operation :if = takes three arguments.", theCommands);
+bool Calculator::evaluateIf(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!input.startsWith(calculator.opDefineConditional(), 4)) {
+    return output.makeError("Error: operation :if = takes three arguments.", calculator);
   }
   Rational conditionRat;
   if (!input[1].isOfType<Rational>(&conditionRat)) {
@@ -1843,17 +1843,17 @@ bool Calculator::evaluateIf(Calculator& theCommands, const Expression& input, Ex
   return false;
 }
 
-bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!(input.startsWith(theCommands.opMinus(), 3) || input.startsWith(theCommands.opMinus(), 2))) {
+bool Calculator::outerMinus(Calculator& calculator, const Expression& input, Expression& output) {
+  if (!(input.startsWith(calculator.opMinus(), 3) || input.startsWith(calculator.opMinus(), 2))) {
     return false;
   }
   Expression tempE, minusOne;
-  minusOne.assignValue(- 1, theCommands);
+  minusOne.assignValue(- 1, calculator);
   if (input.size() == 2) {
-    output.makeXOX(theCommands, theCommands.opTimes(), minusOne, input[1]);
+    output.makeXOX(calculator, calculator.opTimes(), minusOne, input[1]);
   } else {
-    tempE.makeXOX(theCommands, theCommands.opTimes(), minusOne, input[2]);
-    output.makeXOX(theCommands, theCommands.opPlus(), input[1], tempE);
+    tempE.makeXOX(calculator, calculator.opTimes(), minusOne, input[2]);
+    output.makeXOX(calculator, calculator.opPlus(), input[1], tempE);
   }
   return true;
 }
@@ -2938,10 +2938,10 @@ void ObjectContainer::reset() {
 }
 
 template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
 
 bool Calculator::innerWriteGenVermaModAsDiffOperators(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool AllGenerators,
@@ -2949,7 +2949,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   bool ascending
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.recursionDepth);
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.setSize(1);
   Selection theParSel;
@@ -2961,8 +2961,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
       truncatedInput.children.removeLastObject();
     }
   }
-  if (!theCommands.getTypeHighestWeightParabolic<Polynomial<Rational> >(
-    theCommands,
+  if (!calculator.getTypeHighestWeightParabolic<Polynomial<Rational> >(
+    calculator,
     truncatedInput,
     output,
     theHWs[0],
@@ -2970,7 +2970,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     theSSalgebra,
     CalculatorConversions::functionPolynomial<Rational>)
   ) {
-    return output.makeError("Failed to extract type, highest weight, parabolic selection", theCommands);
+    return output.makeError("Failed to extract type, highest weight, parabolic selection", calculator);
   }
   if (output.isError()) {
     return true;
@@ -2987,8 +2987,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   if (input.children.size > 6) {
     exponentLetterString = input[6].toString();
   }
-  return theCommands.innerWriteGenVermaModAsDiffOperatorInner(
-    theCommands,
+  return calculator.innerWriteGenVermaModAsDiffOperatorInner(
+    calculator,
     input,
     output,
     theHWs,
@@ -3004,56 +3004,56 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   );
 }
 
-bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.getTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
+  if (!calculator.getTypeHighestWeightParabolic<Rational>(
+    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
-    return output.makeError("Failed to extract highest weight and algebra", theCommands);
+    return output.makeError("Failed to extract highest weight and algebra", calculator);
   }
   if (output.isError()) {
     return true;
   }
   if (tempSel.cardinalitySelection > 0) {
-    return output.makeError("Failed to extract highest weight. ", theCommands);
+    return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
-    return output.makeError(reportString, theCommands);
+    return output.makeError(reportString, calculator);
   }
   std::stringstream out;
   out << resultChar.toString();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
-bool Calculator::innerFreudenthalFormula(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!theCommands.getTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
+  if (!calculator.getTypeHighestWeightParabolic<Rational>(
+    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
-    return output.makeError("Failed to extract highest weight and algebra", theCommands);
+    return output.makeError("Failed to extract highest weight and algebra", calculator);
   }
   if (output.isError()) {
     return true;
   }
   if (tempSel.cardinalitySelection > 0) {
-    return output.makeError("Failed to extract highest weight. ", theCommands);
+    return output.makeError("Failed to extract highest weight. ", calculator);
   }
   CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
   hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.makeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
-    return output.makeError(reportString, theCommands);
+    return output.makeError(reportString, calculator);
   }
-  return output.assignValue(resultChar, theCommands);
+  return output.assignValue(resultChar, calculator);
 }
 
 bool Expression::isMeltable(int* numResultingChildren) const {
@@ -3165,10 +3165,10 @@ bool Calculator::convertExpressionsToCommonContext(
   return true;
 }
 
-bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerMeltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
-  RecursionDepthCounter theCounter(&theCommands.recursionDepth);
-  if (!input.startsWith(theCommands.opEndStatement())) {
+  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  if (!input.startsWith(calculator.opEndStatement())) {
     return false;
   }
   int tempInt;
@@ -3184,15 +3184,15 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   if (!found) {
     return false;
   }
-  output.reset(theCommands, input.children.size + ChildIncrease);
-  output.addChildAtomOnTop(theCommands.opEndStatement());
+  output.reset(calculator, input.children.size + ChildIncrease);
+  output.addChildAtomOnTop(calculator.opEndStatement());
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
     if (!currentChild.isMeltable()) {
       output.addChildOnTop(input[i]);
       continue;
     }
-    if (!currentChild[1].startsWith(theCommands.opEndStatement())) {
+    if (!currentChild[1].startsWith(calculator.opEndStatement())) {
       output.addChildOnTop(currentChild[1]);
       continue;
     }

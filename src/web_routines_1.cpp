@@ -601,14 +601,14 @@ void WebCrawler::FetchWebPagePart2(
 #endif
 }
 
-bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerFetchWebPageGET(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPageGET");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
+    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), calculator);
   }
   WebCrawler theCrawler;
   if (input.size() != 4) {
-    return theCommands << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
+    return calculator << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
   }
   if (!input[1].isOfType(&theCrawler.serverToConnectTo)) {
     theCrawler.serverToConnectTo = input[1].toString();
@@ -628,17 +628,17 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Ex
   << "<br>";
   theCrawler.FetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchWebPagePOST");
   if (!global.userDefaultHasAdminRights()) {
-    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
+    return output.assignValue(std::string("Fetching web pages available only for logged-in admins. "), calculator);
   }
   WebCrawler theCrawler;
   if (input.size() != 5) {
-    return theCommands << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
+    return calculator << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
   }
   if (!input[1].isOfType(&theCrawler.serverToConnectTo)) {
     theCrawler.serverToConnectTo = input[1].toString();
@@ -661,23 +661,23 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const E
   theCrawler.flagDoUseGET = false;
   theCrawler.FetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctions::innerFetchKnownPublicKeys(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFetchKnownPublicKeys");
   (void) input;
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
     out << "You need to be a logged-in administrator to call this function. ";
-    return output.assignValue(out.str(), theCommands);
+    return output.assignValue(out.str(), calculator);
   }
   WebCrawler theCrawler;
   theCrawler.theTSL.openSSLData.name = "crawler";
   theCrawler.UpdatePublicKeys(&out, &out);
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {

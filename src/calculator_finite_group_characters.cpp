@@ -398,27 +398,27 @@ void WeylGroupData::raiseToMaximallyDominant(List<Vector<Coefficient> >& theWeig
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
-  Calculator& theCommands, const Expression& input, Expression& output, bool useOuter
+  Calculator& calculator, const Expression& input, Expression& output, bool useOuter
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant");
   if (input.children.size < 2) {
-    return output.makeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
+    return output.makeError("Raising to maximally dominant takes at least 2 arguments, type and vector", calculator);
   }
   const Expression& semisimpleLieAlgebraNode = input[1];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     semisimpleLieAlgebraNode,
     CalculatorConversions::functionSemisimpleLieAlgebra,
     semisimpleLieAlgebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra* theSSalgebra = semisimpleLieAlgebra.content;
   Vectors<Rational> theHWs;
   theHWs.setSize(input.children.size - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.getVector<Rational>(
+    if (!calculator.getVector<Rational>(
       input[i], theHWs[i - 2], nullptr, theSSalgebra->getRank()
     )) {
       isGood = false;
@@ -427,7 +427,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   }
   if (!isGood && input.children.size == 3) {
     Matrix<Rational> theHWsMatForm;
-    if (theCommands.functionGetMatrix(
+    if (calculator.functionGetMatrix(
       input[2], theHWsMatForm, nullptr, theSSalgebra->getRank()
     )) {
       theHWsMatForm.getVectorsFromRows(theHWs);
@@ -435,7 +435,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     }
   }
   if (theHWs.size == 0 || !isGood) {
-    return output.makeError("Failed to extract rational vectors from expression " + input.toString() + ". ", theCommands);
+    return output.makeError("Failed to extract rational vectors from expression " + input.toString() + ". ", calculator);
   }
   std::stringstream out;
   out << "Input: " << theHWs.toString()
@@ -449,18 +449,18 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     theOuterAutos.raiseToMaximallyDominant(theHWs);
   }
   out << "<br>Maximally dominant output: " << theHWs.toString();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple");
   if (!input.isListNElements(3)) {
-    return output.makeError("innerWeylOrbit takes two arguments", theCommands);
+    return output.makeError("innerWeylOrbit takes two arguments", calculator);
   }
   const Expression& theSSalgebraNode = input[1];
   const Expression& vectorNode = input[2];
@@ -470,21 +470,21 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     theType = theAlgebra->theWeyl.theDynkinType;
   } else {
     if (!CalculatorConversions::functionDynkinType(
-      theCommands, theSSalgebraNode, theType
+      calculator, theSSalgebraNode, theType
     )) {
       return false;
     }
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords;
-  ExpressionContext theContext(theCommands);
-  if (!theCommands.getVector(
+  ExpressionContext theContext(calculator);
+  if (!calculator.getVector(
     vectorNode,
     theHWfundCoords,
     &theContext,
     theType.getRank(),
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    return output.makeError("Failed to extract highest weight", theCommands);
+    return output.makeError("Failed to extract highest weight", calculator);
   }
   WeylGroupData theWeyl;
   theWeyl.makeFromDynkinType(theType);
@@ -533,39 +533,39 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   }
   latexReport << "\\end{longtable}";
   out << "</table>" << "<br> " << latexReport.str();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
   //double startTimeForDebug= global.getElapsedSeconds();
   WithContext<SemisimpleLieAlgebra*> theAlgebra;
   Vector<Rational> theWeightRat;
-  if (theCommands.getTypeWeight<Rational>(
-    theCommands, input, theWeightRat, theAlgebra, nullptr
+  if (calculator.getTypeWeight<Rational>(
+    calculator, input, theWeightRat, theAlgebra, nullptr
   )) {
     Rational result = theAlgebra.content->theWeyl.getOrbitSize(theWeightRat);
-    return output.assignValue(result, theCommands);
+    return output.assignValue(result, calculator);
   }
   SemisimpleLieAlgebra* theSSalgebra = theAlgebra.content;
   Vector<Polynomial<Rational> > theWeightPoly;
-  if (theCommands.getTypeWeight<Polynomial<Rational> >(
-    theCommands,
+  if (calculator.getTypeWeight<Polynomial<Rational> >(
+    calculator,
     input,
     theWeightPoly,
     theAlgebra,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     Rational result = theSSalgebra->theWeyl.getOrbitSize(theWeightPoly);
-    return output.assignValue(result, theCommands);
+    return output.assignValue(result, calculator);
   }
   return false;
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool useFundCoords,
@@ -573,12 +573,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylOrbit");
   if (!input.isListNElements(3)) {
-    return output.makeError("innerWeylOrbit takes two arguments", theCommands);
+    return output.makeError("innerWeylOrbit takes two arguments", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   Vector<Polynomial<Rational> > theWeight;
-  if (!theCommands.getTypeWeight(
-    theCommands,
+  if (!calculator.getTypeWeight(
+    calculator,
     input,
     theWeight,
     theSSalgebra,
@@ -719,38 +719,38 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   }
   latexReport << "\\end{longtable}";
   out << "</table>" << "<br> " << latexReport.str();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable");
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
   if (theGroup.getDimension() > 8) {
-    theCommands << "Computing character table disabled for rank >= 8, modify file " << __FILE__
+    calculator << "Computing character table disabled for rank >= 8, modify file " << __FILE__
     << " line "  << __LINE__ << " to change that. ";
     return false;
   }
   std::stringstream reportStream;
   theGroup.computeOrLoadCharacterTable(&reportStream);
-  theCommands << reportStream.str();
-  return output.assignValue(theGroup, theCommands);
+  calculator << reportStream.str();
+  return output.assignValue(theGroup, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS");
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroup = output.getValueNonConst<WeylGroupData>();
   if (theGroup.getDimension() > 8) {
-    theCommands << "Conjugacy classes computation disabled for rank greater than 8. "
+    calculator << "Conjugacy classes computation disabled for rank greater than 8. "
     << "Modify source code "
     << "file " << __FILE__ << " line " << __LINE__
     << " and rebuild the calculator to change that.";
@@ -758,15 +758,15 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(
   }
   std::stringstream out;
   theGroup.computeOrLoadConjugacyClasses(&out);
-  theCommands << out.str();
-  return output.assignValue(theGroup, theCommands);
+  calculator << out.str();
+  return output.assignValue(theGroup, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements");
-  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(theCommands, input, output)) {
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
@@ -835,19 +835,19 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
       out << "Maps conj. class " << i + 1 << " -> " << found + 1 << "<br>";
     }
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
   if (theGroupData.getDimension() > 7) {
-    theCommands << "<hr>Loaded Dynkin type "
+    calculator << "<hr>Loaded Dynkin type "
     << theGroupData.theDynkinType.toString() << " of rank "
     << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
@@ -856,23 +856,23 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
   double timeStart1 = global.getElapsedSeconds();
   theGroupData.theGroup.computeConjugacyClassesFromAllElements();
   //std::stringstream out;
-  theCommands << "<hr> Computed conjugacy classes of "
+  calculator << "<hr> Computed conjugacy classes of "
   << theGroupData.toString() << " in " << global.getElapsedSeconds() - timeStart1
   << " second(s). ";
-  return output.assignValue(theGroupData, theCommands);
+  return output.assignValue(theGroupData, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives");
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   WeylGroupData& theGroupData = output.getValueNonConst<WeylGroupData>();
   theGroupData.checkConsistency();
   if (theGroupData.getDimension() > 8) {
-    return theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
+    return calculator << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
     << " of rank " << theGroupData.getDimension() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
@@ -880,17 +880,17 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   double timeStart1 = global.getElapsedSeconds();
   theGroupData.checkConsistency();
   theGroupData.theGroup.computeConjugacyClassSizesAndRepresentatives();
-  theCommands << "<hr> Computed conjugacy classes representatives of "
+  calculator << "<hr> Computed conjugacy classes representatives of "
   << theGroupData.theDynkinType.toString() << " in " << global.getElapsedSeconds()-timeStart1
   << " second(s). ";
-  return output.assignValue(theGroupData, theCommands);
+  return output.assignValue(theGroupData, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch");
-  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(theCommands, input, output)) {
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {
@@ -917,16 +917,16 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
     out << "<hr>" << theGroupData.theGroup.irreps[i].toString(&tempFormat);
   }
   out << theGroupData.toString(&tempFormat);
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
-    return output.makeError("Failed to extract Dynkin type from argument. ", theCommands);
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+    return output.makeError("Failed to extract Dynkin type from argument. ", calculator);
   }
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
@@ -967,26 +967,26 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
       out << "</table>";
     }
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, true, true);
+  return CalculatorFunctionsWeylGroup::innerWeylOrbit(calculator, input, output, true, true);
 }
 
-bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund(Calculator& theCommands, const Expression& input, Expression& output) {
-  return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, true, false);
+bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorFunctionsWeylGroup::innerWeylOrbit(calculator, input, output, true, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, false, false);
+  return CalculatorFunctionsWeylGroup::innerWeylOrbit(calculator, input, output, false, false);
 }
 
-bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTensorWeylReps");
   if (input.size() != 3) {
     return false;
@@ -1003,14 +1003,14 @@ bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, 
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   if (leftRep.ownerGroup != rightRep.ownerGroup) {
-    return output.makeError("Error: attempting to tensor irreps with different owner groups. ", theCommands);
+    return output.makeError("Error: attempting to tensor irreps with different owner groups. ", calculator);
   }
   leftRep *= rightRep;
-  return output.assignValue(leftRep, theCommands);
+  return output.assignValue(leftRep, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps");
   Expression theTensor;
@@ -1028,7 +1028,7 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep =
   leftE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   outputRep *= rightE.getValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
-  return output.assignValue(outputRep, theCommands);
+  return output.assignValue(outputRep, calculator);
 }
 
 std::string WeylGroupData::toStringIrreducibleRepresentationLabel(int indexIrrep) {
@@ -1765,28 +1765,28 @@ bool SelectionFixedRankDifferentMaxMultiplicities::incrementReturnFalseIfPastLas
   return false;
 }
 
-bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerKostkaNumber");
   if (input.size() != 3) {
     return false;
   }
   KostkaNumber theKN;
   if (
-    !theCommands.getVectorInt(input[1], theKN.partition) ||
-    !theCommands.getVectorInt(input[2], theKN.tuple)
+    !calculator.getVectorInt(input[1], theKN.partition) ||
+    !calculator.getVectorInt(input[2], theKN.tuple)
   ) {
-    return theCommands << "Failed to extract partition and tuple from input: " << input.toString();
+    return calculator << "Failed to extract partition and tuple from input: " << input.toString();
   }
   std::stringstream out;
   HashedList<KostkaNumber> theKNs;
   if (theKN.compute(&theKNs, &out)) {
     out << "<br>Final result: " << theKN.value.toString();
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerKostkaNumber");
   if (input.size() != 3) {
@@ -1796,12 +1796,12 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   if (!input[1].isSmallInteger(&theSel.rank)) {
     return false;
   }
-  if (!theCommands.getVectorInt(input[2], theSel.capacities)) {
-    return theCommands << "Failed to extract list of multiplicities from "
+  if (!calculator.getVectorInt(input[2], theSel.capacities)) {
+    return calculator << "Failed to extract list of multiplicities from "
     << input[2].toString();
   }
   if (theSel.rank < 0) {
-    return output.assignValue(0, theCommands);
+    return output.assignValue(0, calculator);
   }
   theSel.initialize();
   std::stringstream out;
@@ -1810,15 +1810,15 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   while (theSel.incrementReturnFalseIfPastLast()) {
     out << "<br>" << theSel.toString();
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
   std::stringstream out;
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {
@@ -1826,15 +1826,15 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
   }
   WeylGroupData& theWeyl = output.getValueNonConst<WeylGroupData>();
   if (theWeyl.getDimension() > 12) {
-    return theCommands << "<hr>Computing sign signatures restricted up to rank 12.";
+    return calculator << "<hr>Computing sign signatures restricted up to rank 12.";
   }
   char type = 'X';
   int rank = - 1;
   if (!theWeyl.theDynkinType.isSimple(&type, &rank)) {
-    return theCommands << "This function is implemented for simple classical Weyl groups only.";
+    return calculator << "This function is implemented for simple classical Weyl groups only.";
   }
   if (type != 'A' && type != 'B' && type != 'C' && type != 'D') {
-    return theCommands << "You requested computation for type " << type
+    return calculator << "You requested computation for type " << type
     << " but our formulas work only for classical types: A, B-C and D. ";
   }
   if (type == 'B' || type == 'C') {
@@ -1853,16 +1853,16 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
         << ", transposed: " << partitionsTransposed[i].toString();
       }
     }
-    return theCommands << "Not implemented yet.";
+    return calculator << "Not implemented yet.";
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
-  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output)) {
+  if (!CalculatorConversions::innerLoadWeylGroup(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {
@@ -1870,7 +1870,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
   }
   WeylGroupData& theWeyl = output.getValueNonConst<WeylGroupData>();
   if (theWeyl.getDimension() > 8) {
-    theCommands << "<hr>Computing sign signatures restricted up to rank 8.";
+    calculator << "<hr>Computing sign signatures restricted up to rank 8.";
     return false;
   }
   std::stringstream out;
@@ -1905,14 +1905,14 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
     }
   }
   out << theWeyl.toStringSignSignatureRootSubsystem(finalSubGroups);
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::getValueNonConst() const;
 
 
-bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerDecomposeWeylRep");
   if (!input.isOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > ()) {
     return false;
@@ -1921,26 +1921,26 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
   input.getValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
   inputRep.makeGRCAM().decomposeTodorsVersion(outputRep);
-  return output.assignValue(outputRep, theCommands);
+  return output.assignValue(outputRep, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup");
   if (input.size() != 3) {
-    return theCommands << "<hr>IsOuterAuto expects 2 arguments.";
+    return calculator << "<hr>IsOuterAuto expects 2 arguments.";
   }
   DynkinType theType;
-  if (!CalculatorConversions::functionDynkinType(theCommands, input[1], theType)) {
-    return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].toString();
+  if (!CalculatorConversions::functionDynkinType(calculator, input[1], theType)) {
+    return calculator << "<hr>Failed to get Dynkin type from argument. " << input[1].toString();
   }
   Matrix<Rational> theMat;
-  if (!theCommands.functionGetMatrix(input[2], theMat)) {
-    return theCommands << "<hr>Failed to get matrix from argument. " << input[2].toString();
+  if (!calculator.functionGetMatrix(input[2], theMat)) {
+    return calculator << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
   if (theMat.numberOfColumns != theMat.numberOfRows || theMat.numberOfColumns != theType.getRank()) {
-    theCommands << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.getRank()
+    calculator << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.getRank()
     << " but extracted linear operator has " << theMat.numberOfColumns << " columns and " << theMat.numberOfRows << " rows.";
     return false;
   }
@@ -1952,14 +1952,14 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
   MatrixTensor<Rational> theOp;
   theOp = theMat;
   if (theAutomorphisms.isElementWeylGroupOrOuterAutomorphisms(theOp)) {
-    return output.assignValue(1, theCommands);
+    return output.assignValue(1, calculator);
   }
-  return output.assignValue(0, theCommands);
+  return output.assignValue(0, calculator);
 }
 
-bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep");
-  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(theCommands, input, output)) {
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(calculator, input, output)) {
     return false;
   }
   if (!output.isOfType<WeylGroupData>()) {
@@ -1970,7 +1970,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
   theGroup.theGroup.computeIrreducibleRepresentationsTodorsVersion();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> tempRep;
   theGroup.getStandardRepresentation(tempRep);
-  return output.assignValue(tempRep.makeOtherGroupRepresentationClass(), theCommands);
+  return output.assignValue(tempRep.makeOtherGroupRepresentationClass(), calculator);
 }
 
 class MonomialMacdonald {
@@ -2080,18 +2080,18 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
   }
 }
 
-bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMacdonaldPolys");
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   if (input.size() != 2) {
-    return theCommands << "Macdonald polynomials expects as input a single argument. ";
+    return calculator << "Macdonald polynomials expects as input a single argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   RootSubalgebras theRootSAs;
   theRootSAs.owner = algebra.content;
@@ -2111,11 +2111,11 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   }
   out << "Type: " << theRootSAs.owner->theWeyl.theDynkinType.toString()
   << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraWeight");
   Weight<Polynomial<Rational> > resultWeight;
@@ -2125,9 +2125,9 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
   Expression tempE;
   SemisimpleLieAlgebra* theSSowner = nullptr;
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    theCommands, input[1], tempE, theSSowner
+    calculator, input[1], tempE, theSSowner
   )) {
-    return theCommands << "<hr>Failed to load semisimple Lie algebra";
+    return calculator << "<hr>Failed to load semisimple Lie algebra";
   }
   std::string theCoordsString;
   bool isGood = input[3].isOperation(&theCoordsString);
@@ -2135,7 +2135,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
     isGood = (theCoordsString == "epsilon") || (theCoordsString == "fundamental") || (theCoordsString == "simple");
   }
   if (!isGood) {
-    return theCommands << "<hr>The third argument of MakeWeight is bad: must be one of the "
+    return calculator << "<hr>The third argument of MakeWeight is bad: must be one of the "
     << "keywords: epsilon, fundamental, simple. ";
   }
   int theWeightIndex = - 1;
@@ -2148,7 +2148,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
       errorStream << "The second argument of the MakeWeight function "
       << "needs to be index of a weight between 1 and the Lie algebra rank. "
       << "However, the index is " << theWeightIndex << ".";
-      return output.makeError(errorStream.str(), theCommands);
+      return output.makeError(errorStream.str(), calculator);
     }
     Vector<Polynomial<Rational> > EiVector;
     EiVector.makeEi(theSSowner->getRank(), theWeightIndex - 1);
@@ -2165,54 +2165,54 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
       std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
       << ". However, the index is " << theWeightIndex << ".";
-      return output.makeError(errorStream.str(), theCommands);
+      return output.makeError(errorStream.str(), calculator);
     }
     EiVector.makeEi(tempV.size, theWeightIndex - 1);
     resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
-  return output.assignValueWithContext(resultWeight, theContext, theCommands);
+  return output.assignValueWithContext(resultWeight, theContext, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
   if (input.size() != 2) {
-    return theCommands << "Lie algebra rho weight expects a single argument. ";
+    return calculator << "Lie algebra rho weight expects a single argument. ";
   }
   Weight<Polynomial<Rational> > resultWeight;
   SemisimpleLieAlgebra* theSSowner = nullptr;
   Expression tempE;
   if (!CalculatorConversions::functionSemisimpleLieAlgebra(
-    theCommands, input[1], tempE, theSSowner
+    calculator, input[1], tempE, theSSowner
   )) {
-    return theCommands << "<hr>Failed to load semisimple Lie algebra. ";
+    return calculator << "<hr>Failed to load semisimple Lie algebra. ";
   }
   theSSowner->checkConsistency();
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
   resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.getFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
   resultWeight.owner = theSSowner;
-  return output.assignValueWithContext(resultWeight, theContext, theCommands);
+  return output.assignValueWithContext(resultWeight, theContext, calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTestSpechtModules");
   int theSymmetricGroupRank = 0;
   if (!input.isSmallInteger(&theSymmetricGroupRank)) {
-    return theCommands << "innerTestSpechtModules called with input that is not a small integer, not performing any tests.";
+    return calculator << "innerTestSpechtModules called with input that is not a small integer, not performing any tests.";
   }
   if (theSymmetricGroupRank < 1) {
-    return theCommands << "innerTestSpechtModules takes as input a small positive integer, instead the input I got was "
+    return calculator << "innerTestSpechtModules takes as input a small positive integer, instead the input I got was "
     << theSymmetricGroupRank << ". ";
   }
   if (theSymmetricGroupRank > 6) {
-    return theCommands
+    return calculator
     << "For speed/memory reasons, innerTestSpechtModules is currently restricted to take input no larger than 6. Your input was: "
     << theSymmetricGroupRank;
   }
@@ -2220,41 +2220,41 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(
   out << "User has requested the test of Specht modules of S_"
   << theSymmetricGroupRank << ". ";
   Partition::testAllSpechtModules(theSymmetricGroupRank);
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
   if (input.size() != 3) {
-    return theCommands << "Representating takes 2 arguments: element and rep.";
+    return calculator << "Representating takes 2 arguments: element and rep.";
   }
   ElementHyperoctahedralGroupR2 theElt;
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
   if (!input[1].isOfType(&theElt)) {
-    return theCommands << "Failed to extract element of hyperoctahedral group from " << input[1].toString();
+    return calculator << "Failed to extract element of hyperoctahedral group from " << input[1].toString();
   }
   if (!input[2].isOfType(&theRep)) {
-    return theCommands << "Failed to extract representation from " << input[2].toString();
+    return calculator << "Failed to extract representation from " << input[2].toString();
   }
   Matrix<Rational> result;
   if (!theRep.getMatrixOfElement(theElt, result)) {
-    return theCommands << "Failed to get matrix of element " << theElt.toString()
+    return calculator << "Failed to get matrix of element " << theElt.toString()
     << " from representation: " << theRep.toString();
   }
-  return output.assignMatrix(result, theCommands, nullptr, false);
+  return output.assignMatrix(result, calculator, nullptr, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation");
   Vector<Rational> inputLeftRat, inputRightRat;
   if (input.size() != 3) {
-    return theCommands << "CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation needs two arguments";
+    return calculator << "CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation needs two arguments";
   }
-  if (!theCommands.getVector(input[1], inputLeftRat)|| !theCommands.getVector(input[2], inputRightRat)) {
+  if (!calculator.getVector(input[1], inputLeftRat)|| !calculator.getVector(input[2], inputRightRat)) {
     return false;
   }
   if (inputLeftRat.size < 1 || inputRightRat.size < 1) {
@@ -2272,17 +2272,17 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     currentInput->setSize(currentInputRat->size);
     for (int i = 0; i < currentInputRat->size; i ++) {
       if (!(*currentInputRat)[i].isIntegerFittingInInt(&(*currentInput)[i])) {
-        return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
+        return calculator << "Failed to convert input: " << input.toString() << " to a list of small integers.";
       }
     }
     for (int i = 0; i < currentInput->size; i ++) {
       if ((*currentInput)[i] < 1 || (*currentInput)[i] > maxPartitionSize ) {
-        return theCommands << "Entry: " << (*currentInput)[i] << " of " << (*currentInput)
+        return calculator << "Entry: " << (*currentInput)[i] << " of " << (*currentInput)
         << " is outside of the allowed input range.";
       }
     }
     if (currentInput->sumCoordinates() > maxPartitionSize) {
-      return theCommands << "The coordinates of vector " << (*currentInput) << " have sum that is too large. ";
+      return calculator << "The coordinates of vector " << (*currentInput) << " have sum that is too large. ";
     }
   }
   Partition partitionLeft, partitionRight;
@@ -2292,35 +2292,35 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
   //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
   int index = 0;
-  for (; index < theCommands.theObjectContainer.theHyperOctahedralGroups.size; index ++) {
+  for (; index < calculator.theObjectContainer.theHyperOctahedralGroups.size; index ++) {
     if (
-      theCommands.theObjectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
-      theCommands.theObjectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
+      calculator.theObjectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup &&
+      calculator.theObjectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n
     ) {
       break;
     }
   }
-  if (index == theCommands.theObjectContainer.theHyperOctahedralGroups.size) {
-    theCommands.theObjectContainer.theHyperOctahedralGroups.setSize(
-      theCommands.theObjectContainer.theHyperOctahedralGroups.size + 1
+  if (index == calculator.theObjectContainer.theHyperOctahedralGroups.size) {
+    calculator.theObjectContainer.theHyperOctahedralGroups.setSize(
+      calculator.theObjectContainer.theHyperOctahedralGroups.size + 1
     );
-    theCommands.theObjectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
+    calculator.theObjectContainer.theHyperOctahedralGroups[index].makeHyperoctahedralGroup(
       partitionLeft.n + partitionRight.n
     );
   }
   //<-may be broken if copying of groups doesn't work!!!!!!!!
-  HyperoctahedralGroupData& HD = theCommands.theObjectContainer.theHyperOctahedralGroups[index];
+  HyperoctahedralGroupData& HD = calculator.theObjectContainer.theHyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   HD.spechtModuleOfPartititons(partitionLeft, partitionRight, R);
   //out << R;
   R.computeCharacter();
-  return output.assignValue(R, theCommands);
+  return output.assignValue(R, calculator);
 }
 
-bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSpechtModule");
   Vector<Rational> inputRat;
-  if (!theCommands.getVectorFromFunctionArguments(input, inputRat)) {
+  if (!calculator.getVectorFromFunctionArguments(input, inputRat)) {
     return false;
   }
   if (inputRat.size < 1) {
@@ -2331,16 +2331,16 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   inputInt.setSize(inputRat.size);
   for (int i = 0; i < inputRat.size; i ++) {
     if (!(inputRat[i].isIntegerFittingInInt(&inputInt[i]))) {
-      return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
+      return calculator << "Failed to convert input: " << input.toString() << " to a list of small integers.";
     }
   }
   for (int i = 0; i < inputInt.size; i ++) {
     if ((inputInt[i] < 1) || (inputInt[i] > maxPartitionSize)) {
-      return theCommands <<  "Entry: " << inputInt[i] << " of " << inputInt << " is outside of the allowed input range.";
+      return calculator <<  "Entry: " << inputInt[i] << " of " << inputInt << " is outside of the allowed input range.";
     }
   }
   if (inputInt.sumCoordinates() > maxPartitionSize) {
-    return theCommands << "The coordinates of vector " << inputInt << " have sum that is too large. ";
+    return calculator << "The coordinates of vector " << inputInt << " have sum that is too large. ";
   }
   Partition p;
   p.fromListInt(inputInt);
@@ -2351,11 +2351,11 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   for (int i = 0; i < gens.size; i ++) {
     out << i << "\n" << gens[i].toStringPlainText() << "\n";
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
   int theRank = 0;
@@ -2363,16 +2363,16 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpec
     return false;
   }
   if (theRank < 1|| theRank > 7) {
-    return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
+    return calculator << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
   HyperoctahedralGroupData G;
   G.makeHyperoctahedralGroup(theRank);
   G.allSpechtModules();
-  return output.assignValue(G.theGroup->prettyPrintCharacterTable(), theCommands);
+  return output.assignValue(G.theGroup->prettyPrintCharacterTable(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
   int theRank = 0;
@@ -2380,25 +2380,25 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutation
     return false;
   }
   if (theRank < 1 || theRank > 10) {
-    return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
+    return calculator << "Input of hyperoctahedral print function has to be between 1 and 10";
   }
   HyperoctahedralGroupData G;
   G.makeHyperoctahedralGroup(theRank);
-  return output.assignValue(G.theGroup->prettyPrintGeneratorCommutationRelations(), theCommands);
+  return output.assignValue(G.theGroup->prettyPrintGeneratorCommutationRelations(), calculator);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupElement");
   if (input.size() < 2) {
-    return output.makeError("Function WeylElement needs to know what group the element belongs to", theCommands);
+    return output.makeError("Function WeylElement needs to know what group the element belongs to", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> thePointer;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, thePointer
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   ElementWeylGroup theElt;
   theElt.generatorsLastAppliedFirst.reserve(input.size() - 2);
@@ -2415,27 +2415,27 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
       theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->getRank() ||
       theElt.generatorsLastAppliedFirst[i].index < 0
     ) {
-      return output.makeError("Bad reflection index", theCommands);
+      return output.makeError("Bad reflection index", calculator);
     }
   }
   theElt.makeCanonical();
-  return output.assignValue(theElt, theCommands);
+  return output.assignValue(theElt, calculator);
 }
 
 bool Calculator::innerGenerateMultiplicativelyClosedSet(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGenerateMultiplicativelyClosedSet");
   if (input.size() <= 2) {
-    return output.makeError("I need at least two arguments - upper bound and at least one element to multiply. ", theCommands);
+    return output.makeError("I need at least two arguments - upper bound and at least one element to multiply. ", calculator);
   }
   int upperLimit;
   if (!input[1].isSmallInteger(&upperLimit)) {
-    return output.makeError("First argument must be a small integer, serving as upper bound for the set. ", theCommands);
+    return output.makeError("First argument must be a small integer, serving as upper bound for the set. ", calculator);
   }
   if (upperLimit <= 0) {
     upperLimit = 10000;
-    theCommands << "The upper computation limit I got was 0 or less; I replaced it with the default value "
+    calculator << "The upper computation limit I got was 0 or less; I replaced it with the default value "
     << upperLimit << ".";
   }
   HashedList<Expression> theSet;
@@ -2448,12 +2448,12 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
   ProgressReport theReport;
   for (int i = 0; i < theSet.size; i ++) {
     for (int j = 0; j < numGenerators; j ++) {
-      theProduct.makeProduct(theCommands, theSet[j], theSet[i]);
+      theProduct.makeProduct(calculator, theSet[j], theSet[i]);
       std::stringstream reportStream;
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
       reportStream << "<br>Evaluating: " << theProduct.toString();
       theReport.report(reportStream.str());
-      theCommands.evaluateExpression(theCommands, theProduct, evaluatedProduct);
+      calculator.evaluateExpression(calculator, theProduct, evaluatedProduct);
       //if (evaluatedProduct == theSet[0])
       //{
       //}
@@ -2462,15 +2462,15 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
         std::stringstream out;
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
         << upperLimit << " elements.";
-        evaluatedProduct.makeError(out.str(), theCommands);
+        evaluatedProduct.makeError(out.str(), calculator);
         theSet.addOnTop(evaluatedProduct);
         i = theSet.size; break;
       }
     }
   }
-  theCommands << "<hr>Generated a list of " << theSet.size << " elements";
-  output.reset(theCommands, theSet.size + 1);
-  output.addChildAtomOnTop(theCommands.opSequence());
+  calculator << "<hr>Generated a list of " << theSet.size << " elements";
+  output.reset(calculator, theSet.size + 1);
+  output.addChildAtomOnTop(calculator.opSequence());
   for (int i = 0; i < theSet.size; i ++) {
     output.addChildOnTop(theSet[i]);
   }
@@ -2517,7 +2517,7 @@ void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(const G
 }
 
 bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep");
   if (input.isOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
@@ -2542,6 +2542,6 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
   outputRep.assignRepresentation(inputRep);
-  return output.assignValue(outputRep, theCommands);
+  return output.assignValue(outputRep, calculator);
 }
 

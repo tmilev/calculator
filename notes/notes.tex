@@ -1,0 +1,93 @@
+\documentclass{article}
+\usepackage{amsmath, amsthm, amsfonts, amssymb, verbatim, hyperref}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\begin{document}
+
+\section{Hensel lifts}
+Let $p$ be a prime and suppose we have a polynomial factorization
+\[
+u = \bar v \cdot \bar w \mod p
+\] with \(p\)-prime, where \(\bar v\) and \(\bar w\) are relatively prime monic polynomials in the variable \(x\). Set 
+\[
+\deg \bar v = m\quad \deg \bar  w = n.
+\] 
+Our goal is to construct monic polynomials \(v, w\) of the same degrees as \(\bar v,\bar  w\) with 
+\[
+u = v \cdot w \mod p^k.
+\]
+Since factorization $\mod p$ is unique, it follows that \(v =  \bar v \mod p \) and \(w = \bar w \mod p\). Our secondary goal is to show that, \(\mod p^{k}\), these polynomials are unique. Proceed by induction. Suppose we have already found \(v, w\) as above and are looking for \(v', w'\) with 
+\[u = v'\cdot w' \mod p^{k+1}\]
+Over $\mathbb Z$, we have that
+
+\[ 
+u = vw + p^k z 
+\]
+for some polynomial \(z\). Since \(u,v,w\) are monic, the leading monomials of \(u\) and \(vw\) are $x^{m+n}$ and so $\deg z = m + n - 1$. Since  \(v, w\) are unique \(\mod p^{k}\), it follows that \(v', w'\) must be of the form 
+\[
+v' = v + p^{k} a \quad w' = w+ p^k b
+\]
+with \(\deg a < \deg v= m\) and \(\deg b < \deg w = n\). 
+\[
+\begin{array}{rcl}
+v' w'& =& \left(v+p^k a\right)\left(w + p^k b\right) \\
+&=&vw + p^k(aw + bv) + p^{2k} ab\\
+&=&u + p^{k}z + p^{k}(aw+bv) + p^{2k}ab\\
+&=&u + p^{k}\left( z + aw + bv\right) + p^{2k}ab
+\end{array}
+\]
+It follows that 
+\begin{equation}\label{eqHenselLift1}
+z + aw + bv = 0 \mod p
+\end{equation} 
+Introduce notation for the coefficients of the polynomials in \eqref{eqHenselLift1}:
+\begin{equation}
+\begin{array}{rcl}
+a &=& a_{1} x^{m-1} + \dots + a_m\\
+b &=& b_{1} x^{n-1} + \dots + b_m \\
+z &=& z_{1}x^{m + n - 1} + \dots +z_{m+n}\\
+w &=& x^{m} + w_{1} \cdot x^{m - 1} + \dots + w_{m}\\
+v &=& x^{n} + v_{1} \cdot x^{n - 1} + \dots + v_{n}\\
+\end{array}
+\end{equation}
+Then \eqref{eqHenselLift1} is a linear system in the \(m+n\) variables \(a_1, \dots, a_m, b_1, \dots, b_n\) with $\deg z + 1 = m + n $ equations. More precisely, the matrix form of the equation \eqref{eqHenselLift1} is given by the Sylvester matrix:
+\begin{equation}\label{eqHanselLift2Sylvester}
+\left( \begin{array}{ccccccccccc}
+w_0      & 0           & \cdots & 0          & v_0        & 0              & \cdots & 0       \\
+w_1    & w_0       & \cdots & 0           & v_1     & v_0           & \cdots & 0  \\
+w_2    & w_1     & \ddots & 0           & v_2     & v_1         & \ddots & 0 \\
+\vdots  &\vdots   & \ddots & w_0        & \vdots   &\vdots       & \ddots & v_0  \\
+w_m       & w_{m-1} & \cdots & \vdots   & v_n       & v_{n-1}     & \cdots & \vdots\\
+0          & w_m       & \ddots &  \vdots  & 0          & v_n          & \ddots &  \vdots  \\
+\vdots  & \vdots   & \ddots & w_{m-1}  & \vdots  & \vdots      & \ddots & v_{n-1}   \\
+0          & 0          & \cdots  & w_m       & 0           & 0              & \cdots & v_n   
+
+\end{array}\right) \begin{pmatrix}
+a_1 \\
+a_2\\
+\vdots\\
+a_m\\
+b_1\\
+b_2\\
+\vdots \\
+b_n
+\end{pmatrix} = \begin{pmatrix}
+z_1\\
+z_2\\
+\vdots
+\\ 
+z_m\\
+z_{m+1} \\
+z_{m+2} \\
+\vdots \\
+z_{m+n}
+
+\end{pmatrix},
+\end{equation}
+where for convenience we have set $v_0 = w_0=1$. The determinant of the matrix above, called the resultant, is known to equal \(\text{res}(v,w) = \displaystyle w_0^mv_0^n\prod_{i, j} \left(\nu_i-\mu_j \right)\), where $\nu_i, \mu_j$ are the roots of $v$ and $w$ over the algebraic closure of $\mathbb Z / p\mathbb Z$. In our starting factorization $u=\bar v\cdot \bar w $, the factors $\bar v, \bar w$ are relatively prime and so have no common roots and we have that $\text{res}(\bar v, \bar w)\neq 0$. At the same time we established that $v =\bar v \mod p$ and $w=\bar w\mod p $ and so $\text{res} (\bar v, \bar w) = \text{res}(v,w) \neq 0$. Since the determinant of \eqref{eqHanselLift2Sylvester} is non-zero, \eqref{eqHanselLift2Sylvester} has a unique solution. This shows both the existence and uniqueness of $v',w'$. This in turn concludes our inductive step.
+
+
+
+\end{document}
+

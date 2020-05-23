@@ -29,6 +29,10 @@ output/crash_test.html
 
 testFileWritePermissionsSSsas.txt
 
+*.log
+*.aux
+*.out
+*.pdf
 results/*
 
 src/calculator.pro.user

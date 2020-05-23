@@ -1356,42 +1356,6 @@ bool CalculatorFunctions::innerApplyToList(Calculator& theCommands, const Expres
   return output.makeSequence(theCommands, &result);
 }
 
-bool CalculatorFunctions::innerPolynomialDivisionQuotient(
-  Calculator& theCommands, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
-  ExpressionContext theContext(theCommands);
-  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!theCommands.getListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
-    return output.makeError("Failed to extract list of polynomials. ", theCommands);
-  }
-  GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
-  computation.flagStoreQuotients = true;
-  for (int i = 1; i < polynomialsRational.size; i ++) {
-    if (polynomialsRational[i].isEqualToZero()) {
-      return output.makeError("Division by zero.", theCommands);
-    }
-    computation.addBasisElementNoReduction(polynomialsRational[i]);
-  }
-  Polynomial<AlgebraicNumber> outputRemainder;
-  computation.remainderDivisionByBasis(polynomialsRational[0], outputRemainder, - 1);
-  Expression currentE, thePolyE;
-  List<Expression> theList;
-  for (int i = 0; i < computation.theQuotients.size; i ++) {
-    currentE.reset(theCommands);
-    currentE.addChildAtomOnTop("MakeExpression");
-    thePolyE.assignValueWithContext(computation.theQuotients[i], theContext, theCommands);
-    currentE.addChildOnTop(thePolyE);
-    theList.addOnTop(currentE);
-  }
-  if (theList.size == 1) {
-    output = theList[0];
-    return true;
-  }
-  return output.makeSequence(theCommands, &theList);
-}
-
 bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArccosAlgebraic");
   if (input.size() != 2) {

@@ -107,26 +107,11 @@ public:
 
   static bool innerChoosecartanSubalgebra(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPolynomialDivisionSlidesGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionQuotient(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerbose(
-    Calculator& theCommands,
-    const Expression& input,
-    Expression& output,
-    List<MonomialP>::Comparator* monomialOrder
-  );
-  static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLexicographicOpposite(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
-
-  static bool innerFactorPolynomialModPrime(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerFactorIntegeR(Calculator& theCommands, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& theCommands, const Expression& input, Expression& output);
@@ -489,6 +474,7 @@ public:
   static bool innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsSquareFreePolynomial(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerIsPower(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -559,6 +545,5 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
 };
-
 #endif
 

@@ -313,6 +313,13 @@ private:
     const ExpressionContext& theContext,
     Calculator& owner
   );
+  template <class BuiltIn>
+  bool assignWithContext(
+    const WithContext<BuiltIn>& input,
+    Calculator& owner
+  ) {
+    return this->assignValueWithContext(input.content, input.context, owner);
+  }
   template <class theType>
   bool addChildValueOnTop(const theType& inputValue) {
     this->checkInitialization();
@@ -697,11 +704,12 @@ public:
   std::string toString() const;
 };
 
-template <class builtIn>
+template <class BuiltIn>
 class WithContext {
+  bool extendContext(ExpressionContext& newContext, std::stringstream* commentsOnFailure);
 public:
   ExpressionContext context;
-  builtIn content;
+  BuiltIn content;
   std::string toStringContentWithFormat() {
     FormatExpressions theFormat;
     this->context.getFormat(theFormat);
@@ -709,8 +717,16 @@ public:
   }
   WithContext() {
   }
-  bool mergeContextWith(
-    WithContext<builtIn>& otherOutput, std::stringstream* commentsOnFailure
+  static bool mergeContexts(
+    WithContext<BuiltIn>& leftOutput,
+    WithContext<BuiltIn>& rightOutput,
+    std::stringstream* commentsOnFailure
+  );
+  bool setContextAtLeast(ExpressionContext& inputOutputContext, std::stringstream* commentsOnFailure);
+  bool setContextAndSerialize(
+    ExpressionContext& inputOutputContext,
+    Expression& output,
+    std::stringstream* commentsOnFailure
   );
 };
 
@@ -2429,7 +2445,6 @@ public:
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output);
   static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
@@ -3308,4 +3323,47 @@ bool CalculatorConversions::innerExpressionFromPoly(
   return output.makeSum(theCommands, theTerms);
 }
 
+template <class BuiltIn>
+bool WithContext<BuiltIn>::setContextAtLeast(
+  ExpressionContext& inputOutputContext,
+  std::stringstream* commentsOnFailure
+) {
+  ExpressionContext newContext;
+  if (!inputOutputContext.mergeContexts(this->context, newContext)) {
+    return false;
+  }
+  inputOutputContext = newContext;
+  return this->extendContext(inputOutputContext, commentsOnFailure);
+}
+
+template <class BuiltIn>
+bool WithContext<BuiltIn>::setContextAndSerialize(
+  ExpressionContext& inputOutputContext,
+  Expression& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (!this->setContextAtLeast(inputOutputContext, commentsOnFailure)) {
+    return false;
+  }
+  return output.assignWithContext(*this, *this->context.owner);
+}
+
+
+template <class BuiltIn>
+bool WithContext<BuiltIn>::mergeContexts(
+  WithContext<BuiltIn>& leftOutput,
+  WithContext<BuiltIn>& rightOutput,
+  std::stringstream* commentsOnFailure
+) {
+  ExpressionContext resultContext;
+  if (!leftOutput.context.mergeContexts(rightOutput.context, resultContext)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to merge contexts.";
+    }
+    return false;
+  }
+  return
+  leftOutput.extendContext(resultContext, commentsOnFailure) &&
+  rightOutput.extendContext(resultContext, commentsOnFailure);
+}
 #endif

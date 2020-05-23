@@ -5,6 +5,7 @@
 #include "calculator_Weyl_group_characters.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_inner_functions.h"
+#include "calculator_functions_polynomial.h"
 #include "calculator_html_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "database.h"
@@ -1463,6 +1464,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialModP{}(x^2+x+1, 2);",
     "CalculatorConversions::innerPolynomialModuloInteger",
     "PolynomialModP",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "SylvesterMatrix",
+    CalculatorFunctionsPolynomial::sylvesterMatrix,
+    "",
+    "Constructs the transpose Sylvester matrix of two polynomials.",
+    "SylvesterMatrix(2x^2+2x+2, 3x+3);\n"
+    "SylvesterMatrix(Polynomial(2x^2+2x+2), Polynomial(3x+3));\n"
+    "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 5));\n"
+    "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 7));\n",
+    "SylvesterMatrix(0, x^2);\n"
+    "CalculatorConversions::sylvesterMatrix",
+    "SylvesterMatrix",
     innerStandard
   );
   this->addOperationHandler(
@@ -3042,7 +3057,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivRemainder",
-    CalculatorFunctions::innerPolynomialDivisionRemainder,
+    CalculatorFunctionsPolynomial::polynomialDivisionRemainder,
     "",
     "Returns the remainder after taking quotient of a "
     "polynomial divided by a set of polynomials "
@@ -3054,18 +3069,18 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivQuotient",
-    CalculatorFunctions::innerPolynomialDivisionQuotient,
+    CalculatorFunctionsPolynomial::polynomialDivisionQuotient,
     "",
     "Returns the quotients of a "
     "polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
     "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
-    "CalculatorFunctions::innerPolynomialDivisionRemainder",
+    "CalculatorFunctionsPolynomial::polynomialDivisionQuotient",
     "PolyDivQuotient",
     innerStandard
   );
   this->addOperationHandler(
     "PolyDivSlidesGrLex",
-    CalculatorFunctions::innerPolynomialDivisionSlidesGrLex,
+    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex,
     "",
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number.",
@@ -3076,7 +3091,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringGrLex",
-    CalculatorFunctions::innerPolynomialDivisionVerboseGrLex,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
@@ -3087,7 +3102,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringGrLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexicographic,
     "",
     "String that presents the division of a polynomial "
     "by a set of polynomials. Uses the graded reverse lexicographic order. "
@@ -3102,7 +3117,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringLex",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the "
@@ -3119,7 +3134,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicOpposite,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographicOpposite,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the "
@@ -5384,7 +5399,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FactorOneVarPolyOverRationals",
-    Calculator::innerFactorPolynomial,
+    CalculatorFunctionsPolynomial::factorPolynomial,
     "",
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
@@ -5397,20 +5412,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "as interpolated by Lagrange polynomials.",
     "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
-    "Calculator::innerFactorPolynomial",
+    "CalculatorFunctionsPolynomial::factorPolynomial",
     "FactorOneVarPolyOverRationals",
     innerStandard
   );
   this->addOperationHandler(
     "FactorOneVariablePolynomialModPrime",
-    CalculatorFunctions::innerFactorPolynomialModPrime,
+    CalculatorFunctionsPolynomial::factorPolynomialModPrime,
     "",
     "Factors a one variable polynomial over a given prime field Z/pZ "
     "using the Cantor-Zassenhaus algorithm. "
     "First argument = polynomial. "
     "Second argument = prime number.",
     "FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);\n",
-    "CalculatorFunctions::innerFactorPolynomialModPrime",
+    "CalculatorFunctionsPolynomial::factorPolynomialModPrime",
     "FactorOneVariablePolynomialModPrime",
     innerStandard
   );

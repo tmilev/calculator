@@ -88,7 +88,8 @@ HEADERS += \
     calculator_problem_storage.h \
     crypto_public_domain.h \
     math_rational_function.h \
-    math_rational_function_implementation.h
+    math_rational_function_implementation.h \
+    calculator_functions_polynomial.h
 
 
 SOURCES += \
@@ -170,5 +171,6 @@ SOURCES += \
     crypto_public_domain_ripemd.cpp \
     crypto_public_domain_aes.cpp \
     crypto_sha3.cpp \
-    calculator_expression_context.cpp
+    calculator_expression_context.cpp \
+    calculator_implementation_8_polynomial.cpp
 

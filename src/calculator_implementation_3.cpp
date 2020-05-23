@@ -1380,51 +1380,6 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   return output.assignValue(theLSpath, theCommands);
 }
 
-template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
-
-bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
-  WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
-  )) {
-    return false;
-  }
-  if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.makeError(
-      "I have been taught to factor one variable polynomials only. ",
-      theCommands
-    );
-  }
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
-  if (!factorization.factor(
-    polynomial.content,
-    &theCommands.comments,
-    &theCommands.comments
-  )) {
-    return false;
-  }
-  List<Expression> resultSequence;
-  Expression constantFactor;
-  constantFactor.assignValue(factorization.constantFactor, theCommands);
-  resultSequence.addOnTop(constantFactor);
-  Expression polynomialE, expressionE(theCommands);
-
-  for (int i = 0; i < factorization.reduced.size; i ++) {
-    polynomialE.assignValueWithContext(
-      factorization.reduced[i], polynomial.context, theCommands
-    );
-    expressionE.children.clear();
-    expressionE.addChildAtomOnTop("MakeExpression");
-    expressionE.addChildOnTop(polynomialE);
-    resultSequence.addOnTop(expressionE);
-  }
-  return output.makeSequence(theCommands, &resultSequence);
-}
-
 bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerZmodP");
   if (!input.isListNElements(3)) {
@@ -2011,4 +1966,3 @@ int Calculator::getNumberOfBuiltInFunctions() {
   }
   return result;
 }
-

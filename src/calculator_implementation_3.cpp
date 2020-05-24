@@ -1401,10 +1401,13 @@ bool Calculator::innerZmodP(Calculator& calculator, const Expression& input, Exp
   if (theGCD > 1) {
     return false;
   }
-  ElementZmodP outputElt;
-  outputElt.modulus = base.value;
-  outputElt = left.getNumerator();
-  return output.assignValue(outputElt, calculator);
+  ElementZmodP outputElement;
+  outputElement.modulus = base.value;
+  outputElement = left.getNumerator();
+  ExpressionContext context;
+  context.initialize(calculator);
+  context.setDefaultModulus(outputElement.modulus);
+  return output.assignValueWithContext(outputElement, context, calculator);
 }
 
 bool Calculator::innerInterpolatePoly(

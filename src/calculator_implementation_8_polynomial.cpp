@@ -188,7 +188,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
 bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorPolynomialModPrime");
+  MacroRegisterFunctionWithName("CalculatorFunctions::factorPolynomialModPrime");
   if (input.size() != 2 && input.size() != 3) {
     return calculator << "Expected two arguments "
     << "(polynomial and prime) or one argument (modular polynomial).";
@@ -234,7 +234,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   calculator << "Factorization success: " << result.toStringResult(&result.format);
   List<Expression> factorsList;
   Expression constant;
-  constant.assignValue(result.constantFactor, calculator);
+  constant.assignValueWithContext(result.constantFactor, polynomial.context, calculator);
   factorsList.addOnTop(constant);
   for (int i = 0; i < result.reduced.size; i ++) {
     Expression next;

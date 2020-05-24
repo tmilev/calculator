@@ -95,11 +95,11 @@ bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPO
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP theElt1, theElt2;
+  ElementZmodP element1, element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&theElt1)) {
-      if (rightE->isOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.modulus != theElt2.modulus) {
+    if (leftE->isOfType<ElementZmodP>(&element1)) {
+      if (rightE->isOfType<ElementZmodP>(&element2)) {
+        if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
@@ -107,13 +107,15 @@ bool CalculatorFunctionsBinaryOps::innerAddElementZModPOrRationalToElementZModPO
         if (!rightE->isOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.modulus = theElt1.modulus;
-        if (!theElt2.assignRational(tempRat)) {
+        element2.modulus = element1.modulus;
+        if (!element2.assignRational(tempRat)) {
           return false;
         }
       }
-      theElt1 += theElt2;
-      return output.assignValue(theElt1, calculator);
+      element1 += element2;
+      ExpressionContext context(calculator);
+      context.setDefaultModulus(element1.modulus);
+      return output.assignValueWithContext(element1, context, calculator);
     }
   }
   return false;
@@ -148,7 +150,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
         }
       }
       theElt1 *= theElt2;
-      return output.assignValue(theElt1, calculator);
+      ExpressionContext context(calculator);
+      context.setDefaultModulus(theElt1.modulus);
+      return output.assignValueWithContext(theElt1, context, calculator);
     }
   }
   return false;
@@ -191,7 +195,9 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
         << theElt1.toString() << " by " << theElt2.toString();
         return output.makeError(out.str(), calculator);
       }
-      return output.assignValue(theElt1, calculator);
+      ExpressionContext context(calculator);
+      context.setDefaultModulus(theElt1.modulus);
+      return output.assignValueWithContext(theElt1, context, calculator);
     }
   }
   return false;
@@ -2778,7 +2784,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   ElementZmodP unit;
   unit.makeOne(theElt.modulus);
   MathRoutines::raiseToPower(theElt, thePower, unit);
-  return output.assignValue(theElt, calculator);
+  ExpressionContext context(calculator);
+  context.setDefaultModulus(theElt.modulus);
+  return output.assignValueWithContext(theElt, context, calculator);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteger(

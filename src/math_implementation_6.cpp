@@ -588,6 +588,7 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
 }
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::computeCoefficientBounds");
   this->largestCoefficient = 0;
   for (int i = 0; i < this->current.size(); i ++) {
     this->largestCoefficient = MathRoutines::maximum(
@@ -610,6 +611,21 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
   // Since the largest binomial coefficient is (n choose floor(n/2)), this is
   // bounded above by
   // leadingCoefficient * (n choose floor(n/2)) * upperBoundAbsoluteValueRoot^n
-  this->coefficientBound = this->largestCoefficient;
+  this->coefficientBound = this->upperBoundAbsoluteValueRoot;
+  this->coefficientBound.raiseToPower(this->degree);
+  this->coefficientBound *= this->largestCoefficient;
   this->coefficientBound *= MathRoutines::nChooseK(this->degree, this->degree / 2);
+  this->henselLift();
+}
+
+void PolynomialFactorizationFiniteFields::henselLift() {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLift");
+  LargeIntegerUnsigned currentPower;
+  currentPower = this->oneModular.modulus;
+
+  while (currentPower < this->coefficientBound) {
+
+
+  }
+
 }

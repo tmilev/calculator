@@ -18,7 +18,9 @@ Our goal is to construct monic polynomials \(v, w\) of the same degrees as \(\ba
 u = v \cdot w \mod p^k.
 \]
 Since factorization $\mod p$ is unique, it follows that \(v =  \bar v \mod p \) and \(w = \bar w \mod p\). Our secondary goal is to show that, \(\mod p^{k}\), these polynomials are unique. Proceed by induction. Suppose we have already found \(v, w\) as above and are looking for \(v', w'\) with 
-\[u = v'\cdot w' \mod p^{k+1}\]
+\[
+u = v'\cdot w' \mod p^{k+1}.
+\]
 Over $\mathbb Z$, we have that
 
 \[ 
@@ -29,14 +31,14 @@ for some polynomial \(z\). Since \(u,v,w\) are monic, the leading monomials of \
 v' = v + p^{k} a \quad w' = w+ p^k b
 \]
 with \(\deg a < \deg v= m\) and \(\deg b < \deg w = n\). 
-\[
+\begin{equation}\label{eqHenselLift0}
 \begin{array}{rcl}
 v' w'& =& \left(v+p^k a\right)\left(w + p^k b\right) \\
 &=&vw + p^k(aw + bv) + p^{2k} ab\\
 &=&u + p^{k}z + p^{k}(aw+bv) + p^{2k}ab\\
 &=&u + p^{k}\left( z + aw + bv\right) + p^{2k}ab
 \end{array}
-\]
+\end{equation}
 It follows that 
 \begin{equation}\label{eqHenselLift1}
 z + aw + bv = 0 \mod p
@@ -54,14 +56,14 @@ v &=& x^{n} + v_{1} \cdot x^{n - 1} + \dots + v_{n}\\
 Then \eqref{eqHenselLift1} is a linear system in the \(m+n\) variables \(a_1, \dots, a_m, b_1, \dots, b_n\) with $\deg z + 1 = m + n $ equations. More precisely, the matrix form of the equation \eqref{eqHenselLift1} is given by the Sylvester matrix:
 \begin{equation}\label{eqHanselLift2Sylvester}
 \left( \begin{array}{ccccccccccc}
-w_0      & 0           & \cdots & 0          & v_0        & 0              & \cdots & 0       \\
-w_1    & w_0       & \cdots & 0           & v_1     & v_0           & \cdots & 0  \\
-w_2    & w_1     & \ddots & 0           & v_2     & v_1         & \ddots & 0 \\
-\vdots  &\vdots   & \ddots & w_0        & \vdots   &\vdots       & \ddots & v_0  \\
-w_m       & w_{m-1} & \cdots & \vdots   & v_n       & v_{n-1}     & \cdots & \vdots\\
-0          & w_m       & \ddots &  \vdots  & 0          & v_n          & \ddots &  \vdots  \\
-\vdots  & \vdots   & \ddots & w_{m-1}  & \vdots  & \vdots      & \ddots & v_{n-1}   \\
-0          & 0          & \cdots  & w_m       & 0           & 0              & \cdots & v_n   
+w_0    & 0       & \cdots & 0       & v_0    & 0       & \cdots & 0      \\
+w_1    & w_0     & \cdots & 0       & v_1    & v_0     & \cdots & 0      \\
+w_2    & w_1     & \ddots & 0       & v_2    & v_1     & \ddots & 0      \\
+\vdots &\vdots   & \ddots & w_0     & \vdots &\vdots   & \ddots & v_0    \\
+w_m    & w_{m-1} & \cdots & \vdots  & v_n    & v_{n-1} & \cdots & \vdots  \\
+0      & w_m     & \ddots & \vdots  & 0      & v_n     & \ddots & \vdots  \\
+\vdots & \vdots  & \ddots & w_{m-1} & \vdots & \vdots  & \ddots & v_{n-1} \\
+0      & 0       & \cdots & w_m     & 0      & 0       & \cdots & v_n   
 
 \end{array}\right) \begin{pmatrix}
 a_1 \\
@@ -83,11 +85,34 @@ z_{m+2} \\
 \vdots \\
 z_{m+n}
 
-\end{pmatrix},
+\end{pmatrix} \mod p,
 \end{equation}
 where for convenience we have set $v_0 = w_0=1$. The determinant of the matrix above, called the resultant, is known to equal \(\text{res}(v,w) = \displaystyle w_0^mv_0^n\prod_{i, j} \left(\nu_i-\mu_j \right)\), where $\nu_i, \mu_j$ are the roots of $v$ and $w$ over the algebraic closure of $\mathbb Z / p\mathbb Z$. In our starting factorization $u=\bar v\cdot \bar w $, the factors $\bar v, \bar w$ are relatively prime and so have no common roots and we have that $\text{res}(\bar v, \bar w)\neq 0$. At the same time we established that $v =\bar v \mod p$ and $w=\bar w\mod p $ and so $\text{res} (\bar v, \bar w) = \text{res}(v,w) \neq 0$. Since the determinant of \eqref{eqHanselLift2Sylvester} is non-zero, \eqref{eqHanselLift2Sylvester} has a unique solution. This shows both the existence and uniqueness of $v',w'$. This in turn concludes our inductive step.
+\subsection{Hensel lift for more than two factors}
+We want to extend the Hensel lift from the previous section to the case of more than two factors. Let
+\[
+u = \bar v_1 \dots \bar v_l \mod p
+\]
+be a factorization with \(p\)-prime. The considerations of the two factor case carry over to the multi-factor one. TODO(tmilev): spell out the notation. Equation \eqref{eqHenselLift0} becomes
+\[
+\begin{array}{rcl}
+v_1'\dots v_k'& = & u + p^k \left(z+ a_1 v_2\dots v_l + v_1 a_2\dots v_l +\dots + v_1\dots v_{l-1} a_l   \right) +p^{2k} s
+\end{array}
+\]
+for some polynomial $s$. Let $t_j$ be the polynomial obtained by removing the $j^{th}$ multiplicand from $v_1\dots v_l$, i.e., let
+\[t_j=\frac{v_1\dots v_l}{v_j}. \]
 
-
+Then equation \eqref{eqHanselLift2Sylvester} carries over directly. Its matrix becomes
+\[
+\left( \begin{array}{ccccccccccc}
+t_{1,0}       & 0      & \cdots & 0              & t_{2,0}       & 0      & \cdots & 0              & \dots \\
+\vdots        & \ddots & \ddots & \vdots         & \vdots        & \ddots & \ddots & \vdots         & \dots \\
+\vdots        & \ddots & \ddots & 0              & \vdots        & \ddots & \ddots & 0              & \dots \\
+t_{1,\deg t_1}& \ddots & \ddots & t_{1,0}        & t_{2,\deg t_2}& \ddots & \ddots & t_{2,0}        & \dots \\
+0             & \ddots & \ddots & \vdots         & 0             & \ddots & \ddots & \vdots         & \dots \\
+\vdots        & \ddots & \ddots & \vdots         & \vdots        & \ddots & \ddots & \vdots         & \dots \\
+0             & \cdots & 0      & t_{1,\deg t_1} & 0             & \cdots & 0      & t_{2,\deg t_2} & \dots \\
+\end{array}\right)\]
 
 \end{document}
 

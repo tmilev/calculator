@@ -28,7 +28,9 @@ bool ExpressionContext::operator==(const ExpressionContext& other) const {
   this->owner == other.owner &&
   this->indexAmbientSemisimpleLieAlgebra == other.indexAmbientSemisimpleLieAlgebra &&
   this->variables == other.variables &&
-  this->differentialOperatorVariables == other.differentialOperatorVariables;
+  this->differentialOperatorVariables == other.differentialOperatorVariables &&
+  this->defaultModulus == other.defaultModulus
+  ;
 }
 
 template <class Coefficient>

@@ -933,7 +933,6 @@ public:
   void rotate(int r) {
     std::rotate(this->objects, this->objects + r, this->objects + (this->size - 1));
   }
-  int sizeWithoutObjects() const;
   Object* lastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void releaseMemory();
 
@@ -1796,11 +1795,6 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
     smallL->objects[i] = bigL->objects[i];
   }
   bigL->size = smallSize;
-}
-
-template <class Object>
-int List<Object>::sizeWithoutObjects() const {
-  return sizeof(this->actualSize) + sizeof(this->size) + sizeof(this->objects);
 }
 
 template <class Object>

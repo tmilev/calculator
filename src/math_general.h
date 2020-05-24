@@ -1215,7 +1215,7 @@ public:
   static void computePotentialChangeGradient(
     Matrix<Coefficient>& matA,
     Selection& BaseVariables,
-    int NumTrueVariables,
+    int numberOfTrueVariables,
     int ColumnIndex,
     Rational& outputChangeGradient,
     bool& hasAPotentialLeavingVariable
@@ -2615,12 +2615,6 @@ class PolynomialOrder {
 template<class Coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
 private:
-  static void fillSylvesterMatrix(
-    const Polynomial<Coefficient>& polynomial,
-    int otherPower,
-    int columnOffset,
-    Matrix<Coefficient>& output
-  );
 public:
   friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Polynomial<Coefficient>& input);
   Polynomial(int x) {
@@ -2795,19 +2789,6 @@ public:
   void operator=(const Polynomial<otherType>& other);
   void operator=(const Coefficient& other);
   void operator=(int other);
-  // For polynomials A = a_0 x^n + ..., B = b_0 x^m + ...,
-  // we define the Sylvester matrix as the matrix:
-  // ( a_0  0  0 ...  0  b_1  0  0 ...  0  )
-  // ( a_1 a_0 0 ...  0  b_2 b_1 0 ...  0  )
-  // (               ...                   )
-  // ( 0    0  0 ... a_n  0   0  0 ... b_m ).
-  // See https://en.wikipedia.org/wiki/Resultant.
-  static bool sylvesterMatrix(
-    const Polynomial& left,
-    const Polynomial& right,
-    Matrix<Coefficient>& output,
-    std::stringstream* commentsOnFailure
-  );
   template <class otherType>
   void assignOtherType(const Polynomial<otherType>& other);
   static bool greatestCommonDivisor(
@@ -2849,6 +2830,50 @@ public:
     bool fromStringTest();
     bool fromStringCommonContextTest();
   };
+};
+
+template <class Coefficient>
+class SylvesterMatrix {
+  static void fillSylvesterMatrix(
+    const Polynomial<Coefficient>& polynomial,
+    int columnOffset,
+    Matrix<Coefficient>& output
+  );
+  // Generalization of sylvester matrix for multiple polynomials.
+  // Similar to the Sylvester matrix
+  // but with coefficient parallelogram for each polynomial.
+  static bool sylvesterMatrixMulti(
+    const List<Polynomial<Coefficient> >& polynomials,
+    int dimension,
+    Matrix<Coefficient>& output
+  );
+public:
+  // For polynomials A = a_0 x^n + ..., B = b_0 x^m + ...,
+  // we define the Sylvester matrix as the matrix:
+  // ( a_0  0  0 ...  0  b_1  0  0 ... 0   )
+  // ( a_1 a_0 0 ...  0  b_2 b_1 0 ... 0   )
+  // (               ...               ... )
+  // ( a_n           a_0               b_1 )
+  // ( 0             ... b_m               )
+  // ( ...           ... ...               )
+  // ( 0    0  0 ... a_n  0   0  0 ... b_m ).
+  // See https://en.wikipedia.org/wiki/Resultant.
+  static bool sylvesterMatrix(
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Let a_1, ..., a_k be the polynomials whose
+  // Sylvester product matrix we want to compute.
+  // Let t_j be the product of the a_i's with a_j omitted,
+  // i.e., t_j = a_1 ... a_k / a_j.
+  // Then we define the Sylvester product matrix to be
+  static bool sylvesterMatrixProduct(
+    const List<Polynomial<Coefficient> >& polynomials,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
 };
 
 template <>
@@ -4159,7 +4184,7 @@ template<class Coefficient>
 void Matrix<Coefficient>::computePotentialChangeGradient(
   Matrix<Coefficient>& matA,
   Selection& BaseVariables,
-  int NumTrueVariables,
+  int numberOfTrueVariables,
   int ColumnIndex,
   Rational& outputChangeGradient,
   bool& hasAPotentialLeavingVariable
@@ -4167,12 +4192,12 @@ void Matrix<Coefficient>::computePotentialChangeGradient(
   hasAPotentialLeavingVariable = false;
   outputChangeGradient.makeZero();
   for (int j = 0; j < matA.numberOfRows; j ++) {
-    if (BaseVariables.elements[j] >= NumTrueVariables) {
+    if (BaseVariables.elements[j] >= numberOfTrueVariables) {
       outputChangeGradient += matA.elements[j][ColumnIndex];
     }
     hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matA.elements[j][ColumnIndex].isPositive();
   }
-  if (ColumnIndex >= NumTrueVariables) {
+  if (ColumnIndex >= numberOfTrueVariables) {
     outputChangeGradient -= 1;
   }
 }

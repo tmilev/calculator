@@ -2889,9 +2889,9 @@ bool PartFraction::reduceOnceGeneralMethod(
 
 int PartFraction::sizeWithoutDebugString() const {
   int Accum = 0;
-  Accum += this->denominator.sizeWithoutObjects();
+  Accum += static_cast<int>(sizeof(this->denominator));
   Accum += this->denominator.size * static_cast<int>(sizeof(OnePartialFractionDenominator));
-  Accum += this->IndicesNonZeroMults.sizeWithoutObjects();
+  Accum += static_cast<int>(sizeof(this->IndicesNonZeroMults));
   return Accum;
 }
 
@@ -3511,7 +3511,7 @@ void PartFraction::operator=(const PartFraction& right) {
 
 int PartialFractions::sizeWithoutDebugString() {
   int Accum = 0;
-  Accum += this->monomials.sizeWithoutObjects();
+  Accum += sizeof(this->monomials);
   for (int i = 0; i < this->size(); i ++) {
     Accum += (*this)[i].sizeWithoutDebugString();
   }

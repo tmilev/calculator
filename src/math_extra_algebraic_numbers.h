@@ -403,6 +403,10 @@ public:
   LargeInteger coefficientBound;
   int degree;
   FormatExpressions format;
+  List<Polynomial<ElementZmodP> > currentFactorization;
+  Matrix<ElementZmodP> sylvesterMatrix;
+  void henselLift();
+  void henselLiftOnce();
   bool oneFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure

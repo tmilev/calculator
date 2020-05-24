@@ -393,17 +393,17 @@ bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::fillSylvesterMatrix(
+void SylvesterMatrix<Coefficient>::fillSylvesterMatrix(
   const Polynomial<Coefficient>& polynomial,
-  int otherPower,
   int columnOffset,
   Matrix<Coefficient>& output
 ) {
   int totalPower = polynomial.totalDegreeInt();
+  int numberOfColumns = output.numberOfRows - totalPower;
   for (int i = 0; i < polynomial.size(); i ++) {
     int power = polynomial.monomials[i].totalDegreeInt();
     const Coefficient& coefficient = polynomial.coefficients[i];
-    for (int j = 0; j < otherPower; j ++) {
+    for (int j = 0; j < numberOfColumns; j ++) {
       int row = totalPower - power + j;
       int column = j + columnOffset;
       output(row, column) = coefficient;
@@ -412,39 +412,42 @@ void Polynomial<Coefficient>::fillSylvesterMatrix(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::sylvesterMatrix(
-  const Polynomial& left,
-  const Polynomial& right,
+bool SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
+  const List<Polynomial<Coefficient> >& polynomials,
   Matrix<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Polynomial::sylvesterMatrix");
-  if (left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "I know how to compute Sylvester "
-      << "matrix only for univariate polynomials. Your polynomials have "
-      << "respectively " << left.minimalNumberOfVariables() << ", "
-      << right.minimalNumberOfVariables() << " variables.";
+  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixProduct");
+  LargeInteger totalPower = 0;
+  for (int i = 0; i < polynomials.size; i ++) {
+    Polynomial<Coefficient>& current = polynomials[i];
+    if (current.minimalNumberOfVariables() > 1) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "I know how to compute Sylvester "
+        << "matrix only for univariate polynomials. Polynomial number "
+        << i + 1 << " has " << current.minimalNumberOfVariables()
+        << " variables.";
+      }
+      return false;
     }
-    return false;
-  }
-  if (left.isEqualToZero() || right.isEqualToZero()) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "I don't have a Sylvester matrix "
-      << "definition when one of the inputs is the zero polynomial. ";
+    if (current.isEqualToZero()) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "I don't have a Sylvester matrix "
+        << "definition when one of the inputs is the zero polynomial. ";
+      }
+      return false;
     }
-    return false;
-  }
-  int leftPower, rightPower;
-  if (!left.hasSmallIntegralPositivePowers(&leftPower) || !right.hasSmallIntegralPositivePowers(&rightPower)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Polynomial powers are not small, positive or integral. ";
+    int currentPower = 0;
+    if (!current.hasSmallIntegralPositivePowers(&currentPower)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Polynomial powers are not small, positive or integral. ";
+      }
+      return false;
     }
-    return false;
+    totalPower += currentPower;
   }
   int maximumDimension = 1000;
-  int dimension = leftPower + rightPower;
-  if (dimension == 0) {
+  if (totalPower == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The calculator does not allow empty (0x0) "
@@ -452,19 +455,60 @@ bool Polynomial<Coefficient>::sylvesterMatrix(
     }
     return false;
   }
-  if (dimension > maximumDimension) {
+  if (totalPower > maximumDimension) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The sylvester matrix is too large: "
-      << dimension << " by " << dimension
+      << totalPower << " by " << totalPower
       << ", the maximum allowed is: " << maximumDimension << " by "
       << maximumDimension << ". ";
     }
     return false;
   }
+  int dimension = totalPower.getIntValueTruncated();
+  List<Polynomial<Coefficient> > products;
+  for (int i = 0; i < polynomials.size; i ++) {
+    Polynomial<Coefficient> product;
+    product.makeConstant(polynomials[0].coefficients[0].one());
+    for (int j = 0; j < polynomials.size; j ++) {
+      if (i == j) {
+        continue;
+      }
+      product *= polynomials[j];
+    }
+    products.addOnTop(product);
+  }
+  return SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(products, dimension, output);
+}
+
+template <class Coefficient>
+bool SylvesterMatrix<Coefficient>::sylvesterMatrix(
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::sylvesterMatrix");
+  List<Polynomial<Coefficient> > polynomials;
+  polynomials.addOnTop(left);
+  polynomials.addOnTop(right);
+  return SylvesterMatrix::sylvesterMatrixProduct(polynomials, output, commentsOnFailure);
+}
+
+
+template <class Coefficient>
+bool SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(
+  const List<Polynomial<Coefficient> >& polynomials,
+  int dimension,
+  Matrix<Coefficient>& output
+) {
+  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixMulti");
   output.initialize(dimension, dimension);
-  output.makeZero(left.coefficients[0].zero());
-  Polynomial<Coefficient>::fillSylvesterMatrix(left, rightPower, 0, output);
-  Polynomial<Coefficient>::fillSylvesterMatrix(right, leftPower, rightPower, output);
+  output.makeZero(polynomials[0].coefficients[0].zero());
+  int columnOffset = 0;
+  for (int i = 0; i < polynomials.size; i ++) {
+    SylvesterMatrix<Coefficient>::fillSylvesterMatrix(polynomials[i], columnOffset, output);
+    columnOffset += output.numberOfRows - polynomials[i].totalDegreeInt();
+  }
   return true;
 }
 

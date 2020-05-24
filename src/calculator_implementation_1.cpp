@@ -40,9 +40,9 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   if (GlobalGoal.isEqualToZero()) {
     return false;
   }
-  int NumTrueVariables = matA.numberOfColumns;
+  int numberOfTrueVariables = matA.numberOfColumns;
   //tempMatb.assign(matb);
-  tempMatA.initialize(matA.numberOfRows, NumTrueVariables + matA.numberOfRows);
+  tempMatA.initialize(matA.numberOfRows, numberOfTrueVariables + matA.numberOfRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.clear();
   BaseVariables.initialize(tempMatA.numberOfColumns);
@@ -54,9 +54,9 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     }
   }
   for (int j = 0; j < matA.numberOfRows; j ++) {
-    tempMatA.elements[j][j + NumTrueVariables].makeOne();
-    matX[j + NumTrueVariables] = (matb.elements[j][0]);
-    BaseVariables.addSelectionAppendNewIndex(j + NumTrueVariables);
+    tempMatA.elements[j][j + numberOfTrueVariables].makeOne();
+    matX[j + numberOfTrueVariables] = (matb.elements[j][0]);
+    BaseVariables.addSelectionAppendNewIndex(j + numberOfTrueVariables);
   }
   Rational ChangeGradient; //Change, PotentialChange;
   int EnteringVariable = 0;
@@ -67,7 +67,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
         Matrix<Rational>::computePotentialChangeGradient(
-          tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
+          tempMatA, BaseVariables, numberOfTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable
         );
         if (PotentialChangeGradient.isGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable) {
           EnteringVariable = i;
@@ -135,14 +135,14 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
     }
   }
-  for (int i = NumTrueVariables; i < matX.size; i ++) {
+  for (int i = numberOfTrueVariables; i < matX.size; i ++) {
     if (matX[i].isPositive()) {
       return false;
     }
   }
   if (outputSolution != nullptr) {
-    outputSolution->setSize(NumTrueVariables);
-    for (int i = 0; i < NumTrueVariables; i ++) {
+    outputSolution->setSize(numberOfTrueVariables);
+    for (int i = 0; i < numberOfTrueVariables; i ++) {
       (*outputSolution)[i] = matX[i];
     }
   }
@@ -165,9 +165,13 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePa
   }
   Coefficient one = left.coefficients[0].one();
   if (doGCD) {
-    Polynomial<Coefficient>::greatestCommonDivisor(left, right, outputPolynomial, one, &calculator.comments);
+    Polynomial<Coefficient>::greatestCommonDivisor(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
   } else {
-    Polynomial<Coefficient>::leastCommonMultiple(left, right, outputPolynomial, one, &calculator.comments);
+    Polynomial<Coefficient>::leastCommonMultiple(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
   }
   return output.assignValueWithContext(outputPolynomial, context, calculator);
 }
@@ -222,11 +226,14 @@ bool Calculator::innerGreatestCommonDivisorOrLeastCommonMultipleModular(
   LargeIntegerUnsigned modulus = leftPolynomial.coefficients[0].modulus;
 
   if (modulus > static_cast<unsigned>(ElementZmodP::maximumModulusForUserFacingPolynomialDivision)) {
-    return calculator << "Polynomial modulus exceeds the maximum allowed for user-facing polynomial division: "
+    return calculator
+    << "Polynomial modulus exceeds the maximum allowed "
+    << "for user-facing polynomial division: "
     << ElementZmodP::maximumModulusForUserFacingPolynomialDivision << ". ";
   }
   if (!modulus.isPossiblyPrime(0, true)) {
-    return calculator << "Cannot do GCD / lcm: modulus " << modulus << " is not prime. ";
+    return calculator << "Cannot do GCD / lcm: modulus "
+    << modulus << " is not prime. ";
   }
   return Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
@@ -292,12 +299,12 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
     theVars.addOnTop(theContextStart.getVariable(i));
   }
   theVars.quickSortAscending();
-  PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.setSize(numVars);
+  PolynomialSubstitution<AlgebraicNumber> substitution;
+  substitution.setSize(numVars);
   const AlgebraicNumber& one = this->theObjectContainer.theAlgebraicClosure.one();
-  for (int i = 0; i < theSub.size; i ++) {
+  for (int i = 0; i < substitution.size; i ++) {
     int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
-    theSub[i].makeMonomial(
+    substitution[i].makeMonomial(
       currentIndex,
       1,
       one
@@ -305,7 +312,7 @@ bool Calculator::getListPolynomialVariableLabelsLexicographic(
   }
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
-    currentP.substitution(theSub, one);
+    currentP.substitution(substitution, one);
   }
   return outputContext.setVariables(theVars);
 }

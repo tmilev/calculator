@@ -365,15 +365,18 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 template <class Coefficient>
 bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   Calculator& calculator,
-  const Polynomial<Coefficient>& left,
-  const Polynomial<Coefficient>& right,
+  const List<Polynomial<Coefficient> >& polynomials,
   ExpressionContext* context,
   Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials");
+  if (polynomials.size < 2) {
+    return output.makeError("Too few polynomials", calculator);
+  }
   Matrix<Coefficient> result;
   std::stringstream commentsOnFailure;
-  if (!Polynomial<Coefficient>::sylvesterMatrix(
-    left, right, result, &commentsOnFailure
+  if (!SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
+    polynomials, result, &commentsOnFailure
   )) {
     return output.makeError(commentsOnFailure.str(), calculator);
   }
@@ -382,27 +385,34 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
 
 bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::sylvesterMatrix");
-  if (input.size() != 3) {
+  if (input.size() < 3) {
     return false;
   }
-  const Expression& left = input[1];
-  const Expression& right = input[2];
-  WithContext<Polynomial<ElementZmodP> > leftPolynomialModular, rightPolynomialModular;
-  if (
-    left.isOfTypeWithContext(&leftPolynomialModular) &&
-    right.isOfTypeWithContext(&rightPolynomialModular)
-  ) {
-    if (!leftPolynomialModular.mergeContexts(
-      leftPolynomialModular, rightPolynomialModular, &calculator.comments
-    )) {
-      return false;
+  bool isModular = true;
+  for (int i = 1; i < input.size(); i ++) {
+    if (!input[i].isOfType<Polynomial<ElementZmodP> >()) {
+      isModular = false;
+      break;
     }
+  }
+  if (isModular) {
+    Expression inputMerged;
+    if (!input.mergeContextsMyAruments(inputMerged, &calculator.comments)) {
+      return output.makeError(
+        "Sylvester matrix: failed to merge polynomial contexts.",
+        calculator
+      );
+    }
+    List<Polynomial<ElementZmodP> > polynomials;
+    polynomials.setSize(input.size() - 1);
+    for (int i = 1; i < inputMerged.size(); i ++) {
+      if (!inputMerged[i].isOfType(&polynomials[i - 1])) {
+        return calculator << "Failed to extract polynomial from expression. ";
+      }
+    }
+    ExpressionContext context = inputMerged[1].getContext();
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
-      calculator,
-      leftPolynomialModular.content,
-      rightPolynomialModular.content,
-      &leftPolynomialModular.context,
-      output
+      calculator, polynomials, &context, output
     );
   }
   Vector<Polynomial<Rational> > inputs;
@@ -410,11 +420,11 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     input,
     inputs,
     nullptr,
-    2,
+    - 1,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
-      calculator, inputs[0], inputs[1], nullptr, output
+      calculator, inputs, nullptr, output
     );
   }
   Vector<Polynomial<AlgebraicNumber> > inputsAlgebraic;
@@ -422,11 +432,11 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     input,
     inputsAlgebraic,
     nullptr,
-    2,
+    - 1,
     CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
-      calculator, inputs[0], inputs[1], nullptr, output
+      calculator, inputs, nullptr, output
     );
   }
   return false;

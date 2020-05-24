@@ -25,8 +25,7 @@ public:
   template<class Coefficient>
   static bool sylvesterMatrixFromPolynomials(
     Calculator& calculator,
-    const Polynomial<Coefficient>& left,
-    const Polynomial<Coefficient>& right,
+    const List<Polynomial<Coefficient>> & polynomials,
     ExpressionContext* context,
     Expression& output
   );

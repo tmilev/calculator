@@ -136,6 +136,7 @@ public:
   bool operator<(int other) const;
   bool operator>(int other) const;
   bool operator<(const LargeIntegerUnsigned& other) const;
+  bool operator<(const LargeInteger& other) const;
   bool operator>=(const LargeIntegerUnsigned& other) const;
   bool operator>(const LargeIntegerUnsigned& other) const;
   void writeBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const;

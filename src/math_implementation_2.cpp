@@ -260,7 +260,7 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   }
   ElementZmodP thePower, theOne;
   thePower.modulus = *this;
-  thePower = theBase;
+  thePower.value = theBase;
   theOne.modulus = *this;
   theOne.value = 1;
   MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
@@ -473,6 +473,13 @@ bool LargeIntegerUnsigned::operator>(int other) const {
 
 bool LargeIntegerUnsigned::operator<(const LargeIntegerUnsigned& other) const {
   return !this->isGreaterThanOrEqualTo(other);
+}
+
+bool LargeIntegerUnsigned::operator<(const LargeInteger& other) const {
+  if (other.isNegative()) {
+    return false;
+  }
+  return (*this) < other.value;
 }
 
 bool LargeIntegerUnsigned::operator>=(const LargeIntegerUnsigned& other) const {

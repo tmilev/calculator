@@ -3111,11 +3111,13 @@ bool Expression::mergeContextsMyAruments(
       }
       return false;
     }
-    if (!commonContext.mergeContexts((*this)[i].getContext(), commonContext)) {
+    ExpressionContext currentContext = (*this)[i].getContext();
+    if (!commonContext.mergeContexts(currentContext, commonContext)) {
       *this->owner << "<hr>Failed to merge context " << commonContext.toString()
       << " with " << (*this)[i].getContext().toString();
       return false;
     }
+
   }
   output.reset(*this->owner, this->size());
   output.addChildOnTop((*this)[0]);

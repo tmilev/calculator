@@ -5401,7 +5401,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FactorOneVarPolyOverRationals",
-    CalculatorFunctionsPolynomial::factorPolynomial,
+    CalculatorFunctionsPolynomial::factorPolynomialKronecker,
     "",
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
@@ -5416,6 +5416,24 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
     "CalculatorFunctionsPolynomial::factorPolynomial",
     "FactorOneVarPolyOverRationals",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "FactorUnivariatePolynomialOverRationals",
+    CalculatorFunctionsPolynomial::factorPolynomialFiniteFields,
+    "",
+    "Factors a one variable polynomial over the rationals "
+    "using finite field methods. "
+    "At the time of writing, the method used is probabilistic "
+    "but with high chance of success. ",
+    "%HideLHS\n"
+    "FactorUnivariatePolynomialOverRationals{}("
+    "182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+"
+    "11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+"
+    "102 x^{3}+145 x^{2}+12276 x+261632"
+    ");\n",
+    "CalculatorFunctionsPolynomial::factorPolynomial",
+    "FactorUnivariatePolynomialOverRationals",
     innerStandard
   );
   this->addOperationHandler(

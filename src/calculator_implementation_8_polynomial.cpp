@@ -211,13 +211,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   if (polynomial.content.isEqualToZero()) {
     return calculator << "Factoring zero not allowed. ";
   }
-  LargeInteger thePrime = polynomial.content.coefficients[0].modulus;
-  if (thePrime < 0) {
-    return calculator << "The modulus: " << thePrime << " is not positive. ";
+  LargeInteger prime = polynomial.content.coefficients[0].modulus;
+  if (prime < 0) {
+    return calculator << "The modulus: " << prime << " is not positive. ";
   }
   std::stringstream commentsOnFailure;
-  if (!thePrime.value.isPossiblyPrime(2, true, &commentsOnFailure)) {
-    calculator << "The modulus: " << thePrime
+  if (!prime.value.isPossiblyPrime(2, true, &commentsOnFailure)) {
+    return calculator << "The modulus: " << prime
     << " appears not to be prime. " << commentsOnFailure.str();
   }
   std::stringstream comments, out;
@@ -280,8 +280,51 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   return output.makeSequence(calculator, &theList);
 }
 
-bool CalculatorFunctionsPolynomial::factorPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
+bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!calculator.convert(
+    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
+  )) {
+    return false;
+  }
+  if (polynomial.content.minimalNumberOfVariables() > 1) {
+    return output.makeError(
+      "I have been taught to factor one variable polynomials only. ",
+      calculator
+    );
+  }
+  PolynomialFactorization<Rational, PolynomialFactorizationFiniteFields> factorization;
+  if (!factorization.factor(
+    polynomial.content,
+    &calculator.comments,
+    &calculator.comments
+  )) {
+    return false;
+  }
+  List<Expression> resultSequence;
+  Expression constantFactor;
+  constantFactor.assignValue(factorization.constantFactor, calculator);
+  resultSequence.addOnTop(constantFactor);
+  Expression polynomialE, expressionE(calculator);
+
+  for (int i = 0; i < factorization.reduced.size; i ++) {
+    polynomialE.assignValueWithContext(
+      factorization.reduced[i], polynomial.context, calculator
+    );
+    expressionE.children.clear();
+    expressionE.addChildAtomOnTop("MakeExpression");
+    expressionE.addChildOnTop(polynomialE);
+    resultSequence.addOnTop(expressionE);
+  }
+  return output.makeSequence(calculator, &resultSequence);
+}
+
+bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
   if (!calculator.convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
@@ -307,7 +350,6 @@ bool CalculatorFunctionsPolynomial::factorPolynomial(Calculator& calculator, con
   constantFactor.assignValue(factorization.constantFactor, calculator);
   resultSequence.addOnTop(constantFactor);
   Expression polynomialE, expressionE(calculator);
-
   for (int i = 0; i < factorization.reduced.size; i ++) {
     polynomialE.assignValueWithContext(
       factorization.reduced[i], polynomial.context, calculator

@@ -540,3 +540,70 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   return true;
 }
 
+bool PolynomialFactorizationFiniteFields::oneFactor(
+  std::stringstream* comments, std::stringstream* commentsOnFailure
+) {
+  this->current = this->output->current;
+  if (this->current.minimalNumberOfVariables() > 1) {
+    return false;
+  }
+  if (this->current.minimalNumberOfVariables() == 0) {
+    return true;
+  }
+  int degree = 0;
+  if (!this->current.totalDegree().isSmallInteger(&degree)) {
+    return false;
+  }
+  Vector<Polynomial<Rational> > derivative;
+  if (!this->current.differential(derivative, commentsOnFailure)) {
+    return false;
+  }
+  Polynomial<Rational> greatestCommonDivisor;
+  derivative[0].greatestCommonDivisor(
+    derivative[0],
+    this->current,
+    greatestCommonDivisor,
+    Rational::one(),
+    commentsOnFailure
+  );
+  if (!greatestCommonDivisor.isConstant()) {
+    this->output->accountNonReducedFactor(greatestCommonDivisor);
+    return true;
+  }
+  unsigned int maximumPrimeToTry = 10000;
+  List<unsigned int> primeFactors;
+  LargeIntegerUnsigned::getPrimesEratosthenesSieve(maximumPrimeToTry, primeFactors);
+  LargeIntegerUnsigned leadingCoefficient = this->current.getLeadingCoefficient(
+    &MonomialP::orderDefault()
+  ).getNumerator().value;
+  for (int i = 1; i < primeFactors.size; i ++) {
+    if (leadingCoefficient % primeFactors[i] == 0) {
+      // Leading coefficient is divisible by prime.
+      continue;
+    }
+    this->oneModular.makeOne(primeFactors[i]);
+    ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+      this->current, this->modularization, primeFactors[i]
+    );
+    if (!this->modularization.isSquareFree(this->oneModular, nullptr)) {
+      continue;
+    }
+    return this->oneFactorFromModularization(comments, commentsOnFailure);
+  }
+  return false;
+}
+
+bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
+  std::stringstream* comments, std::stringstream* commentsOnFailure
+) {
+  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> factorizationModular;
+  if (!factorizationModular.factor(this->modularization, comments, commentsOnFailure)) {
+    return false;
+  }
+  this->format.flagSuppressModP = true;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "DEBUG Factorization mod " << this->oneModular.modulus.toString()
+    << ": " << factorizationModular.toStringResult(&this->format);
+  }
+  return false;
+}

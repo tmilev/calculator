@@ -388,4 +388,20 @@ public:
   PolynomialFactorizationCantorZassenhaus();
 };
 
+class PolynomialFactorizationFiniteFields {
+public:
+  PolynomialFactorization<Rational, PolynomialFactorizationFiniteFields>* output;
+  Polynomial<Rational> current;
+  Polynomial<ElementZmodP> modularization;
+  ElementZmodP oneModular;
+  FormatExpressions format;
+  bool oneFactor(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  bool oneFactorFromModularization(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+};
 #endif

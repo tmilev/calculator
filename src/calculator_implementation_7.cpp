@@ -2030,7 +2030,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
   this->theRF.getDenominator(this->theDen);
   this->theRF.getNumerator(this->theNum);
   this->theNum *= this->theDen.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     this->theDen,
     &this->printoutPFsHtml,
@@ -7678,7 +7678,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   for (int j = 0; j <= desiredHeight; j ++) {
     theHWenumerator.initMaxMultiplicity(theRank - selInducing.cardinalitySelection, j);
     theHWenumerator.incrementSubsetFixedCardinality(j);
-    int numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
+    LargeInteger numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
     for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = highestWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++) {
@@ -8164,8 +8164,8 @@ bool Calculator::innerPrintB3G2branchingTableCommon(Calculator& calculator,
   for (int j = 0; j <= desiredHeight; j ++) {
     theHWenumerator.initMaxMultiplicity(3 - theG2B3Data.selInducing.cardinalitySelection, j);
     theHWenumerator.incrementSubsetFixedCardinality(j);
-    int numCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
-    for (int i = 0; i < numCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
+    LargeInteger numberOfCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
+    for (int i = 0; i < numberOfCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = theG2B3Data.theWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++)
         theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.multiplicities[k];

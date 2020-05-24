@@ -236,7 +236,7 @@ public:
 
   static char convertHumanReadableHexToCharValue(char input);
   static void nChooseK(int n, int k, LargeInteger& result);
-  static int nChooseK(int n, int k);
+  static LargeInteger nChooseK(int n, int k);
   static int factorial(int n);
   static inline double E() {
     return 2.718281828459;

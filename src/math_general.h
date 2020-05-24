@@ -2903,14 +2903,18 @@ public:
 };
 
 template <class Coefficient, class OneFactorFinder>
-class PolynomialFactorization {
+class PolynomialFactorizationUnivariate {
 public:
   Polynomial<Coefficient> original;
   Polynomial<Coefficient> current;
   Coefficient constantFactor;
   List<Polynomial<Coefficient> > reduced;
   List<Polynomial<Coefficient> > nonReduced;
+  int maximumDegree;
   FormatExpressions format;
+  bool basicChecks(
+    std::stringstream* commentsOnFailure
+  );
   bool factor(
     const Polynomial<Coefficient>& input,
     std::stringstream* comments,
@@ -2920,11 +2924,13 @@ public:
   bool accountReducedFactor(Polynomial<Coefficient>& incoming);
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* theFormat) const;
+  PolynomialFactorizationUnivariate();
 };
 
 class PolynomialFactorizationKronecker {
   public:
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker>* output;
+  static const int maximumDegreeDefault = 16;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker>* output;
   Polynomial<Rational> current;
   bool oneFactor(
     std::stringstream* comments,
@@ -2937,7 +2943,11 @@ class PolynomialFactorizationKronecker {
     const Polynomial<Rational>& input,
     List<AlgebraicNumber>& output,
     AlgebraicClosureRationals& closure,
-    std::stringstream* commentsOnFailure);
+    std::stringstream* commentsOnFailure
+  );
+  static std::string name() {
+    return "Kronecker";
+  }
 };
 
 template <class Coefficient>
@@ -5189,8 +5199,8 @@ class Cone {
   }
 public:
   bool flagIsTheZeroCone;
-  Vectors<Rational> Vertices;
-  Vectors<Rational> Normals;
+  Vectors<Rational> vertices;
+  Vectors<Rational> normals;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -5201,10 +5211,10 @@ public:
   void translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
   bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
     int numCommonWalls = 0;
-    for (int i = 0; i < this->Normals.size; i ++) {
+    for (int i = 0; i < this->normals.size; i ++) {
       if (
-        vertex1.scalarEuclidean(this->Normals[i]).isEqualToZero() &&
-        vertex2.scalarEuclidean(this->Normals[i]).isEqualToZero()
+        vertex1.scalarEuclidean(this->normals[i]).isEqualToZero() &&
+        vertex2.scalarEuclidean(this->normals[i]).isEqualToZero()
       ) {
         numCommonWalls ++;
         if (numCommonWalls == this->getDimension() - 2) {
@@ -5215,11 +5225,11 @@ public:
     return false;
   }
   bool isTheEntireSpace() {
-    return this->Normals.size == 0 && this->flagIsTheZeroCone;
+    return this->normals.size == 0 && this->flagIsTheZeroCone;
   }
   bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
-    Vector<Rational>& vertex1 = this->Vertices[vertexIndex1];
-    Vector<Rational>& vertex2 = this->Vertices[vertexIndex2];
+    Vector<Rational>& vertex1 = this->vertices[vertexIndex1];
+    Vector<Rational>& vertex2 = this->vertices[vertexIndex2];
     return this->isHonest1DEdgeAffine(vertex1, vertex2);
   }
   static bool isRegularToBasis(
@@ -5265,15 +5275,15 @@ public:
   void changeBasis(Matrix<Rational>& theLinearMap);
   std::string DebugString;
   int getDimension() const {
-    if (this->Normals.size == 0) {
+    if (this->normals.size == 0) {
       return 0;
     }
-    return this->Normals[0].size;
+    return this->normals[0].size;
   }
   void sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
   bool createFromNormals(
     Vectors<Rational>& inputNormals,
-    bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
@@ -5284,10 +5294,10 @@ public:
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   void getInternalPoint(Vector<Rational>& output) const {
-    if (this->Vertices.size <= 0) {
+    if (this->vertices.size <= 0) {
       return;
     }
-    this->Vertices.sum(output, this->Vertices[0].size);
+    this->vertices.sum(output, this->vertices[0].size);
   }
   Vector<Rational> getInternalPoint() const {
     Vector<Rational> result;
@@ -5295,7 +5305,7 @@ public:
     return result;
   }
   unsigned int hashFunction() const {
-    return this->Vertices.hashFunction();
+    return this->vertices.hashFunction();
   }
   static unsigned int hashFunction(const Cone& input) {
     return input.hashFunction();
@@ -5309,8 +5319,8 @@ public:
   void operator=(const Cone& other) {
     //this->flagHasSufficientlyManyVertices = other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone = other.flagIsTheZeroCone;
-    this->Vertices = other.Vertices;
-    this->Normals = other.Normals;
+    this->vertices = other.vertices;
+    this->normals = other.normals;
     this->LowestIndexNotCheckedForSlicingInDirection = other.LowestIndexNotCheckedForSlicingInDirection;
     this->LowestIndexNotCheckedForChopping = other.LowestIndexNotCheckedForChopping;
   }
@@ -5328,10 +5338,10 @@ public:
   bool solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
   bool solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
   bool operator>(const Cone& other) const {
-    return this->Normals > other.Normals;
+    return this->normals > other.normals;
   }
   bool operator==(const Cone& other) const {
-    return this->flagIsTheZeroCone == other.flagIsTheZeroCone && this->Normals == other.Normals;
+    return this->flagIsTheZeroCone == other.flagIsTheZeroCone && this->normals == other.normals;
   }
 };
 
@@ -5421,11 +5431,11 @@ public:
     const Cone& input, Vectors<Rational>& inputLFsLastCoordConst, List<int>& outputMaximumOverEeachSubChamber
   );
   void initFromCones(
-    List<Vectors<Rational> >& NormalsOfCones,
-    bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    List<Vectors<Rational> >& normalsOfCones,
+    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   void initFromCones(
-    List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    List<Cone>& normalsOfCones, bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   bool splitChamber(
     int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
@@ -5438,8 +5448,8 @@ public:
     this->slicingDirections.size = 0;
     this->clear();
     this->indexLowestNonRefinedChamber = 0;
-    this->ConvexHull.Normals.size = 0;
-    this->ConvexHull.Vertices.size = 0;
+    this->ConvexHull.normals.size = 0;
+    this->ConvexHull.vertices.size = 0;
     this->ConvexHull.flagIsTheZeroCone = true;
   }
   ConeComplex(const ConeComplex& other):HashedList<Cone>() {

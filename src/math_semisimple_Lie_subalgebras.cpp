@@ -3278,9 +3278,9 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
   this->theNilradSubsel.initialize(this->theNilradicalWeights.size);
   this->flagComputedRelativelyStrongIntersections = false;
   for (int i = 1; i < this->theNilradicalWeights.size && i < 5; i ++) {
-    int numcycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
+    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
-    for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
+    for (int j = 0; j < numberOfCycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       if (this->isCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->theNilradicalWeights.subSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
         if (this->theNilradicalSubsetWeights.conesIntersect(
@@ -3314,12 +3314,13 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
   ProgressReport theReport;
   this->flagComputedRelativelyStrongIntersections = true;
   for (int i = 1; i < this->theNilradicalWeights.size + 1 && i < 5; i ++) {
-    int numcycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
+    LargeInteger numberOfCycles = MathRoutines::nChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
 //    this->FKnilradicalLog+= out.str();
-    for (int j = 0; j < numcycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
+    for (int j = 0; j < numberOfCycles; j ++, this->theNilradSubsel.incrementSelectionFixedCardinality(i)) {
       std::stringstream out;
-      out << "<br>Trying " << i + 1 << "-tuples (up to 5-tuples): " << j + 1 << " out of " << numcycles << " cycles to process. ";
+      out << "<br>Trying " << i + 1 << "-tuples (up to 5-tuples): "
+      << j + 1 << " out of " << numberOfCycles << " cycles to process. ";
       theReport.report(out.str());
       if (this->isCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->computeTheTwoConesRelativeToNilradicalSubset();
@@ -3505,10 +3506,10 @@ void CandidateSemisimpleSubalgebra::enumerateAllNilradicals() {
 
 void Cone::getLinesContainedInCone(Vectors<Rational>& output) {
   output.setSize(0);
-  for (int i = 0; i < this->Vertices.size; i ++) {
-    for (int j = i + 1; j < this->Vertices.size; j ++) {
-      if (this->Vertices[i] == - this->Vertices[j]) {
-        output.addOnTop(this->Vertices[i]);
+  for (int i = 0; i < this->vertices.size; i ++) {
+    for (int j = i + 1; j < this->vertices.size; j ++) {
+      if (this->vertices[i] == - this->vertices[j]) {
+        output.addOnTop(this->vertices[i]);
       }
     }
   }
@@ -3533,15 +3534,15 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   Coefficient scalarOther;
   Coefficient theScale;
   Vector<Rational> currentModifier;
-  Vectors<Rational> allVectors = theCone.Vertices;
+  Vectors<Rational> allVectors = theCone.vertices;
   allVectors.addListOnTop(vectorsToBeInGeneralPosition);
   for (int i = 0; i < vectorsToBeInGeneralPosition.size; i ++) {
     if (this->scalarEuclidean(vectorsToBeInGeneralPosition[i]) == 0) {
       bool foundModifier = false;
-      for (int j = 0; j < theCone.Normals.size; j ++) {
-        if (theCone.Normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0) {
+      for (int j = 0; j < theCone.normals.size; j ++) {
+        if (theCone.normals[j].scalarEuclidean(vectorsToBeInGeneralPosition[i]) != 0) {
           foundModifier = true;
-          currentModifier = theCone.Normals[j];
+          currentModifier = theCone.normals[j];
           break;
         }
       }

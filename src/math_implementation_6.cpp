@@ -16,35 +16,7 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::oneFactor");
   this->output->format.flagSuppressModP = true;
   this->current = this->output->current;
-  if (this->current.minimalNumberOfVariables() > 1) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "I haven't been taught how to factor polynomials "
-      << "with more than 1 variable. ";
-    }
-    return false;
-  }
-  if (this->current.minimalNumberOfVariables() == 0) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Factoring constant polynomials is not allowed. ";
-    }
-    return false;
-  }
-  if (this->current.isEqualToZero()) {
-    return false;
-  }
-  if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
-    return false;
-  }
-  if (this->current.totalDegree() > this->maximumtotalDegree) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "The degree of the input is larger than the "
-      << "maximum allowed for the Cantor-Zassenhaus algorithm: "
-      << this->maximumtotalDegree << ". ";
-    }
-    return false;
-  }
+
   this->one.makeOne(this->current.coefficients[0].modulus);
   if (this->one.modulus == 2) {
     if (commentsOnFailure != nullptr) {
@@ -75,8 +47,6 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(
   }
   return this->oneFactorGo(comments, commentsOnFailure);
 }
-
-const int PolynomialFactorizationCantorZassenhaus::maximumtotalDegree = 64;
 
 bool PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree(std::stringstream* comments) {
   MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::hasFactorsOfDifferentDegree");
@@ -481,7 +451,7 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationKronecker::solvePolynomial");
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (input.totalDegree() < 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Polynomial is of degree below 1. ";
@@ -540,6 +510,11 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   return true;
 }
 
+PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
+  this->output = nullptr;
+  this->degree = 0;
+}
+
 bool PolynomialFactorizationFiniteFields::oneFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
@@ -550,8 +525,8 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
   if (this->current.minimalNumberOfVariables() == 0) {
     return true;
   }
-  int degree = 0;
-  if (!this->current.totalDegree().isSmallInteger(&degree)) {
+  this->degree = 0;
+  if (!this->current.totalDegree().isSmallInteger(&this->degree)) {
     return false;
   }
   Vector<Polynomial<Rational> > derivative;
@@ -585,9 +560,13 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
     ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
       this->current, this->modularization, primeFactors[i]
     );
-    if (!this->modularization.isSquareFree(this->oneModular, nullptr)) {
+    if (
+      !this->modularization.isSquareFree(this->oneModular, nullptr) ||
+      modularization.totalDegreeInt() != degree
+    ) {
       continue;
     }
+    this->modularization.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
     return this->oneFactorFromModularization(comments, commentsOnFailure);
   }
   return false;
@@ -596,7 +575,7 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
 bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> factorizationModular;
+  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus> factorizationModular;
   if (!factorizationModular.factor(this->modularization, comments, commentsOnFailure)) {
     return false;
   }
@@ -606,4 +585,31 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
     << ": " << factorizationModular.toStringResult(&this->format);
   }
   return false;
+}
+
+void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
+  this->largestCoefficient = 0;
+  for (int i = 0; i < this->current.size(); i ++) {
+    this->largestCoefficient = MathRoutines::maximum(
+      LargeInteger(this->current.coefficients[i].getNumerator().value),
+      this->largestCoefficient
+    );
+  }
+  // 2 times the largest coefficient gives an upper bound for the absolute value
+  // of the complex roots of the polynomial.
+  this->upperBoundAbsoluteValueRoot = this->largestCoefficient * 2;
+  // Let n be the polynomial degree.
+  // Let a_k be the coefficient of degree k.
+  // Vieta's formulas imply that
+  // a_k = +/- leadingCoefficient * \sum_{i_1,..., i_k} x_{i_1}... x_{i_k},
+  // where x_{1}, ..., x_{n} are the complex roots of the polynomial and
+  // i_1, ..., i_k run over the different roots of the polynomial.
+  // There are (n choose k) summands and each summand can be bounded above
+  // by replacing x_j with upperBoundAbsoluteValueRoot.
+  // Therefore |a_k| <= leadingCoefficient * (n choose k) * upperBoundAbsoluteValueRoot^k
+  // Since the largest binomial coefficient is (n choose floor(n/2)), this is
+  // bounded above by
+  // leadingCoefficient * (n choose floor(n/2)) * upperBoundAbsoluteValueRoot^n
+  this->coefficientBound = this->largestCoefficient;
+  this->coefficientBound *= MathRoutines::nChooseK(this->degree, this->degree / 2);
 }

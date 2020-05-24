@@ -221,7 +221,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
     << " appears not to be prime. " << commentsOnFailure.str();
   }
   std::stringstream comments, out;
-  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
+  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
   polynomial.context.getFormat(result.format);
   result.format.flagSuppressModP = true;
   comments << "Converted polynomial: \\("
@@ -295,7 +295,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
       calculator
     );
   }
-  PolynomialFactorization<Rational, PolynomialFactorizationFiniteFields> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
   if (!factorization.factor(
     polynomial.content,
     &calculator.comments,
@@ -337,7 +337,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
       calculator
     );
   }
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   if (!factorization.factor(
     polynomial.content,
     &calculator.comments,

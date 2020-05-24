@@ -58,12 +58,12 @@ bool PartialFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::st
     outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
   }
-  for (int i = 0; i < tempCone.Vertices.size; i ++) {
-    if (tempCone.isInCone(tempCone.Vertices[i]) && tempCone.isInCone(- tempCone.Vertices[i])) {
+  for (int i = 0; i < tempCone.vertices.size; i ++) {
+    if (tempCone.isInCone(tempCone.vertices[i]) && tempCone.isInCone(- tempCone.vertices[i])) {
       std::stringstream out;
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
-      << tempCone.Vertices[i].toString() << " as well as its opposite vector "
-      << (- tempCone.Vertices[i]).toString()
+      << tempCone.vertices[i].toString() << " as well as its opposite vector "
+      << (- tempCone.vertices[i]).toString()
       << "), hence the vector partition function is " << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();
       return false;

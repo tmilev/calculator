@@ -1997,8 +1997,8 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
     return point.isEqualToZero();
   }
   Rational tempRat;
-  for (int i = 0; i < this->Normals.size; i ++) {
-    tempRat = point.scalarEuclidean(this->Normals[i]);
+  for (int i = 0; i < this->normals.size; i ++) {
+    tempRat = point.scalarEuclidean(this->normals[i]);
     if (tempRat.isNegative()) {
       return false;
     }

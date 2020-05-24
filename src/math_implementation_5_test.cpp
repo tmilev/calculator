@@ -67,7 +67,7 @@ bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   const std::string& input, const std::string& expectedFactors
 ) {
   Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(input);
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorization;
   bool success = factorization.factor(
     toBeFactored,
     nullptr,

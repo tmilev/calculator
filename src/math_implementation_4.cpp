@@ -1551,9 +1551,9 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
   Vectors<Rational> newWalls;
   ConeComplex tempComplex;
   tempComplex = this->projectivizedChambeR;
-  for (int i = 0; i < this->WeylChamberSmallerAlgebra.Normals.size; i ++) {
+  for (int i = 0; i < this->WeylChamberSmallerAlgebra.normals.size; i ++) {
     for (int j = 0; j < smallDim; j ++) {
-      normal[j] = this->WeylChamberSmallerAlgebra.Normals[i][j];
+      normal[j] = this->WeylChamberSmallerAlgebra.normals[i][j];
     }
     newWalls.addOnTop(normal);
     tempComplex.splittingNormals.addOnTop(normal);
@@ -1840,13 +1840,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << this->theExtendedIntegralLatticeMatForM.toString();
   this->WeylChamberSmallerAlgebra.createFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
-  this->PreimageWeylChamberSmallerAlgebra.Normals = this->WeylChamberSmallerAlgebra.Normals;
-  for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.Normals.size; i ++) {
+  this->PreimageWeylChamberSmallerAlgebra.normals = this->WeylChamberSmallerAlgebra.normals;
+  for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.normals.size; i ++) {
     tempRoot.makeZero(input.theRange().getRank() + input.theDomain().getRank() + 1);
     for (int j = 0; j < input.theRange().getRank(); j ++) {
-      tempRoot[j + input.theDomain().getRank()] = this->PreimageWeylChamberLargerAlgebra.Normals[i][j];
+      tempRoot[j + input.theDomain().getRank()] = this->PreimageWeylChamberLargerAlgebra.normals[i][j];
     }
-    this->PreimageWeylChamberLargerAlgebra.Normals[i] = tempRoot;
+    this->PreimageWeylChamberLargerAlgebra.normals[i] = tempRoot;
   }
   tempMat = input.theDomain().theWeyl.cartanSymmetric;
   tempMat.invert();
@@ -1878,21 +1878,21 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     this->PreimageWeylChamberSmallerAlgebra.objects[i].setSize(input.theRange.getRank() + input.theDomain.getRank() + 1);
     *this->PreimageWeylChamberSmallerAlgebra.objects[i].lastObject()= 0;
   }*/
-  for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
+  for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.normals.size; i ++) {
     tempRoot.makeZero(input.theRange().getRank() + input.theDomain().getRank() + 1);
     for (int j = 0; j < input.theDomain().getRank(); j ++) {
-      tempRoot[j] = this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
+      tempRoot[j] = this->PreimageWeylChamberSmallerAlgebra.normals[i][j];
     }
   //  for (int j = 0; j < input.theRange.getRank(); j ++)
    //   tempRoot.objects[j+ input.theDomain.getRank()] = tempRoot2.objects[j];
-    this->PreimageWeylChamberSmallerAlgebra.Normals[i] = tempRoot;
+    this->PreimageWeylChamberSmallerAlgebra.normals[i] = tempRoot;
   }
 
   tempRoot.makeEi(
     input.theRange().getRank() + input.theDomain().getRank() + 1,
     input.theRange().getRank() + input.theDomain().getRank()
   );
-  this->PreimageWeylChamberLargerAlgebra.Normals.addOnTop(tempRoot);
+  this->PreimageWeylChamberLargerAlgebra.normals.addOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.toString(&theFormat) << "\n";
 
@@ -1954,7 +1954,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   out << "\\end{longtable}\n\n\n Multiplicity free chambers \n";
   numFoundChambers = 0;
   out << "\n\\begin{longtable}{cc} ";
-  out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
+  out << "normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++) {
     tempRoot = this->projectivezedChambersSplitByMultFreeWalls.objects[i].getInternalPoint();
     bool found = false;
@@ -2039,8 +2039,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReportOneCone(FormatExpress
   int dimLargerAlgebra = this->theLinearOperators[0].numberOfColumns;
   Rational theConst;
   out1 << "\\begin{tabular}{rcl}";
-  for (int i = 0; i < theCone.Normals.size; i ++) {
-    Vector<Rational>& currentNormal = theCone.Normals[i];
+  for (int i = 0; i < theCone.normals.size; i ++) {
+    Vector<Rational>& currentNormal = theCone.normals[i];
     normalNoConstant = currentNormal;
     normalNoConstant.setSize(dimSmallerAlgebra + dimLargerAlgebra);
     theConst = - (*currentNormal.lastObject());
@@ -2068,7 +2068,7 @@ std::string GeneralizedVermaModuleCharacters::elementToStringMultiplicitiesRepor
   out << "Number chambers: " << projectivizedChambeR.size << " of them " << this->numNonZeroMults << " non-zero.";
   int numInequalities = 0;
   for (int i = 0; i < this->projectivizedChambeR.size; i ++) {
-    numInequalities += this->projectivizedChambeR[i].Normals.size;
+    numInequalities += this->projectivizedChambeR[i].normals.size;
   }
   out << "\nNumber of inequalities: " << numInequalities;
   if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.cardinalitySelection != 0) {
@@ -2169,17 +2169,17 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   projectivizedChamberFinal.initialize();
   for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
     Cone& currentAffineCone = this->smallerAlgebraChamber.objects[i];
-    tempRoots.setSize(currentAffineCone.Normals.size);
-    for (int j = 0; j < currentAffineCone.Normals.size; j ++) {
-      this->transformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
+    tempRoots.setSize(currentAffineCone.normals.size);
+    for (int j = 0; j < currentAffineCone.normals.size; j ++) {
+      this->transformToWeylProjective(0, currentAffineCone.normals[j], tempRoots[j]);
     }
-    tempRoots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
+    tempRoots.addListOnTop(this->PreimageWeylChamberLargerAlgebra.normals);
     theReport.report(tempRoots.toString());
     currentProjectiveCone.createFromNormals(tempRoots);
     projectivizedChamberFinal.addNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
-  for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
-    projectivizedChamberFinal.splittingNormals.addOnTop(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
+  for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.normals.size; i ++) {
+    projectivizedChamberFinal.splittingNormals.addOnTop(this->PreimageWeylChamberSmallerAlgebra.normals[i]);
   }
   out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.toString(false);
   projectivizedChamberFinal.refine();
@@ -2187,8 +2187,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   for (int i = 0; i < projectivizedChamberFinal.size; i ++) {
     const Cone& currentCone = projectivizedChamberFinal[i];
     bool isNonDominant = false;
-    for (int j = 0; j < this->PreimageWeylChamberSmallerAlgebra.Normals.size; j ++) {
-      if (currentCone.getInternalPoint().scalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).isNegative()) {
+    for (int j = 0; j < this->PreimageWeylChamberSmallerAlgebra.normals.size; j ++) {
+      if (currentCone.getInternalPoint().scalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.normals[j]).isNegative()) {
         isNonDominant = true;
         break;
       }
@@ -2203,8 +2203,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   this->projectivizedChambeR= projectivizedChamberFinal;
   for (int k = 1; k < this->theLinearOperators.size; k ++) {
     for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
-      for (int j = 0; j < this->smallerAlgebraChamber[i].Normals.size; j ++) {
-        this->transformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
+      for (int j = 0; j < this->smallerAlgebraChamber[i].normals.size; j ++) {
+        this->transformToWeylProjective(k, this->smallerAlgebraChamber[i].normals[j], wallToSliceWith);
         wallToSliceWith.scaleNormalizeFirstNonZero();
         this->projectivizedChambeR.splittingNormals.addOnTopNoRepetition(wallToSliceWith);
       }

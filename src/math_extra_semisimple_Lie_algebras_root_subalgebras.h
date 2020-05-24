@@ -164,7 +164,7 @@ public:
   Vectors<Rational> SimpleBasisgEpsCoords;
   List<Vectors<Rational> > kModulesKepsCoords;
   List<Vectors<Rational> > kModulesgEpsCoords;
-  List<Vectors<Rational> > PosRootsKConnectedComponents;
+  List<Vectors<Rational> > positiveRootsKConnectedComponents;
   List<Selection> theKEnumerations;
   List<int> theKComponentRanks;
   RootSubalgebras* ownEr;

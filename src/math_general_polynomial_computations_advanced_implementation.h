@@ -1388,12 +1388,61 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
 }
 
 template <class Coefficient, class OneFactorFinder>
-bool PolynomialFactorization<Coefficient, OneFactorFinder>::factor(
+PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::PolynomialFactorizationUnivariate() {
+  this->maximumDegree = OneFactorFinder::maximumDegreeDefault;
+}
+
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::basicChecks(
+  std::stringstream* commentsOnFailure
+) {
+  if (this->current.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "I haven't been taught how to factor polynomials "
+      << "with more than 1 variable. ";
+    }
+    return false;
+  }
+  if (this->current.minimalNumberOfVariables() == 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Factoring constant polynomials is not allowed. ";
+    }
+    return false;
+  }
+  if (this->current.isEqualToZero()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Factoring zero is not allowed. ";
+    }
+    return false;
+  }
+  if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Polynomial is expected to have sufficiently "
+      << "small non-negative integer powers. ";
+    }
+    return false;
+  }
+  if (this->current.totalDegree() > this->maximumDegree) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The degree of the input is larger than the "
+      << "maximum allowed for the " << OneFactorFinder::name() << " algorithm: "
+      << this->maximumDegree << ". ";
+    }
+    return false;
+  }
+  return true;
+}
+
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
   const Polynomial<Coefficient>& input,
   std::stringstream* comments,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::factor");
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::factor");
   this->original = input;
   if (this->original.isConstant(&this->constantFactor)) {
     return true;
@@ -1402,6 +1451,9 @@ bool PolynomialFactorization<Coefficient, OneFactorFinder>::factor(
   this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
+  if (!this->basicChecks(commentsOnFailure)) {
+    return false;
+  }
   OneFactorFinder algorithm;
   algorithm.output = this;
   while (this->nonReduced.size > 0) {
@@ -1418,10 +1470,10 @@ bool PolynomialFactorization<Coefficient, OneFactorFinder>::factor(
 }
 
 template <class Coefficient, class OneFactorFinder>
-bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountNonReducedFactor(
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountNonReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::accountNonReducedFactor");
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountNonReducedFactor");
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
   this->current.divideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
@@ -1439,10 +1491,10 @@ bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountNonReducedFac
 }
 
 template <class Coefficient, class OneFactorFinder>
-bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountReducedFactor(
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::accountReducedFactor");
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountReducedFactor");
   if (incoming.isEqualToZero()) {
     global.fatal << "zero is not a valid factor. " << global.fatal;
   }
@@ -1465,7 +1517,7 @@ bool PolynomialFactorization<Coefficient, OneFactorFinder>::accountReducedFactor
 }
 
 template <class Coefficient, class OneFactorFinder>
-bool PolynomialFactorization<Coefficient, OneFactorFinder>::checkFactorization() const {
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::checkFactorization() const {
   MacroRegisterFunctionWithName("Polynomial::checkFactorization");
   Polynomial<Coefficient> checkComputations;
   checkComputations.makeConstant(this->constantFactor);
@@ -1485,7 +1537,7 @@ bool PolynomialFactorization<Coefficient, OneFactorFinder>::checkFactorization()
 }
 
 template <class Coefficient, class OneFactorFinder>
-std::string PolynomialFactorization<Coefficient, OneFactorFinder>::toStringResult(
+std::string PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::toStringResult(
   FormatExpressions *theFormat
 ) const {
   std::stringstream out;

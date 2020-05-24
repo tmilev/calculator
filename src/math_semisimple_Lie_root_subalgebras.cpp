@@ -881,7 +881,7 @@ void RootSubalgebra::extractRelations(
       if (theRel.theDiagram.toString() == "C^{2}_3") {
         Selection tempSel;
         tempSel.initialize(Ksingular.size);
-        int tempNum=MathRoutines::nChooseK(Ksingular.size, 2);
+        LargeInteger tempNum = MathRoutines::nChooseK(Ksingular.size, 2);
         for (int i = 0; i < tempNum; i ++) {
           tempSel.incrementSelectionFixedCardinality(2);
           theRel.Alphas.setSize(2);
@@ -927,8 +927,8 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   DynkinDiagramRootSubalgebra theDiagram;
   for (int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, theRank); i ++) {
     tempSel.initMaxMultiplicity(highestWeightsAllowed.size, i);
-    int NumElts = tempSel.numberOfCombinationsOfCardinality(i);
-    for (int j = 0; j < NumElts; j ++) {
+    LargeInteger numberOfElements = tempSel.numberOfCombinationsOfCardinality(i);
+    for (int j = 0; j < numberOfElements; j ++) {
       tempSel.incrementSubsetFixedCardinality(i);
       Accum.makeZero(this->getAmbientWeyl().cartanSymmetric.numberOfRows);
       chosenAlphas.size = 0;
@@ -2004,25 +2004,25 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
 }
 
 void RootSubalgebra::doKRootsEnumeration() {
-  this->theKEnumerations.setSize(this->PosRootsKConnectedComponents.size);
-  this->theKComponentRanks.setSize(this->PosRootsKConnectedComponents.size);
+  this->theKEnumerations.setSize(this->positiveRootsKConnectedComponents.size);
+  this->theKComponentRanks.setSize(this->positiveRootsKConnectedComponents.size);
   Matrix<Rational> tempMat;
   Selection tempSel;
-  for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
-    this->theKEnumerations[i].initialize(this->PosRootsKConnectedComponents[i].size);
+  for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
+    this->theKEnumerations[i].initialize(this->positiveRootsKConnectedComponents[i].size);
     this->theKComponentRanks[i] =
-    this->PosRootsKConnectedComponents[i].getRankOfSpanOfElements(&tempMat, &tempSel);
+    this->positiveRootsKConnectedComponents[i].getRankOfSpanOfElements(&tempMat, &tempSel);
   }
   this->doKRootsEnumerationRecursively(0);
 }
 
 void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
   int theRank = this->theKComponentRanks[indexEnumeration];
-  int numRuns = MathRoutines::nChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
+  LargeInteger numberOfIterations = MathRoutines::nChooseK(this->positiveRootsKConnectedComponents[indexEnumeration].size, theRank);
   this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
-  for (int i = 0; i < numRuns; i ++) {
+  for (int i = 0; i < numberOfIterations; i ++) {
     this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
-    if (indexEnumeration < this->PosRootsKConnectedComponents.size - 1) {
+    if (indexEnumeration < this->positiveRootsKConnectedComponents.size - 1) {
       this->doKRootsEnumerationRecursively(indexEnumeration + 1);
     } else {
       this->subalgebraEnumerationsToLinearCombinations();
@@ -2036,8 +2036,8 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
   Selection tempSelection;
   tempMat.initialize(theDimension, theDimension);
   int counter = 0;
-  for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
-    this->PosRootsKConnectedComponents[i].selectionToMatrixAppend(
+  for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
+    this->positiveRootsKConnectedComponents[i].selectionToMatrixAppend(
       this->theKEnumerations[i], theDimension, tempMat, counter
     );
     counter += this->theKComponentRanks[i];

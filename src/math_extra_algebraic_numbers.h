@@ -359,11 +359,11 @@ public:
 
 class PolynomialFactorizationCantorZassenhaus {
 public:
+  static const int maximumDegreeDefault = 512;
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
-  static const int maximumtotalDegree;
-  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
   PolynomialModuloPolynomial<ElementZmodP> baseLetter;
   PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
 
@@ -386,22 +386,35 @@ public:
     std::stringstream* comments
   );
   PolynomialFactorizationCantorZassenhaus();
+  static std::string name() {
+    return "Cantor-Zassenhaus";
+  }
 };
 
 class PolynomialFactorizationFiniteFields {
 public:
-  PolynomialFactorization<Rational, PolynomialFactorizationFiniteFields>* output;
+  static const int maximumDegreeDefault = 100;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields>* output;
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;
   ElementZmodP oneModular;
+  LargeInteger largestCoefficient;
+  LargeInteger upperBoundAbsoluteValueRoot;
+  LargeInteger coefficientBound;
+  int degree;
   FormatExpressions format;
   bool oneFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
+  void computeCoefficientBounds();
   bool oneFactorFromModularization(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
+  static std::string name() {
+    return "finite field factorization";
+  }
+  PolynomialFactorizationFiniteFields();
 };
 #endif

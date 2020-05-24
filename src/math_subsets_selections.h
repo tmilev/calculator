@@ -59,7 +59,7 @@ public:
   }
   int selectionToIndex();
   void expandMaxSize();
-  int getNumberOfCombinationsFixedCardinality(int theCardinality) {
+  LargeInteger getNumberOfCombinationsFixedCardinality(int theCardinality) {
     return MathRoutines::nChooseK(this->maximumSize, theCardinality);
   }
   void shrinkMaxSize();
@@ -124,7 +124,7 @@ class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
 public:
   int maximumMultiplicity;
   void initMaxMultiplicity(int numberOfElements, int maximulMultiplicity);
-  int numberOfCombinationsOfCardinality(int cardinality);
+  LargeInteger numberOfCombinationsOfCardinality(int cardinality);
   LargeInteger getTotalCombinationCount() const;
   int numberOfSelectionsTotal() {
     return MathRoutines::kToTheNth(maximumMultiplicity, this->multiplicities.size);

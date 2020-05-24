@@ -2869,6 +2869,12 @@ public:
   // Let t_j be the product of the a_i's with a_j omitted,
   // i.e., t_j = a_1 ... a_k / a_j.
   // Then we define the Sylvester product matrix to be
+  // the sylvester multi-matrix of the t_j's.
+  // In the case of k = 2 this coincides with the usual
+  // Sylvester matrix (depending on the, defintion
+  // with reversed order of the polynomials).
+  // The Sylvester product matrix is used when computing
+  // Henself lifts of multiple polynomial products.
   static bool sylvesterMatrixProduct(
     const List<Polynomial<Coefficient> >& polynomials,
     Matrix<Coefficient>& output,

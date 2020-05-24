@@ -3996,7 +3996,7 @@ int Matrix<Coefficient>::findPositiveGCDCoefficientNumeratorsTruncated() {
 template <class Coefficient>
 void Matrix<Coefficient>::scaleToIntegralForMinimalRationalHeightNoSignChange() {
   Rational tempRat;
-  tempRat.AssignNumeratorAndDenominator(
+  tempRat.assignNumeratorAndDenominator(
     this->findPositiveLCMCoefficientDenominatorsTruncated(),
     this->findPositiveGCDCoefficientNumeratorsTruncated()
   );

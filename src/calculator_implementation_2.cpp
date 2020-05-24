@@ -337,7 +337,8 @@ bool Calculator::expressionMatchesPattern(
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.toString() << " and the input is "
     << input.toString() << ". The error is certainly in the preceding code; here "
-    << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
+    << "is a stack trace, however beware that the error "
+    << "might be in code preceding the stack loading. "
     << global.fatal;
   }
   if (commentsGeneral != nullptr) {
@@ -352,8 +353,6 @@ bool Calculator::expressionMatchesPattern(
     this->evaluationErrors.addOnTop(out.str());
     return false;
   }
-//  if (this->opDefine() == input.theOperation)
-//    return false;
   int opVarB = this->opBind();
   if (thePattern.isListStartingWithAtom(opVarB)) {
     if (!matchedExpressions.contains(thePattern)) {

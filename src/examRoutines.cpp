@@ -3156,7 +3156,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   if (this->currentUseR.theProblemData.contains(theFileName)) {
     theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
-    percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
+    percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
       this->currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
     );

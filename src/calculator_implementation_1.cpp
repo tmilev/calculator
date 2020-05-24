@@ -446,8 +446,10 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& calculator, const 
     outFromHD << calculator.toStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
     if (precomputedTypes[i].hasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
-      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].toString() << ")";
-      outRecomputeLinks << "<br>" << HtmlRoutines::getCalculatorComputationAnchor(recomputeCommand.str());
+      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}("
+      << precomputedTypes[i].toString() << ")";
+      outRecomputeLinks << "<br>"
+      << HtmlRoutines::getCalculatorComputationAnchor(recomputeCommand.str());
     }
   }
   outFromHD << "</table></p>";
@@ -622,15 +624,17 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& calculator
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  SemisimpleLieAlgebra* ownerSS = ownerAlgebra.content;
+  SemisimpleLieAlgebra* ownerSemisimple = ownerAlgebra.content;
   ElementSemisimpleLieAlgebra<Rational> theErational;
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(calculator, input[2], theErational, *ownerSS)) {
+  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
+    calculator, input[2], theErational, *ownerSemisimple
+  )) {
     return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE = theErational;
   std::stringstream out, logStream;
-  bool success = ownerSS->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
+  bool success = ownerSemisimple->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
   if (success) {
     out << HtmlRoutines::getMathSpanPure("F=" + theF.toString() + ";")
     << "<br>" << HtmlRoutines::getMathSpanPure("H=" + theH.toString() + ";") << "<br>"
@@ -656,17 +660,19 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& calculator, const Expressi
   )) {
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
-  SemisimpleLieAlgebra* ownerSS = algebra.content;
+  SemisimpleLieAlgebra* ownerSemisimple = algebra.content;
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.reserve(input.size() - 2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i = 2; i < input.size(); i ++) {
-    if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(calculator, input[i], tempElt, *ownerSS)) {
+    if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
+      calculator, input[i], tempElt, *ownerSemisimple
+    )) {
       return output.makeError("Failed to extract element of semisimple Lie algebra. ", calculator);
     }
     theOperators.addOnTop(tempElt);
   }
-  ownerSS->getCommonCentralizer(theOperators, outputElts);
+  ownerSemisimple->getCommonCentralizer(theOperators, outputElts);
   std::stringstream out;
   out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
   for (int i = 0; i < outputElts.size; i ++) {
@@ -1068,7 +1074,8 @@ std::string PlotObject::getPlotStringFromFunctionStringAndRanges(
     out << "<br>";
   }
   out << "\\psplot[linecolor =\\fcColorGraph, plotpoints =1000]{"
-  << FloatingPoint::doubleToString(inputLowerBound) << "}{" << FloatingPoint::doubleToString(inputUpperBound) << "}{";
+  << FloatingPoint::doubleToString(inputLowerBound) << "}{"
+  << FloatingPoint::doubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -1161,7 +1168,6 @@ void Plot::computeAxesAndBoundingBox3d() {
       this->highBoundY = MathRoutines::maximum(currentPoint[1], this->highBoundY);
     }
   }
-
 }
 
 bool Plot::isOKVector(const Vector<double>& input) {
@@ -2134,7 +2140,9 @@ bool Calculator::innerConesIntersect(Calculator& calculator, const Expression& i
     out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].toString() << ";";
   }
   Vector<Rational> outputIntersection, outputSeparatingNormal;
-  bool conesDoIntersect = coneNonStrictGens.conesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
+  bool conesDoIntersect = coneNonStrictGens.conesIntersect(
+    coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal
+  );
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
     checkVector.makeZero(coneStrictMatForm.numberOfColumns);
@@ -2253,7 +2261,8 @@ Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
 
 template <class Coefficient>
 Coefficient SemisimpleLieAlgebra::getKillingForm(
-  const ElementSemisimpleLieAlgebra<Coefficient>& left, const ElementSemisimpleLieAlgebra<Coefficient>& right
+  const ElementSemisimpleLieAlgebra<Coefficient>& left,
+  const ElementSemisimpleLieAlgebra<Coefficient>& right
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
   Coefficient result = 0;

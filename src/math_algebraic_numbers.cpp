@@ -241,7 +241,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
   if (this->basisInjections.size > 1) {
     int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
     if (indexToSkipFirst < DimensionOverRationals) {
-      theSel.theInts.makeEi(DimensionOverRationals, indexToSkipFirst);
+      theSel.integers.makeEi(DimensionOverRationals, indexToSkipFirst);
     }
   }
   for (theSel.incrementReturnFalseIfPastLast(); ; theSel.incrementReturnFalseIfPastLast()) {
@@ -256,10 +256,10 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       return false;
     }
     this->generatingElement.element.makeZero();
-    for (int i = 0; i < theSel.theInts.size; i ++) {
+    for (int i = 0; i < theSel.integers.size; i ++) {
       MonomialVector tempV;
       tempV.makeEi(i);
-      this->generatingElement.element.addMonomial(tempV, theSel.theInts[i]);
+      this->generatingElement.element.addMonomial(tempV, theSel.integers[i]);
     }
     this->getMultiplicationBy(this->generatingElement, this->generatingElementTensorForm);
     this->generatingElementTensorForm.getMatrix(this->generatingElementMatrixForm, DimensionOverRationals);

@@ -3440,11 +3440,11 @@ void PartFraction::makePolynomialFromOneNormal(
   tempRat = normal.scalarEuclidean(shiftRationalVector);
   for (int j = 0; j < theMult - 1; j ++) {
     tempP.makeLinearNoConstant(normal);
-    tempRat2.AssignNumeratorAndDenominator(- 1, j + 1);
+    tempRat2.assignNumeratorAndDenominator(- 1, j + 1);
     tempRat2.multiplyBy(tempRat);
     tempRat2 += 1;
     Rational tempRat3;
-    tempRat3.AssignNumeratorAndDenominator(1, j + 1);
+    tempRat3.assignNumeratorAndDenominator(1, j + 1);
     tempP *= (tempRat3);
     tempP.addConstant(tempRat2);
     output *= tempP;
@@ -4689,19 +4689,19 @@ int PartialFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot) {
   return this->getIndex(TheRoot * 2);
 }
 
-void SelectionWithDifferentMaxMultiplicities::initPart1(int NumElements) {
-  this->multiplicities.initializeFillInObject(NumElements, 0);
-  this->capacities.initializeFillInObject(NumElements,0);
-  this->elements.reserve(NumElements);
+void SelectionWithDifferentMaxMultiplicities::initPart1(int numElements) {
+  this->multiplicities.initializeFillInObject(numElements, 0);
+  this->capacities.initializeFillInObject(numElements,0);
+  this->elements.reserve(numElements);
   this->elements.size = 0;
 }
 
-void SelectionWithMultiplicities::initWithMultiplicities(int NumElements) {
-  this->multiplicities.setSize(NumElements);
+void SelectionWithMultiplicities::initWithMultiplicities(int numberOfElements) {
+  this->multiplicities.setSize(numberOfElements);
   for (int i = 0; i < this->multiplicities.size; i ++) {
     this->multiplicities[i] = 0;
   }
-  this->elements.reserve(NumElements);
+  this->elements.reserve(numberOfElements);
   this->elements.size = 0;
 }
 
@@ -4714,9 +4714,11 @@ void SelectionWithMultiplicities::toString(std::string& output) {
   output = out.str();
 }
 
-void SelectionWithMaxMultiplicity::initMaxMultiplicity(int NumElements, int MaxMult) {
-  this->::SelectionWithMultiplicities::initWithMultiplicities(NumElements);
-  this->maximumMultiplicity =MaxMult;
+void SelectionWithMaxMultiplicity::initMaxMultiplicity(
+  int numberOfElements, int maximulMultiplicity
+) {
+  this->::SelectionWithMultiplicities::initWithMultiplicities(numberOfElements);
+  this->maximumMultiplicity = maximulMultiplicity;
 }
 
 int ::SelectionWithMaxMultiplicity::cardinalitySelectionWithMultiplicities() {
@@ -4862,13 +4864,13 @@ LargeInteger SelectionWithDifferentMaxMultiplicities::totalNumberOfSubsets() {
   return result;
 }
 
-void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int NumberMaxMults) {
-  this->multiplicities.initializeFillInObject(NumberMaxMults, 0);
-  this->capacities.setSize(NumberMaxMults);
+void SelectionWithDifferentMaxMultiplicities::initFromInts(int* theMaxMults, int numberMaxMults) {
+  this->multiplicities.initializeFillInObject(numberMaxMults, 0);
+  this->capacities.setSize(numberMaxMults);
   for (int i = 0; i < this->capacities.size; i ++) {
     this->capacities[i] = theMaxMults[i];
   }
-  this->elements.initializeFillInObject(NumberMaxMults, 0);
+  this->elements.initializeFillInObject(numberMaxMults, 0);
 }
 
 void SelectionWithDifferentMaxMultiplicities::initFromInts(const List<int>& theMaxMults) {
@@ -5565,7 +5567,7 @@ Rational DynkinSimpleType::getRatioRootSquaredToFirstSquared(int rootIndex) cons
       return 1;
     case 'B':
       if (rootIndex == this->theRank - 1) {
-        result.AssignNumeratorAndDenominator(1, 2);
+        result.assignNumeratorAndDenominator(1, 2);
         return result;
       }
       return 1;
@@ -5578,7 +5580,7 @@ Rational DynkinSimpleType::getRatioRootSquaredToFirstSquared(int rootIndex) cons
       if (rootIndex < 2) {
         return 1;
       }
-      result.AssignNumeratorAndDenominator(1, 2);
+      result.assignNumeratorAndDenominator(1, 2);
       return result;
     case 'G':
       if (rootIndex == 1) {

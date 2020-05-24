@@ -2211,7 +2211,7 @@ bool Expression::toStringBuiltIn<Rational>(
   if (!input.owner->flagUseFracInRationalLaTeX) {
     out << input.getValue<Rational>().toString();
   } else {
-    out << input.getValue<Rational>().ToStringFrac();
+    out << input.getValue<Rational>().toStringFrac();
   }
   if (input.hasNonEmptyContext()) {
     out << ")";

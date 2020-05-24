@@ -1720,7 +1720,7 @@ GlobalStatistics::checkPointerCounters();
 
 void Rational::addInteger(int x) {
   Rational tempRat;
-  tempRat.AssignNumeratorAndDenominator(x, 1);
+  tempRat.assignNumeratorAndDenominator(x, 1);
   this->operator+=(tempRat);
 }
 
@@ -2123,7 +2123,7 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
 std::string Rational::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (theFormat->flagUseFrac) {
-      return this->ToStringFrac();
+      return this->toStringFrac();
     }
   }
   std::stringstream out;
@@ -2144,7 +2144,7 @@ std::string Rational::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) const {
+std::string Rational::toStringForFileOperations(FormatExpressions* notUsed) const {
   (void) notUsed; //portable way of avoiding unused parameter warning
   std::stringstream out;
   if (this->extended == nullptr) {
@@ -2172,7 +2172,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
   return out.str();
 }
 
-std::string Rational::ToStringFrac() const {
+std::string Rational::toStringFrac() const {
   std::stringstream out;
   if (this->extended == nullptr) {
     if (this->numeratorShort < 0) {

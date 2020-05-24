@@ -298,7 +298,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
-      tempV[0].AssignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
+      tempV[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
       val = myCopy.evaluate(tempV);
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;

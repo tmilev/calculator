@@ -9329,11 +9329,11 @@ public:
     this->maxNumCharsInString = 100;
     this->numLayers = 0;
     this->owner = nullptr;
-    this->charWidth.AssignNumeratorAndDenominator(1, 20);
+    this->charWidth.assignNumeratorAndDenominator(1, 20);
     this->padding = 1;
     this->layerHeight = 2;
     this->widthMaxLayer = 0;
-    this->charHeight.AssignNumeratorAndDenominator(1, 5);
+    this->charHeight.assignNumeratorAndDenominator(1, 5);
   }
   Expression& GetCurrentE() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetCurrentE");

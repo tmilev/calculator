@@ -778,9 +778,9 @@ class Vectors: public List<Vector<Coefficient> > {
     }
     return false;
   }
-  void selectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output);
-  void selectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
-  void selectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<Coefficient>& output, int StartRowIndex);
+  void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output);
+  void selectionToMatrixAppend(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
+  void selectionToMatrix(Selection& theSelection, int outputDimension, Matrix<Coefficient>& output, int startRowIndex);
   void getGramMatrix(Matrix<Coefficient>& output, const Matrix<Rational>* theBilinearForm = nullptr) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(Vectors<Coefficient>& output, Matrix<Rational>* theBilinearForm = nullptr);
@@ -904,8 +904,8 @@ class Vectors: public List<Vector<Coefficient> > {
   );
   bool computeNormalFromSelectionAndTwoExtraRoots(
     Vector<Coefficient>& output,
-    Vector<Coefficient>& ExtraRoot1,
-    Vector<Coefficient>& ExtraRoot2,
+    Vector<Coefficient>& extraRoot1,
+    Vector<Coefficient>& extraRoot2,
     Selection& theSelection,
     Matrix<Coefficient>& bufferMat,
     Selection& bufferSel

@@ -570,7 +570,7 @@ public:
     return true;
   }
   bool isGreaterThan(const Rational& r) const;
-  inline void AssignNumeratorAndDenominator(int n, int d) {
+  inline void assignNumeratorAndDenominator(int n, int d) {
     if (d < 0) {
       d = - d;
       n = - n;
@@ -610,8 +610,8 @@ public:
     this->simplify();
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringFrac() const;
-  std::string ToStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
+  std::string toStringFrac() const;
+  std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
   bool isEqualTo(const Rational& r) const;
   bool isGreaterThanOrEqualTo(const Rational& right) const;
   bool isEven() const {
@@ -716,7 +716,7 @@ public:
   // extended pointer.
   Rational(int n, int d) {
     this->extended = nullptr;
-    this->AssignNumeratorAndDenominator(n, d);
+    this->assignNumeratorAndDenominator(n, d);
   }
   Rational(const LargeInteger& other) {
     this->extended = nullptr;
@@ -730,7 +730,7 @@ public:
   }
   Rational(int n) {
     this->extended = nullptr;
-    this->AssignNumeratorAndDenominator(n, 1);
+    this->assignNumeratorAndDenominator(n, 1);
   }
   Rational(const Rational& right) {
     this->extended = nullptr;
@@ -782,7 +782,6 @@ public:
     return this->isEqualTo(right);
   }
   inline void operator+=(const Rational& r) {
-    //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
     if (r.extended == nullptr && this->extended == nullptr) {
       if (this->tryToAddQuickly(r.numeratorShort, r.denominatorShort)) {
         return;

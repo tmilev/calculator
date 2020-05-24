@@ -7088,7 +7088,7 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
       diagMat(i, i) = this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.cartanSymmetric(i, i) / 2;
       diagMatrix2(i, i) = this->theWeylNonEmbedded->cartanSymmetric(i, i) / 2;
     } else {
-      diagMat(i, i).AssignNumeratorAndDenominator(1, 2);
+      diagMat(i, i).assignNumeratorAndDenominator(1, 2);
       diagMatrix2(i, i) = 1;
     }
   }

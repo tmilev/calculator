@@ -105,7 +105,7 @@ void RationalFunction<Coefficient>::operator/=(int other) {
 }
 
 template<class Coefficient>
-void RationalFunction<Coefficient>::minus() {
+void RationalFunction<Coefficient>::negate() {
   this->operator*= (Rational(- 1));
   if (!this->checkConsistency()) {
     global.fatal << "Failed to take the negative sign of a rational function. " << global.fatal;
@@ -122,7 +122,7 @@ void RationalFunction<Coefficient>::operator-=(const RationalFunction<Coefficien
   }
   RationalFunction<Coefficient> tempRF;
   tempRF = other;
-  tempRF.minus();
+  tempRF.negate();
   this->operator+=(tempRF);
   if (!this->checkConsistency()) {
     global.fatal << "Corrupt output in rational function operator -=." << global.fatal;
@@ -136,7 +136,7 @@ void RationalFunction<Coefficient>::operator-=(const Coefficient& other) {
   }
   RationalFunction tempRF;
   tempRF.makeConstant(other);
-  tempRF.minus();
+  tempRF.negate();
   this->operator+=(tempRF);
   if (!(this->checkConsistency())) {
     global.fatal << "Corrupt output in rational function operator-=(Rational)." << global.fatal;

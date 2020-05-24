@@ -456,7 +456,7 @@ public:
   }
   void invert() {
     for (int i = 0; i < this->monBody.size; i ++) {
-      this->monBody[i].minus();
+      this->monBody[i].negate();
     }
   }
   bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
@@ -623,7 +623,7 @@ public:
   }
   void computeDeterminantOverwriteMatrix(
     Coefficient& output,
-    const Coefficient& theRingOne = 1,
+    const Coefficient& ringOne = 1,
     const Coefficient& ringZero = 0
   );
   void actOnVectorROWSOnTheLeft(List<Vector<Coefficient> >& standOnTheRightAsVectorRow) const {
@@ -1307,7 +1307,7 @@ bool Vectors<Coefficient>::conesIntersect(
     int currentCol = i + StrictCone.size;
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
-      matA.elements[k][currentCol].minus();
+      matA.elements[k][currentCol].negate();
     }
     matA.elements[theDimension][currentCol].makeZero();
   }
@@ -2617,6 +2617,7 @@ class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
 private:
   static void fillSylvesterMatrix(
     const Polynomial<Coefficient>& polynomial,
+    int otherPower,
     int columnOffset,
     Matrix<Coefficient>& output
   );
@@ -3811,7 +3812,7 @@ class Complex {
     this->imaginaryPart /= numerator;
   }
   bool isEqualToZero() const;
-  void minus() {
+  void negate() {
     this->imaginaryPart = - this->imaginaryPart;
     this->realPart = - this->realPart;
   }
@@ -4105,7 +4106,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
       matA.elements[i][k + theDimension].assign(matA.elements[i][k]);
-      matA.elements[i][k + theDimension].minus();
+      matA.elements[i][k + theDimension].negate();
     }
     matb.elements[i][0].makeOne();
     matA.elements[i][theDimension * 2 + i].makeMinusOne();
@@ -4115,7 +4116,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
       matA.elements[currentRow][k + theDimension].assign(matA.elements[currentRow][k]);
-      matA.elements[currentRow][k + theDimension].minus();
+      matA.elements[currentRow][k + theDimension].negate();
     }
     matA.elements[currentRow][2 * theDimension + currentRow].makeOne();
   }

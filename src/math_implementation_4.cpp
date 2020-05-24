@@ -1737,7 +1737,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     this->log << "\n" << currentLinearOperator.toString(&global.theDefaultFormat.getElement());
     currentLinearOperator.actOnVectorColumn(theSubgroup.getRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.getRho();
-    this->theTranslationS[i].minus();
+    this->theTranslationS[i].negate();
     theProjectionBasisChanged.actOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup.allElements[i].generatorsLastAppliedFirst.size % 2 == 0) {
       this->theCoeffs[i] = 1;
@@ -1791,7 +1791,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   tempRoot = theSubgroup.getRho();
   this->theLinearOperators[0].actOnVectorColumn(tempRoot);
   this->preferredBasisChangE.actOnVectorColumn(tempRoot);
-  tempRoot.minus();
+  tempRoot.negate();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
   << theSubgroup.getRho().toStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
   << tempRoot.toStringLetterFormat("\\alpha") << "$.";

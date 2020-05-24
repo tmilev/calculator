@@ -99,7 +99,7 @@ class AlgebraicNumber {
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  AlgebraicNumber one();
+  AlgebraicNumber one() const;
   bool assignRationalQuadraticRadical(
     const Rational& input,
     AlgebraicClosureRationals& inputOwner,
@@ -136,7 +136,7 @@ class AlgebraicNumber {
   bool operator!= (int other) const {
     return !(*this == other);
   }
-  void minus() {
+  void negate() {
     this->element *= - 1;
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
@@ -296,7 +296,8 @@ public:
   static ElementZmodP scaleNormalizeIndex(
     List<ElementZmodP>& toBeScaled, int indexNonZeroElement
   );
-  // Required by RationalFunction.
+  // Required by RationalFunction when scaling simultaneously
+  // numerator and denominator.
   // Returns a copy of the number.
   ElementZmodP getNumerator() const;
   // Required by RationalFunction.
@@ -308,7 +309,7 @@ public:
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
   void checkEqualModuli(const ElementZmodP& other);
-
+  void negate();
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);

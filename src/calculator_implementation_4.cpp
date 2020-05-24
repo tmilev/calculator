@@ -549,7 +549,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       ei.makeEi(theSSalgebra.getRank(), j);
       theGenerator.makeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
-      ei.minus();
+      ei.negate();
       theGenerator.makeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.addOnTop(theGenerator);
     }
@@ -3122,7 +3122,7 @@ bool Expression::mergeContextsMyAruments(
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
-    if (!convertedE.setContextAtLeastEqualTo(commonContext)) {
+    if (!convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure)) {
       *this->owner << "<hr>Failed to convert "
       << convertedE.toString() << " to context " << commonContext.toString();
       return false;
@@ -3155,7 +3155,7 @@ bool Calculator::convertExpressionsToCommonContext(
     }
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
-    if (!inputOutputEs[i].::Expression::setContextAtLeastEqualTo(commonContext)) {
+    if (!inputOutputEs[i].setContextAtLeastEqualTo(commonContext, nullptr)) {
       return false;
     }
   }

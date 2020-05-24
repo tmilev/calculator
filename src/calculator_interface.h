@@ -328,7 +328,9 @@ private:
     tempE.checkConsistency();
     return this->addChildOnTop(tempE);
   }
-  bool setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
+  bool setContextAtLeastEqualTo(
+    ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
+  );
   bool hasContext() const;
   bool hasNonEmptyContext() const;
   ExpressionContext getContext() const;
@@ -669,6 +671,7 @@ public:
   bool setAmbientSemisimpleLieAlgebra(SemisimpleLieAlgebra& input);
   void setIndexAmbientSemisimpleLieAlgebra(int index);
   void setDefaultModulus(const LargeIntegerUnsigned& input);
+  LargeIntegerUnsigned getDefaultModulus();
   void getFormat(FormatExpressions& output) const;
   FormatExpressions getFormat() const;
   Expression getVariable(int variableIndex) const;
@@ -2962,7 +2965,7 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
-      if (!convertedEs(i, j).::Expression::setContextAtLeastEqualTo(theContext)) {
+      if (!convertedEs(i, j).setContextAtLeastEqualTo(theContext, commentsOnError)) {
         if (commentsOnError != nullptr) {
           *commentsOnError
           << "Failed to set context to matrix element: "
@@ -3061,10 +3064,9 @@ template <class theType>
 bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   Expression tempE;
   tempE.owner = &owner;
-  // std::stringstream comments;
-  // comments << inputValue;
   int curType = tempE.getTypeOperation<theType>();
   if (
+    curType == owner.opEltZmodP() ||
     curType == owner.opPolynomialRational() ||
     curType == owner.opRationalFunction() ||
     curType == owner.opElementTensorGVM() ||
@@ -3074,7 +3076,7 @@ bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   ) {
     global.fatal << "This may or may not be a programming error. "
     << "Assigning value WITHOUT CONTEXT to data type "
-    << this->owner->getOperations()[curType]
+    << owner.getOperations()[curType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
     << global.fatal;
   }
@@ -3260,7 +3262,7 @@ template <class Coefficient>
 bool Expression::assignMatrix(
   const Matrix<Coefficient>& input,
   Calculator& owner,
-  const ExpressionContext *inputContext,
+  const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
   MacroRegisterFunctionWithName("Expression::assignMatrix");
@@ -3343,6 +3345,10 @@ bool WithContext<BuiltIn>::setContextAtLeast(
 ) {
   ExpressionContext newContext;
   if (!inputOutputContext.mergeContexts(this->context, newContext)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to merge context " << inputOutputContext.toString()
+      << " with " << this->context.toString();
+    }
     return false;
   }
   inputOutputContext = newContext;

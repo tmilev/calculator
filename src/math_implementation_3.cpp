@@ -1664,7 +1664,7 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   basepoint.makeZero(input.size);
   basepoint[0].assignInteger(1);
   if (input[0].isNegative()) {
-    basepoint.minus();
+    basepoint.negate();
   }
   //////////////////////////////////////////////////
   output.scalarEuclidean(normal, tempRat2);
@@ -7456,7 +7456,7 @@ void WeylGroupData::drawRootSystem(
     for (int i = 0; i < 2; i ++) {
       output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, "green", 1);
       output.drawCircleAtVectorBufferRational(tempRoot, currentColor, 2);
-      tempRoot.minus();
+      tempRoot.negate();
     }
     return;
   }
@@ -8707,7 +8707,7 @@ void WeylGroupData::transformToSimpleBasisGenerators(
   MacroRegisterFunctionWithName("WeylGroup::transformToSimpleBasisGenerators");
   for (int i = 0; i < theGens.size; i ++) {
     if (!theGens[i].isPositiveOrZero()) {
-      theGens[i].minus();
+      theGens[i].negate();
     }
   }
   bool reductionOccured = true;
@@ -8724,7 +8724,7 @@ void WeylGroupData::transformToSimpleBasisGenerators(
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (!tempRoot.isPositiveOrZero()) {
-            tempRoot.minus();
+            tempRoot.negate();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -8779,7 +8779,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
   theH.perturbNoZeroScalarProductWithMe(inputRootSystem);
   for (int i = 0; i < theGens.size; i ++) {
     if (theGens[i].scalarEuclidean(theH) < 0) {
-      theGens[i].minus();
+      theGens[i].negate();
     }
   }
   bool reductionOccured = true;
@@ -8796,7 +8796,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
         }
         if (inputRootSystem.contains(tempRoot)) {
           if (tempRoot.scalarEuclidean(theH) < 0) {
-            tempRoot.minus();
+            tempRoot.negate();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -8811,7 +8811,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(Vectors
 void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Rational>& theGens, const Vector<Rational>& theH) {
   for (int i = 0; i < theGens.size; i ++) {
     if (!this->isPositiveOrPerpWithRespectToH(theGens[i], theH)) {
-      theGens[i].minus();
+      theGens[i].negate();
     }
   }
   bool reductionOccured = true;
@@ -8828,7 +8828,7 @@ void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(Vectors<Ratio
         }
         if (this->rootSystem.getIndex(tempRoot) != - 1) {
           if (!this->isPositiveOrPerpWithRespectToH(tempRoot, theH)) {
-            tempRoot.minus();
+            tempRoot.negate();
             theGens[j] = tempRoot;
           } else {
             theGens[i] = tempRoot;
@@ -11110,7 +11110,7 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   baseCone.createFromVertices(theRoots);
   Vector<Rational> shiftRoot;
   baseLattice.getInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone);
-  shiftRoot.minus();
+  shiftRoot.negate();
   theFracs.theChambers.makeAffineAndTransformToProjectiveDimPlusOne(shiftRoot, this->theProjectivizedComplex);
   outputstring = out.str();
   return true;
@@ -11616,7 +11616,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
   for (int i = 0; i < this->theConesLargerDim.size; i ++) {
     trimmedCone.Normals = this->theConesLargerDim[i].theProjectivizedCone.Normals;
     multFreeWall = this->LPtoMaximizeLargerDim[i];
-    multFreeWall.minus();
+    multFreeWall.negate();
     *multFreeWall.lastObject() +=1;
     trimmedCone.Normals.addOnTop(multFreeWall);
     trimmedCone.createFromNormals(trimmedCone.Normals);
@@ -11786,7 +11786,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   complexBeforeProjection.initialize();
   complexBeforeProjection.addNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
   if (direction.scalarEuclidean(theLPToMaximizeAffine).isNegative()) {
-    direction.minus();
+    direction.negate();
   }
   complexBeforeProjection.slicingDirections.addOnTop(direction);
   complexBeforeProjection.slicingDirections.addOnTop(-direction);
@@ -11940,7 +11940,7 @@ void ConeComplex::getNewVerticesAppend(
       if (myDyingCone.isInCone(tempRoot)) {
         outputVertices.addOnTopNoRepetition(tempRoot);
       } else {
-        tempRoot.minus();
+        tempRoot.negate();
         if (myDyingCone.isInCone(tempRoot)) {
           outputVertices.addOnTopNoRepetition(tempRoot);
         }
@@ -12169,7 +12169,7 @@ void Cone::computeVerticesFromNormalsNoFakeVertices() {
       theMat.nonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool = this->isInCone(tempRoot);
       if (!tempBool) {
-        tempRoot.minus();
+        tempRoot.negate();
         tempBool = this->isInCone(tempRoot);
       }
       if (tempBool) {
@@ -12357,7 +12357,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
       }
       Cone::scaleNormalizeByPositive(normalCandidate);
       if ((hasNegative && !hasPositive)) {
-        normalCandidate.minus();
+        normalCandidate.negate();
       }
       if (!(hasNegative && hasPositive)) {
         this->Normals.addOnTopNoRepetition(normalCandidate);

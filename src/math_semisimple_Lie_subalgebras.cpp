@@ -5854,7 +5854,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(FormatExpressions
         out << "}Relation&";
         for (int j = 0; j < currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j ++) {
           Rational theCF = currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size + j];
-          theCF.minus();
+          theCF.negate();
           out << "$"
           << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j] * theCF).toStringLetterFormat("\\omega", &tempFormat)
           << "$";

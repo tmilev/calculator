@@ -1595,7 +1595,7 @@ Rational operator/(int left, const Rational& right) {
 Rational operator-(const Rational& argument) {
   Rational tempRat;
   tempRat.assign(argument);
-  tempRat.minus();
+  tempRat.negate();
   return tempRat;
 }
 
@@ -1734,7 +1734,7 @@ bool Rational::isGreaterThan(const Rational& r) const {
 void Rational::subtract(const Rational& r) {
   Rational temp;
   temp.assign(r);
-  temp.minus();
+  temp.negate();
   this->operator+=(temp);
 }
 

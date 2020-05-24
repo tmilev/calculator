@@ -147,10 +147,10 @@ bool Expression::mergeContexts(Expression& leftE, Expression& rightE) {
   if (!leftC.mergeContexts(rightC, outputC)) {
     return false;
   }
-  if (!leftE.setContextAtLeastEqualTo(outputC)) {
+  if (!leftE.setContextAtLeastEqualTo(outputC, nullptr)) {
     return false;
   }
-  return rightE.setContextAtLeastEqualTo(outputC);
+  return rightE.setContextAtLeastEqualTo(outputC, nullptr);
 }
 
 bool ExpressionContext::isEmpty() {
@@ -171,7 +171,7 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
 
 std::string ExpressionContext::toString() const {
   std::stringstream out;
-  this->checkInitialization();
+  // this->checkInitialization();
   out << "Context. ";
   if (this->variables.size > 0) {
     out << "Variables: " << this->variables.toStringCommaDelimited() << ". ";
@@ -200,6 +200,10 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
 
 void ExpressionContext::setDefaultModulus(const LargeIntegerUnsigned& input) {
   this->defaultModulus = input;
+}
+
+LargeIntegerUnsigned ExpressionContext::getDefaultModulus() {
+  return this->defaultModulus;
 }
 
 void ExpressionContext::setIndexAmbientSemisimpleLieAlgebra(
@@ -469,10 +473,16 @@ bool ExpressionContext::mergeContexts(
     ExpressionContext rightCopy = other;
     return leftCopy.mergeContexts(rightCopy, outputContext);
   }
-  if (this->owner != other.owner) {
-    return false;
+  if (this->owner != nullptr) {
+    outputContext.owner = this->owner;
+  } else {
+    outputContext.owner = other.owner;
   }
-  outputContext.owner = this->owner;
+  if (this->owner != nullptr && other.owner != nullptr) {
+    if (this->owner != other.owner) {
+      return false;
+    }
+  }
   if (!this->mergeModuli(other, outputContext)) {
     return false;
   }
@@ -576,6 +586,22 @@ bool WithContext<Rational>::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementZmodP>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  LargeIntegerUnsigned contextModulus = newContext.getDefaultModulus();
+  if (this->content.modulus != contextModulus) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The modulus of " << this->content.toString()
+      << " does not equal incoming context modulus: " << contextModulus << ". ";
+    }
+    return false;
+  }
   this->context = newContext;
   return true;
 }
@@ -739,7 +765,9 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   return true;
 }
 
-bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext) {
+bool Expression::setContextAtLeastEqualTo(
+  ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
   if (!this->isBuiltInType()) {
@@ -750,53 +778,57 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
   }
   WithContext<Rational> rational;
   if (this->isOfTypeWithContext(&rational)) {
-    return rational.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return rational.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<ElementZmodP> modularElement;
+  if (this->isOfTypeWithContext(&modularElement)) {
+    return modularElement.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<double> floatingPointNumber;
   if (this->isOfTypeWithContext(&floatingPointNumber)) {
     return floatingPointNumber.setContextAndSerialize(
-      inputOutputMinContext, *this, &this->owner->comments
+      inputOutputMinContext, *this, commentsOnFailure
     );
   }
   WithContext<ElementWeylGroup> elementWeylGroup;
   if (this->isOfTypeWithContext(&elementWeylGroup)) {
-    return elementWeylGroup.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return elementWeylGroup.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<AlgebraicNumber> algebraicNumber;
   if (this->isOfTypeWithContext(&algebraicNumber)) {
-    return algebraicNumber.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return algebraicNumber.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > > elementUniversalEnveloping;
   if (this->isOfTypeWithContext(&elementUniversalEnveloping)) {
-    return elementUniversalEnveloping.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return elementUniversalEnveloping.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<Polynomial<Rational> > polynomial;
   if (this->isOfTypeWithContext(&polynomial)) {
-    return polynomial.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return polynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<Polynomial<ElementZmodP> > polynomialModular;
   if (this->isOfTypeWithContext(&polynomialModular)) {
-    return polynomialModular.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return polynomialModular.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<Polynomial<AlgebraicNumber> > polynomialAlgebraic;
   if (this->isOfTypeWithContext(&polynomialAlgebraic)) {
-    return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<RationalFunction<Rational> > rationalFunction;
   if (this->isOfTypeWithContext(&rationalFunction)) {
-    return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
   if (this->isOfTypeWithContext(&elementWeylAlgebra)) {
-    return elementWeylAlgebra.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return elementWeylAlgebra.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > elementTensorProductGeneralizedVermaModules;
   if (this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)) {
-    return elementTensorProductGeneralizedVermaModules.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return elementTensorProductGeneralizedVermaModules.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   WithContext<Weight<Polynomial<Rational> > > weightPolynomial;
   if (this->isOfTypeWithContext(&weightPolynomial)) {
-    return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, &this->owner->comments);
+    return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   if (this->isMatrixOfType<RationalFunction<Rational> >()) {
     ExpressionContext newContext(*this->owner);
@@ -814,7 +846,7 @@ bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
     for (int i = 0; i < newMat.numberOfRows; i ++) {
       for (int j = 0; j < newMat.numberOfColumns; j ++) {
-        if (!newMat(i, j).substitution(substitution, Rational::one(), &this->owner->comments)) {
+        if (!newMat(i, j).substitution(substitution, Rational::one(), commentsOnFailure)) {
           return *this->owner << "Failed to carry out the substitution "
           << substitution.toString() << " in the matrix " << this->toString() << ". ";
         }

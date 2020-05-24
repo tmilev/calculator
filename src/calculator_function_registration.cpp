@@ -1473,6 +1473,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Constructs the transpose Sylvester matrix of two univariate polynomials.",
     "SylvesterMatrix(2x^2+2x+2, 3x+3);\n"
     "SylvesterMatrix(Polynomial(5x^2+4x+3), Polynomial(2x+1));\n"
+    "SylvesterMatrix(2, 3x+3);"
     "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 5));\n"
     "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 7));\n",
     "SylvesterMatrix(0, x^2);\n"

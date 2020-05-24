@@ -467,7 +467,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
     Domain[numRoots + i] = tempElt;
     tempElt.makeCartanGenerator(rangeRoot, *this);
     Range[numRoots + i] = tempElt;
-    for (int i = 0; i < 2; i ++, domainRoot.minus(), rangeRoot.minus()) {
+    for (int i = 0; i < 2; i ++, domainRoot.negate(), rangeRoot.negate()) {
       int theIndex = this->theWeyl.rootSystem.getIndex(rangeRoot);
       tempElt.makeGGenerator(rangeRoot, *this);
       Range[theIndex] = tempElt;
@@ -483,7 +483,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
       const Vector<Rational>& current = this->theWeyl.rootSystem[theIndex];
       for (int j = 0; j < theDimension; j ++) {
         left.makeEi(theDimension, j);
-        for (int k = 0; k < 2; k ++, left.minus()) {
+        for (int k = 0; k < 2; k ++, left.negate()) {
           right = current - left;
           if (this->theWeyl.isARoot(right)) {
             int leftIndex = this->theWeyl.rootSystem.getIndex(left);
@@ -623,7 +623,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   Vector<Rational> tempRoot;
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.makeEi(theDomainDimension, i);
-    for (int j = 0; j < 2; j ++, tempRoot.minus()) {
+    for (int j = 0; j < 2; j ++, tempRoot.negate()) {
       int index = this->theDomain().theWeyl.rootSystem.getIndex(tempRoot);
       tempDomain[index].makeZero();
       ChevalleyGenerator tempGen;

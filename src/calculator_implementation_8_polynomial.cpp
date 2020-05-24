@@ -325,6 +325,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   Calculator& calculator,
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
+  ExpressionContext* context,
   Expression& output
 ) {
   Matrix<Coefficient> result;
@@ -334,7 +335,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   )) {
     return output.makeError(commentsOnFailure.str(), calculator);
   }
-  return output.assignMatrix(result, calculator, nullptr, false);
+  return output.assignMatrix(result, calculator, context, false);
 }
 
 bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output) {
@@ -358,6 +359,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
       calculator,
       leftPolynomialModular.content,
       rightPolynomialModular.content,
+      &leftPolynomialModular.context,
       output
     );
   }
@@ -370,7 +372,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     CalculatorConversions::functionPolynomial<Rational>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
-      calculator, inputs[0], inputs[1], output
+      calculator, inputs[0], inputs[1], nullptr, output
     );
   }
   Vector<Polynomial<AlgebraicNumber> > inputsAlgebraic;
@@ -382,7 +384,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(Calculator& calculator, cons
     CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
     return CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
-      calculator, inputs[0], inputs[1], output
+      calculator, inputs[0], inputs[1], nullptr, output
     );
   }
   return false;

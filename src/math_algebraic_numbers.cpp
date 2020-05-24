@@ -1055,7 +1055,7 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   return this->constructFromMinimalPolynomial(polyConverted, inputOwner, commentsOnFailure);
 }
 
-AlgebraicNumber AlgebraicNumber::one() {
+AlgebraicNumber AlgebraicNumber::one() const {
   AlgebraicNumber result;
   result.assignRational(1, *this->owner);
   return result;
@@ -1655,6 +1655,13 @@ void ElementZmodP::makeMinusOne(const LargeIntegerUnsigned& newModulo) {
   this->modulus = newModulo;
   this->value = newModulo;
   this->value --;
+}
+
+void ElementZmodP::negate() {
+  if (this->value.isEqualToZero()) {
+    return;
+  }
+  this->value = this->modulus - this->value;
 }
 
 void ElementZmodP::checkEqualModuli(const ElementZmodP& other) {

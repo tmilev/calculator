@@ -840,7 +840,7 @@ void RootSubalgebra::matrixToRelation(
         output.Betas.addOnTop(tempRoot);
         output.BetaCoeffs.addOnTop(matX.elements[i][0]);
       } else {
-        tempRoot.minus();
+        tempRoot.negate();
         output.Alphas.addOnTop(tempRoot);
         output.AlphaCoeffs.addOnTop(matX.elements[i][0]);
       }

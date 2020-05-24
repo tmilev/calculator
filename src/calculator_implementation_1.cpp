@@ -114,7 +114,7 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           tempRat.multiplyBy(MaxMovement);
           matX[BaseVariables.elements[i]] -= tempRat;
           tempRat.assign(tempMatA.elements[i][EnteringVariable]);
-          tempRat.minus();
+          tempRat.negate();
           tempMatA.addTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
         if (i == LeavingVariableRow) {

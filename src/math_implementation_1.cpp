@@ -26,7 +26,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     for (int i = 0; i < this->getRank(); i ++) {
       genWeight.makeEi(this->getRank(), i);
       if (theWeight.isPositive()) {
-        genWeight.minus();
+        genWeight.negate();
       }
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->theWeyl.isARoot(newWeight)) {

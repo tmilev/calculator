@@ -445,6 +445,16 @@ public:
 
   static bool innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
+
+  template<class Coefficient>
+  static bool functionDeterminant(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    Expression::FunctionAddress conversionFunction,
+    int maxiumDimension
+  );
+
   static bool innerDeterminant(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPrintGenVermaModule(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& calculator, const Expression& input, Expression& output);

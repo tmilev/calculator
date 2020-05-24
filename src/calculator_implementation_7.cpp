@@ -3741,7 +3741,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         if (j != NumFoundPivots) {
           if (!theMatrix.elements[j][i].isEqualToZero()) {
             tempElement = theMatrix.elements[j][i];
-            tempElement.minus();
+            tempElement.negate();
             theMatrix.addTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
@@ -3855,7 +3855,7 @@ bool Calculator::innerInvertMatrixVerbose(
         if (j != NumFoundPivots) {
           if (!mat.elements[j][i].isEqualToZero()) {
             tempElement = mat.elements[j][i];
-            tempElement.minus();
+            tempElement.negate();
             mat.addTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.addTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
@@ -7378,93 +7378,81 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& calculator, const
   return output.assignValue(out.str(), calculator);
 }
 
+template <class Coefficient>
+bool CalculatorFunctions::functionDeterminant(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  Expression::FunctionAddress conversionFunction,
+  int maxiumDimension
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionDeterminant");
+  Matrix<Coefficient> matrix;
+  ExpressionContext context;
+  if (!calculator.functionGetMatrix<Coefficient>(
+    input, matrix, &context, - 1, conversionFunction, &calculator.comments
+  )) {
+    return false;
+  }
+  if (matrix.numberOfRows == 0) {
+    calculator << "Matrix has zero rows: " << input.toString() << ".";
+    return output.makeError(
+      "Request to compute determinant of emptry matrix. ", calculator
+    );
+  }
+  if (matrix.numberOfRows != matrix.numberOfColumns) {
+    calculator << "Request to compute determinant of the non-square "
+    << matrix.numberOfRows << " by "
+    << matrix.numberOfColumns << " matrix: " << input.toString();
+    return output.makeError(
+      "Request to compute determinant of non-square matrix. ", calculator
+    );
+  }
+  if (matrix.numberOfRows > maxiumDimension) {
+    return calculator
+    << "<hr>Maximum dimension for "
+    << "determinant computation of the given type is "
+    << maxiumDimension << " by " << maxiumDimension
+    << ". Your matrix is " << matrix.numberOfRows
+    << " by " << matrix.numberOfColumns << ". "
+    << "The restrictions are set around file: "
+    << __FILE__ << ", line " << __LINE__ << ". ";
+  }
+  Coefficient result;
+  const Coefficient& sample = matrix(0, 0);
+  matrix.computeDeterminantOverwriteMatrix(result, sample.one(), sample.zero());
+  return output.assignValueWithContext(result, context, calculator);
+}
+
 bool CalculatorFunctions::innerDeterminant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDeterminant");
-  Matrix<Rational> matRat;
   if (input.size() != 2) {
     return false;
   }
   const Expression& argument = input[1];
-  if (calculator.functionGetMatrix(argument, matRat)) {
-    if (matRat.numberOfRows == matRat.numberOfColumns) {
-      if (matRat.numberOfRows > 100) {
-        return calculator << "<hr>I have been instructed not to compute "
-        << "determinants of rational matrices larger than 100 x 100 "
-        << ", and your matrix had " << matRat.numberOfRows << " rows. "
-        << "To lift the restriction "
-        << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
-      }
-      return output.assignValue(matRat.getDeterminant(), calculator);
-    } else {
-      calculator << "Requesting to compute determinant of the non-square "
-      << matRat.numberOfRows << " by "
-      << matRat.numberOfColumns << " matrix: " << argument.toString();
-      return output.makeError(
-        "Requesting to compute determinant of non-square matrix. ", calculator
-      );
-    }
-  }
-  Matrix<AlgebraicNumber> matAlg;
-  if (calculator.functionGetMatrix(argument, matAlg)) {
-    if (matAlg.numberOfRows == matAlg.numberOfColumns) {
-      if (matAlg.numberOfRows > 100) {
-        return calculator
-        << "<hr>I have been instructed not to compute determinants "
-        << "of algebraic number matrices larger than 100 x 100 "
-        << ", and your matrix had " << matAlg.numberOfRows
-        << " rows. " << "To lift the restriction "
-        << "edit function located in file "
-        << __FILE__ << ", line " << __LINE__ << ". ";
-      }
-      return output.assignValue(matAlg.getDeterminant(), calculator);
-    } else {
-      calculator << "Requesting to compute determinant of the non-square "
-      << matRat.numberOfRows << " by "
-      << matRat.numberOfColumns << " matrix: " << argument.toString();
-      return output.makeError(
-        "Requesting to compute determinant of non-square matrix. ",
-        calculator
-      );
-    }
-  }
-  Matrix<RationalFunction<Rational> > matRF;
-  ExpressionContext context(calculator);
-  if (!calculator.functionGetMatrix(
-      argument,
-      matRF,
-      &context,
-      - 1,
-      CalculatorConversions::functionRationalFunction
+  if (CalculatorFunctions::functionDeterminant<Rational>(
+    calculator, argument, output, nullptr, 100
   )) {
-    return calculator
-    << "<hr>I have been instructed to only compute "
-    << "determinants of matrices whose entries are "
-    << "rational functions or rationals, and "
-    << "I failed to convert your matrix to either type. "
-    << "If this is not how you expect this function to act, "
-    << "correct it: the code is located in "
-    << "file " << __FILE__ << ", line " << __LINE__ << ". ";
+    return true;
   }
-  if (matRF.numberOfRows != matRF.numberOfColumns) {
-    calculator << "Requesting to compute determinant of the non-square "
-    << matRat.numberOfRows << " by "
-    << matRat.numberOfColumns << " matrix: " << argument.toString();
-    return output.makeError(
-      "Requesting to compute determinant of non-square matrix given by: " + argument.toString(),
-      calculator
-    );
+  if (CalculatorFunctions::functionDeterminant<ElementZmodP>(
+    calculator, argument, output, nullptr, 100
+  )) {
+    return true;
   }
-  if (matRF.numberOfRows > 20) {
-    return calculator << "I have been instructed not to "
-    << "compute determinants of matrices of rational functions larger than "
-    << "20 x 20, and your matrix had " << matRF.numberOfRows
-    << " rows. To lift the restriction edit function located in file "
-    << __FILE__ << ", line " << __LINE__ << ". ";
+  if (CalculatorFunctions::functionDeterminant<AlgebraicNumber>(
+    calculator, argument, output, nullptr, 20
+  )) {
+    return true;
   }
-  RationalFunction<Rational> theDet = matRF.getDeterminant();
-  return output.assignValueWithContext(theDet, context, calculator);
+  if (CalculatorFunctions::functionDeterminant<RationalFunction<Rational> >(
+    calculator, argument, output, CalculatorConversions::functionRationalFunction, 10
+  )) {
+    return true;
+  }
+  return false;
 }
 
 bool CalculatorFunctions::innerDecomposeCharGenVerma(
@@ -8044,9 +8032,13 @@ bool CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearFor
     << "<hr>Failed to obtain highest weight from the third argument which is "
     << weightExpression.toString();
   }
-  if (!leftMerged.setContextAtLeastEqualTo(finalContext) || !rightMerged.setContextAtLeastEqualTo(finalContext)) {
+  if (
+    !leftMerged.setContextAtLeastEqualTo(finalContext, &calculator.comments) ||
+    !rightMerged.setContextAtLeastEqualTo(finalContext, &calculator.comments)
+  ) {
     return output.makeError(
-      "Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ",
+      "Failed to merge the contexts of the highest "
+      "weight and the elements of the Universal enveloping. ",
       calculator
     );
   }
@@ -9379,23 +9371,18 @@ public:
     std::stringstream out;
     if (this->flagUseFullTree) {
       std::string atomName;
-       global.comments << "DEBUG Here I am 0.";
        if (input.isOperation(&atomName)) {
-        global.comments << "DEBUG Here I am 1.";
         if (atomName != "...") {
           out << input.theData;
         } else {
           out << "...";
         }
       } else {
-       global.comments << "DEBUG Here I am 0.5.";
         out << input.toString();
       }
     } else {
-        global.comments << "DEBUG Here I am 2.";
       out << input.toString();
     }
-       global.comments << "DEBUG Here I am 3.";
     return out.str();
   }
   void ComputeCurrentEContributionToNextLayer() {

@@ -1489,8 +1489,8 @@ bool Expression::assignMatrixExpressions(
   Expression theMatType(owner);
   theMatType.addChildAtomOnTop(owner.opMatriX());
   this->addChildOnTop(theMatType);
-  enum mType{typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
-  mType outType = typeUnknown;
+  enum matrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
+  matrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
     currentRow.reset(owner);
@@ -1498,7 +1498,7 @@ bool Expression::assignMatrixExpressions(
     currentRow.addChildAtomOnTop(owner.opSequence());
     for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));
-      mType inType;
+      matrixType inType;
       if (input(i, j).isOfType<Rational>()) {
         inType = typeRat;
       } else if (input(i, j).isOfType<AlgebraicNumber>()) {

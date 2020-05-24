@@ -220,7 +220,7 @@ public:
     input.scalarEuclidean(normal, t);
     projectionDirection.scalarEuclidean(normal, tempRat);
     t /= tempRat;
-    t.minus();
+    t.negate();
     Vector<Coefficient>::vectorPlusVectorTimesScalar(input, projectionDirection, t, output);
   }
   static void vectorPlusVectorTimesScalar(
@@ -240,7 +240,7 @@ public:
       output.objects[i] += (tempRat);
     }
   }
-  void minus() {
+  void negate() {
     for (int i = 0; i < this->size; i ++) {
       this->objects[i] *= - 1;
     }
@@ -316,7 +316,7 @@ public:
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
     this->RootScalarEuclideanRoot(normal, point, this->objects[newDimension - 1]);
-    this->objects[newDimension - 1].minus();
+    this->objects[newDimension - 1].negate();
     for (int j = 0; j < newDimension - 1; j ++) {
       this->objects[j] = normal[j];
     }
@@ -589,7 +589,7 @@ void Vector<Coefficient>::scaleToFirstNonZeroCoordinatePositive() {
       return;
     }
     if ((*this)[i].isNegative()) {
-      this->minus();
+      this->negate();
       return;
     }
   }
@@ -923,7 +923,7 @@ class Vectors: public List<Vector<Coefficient> > {
       Vector<Rational> tempRoot;
       for (int i = 0; i < this->size; i ++) {
         tempRoot = this->objects[i];
-        tempRoot.minus();
+        tempRoot.negate();
         for (int j = i + 1; j < this->size; j ++) {
           if (this->objects[j].isEqualTo(tempRoot)) {
             return true;
@@ -1037,7 +1037,7 @@ bool Vector<Coefficient>::getCoordinatesInBasis(const Vectors<Coefficient>& inpu
   bufferMat /= tempCF;
   output.setSize(bufferMat.numberOfRows - 1);
   for (int i = 0; i < bufferMat.numberOfRows - 1; i ++) {
-    bufferMat(i, 0).minus();
+    bufferMat(i, 0).negate();
     output[i] = bufferMat(i, 0);
   }
   return true;
@@ -1252,7 +1252,7 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(Vector<Coefficient>& 
   this->affinePoint.makeZero(input.size);
   this->affinePoint.setSize(input.size - 1);
   this->affinePoint[tempI] = input[input.size - 1];
-  this->affinePoint[tempI].minus();
+  this->affinePoint[tempI].negate();
   this->affinePoint[tempI].divideBy(input[tempI]);
   this->normal = input;
   this->normal.setSize(input.size - 1);

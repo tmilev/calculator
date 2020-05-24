@@ -1106,7 +1106,7 @@ bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFunct
 
 template< >
 bool Expression::convertInternally<Rational>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_Rational");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
     output = *this;
@@ -1116,8 +1116,19 @@ bool Expression::convertInternally<Rational>(Expression& output) const {
 }
 
 template< >
+bool Expression::convertInternally<ElementZmodP>(Expression& output) const {
+  MacroRegisterFunctionWithName("convertInternally");
+  this->checkInitialization();
+  if (this->isOfType<ElementZmodP>()) {
+    output = *this;
+    return true;
+  }
+  return false;
+}
+
+template< >
 bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<AlgebraicNumber>()) {
     output = *this;
@@ -1133,7 +1144,7 @@ bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
 
 template< >
 bool Expression::convertInternally<double>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_double");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<double>()) {
     output = *this;

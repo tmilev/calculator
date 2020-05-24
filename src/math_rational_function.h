@@ -146,7 +146,7 @@ public:
   void operator/=(int other);
   void operator/=(const Polynomial<Coefficient>& other);
   void operator/=(const RationalFunction<Coefficient>& other);
-  void minus();
+  void negate();
   class Test {
   public:
     static bool all();

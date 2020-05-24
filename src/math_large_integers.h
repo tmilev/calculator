@@ -303,7 +303,7 @@ public:
   inline void operator*=(int x) {
     this->multiplyByInt(x);
   }
-  inline void minus() {
+  void negate() {
     if (!this->isEqualToZero()) {
       this->sign *= - 1;
     }
@@ -318,10 +318,10 @@ public:
   inline bool operator!=(const LargeInteger& other) const {
     return !(*this == other);
   }
-  inline void operator-=(const LargeInteger& other) {
-    this->minus();
+  void operator-=(const LargeInteger& other) {
+    this->negate();
     *this += (other);
-    this->minus();
+    this->negate();
   }
   inline bool operator<=(const LargeInteger& other) const {
     return !(other<*this);
@@ -666,7 +666,7 @@ public:
   }
   void simplify();
   void invert();
-  void minus() {
+  void negate() {
     if (this->extended == nullptr) {
       this->numeratorShort *= - 1;
     } else {
@@ -695,7 +695,7 @@ public:
   void drawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
-      this->minus();
+      this->negate();
     }
   }
   static long long int totalAdditions() {

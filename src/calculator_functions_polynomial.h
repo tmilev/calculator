@@ -26,6 +26,7 @@ public:
     Calculator& calculator,
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
+    ExpressionContext* context,
     Expression& output
   );
 };

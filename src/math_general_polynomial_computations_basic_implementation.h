@@ -395,6 +395,7 @@ bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
 template <class Coefficient>
 void Polynomial<Coefficient>::fillSylvesterMatrix(
   const Polynomial<Coefficient>& polynomial,
+  int otherPower,
   int columnOffset,
   Matrix<Coefficient>& output
 ) {
@@ -402,7 +403,7 @@ void Polynomial<Coefficient>::fillSylvesterMatrix(
   for (int i = 0; i < polynomial.size(); i ++) {
     int power = polynomial.monomials[i].totalDegreeInt();
     const Coefficient& coefficient = polynomial.coefficients[i];
-    for (int j = 0; j < totalPower + 1; j ++) {
+    for (int j = 0; j < otherPower; j ++) {
       int row = totalPower - power + j;
       int column = j + columnOffset;
       output(row, column) = coefficient;
@@ -442,7 +443,15 @@ bool Polynomial<Coefficient>::sylvesterMatrix(
     return false;
   }
   int maximumDimension = 1000;
-  int dimension = leftPower + rightPower + 2;
+  int dimension = leftPower + rightPower;
+  if (dimension == 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The calculator does not allow empty (0x0) "
+      << "Sylvester matrix.";
+    }
+    return false;
+  }
   if (dimension > maximumDimension) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The sylvester matrix is too large: "
@@ -454,8 +463,8 @@ bool Polynomial<Coefficient>::sylvesterMatrix(
   }
   output.initialize(dimension, dimension);
   output.makeZero(left.coefficients[0].zero());
-  Polynomial<Coefficient>::fillSylvesterMatrix(left, 0, output);
-  Polynomial<Coefficient>::fillSylvesterMatrix(right, leftPower + 1, output);
+  Polynomial<Coefficient>::fillSylvesterMatrix(left, rightPower, 0, output);
+  Polynomial<Coefficient>::fillSylvesterMatrix(right, leftPower, rightPower, output);
   return true;
 }
 

@@ -292,7 +292,13 @@ public:
       (*this)[i] = 0;
     }
   }
-  int GetNumNonZeroCoords() const {
+  void makeZero(int theDim, const Coefficient& zeroCoefficient) {
+    this->setSize(theDim);
+    for (int i = 0; i < theDim; i ++) {
+      (*this)[i] = zeroCoefficient;
+    }
+  }
+  int getNumberOfNonZeroCoordinates() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
       if (!this->objects[i].isEqualToZero()) {

@@ -1597,11 +1597,56 @@ ElementZmodP ElementZmodP::one() const {
   return result;
 }
 
+void ElementZmodP::convertPolynomialModularToPolynomialIntegral(
+  const Polynomial<ElementZmodP>& input, Polynomial<Rational>& output, bool useNegatives
+) {
+  MacroRegisterFunctionWithName("ElementZmodP::convertPolynomialModularToPolynomialIntegral");
+  output.makeZero();
+  if (input.size() == 0) {
+    return;
+  }
+  Rational modulusDividedByTwo = input.coefficients[0].modulus;
+  modulusDividedByTwo /= 2;
+  for (int i = 0; i < input.size(); i ++) {
+    Rational coefficient = input.coefficients[i].value;
+    if (useNegatives) {
+      if (coefficient > modulusDividedByTwo) {
+        coefficient.negate();
+      }
+    }
+    output.addMonomial(input[i], coefficient);
+  }
+}
+
+void ElementZmodP::convertLiftPolynomialModular(
+  const Polynomial<ElementZmodP>& input,
+  Polynomial<ElementZmodP>& output,
+  const LargeIntegerUnsigned& newModulus
+) {
+  MacroRegisterFunctionWithName("ElementZmodP::convertLiftPolynomialModular");
+  if (&input == &output) {
+    Polynomial<ElementZmodP> inputCopy = input;
+    ElementZmodP::convertLiftPolynomialModular(inputCopy, output, newModulus);
+    return;
+  }
+  output.makeZero();
+  if (input.size() == 0) {
+    return;
+  }
+  for (int i = 0; i < input.size(); i ++) {
+    ElementZmodP coefficient;
+    coefficient.modulus = newModulus;
+    coefficient = input.coefficients[i].value;
+    output.addMonomial(input[i], coefficient);
+  }
+}
+
 void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   const Polynomial<Rational>& input,
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulo
 ) {
+  MacroRegisterFunctionWithName("ElementZmodP::convertModuloIntegerAfterScalingToIntegral");
   Polynomial<Rational> rescaled;
   rescaled = input;
   rescaled.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());

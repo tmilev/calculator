@@ -3271,7 +3271,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
 bool NilradicalCandidate::tryFindingLInfiniteRelations() {
   MacroRegisterFunctionWithName("NilradicalCandidate::tryFindingLInfiniteRelations");
   //Vector<Rational> theNilradLinCombi = this->getNilradicalLinearCombination();
-  //if (theNilradLinCombi.GetNumNonZeroCoords() == 1)
+  //if (theNilradLinCombi.getNumberOfNonZeroCoordinates() == 1)
   //  return true;
 //  Vectors<Rational> curentNilradicalCone;
   Vector<Rational> betterIntersection;

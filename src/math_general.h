@@ -1485,17 +1485,24 @@ GlobalStatistics::globalPointerCounter -= this->actualNumberOfRows * this->actua
 
 template <typename Coefficient>
 bool Matrix<Coefficient>::invert() {
+  MacroRegisterFunctionWithName("Matrix::invert");
   if (this->numberOfColumns != this->numberOfRows) {
-    global.fatal << "This is a programming error: requesting to invert a non-square matrix of "
+    global.fatal << "Request to invert a non-square matrix of "
     << this->numberOfRows << " rows and "
     << this->numberOfColumns << " columns. " << global.fatal;
   }
-  MacroRegisterFunctionWithName("Matrix::invert");
+  if (this->numberOfColumns == 0) {
+    global.fatal << "0 by 0 matrix inversion is not allowed. " << global.fatal;
+  }
   Matrix theInverse;
-  theInverse.makeIdentityMatrix(this->numberOfRows);
-  Selection NonPivotCols;
-  this->gaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
-  if (NonPivotCols.cardinalitySelection != 0) {
+  theInverse.makeIdentityMatrix(
+    this->numberOfRows,
+    (*this)(0, 0).one(),
+    (*this)(0, 0).zero()
+  );
+  Selection nonPivotColumns;
+  this->gaussianEliminationByRows(&theInverse, &nonPivotColumns, 0);
+  if (nonPivotColumns.cardinalitySelection != 0) {
     return false;
   }
   *this = theInverse;
@@ -2045,10 +2052,10 @@ public:
     return result;
   }
   void addMonomial(
-    const templateMonomial& inputMon, const Coefficient& inputCoeff
+    const templateMonomial& monomial, const Coefficient& coefficient
   ) {
     this->cleanupMonomialIndex(
-      this->addMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff)
+      this->addMonomialNoCoefficientCleanUpReturnIndex(monomial, coefficient)
     );
   }
   void getMinimalMonomial(templateMonomial& outputMon, Coefficient& outputCF) const {

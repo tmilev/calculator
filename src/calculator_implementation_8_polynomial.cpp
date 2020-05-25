@@ -283,6 +283,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
 bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
   if (!calculator.convert(
     input, CalculatorConversions::innerPolynomial<Rational>, polynomial
@@ -296,12 +297,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFields(
     );
   }
   PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorization;
+  std::stringstream comments;
   if (!factorization.factor(
     polynomial.content,
-    &calculator.comments,
-    &calculator.comments
+    &comments,
+    &comments
   )) {
-    return false;
+    return output.assignValue(comments.str(), calculator);
   }
   List<Expression> resultSequence;
   Expression constantFactor;

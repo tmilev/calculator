@@ -579,11 +579,14 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   if (!factorizationModular.factor(this->modularization, comments, commentsOnFailure)) {
     return false;
   }
+  this->factorsOverPrime = factorizationModular.reduced;
   this->format.flagSuppressModP = true;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "DEBUG Factorization mod " << this->oneModular.modulus.toString()
     << ": " << factorizationModular.toStringResult(&this->format);
   }
+  this->computeCoefficientBounds();
+  this->henselLift(comments);
   return false;
 }
 
@@ -615,17 +618,96 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
   this->coefficientBound.raiseToPower(this->degree);
   this->coefficientBound *= this->largestCoefficient;
   this->coefficientBound *= MathRoutines::nChooseK(this->degree, this->degree / 2);
-  this->henselLift();
 }
 
-void PolynomialFactorizationFiniteFields::henselLift() {
+void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLift");
-  LargeIntegerUnsigned currentPower;
-  currentPower = this->oneModular.modulus;
+  SylvesterMatrix<ElementZmodP>::sylvesterMatrixProduct(this->factorsOverPrime, this->sylvesterMatrix, comments);
 
-  while (currentPower < this->coefficientBound) {
-
-
+  if (comments != nullptr) {
+    *comments << "Sylvester matrix: " << this->sylvesterMatrix.toString(&this->format);
   }
+  this->sylvesterMatrixInverted = this->sylvesterMatrix;
+  bool mustBeTrue = this->sylvesterMatrixInverted.invert();
+  if (!mustBeTrue) {
+    global.fatal << "Sylvester product matrix is supposed to be invertible. " << global.fatal;
+  }
+  this->factorsLifted = this->factorsOverPrime;
+  this->productLifted = this->modularization;
+  LargeIntegerUnsigned currentModulus;
+  currentModulus = this->oneModular.modulus;
+  while (currentModulus < this->coefficientBound) {
+    LargeIntegerUnsigned oldModulus = currentModulus;
+    currentModulus *= this->oneModular.modulus;
+    this->henselLiftOnce(currentModulus, oldModulus, comments);
+  }
+}
 
+void PolynomialFactorizationFiniteFields::henselLiftOnce(
+  const LargeIntegerUnsigned& newModulus,
+  const LargeIntegerUnsigned& oldModulus,
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLiftOnce");
+  for (int i = 0; i < this->factorsLifted.size; i ++) {
+    ElementZmodP::convertLiftPolynomialModular(
+      this->factorsLifted[i], this->factorsLifted[i], newModulus
+    );
+  }
+  if (comments != nullptr) {
+    *comments << "Lifted factors without correction: "
+    << this->factorsLifted.toStringCommaDelimited(&this->format);
+  }
+  ElementZmodP::convertLiftPolynomialModular(this->productLifted, this->productLifted, newModulus);
+  Polynomial<ElementZmodP> newProduct;
+  ElementZmodP one;
+  one.makeOne(newModulus);
+  newProduct.makeConstant(one);
+  for (int i = 0; i < this->factorsLifted.size; i ++) {
+    newProduct *= this->factorsLifted[i];
+  }
+  if (comments != nullptr) {
+    *comments << "Lifted product without correction: "
+    << newProduct.toString(&this->format);
+  }
+  newProduct -= this->productLifted;
+  if (comments != nullptr) {
+    *comments << "To be corrected: " << newProduct.toString(&this->format);
+  }
+  Vector<ElementZmodP> coefficientsCorrection;
+  coefficientsCorrection.makeZero(
+    this->sylvesterMatrixInverted.numberOfColumns,
+    this->oneModular.zero()
+  );
+  for (int i = 0; i < newProduct.size(); i ++) {
+    int index = newProduct.monomials[i].totalDegreeInt();
+    coefficientsCorrection[index].value =
+    newProduct.coefficients[i].value / oldModulus;
+  }
+  this->sylvesterMatrixInverted.actOnVectorColumn(
+    coefficientsCorrection, this->oneModular.zero()
+  );
+  int offset = 0;
+  for (int i = 0; i < this->factorsLifted.size; i ++) {
+    int totalDegreeCurrentFactor = this->factorsLifted[i].totalDegreeInt();
+    for (int j = 0; j < totalDegreeCurrentFactor; j ++) {
+      ElementZmodP incoming;
+      incoming.modulus = newModulus;
+      incoming.value = coefficientsCorrection[offset + j].value * oldModulus;
+      this->factorsLifted[i].addMonomial(MonomialP(0, j), incoming);
+    }
+    offset += totalDegreeCurrentFactor;
+  }
+  if (comments != nullptr) {
+    *comments << "Lifted factors, modulus: " << newModulus << ": "
+    << this->factorsLifted.toStringCommaDelimited(&this->format);
+  }
+  this->productLifted.makeConstant(one);
+  for (int i = 0; i < this->factorsLifted.size; i ++) {
+    this->productLifted *= this->factorsLifted[i];
+  }
+  if (comments != nullptr) {
+    *comments << "Lifted product, corrected, modulus: " << newModulus << ": "
+    << this->productLifted.toString(&this->format);
+  }
 }

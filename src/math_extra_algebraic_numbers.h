@@ -341,6 +341,18 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
+  static void convertPolynomialModularToPolynomialIntegral(
+    const Polynomial<ElementZmodP>& input,
+    Polynomial<Rational>& output,
+    bool useNegatives
+  );
+  // Convert modular polynomial to another modular polynomial by copying all values
+  // using the new modulus.
+  static void convertLiftPolynomialModular(
+    const Polynomial<ElementZmodP>& input,
+    Polynomial<ElementZmodP>& output,
+    const LargeIntegerUnsigned& newModulus
+  );
   // Format a polynomial with modular coefficients.
   // The modulo information will not be repeated for all coefficients, but will be put
   // at the end of the expression.
@@ -403,10 +415,17 @@ public:
   LargeInteger coefficientBound;
   int degree;
   FormatExpressions format;
-  List<Polynomial<ElementZmodP> > currentFactorization;
+  List<Polynomial<ElementZmodP> > factorsOverPrime;
+  List<Polynomial<ElementZmodP> > factorsLifted;
+  Polynomial<ElementZmodP> productLifted;
   Matrix<ElementZmodP> sylvesterMatrix;
-  void henselLift();
-  void henselLiftOnce();
+  Matrix<ElementZmodP> sylvesterMatrixInverted;
+  void henselLift(std::stringstream* comments);
+  void henselLiftOnce(
+    const LargeIntegerUnsigned& newModulus,
+    const LargeIntegerUnsigned& oldModulus,
+    std::stringstream* comments
+  );
   bool oneFactor(
     std::stringstream* comments,
     std::stringstream* commentsOnFailure

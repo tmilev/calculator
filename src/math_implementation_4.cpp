@@ -625,7 +625,7 @@ FormatExpressions::getMonomialOrder<Weight<Rational> >() {
 }
 
 void DynkinDiagramRootSubalgebra::swapDynkinStrings(int i, int j) {
-  this->SimpleComponentTypes.swapTwoIndices(i, j);
+  this->simpleComponentTypes.swapTwoIndices(i, j);
   this->SimpleBasesConnectedComponents.swapTwoIndices(i, j);
   this->indicesThreeNodes.swapTwoIndices(i, j);
   this->indicesEnds.swapTwoIndices(i, j);
@@ -640,7 +640,7 @@ void DynkinDiagramRootSubalgebra::sort() {
         tempBool = true;
       }
       if (this->SimpleBasesConnectedComponents[i].size == this->SimpleBasesConnectedComponents[j].size) {
-        tempBool = ((this->SimpleComponentTypes[i]) < (this->SimpleComponentTypes[j]));
+        tempBool = ((this->simpleComponentTypes[i]) < (this->simpleComponentTypes[j]));
       }
       if (tempBool) {
         this->swapDynkinStrings(i, j);
@@ -653,10 +653,10 @@ void DynkinDiagramRootSubalgebra::sort() {
   this->sameTypeComponents.reserve(this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    if (!(this->SimpleComponentTypes[i] == tempType)) {
+    if (!(this->simpleComponentTypes[i] == tempType)) {
       this->sameTypeComponents.setSize(this->sameTypeComponents.size + 1);
       this->sameTypeComponents.lastObject()->size = 0;
-      tempType = this->SimpleComponentTypes[i];
+      tempType = this->simpleComponentTypes[i];
     }
     this->sameTypeComponents.lastObject()->addOnTop(i);
     this->indexUniComponent[i] = this->sameTypeComponents.size - 1;
@@ -698,7 +698,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
   }
-  DynkinSimpleType& outputType = this->SimpleComponentTypes[indexComponent];
+  DynkinSimpleType& outputType = this->simpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds = this->indicesEnds[indexComponent];
   if (currentComponent.size < 1) {
@@ -846,8 +846,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
 std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) const {
   DynkinType theType;
   theType.makeZero();
-  for (int j = 0; j < this->SimpleComponentTypes.size; j ++) {
-    theType.addMonomial(this->SimpleComponentTypes[j], 1);
+  for (int j = 0; j < this->simpleComponentTypes.size; j ++) {
+    theType.addMonomial(this->simpleComponentTypes[j], 1);
   }
   return theType.toString(theFormat);
 }
@@ -924,22 +924,22 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& rig
   if (this->rankTotal() < right.rankTotal()) {
     return false;
   }
-  if (this->SimpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
+  if (this->simpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
     global.fatal
     << "Simple component types do "
     << "not match number of connected components. " << global.fatal;
   }
-  for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
+  for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
     if (this->SimpleBasesConnectedComponents[i].size > right.SimpleBasesConnectedComponents[i].size) {
       return true;
     }
     if (right.SimpleBasesConnectedComponents[i].size > this->SimpleBasesConnectedComponents[i].size) {
       return false;
     }
-    if (this->SimpleComponentTypes[i] > right.SimpleComponentTypes[i]) {
+    if (this->simpleComponentTypes[i] > right.simpleComponentTypes[i]) {
       return true;
     }
-    if (right.SimpleComponentTypes[i] > this->SimpleComponentTypes[i]) {
+    if (right.simpleComponentTypes[i] > this->simpleComponentTypes[i]) {
       return false;
     }
   }
@@ -950,7 +950,7 @@ Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     output *= WeylGroupData::sizeByFormulaOrNegative1(
-      this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank
+      this->simpleComponentTypes[i].theLetter, this->simpleComponentTypes[i].theRank
     );
   }
   return output;
@@ -1000,7 +1000,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
 void DynkinDiagramRootSubalgebra::computeDynkinStrings() {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinStrings");
   this->indicesThreeNodes.setSize(this->SimpleBasesConnectedComponents.size);
-  this->SimpleComponentTypes.setSize(this->SimpleBasesConnectedComponents.size);
+  this->simpleComponentTypes.setSize(this->SimpleBasesConnectedComponents.size);
   this->indicesEnds.setSize(this->SimpleBasesConnectedComponents.size);
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     this->computeDynkinString(i);
@@ -1014,7 +1014,7 @@ bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& 
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     bool tempBool =
       ((this->SimpleBasesConnectedComponents[i].size == right.SimpleBasesConnectedComponents[i].size) &&
-      (this->SimpleComponentTypes[i] == right.SimpleComponentTypes[i]));
+      (this->simpleComponentTypes[i] == right.simpleComponentTypes[i]));
     if (!tempBool) {
       return false;
     }
@@ -1024,15 +1024,15 @@ bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& 
 
 void DynkinDiagramRootSubalgebra::getDynkinType(DynkinType& output) const {
   output.makeZero();
-  output.setExpectedSize(this->SimpleComponentTypes.size);
-  for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
-    output.addMonomial(this->SimpleComponentTypes[i], 1);
+  output.setExpectedSize(this->simpleComponentTypes.size);
+  for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
+    output.addMonomial(this->simpleComponentTypes[i], 1);
   }
 }
 
 void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int index) {
   Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[index];
-  DynkinSimpleType& currentStrinG = this->SimpleComponentTypes[index];
+  DynkinSimpleType& currentStrinG = this->simpleComponentTypes[index];
   List<int> thePermutation;
   thePermutation.setSize(currentComponent.size);
   output.size = 0;
@@ -1099,21 +1099,21 @@ int DynkinDiagramRootSubalgebra::rankTotal() {
 
 int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   int result = 0;
-  if (this->SimpleBasesConnectedComponents.size != this->SimpleComponentTypes.size) {
+  if (this->SimpleBasesConnectedComponents.size != this->simpleComponentTypes.size) {
     global.fatal << "Number of simple connected components does not match the number of types. " << global.fatal;
   }
-  for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
+  for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
     int Rank = this->SimpleBasesConnectedComponents[i].size;
-    if (this->SimpleComponentTypes[i].theLetter == 'A') {
+    if (this->simpleComponentTypes[i].theLetter == 'A') {
       result += Rank * (Rank + 1);
     }
-    if (this->SimpleComponentTypes[i].theLetter == 'B' || this->SimpleComponentTypes[i].theLetter == 'C') {
+    if (this->simpleComponentTypes[i].theLetter == 'B' || this->simpleComponentTypes[i].theLetter == 'C') {
       result += Rank * Rank * 2;
     }
-    if (this->SimpleComponentTypes[i].theLetter == 'D') {
+    if (this->simpleComponentTypes[i].theLetter == 'D') {
       result += Rank * (Rank - 1) * 2;
     }
-    if (this->SimpleComponentTypes[i].theLetter == 'E') {
+    if (this->simpleComponentTypes[i].theLetter == 'E') {
       if (Rank == 6) {
         result += 72;
       }
@@ -1124,10 +1124,10 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
         result += 240;
       }
     }
-    if (this->SimpleComponentTypes[i].theLetter == 'F') {
+    if (this->simpleComponentTypes[i].theLetter == 'F') {
       result += 48;
     }
-    if (this->SimpleComponentTypes[i].theLetter == 'G') {
+    if (this->simpleComponentTypes[i].theLetter == 'G') {
       result += 12;
     }
   }

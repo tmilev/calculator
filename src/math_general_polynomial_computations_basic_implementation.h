@@ -226,9 +226,9 @@ void Polynomial<Coefficient>::makeDegreeOne(
 }
 
 template <class Coefficient>
-Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input) {
+Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, const Coefficient& zero) {
   MacroRegisterFunctionWithName("Polynomial::evaluate");
-  Coefficient output = 0;
+  Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMon = (*this)[i];
     Coefficient accum = this->coefficients[i];
@@ -251,7 +251,7 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input) 
         numCycles = - numCycles;
       }
       tempElt = input[j];
-      MathRoutines::raiseToPower(tempElt, numCycles, static_cast<Coefficient>(1));
+      MathRoutines::raiseToPower(tempElt, numCycles, zero.one());
       if (!isPositive) {
         tempElt.invert();
       }

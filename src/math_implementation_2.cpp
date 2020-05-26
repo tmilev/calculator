@@ -462,6 +462,10 @@ bool LargeIntegerUnsigned::operator<(int other) const {
   return *this < tempUI;
 }
 
+bool LargeIntegerUnsigned::operator<=(int other) const {
+  return !(*this > other);
+}
+
 bool LargeIntegerUnsigned::operator>(int other) const {
   if (other < 0) {
     return true;

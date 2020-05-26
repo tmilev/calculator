@@ -128,6 +128,49 @@ bool PolynomialFactorizationCantorZassenhaus::divisorFromCandidate(
   return true;
 }
 
+bool PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor(
+  Polynomial<ElementZmodP>& input
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor");
+  int linearTermsToTry = 500;
+  if (this->one.modulus < linearTermsToTry) {
+    this->one.modulus.isIntegerFittingInInt(&linearTermsToTry);
+  }
+  global.comments << "DEBUG: terms to try: " << linearTermsToTry << "<br>";
+  List<ElementZmodP> foundRoots;
+  Vector<ElementZmodP> rootCandidate;
+  rootCandidate.addOnTop(this->one);
+  for (int i = 0; i < linearTermsToTry; i ++) {
+    rootCandidate[0].value = static_cast<unsigned>(i);
+    ElementZmodP value = input.evaluate(rootCandidate, this->one.zero());
+    if (value.isEqualToZero()) {
+      foundRoots.addOnTop(rootCandidate[0]);
+    }
+  }
+  if (foundRoots.size == 0) {
+    if (this->one.modulus <= linearTermsToTry) {
+      // No linear factors; the current factor is irreducible
+      // as it is of prime degree and all of its sub-factors
+      // are of equal degree.
+      return this->output->accountReducedFactor(input, true);
+    }
+    // It is possible that the current factor has
+    // linear factors we haven't checked for.
+    return false;
+  }
+  for (int i = 0; i < foundRoots.size; i ++) {
+    Polynomial<ElementZmodP> linearFactor;
+    linearFactor.makeMonomial(0, 1, this->one);
+    linearFactor -= foundRoots[i];
+  global.comments << "DEBUG: Account factor: " << linearFactor.toString() << "<br>";
+    this->output->accountReducedFactor(linearFactor, false);
+  }
+  if (this->current.totalDegree() > 0) {
+  global.comments << "DEBUG: Account factor: " << this->current.toString() << "<br>";
+    this->output->accountNonReducedFactor(this->current);
+  }
+  return true;
+}
 
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   std::stringstream* comments,
@@ -147,18 +190,22 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
     *comments << "<br>All divisors of " << this->current.toString(&this->output->format)
     << " are of equal degree. ";
   }
+  if (this->current.totalDegree().getNumerator().value.isPossiblyPrime(0, true, comments)) {
+    if (this->handlePrimeDegreeSeparatedFactor(this->current)) {
+      return true;
+    }
+  }
   if (
-    this->current.totalDegree().getNumerator().value.isPossiblyPrime(0, true, comments) ||
     this->current.totalDegree() == 1
   ) {
-    return this->output->accountReducedFactor(this->current);
+    return this->output->accountReducedFactor(this->current, true);
   }
   int maximumDivisors = 10;
   if (this->one.modulus < maximumDivisors) {
     this->one.modulus.isIntegerFittingInInt(&maximumDivisors);
   }
   ProgressReport report;
-  for (int i = 0; i < maximumDivisors; i ++) {
+  for (unsigned i = 0; i < static_cast<unsigned>(maximumDivisors); i ++) {
     std::stringstream reportStream;
     reportStream << "Looking for factors round " << i + 1 << " out of " << maximumDivisors;
     report.report(reportStream.str());
@@ -166,14 +213,15 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
       return true;
     }
   }
-  return this->output->accountReducedFactor(this->current);
+  return this->output->accountReducedFactor(this->current, true);
 }
 
 bool PolynomialFactorizationCantorZassenhaus::oneFactorProbabilityHalf(
-  int constant,
+  unsigned int constant,
   std::stringstream *comments,
   std::stringstream *commentsOnFailure
 ) {
+  (void) commentsOnFailure;
   LargeIntegerUnsigned modulus = this->one.modulus;
   int degree = this->current.totalDegreeInt();
   PolynomialModuloPolynomial<ElementZmodP> startingPolynomial;
@@ -350,7 +398,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     if (theValuesAtPoints[i].isEqualToZero()) {
       Polynomial<Rational> incomingFactor;
       incomingFactor.makeDegreeOne(1, 0, 1, - theArgument[0]);
-      this->output->accountReducedFactor(incomingFactor);
+      this->output->accountReducedFactor(incomingFactor, true);
       return true;
     }
     if (i > degreeLeft) {
@@ -441,7 +489,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       return true;
     }
   } while (divisorSelection.incrementReturnFalseIfPastLast());
-  return this->output->accountReducedFactor(this->current);
+  return this->output->accountReducedFactor(this->current, true);
 }
 
 bool PolynomialFactorizationKronecker::solvePolynomial(
@@ -548,11 +596,11 @@ bool PolynomialFactorizationFiniteFields::oneFactor(
   unsigned int maximumPrimeToTry = 10000;
   List<unsigned int> primeFactors;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(maximumPrimeToTry, primeFactors);
-  LargeIntegerUnsigned leadingCoefficient = this->current.getLeadingCoefficient(
+  this->leadingCoefficient = this->current.getLeadingCoefficient(
     &MonomialP::orderDefault()
-  ).getNumerator().value;
+  ).getNumerator();
   for (int i = 1; i < primeFactors.size; i ++) {
-    if (leadingCoefficient % primeFactors[i] == 0) {
+    if (this->leadingCoefficient.value % primeFactors[i] == 0) {
       // Leading coefficient is divisible by prime.
       continue;
     }
@@ -633,7 +681,6 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
     global.fatal << "Sylvester product matrix is supposed to be invertible. " << global.fatal;
   }
   this->factorsLifted = this->factorsOverPrime;
-  this->productLifted = this->modularization;
   LargeIntegerUnsigned currentModulus;
   currentModulus = this->oneModular.modulus;
   while (currentModulus < this->coefficientBound) {
@@ -641,6 +688,7 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
     currentModulus *= this->oneModular.modulus;
     this->henselLiftOnce(currentModulus, oldModulus, comments);
   }
+  List<Polynomial<Rational> > liftedOverIntegers;
 }
 
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
@@ -655,10 +703,14 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     );
   }
   if (comments != nullptr) {
-    *comments << "Lifted factors without correction: "
+    *comments << "<hr>"
+    << "Modulus: " << newModulus << ". "
+    << "Lifted factors without correction: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
+
   }
-  ElementZmodP::convertLiftPolynomialModular(this->productLifted, this->productLifted, newModulus);
+  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(this->current, this->desiredLift, newModulus);
+  ElementZmodP scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
   one.makeOne(newModulus);
@@ -667,47 +719,70 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     newProduct *= this->factorsLifted[i];
   }
   if (comments != nullptr) {
-    *comments << "Lifted product without correction: "
+    *comments << "<br>Lifted product without correction: "
     << newProduct.toString(&this->format);
   }
-  newProduct -= this->productLifted;
+  newProduct -= this->desiredLift;
   if (comments != nullptr) {
-    *comments << "To be corrected: " << newProduct.toString(&this->format);
+    *comments << "<br>Desired lift: " << desiredLift.toString(&this->format);
+    *comments << "<br>To be corrected: " << newProduct.toString(&this->format);
   }
   Vector<ElementZmodP> coefficientsCorrection;
   coefficientsCorrection.makeZero(
     this->sylvesterMatrixInverted.numberOfColumns,
     this->oneModular.zero()
   );
+  ElementZmodP minusOne;
+  minusOne.makeMinusOne(this->oneModular.modulus);
   for (int i = 0; i < newProduct.size(); i ++) {
-    int index = newProduct.monomials[i].totalDegreeInt();
+    int index =
+    this->sylvesterMatrixInverted.numberOfColumns -
+    newProduct.monomials[i].totalDegreeInt() - 1;
     coefficientsCorrection[index].value =
     newProduct.coefficients[i].value / oldModulus;
+    coefficientsCorrection[index] *= minusOne;
+  }
+  if (comments != nullptr) {
+    *comments << "<br>Z-vector: " << coefficientsCorrection.toString(&this->format);
   }
   this->sylvesterMatrixInverted.actOnVectorColumn(
     coefficientsCorrection, this->oneModular.zero()
   );
+  if (comments != nullptr) {
+    *comments << "<br>solution vector: " << coefficientsCorrection.toString(&this->format);
+  }
   int offset = 0;
   for (int i = 0; i < this->factorsLifted.size; i ++) {
-    int totalDegreeCurrentFactor = this->factorsLifted[i].totalDegreeInt();
-    for (int j = 0; j < totalDegreeCurrentFactor; j ++) {
+    int summandsCurrentFactor =
+    this->factorsLifted[i].totalDegreeInt();
+    for (int j = 0; j < summandsCurrentFactor; j ++) {
       ElementZmodP incoming;
       incoming.modulus = newModulus;
-      incoming.value = coefficientsCorrection[offset + j].value * oldModulus;
+      int index = offset + summandsCurrentFactor - 1 - j;
+      incoming.value = coefficientsCorrection[index].value * oldModulus;
       this->factorsLifted[i].addMonomial(MonomialP(0, j), incoming);
     }
-    offset += totalDegreeCurrentFactor;
+    offset += summandsCurrentFactor;
   }
   if (comments != nullptr) {
-    *comments << "Lifted factors, modulus: " << newModulus << ": "
+    *comments << "<br>Lifted factors, modulus: " << newModulus << ": "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
   }
-  this->productLifted.makeConstant(one);
+  Polynomial<ElementZmodP> productLift;
+  productLift.makeConstant(one);
   for (int i = 0; i < this->factorsLifted.size; i ++) {
-    this->productLifted *= this->factorsLifted[i];
+    productLift *= this->factorsLifted[i];
   }
   if (comments != nullptr) {
-    *comments << "Lifted product, corrected, modulus: " << newModulus << ": "
-    << this->productLifted.toString(&this->format);
+    *comments << "<br>Lifted product, corrected, before rescaling: "
+    << productLift.toString(&this->format);
+  }
+  productLift /= scaleProductLift;
+  if (comments != nullptr) {
+    *comments << "<br>Lifted product, corrected: " << newModulus << ": "
+    << productLift.toString(&this->format);
+    Polynomial<Rational> negativesIncluded;
+    ElementZmodP::convertPolynomialModularToPolynomialIntegral(productLift, negativesIncluded, true);
+    *comments << "<br>Lifted product, over Z: " << negativesIncluded.toString(&this->format) << "<hr>";
   }
 }

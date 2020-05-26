@@ -3981,7 +3981,7 @@ void ConeRelation::relationOneSideToString(
     for (int j = 0; j < kComponents[i].size; j ++) {
       int index = kComponents[i][j];
       int indexUniComponent = owner.theDynkinDiagram.indexUniComponent[index];
-      out << owner.theDynkinDiagram.SimpleComponentTypes[index].toString();
+      out << owner.theDynkinDiagram.simpleComponentTypes[index].toString();
       if (TakenIndices[index] == - 1) {
         NumPrimesUniTypicComponent[indexUniComponent] ++;
         TakenIndices[index] = NumPrimesUniTypicComponent[indexUniComponent];
@@ -4134,7 +4134,7 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
   if (this->theDiagram.toString() == "F^{1}_4") {
     return false;
   }
-  if (this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' && this->theDiagram.SimpleComponentTypes[0].theRank == 1) {
+  if (this->theDiagram.simpleComponentTypes[0].theLetter == 'A' && this->theDiagram.simpleComponentTypes[0].theRank == 1) {
    //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
@@ -4181,8 +4181,8 @@ void ConeRelation::makeLookCivilized(RootSubalgebra& owner) {
   tempRoots.addListOnTop(this->Betas);
   this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   if (
-    this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' &&
-    this->theDiagram.SimpleComponentTypes[0].theRank == 1
+    this->theDiagram.simpleComponentTypes[0].theLetter == 'A' &&
+    this->theDiagram.simpleComponentTypes[0].theRank == 1
   ) {
     this->computeDiagramRelationsAndK(owner);
     global.fatal << "Failed to compute diagram relation and k. " << global.fatal;

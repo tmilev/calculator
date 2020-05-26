@@ -385,10 +385,13 @@ public:
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
+  // Input is either irreuducible polynomial of prime degree, or a product
+  // of linear polynomials.
+  bool handlePrimeDegreeSeparatedFactor(Polynomial<ElementZmodP>& input);
   bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
   bool hasFactorsOfDifferentDegree(std::stringstream* comments);
   bool oneFactorProbabilityHalf(
-    int constant,
+    unsigned int constant,
     std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
@@ -410,6 +413,7 @@ public:
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;
   ElementZmodP oneModular;
+  LargeInteger leadingCoefficient;
   LargeInteger largestCoefficient;
   LargeInteger upperBoundAbsoluteValueRoot;
   LargeInteger coefficientBound;
@@ -417,7 +421,7 @@ public:
   FormatExpressions format;
   List<Polynomial<ElementZmodP> > factorsOverPrime;
   List<Polynomial<ElementZmodP> > factorsLifted;
-  Polynomial<ElementZmodP> productLifted;
+  Polynomial<ElementZmodP> desiredLift;
   Matrix<ElementZmodP> sylvesterMatrix;
   Matrix<ElementZmodP> sylvesterMatrixInverted;
   void henselLift(std::stringstream* comments);

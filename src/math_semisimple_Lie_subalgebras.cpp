@@ -3221,8 +3221,8 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
     this->owner->BilinearFormFundPrimal
   );
   bool ambientLeviHasBDGE = false;
-  for (int i = 0; i < this->theLeviDiagramAmbienT.SimpleComponentTypes.size; i ++) {
-    DynkinSimpleType& currentType = this->theLeviDiagramAmbienT.SimpleComponentTypes[i];
+  for (int i = 0; i < this->theLeviDiagramAmbienT.simpleComponentTypes.size; i ++) {
+    DynkinSimpleType& currentType = this->theLeviDiagramAmbienT.simpleComponentTypes[i];
     if (
       currentType.theLetter == 'D' ||
       currentType.theLetter == 'G' ||
@@ -3238,8 +3238,8 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
     }
   }
   bool smallLeviHasBDGE = false;
-  for (int i = 0; i < this->theLeviDiagramSmalL.SimpleComponentTypes.size; i ++) {
-    DynkinSimpleType& currentType = this->theLeviDiagramSmalL.SimpleComponentTypes[i];
+  for (int i = 0; i < this->theLeviDiagramSmalL.simpleComponentTypes.size; i ++) {
+    DynkinSimpleType& currentType = this->theLeviDiagramSmalL.simpleComponentTypes[i];
     if (
       currentType.theLetter == 'D' ||
       currentType.theLetter == 'G' ||

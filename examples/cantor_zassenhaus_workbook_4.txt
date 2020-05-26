@@ -1,0 +1,6 @@
+%HideLHS
+p = x^2+2;
+q = x^3+3x+2;
+p*q;
+
+FactorUnivariatePolynomialOverRationals{}(p*q);

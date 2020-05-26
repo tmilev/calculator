@@ -134,6 +134,7 @@ public:
   // LargeIntUnsigned(unsigned int x) {this->assignShiftedUInt(x,0);}
   static LargeIntegerUnsigned getOne();
   bool operator<(int other) const;
+  bool operator<=(int other) const;
   bool operator>(int other) const;
   bool operator<(const LargeIntegerUnsigned& other) const;
   bool operator<(const LargeInteger& other) const;

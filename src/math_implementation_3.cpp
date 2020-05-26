@@ -7175,9 +7175,9 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
     return;
   }
   basisChange.resize(0, 0, true);
-  for (int i = 0; i < tempDyn.SimpleComponentTypes.size; i ++) {
+  for (int i = 0; i < tempDyn.simpleComponentTypes.size; i ++) {
     DynkinSimpleType::getEpsilonMatrix(
-      tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat
+      tempDyn.simpleComponentTypes[i].theLetter, tempDyn.simpleComponentTypes[i].theRank, tempMat
     );
     basisChange.directSumWith(tempMat, Rational(0));
   }

@@ -688,17 +688,17 @@ public:
       return;
     }
     if (this->numberOfColumns != input.size) {
-      global.fatal << "This is a programming error: attempting to multiply a matrix with "
+      global.fatal << "Attempt to multiply a matrix with "
       << this->numberOfColumns << " columns with a vector(column) of "
       << " dimension " << input.size << ". " << global.fatal;
     }
-    output.makeZero(this->numberOfRows);
-    otherType tempElt;
+    output.makeZero(this->numberOfRows, ringZero);
+    otherType product;
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        tempElt = this->elements[i][j];
-        tempElt *= input[j];
-        output[i] += tempElt;
+        product = this->elements[i][j];
+        product *= input[j];
+        output[i] += product;
       }
     }
   }
@@ -732,10 +732,10 @@ public:
       return;
     }
     if (this->numberOfColumns != input.getDimension()) {
-      global.fatal << "This is a programming error: attempting to act by "
-      << this->toString() << "(an " << this->numberOfRows << " x "
+      global.fatal << "Attempt to act by "
+      << this->toString() << " (an " << this->numberOfRows << " x "
       << this->numberOfColumns << " matrix) on a column vector "
-      << input.toString() << "(dimension " << input.size << ")." << global.fatal;
+      << input.toString() << " (dimension " << input.size << "). " << global.fatal;
     }
     output.setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
@@ -997,7 +997,7 @@ public:
   }
   void assignVectorToRowKeepOtherRowsIntactNoInitialization(int rowIndex, const Vector<Coefficient>& input) {
     if (input.size != this->numberOfColumns || rowIndex >= this->numberOfRows || rowIndex < 0) {
-      global.fatal << "Error: attempting to assign vector " << input.toString()
+      global.fatal << "Attempt to assign vector " << input.toString()
       << " (" << input.size << " coordinates) "
       << " to row with index " << rowIndex << " in a matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns << " columns. " << global.fatal;
@@ -1087,7 +1087,7 @@ public:
   );
   void operator+=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
-      global.fatal << "This is a programming error: attempting to add matrix with "
+      global.fatal << "Attempt to add matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " columns to a matrix with " << right.numberOfRows << " rows and "
       << right.numberOfColumns << " columns. " << global.fatal;
@@ -1101,7 +1101,7 @@ public:
   LargeIntegerUnsigned findPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
-      global.fatal << "This is a programming error: attempting to subtract from matrix with "
+      global.fatal << "Attempt to subtract from matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " columns a matrix with " << right.numberOfRows << " rows and "
       << right.numberOfColumns << " columns. " << global.fatal;
@@ -1137,7 +1137,11 @@ public:
     *this = tempMat;
   }
   static void lieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
-    if (left.numberOfColumns != left.numberOfRows || right.numberOfColumns != right.numberOfRows || left.numberOfColumns != right.numberOfColumns) {
+    if (
+      left.numberOfColumns != left.numberOfRows ||
+      right.numberOfColumns != right.numberOfRows ||
+      left.numberOfColumns != right.numberOfColumns
+    ) {
       global.fatal << "In lieBracket: bad dimensions of matrices. " << global.fatal;
     }
     Matrix<Coefficient> tempPlus, tempMinus;
@@ -2759,7 +2763,7 @@ public:
   void raiseToPower(int d, const Coefficient& one);
   bool getRootFromLinearPolynomialConstantTermLastVariable(Vector<Coefficient>& outputRoot);
   Matrix<Coefficient> evaluateUnivariatePolynomial(const Matrix<Coefficient>& input);//<-for univariate polynomials only
-  Coefficient evaluate(const Vector<Coefficient>& input);
+  Coefficient evaluate(const Vector<Coefficient>& input, const Coefficient& zero = 0);
   bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& outputTimesMeEqualsOther, const Coefficient& ringUnit
   ) const;
@@ -2959,7 +2963,9 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
-  bool accountReducedFactor(Polynomial<Coefficient>& incoming);
+  bool accountReducedFactor(
+    Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
+  );
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* theFormat) const;
   PolynomialFactorizationUnivariate();
@@ -5842,7 +5848,7 @@ public:
   List<Vectors<Rational> > SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
-  List<DynkinSimpleType> SimpleComponentTypes;
+  List<DynkinSimpleType> simpleComponentTypes;
   List<int> indicesThreeNodes;
   List<List<int> > indicesEnds;
   List<List<int> > sameTypeComponents;

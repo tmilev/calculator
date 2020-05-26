@@ -1611,7 +1611,8 @@ void ElementZmodP::convertPolynomialModularToPolynomialIntegral(
     Rational coefficient = input.coefficients[i].value;
     if (useNegatives) {
       if (coefficient > modulusDividedByTwo) {
-        coefficient.negate();
+        coefficient = input.coefficients[i].value;
+        coefficient -= input.coefficients[i].modulus;
       }
     }
     output.addMonomial(input[i], coefficient);
@@ -1636,8 +1637,8 @@ void ElementZmodP::convertLiftPolynomialModular(
   for (int i = 0; i < input.size(); i ++) {
     ElementZmodP coefficient;
     coefficient.modulus = newModulus;
-    coefficient = input.coefficients[i].value;
-    output.addMonomial(input[i], coefficient);
+    coefficient.value = input.coefficients[i].value;
+    output.addMonomial(input.monomials[i], coefficient);
   }
 }
 

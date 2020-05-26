@@ -1493,11 +1493,11 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountNon
 
 template <class Coefficient, class OneFactorFinder>
 bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountReducedFactor(
-  Polynomial<Coefficient>& incoming
+  Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountReducedFactor");
   if (incoming.isEqualToZero()) {
-    global.fatal << "zero is not a valid factor. " << global.fatal;
+    global.fatal << "Zero is not a valid factor. " << global.fatal;
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
@@ -1508,12 +1508,15 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountRed
     return false;
   }
   this->reduced.addOnTop(incoming);
-  Coefficient extraFactor;
-  if (quotient.isConstant(&extraFactor)) {
-    this->constantFactor *= extraFactor;
-  } else {
-    this->nonReduced.addOnTop(quotient);
+  if (accountQuotientAsNonReduced || quotient.isConstant()) {
+    Coefficient extraFactor;
+    if (quotient.isConstant(&extraFactor)) {
+      this->constantFactor *= extraFactor;
+    } else {
+      this->nonReduced.addOnTop(quotient);
+    }
   }
+  this->current = quotient;
   return true;
 }
 
@@ -1529,7 +1532,7 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::checkFacto
     checkComputations *= this->reduced[i];
   }
   if (!checkComputations.isEqualTo(this->original)) {
-    global.fatal << "Error in polynomial factorization function."
+    global.fatal << "Error in polynomial factorization function. "
     << "Product of factorization: " << this->toStringResult(nullptr)
     << " equals " << checkComputations
     << global.fatal;

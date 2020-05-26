@@ -638,7 +638,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
     for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theDomain().theWeyl.rootSystem[theIndex];
-      for (int j = 0; j < NonExplored.maximumSize; j ++) {
+      for (int j = 0; j < NonExplored.numberOfElements; j ++) {
         if (!NonExplored.selected[j]) {
           const Vector<Rational>& left = this->theDomain().theWeyl.rootSystem[j];
           right = current - left;

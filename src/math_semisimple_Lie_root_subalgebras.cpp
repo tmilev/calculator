@@ -2019,7 +2019,8 @@ void RootSubalgebra::doKRootsEnumeration() {
 void RootSubalgebra::doKRootsEnumerationRecursively(int indexEnumeration) {
   int theRank = this->theKComponentRanks[indexEnumeration];
   LargeInteger numberOfIterations = MathRoutines::nChooseK(this->positiveRootsKConnectedComponents[indexEnumeration].size, theRank);
-  this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
+  Selection& selection = this->theKEnumerations[indexEnumeration];
+  selection.initialize(selection.numberOfElements);
   for (int i = 0; i < numberOfIterations; i ++) {
     this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
     if (indexEnumeration < this->positiveRootsKConnectedComponents.size - 1) {
@@ -2410,14 +2411,14 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWRTSubalgebra(
   Matrix<Rational>& outputSystemColumnVector
 ) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::attemptExtendingHFtoHEFWRTSubalgebra");
-  if (theZeroCharacteristics.cardinalitySelection == theZeroCharacteristics.maximumSize) {
+  if (theZeroCharacteristics.cardinalitySelection == theZeroCharacteristics.numberOfElements) {
     return false;
   }
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size = 0;
   int theRelativeDimension = simpleBasisSA.size;
 //  int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
-  if (theRelativeDimension != theZeroCharacteristics.maximumSize) {
+  if (theRelativeDimension != theZeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
   //format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+... a_kg^\alpha_k, and
@@ -2611,10 +2612,10 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     }
   }
   InvertedRelativeKillingForm.invert();
-  int numCycles = MathRoutines::twoToTheNth(selectionRootsWithZeroCharacteristic.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(selectionRootsWithZeroCharacteristic.numberOfElements);
   ProgressReport theReport;
   Vectors<Rational> rootsZeroChar;
-  rootsZeroChar.reserve(selectionRootsWithZeroCharacteristic.maximumSize);
+  rootsZeroChar.reserve(selectionRootsWithZeroCharacteristic.numberOfElements);
   Vectors<Rational> relativeRootSystem;
   this->PositiveRootsK.getCoordinatesInBasis(this->SimpleBasisK, relativeRootSystem);
   SlTwoSubalgebra theSl2;
@@ -3444,7 +3445,7 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
 ) {
   Vectors<Rational> selectedRootsBasisCentralizer;
   selectedRootsBasisCentralizer.size = 0;
-  for (int i = 0; i <SelectedBasisRoots.maximumSize; i ++) {
+  for (int i = 0; i <SelectedBasisRoots.numberOfElements; i ++) {
     if (!SelectedBasisRoots.selected[i]) {
       selectedRootsBasisCentralizer.addOnTop(theRootSA.SimpleBasisCentralizerRoots[i]);
     }
@@ -3817,7 +3818,7 @@ void RootSubalgebras::toStringRootSpaces(std::string& output, bool includeMatrix
 
 void RootSubalgebras::applyOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
-  tempSel.initialize(targetSel.maximumSize);
+  tempSel.initialize(targetSel.numberOfElements);
   for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
     tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }
@@ -3826,11 +3827,11 @@ void RootSubalgebras::applyOneGenerator(List<int>& generator, Selection& targetS
 
 bool RootSubalgebras::approveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel) {
   Selection tempSel;
-  tempSel.initialize(targetSel.maximumSize);
+  tempSel.initialize(targetSel.numberOfElements);
   for (int i = 0; i < targetSel.cardinalitySelection; i ++) {
     tempSel.addSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   }
-  for (int i = 0; i < tempSel.maximumSize; i ++) {
+  for (int i = 0; i < tempSel.numberOfElements; i ++) {
     if (targetSel.selected[i] && !tempSel.selected[i]) {
       return true;
     }

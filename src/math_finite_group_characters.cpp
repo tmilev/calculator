@@ -1160,7 +1160,7 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
   this->getSignCharacter(signRep.data);
   Selection sel;
   sel.initialize(this->getDimension());
-  int numCycles = MathRoutines::twoToTheNth(sel.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;

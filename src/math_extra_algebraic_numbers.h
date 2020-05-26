@@ -413,20 +413,30 @@ public:
   Polynomial<Rational> current;
   Polynomial<ElementZmodP> modularization;
   ElementZmodP oneModular;
+  LargeIntegerUnsigned modulusHenselLift;
   LargeInteger leadingCoefficient;
   LargeInteger largestCoefficient;
   LargeInteger upperBoundAbsoluteValueRoot;
   LargeInteger coefficientBound;
+  ElementZmodP scaleProductLift;
   int degree;
+  int factorsLiftedTries;
+  int maximumFactorsLiftedTries;
   FormatExpressions format;
   List<Polynomial<ElementZmodP> > factorsOverPrime;
   List<Polynomial<ElementZmodP> > factorsLifted;
   Polynomial<ElementZmodP> desiredLift;
   Matrix<ElementZmodP> sylvesterMatrix;
   Matrix<ElementZmodP> sylvesterMatrixInverted;
+  bool factorizationFromHenselLift(
+    std::stringstream* comments, std::stringstream* commentsOnFailure
+  );
+  bool factorizationFromHenselLiftOnce(
+    std::stringstream* comments, std::stringstream* commentsOnFailure
+  );
+  bool tryFactor(SelectionFixedRank& selection);
   void henselLift(std::stringstream* comments);
   void henselLiftOnce(
-    const LargeIntegerUnsigned& newModulus,
     const LargeIntegerUnsigned& oldModulus,
     std::stringstream* comments
   );

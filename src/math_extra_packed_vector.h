@@ -623,7 +623,7 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
   Selection sel;
   sel.initialize(G->cartanSymmetric.numberOfColumns);
-  int numCycles = MathRoutines::twoToTheNth(sel.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
   List<List<bool> > tss;
   tss.setSize(numCycles);
   List<ElementWeylGroup> theGenerators;

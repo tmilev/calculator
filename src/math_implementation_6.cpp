@@ -561,6 +561,8 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
 PolynomialFactorizationFiniteFields::PolynomialFactorizationFiniteFields() {
   this->output = nullptr;
   this->degree = 0;
+  this->factorsLiftedTries = 0;
+  this->maximumFactorsLiftedTries = 50000;
 }
 
 bool PolynomialFactorizationFiniteFields::oneFactor(
@@ -635,7 +637,7 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   }
   this->computeCoefficientBounds();
   this->henselLift(comments);
-  return false;
+  return this->factorizationFromHenselLift(comments, commentsOnFailure);
 }
 
 void PolynomialFactorizationFiniteFields::computeCoefficientBounds() {
@@ -681,39 +683,38 @@ void PolynomialFactorizationFiniteFields::henselLift(std::stringstream* comments
     global.fatal << "Sylvester product matrix is supposed to be invertible. " << global.fatal;
   }
   this->factorsLifted = this->factorsOverPrime;
-  LargeIntegerUnsigned currentModulus;
-  currentModulus = this->oneModular.modulus;
-  while (currentModulus < this->coefficientBound) {
-    LargeIntegerUnsigned oldModulus = currentModulus;
-    currentModulus *= this->oneModular.modulus;
-    this->henselLiftOnce(currentModulus, oldModulus, comments);
+  this->modulusHenselLift = this->oneModular.modulus;
+  while (this->modulusHenselLift < this->coefficientBound) {
+    LargeIntegerUnsigned oldModulus = this->modulusHenselLift;
+    this->modulusHenselLift *= this->oneModular.modulus;
+    this->henselLiftOnce(oldModulus, comments);
   }
-  List<Polynomial<Rational> > liftedOverIntegers;
 }
 
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
-  const LargeIntegerUnsigned& newModulus,
   const LargeIntegerUnsigned& oldModulus,
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::henselLiftOnce");
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     ElementZmodP::convertLiftPolynomialModular(
-      this->factorsLifted[i], this->factorsLifted[i], newModulus
+      this->factorsLifted[i], this->factorsLifted[i], this->modulusHenselLift
     );
   }
   if (comments != nullptr) {
     *comments << "<hr>"
-    << "Modulus: " << newModulus << ". "
+    << "Modulus: " << this->modulusHenselLift << ". "
     << "Lifted factors without correction: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
 
   }
-  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(this->current, this->desiredLift, newModulus);
-  ElementZmodP scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+    this->current, this->desiredLift, this->modulusHenselLift
+  );
+  this->scaleProductLift = this->desiredLift.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<ElementZmodP> newProduct;
   ElementZmodP one;
-  one.makeOne(newModulus);
+  one.makeOne(this->modulusHenselLift);
   newProduct.makeConstant(one);
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     newProduct *= this->factorsLifted[i];
@@ -757,7 +758,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     this->factorsLifted[i].totalDegreeInt();
     for (int j = 0; j < summandsCurrentFactor; j ++) {
       ElementZmodP incoming;
-      incoming.modulus = newModulus;
+      incoming.modulus = this->modulusHenselLift;
       int index = offset + summandsCurrentFactor - 1 - j;
       incoming.value = coefficientsCorrection[index].value * oldModulus;
       this->factorsLifted[i].addMonomial(MonomialP(0, j), incoming);
@@ -765,7 +766,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     offset += summandsCurrentFactor;
   }
   if (comments != nullptr) {
-    *comments << "<br>Lifted factors, modulus: " << newModulus << ": "
+    *comments << "<br>Lifted factors, modulus: "
     << this->factorsLifted.toStringCommaDelimited(&this->format);
   }
   Polynomial<ElementZmodP> productLift;
@@ -779,10 +780,86 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   productLift /= scaleProductLift;
   if (comments != nullptr) {
-    *comments << "<br>Lifted product, corrected: " << newModulus << ": "
+    *comments << "<br>Lifted product, corrected: "
     << productLift.toString(&this->format);
     Polynomial<Rational> negativesIncluded;
     ElementZmodP::convertPolynomialModularToPolynomialIntegral(productLift, negativesIncluded, true);
     *comments << "<br>Lifted product, over Z: " << negativesIncluded.toString(&this->format) << "<hr>";
   }
+}
+
+bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selection) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::tryFactor");
+  Polynomial<ElementZmodP> product;
+  ElementZmodP start;
+  start.makeOne(this->modulusHenselLift);
+  start /= this->scaleProductLift;
+  product.makeConstant(start);
+  for (int i = 0; i < selection.theSelection.cardinalitySelection; i ++) {
+    product *= this->factorsLifted[selection.theSelection.elements[i]];
+  }
+  Polynomial<Rational> candidate;
+  ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
+  global.comments << "DEBUG: Trying selection: " << selection.toString()
+  << " factor: " << candidate << " from product: " << product;
+  if (!this->output->accountReducedFactor(candidate, false)) {
+    return false;
+  }
+  global.comments << "<hr>DEBUG: FACTOR FOUND!!!!!!!!!<br> " << candidate;
+  selection.theSelection.invertSelection();
+  List<Polynomial<ElementZmodP> > factorsLiftedTrimmed;
+  for (int i = 0; i < selection.theSelection.cardinalitySelection; i ++) {
+    factorsLiftedTrimmed.addOnTop(this->factorsLifted[selection.theSelection.elements[i]]);
+  }
+  this->factorsLifted = factorsLiftedTrimmed;
+  return true;
+}
+
+bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
+  std::stringstream *comments, std::stringstream *commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factorizationFromHenselLift");
+  this->maximumFactorsLiftedTries = 100;
+  while (this->factorsLifted.size > 0) {
+    if (!this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
+  std::stringstream* comments, std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce");
+  (void) comments;
+  SelectionFixedRank selection;
+  // global.comments << "And the factors are: " << this->factorsLifted.toStringCommaDelimited();
+  for (int i = 1; i <= this->factorsLifted.size; i ++) {
+    selection.setNumberOfItemsAndDesiredSubsetSize(i, this->factorsLifted.size);
+    do {
+      global.comments << "DEBUG: Selection: " << selection.toString() << "i:" << i << "factors lifted size: "
+      << this->factorsLifted.size << "<br>";
+      this->factorsLiftedTries ++;
+      if (this->factorsLiftedTries > this->maximumFactorsLiftedTries) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure
+          << "The maximum allowed Hensel lift combinations is: "
+          << this->maximumFactorsLiftedTries << ". ";
+        }
+        return false;
+      }
+      if (this->tryFactor(selection)) {
+        return true;
+      }
+    } while (selection.incrementReturnFalseIfPastLast());
+  }
+  // Since the product of all lifts should be equal to the
+  // original polynomial, in the worst case scenario,
+  // the loop above should return on
+  // its final iteration.
+  // Therefore if we reach this piece of code we've made
+  // an algorithmic or programming error.
+  global.fatal << "This code section should not be reachable. " << global.fatal;
+  return true;
 }

@@ -780,9 +780,9 @@ void PolynomialSystem<Coefficient>::getVariablesToSolveFor(const List<Polynomial
     NumVars = MathRoutines::maximum(NumVars, input[i].minimalNumberOfVariables());
   }
   output.initialize(NumVars);
-  for (int i = 0; i < input.size && output.cardinalitySelection < output.maximumSize; i ++) {
-    for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.maximumSize; j ++) {
-      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.maximumSize; k ++) {
+  for (int i = 0; i < input.size && output.cardinalitySelection < output.numberOfElements; i ++) {
+    for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.numberOfElements; j ++) {
+      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.numberOfElements; k ++) {
         if (input[i][j](k) != 0) {
           output.addSelectionAppendNewIndex(k);
         }
@@ -1203,8 +1203,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     }
   }
   if (this->flagSystemSolvedOverBaseField) {
-    if (this->solutionsFound.cardinalitySelection != this->solutionsFound.maximumSize) {
-      for (int i = 0; i < this->solutionsFound.maximumSize; i ++) {
+    if (this->solutionsFound.cardinalitySelection != this->solutionsFound.numberOfElements) {
+      for (int i = 0; i < this->solutionsFound.numberOfElements; i ++) {
         if (!this->solutionsFound.selected[i]) {
           this->setSerreLikeSolutionIndex(i, 0);
         }
@@ -1496,8 +1496,8 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountRed
   Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
 ) {
   MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountReducedFactor");
-  if (incoming.isEqualToZero()) {
-    global.fatal << "Zero is not a valid factor. " << global.fatal;
+  if (incoming.isConstant()) {
+    global.fatal << "Constant factors are not to be accounted. " << global.fatal;
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
@@ -1534,7 +1534,8 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::checkFacto
   if (!checkComputations.isEqualTo(this->original)) {
     global.fatal << "Error in polynomial factorization function. "
     << "Product of factorization: " << this->toStringResult(nullptr)
-    << " equals " << checkComputations
+    << " equals " << checkComputations << "; expected: "
+    << this->original
     << global.fatal;
   }
   return true;

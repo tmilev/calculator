@@ -1488,7 +1488,7 @@ std::string GeneralizedVermaModuleCharacters::computeMultiplicitiesLargerAlgebra
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
   tMpRt = this->ParabolicSelectionSmallerAlgebra;
-  for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.maximumSize; i ++) {
+  for (int i = 0; i < this->ParabolicSelectionSmallerAlgebra.numberOfElements; i ++) {
     tempMat.getVectorFromRow(i, tempRoot);
     tempVertices.addOnTop(tempRoot);
     if (this->ParabolicSelectionSmallerAlgebra.selected[i]) {
@@ -1768,7 +1768,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
 
   List<int> displayIndicesReflections;
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize; i ++) {
+  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements; i ++) {
     if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
       displayIndicesReflections.addOnTop(i + 1);
     }
@@ -1923,13 +1923,13 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   << " for $\\gop$ with Dynkin diagram";
   std::stringstream tempStream;
   tempStream << "(";
-  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize; i ++) {
+  for (int i = 0; i < this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements; i ++) {
     if (this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]) {
       tempStream << "+";
     } else {
       tempStream << "0";
     }
-    if (i != this->ParabolicLeviPartRootSpacesZeroStandsForSelected.maximumSize - 1) {
+    if (i != this->ParabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements - 1) {
       tempStream << ",";
     }
   }

@@ -11,7 +11,7 @@ class Selection {
 public:
   List<int> elements;
   List<bool> selected;
-  int maximumSize;
+  int numberOfElements;
   int cardinalitySelection;
   void addSelectionAppendNewIndex(int index);
   void removeLastSelection();
@@ -24,14 +24,14 @@ public:
     this->makeFullSelection();
   }
   void makeFullSelection() {
-    for (int i = 0; i < this->maximumSize; i ++) {
+    for (int i = 0; i < this->numberOfElements; i ++) {
       this->elements[i] = i;
       this->selected[i] = true;
     }
-    this->cardinalitySelection = this->maximumSize;
+    this->cardinalitySelection = this->numberOfElements;
   }
   bool isSubset(const Selection& other) const {
-    if (this->maximumSize != other.maximumSize) {
+    if (this->numberOfElements != other.numberOfElements) {
       return false;
     }
     for (int i = 0; i < this->cardinalitySelection; i ++) {
@@ -41,9 +41,8 @@ public:
     }
     return true;
   }
-  void initialize(int maxNumElements);
+  void initialize(int inputNumberOfElements);
   void computeIndicesFromSelection();
-  void initNoMemoryAllocation();
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const Selection& input) {
     return input.hashFunction();
@@ -60,14 +59,14 @@ public:
   int selectionToIndex();
   void expandMaxSize();
   LargeInteger getNumberOfCombinationsFixedCardinality(int theCardinality) {
-    return MathRoutines::nChooseK(this->maximumSize, theCardinality);
+    return MathRoutines::nChooseK(this->numberOfElements, theCardinality);
   }
   void shrinkMaxSize();
   void makeSubSelection(Selection& theSelection, Selection& theSubSelection);
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
   void invertSelection() {
-    for (int i = 0; i < this->maximumSize; i ++) {
+    for (int i = 0; i < this->numberOfElements; i ++) {
       this->selected[i] = !this->selected[i];
     }
     this->computeIndicesFromSelection();
@@ -78,7 +77,7 @@ public:
   // warning: to call the comparison operator sucessfully, cardinalitySelection must
   // be properly computed!
   bool operator==(const Selection& right) const {
-    if (this->maximumSize != right.maximumSize || this->cardinalitySelection != right.cardinalitySelection) {
+    if (this->numberOfElements != right.numberOfElements || this->cardinalitySelection != right.cardinalitySelection) {
       return false;
     }
     for (int i = 0; i < this->cardinalitySelection; i ++) {
@@ -93,7 +92,7 @@ public:
   Selection(const Vector<Rational>& other) {
     this->operator=(other);
   }
-  Selection(const Selection& other): maximumSize(0), cardinalitySelection(0) {
+  Selection(const Selection& other): numberOfElements(0), cardinalitySelection(0) {
     *this = other;
   }
 };
@@ -257,12 +256,12 @@ public:
   int desiredSubsetSize;
   LargeInteger totalCombinations() {
     LargeInteger result;
-    MathRoutines::nChooseK(theSelection.maximumSize, desiredSubsetSize, result);
+    MathRoutines::nChooseK(theSelection.numberOfElements, desiredSubsetSize, result);
     return result;
   }
   void setNumberOfItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
     if (inputDesiredSubsetSize < 0 || inputNumItems < 0) {
-      global.fatal << "This is a programming error: requesting to initialize a selection of size "
+      global.fatal << "Request to initialize a selection of size "
       << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << global.fatal;
     }
@@ -518,12 +517,12 @@ bool Vectors<Coefficient>::getLinearDependence(Matrix<Coefficient>& outputTheLin
 
 template <class Coefficient>
 void Vector<Coefficient>::operator=(const Selection& other) {
-  if (other.maximumSize < 0) {
+  if (other.numberOfElements < 0) {
     this->setSize(0);
     return;
   }
-  this->setSize(other.maximumSize);
-  for (int i = 0; i < other.maximumSize; i ++) {
+  this->setSize(other.numberOfElements);
+  for (int i = 0; i < other.numberOfElements; i ++) {
     if (other.selected[i]) {
       this->objects[i] = 1;
     } else {

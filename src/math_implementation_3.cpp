@@ -2449,18 +2449,15 @@ int MathRoutines::binomialCoefficientMultivariate(int N, List<int>& theChoices) 
   return result;
 }
 
-void Selection::initialize(int maxNumElements) {
-  this->selected.setSize(maxNumElements);
-  this->elements.setSize(maxNumElements);
-  this->maximumSize = maxNumElements;
-  for (int i = 0; i < this->maximumSize; i ++) {
-    this->selected[i] = false;
-  }
+void Selection::initialize(int inputNumberOfElements) {
+  this->selected.initializeFillInObject(inputNumberOfElements, false);
+  this->elements.initializeFillInObject(inputNumberOfElements, 0);
+  this->numberOfElements = inputNumberOfElements;
   this->cardinalitySelection = 0;
 }
 
 void Selection::addSelectionAppendNewIndex(int index) {
-  if (index >= this->maximumSize || index < 0) {
+  if (index >= this->numberOfElements || index < 0) {
     return;
   }
   if (this->selected[index]) {
@@ -2472,7 +2469,7 @@ void Selection::addSelectionAppendNewIndex(int index) {
 }
 
 Selection::Selection() {
-  this->maximumSize = - 1;
+  this->numberOfElements = - 1;
   this->cardinalitySelection = 0;
 }
 
@@ -2491,7 +2488,7 @@ void Selection::removeLastSelection() {
 
 int Selection::selectionToIndex() {
   int result = 0;
-  for (int i = 0; i < maximumSize; i ++) {
+  for (int i = 0; i < numberOfElements; i ++) {
     result *= 2;
     if (this->selected[i]) {
       result += 1;
@@ -2501,16 +2498,16 @@ int Selection::selectionToIndex() {
 }
 
 void Selection::shrinkMaxSize() {
-  maximumSize --;
-  if (selected[maximumSize]) {
+  numberOfElements --;
+  if (selected[numberOfElements]) {
     cardinalitySelection --;
   }
 }
 
 void Selection::expandMaxSize() {
-  this->elements[this->cardinalitySelection] = this->maximumSize;
-  this->selected[this->maximumSize] = true;
-  this->maximumSize ++;
+  this->elements[this->cardinalitySelection] = this->numberOfElements;
+  this->selected[this->numberOfElements] = true;
+  this->numberOfElements ++;
   this->cardinalitySelection ++;
 }
 
@@ -2521,7 +2518,7 @@ std::string Selection::toString() const {
 }
 
 void Selection::incrementSelection() {
-  for (int i = this->maximumSize - 1; i >= 0; i --) {
+  for (int i = this->numberOfElements - 1; i >= 0; i --) {
     this->selected[i] = !this->selected[i];
     if (this->selected[i]) {
       this->computeIndicesFromSelection();
@@ -2532,7 +2529,7 @@ void Selection::incrementSelection() {
 }
 
 void Selection::initSelectionFixedCardinality(int card) {
-  this->initNoMemoryAllocation();
+  this->initialize(this->numberOfElements);
   for (int i = 0; i < card; i ++) {
     this->selected[i] = true;
     this->elements[i] = i;
@@ -2541,31 +2538,32 @@ void Selection::initSelectionFixedCardinality(int card) {
 }
 
 void Selection::incrementSelectionFixedCardinality(int card) {
-  //example of the order of generation of all combinations when card = 2 and maximumSize = 5. The second column indicates the
+  //example of the order of generation of all combinations
+  // when card = 2 and maximumSize = 5. The second column indicates the
   //state of the array at the point in code marked with *** below
-  //11000     (->10000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
-  //10100     (->10000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
-  //10010     (->10000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //10001     (->00000) indexLastZeroWithOneBefore: 1 NumOnesAfterLastZeroWithOneBefore: 1
-  //01100     (->01000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
-  //01010     (->01000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //01001     (->00000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 1
-  //00110     (->00100) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
-  //00101     (->00000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
+  //11000 (->10000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
+  //10100 (->10000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
+  //10010 (->10000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //10001 (->00000) indexLastZeroWithOneBefore: 1 NumOnesAfterLastZeroWithOneBefore: 1
+  //01100 (->01000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 0
+  //01010 (->01000) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //01001 (->00000) indexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 1
+  //00110 (->00100) indexLastZeroWithOneBefore: 4 NumOnesAfterLastZeroWithOneBefore: 0
+  //00101 (->00000) indexLastZeroWithOneBefore: 3 NumOnesAfterLastZeroWithOneBefore: 1
   //00011
-  if (card > this->maximumSize) {
+  if (card > this->numberOfElements) {
     return;
   }
   if (this->cardinalitySelection != card) {
     this->initSelectionFixedCardinality(card);
     return;
   }
-  if (card == this->maximumSize || card == 0) {
+  if (card == this->numberOfElements || card == 0) {
     return;
   }
   int indexLastZeroWithOneBefore = - 1;
   int NumOnesAfterLastZeroWithOneBefore = 0;
-  for (int i = this->maximumSize - 1; i >= 0; i --) {
+  for (int i = this->numberOfElements - 1; i >= 0; i --) {
     if (this->selected[i]) {
       if (indexLastZeroWithOneBefore == - 1) {
         NumOnesAfterLastZeroWithOneBefore ++;
@@ -2592,7 +2590,7 @@ void Selection::incrementSelectionFixedCardinality(int card) {
 
 void Selection::computeIndicesFromSelection() {
   this->cardinalitySelection = 0;
-  for (int i = 0; i < this->maximumSize; i ++) {
+  for (int i = 0; i < this->numberOfElements; i ++) {
     if (this->selected[i]) {
       this->elements[cardinalitySelection] = i;
       this->cardinalitySelection ++;
@@ -2600,38 +2598,22 @@ void Selection::computeIndicesFromSelection() {
   }
 }
 
-void Selection::initNoMemoryAllocation() {
-  for (int i = 0; i < this->cardinalitySelection; i ++) {
-    this->selected[this->elements[i]] = false;
-  }
-  this->cardinalitySelection = 0;
-}
-
 void Selection::makeSubSelection(Selection &theSelection, Selection &theSubSelection) {
-  this->initialize(theSelection.maximumSize);
+  this->initialize(theSelection.numberOfElements);
   for (int i = 0; i < theSubSelection.cardinalitySelection; i ++) {
     this->addSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
   }
 }
 
 void Selection::operator=(const Selection& right) {
-  if (this == &right) {
-    return;
-  }
-  if (this->maximumSize != right.maximumSize) {
-    this->initialize(right.maximumSize);
-  } else {
-    this->initNoMemoryAllocation();
-  }
-  for (int i = 0; i < right.cardinalitySelection; i ++) {
-    this->elements[i] = right.elements[i];
-    this->selected[this->elements[i]] = true;
-  }
+  this->elements = right.elements;
   this->cardinalitySelection = right.cardinalitySelection;
+  this->numberOfElements = right.numberOfElements;
+  this->selected = right.selected;
 }
 
 unsigned int Selection::hashFunction() const {
-  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->maximumSize);
+  int tempMin = MathRoutines::minimum(someRandomPrimesSize, this->numberOfElements);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
     if (this->selected[i]) {
@@ -7894,13 +7876,13 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::m
   this->AmbientWeyl = &inputWeyl;
   this->checkInitialization();
   Vectors<Rational> selectedRoots;
-  selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize - ZeroesMeanSimpleRootSpaceIsInParabolic.cardinalitySelection);
-  if (this->AmbientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize) {
+  selectedRoots.reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements - ZeroesMeanSimpleRootSpaceIsInParabolic.cardinalitySelection);
+  if (this->AmbientWeyl->getDimension() != ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements) {
     global.fatal << "This is a programming error: parabolic selection selects out of "
-    << ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize
+    << ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements
     << " elements while the Weyl group is of rank " << this->AmbientWeyl->getDimension() << ". " << global.fatal;
   }
-  for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.maximumSize; i ++) {
+  for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements; i ++) {
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
       selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
@@ -9697,7 +9679,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
   if (nonPivotPoints.cardinalitySelection != 0) {
     return false;
   }
-  int numNonZeroRows = nonPivotPoints.maximumSize;
+  int numNonZeroRows = nonPivotPoints.numberOfElements;
   int numZeroRows = theMat.numberOfRows-numNonZeroRows;
   matRelationBetweenStartingVariables.initialize(numZeroRows, startingDim);
   for (int i = 0; i < numZeroRows; i ++) {

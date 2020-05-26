@@ -257,8 +257,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   this->checkNonZeroOwner();
   std::stringstream out;
   std::string tempS;
-  if (this->getOwner()->getRank() != splittingParSel.maximumSize) {
-    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.maximumSize
+  if (this->getOwner()->getRank() != splittingParSel.numberOfElements) {
+    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.numberOfElements
     << " elements while the weyl group is of rank " << this->getOwner()->getRank() << ". " << global.fatal;
   }
   outputWeylSub.makeParabolicFromSelectionSimpleRoots(this->getOwner()->theWeyl, splittingParSel, 1);
@@ -402,10 +402,10 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     }
     return;
   }
-  if (this->getOwner().getRank() != splittingParSel.maximumSize) {
+  if (this->getOwner().getRank() != splittingParSel.numberOfElements) {
     global.fatal << "This is a programming error: semisimple rank is "
     << this->getOwner().getRank() << " but splitting parabolic selects "
-    << " out of " << splittingParSel.maximumSize << " simple roots. " << global.fatal;
+    << " out of " << splittingParSel.numberOfElements << " simple roots. " << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
@@ -570,13 +570,13 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   SemisimpleLieAlgebra& theAlgebrA = inputAlgebra;
 
   int theRank = theAlgebrA.getRank();
-  if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.maximumSize != theRank) {
+  if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.numberOfElements != theRank) {
     global.fatal << "This is a programming error. I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
     << theRank << " but the input highest weight, "
     << HWFundCoords.toString() << ", has " << HWFundCoords.size << " coordinates and "
     << " the parabolic section indicates rank of "
-    << selNonSelectedAreElementsLevi.maximumSize << ". " << global.fatal;
+    << selNonSelectedAreElementsLevi.numberOfElements << ". " << global.fatal;
   }
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   this->cachedPairs.clear();

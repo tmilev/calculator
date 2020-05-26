@@ -1741,7 +1741,7 @@ bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
   Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution
 ) {
   if (
-    inputPivotPoints.maximumSize != this->numberOfColumns ||
+    inputPivotPoints.numberOfElements != this->numberOfColumns ||
     inputRightHandSide.numberOfColumns != 1 ||
     inputRightHandSide.numberOfRows != this->numberOfRows
   ) {
@@ -2715,11 +2715,11 @@ public:
   static Polynomial<Coefficient> zero();
   Rational rationalValue();
   void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
-  void makeConstant(const Coefficient& theConst) {
+  void makeConstant(const Coefficient& constant) {
     this->makeZero();
-    MonomialP theConstMon;
-    theConstMon.makeOne();
-    this->addMonomial(theConstMon, theConst);
+    MonomialP one;
+    one.makeOne();
+    this->addMonomial(one, constant);
   }
   void makeOne();
   void getPolynomialWithPolynomialCoefficient(

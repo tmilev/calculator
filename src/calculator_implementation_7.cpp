@@ -1563,7 +1563,7 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   Selection& theNonCoefficientVariables, Polynomial<Polynomial<Coefficient> >& output
 ) const {
   MacroRegisterFunctionWithName("Polynomial::getPolynomialWithPolynomialCoefficient");
-  if (theNonCoefficientVariables.maximumSize != this->minimalNumberOfVariables()) {
+  if (theNonCoefficientVariables.numberOfElements != this->minimalNumberOfVariables()) {
     global.fatal << "getPolynomialWithPolynomialCoefficient called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
@@ -7192,7 +7192,7 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
     return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra& theSSalgebra = *theSSPointer.content;
-  int numCycles = MathRoutines::twoToTheNth(selectionParSel.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(selectionParSel.numberOfElements);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
   for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
@@ -7842,23 +7842,23 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   ModuleSSalgebra<RationalFunction<Rational> >& theFDMod = theHWfd[0].theMons[0].getOwner();
   if (
     theGenMod.owner != theFDMod.owner ||
-    theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize ||
-    theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize
+    theGenMod.getOwner().getRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements ||
+    theFDMod.getOwner().getRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
   ) {
     global.fatal << "This is a programming error: the two modules have owners, "
     << theFDMod.getOwner().theWeyl.theDynkinType.toString()
     << " and " << theGenMod.getOwner().theWeyl.theDynkinType.toString() << ", and parabolic selections of max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize
-    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize << global.fatal;
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements
+    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << global.fatal;
   }
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir, theCasimirMinusChar;
   CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.makeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction<Rational> > > theLeviEigenVectors;
   Vectors<RationalFunction<Rational> > theEigenVectorWeightsFund;
-  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize != theGenMod.getOwner().getRank()) {
+  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements != theGenMod.getOwner().getRank()) {
     global.fatal << "This is a programming error: module has parabolic selection with max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.maximumSize << " but the ambient semisimple Lie algebra is of rank "
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.numberOfElements << " but the ambient semisimple Lie algebra is of rank "
     << theGenMod.getOwner().getRank() << ". " << global.fatal;
   }
   std::string report;

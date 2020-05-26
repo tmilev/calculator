@@ -93,14 +93,14 @@ bool AlgebraicClosureRationals::getRadicalSelectionFromIndex(int inputIndex, Sel
 }
 
 int AlgebraicClosureRationals::getIndexFromRadicalSelection(const Selection& theSel) {
-  if (theSel.maximumSize > 30) {
+  if (theSel.numberOfElements > 30) {
     global.fatal
     << "This is a programming error: the algebraic extension "
     << "is too large to be handled by the current data structures. "
     << global.fatal;
   }
   int result = 0;
-  for (int i = theSel.maximumSize - 1; i >= 0; i --) {
+  for (int i = theSel.numberOfElements - 1; i >= 0; i --) {
     result *= 2;
     if (theSel.selected[i]) {
       result += 1;
@@ -162,7 +162,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
   largerFieldSel.initialize(radicalsNew.size);
   smallerFieldSel.initialize(this->theQuadraticRadicals.size);
   do {
-    largerFieldSel.initNoMemoryAllocation();
+    largerFieldSel.initialize(radicalsNew.size);
     for (int j = 0; j < this->theQuadraticRadicals.size; j ++) {
       if (smallerFieldSel.selected[j]) {
         if (this->theQuadraticRadicals[j] == - 1) {

@@ -61,6 +61,7 @@ void Test::run() {
     Rational::Test::all();
     ElementZmodP::Test::all();
     RationalFunction<Rational>::Test::all();
+    Selection::Test::all();
   }
   if (this->shouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();

@@ -258,12 +258,11 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   if (this->isEqualToOne()) {
     return false;
   }
-  ElementZmodP thePower, theOne;
+  ElementZmodP thePower, one;
   thePower.modulus = *this;
-  thePower.value = theBase;
-  theOne.modulus = *this;
-  theOne.value = 1;
-  MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
+  thePower = theBase;
+  one.makeOne(*this);
+  MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, one);
   if (thePower == 1) {
     return true;
   }
@@ -342,14 +341,21 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabin(int numberOfTries, std::st
 }
 
 bool LargeIntegerUnsigned::isCompositePrimeDivision(
-  List<unsigned int>& primesGenerated, std::stringstream* comments
+  List<unsigned int>& primesGenerated,
+  bool& outputGuaranteedPrime,
+  std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isCompositePrimeDivision");
-  if (this->isEven()) {
-    return *this == 2;
-  }
-  if (this->isEqualToOne()) {
+  outputGuaranteedPrime = false;
+  if (this->isEqualToOne() || this->isEqualToZero()) {
     return false;
+  }
+  if (this->isEven()) {
+    if (*this == 2) {
+      outputGuaranteedPrime = true;
+      return false;
+    }
+    return true;
   }
   int maximumDivisor = this->maximumDivisorToTryWhenFactoring(- 1);
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(
@@ -358,6 +364,7 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
   for (int i = 0; i < primesGenerated.size; i ++) {
     LargeIntegerUnsigned current = primesGenerated[i];
     if (current >= *this) {
+      outputGuaranteedPrime = true;
       return false;
     }
     if (!this->isDivisibleBy(current)) {
@@ -368,6 +375,10 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
       << primesGenerated[i] << ". ";
     }
     return true;
+  }
+  LargeIntegerUnsigned lastPrime = *primesGenerated.lastObject();
+  if (lastPrime * lastPrime >= *this) {
+    outputGuaranteedPrime = true;
   }
   return false;
 }
@@ -392,8 +403,12 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   }
   List<unsigned int> aFewPrimes;
   if (tryDivisionSetTrueFaster) {
-    if (this->isCompositePrimeDivision(aFewPrimes, comments)) {
+    bool guaranteedPrime = false;
+    if (this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)) {
       return false;
+    }
+    if (guaranteedPrime) {
+      return true;
     }
   } else {
     LargeIntegerUnsigned::getPrimesEratosthenesSieve(1000, aFewPrimes);

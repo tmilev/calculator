@@ -95,6 +95,11 @@ public:
   Selection(const Selection& other): numberOfElements(0), cardinalitySelection(0) {
     *this = other;
   }
+  class Test {
+  public:
+    static bool all();
+    static bool testNElements(int n);
+  };
 };
 
 class SelectionWithMultiplicities {

@@ -54,7 +54,11 @@ public:
   bool isEven() const;
   bool isPositive() const;
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool isCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
+  bool isCompositePrimeDivision(
+    List<unsigned int>& primesGenerated,
+    bool& outputGuaranteedPrime,
+    std::stringstream* comments
+  );
   bool isPossiblyPrime(int millerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
   bool isPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = nullptr);
   bool isPossiblyPrimeMillerRabinOnce(
@@ -156,11 +160,17 @@ public:
     static bool serializationToHex();
     static bool comparisons();
     static bool isPossiblyPrime();
+    static bool guaranteedPrime();
     static bool isPossiblyPrimeFast(
       const List<LargeIntegerUnsigned>& input,
       bool mustBeTrue,
       int millerRabinTries,
       int64_t maximumRunningTimeMilliseconds
+    );
+    static bool isPossiblyPrimeMillerRabinOnly(
+      const List<LargeIntegerUnsigned>& input,
+      bool mustBeTrue,
+      int millerRabinTries
     );
     static bool factor();
     static bool factorSmall(

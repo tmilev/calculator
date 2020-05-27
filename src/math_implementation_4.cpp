@@ -626,20 +626,20 @@ FormatExpressions::getMonomialOrder<Weight<Rational> >() {
 
 void DynkinDiagramRootSubalgebra::swapDynkinStrings(int i, int j) {
   this->simpleComponentTypes.swapTwoIndices(i, j);
-  this->SimpleBasesConnectedComponents.swapTwoIndices(i, j);
+  this->simpleBasesConnectedComponents.swapTwoIndices(i, j);
   this->indicesThreeNodes.swapTwoIndices(i, j);
   this->indicesEnds.swapTwoIndices(i, j);
 }
 
 void DynkinDiagramRootSubalgebra::sort() {
   //doing bubble sort -> shortest to code
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    for (int j = i + 1; j < this->SimpleBasesConnectedComponents.size; j ++) {
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
+    for (int j = i + 1; j < this->simpleBasesConnectedComponents.size; j ++) {
       bool tempBool = false;
-      if (this->SimpleBasesConnectedComponents[i].size < this->SimpleBasesConnectedComponents[j].size) {
+      if (this->simpleBasesConnectedComponents[i].size < this->simpleBasesConnectedComponents[j].size) {
         tempBool = true;
       }
-      if (this->SimpleBasesConnectedComponents[i].size == this->SimpleBasesConnectedComponents[j].size) {
+      if (this->simpleBasesConnectedComponents[i].size == this->simpleBasesConnectedComponents[j].size) {
         tempBool = ((this->simpleComponentTypes[i]) < (this->simpleComponentTypes[j]));
       }
       if (tempBool) {
@@ -648,11 +648,11 @@ void DynkinDiagramRootSubalgebra::sort() {
     }
   }
   this->sameTypeComponents.size = 0;
-  this->indexInUniComponent.setSize(this->SimpleBasesConnectedComponents.size);
-  this->indexUniComponent.setSize(this->SimpleBasesConnectedComponents.size);
-  this->sameTypeComponents.reserve(this->SimpleBasesConnectedComponents.size);
+  this->indexInUniComponent.setSize(this->simpleBasesConnectedComponents.size);
+  this->indexUniComponent.setSize(this->simpleBasesConnectedComponents.size);
+  this->sameTypeComponents.reserve(this->simpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     if (!(this->simpleComponentTypes[i] == tempType)) {
       this->sameTypeComponents.setSize(this->sameTypeComponents.size + 1);
       this->sameTypeComponents.lastObject()->size = 0;
@@ -695,11 +695,11 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(const 
 void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinString");
   this->checkInitialization();
-  if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
+  if (indexComponent >= this->simpleBasesConnectedComponents.size) {
     global.fatal << "Bad Dynkin index. " << global.fatal;
   }
   DynkinSimpleType& outputType = this->simpleComponentTypes[indexComponent];
-  Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
+  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds = this->indicesEnds[indexComponent];
   if (currentComponent.size < 1) {
     global.fatal << "This is a programming error: currentComponent is empty which is impossible. " << global.fatal;
@@ -721,64 +721,64 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     diagramWithoutTripleNode.AmbientBilinearForm = this->AmbientBilinearForm;
     diagramWithoutTripleNode.AmbientRootSystem = this->AmbientRootSystem;
     diagramWithoutTripleNode.computeDiagramInputIsSimple(rootsWithoutTripleNode);
-    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3) {
+    if (diagramWithoutTripleNode.simpleBasesConnectedComponents.size != 3) {
       global.fatal << "This is a programming error: Dynkin diagram has a triple "
       << "node whose removal does not yield 3 connected components. " << global.fatal;
     }
     for (int i = 0; i < 3; i ++) {
-      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].reverseElements();
+      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[i].reverseElements();
       }
     }
     for (int i = 0; i < 3; i ++) {
       for (int j = i + 1; j < 3; j ++) {
         if (
-          diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size <
-          diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size
+          diagramWithoutTripleNode.simpleBasesConnectedComponents[i].size <
+          diagramWithoutTripleNode.simpleBasesConnectedComponents[j].size
         ) {
           diagramWithoutTripleNode.swapDynkinStrings(i, j);
         }
       }
     }
     currentComponent.setSize(0);
-    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size == 1) {
+    if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size == 1) {
       //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
       Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
-      currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
+      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.scalarProduct(currentComponent[0], this->AmbientBilinearForm).isEqualToZero()) {
         currentComponent.reverseElements();
       }
       currentComponent.addOnTop(tripleNode);//<-then triple node
-      currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
-      currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2]);//<-last two vectors
+      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1]);//<-last two vectors
+      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[2]);//<-last two vectors
       outputType.makeArbitrary('D', currentComponent.size, theScale);
     } else {
       //the second largest component has more than one element, hence we are in type E_n.
       Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
-      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size != 2) {
+      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2) {
         global.fatal << "This is a programming error: the Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
         << global.fatal;
       }
       if (!tripleNode.scalarProduct(
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0],
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0],
         this->AmbientBilinearForm).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].reverseElements(); //<-the 2-root component has the first root perpendicular to the triple node
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1].reverseElements(); //<-the 2-root component has the first root perpendicular to the triple node
       }
       if (
-        tripleNode.scalarProduct(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0][0],
+        tripleNode.scalarProduct(diagramWithoutTripleNode.simpleBasesConnectedComponents[0][0],
         this->AmbientBilinearForm).isEqualToZero()
       ) {
-        diagramWithoutTripleNode.SimpleBasesConnectedComponents[0].reverseElements(); //<-the largest component has the first root non-perpendicular to the triple node
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[0].reverseElements(); //<-the largest component has the first root non-perpendicular to the triple node
       }
-      currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
-      currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
-      currentComponent.addOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
+      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
+      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
+      currentComponent.addOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
       currentComponent.addOnTop(tripleNode); //<- next the triple node
-      currentComponent.addListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
+      currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
       outputType.makeArbitrary('E', currentComponent.size, theScale);
     }
    return;
@@ -865,30 +865,30 @@ bool DynkinDiagramRootSubalgebra::checkInitialization() const {
 void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple");
   this->checkInitialization();
-  this->SimpleBasesConnectedComponents.size = 0;
-  this->SimpleBasesConnectedComponents.reserve(simpleBasisInput.size);
+  this->simpleBasesConnectedComponents.size = 0;
+  this->simpleBasesConnectedComponents.reserve(simpleBasisInput.size);
   for (int i = 0; i < simpleBasisInput.size; i ++) {
     int indexFirstComponentConnectedToRoot = - 1;
-    for (int j = 0; j < this->SimpleBasesConnectedComponents.size; j ++) {
-      if (this->SimpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
+    for (int j = 0; j < this->simpleBasesConnectedComponents.size; j ++) {
+      if (this->simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
         simpleBasisInput[i], this->AmbientBilinearForm)
       ) {
         if (indexFirstComponentConnectedToRoot == - 1) {
           indexFirstComponentConnectedToRoot = j;
-          this->SimpleBasesConnectedComponents[j].addOnTop(simpleBasisInput[i]);
+          this->simpleBasesConnectedComponents[j].addOnTop(simpleBasisInput[i]);
         } else {
-          this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].addListOnTop(
-            this->SimpleBasesConnectedComponents[j]
+          this->simpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].addListOnTop(
+            this->simpleBasesConnectedComponents[j]
           );
-          this->SimpleBasesConnectedComponents.removeIndexSwapWithLast(j);
+          this->simpleBasesConnectedComponents.removeIndexSwapWithLast(j);
           j --;
         }
       }
     }
     if (indexFirstComponentConnectedToRoot == - 1) {
-      this->SimpleBasesConnectedComponents.setSize(this->SimpleBasesConnectedComponents.size + 1);
-      this->SimpleBasesConnectedComponents.lastObject()->size = 0;
-      this->SimpleBasesConnectedComponents.lastObject()->addOnTop(simpleBasisInput[i]);
+      this->simpleBasesConnectedComponents.setSize(this->simpleBasesConnectedComponents.size + 1);
+      this->simpleBasesConnectedComponents.lastObject()->size = 0;
+      this->simpleBasesConnectedComponents.lastObject()->addOnTop(simpleBasisInput[i]);
     }
   }
   this->computeDynkinStrings();
@@ -924,16 +924,16 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& rig
   if (this->rankTotal() < right.rankTotal()) {
     return false;
   }
-  if (this->simpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
+  if (this->simpleComponentTypes.size != this->simpleBasesConnectedComponents.size) {
     global.fatal
     << "Simple component types do "
     << "not match number of connected components. " << global.fatal;
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
-    if (this->SimpleBasesConnectedComponents[i].size > right.SimpleBasesConnectedComponents[i].size) {
+    if (this->simpleBasesConnectedComponents[i].size > right.simpleBasesConnectedComponents[i].size) {
       return true;
     }
-    if (right.SimpleBasesConnectedComponents[i].size > this->SimpleBasesConnectedComponents[i].size) {
+    if (right.simpleBasesConnectedComponents[i].size > this->simpleBasesConnectedComponents[i].size) {
       return false;
     }
     if (this->simpleComponentTypes[i] > right.simpleComponentTypes[i]) {
@@ -948,7 +948,7 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(DynkinDiagramRootSubalgebra& rig
 
 Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula() {
   Rational output = 1;
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     output *= WeylGroupData::sizeByFormulaOrNegative1(
       this->simpleComponentTypes[i].theLetter, this->simpleComponentTypes[i].theRank
     );
@@ -963,16 +963,16 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
   SelectionWithDifferentMaxMultiplicities& theAutosPerm,
   DynkinDiagramRootSubalgebra& right
 ) {
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    for (int j = 0; j < this->SimpleBasesConnectedComponents[i].size; j ++) {
-      if (this->SimpleBasesConnectedComponents[i].size != right.SimpleBasesConnectedComponents[thePerm[i]].size) {
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
+    for (int j = 0; j < this->simpleBasesConnectedComponents[i].size; j ++) {
+      if (this->simpleBasesConnectedComponents[i].size != right.simpleBasesConnectedComponents[thePerm[i]].size) {
         global.fatal << "Connected components simple bases sizes do not match. " << global.fatal;
       }
-      domain.addOnTop( this->SimpleBasesConnectedComponents[i][j]);
+      domain.addOnTop( this->simpleBasesConnectedComponents[i][j]);
       int indexTargetComponent = thePerm[i];
       int indexAutomorphismInComponent = theAutosPerm.multiplicities[i];
       int indexRoot = theAutos[i][indexAutomorphismInComponent][j];
-      range.addOnTop(right.SimpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
+      range.addOnTop(right.simpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
     }
   }
 }
@@ -999,21 +999,21 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
 
 void DynkinDiagramRootSubalgebra::computeDynkinStrings() {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDynkinStrings");
-  this->indicesThreeNodes.setSize(this->SimpleBasesConnectedComponents.size);
-  this->simpleComponentTypes.setSize(this->SimpleBasesConnectedComponents.size);
-  this->indicesEnds.setSize(this->SimpleBasesConnectedComponents.size);
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+  this->indicesThreeNodes.setSize(this->simpleBasesConnectedComponents.size);
+  this->simpleComponentTypes.setSize(this->simpleBasesConnectedComponents.size);
+  this->indicesEnds.setSize(this->simpleBasesConnectedComponents.size);
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     this->computeDynkinString(i);
   }
 }
 
 bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& right) const {
-  if (right.SimpleBasesConnectedComponents.size != this->SimpleBasesConnectedComponents.size) {
+  if (right.simpleBasesConnectedComponents.size != this->simpleBasesConnectedComponents.size) {
     return false;
   }
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     bool tempBool =
-      ((this->SimpleBasesConnectedComponents[i].size == right.SimpleBasesConnectedComponents[i].size) &&
+      ((this->simpleBasesConnectedComponents[i].size == right.simpleBasesConnectedComponents[i].size) &&
       (this->simpleComponentTypes[i] == right.simpleComponentTypes[i]));
     if (!tempBool) {
       return false;
@@ -1031,7 +1031,7 @@ void DynkinDiagramRootSubalgebra::getDynkinType(DynkinType& output) const {
 }
 
 void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int index) {
-  Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[index];
+  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[index];
   DynkinSimpleType& currentStrinG = this->simpleComponentTypes[index];
   List<int> thePermutation;
   thePermutation.setSize(currentComponent.size);
@@ -1083,27 +1083,27 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(List<List<int> >& output, int 
 }
 
 void DynkinDiagramRootSubalgebra::getAutomorphisms(List<List<List<int> > >& output) {
-  output.setSize(this->SimpleBasesConnectedComponents.size);
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
+  output.setSize(this->simpleBasesConnectedComponents.size);
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     this->getAutomorphism(output[i], i);
   }
 }
 
 int DynkinDiagramRootSubalgebra::rankTotal() {
   int result = 0;
-  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
-    result += this->SimpleBasesConnectedComponents[i].size;
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
+    result += this->simpleBasesConnectedComponents[i].size;
   }
   return result;
 }
 
 int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   int result = 0;
-  if (this->SimpleBasesConnectedComponents.size != this->simpleComponentTypes.size) {
+  if (this->simpleBasesConnectedComponents.size != this->simpleComponentTypes.size) {
     global.fatal << "Number of simple connected components does not match the number of types. " << global.fatal;
   }
   for (int i = 0; i < this->simpleComponentTypes.size; i ++) {
-    int Rank = this->SimpleBasesConnectedComponents[i].size;
+    int Rank = this->simpleBasesConnectedComponents[i].size;
     if (this->simpleComponentTypes[i].theLetter == 'A') {
       result += Rank * (Rank + 1);
     }
@@ -1136,7 +1136,7 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
 
 int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
-  Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
+  Vectors<Rational>& currentComponent = this->simpleBasesConnectedComponents[indexComponent];
   int numEnds = 0;
   int result = 0;
   this->indicesThreeNodes[indexComponent] = - 1;

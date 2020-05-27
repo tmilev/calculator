@@ -2355,7 +2355,7 @@ bool Calculator::innerRootSubsystem(Calculator& calculator, const Expression& in
   theDiagram.AmbientRootSystem = theWeyl.rootSystem;
   theDiagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.toString()
-  << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.toString();
+  << ". Simple basis: " << theDiagram.simpleBasesConnectedComponents.toString();
   return output.assignValue(out.str(), calculator);
 }
 

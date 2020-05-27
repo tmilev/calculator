@@ -2784,7 +2784,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
       }
       for (int j = 0; j < this->modules[i][k].size; j ++) {
         ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt = this->modules[i][k][j];
-        Vector<Rational> currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentElt[0].theGeneratorIndex);
+        Vector<Rational> currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentElt[0].generatorIndex);
         this->getWeightProjectionFundamentalCoordinates(currentRoot, theProjection);
         this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, thePrimalProjection);
         if (k == 0) {
@@ -2944,7 +2944,7 @@ void CandidateSemisimpleSubalgebra::computePairingTable() {
   for (int i = 0; i < this->NilradicalPairingTable.size; i ++) {
     for (int j = 0; j < this->ModulesIsotypicallyMerged[i].size; j ++) {
       if (this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(
-        this->ModulesIsotypicallyMerged[i][j][0].theGeneratorIndex).isEqualToZero()
+        this->ModulesIsotypicallyMerged[i][j][0].generatorIndex).isEqualToZero()
       ) {
         this->modulesWithZeroWeights.addOnTop(i);
         break;
@@ -3016,14 +3016,14 @@ void CandidateSemisimpleSubalgebra::computeKsl2TriplesGetOppositeElementsInOppos
 
 Vector<Rational> CandidateSemisimpleSubalgebra::getPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const {
   Vector<Rational> output;
-  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].theGeneratorIndex);
+  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
   this->getPrimalWeightProjectionFundamentalCoordinates(theRoot, output);
   return output;
 }
 
 Vector<Rational> CandidateSemisimpleSubalgebra::getNonPrimalWeightFirstGenerator(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const {
   Vector<Rational> output;
-  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].theGeneratorIndex);
+  Vector<Rational> theRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(input[0].generatorIndex);
   this->getWeightProjectionFundamentalCoordinates(theRoot, output);
   return output;
 }
@@ -3752,7 +3752,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHighestWeigh
   for (int i = 0; i < this->highestVectorsNonSorted.size; i ++) {
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentVector = this->highestVectorsNonSorted[i];
     for (int j = 0; j< currentVector.size(); j ++) {
-      currentRootSpace = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentVector[j].theGeneratorIndex);
+      currentRootSpace = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(currentVector[j].generatorIndex);
       currentWeight.setSize(this->theHs.size + this->CartanOfCentralizer.size);
       for (int k = 0; k < this->theHs.size; k ++) {
         currentWeight[k] = this->getAmbientWeyl().rootScalarCartanRoot(currentRootSpace, this->theHs[k]);
@@ -3833,7 +3833,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
   Vector<Rational> currentRoot;
   List<Vector<Rational> > sortingWeights;
   for (int i = 0; i < this->highestVectorsNonSorted.size; i ++) {
-    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(this->highestVectorsNonSorted[i][0].theGeneratorIndex);
+    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(this->highestVectorsNonSorted[i][0].generatorIndex);
     Vector<Rational>& currentHWPrimal = this->HighestWeightsPrimalNonSorted[i];
     this->getPrimalWeightProjectionFundamentalCoordinates(currentRoot, currentHWPrimal);
     sortingWeights.addOnTop(currentHWPrimal);
@@ -3844,7 +3844,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
   tempModules.setExpectedSize(this->highestVectorsNonSorted.size);
   tempHWs.setExpectedSize(this->highestVectorsNonSorted.size);
   for (int i = 0; i < this->highestVectorsNonSorted.size; i ++) {
-    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(this->highestVectorsNonSorted[i][0].theGeneratorIndex);
+    currentRoot = this->getAmbientSemisimpleLieAlgebra().getWeightOfGenerator(this->highestVectorsNonSorted[i][0].generatorIndex);
     Vector<Rational>& currentHWrelative = this->HighestWeightsNONprimalNonSorted[i];
     Vector<Rational>& currentHWPrimal = this->HighestWeightsPrimalNonSorted[i];
     this->getWeightProjectionFundamentalCoordinates(currentRoot, currentHWrelative);
@@ -4134,7 +4134,7 @@ void CandidateSemisimpleSubalgebra::getGenericCartanCentralizerLinearCombination
   List<ChevalleyGenerator> eltsCartan;
   eltsCartan.setSize(this->getAmbientWeyl().getDimension());
   for (int i = 0; i < eltsCartan.size; i ++) {
-    eltsCartan[i].theGeneratorIndex = this->getAmbientSemisimpleLieAlgebra().getNumberOfPositiveRoots() + i;
+    eltsCartan[i].generatorIndex = this->getAmbientSemisimpleLieAlgebra().getNumberOfPositiveRoots() + i;
     eltsCartan[i].owner = &this->getAmbientSemisimpleLieAlgebra();
   }
   this->getGenericLinearCombination(this->totalNumUnknownsWithCentralizer, offsetIndex, eltsCartan, output);
@@ -4173,7 +4173,7 @@ void CandidateSemisimpleSubalgebra::getGenericLinearCombination(
   output.makeZero();
   for (int i = 0; i < involvedGens.size; i ++) {
     theCF.makeDegreeOne(numVars, varOffset + i, 1);
-    tempMon.makeGenerator(involvedGens[i].theGeneratorIndex, *this->owner->owner);
+    tempMon.makeGenerator(involvedGens[i].generatorIndex, *this->owner->owner);
     tempMon*= theCF;
     output += tempMon;
   }
@@ -4771,8 +4771,8 @@ void SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegular
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++) {
     RootSubalgebra& theSA = owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
     this->computeModuleDecompositionsition(
-      theSA.PositiveRootsK,
-      theSA.SimpleBasisK.size,
+      theSA.positiveRootsReductiveSubalgebra,
+      theSA.simpleRootsReductiveSubalgebra.size,
       this->moduleDecompositionMinimalContainingRootSAs[i],
       buffer
     );
@@ -4786,7 +4786,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   int theDimension = this->getOwnerSemisimpleAlgebra().getRank();
   this->IndicesContainingRootSAs.size = 0;
   Vectors<Rational> tempRoots;
-  tempRoots = MinimalContainingRegularSubalgebra.SimpleBasisK;
+  tempRoots = MinimalContainingRegularSubalgebra.simpleRootsReductiveSubalgebra;
   this->getOwnerSemisimpleAlgebra().theWeyl.transformToSimpleBasisGeneratorsWithRespectToH(tempRoots, this->theH.getCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.AmbientBilinearForm = this->getOwnerWeyl().cartanSymmetric;

@@ -40,8 +40,8 @@ public:
 class ChevalleyGenerator {
 public:
   SemisimpleLieAlgebra* owner;
-  int theGeneratorIndex;
-  ChevalleyGenerator(): owner(nullptr), theGeneratorIndex(- 1) {
+  int generatorIndex;
+  ChevalleyGenerator(): owner(nullptr), generatorIndex(- 1) {
   }
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen) {
     output << theGen.toString();
@@ -49,25 +49,25 @@ public:
   }
   bool checkInitialization() const;
   static unsigned int hashFunction(const ChevalleyGenerator& input) {
-    return static_cast<unsigned>(input.theGeneratorIndex);
+    return static_cast<unsigned>(input.generatorIndex);
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
   void makeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex) {
     this->owner = &inputOwner;
-    this->theGeneratorIndex = inputGeneratorIndex;
+    this->generatorIndex = inputGeneratorIndex;
   }
   void operator=(const ChevalleyGenerator& other) {
     this->owner = other.owner;
-    this->theGeneratorIndex = other.theGeneratorIndex;
+    this->generatorIndex = other.generatorIndex;
   }
   bool operator>(const ChevalleyGenerator& other) const;
   std::string toString(FormatExpressions* inputFormat = nullptr) const;
   void checkConsistencyWithOther(const ChevalleyGenerator& other) const;
   bool operator==(const ChevalleyGenerator& other) const {
     this->checkConsistencyWithOther(other);
-    return this->theGeneratorIndex == other.theGeneratorIndex;
+    return this->generatorIndex == other.generatorIndex;
   }
 };
 
@@ -5845,7 +5845,7 @@ class DynkinDiagramRootSubalgebra {
 public:
   Vectors<Rational> AmbientRootSystem;
   Matrix<Rational> AmbientBilinearForm;
-  List<Vectors<Rational> > SimpleBasesConnectedComponents;
+  List<Vectors<Rational> > simpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
   List<DynkinSimpleType> simpleComponentTypes;

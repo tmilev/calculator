@@ -2101,7 +2101,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& calculator, c
   HashedList<MonomialMacdonald> theOrbit;
   for (int i = 0; i < theRootSAs.theSubalgebras.size; i ++) {
     RootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
-    theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *algebra.content);
+    theGenerator.MakeFromRootSubsystem(currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.toString();
     out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";

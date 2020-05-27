@@ -876,7 +876,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
       this->getOwner().lieBracket(leftGen, rightGen, outputGen);
       otherOutput.makeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
-        tempMat = this->getActionGeneratorIndex(outputGen[k].theGeneratorIndex);
+        tempMat = this->getActionGeneratorIndex(outputGen[k].generatorIndex);
         tempMat *= outputGen.coefficients[k];
         otherOutput += tempMat;
       }

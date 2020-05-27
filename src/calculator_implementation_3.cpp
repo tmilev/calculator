@@ -426,7 +426,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     MatrixTensor<Coefficient> currentOp, tempMat;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
-      tempMat = this->getActionGeneratorIndex(currentElt[j].theGeneratorIndex);
+      tempMat = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
       tempMat *= currentElt.coefficients[j];
       currentOp += tempMat;
     }

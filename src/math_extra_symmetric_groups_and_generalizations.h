@@ -348,7 +348,7 @@ public:
     out = conjugateOn ^ conjugateWith;
   }
 
-  bool operator== (const SemidirectProductElement<helt, kelt, oa> right) const {
+  bool operator==(const SemidirectProductElement<helt, kelt, oa> right) const {
     return (this->h == right.h) && (this->k == right.k);
   }
   bool operator>(const SemidirectProductElement<helt, kelt, oa> right) const {

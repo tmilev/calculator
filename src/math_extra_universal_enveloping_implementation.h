@@ -301,7 +301,7 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   //(L_a)^n =(R_a +ad_a)^n.
   do {
     for (int i = 0; i < adAToTheIthOfB.size(); i ++) {
-      int theNewGeneratorIndex = adAToTheIthOfB[i].theGeneratorIndex;
+      int theNewGeneratorIndex = adAToTheIthOfB[i].generatorIndex;
       tempMon = startMon;
       incomingAcquiredCoefficienT = acquiredCoefficienT;
       incomingAcquiredCoefficienT *= adAToTheIthOfB.coefficients[i];
@@ -361,7 +361,7 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
   //(L_b-ad_b)^n =R_b^n.
   do {
     for (int i = 0; i < adResult.size(); i ++) {
-      int theNewGeneratorIndex = adResult[i].theGeneratorIndex;
+      int theNewGeneratorIndex = adResult[i].generatorIndex;
       tempMon = startMon;
       tempMon.multiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
       incomingAcquiredCoefficient = acquiredCoefficient;
@@ -831,7 +831,7 @@ void ElementUniversalEnveloping<Coefficient>::assignElementLieAlgebra(
   for (int i = 0; i < input.size(); i ++) {
     tempCF = ringUnit; //<- to facilitate implicit type conversion: ringUnit does not have to be of type Rational
     tempCF *= input.coefficients[i];//<- to facilitate implicit type conversion: ringUnit does not have to be of type Rational
-    tempMon.generatorsIndices[0] = input[i].theGeneratorIndex;
+    tempMon.generatorsIndices[0] = input[i].generatorIndex;
     this->addMonomial(tempMon, tempCF);
   }
 }

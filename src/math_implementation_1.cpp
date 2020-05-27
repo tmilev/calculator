@@ -448,7 +448,7 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (!this->powers[k].isSmallInteger(thePower)) {
       return false;
     }
-    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
+    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].generatorIndex);
     const Vector<Rational>& currentRoot = theWeyl.rootSystem[rootIndex];
     for (int j = 0; j < thePower; j ++) {
       currentWeight += currentRoot;

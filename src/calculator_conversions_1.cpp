@@ -18,14 +18,14 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   output.reset(calculator, 2);
   Expression generatorLetterE, generatorIndexE;
   if (
-    input.theGeneratorIndex >= input.owner->getNumberOfPositiveRoots() &&
-    input.theGeneratorIndex < input.owner->getNumberOfPositiveRoots() + input.owner->getRank()
+    input.generatorIndex >= input.owner->getNumberOfPositiveRoots() &&
+    input.generatorIndex < input.owner->getNumberOfPositiveRoots() + input.owner->getRank()
   ) {
     generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("h"), calculator);
   } else {
     generatorLetterE.makeAtom(calculator.addOperationNoRepetitionOrReturnIndexFirst("g"), calculator);
   }
-  generatorIndexE.assignValue(input.owner->getDisplayIndexFromGenerator(input.theGeneratorIndex), calculator);
+  generatorIndexE.assignValue(input.owner->getDisplayIndexFromGenerator(input.generatorIndex), calculator);
   return output.makeXOX(calculator, calculator.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
@@ -796,7 +796,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   Expression chevGenE, powerE, termE;
   List<Expression> theTerms;
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
-    theGen.theGeneratorIndex = input.generatorsIndices[i];
+    theGen.generatorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(calculator, theGen, chevGenE);
     CalculatorConversions::innerExpressionFromRF(calculator, input.powers[i], powerE, inputContext);
     termE.makeXOX(calculator, calculator.opThePower(), chevGenE, powerE);
@@ -890,7 +890,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     std::string theLetter;
     if (
       !singleChevGenE[1].isOperation(&theLetter) ||
-      !singleChevGenE[2].isSmallInteger(&theChevGen.theGeneratorIndex)
+      !singleChevGenE[2].isSmallInteger(&theChevGen.generatorIndex)
     ) {
       return calculator << "<hr>Failed to convert summand "
       << singleChevGenE.toString() << " to Chevalley generator of "
@@ -898,13 +898,13 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     }
     bool isGood = true;
     if (theLetter == "g") {
-      theChevGen.theGeneratorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-      if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.getNumberOfGenerators()) {
+      theChevGen.generatorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.generatorIndex);
+      if (theChevGen.generatorIndex < 0 || theChevGen.generatorIndex >= owner.getNumberOfGenerators()) {
         isGood = false;
       }
       output.addMonomial(theChevGen, polyForm.coefficients[j]);
     } else if (theLetter == "h") {
-      int theRootIndex = owner.getRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
+      int theRootIndex = owner.getRootIndexFromDisplayIndex(theChevGen.generatorIndex);
       if (theRootIndex < 0) {
         isGood = false;
       } else {
@@ -974,7 +974,7 @@ bool CalculatorConversions::innerElementUE(
       std::string theLetter;
       if (
         !singleChevGenE[0].isOperation(&theLetter) ||
-        !singleChevGenE[1].isSmallInteger(&theChevGen.theGeneratorIndex)
+        !singleChevGenE[1].isSmallInteger(&theChevGen.generatorIndex)
       ) {
         return calculator << "<hr>Failed to convert summand "
         << singleChevGenE.toString() << " to Chevalley generator of "
@@ -983,15 +983,15 @@ bool CalculatorConversions::innerElementUE(
       bool isGood = true;
       bool isHonestElementUE = true;
       if (theLetter == "g") {
-        theChevGen.theGeneratorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-        if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.getNumberOfGenerators()) {
+        theChevGen.generatorIndex = owner.getGeneratorFromDisplayIndex(theChevGen.generatorIndex);
+        if (theChevGen.generatorIndex < 0 || theChevGen.generatorIndex >= owner.getNumberOfGenerators()) {
           isGood = false;
         }
       } else if (theLetter == "h") {
-        if (theChevGen.theGeneratorIndex < 1 || theChevGen.theGeneratorIndex>owner.getRank()) {
+        if (theChevGen.generatorIndex < 1 || theChevGen.generatorIndex>owner.getRank()) {
           isGood = false;
         } else {
-          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.getNumberOfPositiveRoots() - 1;
+          theChevGen.generatorIndex = theChevGen.generatorIndex +owner.getNumberOfPositiveRoots() - 1;
         }
       } else {
         isHonestElementUE = false;
@@ -1002,7 +1002,7 @@ bool CalculatorConversions::innerElementUE(
         << owner.toStringLieAlgebraName();
       }
       if (isHonestElementUE) {
-        currentMultiplicand.makeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
+        currentMultiplicand.makeOneGenerator(theChevGen.generatorIndex, owner, 1);
         currentMultiplicand.raiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {

@@ -751,7 +751,7 @@ void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   }
   output.makeZero();
   for (int i = 0; i < input.size(); i ++) {
-    int currentIndex = input[i].theGeneratorIndex;
+    int currentIndex = input[i].generatorIndex;
     output += this->imagesAllChevalleyGenerators[currentIndex] * input.coefficients[i];
   }
 }
@@ -901,11 +901,11 @@ bool ChevalleyGenerator::checkInitialization() const {
 
 std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
   this->checkInitialization();
-  return this->owner->getStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+  return this->owner->getStringFromChevalleyGenerator(this->generatorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other) const {
-  return this->theGeneratorIndex>other.theGeneratorIndex;
+  return this->generatorIndex>other.generatorIndex;
 }
 
 std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
@@ -1225,7 +1225,7 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   this->checkInitialization();
   theCoeffs.makeZero(this->theOwner->getNumberOfGenerators());
   for (int i = 0; i < input.size(); i ++) {
-    int theIndex = input[i].theGeneratorIndex;
+    int theIndex = input[i].generatorIndex;
     theCoeffs[this->theOwner->getGeneratorFromRootIndex(theIndex)] = input.coefficients[i];
   }
   int numPosRoots = this->theOwner->getNumberOfPositiveRoots();

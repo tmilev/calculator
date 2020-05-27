@@ -258,7 +258,7 @@ void SemisimpleLieAlgebra::getAdjoint(Matrix<Coefficient>& output, ElementSemisi
     theGen.makeGenerator(i, *this);
     this->lieBracket(e, theGen, theResult);
     for (int j = 0; j < theResult.size(); j ++) {
-      output(theResult[j].theGeneratorIndex, i) = theResult.coefficients[j];
+      output(theResult[j].generatorIndex, i) = theResult.coefficients[j];
     }
   }
 }
@@ -304,7 +304,7 @@ void SemisimpleLieAlgebra::lieBracket(
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
-      buffer = this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
+      buffer = this->theLiebrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
       theCoeff = g1.coefficients[i];
       theCoeff *= g2.coefficients[j];
       buffer *= theCoeff;
@@ -356,7 +356,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::elementToVectorNegativeRootSpaces
   }
   output.makeZero(this->getOwner()->getNumberOfGenerators());
   for (int i = 0; i < this->size(); i ++) {
-    output[(*this)[i].theGeneratorIndex] = this->coefficients[i];
+    output[(*this)[i].generatorIndex] = this->coefficients[i];
   }
 }
 
@@ -389,7 +389,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
   }
   SemisimpleLieAlgebra* owner = (*this)[0].owner;
   for (int i = 0; i < this->size(); i ++) {
-    if (!owner->isGeneratorFromCartan((*this)[i].theGeneratorIndex)) {
+    if (!owner->isGeneratorFromCartan((*this)[i].generatorIndex)) {
       return false;
     }
   }

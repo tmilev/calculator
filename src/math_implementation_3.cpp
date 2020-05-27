@@ -7163,7 +7163,7 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
     );
     basisChange.directSumWith(tempMat, Rational(0));
   }
-  simpleBasis.assignListList(tempDyn.SimpleBasesConnectedComponents);
+  simpleBasis.assignListList(tempDyn.simpleBasesConnectedComponents);
   coordsInNewBasis.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     input[i].getCoordinatesInBasis(simpleBasis, coordsInNewBasis[i]);

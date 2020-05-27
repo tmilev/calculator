@@ -391,15 +391,15 @@ bool Selection::Test::all() {
 
 bool Selection::Test::testNElements(int n) {
   Selection selection;
-  selection.initialize(0);
-  int counter = 1;
-  while (selection.incrementReturnFalseIfPastLast()) {
+  selection.initialize(n);
+  int counter = 0;
+  do {
     counter ++;
-  }
-  LargeInteger twoToTheNth;
+  } while (selection.incrementReturnFalseIfPastLast());
+  LargeInteger twoToTheNth = 2;
   twoToTheNth.raiseToPower(n);
   if (twoToTheNth != counter) {
-    global.fatal << "Wrong number of subsets of " << n << " elements." << global.fatal;
+    global.fatal << "Got " << counter << " subsets of " << n << " elements, expected: " << twoToTheNth << global.fatal;
   }
   return true;
 }

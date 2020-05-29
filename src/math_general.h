@@ -5525,7 +5525,7 @@ public:
   int HighestIndex;
   int NumberIrrelevantFractions;
   int NumberRelevantReducedFractions;
-  int NumMonomialsInTheNumerators;
+  int numberOfMonomialsInTheNumerators;
   int NumGeneratorsInTheNumerators;
   int NumRelevantNonReducedFractions;
   //int NumRelevantMonomialsInNonReducedFractions;

@@ -1452,7 +1452,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   std::string tempS = out.str();
   out2 << "\n\n" << tempS;
   if (DoEnumeration) {
-    this->TestedRootsAlpha = this->LowestWeightsPrimalSimple;
+    this->testedRootsAlpha = this->LowestWeightsPrimalSimple;
     this->doKRootsEnumeration();
   }
 //  this->getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
@@ -1816,38 +1816,39 @@ void RootSubalgebra::generatePossibleNilradicals(
   }
 }
 
-bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
-  Vectors<Rational>& Range,
+bool RootSubalgebra::attemptExtensionToIsomorphism(
+  Vectors<Rational>& domain,
+  Vectors<Rational>& range,
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms,
   RootSubalgebras& inputOwner,
-  bool* DomainAndRangeGenerateNonIsoSAs
+  bool* domainAndRangeGenerateNonIsoSAs
 ) {
   if (outputAutomorphisms != nullptr) {
     outputAutomorphisms->ExternalAutomorphisms.size = 0;
   }
-  if (DomainAndRangeGenerateNonIsoSAs != nullptr) {
-    *DomainAndRangeGenerateNonIsoSAs = false;
+  if (domainAndRangeGenerateNonIsoSAs != nullptr) {
+    *domainAndRangeGenerateNonIsoSAs = false;
   }
   RootSubalgebra theDomainRootSA;
   RootSubalgebra theRangeRootSA;
   theDomainRootSA.owner = &inputOwner;
   theRangeRootSA.owner = &inputOwner;
-  theDomainRootSA.genK = Domain;
-  theRangeRootSA.genK = Range;
+  theDomainRootSA.genK = domain;
+  theRangeRootSA.genK = range;
   theDomainRootSA.computeEssentials();
   theRangeRootSA.computeEssentials();
   if (
     theDomainRootSA.theDynkinDiagram.toString() != theRangeRootSA.theDynkinDiagram.toString() ||
     theDomainRootSA.theCentralizerDiagram.toString() != theRangeRootSA.theCentralizerDiagram.toString()
   ) {
-    if (DomainAndRangeGenerateNonIsoSAs != nullptr) {
-      *DomainAndRangeGenerateNonIsoSAs = true;
+    if (domainAndRangeGenerateNonIsoSAs != nullptr) {
+      *domainAndRangeGenerateNonIsoSAs = true;
     }
     return false;
   }
   Vectors<Rational> isoDomain, isoRange;
   Permutation permComponentsCentralizer;
-  List<int> tempList, tempPermutation1, tempPermutation2;
+  List<int> tempList, tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
@@ -1868,12 +1869,12 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   Matrix<Rational> tempMat;
   Selection tempSel;
-  for (int i = 0; i <Domain.size; i ++) {
-    isoDomain.addOnTop(Domain[i]);
+  for (int i = 0; i <domain.size; i ++) {
+    isoDomain.addOnTop(domain[i]);
     if (isoDomain.getRankOfSpanOfElements(&tempMat, &tempSel) < isoDomain.size) {
       isoDomain.removeLastObject();
     } else {
-      isoRange.addOnTop(Range[i]);
+      isoRange.addOnTop(range[i]);
     }
   }
   if (isoRange.getRankOfSpanOfElements(&tempMat, &tempSel) < isoRange.size) {
@@ -1893,7 +1894,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
         theRangeRootSA.theCentralizerDiagram
       );
       if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer(
-        isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, &Domain, &Range
+        isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, &domain, &range
       )) {
         if (outputAutomorphisms == nullptr) {
           return true;
@@ -2046,9 +2047,9 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
   //tempMat.ComputeDebugString();
   if (tempMat.invert()) {
     //tempMat.ComputeDebugString();
-    for (int l = 0; l < this->TestedRootsAlpha.size; l ++) {
+    for (int l = 0; l < this->testedRootsAlpha.size; l ++) {
       Vector<Rational> linComb;
-      Vector<Rational>& TestedRootAlpha = this->TestedRootsAlpha[l];
+      Vector<Rational>& TestedRootAlpha = this->testedRootsAlpha[l];
       for (int j = 0; j < theDimension; j ++) {
         linComb[j].makeZero();
         for (int k = 0; k < theDimension; k ++) {

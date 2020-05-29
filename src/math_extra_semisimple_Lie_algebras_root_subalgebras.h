@@ -157,7 +157,7 @@ public:
   Selection NilradicalKmods;
   Selection CentralizerKmods;
   Vectors<Rational> HighestRootsK;
-  Vectors<Rational> TestedRootsAlpha;
+  Vectors<Rational> testedRootsAlpha;
   Vectors<Rational> CentralizerRoots;
   Vectors<Rational> SimpleBasisCentralizerRoots;
   Vectors<Rational> SimpleBasisKEpsCoords;
@@ -236,11 +236,11 @@ public:
     Vectors<Rational>* additionalRange
   );
   static bool attemptExtensionToIsomorphism(
-    Vectors<Rational>& Domain,
-    Vectors<Rational>& Range,
+    Vectors<Rational>& domain,
+    Vectors<Rational>& range,
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
     RootSubalgebras& inputOwner,
-    bool* DomainAndRangeGenerateNonIsoSAs
+    bool* domainAndRangeGenerateNonIsoSAs
   );
   bool checkForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots);
   int numberOfRootsInNilradical();

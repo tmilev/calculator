@@ -108,7 +108,7 @@ class WebAPIResponse {
     bool* answerGenerationSuccess = nullptr,
     bool doIncludeTimeStats = true
   );
-  static std::string GetCommentsInterpretation(
+  static std::string getCommentsInterpretation(
     Calculator& theInterpreterWithAdvice,
     int indexShift,
     FormatExpressions& theFormat

@@ -197,10 +197,10 @@ std::string WebAPIResponse::getSanitizedComment(
   return input.toString(&theFormat);
 }
 
-std::string WebAPIResponse::GetCommentsInterpretation(
+std::string WebAPIResponse::getCommentsInterpretation(
   Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
 ) {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetCommentsInterpretation");
+  MacroRegisterFunctionWithName("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
   theFormat.flagExpressionIsFinal = true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
@@ -384,7 +384,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     return result;
   }
   if (hasCommentsBeforeSubmission){
-    out << WebAPIResponse::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
+    out << WebAPIResponse::getCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
   result[WebAPI::result::millisecondsComputation] = global.getElapsedSeconds() - startTime;
   if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
@@ -1115,7 +1115,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   }
   if (hasCommentsBeforeSubmission) {
     output << "<tr><td>"
-    << WebAPIResponse::GetCommentsInterpretation(theInterpreter, 3, theFormat)
+    << WebAPIResponse::getCommentsInterpretation(theInterpreter, 3, theFormat)
     << "</td></tr>\n";
   }
   if (global.flagDatabaseCompiled) {

@@ -3556,7 +3556,7 @@ void PartialFractions::prepareIndicatorVariables() {
   this->NumGeneratorsRelevenatFractions = 0;
   this->NumMonomialsInNumeratorsIrrelevantFractions = 0;
   this->NumMonomialsInNumeratorsRelevantFractions = 0;
-  this->NumMonomialsInTheNumerators = 1;
+  this->numberOfMonomialsInTheNumerators = 1;
   this->NumTotalReduced = 0;
   this->NumRelevantNonReducedFractions = 0;
   this->NumProcessedForVPFMonomialsTotal = 0;
@@ -4096,7 +4096,7 @@ void PartialFractions::makeProgressReportSplittingMainPart() {
   out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
   << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
   << this->NumMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions << " out of "
-  << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
+  << this->numberOfMonomialsInTheNumerators << " total monomials in the numerators";
   theReport2.report(out2.str());
   if (this->NumGeneratorsInTheNumerators != 0) {
     out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + "

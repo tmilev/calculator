@@ -9,10 +9,13 @@ We aspire to get our system to be as powerful and useful as Mathematica and SAGE
 ## calculator installation 
 1. Download the `courses_calculator` repository:
 ```
-git clone --recurse-submodules -j8 git@github.com:tmilev/courses_calculator.git
+git clone --recurse-submodules -j8 https://github.com/tmilev/courses_calculator.git
 ```
-The repository courses_calculator contains the present repository as a sub-module, 
-as well as a large part of the educational materials. 
+The repository `courses_calculator` contains the present repository as a sub-module, 
+as well as the educational materials in the `freecalc` project
+
+https://github.com/tmilev/freecalc.git
+
 
 2. Compile the calculator.
 

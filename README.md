@@ -39,7 +39,11 @@ Start the calculator as a web server:
 ```
 calculator server
 ```
-Leave the terminal window open if you'd like to monitor what's going on. 
+The terminal window will shows web server traffic log, 
+and includes a link to the web browser interface.
+
+http://localhost:8155
+ 
 The default ports are 8155 (http) and 8166 (https). 
 There is also a default computation timeout
 (computations that take longer than a default amount of seconds will crash).
@@ -50,15 +54,11 @@ These can be overridden of course:
 ./calculator server 10000 portHTTPSOpenSSL 12345 portHTTP 12346
 ```
 
-runs the server on https port `12345`, http port `12346` with a timeout of `10000` seconds.
+runs the server on https port `12345`, http port `12346` with a timeout of `10000` seconds. 
 
-
-
-Open your favorite browser and navigate to 
-
-http://localhost:8155
-
-This completes the setup and your first run.
+While running for first time, you may be prompted to fill in an openSSL certificate.
+This is to fill in a self-signed certificate to be used when running locally; 
+the data of course stays on your computer (in folder `calculator/certificates`).
 
 ### Run the calculator in development mode.
 

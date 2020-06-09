@@ -7,51 +7,64 @@ both researchers and teachers.
 We aspire to get our system to be as powerful and useful as Mathematica and SAGE.
 
 ## calculator installation 
-At the moment, you can only install the calculator from source. Here's what you need to do get started.
-1. Create a folder where you want the calculator project to be.
+1. Download the `courses_calculator` repository:
 ```
-mkdir baseFolder
+git clone --recurse-submodules -j8 git@github.com:tmilev/courses_calculator.git
 ```
-2. Download the source code **inside** that folder. 
-```
-cd baseFolder
-git clone https://github.com/tmilev/calculator.git
+The repository courses_calculator contains the present repository as a sub-module, 
+as well as a large part of the educational materials. 
+
+2. Compile the calculator.
+
+2.1. Default build.
 
 ```
-Please note that **the files you create with the calculator will be placed in baseFolder**, i.e., inside the first folder you created and where you checked out the calculator trunk, but outside of that calculator trunk. In this way, the files you create via the calculator are kept outside of the calculator folder, and so, you can put **baseFolder** in a repository of your own. 
-
-3. Compile the calculator.
-
-3.1. Default build.
-
-- This build assumes you have openssl and mongoDB installed on your system. 
-- However, if you don't have these installed, the build should auto-detect this, turn off mongoDB and openSSL and not fail. If, contrary to promised, the build does fail, please file a bug.
-
-```
-cd calculator
+cd courses_calculator/calculator
 make -j10
 ```
 The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the number 10 to whatever is appropriate for your system (-j10 should work on a 4G RAM laptop).
 
-3.2. To explicitly request a build without mongoDB and openSSL, use the following.
+2.2. The build above assumes you have openssl and mongoDB installed on your system, but should work even if those are absent. 
+If it doesn't, please do let us know by posting a bug report here.
+To explicitly request a build without mongoDB and openSSL, use the following.
 ```
 make -j10 nossl=1 nomongo=1
 ```
 
-### Running the calculator
-5. Start the calculator as a web server:
+### Run the calculator
+Start the calculator as a web server:
 ```
-calculator server 10000
+calculator server
 ```
-The number 10000 gives you computation timeout (computations that take longer than 10000 seconds will crash).
 Leave the terminal window open if you'd like to monitor what's going on. 
-The calculator will try to bind on ports 8155 (http) and 8166 (https). 
+The default ports are 8155 (http) and 8166 (https). 
+There is also a default computation timeout
+(computations that take longer than a default amount of seconds will crash).
 
-6. Open your favorite browser and navigate to 
+These can be overridden of course:
+
+```
+./calculator server 10000 portHTTPSOpenSSL 12345 portHTTP 12346
+```
+
+runs the server on https port `12345`, http port `12346` with a timeout of `10000` seconds.
+
+
+
+Open your favorite browser and navigate to 
 
 http://localhost:8155
 
 This completes the setup and your first run.
+
+### Run the calculator in development mode.
+
+Run 
+```
+./calculator daemon
+```
+will start the calculator in daemon mode. 
+The server will restart when you rebuild the executable successfully.
 
 ### Prerequisites
 1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). 

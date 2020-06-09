@@ -248,7 +248,9 @@ public:
   void substitutionCoefficients(
     PolynomialSubstitution<Rational>& theSub, const Coefficient& ringUnit, const Coefficient& ringZero
   );
-  void substitution(const PolynomialSubstitution<Rational>& theSub);
+  void substitution(
+    const PolynomialSubstitution<Rational>& theSub
+  );
   void makeCasimir(SemisimpleLieAlgebra& theOwner);
   void makeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots);
   static void lieBracket(

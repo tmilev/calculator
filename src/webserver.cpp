@@ -15,6 +15,7 @@
 #include <fcntl.h>//<-setting flags of file descriptors
 #include "math_extra_latex_routines.h"
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
+#include "assert.h"
 
 WebServer& GlobalVariables::server() {
   static WebServer theServer;
@@ -2155,7 +2156,7 @@ void WebWorker::releaseKeepInUseFlag() {
 
 void WebWorker::release() {
   this->releaseKeepInUseFlag();
-  this->flagInUsE = false;
+  this->flagInUse = false;
 }
 
 void WebWorker::getIndicatorOnTimeout(
@@ -2233,7 +2234,7 @@ std::string WebWorker::toStringStatus() const {
   if (this->flagExited) {
     out << ", <b style = 'color:red'>exited</b>";
   }
-  if (this->flagInUsE) {
+  if (this->flagInUse) {
     if (this->parent->activeWorker == this->indexInParent) {
       out << ", <b style ='color:green'>current process</b>";
     } else {
@@ -2284,12 +2285,16 @@ std::string WebWorker::toStringStatus() const {
 
 bool WebServer::checkConsistency() {
   if (this->flagDeallocated) {
-    global.fatal << "Use after free of WebServer." << global.fatal;
+    // The web server is global, if deallocated this is likely
+    // a crash outside of main(). We therefore abstain from using logging.
+    std::cout << "Use after free of WebServer." << std::endl;
+    assert(false);
   }
   return true;
 }
 
 void WebServer::releaseEverything() {
+  this->checkConsistency();
   this->theTLS.free();
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].release();
@@ -2360,7 +2365,8 @@ void WebServer::reapChildren() {
   // Do not use anything that is not thread-safe here.
   // In particular, do not use any loggers.
   int waitResult = 0;
-  int exitFlags = WNOHANG| WEXITED;
+  int exitFlags = WNOHANG | WEXITED;
+  this->checkConsistency();
   do {
     waitResult = waitpid(- 1, nullptr, exitFlags);
     if (waitResult > 0) {
@@ -2452,7 +2458,7 @@ bool WebServer::createNewActiveWorker() {
   }
   bool found = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (!this->theWorkers[i].flagInUsE) {
+    if (!this->theWorkers[i].flagInUse) {
       this->activeWorker = i;
       found = true;
       break;
@@ -2466,12 +2472,12 @@ bool WebServer::createNewActiveWorker() {
   this->getActiveWorker().parent = this;
   this->getActiveWorker().pingMessage = "";
   if (found) {
-    this->theWorkers[this->activeWorker].flagInUsE = true;
+    this->theWorkers[this->activeWorker].flagInUse = true;
     this->theWorkers[this->activeWorker].flagExited = false;
     return true;
   }
   this->getActiveWorker().release();
-  this->theWorkers[this->activeWorker].flagInUsE = false; //<-until everything is initialized, we cannot be in use.
+  this->theWorkers[this->activeWorker].flagInUse = false; //<-until everything is initialized, we cannot be in use.
   std::stringstream stowstream, wtosStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
   wtosStream << "W" << this->activeWorker + 1 << "->S: ";
@@ -2504,7 +2510,7 @@ bool WebServer::createNewActiveWorker() {
   << this->theWorkers.size << ". "
   << Logger::endL;
   this->theWorkers[this->activeWorker].workerId = "";
-  this->theWorkers[this->activeWorker].flagInUsE = true;
+  this->theWorkers[this->activeWorker].flagInUse = true;
   this->theWorkers[this->activeWorker].flagExited = false;
 
   return true;
@@ -2576,7 +2582,7 @@ std::string WebServer::toStringStatusForLogFile() {
   out << this->toStringConnectionSummary();
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUsE) {
+    if (this->theWorkers[i].flagInUse) {
       numInUse ++;
     }
   }
@@ -2611,7 +2617,7 @@ std::string WebServer::toStringStatusAll() {
   }
   for (int i = 0; i < this->theWorkers.size; i ++) {
     WebWorker& currentWorker = this->theWorkers[i];
-    if (!currentWorker.flagInUsE) {
+    if (!currentWorker.flagInUse) {
       continue;
     }
     currentWorker.pipeWorkerToWorkerStatus.readOnceWithoutEmptying(false);
@@ -2677,7 +2683,7 @@ void WebServer::stopKillAll() {
   while (true) {
     workersStillInUse = 0;
     for (int i = 0 ; i < this->theWorkers.size; i ++) {
-      if (!this->theWorkers[i].flagExited && this->theWorkers[i].flagInUsE) {
+      if (!this->theWorkers[i].flagExited && this->theWorkers[i].flagInUse) {
         workersStillInUse ++;
         break;
       }
@@ -2695,6 +2701,7 @@ void WebServer::stopKillAll() {
     << workersStillInUse << " workers to finish. " << Logger::endL;
     global.fallAsleep(1000000);
   }
+  this->releaseEverything();
   this->releaseEverything();
   exit(0);
 }
@@ -2793,7 +2800,7 @@ void WebServer::terminateProcessId(int processId) {
 
 void WebServer::terminateChildSystemCall(int i) {
   // Signal lock not needed: signals are unlocked outside of the select loop.
-  if (!this->theWorkers[i].flagInUsE || this->theWorkers[i].flagExited) {
+  if (!this->theWorkers[i].flagInUse || this->theWorkers[i].flagExited) {
     return;
   }
   this->markChildNotInUse(i);
@@ -2827,7 +2834,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
   List<double> theTimes;
   List<int> theIndices;
   for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUsE) {
+    if (this->theWorkers[i].flagInUse) {
       if (this->theWorkers[i].userAddress == incomingAddress) {
         theTimes.addOnTop(this->theWorkers[i].millisecondsServerAtWorkerStart);
         theIndices.addOnTop(i);
@@ -2866,7 +2873,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
 
 void WebServer::markChildNotInUse(int childIndex) {
   WebWorker& worker = this->theWorkers[childIndex];
-  worker.flagInUsE = false;
+  worker.flagInUse = false;
   this->currentlyConnectedAddresses.subtractMonomial(
     worker.userAddress, 1
   );
@@ -2905,7 +2912,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
 }
 
 void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
-  if (!this->theWorkers[childIndex].flagInUsE) {
+  if (!this->theWorkers[childIndex].flagInUse) {
     return;
   }
   WebWorker& currentWorker = this->theWorkers[childIndex];
@@ -2967,7 +2974,7 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     return;
   }
   for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++) {
-    if (!this->theWorkers[i].flagInUsE) {
+    if (!this->theWorkers[i].flagInUse) {
       continue;
     }
     this->terminateChildSystemCall(i);
@@ -3000,7 +3007,7 @@ void WebServer::recycleChildrenIfPossible() {
   }
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++) {
-    if (this->theWorkers[i].flagInUsE) {
+    if (this->theWorkers[i].flagInUse) {
       numInUse ++;
     }
   }
@@ -3265,7 +3272,7 @@ int WebServer::daemon() {
   global.logs.logType = GlobalVariables::LogData::type::daemon;
   std::stringstream restartCommand;
   restartCommand << global.physicalNameExecutableWithPath << " ";
-  bool prependServer = false;;
+  bool prependServer = false;
   if (global.programArguments.size < 3) {
     prependServer = true;
   } else {
@@ -4018,7 +4025,7 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   }
   ArgumentAnalyzer arguments;
   arguments.currentIndex = 1;
-  arguments.commandLineConfigurations.addOnTop(List<std::string> ({
+  arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
     Configuration::portHTTPSOpenSSL
   }));

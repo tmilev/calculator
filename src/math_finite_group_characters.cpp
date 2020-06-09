@@ -105,7 +105,7 @@ void matrixInBasis(
   out.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
-      out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
+      out.elements[i][j] = basis[i].scalarEuclidean(in * basis[j]);
     }
   }
   out.multiplyOnTheLeft(gramMatrix);
@@ -255,15 +255,15 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
   GM.initialize(d, d);
   for (int i = 0; i < d; i ++) {
     for (int j = 0; j < d; j ++) {
-      GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
+      GM.elements[i][j] = this->basis[i].scalarEuclidean(this->basis[j]);
     }
   }
   GM.invert();
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> out;
-  out.generatorS.setSize(this->generatorS.size);
-  for (int i = 0; i < this->generatorS.size; i ++) {
-  //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
-    matrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
+  out.generators.setSize(this->generators.size);
+  for (int i = 0; i < this->generators.size; i ++) {
+  //     MatrixInBasisFast(out.generators[i], this->generators[i], BM);
+    matrixInBasis(out.generators[i], this->generators[i], this->basis, GM);
   }
   out.ownerGroup = ownerGroup;
   out.basis.makeEiBasis(d);
@@ -283,7 +283,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reduced() const {
 }
 
 template <typename somegroup, typename Coefficient>
-VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::FindDecentBasis() const {
+VectorSpace<Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::findBasis() const {
   VectorSpace<Coefficient> V;
   int d = this->generators[0].numberOfColumns;
   for (int geni = 0; geni < this->generators.size; geni ++) {
@@ -339,7 +339,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
     global.comments << "calculating remaining subrep... ";
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> V;
     V.ownerGroup = this->ownerGroup;
-    V.generatorS = this->generatorS;
+    V.generators = this->generators;
     V.basis = Vb;
     V = V.reduced();
     global.comments << "done\n";
@@ -399,7 +399,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
   for (int i = 0; i < es.size; i ++) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> outeme;
     outeme.ownerGroup = this->ownerGroup;
-    outeme.generatorS = this->generatorS;
+    outeme.generators = this->generators;
     outeme.basis = es[i];
     out.addOnTop(outeme.reduced());
   }
@@ -645,7 +645,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   GM.initialize(W.size, W.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < W.size; j ++) {
-      GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
+      GM.elements[i][j] = W[i].scalarEuclidean(W[j]);
     }
   }
   GM.invert();
@@ -653,7 +653,7 @@ List<Vector<Coefficient> > orthogonal_complement(
   VM.initialize(W.size,V.size);
   for (int i = 0; i < W.size; i ++) {
     for (int j = 0; j < V.size; j ++) {
-      VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
+      VM.elements[i][j] = W[i].scalarEuclidean(V[j]);
     }
   }
   VM.multiplyOnTheLeft(GM);
@@ -1146,7 +1146,7 @@ void WeylGroupData::getSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   List<Vectors<Rational> > theRootSAsBases;
   theRootSAsBases.setExpectedSize(theRootSAs.theSubalgebras.size);
   for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
+    theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].simpleRootsReductiveSubalgebra);
   }
   this->getSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }
@@ -1160,7 +1160,7 @@ void WeylGroupData::getSignSignatureParabolics(List<SubgroupDataRootReflections>
   this->getSignCharacter(signRep.data);
   Selection sel;
   sel.initialize(this->getDimension());
-  int numCycles = MathRoutines::twoToTheNth(sel.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
   outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
@@ -1191,7 +1191,7 @@ void WeylGroupData::getSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   parSelrootsAreInLevi.initialize(this->getDimension() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.makeEiBasis(this->getDimension());
-  extendedBasis.addOnTop(this->RootSystem[0]);
+  extendedBasis.addOnTop(this->rootSystem[0]);
   outputSubgroups.setExpectedSize(MathRoutines::twoToTheNth(this->getDimension()));
   outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;

@@ -4,14 +4,16 @@
 
 template <class Coefficient>
 void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
-  Coefficient& output, const Coefficient& theRingOne, const Coefficient& ringZero
+  Coefficient& output,
+  const Coefficient& ringOne,
+  const Coefficient& ringZero
 ) {
   MacroRegisterFunctionWithName("Matrix::computeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 && this->numberOfRows > 10 && this->numberOfColumns * this->numberOfRows >= 400;
   ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::gaussianElimination);
   int tempI;
-  output = theRingOne;
+  output = ringOne;
   Coefficient tempRat;
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
@@ -47,7 +49,7 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
     for (int j = i + 1; j < dim; j ++) {
       if (!this->elements[j][i].isEqualToZero()) {
         tempRat = this->elements[j][i];
-        tempRat.minus();
+        tempRat.negate();
         this->addTwoRows (i, j, i, tempRat);
         if (doReport) {
           if (theReport2.tickAndWantReport()) {
@@ -597,7 +599,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
       if (j != NumFoundPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
           tempElement = this->elements[j][i];
-          tempElement.minus();
+          tempElement.negate();
           if (theReport.tickAndWantReport()) {
             std::stringstream reportStream;
             reportStream << "Gaussian elimination (" << this->numberOfRows << "x" << this->numberOfColumns

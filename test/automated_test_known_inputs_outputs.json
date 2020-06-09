@@ -21,11 +21,15 @@
   },
   {
     "input":"a = PolynomialModP(x^2 + x + 7, 5);\nb = PolynomialModP(x^2 + 1, 5);\na + b",
-    "output":"(a=PolynomialModP{}(x^{2}+x +2,5);b=PolynomialModP{}(x^{2}+1,5);PolynomialModP{}(2x^{2}+x +3,5))"
+    "output":"(a=PolynomialModP{}(x^{2}+x +2, 5);b=PolynomialModP{}(x^{2}+1, 5);PolynomialModP{}(2x^{2}+x +3, 5))"
+  },
+  {
+    "input":"a = PolynomialModP(x^2 + x + 7, 5);\nb = 3;\na + b",
+    "output":"(a=PolynomialModP{}(x^{2}+x +2, 5);b=3;PolynomialModP{}(x^{2}+x , 5))"
   },
   {
     "input":"p = PolynomialModP(x^2 + x + 7, 5);\na = PolynomialModP(x^2 + 1, 5);\nb = PolynomialModP(x^2, 5);\na mod p;\nb mod p;\na+b",
-    "output":"(p=PolynomialModP{}(x^{2}+x +2,5);a=PolynomialModP{}(x^{2}+1,5);b=PolynomialModP{}(x^{2},5);PolynomialModP{}(4x +4, 5) mod PolynomialModP{}(x^{2}+x +2, 5) ;PolynomialModP{}(4x +3, 5) mod PolynomialModP{}(x^{2}+x +2, 5) ;PolynomialModP{}(2x^{2}+1,5))"
+    "output":"(p=PolynomialModP{}(x^{2}+x +2, 5);a=PolynomialModP{}(x^{2}+1, 5);b=PolynomialModP{}(x^{2}, 5);PolynomialModP{}(4x +4, 5) mod PolynomialModP{}(x^{2}+x +2, 5);PolynomialModP{}(4x +3, 5) mod PolynomialModP{}(x^{2}+x +2, 5);PolynomialModP{}(2x^{2}+1, 5))"
   },
   {
     "input":"\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
@@ -233,7 +237,7 @@
   },
   {
     "input":"PolynomialModP{}(x^5+5x^3+x^2+4x+1, 7) / PolynomialModP{}(x^5+6x^3+x^2+5x+1, 7);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 3);\nPolynomialModP{}(x^3-x+1, 3) / PolynomialModP{}(x^2+2, 7);\nPolynomialModP{}(x^3-x+1, 6) / PolynomialModP{}(2x^2+2, 6);\nPolynomialModP{}(x^3-x+1, 21) / PolynomialModP{}(2x^2+2, 21);\n",
-    "output":"(\\frac{x^{3}+4x +1 mod (7)}{x^{3}+5x +1 mod (7)};\\frac{x^{3}+2x +1 mod (3)}{x^{2}+2 mod (3)};\\frac{PolynomialModP{}(x^{3}+2x +1,3)}{PolynomialModP{}(x^{2}+2,7)};\\frac{PolynomialModP{}(x^{3}+5x +1,6)}{PolynomialModP{}(2x^{2}+2,6)};\\frac{PolynomialModP{}(x^{3}+20x +1,21)}{PolynomialModP{}(2x^{2}+2,21)})"
+    "output":"(\\frac{PolynomialModP{}(x^{3}+4x +1, 7)} {PolynomialModP{}(x^{3}+5x +1, 7)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)} {PolynomialModP{}(x^{2}+2, 3)};\\frac{PolynomialModP{}(x^{3}+2x +1, 3)}{PolynomialModP{}(x^{2}+2, 7)};\\frac{PolynomialModP{}(x^{3}+5x +1, 6)}{PolynomialModP{}(2x^{2}+2, 6)};\\frac{PolynomialModP{}(x^{3}+20x +1, 21)}{PolynomialModP{}(2x^{2}+2, 21)})"
   },
   {
     "input":"(a/b){}x;",
@@ -325,11 +329,11 @@
   },
   {
     "input":"a = PolynomialModP( x^2 + x + 1, 7 );\nb = PolynomialModP( x^3 + x + 1, 7 );\na * b;\na * PolynomialModP( x^3 + x + 1, 5 );",
-    "output":"(a=PolynomialModP{}(x^{2}+x +1,7);b=PolynomialModP{}(x^{3}+x +1,7);PolynomialModP{}(x^{5}+x^{4}+2x^{3}+2x^{2}+2x +1,7);\\left(PolynomialModP{}(x^{2}+x +1,7)\\right)PolynomialModP{}(x^{3}+x +1,5))"
+    "output":"(a=PolynomialModP{}(x^{2}+x +1, 7);b=PolynomialModP{}(x^{3}+x +1, 7);PolynomialModP{}(x^{5}+x^{4}+2x^{3}+2x^{2}+2x +1, 7);\\left(PolynomialModP{}(x^{2}+x +1, 7)\\right)PolynomialModP{}(x^{3}+x +1, 5))"
   },
   {
     "input":"p = PolynomialModP( x^4 + x + 1, 7 );\na = PolynomialModP( x^3 + x + 1, 7 );\nb = PolynomialModP( x + 2, 7 );\nf = a mod p;\ng = b mod p;\nf * g",
-    "output":"(p=PolynomialModP{}(x^{4}+x +1,7);a=PolynomialModP{}(x^{3}+x +1,7);b=PolynomialModP{}(x +2,7);f=PolynomialModP{}(x^{3}+x +1, 7) mod PolynomialModP{}(x^{4}+x +1, 7) ;g=PolynomialModP{}(x +2, 7) mod PolynomialModP{}(x^{4}+x +1, 7) ;PolynomialModP{}(2x^{3}+x^{2}+2x +1, 7) mod PolynomialModP{}(x^{4}+x +1, 7) )"
+    "output":"(p=PolynomialModP{}(x^{4}+x +1, 7);a=PolynomialModP{}(x^{3}+x +1, 7);b=PolynomialModP{}(x +2, 7);f=PolynomialModP{}(x^{3}+x +1, 7) mod PolynomialModP{}(x^{4}+x +1, 7);g=PolynomialModP{}(x +2, 7) mod PolynomialModP{}(x^{4}+x +1, 7);PolynomialModP{}(2x^{3}+x^{2}+2x +1, 7) mod PolynomialModP{}(x^{4}+x +1, 7))"
   },
   {
     "input":"PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};",
@@ -485,7 +489,7 @@
   },
   {
     "input":"p = PolynomialModP(x^2, 7);\nq = PolynomialModP(x^9+x+1, 7);\nr = PolynomialModP(y^2, 7);\ns = PolynomialModP(x^5, 5);\na = p mod q;\na^10;\nr mod q;\ns mod q",
-    "output":"(p=PolynomialModP{}(x^{2},7);q=PolynomialModP{}(x^{9}+x +1,7);r=PolynomialModP{}(y^{2},7);s=PolynomialModP{}(x^{5},5);a=PolynomialModP{}(x^{2}, 7) mod PolynomialModP{}(x^{9}+x +1, 7) ;PolynomialModP{}(x^{4}+2x^{3}+x^{2}, 7) mod PolynomialModP{}(x^{9}+x +1, 7) ;PolynomialModP{}(y^{2},7) mod PolynomialModP{}(x^{9}+x +1,7);PolynomialModP{}(x^{5},5) mod PolynomialModP{}(x^{9}+x +1,7))"
+    "output":"(p=PolynomialModP{}(x^{2}, 7);q=PolynomialModP{}(x^{9}+x +1, 7);r=PolynomialModP{}(y^{2}, 7);s=PolynomialModP{}(x^{5}, 5);a=PolynomialModP{}(x^{2}, 7) mod PolynomialModP{}(x^{9}+x +1, 7);PolynomialModP{}(x^{4}+2x^{3}+x^{2}, 7) mod PolynomialModP{}(x^{9}+x +1, 7);PolynomialModP{}(y^{2}, 7) mod PolynomialModP{}(x^{9}+x +1, 7);PolynomialModP{}(x^{5}, 5) mod PolynomialModP{}(x^{9}+x +1, 7))"
   },
   {
     "input":"0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
@@ -621,11 +625,11 @@
   },
   {
     "input":"a = PolynomialModP{}(x^2 + x + 1, 7);\na^20",
-    "output":"(a=PolynomialModP{}(x^{2}+x +1,7);PolynomialModP{}(x^{40}+6x^{39}+x^{37}+6x^{36}+x^{34}+2x^{33}+4x^{32}+x^{31}+2x^{30}+4x^{29}+x^{28}+2x^{27}+3x^{26}+2x^{25} <br>+2x^{24}+3x^{23}+2x^{22}+2x^{21}+3x^{20}+2x^{19}+2x^{18}+3x^{17}+2x^{16}+2x^{15}+3x^{14}+2x^{13}+x^{12} <br>+4x^{11}+2x^{10}+x^{9}+4x^{8}+2x^{7}+x^{6}+6x^{4}+x^{3}+6x +1,7))"
+    "output":"(a=PolynomialModP{}(x^{2}+x +1, 7);PolynomialModP{}(x^{40}+6x^{39}+x^{37}+6x^{36}+x^{34}+2x^{33}+4x^{32}+x^{31}+2x^{30}+4x^{29}+x^{28}+2x^{27}+3x^{26}+2x^{25} <br>+2x^{24}+3x^{23}+2x^{22}+2x^{21}+3x^{20}+2x^{19}+2x^{18}+3x^{17}+2x^{16}+2x^{15}+3x^{14}+2x^{13}+x^{12} <br>+4x^{11}+2x^{10}+x^{9}+4x^{8}+2x^{7}+x^{6}+6x^{4}+x^{3}+6x +1, 7))"
   },
   {
     "input":"p = x^2 + 3x + 1;\nq = x^3 +x^2 + 3 x + 5;\nmodulusComposite = p * q;\nmodulo = PolynomialModP(modulusComposite, 7);\na = PolynomialModP{}(x+2, 7) mod modulo;\na^(7  );\na^(49);\na^(7^3 );\na^(7^4 );\na^(7^5 );\nr = a^( (7^6 - 1) /2);\ns = PolynomialModP(Value Value r - 1, 7);\nt = PolynomialModP(Value Value r, 7);\nu = PolynomialModP(Value Value r + 1, 7);\nGCDPoly(s, modulo);\nGCDPoly(t, modulo);\nGCDPoly(u, modulo);",
-    "output":"(p=x^{2}+3 x+1;q=x^{3}+x^{2}+3 x+5;modulusComposite=x^{5}+4 x^{4}+7 x^{3}+15 x^{2}+18 x+5;modulo=PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5,7);a=PolynomialModP{}(x +2, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;PolynomialModP{}(5x^{4}+2x^{2}+5x +6, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;PolynomialModP{}(4x^{4}+2x^{3}+4x^{2}+4x +4, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;PolynomialModP{}(3x^{4}+3x^{3}+2x^{2}+2x +2, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;PolynomialModP{}(2x^{4}+4x^{3}+4x +6, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;PolynomialModP{}(5x^{3}+6x^{2}+5x +4, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;r=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+3, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7) ;s=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+2,7);t=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+3,7);u=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+4,7);PolynomialModP{}(x^{3}+x^{2}+3x +5,7);PolynomialModP{}(1,7);PolynomialModP{}(x^{2}+3x +1,7))"
+    "output":"(p=x^{2}+3 x+1;q=x^{3}+x^{2}+3 x+5;modulusComposite=x^{5}+4 x^{4}+7 x^{3}+15 x^{2}+18 x+5;modulo=PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);a=PolynomialModP{}(x +2, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);PolynomialModP{}(5x^{4}+2x^{2}+5x +6, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);PolynomialModP{}(4x^{4}+2x^{3}+4x^{2}+4x +4, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);PolynomialModP{}(3x^{4}+3x^{3}+2x^{2}+2x +2, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);PolynomialModP{}(2x^{4}+4x^{3}+4x +6, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);PolynomialModP{}(5x^{3}+6x^{2}+5x +4, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);r=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+3, 7) mod PolynomialModP{}(x^{5}+4x^{4}+x^{2}+4x +5, 7);s=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+2, 7);t=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+3, 7);u=PolynomialModP{}(2x^{4}+x^{3}+5x^{2}+4, 7);PolynomialModP{}(x^{3}+x^{2}+3x +5, 7);PolynomialModP{}(1, 7);PolynomialModP{}(x^{2}+3x +1, 7))"
   },
   {
     "input":"g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\ng^2",
@@ -905,7 +909,7 @@
   },
   {
     "input":"Value(3 mod 7);\nValue(9 mod 7);\na = Value((PolynomialModP(x^9, 7)) mod (PolynomialModP(x^5+x+1, 7)));\nValue a",
-    "output":"(3;2;a=PolynomialModP{}(6x^{4}+x +1,7);Polynomial{}(6x^{4}+x +1))"
+    "output":"(3;2;a=PolynomialModP{}(6x^{4}+x +1, 7);Polynomial{}(6x^{4}+x +1))"
   },
   {
     "input":" (x,y,t) \\setminus Sequence{}x; (x,y)\\setminus (z,y)",
@@ -945,7 +949,7 @@
   },
   {
     "input":"SetRandomSeed(123);\nRandomInteger(- 100, 100);\nRandomInteger(- 100, 100)",
-    "output":"(\"Successfully set random seed to: 123\";-30;-26)"
+    "output":"(\"Successfully set random seed to: 123. \";-30;-26)"
   },
   {
     "input":"TurnOffRules(\"sqrt\");\na = \\sqrt[4]{t};\nTurnOnRules(\"sqrt\");\na;\nTurnOffRules(\"ConvertShortDenominatorToNegativePower\");\nb=1/t^3;TurnOnRules(\"ConvertShortDenominatorToNegativePower\");b",
@@ -1029,7 +1033,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 100 , 458 )\""
+    "output":"\"(20 , 100 , 460 )\""
   },
   {
     "input":"ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
@@ -1040,8 +1044,8 @@
     "output":"(\"e^{x}\";\"e^x\";\"The quick brown fox jumps over the lazy dog.\")"
   },
   {
-    "input":"f = \\sin {}x / \\cos {}x;\nPlot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
-    "output":"(f=\\frac{\\sin{}x}{\\cos{}x};Plot \\left(\\frac{\\sin{}x}{\\cos{}x}, -\\frac{1}{4} \\pi, \\frac{1}{4} \\pi\\right)+[plot alredy displayed])"
+    "input":"f = \\sin {}x / \\cos {}x;\nPlot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f))",
+    "output":"(f=\\frac{\\sin{}x}{\\cos{}x};[plot alredy displayed])"
   },
   {
     "input":"StringToAtom(\"The quick brown fox jumps over the lazy dog.\")",
@@ -1221,7 +1225,7 @@
   },
   {
     "input":"Product(a, b);\nProduct{}(Sequence{}a);\nProduct(Sequence{}a);\nProduct(a)",
-    "output":"(a b;{Sequence{}\\left(a\\right)};a;a)"
+    "output":"(a b;a;a;a)"
   },
   {
     "input":"\\sum(a, b);\n\\sum();\n\\sum{}(Sequence{}a);\n\\sum(Sequence{}a);\n\\sum(a)",
@@ -1245,7 +1249,11 @@
   },
   {
     "input":"PolynomialModP{}(x^2+x+1, 2);",
-    "output":"PolynomialModP{}(x^{2}+x +1,2)"
+    "output":"PolynomialModP{}(x^{2}+x +1, 2)"
+  },
+  {
+    "input":"SylvesterMatrix(2x^2+2x+2, 3x+3);\nSylvesterMatrix(Polynomial(5x^2+4x+3), Polynomial(2x+1));\nSylvesterMatrix(2, 3x+3);\nSylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 5));\nSylvesterMatrix(x^2+2x+3, 4x+5, 6x+7);\nSylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 7));\nSylvesterMatrix(0, x^2);\n",
+    "output":"(\\begin{pmatrix}3 & 0 & 2\\\\ \n3 & 3 & 2\\\\ \n0 & 3 & 2 \\end{pmatrix};\\begin{pmatrix}2 & 0 & 5\\\\ \n1 & 2 & 4\\\\ \n0 & 1 & 3 \\end{pmatrix};\\begin{pmatrix}2 \\end{pmatrix};\\begin{pmatrix}(3 mod (5)) & (0 mod (5)) & (2 mod (5))\\\\ \n(3 mod (5)) & (3 mod (5)) & (2 mod (5))\\\\ \n(0 mod (5)) & (3 mod (5)) & (2 mod (5)) \\end{pmatrix};\\begin{pmatrix}24 & 0 & 6 & 4\\\\ \n58 & 24 & 19 & 13\\\\ \n35 & 58 & 32 & 22\\\\ \n0 & 35 & 21 & 15 \\end{pmatrix};\\text{Error: \"Sylvester matrix: failed to merge polynomial contexts.\"};SylvesterMatrix{}\\left(0, x^{2}\\right))"
   },
   {
     "input":"a = \\sqrt{2};\nA = ConvertAlgebraicNumberToMatrix(a);\nb = \\sqrt{3};\nB = ConvertAlgebraicNumberToMatrix(b);\nc = \\sqrt{6};\nC = ConvertAlgebraicNumberToMatrix(c);\nA \\otimes B",
@@ -1585,7 +1593,7 @@
   },
   {
     "input":"GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\nGCDPoly(PolynomialModP((x^2+3)(x^3+1), 7), PolynomialModP((x^2+3)(x^3+x+1), 7));\nf=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);\ny=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\nGCDPoly(f, y);\nGCDPoly{}(x y, y+x z);\nGCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
-    "output":"(Polynomial{}(a^{3}-a^{2}b -a b^{2}+b^{3});PolynomialModP{}(x^{2}+3,7);f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3,7);y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);PolynomialModP{}(1,7);Polynomial{}(1);Polynomial{}({x}_{13}^{2}{x}_{21}^{2}))"
+    "output":"(Polynomial{}(a^{3}-a^{2}b -a b^{2}+b^{3});PolynomialModP{}(x^{2}+3, 7);f=PolynomialModP{}(x^{5}+x^{4}+3x^{3}+x^{2}+x +3, 7);y=PolynomialModP{}(3x^{4}+2x^{3}+3x +3, 7);PolynomialModP{}(1, 7);Polynomial{}(1);Polynomial{}({x}_{13}^{2}{x}_{21}^{2}))"
   },
   {
     "input":"LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ 2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}- 4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- 2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
@@ -1908,7 +1916,7 @@
     "output":"\\left(a, c, b, d\\right)"
   },
   {
-    "input":"sort(x^2, x^3, x^1, x^{- 1});\nsort(3,2,1,4,3);\nsort((3,2,3,1));\nsort{}((3,2,3,1));\n",
+    "input":"Sort(x^2, x^3, x^1, x^{- 1});\nSort(3,2,1,4,3);\nSort((3,2,3,1));\nSort{}((3,2,3,1));\n",
     "output":"(\\left(x, x^{-1}, x^{2}, x^{3}\\right);\\left(1, 2, 3, 3, 4\\right);\\left(1, 2, 3, 3\\right);\\left(1, 2, 3, 3\\right))"
   },
   {
@@ -2052,8 +2060,8 @@
     "output":"{1}_{s} {2}_{s} {3}_{s} {2}_{s} {1}_{s} {4}_{s} {3}_{s} {2}_{s} {1}_{s} {3}_{s} {2}_{s} {4}_{s} {3}_{s} {2}_{s} {1}_{s}"
   },
   {
-    "input":"SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)",
-    "output":"(\\left(\\frac{-\\sqrt{b^{2}-4 a c}-b}{2 a}, \\frac{\\sqrt{b^{2}-4 a c}-b}{2 a}\\right);\\frac{-b}{a})"
+    "input":"SolveFor(x, a x^2 + b x + c);\nSolveFor(x, a x + b);\nSolveFor(x, x^3 - 3x^2 - x/2 + 5);",
+    "output":"(\\left(\\frac{-\\sqrt{b^{2}-4 a c}-b}{2 a}, \\frac{\\sqrt{b^{2}-4 a c}-b}{2 a}\\right);\\frac{-b}{a};\\left(2, \\frac{\\sqrt{11}}{2}+\\frac{1}{2}, -\\frac{\\sqrt{11}}{2}+\\frac{1}{2}\\right))"
   },
   {
     "input":"FindOneSolutionSerreLikePolynomialSystem{}(x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}- 1, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}- 1, x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14} - x_{1}x_{13} + 1, x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
@@ -2104,8 +2112,12 @@
     "output":"(\\left(1, x^{4}-22 x^{2}+48 x-23, x^{4}-22 x^{2}-48 x-23\\right);\\left(1, x^{4}+x^{3}-2 x^{2}-3 x+1, x^{4}+x^{3}-2 x^{2}+3 x+1\\right))"
   },
   {
+    "input":"%HideLHS\nFactorUnivariatePolynomialOverRationals{}(182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+102 x^{3}+145 x^{2}+12276 x+261632);\n",
+    "output":"\\left(1, 203 x^{5}+113 x^{4}-102 x^{3}-x^{2}+12 x+512, 901 x^{6}+113 x^{4}+102 x^{3}+x^{2}+12 x+511\\right)"
+  },
+  {
     "input":"FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);\n",
-    "output":"\"Converted polynomial: \\\\(x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008\\\\)<br>\\\\(x^{\\\\frac{1009^{1} - 1}{2}} \\\\)=\\\\( 965x^{4}+597x^{3}+842x^{2}+247x +475(mod (x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008))\\\\), gcd: 1, gcdWithPlusOne: 1, gcdWithMinusOne: x^{2}+514x +522<br>\\\\(x^{\\\\frac{1009^{2} - 1}{2}} \\\\)=\\\\( 203x^{4}+24x^{3}+93x^{2}+625x +932(mod (x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008))\\\\), gcd: 1, gcdWithPlusOne: 1, gcdWithMinusOne: x^{2}+514x +522<br>\\\\(x^{\\\\frac{1009^{3} - 1}{2}} \\\\)=\\\\( 1(mod (x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008))\\\\), gcd: 1, gcdWithPlusOne: 1, gcdWithMinusOne: 0<br>\\\\(x^{\\\\frac{1009^{4} - 1}{2}} \\\\)=\\\\( 965x^{4}+597x^{3}+842x^{2}+247x +475(mod (x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008))\\\\), gcd: 1, gcdWithPlusOne: 1, gcdWithMinusOne: x^{2}+514x +522<br>\\\\(x^{\\\\frac{1009^{5} - 1}{2}} \\\\)=\\\\( 203x^{4}+24x^{3}+93x^{2}+625x +932(mod (x^{5}+x^{4}+2x^{3}+1008x^{2}+1008x +1008))\\\\), gcd: 1, gcdWithPlusOne: 1, gcdWithMinusOne: x^{2}+514x +522<br>\""
+    "output":"\\left((1 mod (1009)), PolynomialModP{}(x +507, 1009), PolynomialModP{}(x +7, 1009), PolynomialModP{}(x^{3}+496x^{2}+822x +663, 1009)\\right)"
   },
   {
     "input":"FactorInteger(10001011);\nFactorInteger(1);\nFactorInteger(- 10);\nFactorInteger(0);",

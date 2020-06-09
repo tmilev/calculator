@@ -298,10 +298,6 @@ public:
     bool isTimedOut();
     Response();
   };
-  // Do not use for cryptographic purposes.
-  // Intended use:
-  // generate random numbers for mathematical problems/education.
-  UnsecurePseudoRandomGenerator unsecurePseudoRandomGenerator;
   Response theResponse;
   ListReferences<std::thread> theThreads;
   ListReferences<ThreadData> theThreadData;

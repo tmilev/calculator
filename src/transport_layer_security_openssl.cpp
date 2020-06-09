@@ -18,6 +18,9 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WA
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
+  this->peer_certificate = nullptr;
+  this->theSSLMethod = nullptr;
+  this->owner = nullptr;
   this->freeSSL();
   this->freeContext();
 }
@@ -42,7 +45,7 @@ void TransportLayerSecurityOpenSSL::freeContext() {
 #ifdef MACRO_use_open_ssl
   // if (this->context != nullptr && this->name != "") {
   // }
-  SSL_CTX_free (this->context);
+  SSL_CTX_free(this->context);
 #endif // MACRO_use_open_ssl
   this->context = nullptr;
 }

@@ -158,37 +158,21 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
-// Do not use for cryptographic purposes.
-// Intended use:
-// generate random numbers for mathematical problems/education.
-class UnsecurePseudoRandomGenerator {
-public:
-  const int maximumRandomSeed = 1000000000;
-  int randomSeed;
-  int64_t randomNumbersGenerated;
-  int bytesConsumed;
-  List<unsigned char>& state();
-  UnsecurePseudoRandomGenerator();
-  void setRandomSeed(int32_t inputRandomSeed);
-  unsigned int getRandomLessThanBillion();
-  signed getRandomPositiveLessThanBillion();
-};
-
 class MathRoutines {
 public:
   template <class Coefficient>
-  static bool invertXModN(const Coefficient& X, const Coefficient& N, Coefficient& output) {
+  static bool invertXModN(const Coefficient& x, const Coefficient& n, Coefficient& output) {
     Coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     Coefficient vD[2], vP[2], temp;
     vP[0] = 1;
     vP[1] = 0; // at any given moment, p = vP[0] * N + vP[1] * X
     vD[0] = 0;
     vD[1] = 1; // at any given moment, d = vD[0] * N + vD[1] * X
-    p = N;
-    d = X;
-    d %= N;
+    p = n;
+    d = x;
+    d %= n;
     if (d < 0) {
-      d += N;
+      d += n;
     }
     while (d > 0) {
       q = p / d;
@@ -204,9 +188,9 @@ public:
     if (!(p == 1)) {
       return false;//d and p were not relatively prime.
     }
-    p = vP[1] % N;
+    p = vP[1] % n;
     if (p < 0) {
-      p += N;
+      p += n;
     }
     output = p;
     return true;
@@ -252,7 +236,7 @@ public:
 
   static char convertHumanReadableHexToCharValue(char input);
   static void nChooseK(int n, int k, LargeInteger& result);
-  static int nChooseK(int n, int k);
+  static LargeInteger nChooseK(int n, int k);
   static int factorial(int n);
   static inline double E() {
     return 2.718281828459;
@@ -365,8 +349,8 @@ public:
 
 class DrawElementInputOutput {
 public:
-  int TopLeftCornerX;
-  int TopLeftCornerY;
+  int topLeftCornerX;
+  int topLeftCornerY;
   int outputWidth;
   int outputHeight;
 };
@@ -552,7 +536,14 @@ public:
     }
     this->setSize(newSize);
   }
-  void setSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void setSize(int theSize); // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void clear() {
+    // <-Registering stack trace forbidden! Multithreading deadlock alert.
+    this->setSize(0);
+  }
+  void setObjectAtIndex(int index, const Object& o) {
+    (*this)[index] = o;
+  }
   void setSizeMakeMatrix(int numRows, int numCols) {
     this->setSize(numRows);
     for (int i = 0; i < numRows; i ++) {
@@ -942,7 +933,6 @@ public:
   void rotate(int r) {
     std::rotate(this->objects, this->objects + r, this->objects + (this->size - 1));
   }
-  int sizeWithoutObjects() const;
   Object* lastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void releaseMemory();
 
@@ -1075,42 +1065,42 @@ class Pair {
   friend std::ostream& operator << (
     std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair
   ) {
-    output << "("  << thePair.Object1 << ", " <<  thePair.Object2 << ")";
+    output << "("  << thePair.object1 << ", " <<  thePair.object2 << ")";
     return output;
   }
 public:
-  ObjectType1 Object1;
-  ObjectType2 Object2;
+  ObjectType1 object1;
+  ObjectType2 object2;
   Pair(){}
-  Pair(const ObjectType1& o1, const ObjectType2& o2): Object1(o1), Object2(o2) {}
+  Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2) {}
   static unsigned int hashFunction(
     const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
   ) {
     return
-      someRandomPrimes[0] * hashFunction1(input.Object1) +
-      someRandomPrimes[1] * hashFunction2(input.Object2);
+      someRandomPrimes[0] * hashFunction1(input.object1) +
+      someRandomPrimes[1] * hashFunction2(input.object2);
   }
   unsigned int hashFunction() const {
     return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(*this);
   }
   void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
-    this->Object1 = other.Object1;
-    this->Object2 = other.Object2;
+    this->object1 = other.object1;
+    this->object2 = other.object2;
   }
   bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) const {
-    return this->Object1 == other.Object1 && this->Object2 == other.Object2;
+    return this->object1 == other.object1 && this->object2 == other.object2;
   }
   bool operator>(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
-    if (this->Object1 > other.Object1) {
+    if (this->object1 > other.object1) {
       return true;
     }
-    if (other.Object1 > this->Object1) {
+    if (other.object1 > this->object1) {
       return false;
     }
-    if (this->Object2 > other.Object2) {
+    if (this->object2 > other.object2) {
       return true;
     }
-    if (other.Object2 > this->Object2) {
+    if (other.object2 > this->object2) {
       return false;
     }
     return false;
@@ -1121,7 +1111,6 @@ typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignI
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {
 private:
-  void addListOnTop(List<Object>& theList);
   Object popIndexShiftDown(int index);
   void reverseElements();
   void shiftUpExpandOnTop(int StartingIndex);
@@ -1180,7 +1169,7 @@ public:
       this->adjustHashes();
     }
   }
-  void addOnTop(const List<Object>& theList) {
+  void addListOnTop(const List<Object>& theList) {
     this->setExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
       this->addOnTop(theList[i]);
@@ -1464,21 +1453,21 @@ public:
   std::string toString() const {
     return this->::List<Object>::toString();
   }
-  void operator=(const HashedList<Object, hashFunction>& From) {
-    if (&From == this) {
+  void operator=(const HashedList<Object, hashFunction>& from) {
+    if (&from == this) {
       return;
     }
     this->clear();
-    this->setHashSize(From.theHashedArrays.size);
-    this->::List<Object>::operator=(From);
-    if (From.isSparse()) {
+    this->setHashSize(from.theHashedArrays.size);
+    this->::List<Object>::operator=(from);
+    if (from.isSparse()) {
       for (int i = 0; i < this->size; i ++) {
         unsigned int hashIndex = this->getHash(this->objects[i]);
-        this->theHashedArrays[hashIndex].reserve(From.theHashedArrays[hashIndex].size);
+        this->theHashedArrays[hashIndex].reserve(from.theHashedArrays[hashIndex].size);
         this->theHashedArrays[hashIndex].addOnTop(i);
       }
     } else {
-      this->theHashedArrays = From.theHashedArrays;
+      this->theHashedArrays = from.theHashedArrays;
     }
   }
   const Object& operator[](int i) const {
@@ -1525,8 +1514,8 @@ public:
   void addOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
   }
-  void addOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(theList);
+  void addListOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addListOnTop(theList);
   }
   bool contains(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::contains(o);
@@ -1621,6 +1610,25 @@ public:
     this->reportType = inputReportType;
   }
   ~ProgressReport();
+};
+
+// Do not use for cryptographic purposes.
+// Intended use:
+// generate random numbers for mathematical problems/education.
+class UnsecurePseudoRandomGenerator {
+private:
+  uint32_t randomSeed;
+public:
+  const unsigned int maximumRandomSeed = 1000000000;
+  int64_t randomNumbersGenerated;
+  int bytesConsumed;
+  List<unsigned char> state;
+  UnsecurePseudoRandomGenerator();
+  uint32_t getRandomSeed();
+  void setRandomSeedSmall(uint32_t inputRandomSeed);
+  void setRandomSeedLarge(const LargeInteger& inputRandomSeed, std::stringstream* comments);
+  unsigned int getRandomNonNegativeLessThanMaximumSeed();
+  signed getRandom();
 };
 
 template<class Base>
@@ -1787,11 +1795,6 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
     smallL->objects[i] = bigL->objects[i];
   }
   bigL->size = smallSize;
-}
-
-template <class Object>
-int List<Object>::sizeWithoutObjects() const {
-  return sizeof(this->actualSize) + sizeof(this->size) + sizeof(this->objects);
 }
 
 template <class Object>

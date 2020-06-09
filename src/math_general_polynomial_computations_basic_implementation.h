@@ -8,10 +8,11 @@
 template <class Coefficient>
 bool MonomialP::substitution(
   const List<Polynomial<Coefficient> >& theSubstitution,
-  Polynomial<Coefficient>& output
+  Polynomial<Coefficient>& output,
+  const Coefficient& one
 ) const {
   MacroRegisterFunctionWithName("MonomialP::substitution");
-  output.makeConstant(1);
+  output.makeConstant(one);
   if (this->isConstant()) {
     return true;
   }
@@ -21,9 +22,10 @@ bool MonomialP::substitution(
       continue;
     }
     if (i >= theSubstitution.size) {
-      global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
+      global.fatal << "Attempt to carry out a substitution in the monomial "
       << this->toString()
-      << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
+      << " which does have non-zero exponent of variable x_{"
+      << i + 1 << "}; however, the input substitution has "
       << theSubstitution.size
       << " variable images. More precisely, the input substitution is:  "
       << theSubstitution.toString() << ". " << global.fatal;
@@ -43,7 +45,7 @@ bool MonomialP::substitution(
       return false;
     }
     tempPoly = theSubstitution[i];
-    tempPoly.raiseToPower(theExponent, 1);
+    tempPoly.raiseToPower(theExponent, one);
     output *= tempPoly;
   }
   return true;
@@ -164,18 +166,19 @@ Rational Polynomial<Coefficient>::totalDegree() const {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::substitution(
-  const List<Polynomial<Coefficient> >& TheSubstitution
+  const List<Polynomial<Coefficient> >& substitution,
+  const Coefficient& one
 ) {
   MacroRegisterFunctionWithName("Polynomial::substitution");
-  Polynomial<Coefficient> Accum, TempPoly;
+  Polynomial<Coefficient> sum, monomialContribution;
   for (int i = 0; i < this->size(); i ++) {
-    if (!(*this)[i].substitution(TheSubstitution, TempPoly)) {
+    if (!(*this)[i].substitution(substitution, monomialContribution, one)) {
       return false;
     }
-    TempPoly *= this->coefficients[i];
-    Accum += TempPoly;
+    monomialContribution *= this->coefficients[i];
+    sum += monomialContribution;
   }
-  *this = Accum;
+  *this = sum;
   return true;
 }
 
@@ -223,9 +226,9 @@ void Polynomial<Coefficient>::makeDegreeOne(
 }
 
 template <class Coefficient>
-Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input) {
+Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input, const Coefficient& zero) {
   MacroRegisterFunctionWithName("Polynomial::evaluate");
-  Coefficient output = 0;
+  Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMon = (*this)[i];
     Coefficient accum = this->coefficients[i];
@@ -248,7 +251,7 @@ Coefficient Polynomial<Coefficient>::evaluate(const Vector<Coefficient>& input) 
         numCycles = - numCycles;
       }
       tempElt = input[j];
-      MathRoutines::raiseToPower(tempElt, numCycles, static_cast<Coefficient>(1));
+      MathRoutines::raiseToPower(tempElt, numCycles, zero.one());
       if (!isPositive) {
         tempElt.invert();
       }
@@ -288,14 +291,16 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::hasSmallIntegralPositivePowers(
   int* whichtotalDegree
 ) const {
-  int whichtotalDegreeContainer = 0;
+  int maximum = 0;
+  int current = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->monomials[i].hasSmallIntegralPositivePowers(&whichtotalDegreeContainer)) {
+    if (!this->monomials[i].hasSmallIntegralPositivePowers(&current)) {
       return false;
     }
+    maximum = MathRoutines::maximum(maximum, current);
   }
   if (whichtotalDegree != nullptr) {
-    *whichtotalDegree = whichtotalDegreeContainer;
+    *whichtotalDegree = maximum;
   }
   return true;
 }
@@ -383,6 +388,126 @@ bool Polynomial<Coefficient>::isLinearNoConstantTerm() {
     if (!this->objects[i].isLinearNoConstantTerm()) {
       return false;
     }
+  }
+  return true;
+}
+
+template <class Coefficient>
+void SylvesterMatrix<Coefficient>::fillSylvesterMatrix(
+  const Polynomial<Coefficient>& polynomial,
+  int columnOffset,
+  Matrix<Coefficient>& output
+) {
+  int totalPower = polynomial.totalDegreeInt();
+  int numberOfColumns = output.numberOfRows - totalPower;
+  for (int i = 0; i < polynomial.size(); i ++) {
+    int power = polynomial.monomials[i].totalDegreeInt();
+    const Coefficient& coefficient = polynomial.coefficients[i];
+    for (int j = 0; j < numberOfColumns; j ++) {
+      int row = totalPower - power + j;
+      int column = j + columnOffset;
+      output(row, column) = coefficient;
+    }
+  }
+}
+
+template <class Coefficient>
+bool SylvesterMatrix<Coefficient>::sylvesterMatrixProduct(
+  const List<Polynomial<Coefficient> >& polynomials,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixProduct");
+  LargeInteger totalPower = 0;
+  for (int i = 0; i < polynomials.size; i ++) {
+    Polynomial<Coefficient>& current = polynomials[i];
+    if (current.minimalNumberOfVariables() > 1) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "I know how to compute Sylvester "
+        << "matrix only for univariate polynomials. Polynomial number "
+        << i + 1 << " has " << current.minimalNumberOfVariables()
+        << " variables.";
+      }
+      return false;
+    }
+    if (current.isEqualToZero()) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "I don't have a Sylvester matrix "
+        << "definition when one of the inputs is the zero polynomial. ";
+      }
+      return false;
+    }
+    int currentPower = 0;
+    if (!current.hasSmallIntegralPositivePowers(&currentPower)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Polynomial powers are not small, positive or integral. ";
+      }
+      return false;
+    }
+    totalPower += currentPower;
+  }
+  int maximumDimension = 1000;
+  if (totalPower == 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The calculator does not allow empty (0x0) "
+      << "Sylvester matrix.";
+    }
+    return false;
+  }
+  if (totalPower > maximumDimension) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The sylvester matrix is too large: "
+      << totalPower << " by " << totalPower
+      << ", the maximum allowed is: " << maximumDimension << " by "
+      << maximumDimension << ". ";
+    }
+    return false;
+  }
+  int dimension = totalPower.getIntValueTruncated();
+  List<Polynomial<Coefficient> > products;
+  for (int i = 0; i < polynomials.size; i ++) {
+    Polynomial<Coefficient> product;
+    product.makeConstant(polynomials[0].coefficients[0].one());
+    for (int j = 0; j < polynomials.size; j ++) {
+      if (i == j) {
+        continue;
+      }
+      product *= polynomials[j];
+    }
+    products.addOnTop(product);
+  }
+  return SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(products, dimension, output);
+}
+
+template <class Coefficient>
+bool SylvesterMatrix<Coefficient>::sylvesterMatrix(
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::sylvesterMatrix");
+  List<Polynomial<Coefficient> > polynomials;
+  polynomials.addOnTop(left);
+  polynomials.addOnTop(right);
+  return SylvesterMatrix::sylvesterMatrixProduct(polynomials, output, commentsOnFailure);
+}
+
+
+template <class Coefficient>
+bool SylvesterMatrix<Coefficient>::sylvesterMatrixMulti(
+  const List<Polynomial<Coefficient> >& polynomials,
+  int dimension,
+  Matrix<Coefficient>& output
+) {
+  MacroRegisterFunctionWithName("SylvesterMatrix::sylvesterMatrixMulti");
+  output.initialize(dimension, dimension);
+  output.makeZero(polynomials[0].coefficients[0].zero());
+  int columnOffset = 0;
+  for (int i = 0; i < polynomials.size; i ++) {
+    SylvesterMatrix<Coefficient>::fillSylvesterMatrix(polynomials[i], columnOffset, output);
+    columnOffset += output.numberOfRows - polynomials[i].totalDegreeInt();
   }
   return true;
 }
@@ -899,13 +1024,55 @@ int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int VariableIndex) {
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::maximum(result, (*this)[i](VariableIndex).numeratorShort);
     if (!(*this)[i](VariableIndex).isSmallInteger()) {
-      global.fatal << " This is a programming error: "
-      << "getMaximumPowerOfVariableIndex called on a polynomial whose monomials "
+      global.fatal << "Function getMaximumPowerOfVariableIndex "
+      << "called on a polynomial whose monomials "
       << "have degrees that are not small integers. "
       << "This needs to be fixed! " << global.fatal;
     }
   }
   return result;
+}
+
+template <class Coefficient>
+void Polynomial<Coefficient>::interpolate(
+  const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints
+) {
+  Polynomial<Coefficient> lagrangeInterpolator, accumulator;
+  this->makeZero();
+  for (int i = 0; i < thePoints.size; i ++) {
+    lagrangeInterpolator.makeConstant(1);
+    for (int j = 0; j < thePoints.size; j ++) {
+      if (i == j) {
+        continue;
+      }
+      accumulator.makeDegreeOne(1, 0, 1, - thePoints[j]);
+      accumulator /= thePoints[i] - thePoints[j];
+      lagrangeInterpolator *= accumulator;
+    }
+    lagrangeInterpolator *= valuesAtThePoints[i];
+    *this += lagrangeInterpolator;
+  }
+}
+
+template <class Coefficient>
+Coefficient Polynomial<Coefficient>::getDiscriminant() {
+  MacroRegisterFunctionWithName("Polynomial::getDiscriminant");
+  if (this->minimalNumberOfVariables() > 1) {
+    global.fatal
+    << "I do not have a definition of discriminant "
+    << "for more than one variable. "
+    << global.fatal;
+  }
+  if (this->totalDegree() != 2) {
+    global.fatal
+    << "Discriminant not implemented for polynomial "
+    << "of degree not equal to 1."
+    << global.fatal;
+  }
+  Coefficient a = this->getCoefficientOf(MonomialP(0, 2));
+  Coefficient b = this->getCoefficientOf(MonomialP(0, 1));
+  Coefficient c = this->getCoefficientOf(MonomialP(0, 0));
+  return b * b - a * c * 4;
 }
 
 template <class Coefficient>
@@ -1346,11 +1513,24 @@ void PolynomialModuloPolynomial<Coefficient>::operator+=(
   const PolynomialModuloPolynomial& other
 ) {
   if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to multiply quotient-ring "
+    global.fatal << "Not allowed to add quotient-ring "
     << "elements of different rings. [This modulus, other modulus]: "
     << this->modulus << ", " << other.modulus << global.fatal;
   }
   this->value += other.value;
+  this->reduce();
+}
+
+template<class Coefficient>
+void PolynomialModuloPolynomial<Coefficient>::operator-=(
+  const PolynomialModuloPolynomial& other
+) {
+  if (other.modulus != this->modulus) {
+    global.fatal << "Not allowed to subtract quotient-ring "
+    << "elements of different rings. [This modulus, other modulus]: "
+    << this->modulus << ", " << other.modulus << global.fatal;
+  }
+  this->value -= other.value;
   this->reduce();
 }
 

@@ -8,200 +8,205 @@
 class CalculatorFunctionsBinaryOps {
 public:
   template <class theType>
-  static bool innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output);
   template <class theType>
-  static bool innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output);
   template <class theType>
-  static bool innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideTypeByType(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddMatrixToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDirectSumMatrixWithMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAugmentMatrixToTheRight(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAugmentMatrixBelow(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddUEToAny(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddEltTensorToEltTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddNumberOrPolynomialToNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddPlotToPlot(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddSequenceToSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddMatrixToMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerDirectSumMatrixWithMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAugmentMatrixToTheRight(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAugmentMatrixBelow(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPolynomialModPToPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP(
-    Calculator& theCommands, const Expression& input, Expression& output
+  static bool innerAddMatrixRFsToMatrixRFs(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddMatrixTensorToMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddRatToRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddStringToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddElementZModPOrRationalToElementZModPOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddPolynomialModuloIntegerToPolynomialModuloInteger(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool innerAddPolynomialModuloIntegerToInteger(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger(
+    Calculator& calculator, const Expression& input, Expression& output
   );
 
-  static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAddWeightToWeight(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyEltHypOctByEltHypOct(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyEltHypOctByEltHypOct(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyPolynomialModPByPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyNumberOrPolynomialByNumberOrPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyPolynomialModPolynomialModPToPolynomialModPolynomialModP(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyScalarByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplySequenceByAnyScalar(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplySequenceByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyLRObyLRO(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyLRObyLSPath(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyScalarByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyScalarBySequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplySequenceByAnyScalar(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplySequenceByMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMultiplyMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRationalByRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCharacterByCharacter(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyEllipticCurveElements(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyRationalByRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyDoubleOrRationalByDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyCharacterByCharacter(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyByUE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyEllipticCurveElements(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyEllipticCurveElementsZmodP(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerLieBracketExtractConstant(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketDistribute(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketSwapTermsIfNeeded(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketJacobiIdentityIfNeeded(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketExtractConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLieBracketDistribute(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLieBracketSwapTermsIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLieBracketJacobiIdentityIfNeeded(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerDivideRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDivideDoubleByDouble(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideRatByRat(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerDivideDoubleByDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
 
   static bool innerDividePolynomialModuloIntegerByPolynomialModuloInteger(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerDivideRationalFunctionOrPolynomialOrRationalByRationalFunctionOrPolynomial(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerMatrixNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatrixNumbersBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerMatrixExpressionsBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerMatrixNumbersByLargeIntegerIfPossible(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerRationalByInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerAlgebraicNumberPolynomialBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerRationalByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerAlgebraicNumberPolynomialBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialModuloIntegerBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerPolynomialModPModuloPolynomialModPBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerEWABySmallInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerDoubleOrRationalToDoubleOrRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerSequenceOrMatrixByT(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPowerElementZmodPByInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerEllipticCurveRationalElementByInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerEllipticCurveZmodPElementByInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerElementZmodPByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerEllipticCurveRationalElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPowerEllipticCurveZmodPElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerNChooseK(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSetMinus(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTensorMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTensorMatByMatTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTensorEltTensorByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerTensorMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerTensorMatByMatTensor(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPolynomialModPModuloPolynomialModP(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
 };
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
   theType result = inputContextsMerged[1].getValue<theType>();
   result *= inputContextsMerged[2].getValue<theType>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
   theType result;
   result = inputContextsMerged[1].getValue<theType>();
   result += inputContextsMerged[2].getValue<theType>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class theType>
-bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideTypeByType");
   if (input.size() != 3) {
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.comments)) {
+  if (!input.mergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &calculator.comments)) {
     return false;
   }
   if (inputContextsMerged[2].getValue<theType>().isEqualToZero()) {
-    return output.makeError("Division by zero. ", theCommands);
+    return output.makeError("Division by zero. ", calculator);
   }
   theType result = inputContextsMerged[1].getValue<theType>();
   result /= inputContextsMerged[2].getValue<theType>();
-  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), theCommands);
+  return output.assignValueWithContext(result, inputContextsMerged[1].getContext(), calculator);
 }
 
 template <class Coefficient>
 bool CalculatorConversions::innerPolynomial(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorConversions::functionPolynomial<Coefficient>(theCommands, input[1], output);
+  return CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], output);
 }
 
 template <class Coefficient>
-bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorConversions::functionPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDeptH > theCommands.maximumRecursionDepth) {
-    return theCommands << "Max recursion depth of " << theCommands.maximumRecursionDepth
+  RecursionDepthCounter theRecursionCounter(&calculator.recursionDepth);
+  if (calculator.recursionDepth > calculator.maximumRecursionDepth) {
+    return calculator << "Max recursion depth of " << calculator.maximumRecursionDepth
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   }
   if (input.isOfType<Polynomial<Coefficient> >()) {
@@ -213,7 +218,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
     Polynomial<Coefficient> converted;
     input.isOfType(&thePolynomial);
     converted = thePolynomial;
-    return output.assignValueWithContext(converted, input.getContext(), theCommands);
+    return output.assignValueWithContext(converted, input.getContext(), calculator);
   }
   if (input.isOfType<Coefficient>() || input.isOfType<Rational>()) {
     if (!input.convertInternally<Polynomial<Coefficient> >(output)) {
@@ -224,51 +229,51 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   }
   Expression theConverted, theComputed;
   if (
-    input.isListStartingWithAtom(theCommands.opTimes()) ||
-    input.isListStartingWithAtom(theCommands.opPlus())
+    input.isListStartingWithAtom(calculator.opTimes()) ||
+    input.isListStartingWithAtom(calculator.opPlus())
   ) {
-    theComputed.reset(theCommands, input.size());
+    theComputed.reset(calculator, input.size());
     theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
       if (!CalculatorConversions::functionPolynomial<Coefficient>(
-        theCommands, input[i], theConverted
+        calculator, input[i], theConverted
       )) {
-        return theCommands << "<hr>Failed to extract polynomial from "
+        return calculator << "<hr>Failed to extract polynomial from "
         << input[i].toString();
       }
       theComputed.addChildOnTop(theConverted);
     }
-    if (input.isListStartingWithAtom(theCommands.opTimes())) {
+    if (input.isListStartingWithAtom(calculator.opTimes())) {
       return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolynomialByNumberOrPolynomial(
-        theCommands, theComputed, output
+        calculator, theComputed, output
       );
     }
-    if (input.isListStartingWithAtom(theCommands.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(theCommands, theComputed, output);
+    if (input.isListStartingWithAtom(calculator.opPlus())) {
+      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, theComputed, output);
     }
     global.fatal << "Error, this line of code should never be reached. " << global.fatal;
   }
-  if (input.startsWith(theCommands.opMinus(), 3)) {
-    theComputed.reset(theCommands, input.size());
+  if (input.startsWith(calculator.opMinus(), 3)) {
+    theComputed.reset(calculator, input.size());
     theComputed.addChildOnTop(input[0]);
     for (int i = 1; i < 3; i ++) {
       Expression summand = input[i];
       if (i == 2) {
         summand *= - 1;
       }
-      if (!CalculatorConversions::functionPolynomial<Coefficient>(theCommands, summand, theConverted)) {
-        return theCommands << "<hr>Failed to extract polynomial from " << summand.toString();
+      if (!CalculatorConversions::functionPolynomial<Coefficient>(calculator, summand, theConverted)) {
+        return calculator << "<hr>Failed to extract polynomial from " << summand.toString();
       }
       theComputed.addChildOnTop(theConverted);
     }
-    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(theCommands, theComputed, output);
+    return CalculatorFunctionsBinaryOps::innerAddNumberOrPolynomialToNumberOrPolynomial(calculator, theComputed, output);
   }
 
   int thePower = - 1;
-  if (input.startsWith(theCommands.opThePower(), 3)) {
+  if (input.startsWith(calculator.opThePower(), 3)) {
     if (input[2].isSmallInteger(&thePower)) {
-      if (!CalculatorConversions::functionPolynomial<Coefficient>(theCommands, input[1], theConverted)) {
-        return theCommands
+      if (!CalculatorConversions::functionPolynomial<Coefficient>(calculator, input[1], theConverted)) {
+        return calculator
         << "<hr>Failed to extract polynomial from "
         << input[1].toString() << ".";
       }
@@ -276,28 +281,28 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       if (thePower < 0) {
         Coefficient theConst;
         if (!resultP.isConstant(&theConst)) {
-          theCommands << "<hr>Failed to extract polynomial from  "
+          calculator << "<hr>Failed to extract polynomial from  "
           << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "
           << "I am treating " << input.toString() << " as a single variable. ";
           Polynomial<Coefficient> monomial;
           monomial.makeMonomial(0, 1, 1);
-          ExpressionContext theContext(theCommands);
+          ExpressionContext theContext(calculator);
           theContext.makeOneVariable(input);
-          return output.assignValueWithContext(monomial, theContext, theCommands);
+          return output.assignValueWithContext(monomial, theContext, calculator);
         }
         theConst.invert();
         thePower *= - 1;
         resultP = theConst;
       }
       resultP.raiseToPower(thePower, 1);
-      return output.assignValueWithContext(resultP, theConverted.getContext(), theCommands);
+      return output.assignValueWithContext(resultP, theConverted.getContext(), calculator);
     }
   }
   Polynomial<Coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   theContext.makeOneVariable(input);
-  return output.assignValueWithContext(monomial, theContext, theCommands);
+  return output.assignValueWithContext(monomial, theContext, calculator);
 }
 #endif

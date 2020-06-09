@@ -765,7 +765,7 @@ bool SSLContent::decodeSupportedCiphers(std::stringstream* commentsOnFailure) {
   this->cipherSpecLength = halfCipherLength * 2; // make sure cipher spec length is even.
   if (this->cipherSpecLength + this->owner->offsetDecoded >= this->owner->incomingBytes.size) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
+      *commentsOnFailure << "cipher suite length: " << this->cipherSpecLength << " exceeds message length. ";
     }
     return false;
   }

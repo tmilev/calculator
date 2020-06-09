@@ -59,8 +59,8 @@ void Weight<Coefficient>::accountSingleWeight(
   dominant += theWeyl.rho;
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
-  for (int i = 0; i < theWeyl.RootsOfBorel.size; i ++) {
-    if (theWeyl.rootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).isEqualToZero()) {
+  for (int i = 0; i < theWeyl.rootsOfBorel.size; i ++) {
+    if (theWeyl.rootScalarCartanRoot(dominant, theWeyl.rootsOfBorel[i]).isEqualToZero()) {
       return;
     }
   }
@@ -171,7 +171,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(CharacterSemisimp
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     tempM = (*this)[i];
-    tempM.weightFundamentalCoordS.minus();
+    tempM.weightFundamentalCoordS.negate();
     output.addMonomial(tempM, this->coefficients[i]);
   }
 }
@@ -258,7 +258,7 @@ void SemisimpleLieAlgebra::getAdjoint(Matrix<Coefficient>& output, ElementSemisi
     theGen.makeGenerator(i, *this);
     this->lieBracket(e, theGen, theResult);
     for (int j = 0; j < theResult.size(); j ++) {
-      output(theResult[j].theGeneratorIndex, i) = theResult.coefficients[j];
+      output(theResult[j].generatorIndex, i) = theResult.coefficients[j];
     }
   }
 }
@@ -304,7 +304,7 @@ void SemisimpleLieAlgebra::lieBracket(
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
-      buffer = this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
+      buffer = this->theLiebrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
       theCoeff = g1.coefficients[i];
       theCoeff *= g2.coefficients[j];
       buffer *= theCoeff;
@@ -356,7 +356,7 @@ void ElementSemisimpleLieAlgebra<Coefficient>::elementToVectorNegativeRootSpaces
   }
   output.makeZero(this->getOwner()->getNumberOfGenerators());
   for (int i = 0; i < this->size(); i ++) {
-    output[(*this)[i].theGeneratorIndex] = this->coefficients[i];
+    output[(*this)[i].generatorIndex] = this->coefficients[i];
   }
 }
 
@@ -389,7 +389,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
   }
   SemisimpleLieAlgebra* owner = (*this)[0].owner;
   for (int i = 0; i < this->size(); i ++) {
-    if (!owner->isGeneratorFromCartan((*this)[i].theGeneratorIndex)) {
+    if (!owner->isGeneratorFromCartan((*this)[i].generatorIndex)) {
       return false;
     }
   }
@@ -433,7 +433,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
       break;
     }
     for (int j = 0; j < finalWeights.size; j ++) {
-      convertor = finalWeights[j].GetVectorRational();
+      convertor = finalWeights[j].getVectorRational();
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMults) {
         theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
@@ -463,7 +463,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMeAssumeCharIsOverCar
   actualAmbientWeyl.drawRootSystem(theDrawingVars, true, false, nullptr, false);
   for (int j = 0; j < this->size(); j ++) {
     actualWeight = actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
-    actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
+    actualWeightRationalPart = actualWeight.getVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
     theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
   }
@@ -652,7 +652,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordS
-      ).GetVectorRational();
+      ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");

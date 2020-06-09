@@ -40,8 +40,8 @@ public:
 class ChevalleyGenerator {
 public:
   SemisimpleLieAlgebra* owner;
-  int theGeneratorIndex;
-  ChevalleyGenerator(): owner(nullptr), theGeneratorIndex(- 1) {
+  int generatorIndex;
+  ChevalleyGenerator(): owner(nullptr), generatorIndex(- 1) {
   }
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen) {
     output << theGen.toString();
@@ -49,25 +49,25 @@ public:
   }
   bool checkInitialization() const;
   static unsigned int hashFunction(const ChevalleyGenerator& input) {
-    return static_cast<unsigned>(input.theGeneratorIndex);
+    return static_cast<unsigned>(input.generatorIndex);
   }
   unsigned int hashFunction() const {
     return this->hashFunction(*this);
   }
   void makeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex) {
     this->owner = &inputOwner;
-    this->theGeneratorIndex = inputGeneratorIndex;
+    this->generatorIndex = inputGeneratorIndex;
   }
   void operator=(const ChevalleyGenerator& other) {
     this->owner = other.owner;
-    this->theGeneratorIndex = other.theGeneratorIndex;
+    this->generatorIndex = other.generatorIndex;
   }
   bool operator>(const ChevalleyGenerator& other) const;
   std::string toString(FormatExpressions* inputFormat = nullptr) const;
   void checkConsistencyWithOther(const ChevalleyGenerator& other) const;
   bool operator==(const ChevalleyGenerator& other) const {
     this->checkConsistencyWithOther(other);
-    return this->theGeneratorIndex == other.theGeneratorIndex;
+    return this->generatorIndex == other.generatorIndex;
   }
 };
 
@@ -397,7 +397,11 @@ public:
     return true;
   }
   template <class Coefficient>
-  bool substitution(const List<Polynomial<Coefficient> >& theSubstitution, Polynomial<Coefficient>& output) const;
+  bool substitution(
+    const List<Polynomial<Coefficient> >& theSubstitution,
+    Polynomial<Coefficient>& output,
+    const Coefficient& one
+  ) const;
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGreatestCommonDivisor();
@@ -452,7 +456,7 @@ public:
   }
   void invert() {
     for (int i = 0; i < this->monBody.size; i ++) {
-      this->monBody[i].minus();
+      this->monBody[i].negate();
     }
   }
   bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
@@ -489,12 +493,13 @@ class Matrix {
   friend std::ostream& operator<< <Coefficient>(std::ostream& output, const Matrix<Coefficient>& theMat);
   //friend std::iostream& operator>> <Coefficient>(std::iostream& input, Matrix<Coefficient>& theMat);
 public:
-  int numberOfRows; int ActualNumRows;
-  int numberOfColumns; int ActualNumCols;
+  int numberOfRows;
+  int actualNumberOfRows;
+  int numberOfColumns;
+  int actualNumberOfColumns;
   Coefficient** elements;
-  static bool flagComputingDebugInfo;
   bool flagDeallocated;
-  void initialize(int r, int c);
+  void initialize(int desiredNumberOfRows, int desiredNumberOfColumns);
   void releaseMemory();
   bool isPositiveDefinite();
   bool isNonNegativeAllEntries() {
@@ -507,11 +512,11 @@ public:
     }
     return true;
   }
-  void resize(int r, int c, bool PReserveValues, const Coefficient* ringZero = nullptr);
-  Matrix(): numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(nullptr), flagDeallocated(false) {
+  void resize(int desiredRows, int desiredColumns, bool preserveValues, const Coefficient* ringZero = nullptr);
+  Matrix(): numberOfRows(0), actualNumberOfRows(0), numberOfColumns(0), actualNumberOfColumns(0), elements(nullptr), flagDeallocated(false) {
   }
   Matrix(const Matrix<Coefficient>& other):
-    numberOfRows(0), ActualNumRows(0), numberOfColumns(0), ActualNumCols(0), elements(0), flagDeallocated(false) {
+    numberOfRows(0), actualNumberOfRows(0), numberOfColumns(0), actualNumberOfColumns(0), elements(0), flagDeallocated(false) {
     *this = other;
   }
   ~Matrix() {
@@ -611,14 +616,14 @@ public:
     for (int j = 0; j < d; j ++) {
       input.actOnVectorColumn(basis[j], tempV);
       for (int i = 0; i < d; i ++) {
-        output.elements[i][j] = basis[i].ScalarEuclidean(tempV);
+        output.elements[i][j] = basis[i].scalarEuclidean(tempV);
       }
     }
     output.multiplyOnTheLeft(gramMatrixInverted);
   }
   void computeDeterminantOverwriteMatrix(
     Coefficient& output,
-    const Coefficient& theRingOne = 1,
+    const Coefficient& ringOne = 1,
     const Coefficient& ringZero = 0
   );
   void actOnVectorROWSOnTheLeft(List<Vector<Coefficient> >& standOnTheRightAsVectorRow) const {
@@ -683,17 +688,17 @@ public:
       return;
     }
     if (this->numberOfColumns != input.size) {
-      global.fatal << "This is a programming error: attempting to multiply a matrix with "
+      global.fatal << "Attempt to multiply a matrix with "
       << this->numberOfColumns << " columns with a vector(column) of "
       << " dimension " << input.size << ". " << global.fatal;
     }
-    output.makeZero(this->numberOfRows);
-    otherType tempElt;
+    output.makeZero(this->numberOfRows, ringZero);
+    otherType product;
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        tempElt = this->elements[i][j];
-        tempElt *= input[j];
-        output[i] += tempElt;
+        product = this->elements[i][j];
+        product *= input[j];
+        output[i] += product;
       }
     }
   }
@@ -727,10 +732,10 @@ public:
       return;
     }
     if (this->numberOfColumns != input.getDimension()) {
-      global.fatal << "This is a programming error: attempting to act by "
-      << this->toString() << "(an " << this->numberOfRows << " x "
+      global.fatal << "Attempt to act by "
+      << this->toString() << " (an " << this->numberOfRows << " x "
       << this->numberOfColumns << " matrix) on a column vector "
-      << input.toString() << "(dimension " << input.size << ")." << global.fatal;
+      << input.toString() << " (dimension " << input.size << "). " << global.fatal;
     }
     output.setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
@@ -827,8 +832,8 @@ public:
   Coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->numberOfRows || j < 0 || j >= this->numberOfColumns) {
       global.fatal
-      << "This is a programming error: requesting row, column indexed by "
-      << i << " and " << j << " but I am a matrix with "
+      << "Request of (row, column) with index ("
+      << i << ", " << j << "), but the present matrix has "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " colums. " << global.fatal;
     }
@@ -992,7 +997,7 @@ public:
   }
   void assignVectorToRowKeepOtherRowsIntactNoInitialization(int rowIndex, const Vector<Coefficient>& input) {
     if (input.size != this->numberOfColumns || rowIndex >= this->numberOfRows || rowIndex < 0) {
-      global.fatal << "Error: attempting to assign vector " << input.toString()
+      global.fatal << "Attempt to assign vector " << input.toString()
       << " (" << input.size << " coordinates) "
       << " to row with index " << rowIndex << " in a matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns << " columns. " << global.fatal;
@@ -1082,7 +1087,7 @@ public:
   );
   void operator+=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
-      global.fatal << "This is a programming error: attempting to add matrix with "
+      global.fatal << "Attempt to add matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " columns to a matrix with " << right.numberOfRows << " rows and "
       << right.numberOfColumns << " columns. " << global.fatal;
@@ -1096,7 +1101,7 @@ public:
   LargeIntegerUnsigned findPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<Coefficient>& right) {
     if (this->numberOfRows != right.numberOfRows || this->numberOfColumns != right.numberOfColumns) {
-      global.fatal << "This is a programming error: attempting to subtract from matrix with "
+      global.fatal << "Attempt to subtract from matrix with "
       << this->numberOfRows << " rows and " << this->numberOfColumns
       << " columns a matrix with " << right.numberOfRows << " rows and "
       << right.numberOfColumns << " columns. " << global.fatal;
@@ -1132,7 +1137,11 @@ public:
     *this = tempMat;
   }
   static void lieBracket(const Matrix<Coefficient>& left, const Matrix<Coefficient>& right, Matrix<Coefficient>& output) {
-    if (left.numberOfColumns != left.numberOfRows || right.numberOfColumns != right.numberOfRows || left.numberOfColumns != right.numberOfColumns) {
+    if (
+      left.numberOfColumns != left.numberOfRows ||
+      right.numberOfColumns != right.numberOfRows ||
+      left.numberOfColumns != right.numberOfColumns
+    ) {
       global.fatal << "In lieBracket: bad dimensions of matrices. " << global.fatal;
     }
     Matrix<Coefficient> tempPlus, tempMinus;
@@ -1210,7 +1219,7 @@ public:
   static void computePotentialChangeGradient(
     Matrix<Coefficient>& matA,
     Selection& BaseVariables,
-    int NumTrueVariables,
+    int numberOfTrueVariables,
     int ColumnIndex,
     Rational& outputChangeGradient,
     bool& hasAPotentialLeavingVariable
@@ -1273,7 +1282,7 @@ public:
 template <class Coefficient>
 bool Vectors<Coefficient>::conesIntersect(
   List<Vector<Rational> >& StrictCone,
-  List<Vector<Rational> >& NonStrictCone,
+  List<Vector<Rational> >& nonStrictCone,
   Vector<Rational>* outputLinearCombo,
   Vector<Rational>* outputSplittingNormal
 ) {
@@ -1281,14 +1290,14 @@ bool Vectors<Coefficient>::conesIntersect(
   Matrix<Rational> matb;
   if (StrictCone.size == 0) {
     if (outputSplittingNormal != nullptr) {
-      if (NonStrictCone.size > 0) {
-        outputSplittingNormal->makeZero(NonStrictCone[0].size);
+      if (nonStrictCone.size > 0) {
+        outputSplittingNormal->makeZero(nonStrictCone[0].size);
       }
     }
     return false;
   }
   int theDimension = StrictCone[0].size;
-  int numCols = StrictCone.size + NonStrictCone.size;
+  int numCols = StrictCone.size + nonStrictCone.size;
   matA.initialize(theDimension + 1, numCols);
   matb.initialize(theDimension + 1, 1);
   matb.makeZero(); matb.elements[theDimension][0].makeOne();
@@ -1298,11 +1307,11 @@ bool Vectors<Coefficient>::conesIntersect(
     }
     matA.elements[theDimension][i].makeOne();
   }
-  for (int i = 0; i < NonStrictCone.size; i ++) {
+  for (int i = 0; i < nonStrictCone.size; i ++) {
     int currentCol = i + StrictCone.size;
     for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][currentCol].assign(NonStrictCone[i][k]);
-      matA.elements[k][currentCol].minus();
+      matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
+      matA.elements[k][currentCol].negate();
     }
     matA.elements[theDimension][currentCol].makeZero();
   }
@@ -1310,14 +1319,14 @@ bool Vectors<Coefficient>::conesIntersect(
     matA, matb, outputLinearCombo
   )) {
     if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
+      bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(StrictCone, nonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
         global.fatal << "This is an algorithmic/mathematical (hence also programming) error. "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
         << StrictCone.toString() << "<br>Non-strict cone: <br>"
-        << NonStrictCone.toString() << "<br>" << global.fatal;
+        << nonStrictCone.toString() << "<br>" << global.fatal;
       }
     }
     return false;
@@ -1331,7 +1340,7 @@ bool Vectors<Coefficient>::conesIntersect(
 }
 
 template <typename Element>
-void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* const ringZero) {
+void Matrix<Element>::resize(int r, int c, bool preserveValues, const Element* const ringZero) {
   if (r < 0) {
     r = 0;
   }
@@ -1347,9 +1356,9 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
     return;
   }
   Element** newElements = nullptr;
-  int newActualNumCols = MathRoutines::maximum(this->ActualNumCols, c);
-  int newActualNumRows = MathRoutines::maximum(this->ActualNumRows, r);
-  if (r > this->ActualNumRows || c > this->ActualNumCols) {
+  int newActualNumCols = MathRoutines::maximum(this->actualNumberOfColumns, c);
+  int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
+  if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
     newElements  = new Element * [newActualNumRows];
 #ifdef AllocationLimitsSafeguard
   GlobalStatistics::globalPointerCounter += newActualNumRows;
@@ -1365,7 +1374,7 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
   }
   int firstInvalidRow = MathRoutines::minimum(this->numberOfRows, r);
   int firstInvalidCol = MathRoutines::minimum(this->numberOfColumns, c);
-  if (PReserveValues && newElements != nullptr) {
+  if (preserveValues && newElements != nullptr) {
     for (int j = 0; j < firstInvalidRow; j ++) {
       for (int i = 0; i < firstInvalidCol; i ++) {
         newElements[j][i] = this->elements[j][i];
@@ -1373,7 +1382,7 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
     }
   }
   if (ringZero != nullptr) {
-    if (!PReserveValues) {
+    if (!preserveValues) {
       firstInvalidRow = 0;
       firstInvalidCol = 0;
     }
@@ -1387,8 +1396,8 @@ void Matrix<Element>::resize(int r, int c, bool PReserveValues, const Element* c
   if (newElements != nullptr) {
     this->releaseMemory();
     this->elements = newElements;
-    this->ActualNumCols = newActualNumCols;
-    this->ActualNumRows = newActualNumRows;
+    this->actualNumberOfColumns = newActualNumCols;
+    this->actualNumberOfRows = newActualNumRows;
   }
   this->numberOfColumns = c;
   this->numberOfRows = r;
@@ -1463,34 +1472,41 @@ void Matrix<Element>::operator=(const Matrix<Element>& m) {
 
 template <typename Element>
 void Matrix<Element>::releaseMemory() {
-  for (int i = 0; i < this->ActualNumRows; i ++) {
+  for (int i = 0; i < this->actualNumberOfRows; i ++) {
     delete [] this->elements[i];
   }
   delete [] this->elements;
 #ifdef AllocationLimitsSafeguard
-GlobalStatistics::globalPointerCounter -= this->ActualNumRows * this->ActualNumCols + this->ActualNumRows;
+GlobalStatistics::globalPointerCounter -= this->actualNumberOfRows * this->actualNumberOfColumns + this->actualNumberOfRows;
   GlobalStatistics::checkPointerCounters();
 #endif
   this->elements = nullptr;
   this->numberOfColumns = 0;
   this->numberOfRows = 0;
-  this->ActualNumRows = 0;
-  this->ActualNumCols = 0;
+  this->actualNumberOfRows = 0;
+  this->actualNumberOfColumns = 0;
 }
 
 template <typename Coefficient>
 bool Matrix<Coefficient>::invert() {
+  MacroRegisterFunctionWithName("Matrix::invert");
   if (this->numberOfColumns != this->numberOfRows) {
-    global.fatal << "This is a programming error: requesting to invert a non-square matrix of "
+    global.fatal << "Request to invert a non-square matrix of "
     << this->numberOfRows << " rows and "
     << this->numberOfColumns << " columns. " << global.fatal;
   }
-  MacroRegisterFunctionWithName("Matrix::invert");
+  if (this->numberOfColumns == 0) {
+    global.fatal << "0 by 0 matrix inversion is not allowed. " << global.fatal;
+  }
   Matrix theInverse;
-  theInverse.makeIdentityMatrix(this->numberOfRows);
-  Selection NonPivotCols;
-  this->gaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
-  if (NonPivotCols.cardinalitySelection != 0) {
+  theInverse.makeIdentityMatrix(
+    this->numberOfRows,
+    (*this)(0, 0).one(),
+    (*this)(0, 0).zero()
+  );
+  Selection nonPivotColumns;
+  this->gaussianEliminationByRows(&theInverse, &nonPivotColumns, 0);
+  if (nonPivotColumns.cardinalitySelection != 0) {
     return false;
   }
   *this = theInverse;
@@ -1725,7 +1741,7 @@ bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
   Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution
 ) {
   if (
-    inputPivotPoints.maximumSize != this->numberOfColumns ||
+    inputPivotPoints.numberOfElements != this->numberOfColumns ||
     inputRightHandSide.numberOfColumns != 1 ||
     inputRightHandSide.numberOfRows != this->numberOfRows
   ) {
@@ -1817,8 +1833,10 @@ void Matrix<Element>::makeIdentity(
 }
 
 template <typename Element>
-void Matrix<Element>::initialize(int r, int c) {
-  this->resize(r, c, false);
+void Matrix<Element>::initialize(
+  int desiredNumberOfRows, int desiredNumberOfColumns
+) {
+  this->resize(desiredNumberOfRows, desiredNumberOfColumns, false);
 }
 
 class FormatExpressions {
@@ -1879,7 +1897,7 @@ public:
   List<MonomialP>::Comparator monomialOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::Comparator* getMonomialOrder();
-  std::string GetPolyLetter(int index) const;
+  std::string getPolynomialLetter(int index) const;
   FormatExpressions();
 };
 
@@ -2038,10 +2056,10 @@ public:
     return result;
   }
   void addMonomial(
-    const templateMonomial& inputMon, const Coefficient& inputCoeff
+    const templateMonomial& monomial, const Coefficient& coefficient
   ) {
     this->cleanupMonomialIndex(
-      this->addMonomialNoCoefficientCleanUpReturnIndex(inputMon, inputCoeff)
+      this->addMonomialNoCoefficientCleanUpReturnIndex(monomial, coefficient)
     );
   }
   void getMinimalMonomial(templateMonomial& outputMon, Coefficient& outputCF) const {
@@ -2249,7 +2267,7 @@ public:
     Coefficient newCoeff;
     for (int i = 0; i < this->size(); i ++) {
       newCoeff = this->coefficients[i];
-      newCoeff.substitution(theSub);
+      newCoeff.substitution(theSub, 1);
       if (newCoeff.isEqualToZero()) {
         this->popMonomial(i);
         i --;
@@ -2364,7 +2382,7 @@ public:
     this->monomials.setExpectedSize(theSize);
     this->coefficients.setExpectedSize(theSize);
   }
-  bool hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex);
+  bool hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& whichIndex);
   void writeToFile(std::fstream& output);
   void clearDenominators(Rational& output) {
     output.makeOne();
@@ -2605,11 +2623,9 @@ class PolynomialOrder {
   bool compareLeftGreaterThanRight(const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right) const;
 };
 
-template <class Coefficient, class oneFactorFinder>
-class PolynomialFactorization;
-
 template<class Coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, Coefficient> {
+private:
 public:
   friend std::iostream& operator<< <Coefficient>(std::iostream& output, const Polynomial<Coefficient>& input);
   Polynomial(int x) {
@@ -2663,7 +2679,7 @@ public:
   bool differential(
     Vector<Polynomial<Coefficient> >& output, std::stringstream* comments
   ) const;
-  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& ValuesAtThePoints);
+  void interpolate(const Vector<Coefficient>& thePoints, const Vector<Coefficient>& valuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient getDiscriminant();
   void getCoefficientInFrontOfLinearTermVariableIndex(int index, Coefficient& output);
@@ -2699,11 +2715,11 @@ public:
   static Polynomial<Coefficient> zero();
   Rational rationalValue();
   void makeDeterminantFromSquareMatrix(const Matrix<Polynomial<Coefficient> >& theMat);
-  void makeConstant(const Coefficient& theConst) {
+  void makeConstant(const Coefficient& constant) {
     this->makeZero();
-    MonomialP theConstMon;
-    theConstMon.makeOne();
-    this->addMonomial(theConstMon, theConst);
+    MonomialP one;
+    one.makeOne();
+    this->addMonomial(one, constant);
   }
   void makeOne();
   void getPolynomialWithPolynomialCoefficient(
@@ -2733,7 +2749,7 @@ public:
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumVars);
   int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
   void scaleToPositiveMonomialExponents(MonomialP& outputScale);
-  bool substitution(const List<Polynomial<Coefficient> >& TheSubstitution);
+  bool substitution(const List<Polynomial<Coefficient> >& substitution, const Coefficient& one);
   Rational totalDegree() const;
   int totalDegreeInt() const;
   bool isEqualToOne() const;
@@ -2747,7 +2763,7 @@ public:
   void raiseToPower(int d, const Coefficient& one);
   bool getRootFromLinearPolynomialConstantTermLastVariable(Vector<Coefficient>& outputRoot);
   Matrix<Coefficient> evaluateUnivariatePolynomial(const Matrix<Coefficient>& input);//<-for univariate polynomials only
-  Coefficient evaluate(const Vector<Coefficient>& input);
+  Coefficient evaluate(const Vector<Coefficient>& input, const Coefficient& zero = 0);
   bool isProportionalTo(
     const Polynomial<Coefficient>& other, Coefficient& outputTimesMeEqualsOther, const Coefficient& ringUnit
   ) const;
@@ -2827,6 +2843,56 @@ public:
   };
 };
 
+template <class Coefficient>
+class SylvesterMatrix {
+  static void fillSylvesterMatrix(
+    const Polynomial<Coefficient>& polynomial,
+    int columnOffset,
+    Matrix<Coefficient>& output
+  );
+  // Generalization of sylvester matrix for multiple polynomials.
+  // Similar to the Sylvester matrix
+  // but with coefficient parallelogram for each polynomial.
+  static bool sylvesterMatrixMulti(
+    const List<Polynomial<Coefficient> >& polynomials,
+    int dimension,
+    Matrix<Coefficient>& output
+  );
+public:
+  // For polynomials A = a_0 x^n + ..., B = b_0 x^m + ...,
+  // we define the Sylvester matrix as the matrix:
+  // ( a_0  0  0 ...  0  b_1  0  0 ... 0   )
+  // ( a_1 a_0 0 ...  0  b_2 b_1 0 ... 0   )
+  // (               ...               ... )
+  // ( a_n           a_0               b_1 )
+  // ( 0             ... b_m               )
+  // ( ...           ... ...               )
+  // ( 0    0  0 ... a_n  0   0  0 ... b_m ).
+  // See https://en.wikipedia.org/wiki/Resultant.
+  static bool sylvesterMatrix(
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Let a_1, ..., a_k be the polynomials whose
+  // Sylvester product matrix we want to compute.
+  // Let t_j be the product of the a_i's with a_j omitted,
+  // i.e., t_j = a_1 ... a_k / a_j.
+  // Then we define the Sylvester product matrix to be
+  // the sylvester multi-matrix of the t_j's.
+  // In the case of k = 2 this coincides with the usual
+  // Sylvester matrix (depending on the, defintion
+  // with reversed order of the polynomials).
+  // The Sylvester product matrix is used when computing
+  // Henself lifts of multiple polynomial products.
+  static bool sylvesterMatrixProduct(
+    const List<Polynomial<Coefficient> >& polynomials,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  );
+};
+
 template <>
 bool Polynomial<Rational>::Test::differential();
 template <>
@@ -2869,6 +2935,7 @@ public:
   void reduce();
   void operator*=(const PolynomialModuloPolynomial<Coefficient>& other);
   void operator+=(const PolynomialModuloPolynomial<Coefficient>& other);
+  void operator-=(const PolynomialModuloPolynomial<Coefficient>& other);
   std::string toString(FormatExpressions* theFormat = nullptr);
   PolynomialModuloPolynomial<Coefficient> one();
   static unsigned int hashFunction(const PolynomialModuloPolynomial<Coefficient>& input);
@@ -2877,31 +2944,40 @@ public:
   bool isEqualToZero() const;
 };
 
-template <class Coefficient, class oneFactorFinder>
-class PolynomialFactorization {
+template <class Coefficient, class OneFactorFinder>
+class PolynomialFactorizationUnivariate {
 public:
   Polynomial<Coefficient> original;
   Polynomial<Coefficient> current;
   Coefficient constantFactor;
   List<Polynomial<Coefficient> > reduced;
   List<Polynomial<Coefficient> > nonReduced;
+  int maximumDegree;
   FormatExpressions format;
+  bool basicChecks(
+    std::stringstream* commentsOnFailure
+  );
   bool factor(
     const Polynomial<Coefficient>& input,
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
   bool accountNonReducedFactor(Polynomial<Coefficient>& incoming);
-  bool accountReducedFactor(Polynomial<Coefficient>& incoming);
-  bool oneFactor(std::stringstream* comments);
+  bool accountReducedFactor(
+    Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
+  );
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* theFormat) const;
+  PolynomialFactorizationUnivariate();
 };
 
 class PolynomialFactorizationKronecker {
   public:
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker>* output;
+  static const int maximumDegreeDefault = 16;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker>* output;
   Polynomial<Rational> current;
   bool oneFactor(
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
   PolynomialFactorizationKronecker() {
@@ -2910,8 +2986,12 @@ class PolynomialFactorizationKronecker {
   static bool solvePolynomial(
     const Polynomial<Rational>& input,
     List<AlgebraicNumber>& output,
-    AlgebraicClosureRationals& closure
-  , std::stringstream* commentsOnFailure);
+    AlgebraicClosureRationals& closure,
+    std::stringstream* commentsOnFailure
+  );
+  static std::string name() {
+    return "Kronecker";
+  }
 };
 
 template <class Coefficient>
@@ -3161,7 +3241,7 @@ public:
   int getPreferredSerreSystemSubstitutionIndex(List<Polynomial<Coefficient> >& inputSystem);
   void solveSerreLikeSystemRecursively(List<Polynomial<Coefficient> >& inputSystem);
   void polynomialSystemSolutionSimplificationPhase(List<Polynomial<Coefficient> >& inputSystem);
-  void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& theImpliedSubs);
+  void backSubstituteIntoPolynomialSystem(List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions);
   void backSubstituteIntoSinglePolynomial(
     Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
   );
@@ -3312,13 +3392,13 @@ void LinearCombination<templateMonomial, Coefficient>::subtractOtherTimesCoeffic
     return;
   }
   this->setExpectedSize(other.size() + this->size());
-  Coefficient tempCF;
+  Coefficient product;
   for (int i = 0; i < other.size(); i ++) {
-    tempCF = other.coefficients[i];
+    product = other.coefficients[i];
     if (inputcf != nullptr) {
-      tempCF *= *inputcf;
+      product *= *inputcf;
     }
-    this->subtractMonomial(other[i], tempCF);
+    this->subtractMonomial(other[i], product);
   }
 }
 
@@ -3327,11 +3407,11 @@ void LinearCombination<templateMonomial, Coefficient>::addOtherTimesConst(
   LinearCombination<templateMonomial, Coefficient>& other, const Coefficient& theConst
 ) {
   this->setExpectedSize(other.size() + this->size());
-  Coefficient tempCF;
+  Coefficient product;
   for (int i = 0; i < other.size(); i ++) {
-    tempCF = theConst;
-    tempCF *= other.coefficients[i];
-    this->addMonomial(other[i], tempCF);
+    product = theConst;
+    product *= other.coefficients[i];
+    this->addMonomial(other[i], product);
   }
 }
 
@@ -3346,14 +3426,14 @@ void LinearCombination<templateMonomial, Coefficient>::operator+=(
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& WhichIndex) {
+bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& whichIndex) {
   for (int i = 0; i < this->size; i ++) {
     if (this->objects[i].IsGEQpartialOrder(m)) {
-      WhichIndex = i;
+      whichIndex = i;
       return true;
     }
   }
-  WhichIndex = - 1;
+  whichIndex = - 1;
   return false;
 }
 
@@ -3373,16 +3453,16 @@ bool LinearCombination<templateMonomial, Coefficient>::linearSpanContainsGetFirs
   );
   LinearCombinationTemplate remainderFromInput = input;
   templateMonomial currentMon;
-  Coefficient CFminMon, CFinRemainder;
+  Coefficient coefficientMinimialMonomial, coefficientInRemainder;
   outputFirstLinearCombination.makeZero(listCopy.size);
   for (int i = 0; i < listCopy.size; i ++) {
     if (listCopy[i].isEqualToZero()) {
       break;
     }
-    listCopy[i].getMinimalMonomial(currentMon, CFminMon);
-    CFinRemainder = remainderFromInput.getCoefficientOf(currentMon);
-    outputFirstLinearCombination[i] = CFinRemainder;
-    outputFirstLinearCombination[i] /= CFminMon;
+    listCopy[i].getMinimalMonomial(currentMon, coefficientMinimialMonomial);
+    coefficientInRemainder = remainderFromInput.getCoefficientOf(currentMon);
+    outputFirstLinearCombination[i] = coefficientInRemainder;
+    outputFirstLinearCombination[i] /= coefficientMinimialMonomial;
     remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];
   }
   if (!remainderFromInput.isEqualToZero()) {
@@ -3608,7 +3688,7 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(Matrix<LargeI
   }
 }
 
-class PartFractions;
+class PartialFractions;
 
 class OnePartialFractionDenominator {
 public:
@@ -3633,7 +3713,7 @@ public:
   bool operator==(OnePartialFractionDenominator& right);
   std::string toString();
   void oneFractionToStringBasisChange(
-    PartFractions& owner,
+    PartialFractions& owner,
     int indexElongation,
     Matrix<LargeInteger>& VarChange,
     bool UsingVarChange,
@@ -3786,7 +3866,7 @@ class Complex {
     this->imaginaryPart /= numerator;
   }
   bool isEqualToZero() const;
-  void minus() {
+  void negate() {
     this->imaginaryPart = - this->imaginaryPart;
     this->realPart = - this->realPart;
   }
@@ -3970,7 +4050,7 @@ int Matrix<Coefficient>::findPositiveGCDCoefficientNumeratorsTruncated() {
 template <class Coefficient>
 void Matrix<Coefficient>::scaleToIntegralForMinimalRationalHeightNoSignChange() {
   Rational tempRat;
-  tempRat.AssignNumeratorAndDenominator(
+  tempRat.assignNumeratorAndDenominator(
     this->findPositiveLCMCoefficientDenominatorsTruncated(),
     this->findPositiveGCDCoefficientNumeratorsTruncated()
   );
@@ -4045,7 +4125,7 @@ template <class Coefficient>
 void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
   Vector<Coefficient>& direction, Vector<Coefficient>& normal, Coefficient& Correction
 ) {
-  Rational tempRat2 = Vector<Coefficient>::ScalarEuclidean(direction, normal);
+  Rational tempRat2 = Vector<Coefficient>::scalarEuclidean(direction, normal);
   this->makeZero();
   MonomialP tempM;
   for (int i = 0; i < direction.size; i ++) {
@@ -4080,7 +4160,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[i][k].assign(coneStrictlyPositiveCoeffs.objects[i].objects[k]);
       matA.elements[i][k + theDimension].assign(matA.elements[i][k]);
-      matA.elements[i][k + theDimension].minus();
+      matA.elements[i][k + theDimension].negate();
     }
     matb.elements[i][0].makeOne();
     matA.elements[i][theDimension * 2 + i].makeMinusOne();
@@ -4090,7 +4170,7 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[currentRow][k].assign(coneNonNegativeCoeffs.objects[i].objects[k]);
       matA.elements[currentRow][k + theDimension].assign(matA.elements[currentRow][k]);
-      matA.elements[currentRow][k + theDimension].minus();
+      matA.elements[currentRow][k + theDimension].negate();
     }
     matA.elements[currentRow][2 * theDimension + currentRow].makeOne();
   }
@@ -4104,13 +4184,13 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
   if (result) {
     Rational tempRat;
     for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
-      coneStrictlyPositiveCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
+      coneStrictlyPositiveCoeffs[i].scalarEuclidean(outputNormal, tempRat);
       if (!tempRat.isPositive()) {
         global.fatal << "Unexpected non-positive value. " << global.fatal;
       }
     }
     for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
-      coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
+      coneNonNegativeCoeffs[i].scalarEuclidean(outputNormal, tempRat);
       if (!tempRat.isNonPositive()) {
         global.fatal << "Unexpected positive value. " << global.fatal;
       }
@@ -4123,7 +4203,7 @@ template<class Coefficient>
 void Matrix<Coefficient>::computePotentialChangeGradient(
   Matrix<Coefficient>& matA,
   Selection& BaseVariables,
-  int NumTrueVariables,
+  int numberOfTrueVariables,
   int ColumnIndex,
   Rational& outputChangeGradient,
   bool& hasAPotentialLeavingVariable
@@ -4131,12 +4211,12 @@ void Matrix<Coefficient>::computePotentialChangeGradient(
   hasAPotentialLeavingVariable = false;
   outputChangeGradient.makeZero();
   for (int j = 0; j < matA.numberOfRows; j ++) {
-    if (BaseVariables.elements[j] >= NumTrueVariables) {
+    if (BaseVariables.elements[j] >= numberOfTrueVariables) {
       outputChangeGradient += matA.elements[j][ColumnIndex];
     }
     hasAPotentialLeavingVariable = hasAPotentialLeavingVariable || matA.elements[j][ColumnIndex].isPositive();
   }
-  if (ColumnIndex >= NumTrueVariables) {
+  if (ColumnIndex >= numberOfTrueVariables) {
     outputChangeGradient -= 1;
   }
 }
@@ -4971,8 +5051,8 @@ class PartFraction {
 private:
   void findPivot();
   void findInitialPivot();
-  bool rootIsInFractionCone (PartFractions& owner, Vector<Rational>* theRoot) const;
-  friend class PartFractions;
+  bool rootIsInFractionCone (PartialFractions& owner, Vector<Rational>* theRoot) const;
+  friend class PartialFractions;
   friend class partFractionPolynomialSubstitution;
 public:
   std::string DebugString;
@@ -4989,9 +5069,9 @@ public:
     return output;
   }
   bool removeRedundantShortRootsClassicalRootSystem(
-    PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
+    PartialFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
   );
-  bool removeRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
+  bool removeRedundantShortRoots(PartialFractions& owner, Vector<Rational>* Indicator, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
   static std::fstream TheBigDump;
@@ -5015,16 +5095,16 @@ public:
     Polynomial<Rational>& output
   );
   void computeNormals(
-    PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
+    PartialFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer
   );
   int computeGainingMultiplicityIndexInLinearRelation(
     bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation
   );
   void getRootsFromDenominator(
-    PartFractions& owner, Vectors<Rational>& output
+    PartialFractions& owner, Vectors<Rational>& output
   ) const;
   void getVectorPartitionFunction(
-    PartFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
+    PartialFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
   ) const;
   void decomposeAMinusNB(
     int indexA,
@@ -5032,7 +5112,7 @@ public:
     int n,
     int indexAminusNB,
     LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
-    PartFractions& owner
+    PartialFractions& owner
   );
   bool decomposeFromLinearRelation(
     Matrix<Rational>& theLinearRelation,
@@ -5041,14 +5121,14 @@ public:
     List<Vector<Rational> >& startingVectors
   );
   void computeOneCheckSum(
-    PartFractions& owner, Rational& output, int theDimension
+    PartialFractions& owner, Rational& output, int theDimension
   ) const;
   bool reduceMeOnce(
     const Polynomial<LargeInteger>& myCoeff,
     Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
-  void reduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
+  void reduceMonomialByMonomial(PartialFractions& owner, int myIndex, Vector<Rational>* Indicator);
   void applySzenesVergneFormula(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5069,17 +5149,17 @@ public:
   );
   bool checkForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartialFractions& owner
   );
   bool reduceOnceGeneralMethodNoOSBasis(
-    PartFractions& owner,
+    PartialFractions& owner,
     LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   bool reduceOnceGeneralMethod(
-    PartFractions& owner,
+    PartialFractions& owner,
     LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
@@ -5104,14 +5184,14 @@ public:
   void assign(const PartFraction& p);
   void assignDenominatorOnly(const PartFraction& p);
   void assignNoIndicesNonZeroMults(PartFraction& p);
-  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
+  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartialFractions& owner, int minIndex);
   int controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
   int controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
   PartFraction();
   ~PartFraction();
   void getPolyReduceMonomialByMonomial(
-    PartFractions& owner,
+    PartialFractions& owner,
     Vector<Rational>& theExponent,
     int StartMonomialPower,
     int DenPowerReduction,
@@ -5119,13 +5199,13 @@ public:
     Polynomial<LargeInteger>& output
   );
   void reduceMonomialByMonomialModifyOneMonomial(
-    PartFractions& Accum,
+    PartialFractions& Accum,
     SelectionWithDifferentMaxMultiplicities& thePowers,
     List<int>& thePowersSigned,
     MonomialP& input,
     LargeInteger& inputCoeff
   );
-  void getAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
+  void getAlphaMinusNBetaPoly(PartialFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
   void getNElongationPolynomialWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
@@ -5144,12 +5224,12 @@ public:
     int theDimension
   );
   static void getNElongationPolynomial(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
-  int getNumberProportionalVectorsClassicalRootSystems(PartFractions& owner);
+  int getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner);
   bool operator==(const PartFraction& right) const;
   void operator=(const PartFraction& right);
-  bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
+  bool initFromRoots(PartialFractions& owner, Vectors<Rational>& input);
   std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
-  void readFromFile(PartFractions& owner, std::fstream& input);
+  void readFromFile(PartialFractions& owner, std::fstream& input);
   void writeToFile(std::fstream& output) const;
   int sizeWithoutDebugString() const;
 };
@@ -5163,8 +5243,8 @@ class Cone {
   }
 public:
   bool flagIsTheZeroCone;
-  Vectors<Rational> Vertices;
-  Vectors<Rational> Normals;
+  Vectors<Rational> vertices;
+  Vectors<Rational> normals;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
@@ -5175,10 +5255,10 @@ public:
   void translateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
   bool isHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2) const {
     int numCommonWalls = 0;
-    for (int i = 0; i < this->Normals.size; i ++) {
+    for (int i = 0; i < this->normals.size; i ++) {
       if (
-        vertex1.ScalarEuclidean(this->Normals[i]).isEqualToZero() &&
-        vertex2.ScalarEuclidean(this->Normals[i]).isEqualToZero()
+        vertex1.scalarEuclidean(this->normals[i]).isEqualToZero() &&
+        vertex2.scalarEuclidean(this->normals[i]).isEqualToZero()
       ) {
         numCommonWalls ++;
         if (numCommonWalls == this->getDimension() - 2) {
@@ -5189,11 +5269,11 @@ public:
     return false;
   }
   bool isTheEntireSpace() {
-    return this->Normals.size == 0 && this->flagIsTheZeroCone;
+    return this->normals.size == 0 && this->flagIsTheZeroCone;
   }
   bool isHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2) const {
-    Vector<Rational>& vertex1 = this->Vertices[vertexIndex1];
-    Vector<Rational>& vertex2 = this->Vertices[vertexIndex2];
+    Vector<Rational>& vertex1 = this->vertices[vertexIndex1];
+    Vector<Rational>& vertex2 = this->vertices[vertexIndex2];
     return this->isHonest1DEdgeAffine(vertex1, vertex2);
   }
   static bool isRegularToBasis(
@@ -5239,15 +5319,15 @@ public:
   void changeBasis(Matrix<Rational>& theLinearMap);
   std::string DebugString;
   int getDimension() const {
-    if (this->Normals.size == 0) {
+    if (this->normals.size == 0) {
       return 0;
     }
-    return this->Normals[0].size;
+    return this->normals[0].size;
   }
   void sliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
   bool createFromNormals(
     Vectors<Rational>& inputNormals,
-    bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
@@ -5258,10 +5338,10 @@ public:
   bool createFromVertices(const Vectors<Rational>& inputVertices);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   void getInternalPoint(Vector<Rational>& output) const {
-    if (this->Vertices.size <= 0) {
+    if (this->vertices.size <= 0) {
       return;
     }
-    this->Vertices.sum(output, this->Vertices[0].size);
+    this->vertices.sum(output, this->vertices[0].size);
   }
   Vector<Rational> getInternalPoint() const {
     Vector<Rational> result;
@@ -5269,7 +5349,7 @@ public:
     return result;
   }
   unsigned int hashFunction() const {
-    return this->Vertices.hashFunction();
+    return this->vertices.hashFunction();
   }
   static unsigned int hashFunction(const Cone& input) {
     return input.hashFunction();
@@ -5283,8 +5363,8 @@ public:
   void operator=(const Cone& other) {
     //this->flagHasSufficientlyManyVertices = other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone = other.flagIsTheZeroCone;
-    this->Vertices = other.Vertices;
-    this->Normals = other.Normals;
+    this->vertices = other.vertices;
+    this->normals = other.normals;
     this->LowestIndexNotCheckedForSlicingInDirection = other.LowestIndexNotCheckedForSlicingInDirection;
     this->LowestIndexNotCheckedForChopping = other.LowestIndexNotCheckedForChopping;
   }
@@ -5302,10 +5382,10 @@ public:
   bool solveLPolynomialEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
   bool solveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
   bool operator>(const Cone& other) const {
-    return this->Normals > other.Normals;
+    return this->normals > other.normals;
   }
   bool operator==(const Cone& other) const {
-    return this->flagIsTheZeroCone == other.flagIsTheZeroCone && this->Normals == other.Normals;
+    return this->flagIsTheZeroCone == other.flagIsTheZeroCone && this->normals == other.normals;
   }
 };
 
@@ -5395,11 +5475,11 @@ public:
     const Cone& input, Vectors<Rational>& inputLFsLastCoordConst, List<int>& outputMaximumOverEeachSubChamber
   );
   void initFromCones(
-    List<Vectors<Rational> >& NormalsOfCones,
-    bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    List<Vectors<Rational> >& normalsOfCones,
+    bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   void initFromCones(
-    List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
+    List<Cone>& normalsOfCones, bool useWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices
   );
   bool splitChamber(
     int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
@@ -5412,8 +5492,8 @@ public:
     this->slicingDirections.size = 0;
     this->clear();
     this->indexLowestNonRefinedChamber = 0;
-    this->ConvexHull.Normals.size = 0;
-    this->ConvexHull.Vertices.size = 0;
+    this->ConvexHull.normals.size = 0;
+    this->ConvexHull.vertices.size = 0;
     this->ConvexHull.flagIsTheZeroCone = true;
   }
   ConeComplex(const ConeComplex& other):HashedList<Cone>() {
@@ -5435,7 +5515,7 @@ public:
   }
 };
 
-class PartFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
+class PartialFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
 public:
@@ -5445,7 +5525,7 @@ public:
   int HighestIndex;
   int NumberIrrelevantFractions;
   int NumberRelevantReducedFractions;
-  int NumMonomialsInTheNumerators;
+  int numberOfMonomialsInTheNumerators;
   int NumGeneratorsInTheNumerators;
   int NumRelevantNonReducedFractions;
   //int NumRelevantMonomialsInNonReducedFractions;
@@ -5522,7 +5602,7 @@ public:
   void computeOneCheckSum(Rational& output);
   void popIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational>* Indicator);
   void prepareIndicatorVariables();
-  void initFromOtherPartFractions(PartFractions& input);
+  void initFromOtherPartialFractions(PartialFractions& input);
   std::string toString(FormatExpressions& theFormat) {
     std::string tempS;
     this->toString(tempS, theFormat);
@@ -5544,7 +5624,7 @@ public:
   void resetRelevanceIsComputed() {
     global.fatal << "This is not implemented yet. " << global.fatal;
   }
-  PartFractions();
+  PartialFractions();
   int sizeWithoutDebugString();
   bool checkForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot);
   void makeProgressReportSplittingMainPart();
@@ -5765,10 +5845,10 @@ class DynkinDiagramRootSubalgebra {
 public:
   Vectors<Rational> AmbientRootSystem;
   Matrix<Rational> AmbientBilinearForm;
-  List<Vectors<Rational> > SimpleBasesConnectedComponents;
+  List<Vectors<Rational> > simpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
-  List<DynkinSimpleType> SimpleComponentTypes;
+  List<DynkinSimpleType> simpleComponentTypes;
   List<int> indicesThreeNodes;
   List<List<int> > indicesEnds;
   List<List<int> > sameTypeComponents;
@@ -6252,11 +6332,11 @@ public:
   void substitution(const PolynomialSubstitution<Rational>& theSub) {
     MatrixTensor<Coefficient> thisCopy = *this;
     this->makeZero();
-    Coefficient tempCF;
+    Coefficient coefficient;
     for (int i = 0; i < thisCopy.size(); i ++) {
-      tempCF = thisCopy.coefficients[i];
-      tempCF.substitution(theSub);
-      this->addMonomial(thisCopy[i], tempCF);
+      coefficient = thisCopy.coefficients[i];
+      coefficient.substitution(theSub, Rational::one());
+      this->addMonomial(thisCopy[i], coefficient);
     }
   }
   void transpose() {
@@ -6810,7 +6890,7 @@ template<class Coefficient>
 void Matrix<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSub) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      this->elements[i][j].substitution(theSub);
+      this->elements[i][j].substitution(theSub, 1);
     }
   }
 }

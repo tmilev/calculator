@@ -200,7 +200,8 @@ public:
   int numberOfSlidesFound;
   int numberOfHandwrittenSolutionsFound;
   int numberOfAnswerIdsMathquilled;
-  List<int> randomSeedsIfInterpretationFails;
+  uint32_t randomSeedCurrent;
+  List<uint32_t> randomSeedPerAttempt;
   bool flagIsExamHome;
   bool flagIsExamProblem;
   bool flagParentInvestigated;

@@ -5,6 +5,7 @@
 #include "calculator_Weyl_group_characters.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_inner_functions.h"
+#include "calculator_functions_polynomial.h"
 #include "calculator_html_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "database.h"
@@ -16,6 +17,7 @@ std::string Calculator::Atoms::setRandomSeed = "SetRandomSeed";
 std::string Calculator::Atoms::commandEnclosure = "CommandEnclosure";
 std::string Calculator::Atoms::setInputBox = "CommandEnclosure";
 std::string Calculator::Atoms::sort = "Sort";
+std::string Calculator::Atoms::transpose = "Transpose";
 
 void Calculator::initAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
@@ -604,7 +606,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f = \\sin {}x / \\cos {}x;\n"
-    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
+    "Plot2D(f, -\\pi/4, \\pi/4) + PlotLabel{}((1, 1), \"y =\" + ToUTF8String(f))",
     "CalculatorFunctions::innerExpressiontoUTF8String",
     "ToUTF8String",
     innerStandard
@@ -1462,6 +1464,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialModP{}(x^2+x+1, 2);",
     "CalculatorConversions::innerPolynomialModuloInteger",
     "PolynomialModP",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "SylvesterMatrix",
+    CalculatorFunctionsPolynomial::sylvesterMatrix,
+    "",
+    "Constructs the transpose Sylvester matrix of two univariate polynomials.",
+    "SylvesterMatrix(2x^2+2x+2, 3x+3);\n"
+    "SylvesterMatrix(Polynomial(5x^2+4x+3), Polynomial(2x+1));\n"
+    "SylvesterMatrix(2, 3x+3);\n"
+    "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 5));\n"
+    "SylvesterMatrix(x^2+2x+3, 4x+5, 6x+7);\n"
+    "SylvesterMatrix(PolynomialModP(2x^2+2x+2, 5), PolynomialModP(3x+3, 7));\n"
+    "SylvesterMatrix(0, x^2);\n",
+    "CalculatorConversions::sylvesterMatrix",
+    "SylvesterMatrix",
     innerStandard
   );
   this->addOperationHandler(
@@ -2625,12 +2643,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
+    "BuildFreecalc(\"freecalc/lectures/referencelectures/precalculus.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusiiimultivariable.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiiimasterproblemsheet.tex\");",
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/precalculus.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusii.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiii.tex\");\n",
     "CalculatorFunctions::innerBuildFreecalc",
     "BuildFreecalc",
     innerAdminNoTest
@@ -3039,7 +3059,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivRemainder",
-    CalculatorFunctions::innerPolynomialDivisionRemainder,
+    CalculatorFunctionsPolynomial::polynomialDivisionRemainder,
     "",
     "Returns the remainder after taking quotient of a "
     "polynomial divided by a set of polynomials "
@@ -3051,18 +3071,18 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivQuotient",
-    CalculatorFunctions::innerPolynomialDivisionQuotient,
+    CalculatorFunctionsPolynomial::polynomialDivisionQuotient,
     "",
     "Returns the quotients of a "
     "polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
     "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
-    "CalculatorFunctions::innerPolynomialDivisionRemainder",
+    "CalculatorFunctionsPolynomial::polynomialDivisionQuotient",
     "PolyDivQuotient",
     innerStandard
   );
   this->addOperationHandler(
     "PolyDivSlidesGrLex",
-    CalculatorFunctions::innerPolynomialDivisionSlidesGrLex,
+    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex,
     "",
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number.",
@@ -3073,7 +3093,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringGrLex",
-    CalculatorFunctions::innerPolynomialDivisionVerboseGrLex,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
@@ -3084,7 +3104,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringGrLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseGradedReverseLexicographic,
     "",
     "String that presents the division of a polynomial "
     "by a set of polynomials. Uses the graded reverse lexicographic order. "
@@ -3099,7 +3119,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringLex",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographic,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the "
@@ -3116,7 +3136,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolyDivStringLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicOpposite,
+    CalculatorFunctionsPolynomial::polynomialDivisionVerboseLexicographicOpposite,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the "
@@ -4049,13 +4069,13 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->addOperationHandler(
-    "Transpose",
+    Calculator::Atoms::transpose,
     Calculator::innerTranspose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
     "Calculator::innerTranspose",
-    "Transpose",
+    Calculator::Atoms::transpose,
     innerStandard
   );
   this->addOperationHandler(
@@ -4301,7 +4321,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HeighestWeightVector",
-    CalculatorFunctions::innerHWV,
+    CalculatorFunctions::innerHighestWeightVector,
     "",
     "Highest weight vector in a generalized Verma module. "
     "The first argument gives the semisimple Lie algebra. "
@@ -4318,7 +4338,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
     "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
     "h_1g_{- 1}v_\\lambda",
-    "CalculatorFunctions::innerHWV",
+    "CalculatorFunctions::innerHighestWeightVector",
     "HeighestWeightVector",
     innerStandard
   );
@@ -4347,7 +4367,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HighestWeightTAAbf",
-    CalculatorFunctions::innerHWTAABF,
+    CalculatorFunctions::innerHighestWeightTransposeAntiAutomorphismBilinearForm,
     "",
     "Highest weight transpose anti-automorphism bilinear form, a.k.a. "
     "Shapovalov form. Let M be a Verma module "
@@ -4564,7 +4584,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "negative root space is not in the parabolic. "
     "The expression given in that coordinate "
     "is used as the corresponding highest weight. ",
-    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
+    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); "
+    "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
     "Calculator::innerPrintB3G2branchingTableCharsOnly",
     "PrintB3G2branchingTableCharsOnly",
     innerInvisibleExperimental
@@ -5381,7 +5402,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FactorOneVarPolyOverRationals",
-    Calculator::innerFactorPolynomial,
+    CalculatorFunctionsPolynomial::factorPolynomialKronecker,
     "",
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
@@ -5394,20 +5415,38 @@ void Calculator::initPredefinedInnerFunctions() {
     "as interpolated by Lagrange polynomials.",
     "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
-    "Calculator::innerFactorPolynomial",
+    "CalculatorFunctionsPolynomial::factorPolynomial",
     "FactorOneVarPolyOverRationals",
     innerStandard
   );
   this->addOperationHandler(
+    "FactorUnivariatePolynomialOverRationals",
+    CalculatorFunctionsPolynomial::factorPolynomialFiniteFields,
+    "",
+    "Factors a one variable polynomial over the rationals "
+    "using finite field methods. "
+    "At the time of writing, the method used is probabilistic "
+    "but with high chance of success. ",
+    "%HideLHS\n"
+    "FactorUnivariatePolynomialOverRationals{}("
+    "182903 x^{11}+101813 x^{10}-68963 x^{9}+32574 x^{8}+"
+    "11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+"
+    "102 x^{3}+145 x^{2}+12276 x+261632"
+    ");\n",
+    "CalculatorFunctionsPolynomial::factorPolynomial",
+    "FactorUnivariatePolynomialOverRationals",
+    innerStandard
+  );
+  this->addOperationHandler(
     "FactorOneVariablePolynomialModPrime",
-    CalculatorFunctions::innerFactorPolynomialModPrime,
+    CalculatorFunctionsPolynomial::factorPolynomialModPrime,
     "",
     "Factors a one variable polynomial over a given prime field Z/pZ "
     "using the Cantor-Zassenhaus algorithm. "
     "First argument = polynomial. "
     "Second argument = prime number.",
     "FactorOneVariablePolynomialModPrime{}(x^5+x^4+2x^3-x^2-x-1, 1009);\n",
-    "CalculatorFunctions::innerFactorPolynomialModPrime",
+    "CalculatorFunctionsPolynomial::factorPolynomialModPrime",
     "FactorOneVariablePolynomialModPrime",
     innerStandard
   );
@@ -5673,20 +5712,33 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP,
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger,
     this->opPolynomialModuloInteger(),
     this->opPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
     "a = PolynomialModP(x^2 + x + 7, 5);\n"
     "b = PolynomialModP(x^2 + 1, 5);\n"
     "a + b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModPToPolynomialModP",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToPolynomialModuloInteger",
     "AddPolynomialZmodPToPolynomialZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
-    CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP,
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger,
+    this->opPolynomialModuloInteger(),
+    this->opRational(),
+    "Adds polynomials modulo integers. ",
+    "a = PolynomialModP(x^2 + x + 7, 5);\n"
+    "b = 3;\n"
+    "a + b",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloIntegerToInteger",
+    "AddPolynomialZmodPToInteger",
+    innerStandard
+  );
+  this->addOperationBinaryInnerHandlerWithTypes(
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger,
     this->opPolynomialModuloPolynomialModuloInteger(),
     this->opPolynomialModuloPolynomialModuloInteger(),
     "Adds polynomials modulo integers. ",
@@ -5696,7 +5748,7 @@ void Calculator::initPredefinedStandardOperations() {
     "a mod p;\n"
     "b mod p;\n"
     "a+b",
-    "CalculatorFunctionsBinaryOps::innerAddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
+    "CalculatorFunctionsBinaryOps::innerAddPolynomialModuloPolynomialModuloIntegerToPolynomialModuloPolynomialModuloInteger",
     "AddPolynomialModPolynomialModPToPolynomialModPolynomialModP",
     innerStandard
   );
@@ -8632,7 +8684,7 @@ void Calculator::initializePredefinedWordSplits() {
 void Calculator::initAtomsThatFreezeArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(this->builtInTypes.size + 100);
-  this->atomsThatFreezeArguments.addOnTop(this->builtInTypes);
+  this->atomsThatFreezeArguments.addListOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");

@@ -25,23 +25,23 @@ std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(FormatExpressio
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::computeAllElements(
-  bool andWords, int MaxElements
+  bool andWords, int maximumElements
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::computeAllElements");
   this->checkConsistency();
   //double startTimeDebug= global.getElapsedSeconds();
   this->sizePrivate = this->sizeByFormulaOrNegative1();
-  if (this->sizePrivate > 0 && MaxElements > 0 && this->sizePrivate > MaxElements) {
+  if (this->sizePrivate > 0 && maximumElements > 0 && this->sizePrivate > maximumElements) {
     return false;
   }
-  if (!this->computeAllElementsLargeGroup(andWords, MaxElements)) {
+  if (!this->computeAllElementsLargeGroup(andWords, maximumElements)) {
     return false;
   }
   return true;
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, int MaxElements) {
+bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, int maximumElements) {
   MacroRegisterFunctionWithName("Subgroup::computeAllElementsLargeGroup");
   this->initializeGenerators();
   if (this->generators.size == 0) {
@@ -63,12 +63,12 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
     for (int i = 0; i < this->generators.size; i ++) {
       currentElement = this->generators[i] * this->theElements[j];
       if (this->theElements.addOnTopNoRepetition(currentElement) && andWords) {
-        if (this->GetWordByFormula == 0) {
+        if (this->getWordByFormula == 0) {
           this->theWords.addOnTop(this->theWords[j]);
           this->theWords.lastObject()->addOnTop(i);
         } else {
           this->theWords.setSize(this->theWords.size + 1);
-          this->GetWordByFormula(*this, currentElement, *this->theWords.lastObject());
+          this->getWordByFormula(*this, currentElement, *this->theWords.lastObject());
         }
       }
       if (theReport.tickAndWantReport()) {
@@ -81,8 +81,8 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(bool andWords, 
         reportStream << ".";
         theReport.report(reportStream.str());
       }
-      if (MaxElements > 0) {
-        if (this->theElements.size > MaxElements) {
+      if (maximumElements > 0) {
+        if (this->theElements.size > maximumElements) {
           return false;
         }
       }
@@ -246,7 +246,7 @@ void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
       this->superGeneratorSubWordExists[i] = true;
     }
   }
-  this->theSubgroup->GetWordByFormula = translatableWordsSubgroupElementGetWord<elementSomeGroup>;
+  this->theSubgroup->getWordByFormula = translatableWordsSubgroupElementGetWord<elementSomeGroup>;
   this->theSubgroup->parentRelationship = this;
 }
 
@@ -409,15 +409,15 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
       }
       out << "Class size: " << this->conjugacyClasses[i].size.toString() << ".\n<br>\n";
       if (this->flagCharPolysAreComputed) {
-        if (i < this->CCsStandardRepCharPolys.size) {
+        if (i < this->characterPolynomialsConjugacyClassesStandardRepresentation.size) {
           out << "Characteristic poly standard representation: "
-          << this->CCsStandardRepCharPolys[i].toString(&charPolyFormat);
-          const List<int>& currentHashList = this->CCsStandardRepCharPolys.getHashArray(
-            this->CCsStandardRepCharPolys.getHash(this->CCsStandardRepCharPolys[i])
+          << this->characterPolynomialsConjugacyClassesStandardRepresentation[i].toString(&charPolyFormat);
+          const List<int>& currentHashList = this->characterPolynomialsConjugacyClassesStandardRepresentation.getHashArray(
+            this->characterPolynomialsConjugacyClassesStandardRepresentation.getHash(this->characterPolynomialsConjugacyClassesStandardRepresentation[i])
           );
           int numClassesSameCharPoly = 0;
           for (int j = 0; j < currentHashList.size; j ++) {
-            if (this->CCsStandardRepCharPolys[currentHashList[j]] == this->CCsStandardRepCharPolys[i]) {
+            if (this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] == this->characterPolynomialsConjugacyClassesStandardRepresentation[i]) {
               numClassesSameCharPoly ++;
             }
           }
@@ -425,7 +425,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(FormatExpres
             out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
             << " conjugacy classes, numbers: ";
             for (int j = 0; j < currentHashList.size; j ++) {
-              if (this->CCsStandardRepCharPolys[currentHashList[j]] == this->CCsStandardRepCharPolys[i]) {
+              if (this->characterPolynomialsConjugacyClassesStandardRepresentation[currentHashList[j]] == this->characterPolynomialsConjugacyClassesStandardRepresentation[i]) {
                 out << currentHashList[j] + 1 << (j == currentHashList.size - 1 ? "" : ", ");
               }
             }
@@ -626,8 +626,8 @@ template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeConjugacyClassSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords) {
   MacroRegisterFunctionWithName("FiniteGroup::computeConjugacyClassSizesAndRepresentatives");
   this->checkConsistency();
-  if (this->GetSizeByFormula != 0) {
-    LargeInteger theSize = this->GetSizeByFormula(*this);
+  if (this->getSizeByFormula != 0) {
+    LargeInteger theSize = this->getSizeByFormula(*this);
     //extended digit separators only appear in cxx14
     if (theSize > 100000000) {
       if (this->flagCanComputeCCsWithOrbitIterator) {
@@ -650,7 +650,7 @@ void FiniteGroup<elementSomeGroup>::computeConjugacyClassSizesAndRepresentatives
 
   this->initializeGenerators();
   this->checkInitialization();
-  this->CCsStandardRepCharPolys.clear();
+  this->characterPolynomialsConjugacyClassesStandardRepresentation.clear();
   this->conjugacyClasses.setSize(0);
   this->sizePrivate = 0;
 
@@ -737,10 +737,10 @@ LargeInteger WeylGroupData::getOrbitSize(Vector<Coefficient>& theWeight) {
   // all the way up to E6.
   Vector<Coefficient> currentWeight;
   Vectors<Rational> theStabilizingRoots;
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    this->reflectBetaWithRespectToAlpha(this->RootsOfBorel[i], theWeight, false, currentWeight);
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    this->reflectBetaWithRespectToAlpha(this->rootsOfBorel[i], theWeight, false, currentWeight);
     if (currentWeight == theWeight) {
-      theStabilizingRoots.addOnTop(this->RootsOfBorel[i]);
+      theStabilizingRoots.addOnTop(this->rootsOfBorel[i]);
     }
   }
   DynkinDiagramRootSubalgebra theStabilizerSubsystem;
@@ -850,7 +850,7 @@ void WeylGroupData::raiseToDominantWeight(
   }
   Coefficient theScalarProd;
   int theDim = this->getDimension();
-  simpleReflection theGen;
+  SimpleReflection theGen;
   if (raisingElt != nullptr) {
     raisingElt->makeIdentity(*this);
   }
@@ -937,7 +937,7 @@ bool WeylGroupData::generateOrbit(
     outputSubset->addOnTop(currentElt);
   }
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
-  simpleReflection theGen;
+  SimpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {
       currentRoot = output[i];
@@ -1029,8 +1029,8 @@ Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   rhoOverNewRing = this->rho;//<-type conversion here!
   Result = ringUnit;
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    rootOfBorelNewRing = this->RootsOfBorel[i]; //<-type conversion here!
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    rootOfBorelNewRing = this->rootsOfBorel[i]; //<-type conversion here!
     sumWithRho = rhoOverNewRing + theWeightInSimpleCoords;
     buffer = this->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
     buffer /= this->rootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
@@ -1055,7 +1055,7 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromEpsilon(const Vector<
   Vector<Coefficient> result;
   result.setSize(this->getDimension());
   for (int i = 0; i < simpleBasisEpsCoords.size; i ++) {
-    result[i] = simpleBasisEpsCoords[i].ScalarEuclidean(inputInEpsCoords);
+    result[i] = simpleBasisEpsCoords[i].scalarEuclidean(inputInEpsCoords);
   }
   Matrix<Rational> invertedCartanSymmetric = this->cartanSymmetric;
   invertedCartanSymmetric.invert();
@@ -1135,10 +1135,10 @@ bool WeylGroupData::freudenthalFormula(
     Explored[k] = true;
     Coefficient& currentAccum = outputMultsSimpleCoords[k];
     currentAccum = 0;
-    for (int j = 0; j < this->RootsOfBorel.size; j ++) {
+    for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1; ; i ++) {
         currentWeight = outputDominantWeightsSimpleCoords[k];
-        currentWeight += this->RootsOfBorel[j] * i;
+        currentWeight += this->rootsOfBorel[j] * i;
         currentDominantRepresentative = currentWeight;
         this->raiseToDominantWeight(currentDominantRepresentative);
         int theIndex = outputDominantWeightsSimpleCoords.getIndex(currentDominantRepresentative);
@@ -1156,7 +1156,7 @@ bool WeylGroupData::freudenthalFormula(
           }
           return false;
         }
-        BufferCoeff = this->rootScalarCartanRoot(currentWeight, this->RootsOfBorel[j]);
+        BufferCoeff = this->rootScalarCartanRoot(currentWeight, this->rootsOfBorel[j]);
         BufferCoeff *= outputMultsSimpleCoords[theIndex];
         currentAccum += BufferCoeff;
       }
@@ -1193,7 +1193,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   highestWeightTrue = highestWeightSimpleCoords;
   this->raiseToDominantWeight(highestWeightTrue);
   Vector<Coefficient> highestWeightFundCoords = this->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
+  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     if (outputDetails != nullptr) {
       out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.toString()
       << " which equals " << highestWeightFundCoords.toString()
@@ -1202,12 +1202,12 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     }
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->RootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1218,7 +1218,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   outputWeightsSimpleCoords.setHashSize(10000);
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
-  int numPosRoots = this->RootsOfBorel.size;
+  int numPosRoots = this->rootsOfBorel.size;
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0;
@@ -1233,9 +1233,9 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
-        currentWeight -= this->RootsOfBorel[i];
+        currentWeight -= this->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
+          int currentIndexShift = this->rootsOfBorel[i].sumCoordinates().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
@@ -1244,7 +1244,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
     if (numTotalWeightsFound > upperBoundDominantWeights && upperBoundDominantWeights > 0) {
@@ -1318,8 +1318,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::initialize(s
   this->reset();
   this->ownerGroup = &inputOwner;
   this->ownerGroup->checkInitializationConjugacyClasses();
-  this->generatorS.setSize(this->ownerGroup->generators.size);
-  this->theElementImageS.setSize(this->ownerGroup->theElements.size);
+  this->generators.setSize(this->ownerGroup->generators.size);
+  this->theElementImages.setSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initializeFillInObject(this->ownerGroup->theElements.size, false);
   this->classFunctionMatrices.setSize(this->ownerGroup->conjugacyClassCount());
   this->classFunctionMatricesComputed.initializeFillInObject(this->ownerGroup->conjugacyClassCount(), false);
@@ -1346,7 +1346,7 @@ unsigned int GroupRepresentation<somegroup, Coefficient>::hashFunction() const {
 
 template <typename somegroup, typename Coefficient>
 Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixElement(int groupElementIndex) {
-  Matrix<Coefficient>& theMat = this->theElementImageS[groupElementIndex];
+  Matrix<Coefficient>& theMat = this->theElementImages[groupElementIndex];
   if (this->theElementIsComputed[groupElementIndex]) {
     return theMat;
   }
@@ -1369,7 +1369,7 @@ int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getDimension(
   if (this->ownerGroup->generators.size == 0) {
     return 1;
   }
-  return this->generatorS[0].numberOfRows;
+  return this->generators[0].numberOfRows;
 }
 
 template <typename somegroup, typename Coefficient>
@@ -1385,7 +1385,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getMatrixEle
   this->ownerGroup->checkInitializationConjugacyClasses();
   output.makeIdentityMatrix(this->getDimension());
   for (int i = 0; i < input.generatorsLastAppliedFirst.size; i ++) {
-    output.multiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
+    output.multiplyOnTheRight(this->generators[input.generatorsLastAppliedFirst[i].index]);
   }
 }
 
@@ -1443,7 +1443,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getClassFunc
           if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]]) {
             this->computeAllElementImages();
           }
-          this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
+          this->classFunctionMatrices[cci] += this->theElementImages[currentCC.indicesEltsInOwner[i]];
           if (theReport.tickAndWantReport()) {
             std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
@@ -1472,7 +1472,7 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctionMatrix(
   ClassFunction<somegroup, Coefficient>& inputCF, Matrix<Coefficient>& outputMat
 ) {
-  int theDim = this->generatorS[0].numberOfRows;
+  int theDim = this->generators[0].numberOfRows;
   outputMat.makeZeroMatrix(theDim);
   if (classFunctionMatrices.size == 0) {
     classFunctionMatrices.setSize(this->ownerGroup->conjugacyClassCount());
@@ -1482,7 +1482,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::classFunctio
       continue;
     }
     if (classFunctionMatrices[cci].numberOfColumns == 0) {
-      classFunctionMatrices[cci].makeZeroMatrix(this->generatorS[0].numberOfColumns);
+      classFunctionMatrices[cci].makeZeroMatrix(this->generators[0].numberOfColumns);
       for (int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size; icci ++) {
         this->classFunctionMatrices[cci] += this->getMatrixElement(this->ownerGroup->conjugacyClasses[cci].theElements[icci]);
       }
@@ -1513,9 +1513,9 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
   out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
   for (int i = 0; i < theRank; i ++) {
-    if (i < this->generatorS.size) {
+    if (i < this->generators.size) {
       std::stringstream tempStream;
-      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generatorS[i].toString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generators[i].toString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << HtmlRoutines::getMathSpanPure("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
     } else {
@@ -1629,12 +1629,12 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Coefficient> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1660,7 +1660,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         currentWeight = currentHashes[lowest];
         currentWeight -= this->RootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
-          int currentIndexShift = this->RootsOfBorel[i].SumCoords().numeratorShort;
+          int currentIndexShift = this->RootsOfBorel[i].sumCoordinates().numeratorShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
@@ -1669,7 +1669,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }
@@ -2137,7 +2137,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::spreadVector
   for (int i = 0; i < outputBasisGeneratedSpace.size; i ++) {
     for (int j = 0; j < theRank; j ++) {
       tempV = outputBasisGeneratedSpace[i];
-      this->theElementImageS[j + 1].actOnVectorColumn(tempV);
+      this->theElementImages[j + 1].actOnVectorColumn(tempV);
       if (!outputBasisGeneratedSpace.linearSpanContainsVector(tempV)) {
         outputBasisGeneratedSpace.addOnTop(tempV);
       }
@@ -2152,13 +2152,13 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getLargestDe
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::getLargestDenominatorSimpleGenerators");
   outputLCM = 1;
   outputDen = 1;
-  for (int gi = 0; gi < this->generatorS.size; gi ++) {
-    for (int mi = 0; mi < this->generatorS[gi].numberOfRows; mi ++) {
-      for (int mj = 0; mj < this->generatorS[gi].numberOfColumns; mj ++) {
-        if (this->generatorS[gi](mi, mj).getDenominator() > outputDen) {
-          outputDen = this->generatorS[gi](mi, mj).getDenominator();
+  for (int gi = 0; gi < this->generators.size; gi ++) {
+    for (int mi = 0; mi < this->generators[gi].numberOfRows; mi ++) {
+      for (int mj = 0; mj < this->generators[gi].numberOfColumns; mj ++) {
+        if (this->generators[gi](mi, mj).getDenominator() > outputDen) {
+          outputDen = this->generators[gi](mi, mj).getDenominator();
         }
-        outputLCM = LargeIntegerUnsigned::lcm(outputLCM, this->generatorS[gi](mi, mj).getDenominator());
+        outputLCM = LargeIntegerUnsigned::lcm(outputLCM, this->generators[gi](mi, mj).getDenominator());
       }
     }
   }
@@ -2297,11 +2297,11 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::decomposeTod
   Vector<Coefficient> startingVector, tempV, average;
   startingVector.makeEi(this->getDimension(), 0);
   average.makeZero(this->getDimension());
-  for (int i = 0; i < this->theElementImageS.size; i ++) {
+  for (int i = 0; i < this->theElementImages.size; i ++) {
     if (!this->theElementIsComputed[i]) {
       global.fatal << "<hr>This is a programming error: an internal check failed. " << global.fatal;
     }
-    this->theElementImageS[i].actOnVectorColumn(startingVector, tempV);
+    this->theElementImages[i].actOnVectorColumn(startingVector, tempV);
     average += tempV;
   }
   return false;
@@ -2311,7 +2311,7 @@ template <typename somegroup, typename Coefficient>
 GroupRepresentation<somegroup, Coefficient> GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::makeOtherGroupRepresentationClass() const {
   GroupRepresentation<somegroup, Coefficient> out;
   out.flagCharacterIsComputed = this->flagCharacterIsComputed;
-  out.generatorS = this->generatorS;
+  out.generators = this->generators;
   out.ownerGroup = this->ownerGroup;
   std::stringstream s;
   for (int i = 0; i < this->names.size; i ++) {
@@ -2338,7 +2338,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentationsThomasVersi
         startingIrrep = &(this->irreps[0].makeGRCAM());
       }
     }
-    if (!startingIrrep || (startingIrrep->generatorS.size > 0 && startingIrrep->generatorS[0].numberOfRows == 1)) {
+    if (!startingIrrep || (startingIrrep->generators.size > 0 && startingIrrep->generators[0].numberOfRows == 1)) {
       global.fatal << "Can't find a good starting irrep.  If you think you provided one, change the present assertion. "
       << global.fatal;
     }
@@ -2453,11 +2453,11 @@ void WeylGroupAutomorphisms::raiseToMaximallyDominant(List<Vector<Coefficient> >
   for (int i = 0; i < theWeights.size; i ++) {
     do {
       found = false;
-      for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
-        if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
+      for (int j = 0; j < this->theWeyl->rootsOfBorel.size; j ++) {
+        if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[i]) < 0) {
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
-            if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
+            if (this->theWeyl->rootScalarCartanRoot(this->theWeyl->rootsOfBorel[j], theWeights[k]) > 0) {
               isGood = false;
               break;
             }
@@ -2466,7 +2466,7 @@ void WeylGroupAutomorphisms::raiseToMaximallyDominant(List<Vector<Coefficient> >
             continue;
           }
           for (int k = 0; k < theWeights.size; k ++) {
-            this->theWeyl->reflectBetaWithRespectToAlpha(this->theWeyl->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
+            this->theWeyl->reflectBetaWithRespectToAlpha(this->theWeyl->rootsOfBorel[j], theWeights[k], false, theWeights[k]);
           }
           found = true;
         }

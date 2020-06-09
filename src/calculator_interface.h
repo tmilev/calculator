@@ -89,8 +89,8 @@ private:
   // are implementation specific and are subject to change.
   // The i^th child of an expression can be accessed as const using operator[](i).
   // The children of an expression are kept as a list of integers indicating the children's
-  // position in Calculator::theExpressionContainer.
-  // Calculator::theExpressionContainer is a Hashed List of references and must not be modified
+  // position in Calculator::expressionContainer.
+  // Calculator::expressionContainer is a Hashed List of references and must not be modified
   // directly in any way.
   // Motivation for this implementation choice. The original implementation
   // had Expression contain all of its children as List<Expression>, making the copy operator=
@@ -99,12 +99,10 @@ private:
   // When processing an expression, one must traverse all of its subtrees.
   // Making temporary copies of all subtrees is then approximately O(n^2),
   // where n^2 is the number of nodes of the tree.
+  // For a tree with 1k nodes this is already unacceptably slow.
   //
-  // For a tree with 1k nodes this is already
-  // unacceptably slow, if it could be avoided.
-  //
-  // If change is to be applied to
-  // most subtrees, then the approximate cost of O(n^2) operations obviously cannot be avoided.
+  // If most subtrees are subject to change, then the
+  // approximate cost of O(n^2) operations seems justified.
   // However, in most computations, subtrees need not be changed - in reality, most expression
   // will arrive to the calculator in reduced or close-to-reduced form.
   //
@@ -120,28 +118,14 @@ private:
   public:
   Calculator* owner;
   int theData;
+  // List<int> children;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
   bool flagDeallocated;
 //////
-  typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
+  typedef bool (*FunctionAddress) (Calculator& calculator, const Expression& input, Expression& output);
   typedef bool (*ToStringHandler) (const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
 //////
-  void operator=(const Expression& other) {
-    this->theData = other.theData;
-    this->children = other.children;
-    this->owner = other.owner;
-  }
-  void operator=(const Rational& other) {
-    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
-    this->checkInitialization();
-    this->assignValue(other, *this->owner);
-  }
-  void operator=(int other) {
-    MacroRegisterFunctionWithName("Expression::operator=(int)");
-    this->checkInitialization();
-    this->assignValue(other, *this->owner);
-  }
-  friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
+  friend std::ostream& operator<<(std::ostream& output, const Expression& theMon) {
     output << theMon.toString();
     return output;
   }
@@ -243,7 +227,6 @@ private:
   bool isElementaryObject() const;
   bool isBuiltInType(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInType(int* outputWhichType) const;
-  const Expression& operator[](int n) const;
   bool isIntervalRealLine() const;
   bool isSequenceDoubleButNotTripleNested() const;
   bool isSequenceNElements(int N = - 2) const;
@@ -330,6 +313,13 @@ private:
     const ExpressionContext& theContext,
     Calculator& owner
   );
+  template <class BuiltIn>
+  bool assignWithContext(
+    const WithContext<BuiltIn>& input,
+    Calculator& owner
+  ) {
+    return this->assignValueWithContext(input.content, input.context, owner);
+  }
   template <class theType>
   bool addChildValueOnTop(const theType& inputValue) {
     this->checkInitialization();
@@ -338,7 +328,9 @@ private:
     tempE.checkConsistency();
     return this->addChildOnTop(tempE);
   }
-  bool setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
+  bool setContextAtLeastEqualTo(
+    ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
+  );
   bool hasContext() const;
   bool hasNonEmptyContext() const;
   ExpressionContext getContext() const;
@@ -365,14 +357,14 @@ private:
   bool makeAtom(const std::string& atomName, Calculator& newBoss);
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   bool makeIntegral(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& integrationSet,
     const Expression& theFunction,
     const Expression& theVariable
   );
   template<class Coefficient>
-  bool makeSum(Calculator& theCommands, const LinearCombination<Expression, Coefficient>& theSum);
-  bool makeSum(Calculator& theCommands, const List<Expression>& theSum);
+  bool makeSum(Calculator& calculator, const LinearCombination<Expression, Coefficient>& theSum);
+  bool makeSum(Calculator& calculator, const List<Expression>& theSum);
   bool makeProduct(Calculator& owner, const List<Expression>& theMultiplicands);
   bool makeProduct(Calculator& owner, const Expression& left, const Expression& right);
   int getNumberOfColumns() const;
@@ -506,23 +498,8 @@ private:
   ) const;
 
   JSData toJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
-  static unsigned int hashFunction(const Expression& input) {
-    return input.hashFunction();
-  }
-  unsigned int hashFunction() const {
-    return this->hashFunctionRecursive(0, 1000);
-  }
-  unsigned int hashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
-    if (RecursionDepth > MaxRecursionDepth) {
-      return 0;
-    }
-    unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
-    int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize);
-    for (int i = 0; i < numCycles; i ++) {
-      result += (*this)[i].hashFunctionRecursive(RecursionDepth + 1, MaxRecursionDepth) * someRandomPrimes[i];
-    }
-    return result;
-  }
+  static unsigned int hashFunction(const Expression& input);
+  unsigned int hashFunction() const;
   Expression(): flagDeallocated(false) {
     this->reset();
   }
@@ -592,7 +569,22 @@ private:
     MapList<std::string, Expression, MathRoutines::hashString>* substitutions,
     Calculator& owner
   );
-  void operator/=(const Expression& other);
+  const Expression& operator[](int n) const;
+  void operator=(const Expression& other) {
+    this->theData = other.theData;
+    this->children = other.children;
+    this->owner = other.owner;
+  }
+  void operator=(const Rational& other) {
+    MacroRegisterFunctionWithName("Expression::operator=(Rational)");
+    this->checkInitialization();
+    this->assignValue(other, *this->owner);
+  }
+  void operator=(int other) {
+    MacroRegisterFunctionWithName("Expression::operator=(int)");
+    this->checkInitialization();
+    this->assignValue(other, *this->owner);
+  }  void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
   Expression operator+(int other);
@@ -630,7 +622,14 @@ private:
 
 class ExpressionContext {
 private:
+  HashedList<Expression> variables;
+  List<Expression> differentialOperatorVariables;
+  LargeIntegerUnsigned defaultModulus;
   bool mergeSemisimpleLieAlgebraContexts(
+    const ExpressionContext& other,
+    ExpressionContext& outputContext
+  );
+  bool mergeModuli(
     const ExpressionContext& other,
     ExpressionContext& outputContext
   );
@@ -646,8 +645,6 @@ private:
     Selection &differentialOperatorVariablesFound,
     ExpressionContext& outputContext
   ) const;
-  HashedList<Expression> variables;
-  List<Expression> differentialOperatorVariables;
 public:
   Calculator* owner;
   int indexAmbientSemisimpleLieAlgebra;
@@ -673,6 +670,8 @@ public:
   bool setVariablesFromStrings(const List<std::string>& inputVariables);
   bool setAmbientSemisimpleLieAlgebra(SemisimpleLieAlgebra& input);
   void setIndexAmbientSemisimpleLieAlgebra(int index);
+  void setDefaultModulus(const LargeIntegerUnsigned& input);
+  LargeIntegerUnsigned getDefaultModulus();
   void getFormat(FormatExpressions& output) const;
   FormatExpressions getFormat() const;
   Expression getVariable(int variableIndex) const;
@@ -681,12 +680,14 @@ public:
   template <class Coefficient>
   bool polynomialSubstitution(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<Coefficient>& output
+    PolynomialSubstitution<Coefficient>& output,
+    const Coefficient& one
   ) const;
   template <class Coefficient>
   void polynomialSubstitutionNoFailure(
     const ExpressionContext& largerContext,
-    PolynomialSubstitution<Coefficient>& output
+    PolynomialSubstitution<Coefficient>& output,
+    const Coefficient& one
   ) const;
   template <class Coefficient>
   bool polynomialAndWeylAlgebraSubstitution(
@@ -708,17 +709,20 @@ public:
   bool fromExpressionPolynomialVariables(const Expression& input);
   bool fromExpressionDifferentialOperatorVariables(const Expression& input);
   bool fromExpressionSemisimpleLieAlgebra(const Expression& input);
+  bool fromExpressionDefaultModulus(const Expression& input);
+  Expression toExpressionDefaultModulus() const;
   Expression toExpressionSemisimpleLieAlgebra() const;
   Expression toExpressionPolynomialVariables() const;
   Expression toExpressionDifferntialOperators() const;
   std::string toString() const;
 };
 
-template <class builtIn>
+template <class BuiltIn>
 class WithContext {
+  bool extendContext(ExpressionContext& newContext, std::stringstream* commentsOnFailure);
 public:
   ExpressionContext context;
-  builtIn content;
+  BuiltIn content;
   std::string toStringContentWithFormat() {
     FormatExpressions theFormat;
     this->context.getFormat(theFormat);
@@ -726,8 +730,16 @@ public:
   }
   WithContext() {
   }
-  bool mergeContextWith(
-    WithContext<builtIn>& otherOutput, std::stringstream* commentsOnFailure
+  static bool mergeContexts(
+    WithContext<BuiltIn>& leftOutput,
+    WithContext<BuiltIn>& rightOutput,
+    std::stringstream* commentsOnFailure
+  );
+  bool setContextAtLeast(ExpressionContext& inputOutputContext, std::stringstream* commentsOnFailure);
+  bool setContextAndSerialize(
+    ExpressionContext& inputOutputContext,
+    Expression& output,
+    std::stringstream* commentsOnFailure
   );
 };
 
@@ -815,7 +827,7 @@ class Function {
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
-  bool apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
+  bool apply(Calculator& calculator, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function** outputHandler);
   bool checkConsistency() const;
 };
 
@@ -934,8 +946,8 @@ public:
   double theUpperBoundAxes;
   double lowBoundY;
   double highBoundY;
-  int DesiredHtmlHeightInPixels;
-  int DesiredHtmlWidthInPixels;
+  int desiredHtmlHeightInPixels;
+  int desiredHtmlWidthInPixels;
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
@@ -1031,7 +1043,7 @@ public:
   WeylGroupData& getWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& getLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& getSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
-  int currentRandomSeed;
+  UnsecurePseudoRandomGenerator pseudoRandom;
   int canvasPlotCounter;
   void reset();
   void resetSliders();
@@ -1101,10 +1113,11 @@ public:
   };
   class Atoms {
   public:
-    static std::string setRandomSeed;
     static std::string commandEnclosure;
     static std::string setInputBox;
+    static std::string setRandomSeed;
     static std::string sort;
+    static std::string transpose;
   };
 
   // Operations parametrize the expression elements.
@@ -1197,22 +1210,36 @@ public:
   List<double> knownDoubleConstantValues;
 
   int maximumRecursionDepth;
-  int RecursionDeptH;
+  int recursionDepth;
   int DepthRecursionReached;
-  int MaxAlgTransformationsPerExpression;
+  int maximumAlgebraicTransformationsPerExpression;
   int MaxLatexChars;
   int MaxCachedExpressionPerRuleStack;
   int MaxRuleStacksCached;
   int RuleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
-  class EvaluationStats {
+  class EvaluationStatistics {
   public:
-    int expressionEvaluated;
+    int expressionsEvaluated;
     int callsSinceReport;
     int maximumCallsBeforeReportGeneration;
-    EvaluationStats();
+    int totalSubstitutions;
+    int numberOfListsStart;
+    int numberListResizesStart;
+    int numberHashResizesStart;
+    long long int numberOfSmallAdditionsStart;
+    long long int numberOfSmallMultiplicationsStart;
+    long long int numberOfSmallGreatestCommonDivisorsStart;
+    long long int numberOfLargeAdditionsStart;
+    long long int numberOfLargeMultiplicationsStart;
+    long long int numberOfLargeGreatestCommonDivisorsStart;
+    int64_t millisecondsLastLog;
+    int64_t startTimeEvaluationMilliseconds;
+    EvaluationStatistics();
+    void initialize();
+    void reset();
   };
-  EvaluationStats stats;
+  EvaluationStatistics statistics;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
@@ -1249,27 +1276,12 @@ public:
 
   bool flagNoApproximations;
 
-  // bool flagReplaceInputBoxesByValues;
+  bool flagForkingprocessAllowed;
 
-  bool flagforkingprocessAllowed;
-
-  int64_t millisecondsLastLog;
-  ///////////////////////////////////////////////////////////////////////////
-  int numberOfListsStart;
-  int numberListResizesStart;
-  int numberHashResizesStart;
-  long long int numberOfSmallAdditionsStart;
-  long long int numberOfSmallMultiplicationsStart;
-  long long int numberOfSmallGreatestCommonDivisorsStart;
-  long long int numberOfLargeAdditionsStart;
-  long long int numberOfLargeMultiplicationsStart;
-  long long int numberOfLargeGreatestCommonDivisorsStart;
-  ////////////////////////////////////////////////
   int totalPatternMatchesPerformed;
   int numberOfPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
-  // std::vector<std::stringstream> theLogs;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSoup;
   List<SyntacticElement> syntacticStacK;
@@ -1287,7 +1299,8 @@ public:
   Expression ruleStack;
   HashedList<Expression> cachedRuleStacks;
 
-  HashedListReferences<Expression> theExpressionContainer;
+  HashedListReferences<Expression> allChildExpressions;
+  List<unsigned int> allChildExpressionHashes;
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
@@ -1300,7 +1313,6 @@ public:
   std::string outputCommentsString;
   std::string parsingLog;
   ObjectContainer theObjectContainer;
-  int64_t startTimeEvaluationMilliseconds;
 
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
@@ -1323,7 +1335,8 @@ public:
   operator bool() const {
     return false;
   }
-
+  // Adds an expression to the global list of expressions that are children of another expression.
+  int addChildExpression(const Expression& child);
   void registerCalculatorFunction(Function& theFun, int indexOp);
   std::string toStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
@@ -2093,32 +2106,32 @@ public:
     std::stringstream* commentsGeneral = nullptr
   );
   static bool innerLogEvaluationStepsDebug(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerLogEvaluationSteps(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerLogEvaluationStepsHumanReadableMerged(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool doDebug
   );
 
-  static bool innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerReverseOrderRecursivelY(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialWithEWA(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerEWAorPoly(theCommands, input, output, true);
+  static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerReverseOrderRecursivelY(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerEWAorPoly(calculator, input, output, true);
   }
-  static bool innerElementWeylAlgebra(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerEWAorPoly(theCommands, input, output, false);
+  static bool innerElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerEWAorPoly(calculator, input, output, false);
   }
-  static bool innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly);
-  static bool innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp);
-  static bool innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
+  static bool innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
+  static bool innerOperationBinary(Calculator& calculator, const Expression& input, Expression& output, int theOp);
+  static bool innerInterpolatePoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerOperationBinary(calculator, input, output, calculator.opTimes());
   }
   std::string writeFileToOutputFolderReturnLink(
     const std::string& fileContent,
@@ -2166,33 +2179,33 @@ public:
     void calculatorTestPrepare();
     bool calculatorTestRun();
   };
-  static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAutomatedTest(Calculator& calculator, const Expression& input, Expression& output);
   int getNumberOfBuiltInFunctions();
-  static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTranspose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGetElementWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerStandardFunction(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int opIndexParentIfAvailable,
     Function **outputHandler
   );
   static bool outerStandardCompositeHandler(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int opIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerStandardHandler(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int opIndexParentIfAvailable,
     Function** outputHandler
   );
-  static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerPlus(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerPowerRaiseToFirst(Calculator& calculator, const Expression& input, Expression& output);
   static bool collectCoefficientsPowersVariables(
     const Expression& input,
     const Expression& theVariable,
@@ -2201,37 +2214,37 @@ public:
   bool collectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
   bool collectOpandsAccumulate(const Expression& input, int theOp, List<Expression>& outputOpands);
   static bool functionCollectSummands(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
   );
-  static bool outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool standardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerAssociate(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerTensorProductStandard(Calculator& calculator, const Expression& input, Expression& output);
+  static bool standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerMinus(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerCombineFractions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerCheckRule(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerAssociate(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSubZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerCancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAssociateExponentExponent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerAssociateTimesDivision(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFlattenCommandEnclosuresOneLayeR(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool functionFlattenCommandEnclosuresOneLayer(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerDistributeTimesConstant(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerExtractBaseMultiplication(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerMeltBrackets(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMultiplyByOne(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerTimesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerDistributeTimes(Calculator& calculator, const Expression& input, Expression& output);
+  static bool outerDistributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerDistribute(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int theAdditiveOp = - 1,
@@ -2239,7 +2252,7 @@ public:
     bool constantsOnly = false
   );
   static bool outerLeftDistributeBracketIsOnTheLeft(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int theAdditiveOp = - 1,
@@ -2247,14 +2260,14 @@ public:
     bool constantsOnly = false
   );
   static bool outerRightDistributeBracketIsOnTheRight(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int theAdditiveOp = - 1,
     int theMultiplicativeOp = - 1,
     bool constantsOnly = false
   );
-  static bool evaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool evaluateIf(Calculator& calculator, const Expression& input, Expression& output);
   template<class theType>
   bool functionGetMatrix(
     const Expression& input,
@@ -2306,28 +2319,33 @@ public:
     int targetDimNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   );
-  static bool innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGenerateMultiplicativelyClosedSet(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIsRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFreudenthalFormula(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
-  template<class Coefficient>
-  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialType(
-    Calculator& theCommands,
+  static bool innerDeterminantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerInvertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIsInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerKillingForm(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool doGCD
   );
   template<class Coefficient>
   static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
     const ExpressionContext& context,
@@ -2335,16 +2353,16 @@ public:
     bool doGCD
   );
   static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-    Calculator& theCommands, const Expression& input, Expression& output, bool doGCD
+    Calculator& calculator, const Expression& input, Expression& output, bool doGCD
   );
-  static bool innerLCMPoly(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-      theCommands, input, output, false
+  static bool innerLCMPoly(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, false
     );
   }
-  static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-      theCommands, input, output, true
+  static bool innerGCDPoly(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, true
     );
   }
   bool getListPolynomialVariableLabelsLexicographic(
@@ -2352,12 +2370,12 @@ public:
     Vector<Polynomial<AlgebraicNumber> >& output,
     ExpressionContext& outputContext
   );
-  static bool innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPrintB3G2branchingTableCharsOnly(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   bool innerPrintB3G2branchingIntermediate(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     Vectors<RationalFunction<Rational> >& theHWs,
@@ -2365,39 +2383,39 @@ public:
     ExpressionContext &theContext
   );
   static bool innerPrintB3G2branchingTable(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerPrintB3G2branchingTableCommon(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     Vectors<RationalFunction<Rational> >& outputHWs,
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
-  static bool innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebraShort(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
+  static bool innerGetChevGen(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGetCartanGen(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSLieAlgebraShort(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerPrintSSLieAlgebra(calculator, input, output, false);
   }
-  static bool innerPrintSSLieAlgebraVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, true);
+  static bool innerPrintSSLieAlgebraVerbose(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerPrintSSLieAlgebra(calculator, input, output, true);
   }
-  static bool innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose);
+  static bool innerWriteSSLieAlgebraToHD(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
   static bool innerWriteToHDOrPrintSSLieAlgebra(
-    Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
   );
   static bool functionWriteToHDOrPrintSSLieAlgebra(
-    Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
   );
-  static bool innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
   template<class Coefficient>
   bool getTypeWeight(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Vector<Coefficient>& outputWeightSimpleCoords,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
@@ -2405,7 +2423,7 @@ public:
   );
   template<class Coefficient>
   bool getTypeHighestWeightParabolic(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     Vector<Coefficient>& outputWeightHWFundcoords,
@@ -2413,38 +2431,37 @@ public:
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
-  static bool innerGroebnerGradedLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::gradedLexicographic);
+  static bool innerGroebnerGradedLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::gradedLexicographic);
   }
-  static bool innerGroebnerGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::gradedReverseLexicographic);
+  static bool innerGroebnerGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::gradedReverseLexicographic);
   }
-  static bool innerGroebnerLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographic);
+  static bool innerGroebnerLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographic);
   }
-  static bool innerGroebnerLexicographicOpposite(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographicOpposite);
+  static bool innerGroebnerLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographicOpposite);
   }
-  static bool innerGroebnerModZpLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographic, true);
+  static bool innerGroebnerModZpLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographic, true);
   }  
   static bool innerGroebner(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     int order,
     bool useModZp = false
   );
-  static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output);
-  static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLSPath(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHWVCommon(Calculator& theCommands,
+  static bool innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2old(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output);
+  static bool innerLittelmannOperator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerAnimateLittelmannPaths(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLSPath(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerTestMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerHWVCommon(Calculator& calculator,
     Expression& output,
     Vector<RationalFunction<Rational> >& highestWeightFundCoords,
     Selection& selectionParSel,
@@ -2453,7 +2470,7 @@ public:
     bool Verbose = true
   );
   bool innerWriteGenVermaModAsDiffOperatorInner(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     Vectors<Polynomial<Rational> >& theHws,
@@ -2468,24 +2485,24 @@ public:
     bool ascending
   );
   template<class Coefficient>
-  static bool TypeHighestWeightParabolic(
-    Calculator& theCommands,
+  static bool typeHighestWeightParabolic(
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     Vector<Coefficient>& outputWeight,
     Selection& outputInducingSel,
     Expression* outputContext = nullptr
   );
-  static bool innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerNot(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerZmodP(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerNot(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerZmodP(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAttemptExtendingEtoHEFwithHinCartan(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperators(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool AllGenerators,
@@ -2493,25 +2510,25 @@ public:
     bool ascending
   );
   static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, false, true);
+    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
   }
   static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, true, false);
+    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
   }
   static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true, false, false);
+    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
   }
-  static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCharacterSSLieAlgFD(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCasimir(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGetLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerCharacterSSLieAlgFD(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPrintSSSubalgebras(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool doForceRecompute,
@@ -2521,11 +2538,11 @@ public:
     bool doComputeNilradicals,
     bool doAdjustCentralizers
   );
-  static bool innerPrintSSsubalgebrasNilradicals(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRecompute(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoSolutions(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRegular(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasRecompute(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output);
   void addEmptyHeadedCommand();
   Calculator();
   int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
@@ -2573,7 +2590,6 @@ public:
   void reset();
   void initialize();
   void initializeToStringHandlers();
-  void initializeComputationStatistics();
   void initializePredefinedWordSplits();
   void initAtomsThatFreezeArguments();
   void initializeAtomsNonCacheable();
@@ -2595,14 +2611,14 @@ public:
   void evaluateCommands();
   bool isTimedOut();
   static bool evaluateExpression(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool evaluateExpression(Calculator& theCommands,
+  static bool evaluateExpression(Calculator& calculator,
     const Expression& input,
     Expression& outpuT,
     bool& outputIsCacheable,
     int opIndexParentIfAvailable,
-    Expression *outputHistory
+    Expression* outputHistory
   );
   class EvaluateLoop {
   public:
@@ -2613,7 +2629,7 @@ public:
     int indexInCache;
     ProgressReport theReport;
     bool reductionOccurred;
-    Expression* outpuT;
+    Expression* output;
     Expression* history;
     Expression currentChild;
     bool reduceOnce();
@@ -2658,147 +2674,147 @@ public:
   ////////////////////Conversion from expression tree/////////////////////////////////
   // conversions from expression tree to type
   static bool innerElementSemisimpleLieAlgebraRationalCoeffs(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     ElementSemisimpleLieAlgebra<Rational>& output,
     SemisimpleLieAlgebra& owner
   );
   static bool innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
     SemisimpleLieAlgebra& owner
   );
-  static bool innerDynkinTypE(Calculator& theCommands, const Expression& input, DynkinType& output);
-  static bool functionDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
-  static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
-  static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
-  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, SlTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction<Rational>& output);
-  static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialModuloInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDynkinTypE(Calculator& calculator, const Expression& input, DynkinType& output);
+  static bool functionDynkinType(Calculator& calculator, const Expression& input, DynkinType& output);
+  static bool innerDynkinSimpleTypE(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
+  static bool functionDynkinSimpleType(Calculator& calculator, const Expression& input, DynkinSimpleType& output);
+  static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, SlTwoSubalgebra& output);
+  static bool innerLoadFromObject(Calculator& calculator, const Expression& input, RationalFunction<Rational>& output);
+  static bool innerAlgebraicNumber(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPolynomialModuloInteger(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
-  static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomial(Calculator& calculator, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
   template <class Coefficient>
-  static bool functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRationalFunctioN(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerRationalFunctioN(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerElementUE(
-    Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
+    Calculator& calculator, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
   );
   static bool outerMatrixExpressionsToMatrixOfType(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalTensorForM(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool functionMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMakeMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMatrixDouble(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMatrixAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMatrixRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMatrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMatrixRationalFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerMatrixRationalTensorForM(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionMatrixRationalTensorForm(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLoadFileIntoString(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMakeElementHyperOctahedral(Calculator& calculator, const Expression& input, Expression& output);
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
   template <class Coefficient>
   static bool innerExpressionFromPoly(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Polynomial<Coefficient>& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
   static bool innerExpressionFromRF(
-    Calculator& theCommands,
+    Calculator& calculator,
     const RationalFunction<Rational>& input,
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
   static bool innerLoadKey(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& inputStatementList,
     const std::string& inputKey,
     Expression& output
   );
   static bool innerLoadKeysFromStatementList(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     MapList<std::string, Expression, MathRoutines::hashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
   static bool innerLoadKeysFromStatementList(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     MapList<Expression, Expression>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
   static bool innerStoreSemisimpleSubalgebras(
-    Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output
+    Calculator& calculator, const SemisimpleSubalgebras& input, Expression& output
   );
   static std::string innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input);
 
   static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-    Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
+    Calculator& calculator, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
   );
   static bool innerExpressionFromUE(
-    Calculator& theCommands,
+    Calculator& calculator,
     const ElementUniversalEnveloping<RationalFunction<Rational> >& input,
     Expression& output,
     ExpressionContext *inputContext = nullptr
   );
-  static bool innerStoreCandidateSubalgebra(Calculator& theCommands, const CandidateSemisimpleSubalgebra& input, Expression& output);
-  static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
-  static bool innerExpressionFromDynkinSimpleType(Calculator& theCommands, const DynkinSimpleType& input, Expression& output);
+  static bool innerStoreCandidateSubalgebra(Calculator& calculator, const CandidateSemisimpleSubalgebra& input, Expression& output);
+  static bool innerExpressionFromDynkinType(Calculator& calculator, const DynkinType& input, Expression& output);
+  static bool innerExpressionFromDynkinSimpleType(Calculator& calculator, const DynkinSimpleType& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraRationals(
-    Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
+    Calculator& calculator, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
   );
   //conversions from expression containing type to expression tree
-  static bool innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerStoreSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionSemisimpleLieAlgebra(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool functionSemisimpleLieAlgebra(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     SemisimpleLieAlgebra*& outputSSalgebra
   );
   static bool innerSemisimpleLieAlgebra(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerCandidateSubalgebraPrecomputed(
-    Calculator& theCommands,
+    Calculator& calculator,
     const Expression& input,
     Expression& output,
     CandidateSemisimpleSubalgebra& outputPointer,
     SemisimpleSubalgebras& owner
   );
-  static bool innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLoadWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerStoreSemisimpleSubalgebras(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output);
+  static bool innerSlTwoSubalgebraPrecomputed(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerLoadSemisimpleSubalgebras(Calculator& calculator, const Expression& inpuT, Expression& output);
   static bool innerExpressionFromChevalleyGenerator(
-    Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
+    Calculator& calculator, const ChevalleyGenerator& input, Expression& output
   );
   static bool innerExpressionFromMonomialUE(
-    Calculator& theCommands,
+    Calculator& calculator,
     const MonomialUniversalEnveloping<RationalFunction<Rational> >& input,
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
-  static bool functionExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFromBuiltInTypE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionExpressionFromBuiltInType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerExpressionFromBuiltInTypE(Calculator& calculator, const Expression& input, Expression& output);
   template <class Coefficient>
-  static bool functionExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFromUE(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFrom(Calculator& theCommands, const MonomialP& input, Expression& output);
+  static bool functionExpressionFromPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerExpressionFromRF(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerExpressionFromUE(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerExpressionFrom(Calculator& calculator, const MonomialP& input, Expression& output);
 };
 
 template <class theType>
@@ -2816,7 +2832,9 @@ bool Calculator::getVector(const Expression& input,
   List<Expression> convertedEs;
   convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
-    if (!this->convertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
+    if (!this->convertToTypeUsingFunction<theType>(
+      conversionFunction, nonConvertedEs[i], convertedEs[i]
+    )) {
       return false;
     }
   }
@@ -2837,7 +2855,7 @@ bool Calculator::getVector(const Expression& input,
 
 template <class Coefficient>
 bool CalculatorConversions::functionExpressionFromPoly(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPoly");
   if (!input.isOfType<Polynomial<Coefficient> >()) {
@@ -2845,7 +2863,7 @@ bool CalculatorConversions::functionExpressionFromPoly(
   }
   const Polynomial<Coefficient>& thePoly = input.getValue<Polynomial<Coefficient> >();
   ExpressionContext context = input.getContext();
-  return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &context);
+  return CalculatorConversions::innerExpressionFromPoly(calculator, thePoly, output, &context);
 }
 
 template <class theType>
@@ -2947,7 +2965,7 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < convertedEs.numberOfRows; i ++) {
     for (int j = 0; j < convertedEs.numberOfColumns; j ++) {
-      if (!convertedEs(i, j).::Expression::setContextAtLeastEqualTo(theContext)) {
+      if (!convertedEs(i, j).setContextAtLeastEqualTo(theContext, commentsOnError)) {
         if (commentsOnError != nullptr) {
           *commentsOnError
           << "Failed to set context to matrix element: "
@@ -2974,24 +2992,24 @@ bool Calculator::functionGetMatrix(
 
 template <class Coefficient>
 bool Expression::makeSum(
-  Calculator& theCommands,
+  Calculator& calculator,
   const LinearCombination<Expression, Coefficient>& theSum
 ) {
   MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
-  oneE.assignValue<Rational>(1, theCommands);
+  oneE.assignValue<Rational>(1, calculator);
   if (theSum.isEqualToZero()) {
-    return this->assignValue<Rational>(0, theCommands);
+    return this->assignValue<Rational>(0, calculator);
   }
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.setSize(theSum.size());
   for (int i = 0; i < theSum.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (theSum[i] == oneE) {
-      current.assignValue(theSum.coefficients[i], theCommands);
+      current.assignValue(theSum.coefficients[i], calculator);
     } else if (!(theSum.coefficients[i] == 1)) {
-      current.reset(theCommands, 3);
-      current.addChildAtomOnTop(theCommands.opTimes());
+      current.reset(calculator, 3);
+      current.addChildAtomOnTop(calculator.opTimes());
       current.addChildValueOnTop(theSum.coefficients[i]);
       current.addChildOnTop(theSum[i]);
     } else {
@@ -3014,7 +3032,7 @@ bool Expression::makeSum(
       }
     }
   }
-  return this->makeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
+  return this->makeOXdotsX(calculator, calculator.opPlus(), summandsWithCoeff);
 }
 
 template <typename theType>
@@ -3046,10 +3064,9 @@ template <class theType>
 bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   Expression tempE;
   tempE.owner = &owner;
-  // std::stringstream comments;
-  // comments << inputValue;
   int curType = tempE.getTypeOperation<theType>();
   if (
+    curType == owner.opEltZmodP() ||
     curType == owner.opPolynomialRational() ||
     curType == owner.opRationalFunction() ||
     curType == owner.opElementTensorGVM() ||
@@ -3059,7 +3076,7 @@ bool Expression::assignValue(const theType& inputValue, Calculator& owner) {
   ) {
     global.fatal << "This may or may not be a programming error. "
     << "Assigning value WITHOUT CONTEXT to data type "
-    << this->owner->getOperations()[curType]
+    << owner.getOperations()[curType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
     << global.fatal;
   }
@@ -3095,7 +3112,7 @@ bool Expression::mergeContextsMyArumentsAndConvertThem(
 
 template<class Coefficient>
 bool Calculator::getTypeWeight(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Vector<Coefficient>& outputWeightSimpleCoords,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra,
@@ -3103,8 +3120,8 @@ bool Calculator::getTypeWeight(
 ) {
   MacroRegisterFunctionWithName("Calculator::getTypeWeight");
   if (input.size() != 3) {
-    return theCommands
-    << "Function TypeHighestWeightParabolic is expected to have two arguments: "
+    return calculator
+    << "Function typeHighestWeightParabolic is expected to have two arguments: "
     << "Semisimple algebra type, highest weight in simple coordinates. ";
   }
   const Expression& leftE = input[1];
@@ -3114,31 +3131,31 @@ bool Calculator::getTypeWeight(
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSemisimpleLieAlgebra
   )) {
-    theCommands << "Error extracting Lie algebra from " << leftE.toString();
+    calculator << "Error extracting Lie algebra from " << leftE.toString();
     return false;
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSemisimpleLieAlgebra.content;
-  if (!theCommands.getVector<Coefficient>(
+  if (!calculator.getVector<Coefficient>(
     middleE,
     outputWeightSimpleCoords,
     &outputAmbientSemisimpleLieAlgebra.context,
     ambientSSalgebra->getRank(),
     ConversionFun
   )) {
-    theCommands << "Failed to convert the second "
+    calculator << "Failed to convert the second "
     << "argument of HWV to a list of " << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
     return false;
   }
-  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.contains(
+  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
     << ambientSSalgebra->toStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
   outputAmbientSemisimpleLieAlgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
@@ -3157,7 +3174,7 @@ void Calculator::addOneBuiltInHandler() {
 
 template<class Coefficient>
 bool Calculator::getTypeHighestWeightParabolic(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vector<Coefficient>& outputWeightHWFundcoords,
@@ -3167,10 +3184,11 @@ bool Calculator::getTypeHighestWeightParabolic(
 ) {
   if (!input.isListNElements(4) && !input.isListNElements(3)) {
     return output.makeError(
-      "Function TypeHighestWeightParabolic is "
+      "Function typeHighestWeightParabolic is "
       "expected to have two or three arguments: "
-      "SS algebra type, highest weight, [optional] parabolic selection. ",
-      theCommands
+      "semisimple Lie algebra type, highest weight, "
+      "[optional] parabolic selection. ",
+      calculator
     );
   }
   const Expression& leftE = input[1];
@@ -3180,10 +3198,10 @@ bool Calculator::getTypeHighestWeightParabolic(
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSSalgebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSSalgebra.content;
-  if (!theCommands.getVector<Coefficient>(
+  if (!calculator.getVector<Coefficient>(
     middleE,
     outputWeightHWFundcoords,
     &outputAmbientSSalgebra.context,
@@ -3192,16 +3210,16 @@ bool Calculator::getTypeHighestWeightParabolic(
   )) {
     std::stringstream tempStream;
     tempStream
-    << "Failed to convert the second argument of HWV to a list of "
+    << "Failed to convert the second argument of highest weight vector to a list of "
     << ambientSSalgebra->getRank()
     << " polynomials. The second argument you gave is "
     << middleE.toString() << ".";
-    return output.makeError(tempStream.str(), theCommands);
+    return output.makeError(tempStream.str(), calculator);
   }
   if (input.isListNElements(4)) {
     Vector<Rational> parabolicSel;
     const Expression& rightE = input[3];
-    if (!theCommands.getVector<Rational>(
+    if (!calculator.getVector<Rational>(
       rightE,
       parabolicSel,
       &outputAmbientSSalgebra.context,
@@ -3210,11 +3228,11 @@ bool Calculator::getTypeHighestWeightParabolic(
     )) {
       std::stringstream tempStream;
       tempStream
-      << "Failed to convert the third argument of HWV to a list of "
+      << "Failed to convert the third argument of highest weight vector to a list of "
       << ambientSSalgebra->getRank()
       << " rationals. The third argument you gave is "
       << rightE.toString() << ".";
-      return output.makeError(tempStream.str(), theCommands);
+      return output.makeError(tempStream.str(), calculator);
     }
     outputInducingSel = parabolicSel;
   } else {
@@ -3225,7 +3243,7 @@ bool Calculator::getTypeHighestWeightParabolic(
       }
     }
   }
-  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.contains(
+  if (!calculator.theObjectContainer.semisimpleLieAlgebras.contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
@@ -3233,7 +3251,7 @@ bool Calculator::getTypeHighestWeightParabolic(
     << " contained object container more than once. "
     << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
+  int algebraIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
   outputAmbientSSalgebra.context.setIndexAmbientSemisimpleLieAlgebra(algebraIndex);
@@ -3244,7 +3262,7 @@ template <class Coefficient>
 bool Expression::assignMatrix(
   const Matrix<Coefficient>& input,
   Calculator& owner,
-  const ExpressionContext *inputContext,
+  const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
   MacroRegisterFunctionWithName("Expression::assignMatrix");
@@ -3268,7 +3286,7 @@ bool Expression::assignMatrix(
 
 template <class Coefficient>
 bool CalculatorConversions::innerExpressionFromPoly(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Polynomial<Coefficient>& input,
   Expression& output,
   ExpressionContext* inputContext
@@ -3277,7 +3295,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   LinearCombination<Expression, Coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.isConstant() && inputContext == nullptr) {
-    theCommands << "While converting polynomial to expression, "
+    calculator << "While converting polynomial to expression, "
     << "I was given no variable names. Using the "
     << "default variable names x_1, x_2, ... "
     << "Please make sure you are not using those "
@@ -3285,7 +3303,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   }
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].isConstant()) {
-      currentTerm.assignValue(1, theCommands);
+      currentTerm.assignValue(1, calculator);
       theTerms.addMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
@@ -3295,16 +3313,16 @@ bool CalculatorConversions::innerExpressionFromPoly(
         if (inputContext != nullptr) {
           currentBase = inputContext->getVariable(j);
         } else {
-          currentBase.reset(theCommands);
+          currentBase.reset(calculator);
           currentBase.addChildAtomOnTop("x");
           currentBase.addChildValueOnTop(Rational(j));
         }
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;
         } else {
-          currentPower.assignValue(input[i](j), theCommands);
+          currentPower.assignValue(input[i](j), calculator);
           currentMultTermE.makeXOX(
-            theCommands, theCommands.opThePower(), currentBase, currentPower
+            calculator, calculator.opThePower(), currentBase, currentPower
           );
         }
         if (!found) {
@@ -3317,7 +3335,54 @@ bool CalculatorConversions::innerExpressionFromPoly(
     }
     theTerms.addMonomial(currentTerm, input.coefficients[i]);
   }
-  return output.makeSum(theCommands, theTerms);
+  return output.makeSum(calculator, theTerms);
 }
 
+template <class BuiltIn>
+bool WithContext<BuiltIn>::setContextAtLeast(
+  ExpressionContext& inputOutputContext,
+  std::stringstream* commentsOnFailure
+) {
+  ExpressionContext newContext;
+  if (!inputOutputContext.mergeContexts(this->context, newContext)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to merge context " << inputOutputContext.toString()
+      << " with " << this->context.toString();
+    }
+    return false;
+  }
+  inputOutputContext = newContext;
+  return this->extendContext(inputOutputContext, commentsOnFailure);
+}
+
+template <class BuiltIn>
+bool WithContext<BuiltIn>::setContextAndSerialize(
+  ExpressionContext& inputOutputContext,
+  Expression& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (!this->setContextAtLeast(inputOutputContext, commentsOnFailure)) {
+    return false;
+  }
+  return output.assignWithContext(*this, *this->context.owner);
+}
+
+
+template <class BuiltIn>
+bool WithContext<BuiltIn>::mergeContexts(
+  WithContext<BuiltIn>& leftOutput,
+  WithContext<BuiltIn>& rightOutput,
+  std::stringstream* commentsOnFailure
+) {
+  ExpressionContext resultContext;
+  if (!leftOutput.context.mergeContexts(rightOutput.context, resultContext)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to merge contexts.";
+    }
+    return false;
+  }
+  return
+  leftOutput.extendContext(resultContext, commentsOnFailure) &&
+  rightOutput.extendContext(resultContext, commentsOnFailure);
+}
 #endif

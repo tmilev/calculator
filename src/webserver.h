@@ -39,7 +39,7 @@ public:
   std::string RelativePhysicalFileNamE;
   std::string status;
   std::string pingMessage;
-  bool flagInUsE;
+  bool flagInUse;
   bool flagExited;
   bool flagDeallocated;
   bool flagKeepAlive;
@@ -222,6 +222,7 @@ public:
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
+  bool flagDeallocated;
   TransportLayerSecurity theTLS;
   LinearCombination<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
@@ -242,7 +243,6 @@ public:
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
-  bool flagDeallocated;
   WebServer();
   ~WebServer();
   static void figureOutOperatingSystem();

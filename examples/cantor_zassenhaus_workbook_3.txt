@@ -1,0 +1,5 @@
+prime = 9973;
+p = x^5+113x^4+102x^3+x^2+12x+511;
+q = x^6+113x^4+102x^3+x^2+12x+511;
+FactorOneVariablePolynomialModPrime{}( p*q, prime );
+

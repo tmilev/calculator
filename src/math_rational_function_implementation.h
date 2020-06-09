@@ -105,7 +105,7 @@ void RationalFunction<Coefficient>::operator/=(int other) {
 }
 
 template<class Coefficient>
-void RationalFunction<Coefficient>::minus() {
+void RationalFunction<Coefficient>::negate() {
   this->operator*= (Rational(- 1));
   if (!this->checkConsistency()) {
     global.fatal << "Failed to take the negative sign of a rational function. " << global.fatal;
@@ -122,7 +122,7 @@ void RationalFunction<Coefficient>::operator-=(const RationalFunction<Coefficien
   }
   RationalFunction<Coefficient> tempRF;
   tempRF = other;
-  tempRF.minus();
+  tempRF.negate();
   this->operator+=(tempRF);
   if (!this->checkConsistency()) {
     global.fatal << "Corrupt output in rational function operator -=." << global.fatal;
@@ -136,7 +136,7 @@ void RationalFunction<Coefficient>::operator-=(const Coefficient& other) {
   }
   RationalFunction tempRF;
   tempRF.makeConstant(other);
-  tempRF.minus();
+  tempRF.negate();
   this->operator+=(tempRF);
   if (!(this->checkConsistency())) {
     global.fatal << "Corrupt output in rational function operator-=(Rational)." << global.fatal;
@@ -1085,28 +1085,40 @@ void RationalFunction<Coefficient>::reduceRationalFunctionToPolynomial() {
 }
 
 template<class Coefficient>
-bool RationalFunction<Coefficient>::substitution(const PolynomialSubstitution<Rational>& theSubstitution) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::substitution");
-  if (theSubstitution.size < 1) {
-    return false;
-  }
+bool RationalFunction<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& substitution,
+  const Coefficient& one
+) {
+  return this->substitution(substitution, one, nullptr);
+}
+
+template<class Coefficient>
+bool RationalFunction<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& substitution,
+  const Coefficient& one,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("RationalFunction::substitution");
   switch(this->expressionType) {
     case RationalFunction::typeConstant:
       return true;
     case RationalFunction::typePolynomial:
-      if (!this->numerator.getElement().substitution(theSubstitution)) {
+      if (!this->numerator.getElement().substitution(substitution, one)) {
         return false;
       }
       this->simplify();
       return true;
     case RationalFunction::typeRationalFunction:
-      if (!this->numerator.getElement().substitution(theSubstitution)) {
+      if (!this->numerator.getElement().substitution(substitution, one)) {
         return false;
       }
-      if (!this->denominator.getElement().substitution(theSubstitution)) {
+      if (!this->denominator.getElement().substitution(substitution, one)) {
         return false;
       }
       if (this->denominator.getElement().isEqualToZero()) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure << "Substitution leads to division by zero. ";
+        }
         return false;
       }
       this->simplify();
@@ -1127,7 +1139,8 @@ int RationalFunction<Coefficient>::minimalNumberOfVariables() const {
       return this->numerator.getElementConst().minimalNumberOfVariables();
     case RationalFunction::typeRationalFunction:
       return MathRoutines::maximum(
-        this->numerator.getElementConst().minimalNumberOfVariables(), this->denominator.getElementConst().minimalNumberOfVariables()
+        this->numerator.getElementConst().minimalNumberOfVariables(),
+        this->denominator.getElementConst().minimalNumberOfVariables()
       );
     default: //this should never happen! maybe global.fatal << global.fatal here...
       return - 1;

@@ -1106,7 +1106,7 @@ bool Expression::convertInternally<ElementTensorsGeneralizedVermas<RationalFunct
 
 template< >
 bool Expression::convertInternally<Rational>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_Rational");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<Rational>()) {
     output = *this;
@@ -1116,8 +1116,19 @@ bool Expression::convertInternally<Rational>(Expression& output) const {
 }
 
 template< >
+bool Expression::convertInternally<ElementZmodP>(Expression& output) const {
+  MacroRegisterFunctionWithName("convertInternally");
+  this->checkInitialization();
+  if (this->isOfType<ElementZmodP>()) {
+    output = *this;
+    return true;
+  }
+  return false;
+}
+
+template< >
 bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<AlgebraicNumber>()) {
     output = *this;
@@ -1133,7 +1144,7 @@ bool Expression::convertInternally<AlgebraicNumber>(Expression& output) const {
 
 template< >
 bool Expression::convertInternally<double>(Expression& output) const {
-  MacroRegisterFunctionWithName("ConvertToType_double");
+  MacroRegisterFunctionWithName("convertInternally");
   this->checkInitialization();
   if (this->isOfType<double>()) {
     output = *this;
@@ -1158,7 +1169,7 @@ bool Expression::checkConsistencyRecursively() const {
 
 bool Expression::checkConsistency() const {
   MacroRegisterFunctionWithName("Expression::checkConsistency");
-  // warning: do not use toString method from here: toString itself calls CheckConosistency,
+  // warning: do not use toString method from here: toString itself calls CheckConsistency,
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
   if (this->flagDeallocated) {
@@ -1176,8 +1187,8 @@ bool Expression::checkConsistency() const {
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.startsWith(this->owner->opContext())) {
-      global.fatal << "This is a programming error. At the moment of writing, "
-      << "the second child of a built-in type must be a context. It is instead "
+      global.fatal
+      << "The second child of a built-in type must be a context. It is instead "
       << mustBeTheContext.toStringFull() << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
@@ -1192,6 +1203,9 @@ bool Expression::checkConsistency() const {
       if (currentE.startsWith(this->owner->opWeylAlgebraVariables())) {
         isGood = true;
       }
+      if (currentE.startsWith(this->owner->opMod())) {
+        isGood = true;
+      }
       if (!isGood) {
         global.fatal << "This is a programming error. The context "
         << mustBeTheContext.toStringFull() << " has an entry which I do not recognize, namely, "
@@ -1202,6 +1216,26 @@ bool Expression::checkConsistency() const {
   return true;
 }
 
+unsigned int Expression::hashFunction(const Expression& input) {
+  return input.hashFunction();
+}
+
+unsigned int Expression::hashFunction() const {
+  unsigned int result = static_cast<unsigned>(this->theData) * someRandomPrimes[0];
+  if (this->owner == nullptr) {
+    if (this->children.size == 0) {
+      return result;
+    }
+    global.fatal << "Uninitialized expression. " << global.fatal;
+  }
+  int numCycles = MathRoutines::minimum(this->children.size, someRandomPrimesSize - 1);
+  for (int i = 0; i < numCycles; i ++) {
+    result += this->owner->allChildExpressionHashes[this->children[i]] * someRandomPrimes[i + 1];
+  }
+  return result;
+
+}
+
 const Expression& Expression::operator[](int n) const {
   this->checkInitialization();
   int childIndex = this->children[n];
@@ -1210,7 +1244,7 @@ const Expression& Expression::operator[](int n) const {
     << n << " out of " << this->children.size - 1
     << " is not contained in the expression container. " << global.fatal;
   }
-  return this->owner->theExpressionContainer[childIndex];
+  return this->owner->allChildExpressions[childIndex];
 }
 
 Expression Expression::zero() {
@@ -1233,10 +1267,21 @@ bool Expression::addChildRationalOnTop(const Rational& inputRat) {
   return this->addChildOnTop(ratE);
 }
 
+int Calculator::addChildExpression(const Expression& child) {
+  int index = this->allChildExpressions.getIndex(child);
+  if (index != - 1) {
+    return index;
+  }
+  index = this->allChildExpressions.size;
+  this->allChildExpressions.addOnTop(child);
+  this->allChildExpressionHashes.addOnTop(child.hashFunction());
+  return index;
+}
+
 bool Expression::addChildOnTop(const Expression& inputChild) {
   this->checkInitialization();
   this->children.addOnTop(
-    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild)
+    this->owner->addChildExpression(inputChild)
   );
   return true;
 }
@@ -1247,7 +1292,7 @@ bool Expression::setChildAtomValue(int childIndex, int TheAtomValue) {
   tempE.makeAtom(TheAtomValue, *this->owner);
   this->children.setObjectAtIndex(
     childIndex,
-    this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    this->owner->allChildExpressions.addNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }
@@ -1257,14 +1302,14 @@ bool Expression::setChildAtomValue(int childIndex, const std::string& theAtom) {
   Expression tempE;
   tempE.makeAtom(theAtom, *this->owner);
   this->children.setObjectAtIndex(
-    childIndex, this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(tempE)
+    childIndex, this->owner->addChildExpression(tempE)
   );
   return true;
 }
 
 bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   this->checkInitialization();
-  int theIndexOfTheExpression = this->owner->theExpressionContainer.addNoRepetitionOrReturnIndexFirst(inputChild);
+  int theIndexOfTheExpression = this->owner->addChildExpression(inputChild);
   this->children.setObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
   return true;
 }
@@ -1365,7 +1410,7 @@ bool Expression::getExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getExpressionLeafs:")) {
     return false;
   }
@@ -1386,7 +1431,7 @@ bool Expression::getBoundVariables(HashedList<Expression>& outputAccumulateBound
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
@@ -1434,7 +1479,7 @@ bool Expression::getFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   if (this->owner == nullptr) {
     return true;
   }
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::getFreeVariables:")) {
     return false;
   }
@@ -1540,7 +1585,7 @@ bool Expression::containsAsSubExpressionNoBuiltInTypes(const Expression& input) 
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::ContainsAsSubExpression: ")) {
     return false;
   }
@@ -1667,15 +1712,15 @@ bool Expression::isKnownToBeNonNegative() const {
     return false;
   }
   Expression testInequality, testResult;
-  Calculator& theCommands = *(this->owner);
-  testInequality.makeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.expressionZero());
-  if (this->owner->evaluateExpression(theCommands, testInequality, testResult)) {
+  Calculator& calculator = *(this->owner);
+  testInequality.makeXOX(calculator, calculator.opGreaterThan(), *this, calculator.expressionZero());
+  if (this->owner->evaluateExpression(calculator, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
     }
   }
-  testInequality.makeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.expressionZero());
-  if (theCommands.evaluateExpression(theCommands, testInequality, testResult)) {
+  testInequality.makeXOX(calculator, calculator.opGreaterThanOrEqualTo(), *this, calculator.expressionZero());
+  if (calculator.evaluateExpression(calculator, testInequality, testResult)) {
     if (testResult.isEqualToOne()) {
       return true;
     }
@@ -1766,7 +1811,7 @@ bool Expression::divisionByMeShouldBeWrittenInExponentForm() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly()) {
     return false;
   }
@@ -1807,7 +1852,7 @@ bool Expression::isConstantNumber() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isConstantNumber: ")) {
     return false;
   }
@@ -1836,7 +1881,7 @@ bool Expression::isAlgebraicRadical() const {
   if (this->owner == nullptr) {
     return false;
   }
-  RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter thecounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("In Expression::isAlgebraicRadical: ")) {
     return false;
   }
@@ -2030,7 +2075,7 @@ int Expression::getExpressionTreeSize() const {
     return 1;
   }
   this->checkInitialization();
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
   if (this->owner->recursionDepthExceededHandleRoughly("While computing Expression::getExpressionTreeSize: ")) {
     return 1;
   }
@@ -2166,7 +2211,7 @@ bool Expression::toStringBuiltIn<Rational>(
   if (!input.owner->flagUseFracInRationalLaTeX) {
     out << input.getValue<Rational>().toString();
   } else {
-    out << input.getValue<Rational>().ToStringFrac();
+    out << input.getValue<Rational>().toStringFrac();
   }
   if (input.hasNonEmptyContext()) {
     out << ")";
@@ -2278,19 +2323,14 @@ bool Expression::toStringBuiltIn<Polynomial<ElementZmodP> >(
   (void) theFormat;
   bool showContext = input.owner == nullptr ? false : input.owner->flagDisplayContext;
   FormatExpressions format;
-  format.flagSuppressModP = !input.owner->flagHidePolynomialBuiltInTypeIndicator;
   const Polynomial<ElementZmodP>& polynomial = input.getValue<Polynomial<ElementZmodP> >();
   input.getContext().getFormat(format);
+  format.flagSuppressModP = true;
   format.flagUseFrac = true;
-  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
-    out << "PolynomialModP{}(";
-  }
-  out << polynomial.toString(&format);
-  if (!input.owner->flagHidePolynomialBuiltInTypeIndicator) {
-    if (!polynomial.isEqualToZero()) {
-      out << "," << polynomial.coefficients[0].modulus;
-    }
-    out << ")";
+  if (!polynomial.isEqualToZero()) {
+    out << polynomial.coefficients[0].toStringPolynomial(polynomial, &format);
+  } else {
+    out << "PolynomialModP(0)";
   }
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
@@ -2342,20 +2382,20 @@ bool Expression::toStringBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
   input.getContext().getFormat(format);
   format.flagUseFrac = true;
   const PolynomialModuloPolynomial<ElementZmodP>& element = input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
-  LargeIntegerUnsigned modulus;
-  if (!element.value.isEqualToZero()) {
-    modulus = element.value.coefficients[0].modulus;
-  }
+  ElementZmodP sample;
   format.flagSuppressModP = true;
-  out
-  << "PolynomialModP{}(" << element.value.toString(&format)
-  << ", "
-  << modulus
-  << ") mod "
-  << "PolynomialModP{}(" << element.modulus.toString(&format)
-  << ", "
-  << modulus
-  << ") ";
+  if (!element.modulus.isEqualToZero()) {
+    sample = element.modulus.coefficients[0];
+    out
+    << sample.toStringPolynomial(element.value, &format)
+    << " mod "
+    << sample.toStringPolynomial(element.modulus, &format);
+  } else {
+    out
+    << element.value.toString(&format)
+    << " mod "
+    << element.modulus.toString(&format);
+  }
   return true;
 }
 
@@ -2391,10 +2431,20 @@ bool Expression::toStringBuiltIn<RationalFunction<ElementZmodP> >(
   format.flagSuppressModP = true;
   format.flagUseFrac = true;
   const RationalFunction<ElementZmodP>& data = input.getValue<RationalFunction<ElementZmodP> >();
-  if (!data.isEqualToZero()) {
-    format.suffixLinearCombination = data.constantValue.toStringModP();
+  if (data.expressionType == data.typeRationalFunction) {
+    ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
+    out << "\\frac{"
+    << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format)
+    << "} {"
+    << constantSample.toStringPolynomial(data.denominator.getElementConst(), &format)
+    << "}";
+  } else if (data.expressionType == data.typePolynomial) {
+    ElementZmodP constantSample = data.numerator.getElementConst().coefficients[0];
+    out << constantSample.toStringPolynomial(data.numerator.getElementConst(), &format);
+  } else {
+    Polynomial<ElementZmodP> zero;
+    out << data.constantValue.toStringPolynomial(zero, &format);
   }
-  out << data.toString(&format);
   if (showContext) {
     out << "[" << input.getContext().toString() << "]";
   }
@@ -2927,49 +2977,49 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
 }
 
 bool Calculator::innerFlattenCommandEnclosuresOneLayeR(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
     return false;
   }
   return Calculator::functionFlattenCommandEnclosuresOneLayer(
-    theCommands, input[1], output
+    calculator, input[1], output
   );
 }
 
 bool Calculator::functionFlattenCommandEnclosuresOneLayer(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
-  if (input.startsWith(theCommands.opCommandEnclosure())) {
+  if (input.startsWith(calculator.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;
     }
-    Expression result(theCommands);
-    result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+    Expression result(calculator);
+    result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
     if (input.size() == 2) {
       result.addChildOnTop(input[1]);
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
       output = result;
       return true;
     }
     for (int i = 1; i < input.size(); i ++) {
       result.addChildOnTop(input[i]);
     }
-    result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     output = result;
     return true;
   }
-  if (!input.startsWith(theCommands.opEndStatement())) {
+  if (!input.startsWith(calculator.opEndStatement())) {
     return false;
   }
-  Expression result(theCommands);
+  Expression result(calculator);
   for (int i = 0; i < input.size(); i ++) {
-    if (input[i].startsWith(theCommands.opCommandEnclosure())) {
+    if (input[i].startsWith(calculator.opCommandEnclosure())) {
       bool processed = false;
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
       if (input[i].size() == 2) {
-        if (input[i][1].startsWith(theCommands.opEndStatement())) {
+        if (input[i][1].startsWith(calculator.opEndStatement())) {
           for (int j = 1; j < input[i][1].size(); j ++) {
             result.addChildOnTop(input[i][1][j]);
           }
@@ -2981,11 +3031,11 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
           result.addChildOnTop(input[i][j]);
         }
       }
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     } else if (input[i].startsWithGivenOperation("MatchesPattern")) {
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureStart());
       result.addChildOnTop(input[i]);
-      result.addChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      result.addChildAtomOnTop(calculator.opCommandEnclosureFinish());
     } else {
       result.addChildOnTop(input[i]);
     }
@@ -4364,8 +4414,15 @@ bool Expression::toStringMod(
   if (!input.isListStartingWithAtom(input.owner->opMod())) {
     return false;
   }
-  out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
-  return true;
+  if (input.size() == 2) {
+    out << " mod " << input[1].toString(theFormat);
+    return true;
+  }
+  if (input.size() == 3) {
+    out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
+    return true;
+  }
+  return false;
 }
 
 bool Expression::toStringLieBracket(
@@ -4452,13 +4509,13 @@ std::string Expression::toString(
     theFormat->flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
-    if (this->owner->RecursionDeptH + 1 > this->owner->maximumRecursionDepth) {
+    if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
       return "(...)";
     }
   } else {
     return "(Error:NoOwner)";
   }
-  RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
+  RecursionDepthCounter theRecursionCounter(&this->owner->recursionDepth);
   this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
@@ -4512,8 +4569,8 @@ std::string Expression::lispify() const {
   if (this->owner == nullptr) {
     return "Error: not initialized";
   }
-  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDeptH > this->owner->maximumRecursionDepth) {
+  RecursionDepthCounter theCounter(&this->owner->recursionDepth);
+  if (this->owner->recursionDepth > this->owner->maximumRecursionDepth) {
     return "(error: max recursion depth ...)";
   }
   std::stringstream dataStream;

@@ -28,15 +28,18 @@ bool ExpressionContext::operator==(const ExpressionContext& other) const {
   this->owner == other.owner &&
   this->indexAmbientSemisimpleLieAlgebra == other.indexAmbientSemisimpleLieAlgebra &&
   this->variables == other.variables &&
-  this->differentialOperatorVariables == other.differentialOperatorVariables;
+  this->differentialOperatorVariables == other.differentialOperatorVariables &&
+  this->defaultModulus == other.defaultModulus
+  ;
 }
 
 template <class Coefficient>
 void ExpressionContext::polynomialSubstitutionNoFailure(
   const ExpressionContext& largerContext,
-  PolynomialSubstitution<Coefficient>& output
+  PolynomialSubstitution<Coefficient>& output,
+  const Coefficient& one
 ) const {
-  bool mustBeTrue = this->polynomialSubstitution(largerContext, output);
+  bool mustBeTrue = this->polynomialSubstitution(largerContext, output, one);
   if (!mustBeTrue) {
     global.fatal << "This is a programming error: I was not able to "
     << "extract a polynomial substitution from smaller context "
@@ -65,6 +68,9 @@ Expression ExpressionContext::toExpression() const {
   if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
     result.addChildOnTop(this->toExpressionSemisimpleLieAlgebra());
   }
+  if (this->defaultModulus != 0) {
+    result.addChildOnTop(this->toExpressionDefaultModulus());
+  }
   if (this->variables.size > 0) {
     result.addChildOnTop(this->toExpressionPolynomialVariables());
   }
@@ -72,6 +78,13 @@ Expression ExpressionContext::toExpression() const {
     result.addChildOnTop(this->toExpressionDifferntialOperators());
   }
   return result;
+}
+
+Expression ExpressionContext::toExpressionDefaultModulus() const {
+  Expression modularContext(*this->owner);
+  modularContext.addChildAtomOnTop(this->owner->opMod());
+  modularContext.addChildRationalOnTop(this->defaultModulus);
+  return modularContext;
 }
 
 Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
@@ -136,10 +149,10 @@ bool Expression::mergeContexts(Expression& leftE, Expression& rightE) {
   if (!leftC.mergeContexts(rightC, outputC)) {
     return false;
   }
-  if (!leftE.setContextAtLeastEqualTo(outputC)) {
+  if (!leftE.setContextAtLeastEqualTo(outputC, nullptr)) {
     return false;
   }
-  return rightE.setContextAtLeastEqualTo(outputC);
+  return rightE.setContextAtLeastEqualTo(outputC, nullptr);
 }
 
 bool ExpressionContext::isEmpty() {
@@ -160,7 +173,7 @@ SemisimpleLieAlgebra* ExpressionContext::getAmbientSemisimpleLieAlgebra() const 
 
 std::string ExpressionContext::toString() const {
   std::stringstream out;
-  this->checkInitialization();
+  // this->checkInitialization();
   out << "Context. ";
   if (this->variables.size > 0) {
     out << "Variables: " << this->variables.toStringCommaDelimited() << ". ";
@@ -185,6 +198,14 @@ Expression ExpressionContext::getVariable(int variableIndex) const {
     return errorE.makeError(out.str(), *this->owner);
   }
   return this->variables[variableIndex];
+}
+
+void ExpressionContext::setDefaultModulus(const LargeIntegerUnsigned& input) {
+  this->defaultModulus = input;
+}
+
+LargeIntegerUnsigned ExpressionContext::getDefaultModulus() {
+  return this->defaultModulus;
 }
 
 void ExpressionContext::setIndexAmbientSemisimpleLieAlgebra(
@@ -253,6 +274,9 @@ bool ExpressionContext::fromExpressionOneContext(
   if (input.startsWith(this->owner->opSemisimpleLieAlgebrA())) {
     return this->fromExpressionSemisimpleLieAlgebra(input);
   }
+  if (input.startsWith(this->owner->opMod())) {
+    return this->fromExpressionDefaultModulus(input);
+  }
   return *this->owner << "Uknown context type. ";
 }
 
@@ -302,6 +326,34 @@ bool ExpressionContext::fromExpressionSemisimpleLieAlgebra(
   }
   this->indexAmbientSemisimpleLieAlgebra = input[1].theData;
   return true;
+}
+
+bool ExpressionContext::fromExpressionDefaultModulus(
+  const Expression& input
+) {
+  MacroRegisterFunctionWithName("Expression::fromExpressionSemisimpleLieAlgebra");
+  if (input.size() != 2) {
+    return *this->owner << "Corrupt modulus " << input.toString();
+  }
+  if (!input[1].isIntegerNonNegative(&this->defaultModulus)) {
+    return *this->owner
+    << "Corrupt modulus: modulus needs to be a non-negative integer: "
+    << input.toString();
+  }
+  return true;
+}
+
+bool ExpressionContext::mergeModuli(
+  const ExpressionContext& other, ExpressionContext& outputContext
+) {
+  outputContext.defaultModulus = this->defaultModulus;
+  if (outputContext.defaultModulus == 0) {
+    outputContext.defaultModulus = other.defaultModulus;
+  }
+  if (other.defaultModulus == 0 || this->defaultModulus == 0) {
+    return true;
+  }
+  return outputContext.defaultModulus == other.defaultModulus;
 }
 
 bool ExpressionContext::mergeSemisimpleLieAlgebraContexts(
@@ -423,10 +475,19 @@ bool ExpressionContext::mergeContexts(
     ExpressionContext rightCopy = other;
     return leftCopy.mergeContexts(rightCopy, outputContext);
   }
-  if (this->owner != other.owner) {
+  if (this->owner != nullptr) {
+    outputContext.owner = this->owner;
+  } else {
+    outputContext.owner = other.owner;
+  }
+  if (this->owner != nullptr && other.owner != nullptr) {
+    if (this->owner != other.owner) {
+      return false;
+    }
+  }
+  if (!this->mergeModuli(other, outputContext)) {
     return false;
   }
-  outputContext.owner = this->owner;
   if (!this->mergeSemisimpleLieAlgebraContexts(other, outputContext)) {
     return false;
   }
@@ -465,7 +526,9 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
 
 template <class Coefficient>
 bool ExpressionContext::polynomialSubstitution(
-  const ExpressionContext& largerContext, PolynomialSubstitution<Coefficient>& output
+  const ExpressionContext& largerContext,
+  PolynomialSubstitution<Coefficient>& output,
+  const Coefficient& one
 ) const {
   output.setSize(this->variables.size);
   for (int i = 0; i < this->variables.size; i ++) {
@@ -473,7 +536,7 @@ bool ExpressionContext::polynomialSubstitution(
     if (theNewIndex == - 1) {
       return false;
     }
-    output[i].makeMonomial(theNewIndex, 1, 1);
+    output[i].makeMonomial(theNewIndex, 1, one);
   }
   return true;
 }
@@ -502,7 +565,9 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   PolynomialSubstitution<Coefficient>& outputPolynomialPart,
   PolynomialSubstitution<Coefficient>& outputDifferentialPart
 ) const {
-  if (!this->polynomialSubstitution(largerContext, outputPolynomialPart)) {
+  if (!this->polynomialSubstitution(
+    largerContext, outputPolynomialPart, Rational::one()
+  )) {
     return false;
   }
   outputDifferentialPart.setSize(this->differentialOperatorVariables.size);
@@ -518,108 +583,274 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   return true;
 }
 
-bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext) {
+template<>
+bool WithContext<Rational>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementZmodP>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  LargeIntegerUnsigned contextModulus = newContext.getDefaultModulus();
+  if (this->content.modulus != contextModulus) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The modulus of " << this->content.toString()
+      << " does not equal incoming context modulus: " << contextModulus << ". ";
+    }
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementWeylGroup>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<AlgebraicNumber>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+) {
+  (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<double>::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  PolynomialSubstitution<Rational> substitution;
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  this->content.substitution(substitution);
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<Polynomial<Rational> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  PolynomialSubstitution<Rational> substitution;
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  if (!this->content.substitution(substitution, Rational::one())) {
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<Polynomial<ElementZmodP> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  if (!this->content.isEqualToZero()) {
+    PolynomialSubstitution<ElementZmodP> substitution;
+    const ElementZmodP& one = this->content.coefficients[0].one();
+    this->context.polynomialSubstitutionNoFailure(
+      newContext, substitution, one
+    );
+    if (!this->content.substitution(substitution, one)) {
+      return false;
+    }
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<Polynomial<AlgebraicNumber> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  PolynomialSubstitution<AlgebraicNumber> substitution;
+  this->context.polynomialSubstitutionNoFailure<AlgebraicNumber>(
+    newContext,
+    substitution,
+    this->context.owner->theObjectContainer.theAlgebraicClosure.one()
+  );
+  if (!this->content.substitution(substitution, Rational::one())) {
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
+  PolynomialSubstitution<Rational> substitutionPolynomialPart;
+  this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
+    newContext, substitutionPolynomialPart, substitutionDifferentialOperatorPart
+  );
+  if (!this->content.substitution(
+    substitutionPolynomialPart, substitutionDifferentialOperatorPart
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "<hr>Failed to convert "
+      << this->content.toString() << ": failed to carry out substitution "
+      << substitutionDifferentialOperatorPart.toString()
+      << ", " << substitutionPolynomialPart.toString();
+    }
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<RationalFunction<Rational> >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  PolynomialSubstitution<Rational> substitution;
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  if (!this->content.substitution(substitution, Rational::one(), commentsOnFailure)) {
+    // This is not supposed to happen.
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "<hr>Failed to apply substitution: "
+      << substitution.toString()
+      << " to " << this->content.toString();
+    }
+    return false;
+  }
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  PolynomialSubstitution<Rational> substitution;
+  this->context.polynomialSubstitutionNoFailure(newContext, substitution, Rational::one());
+  this->content.substitution(substitution, this->context.owner->theObjectContainer.theCategoryOmodules);
+  this->context = newContext;
+  return true;
+}
+
+template<>
+bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
+  ExpressionContext& newContext, std::stringstream* commentsOnFailure
+){
+  (void) commentsOnFailure;
+  PolynomialSubstitution<Rational> substitution;
+  this->context.polynomialSubstitution(newContext, substitution, Rational::one());
+  for (int i = 0; i < this->content.weightFundamentalCoordS.size; i ++) {
+    this->content.weightFundamentalCoordS[i].substitution(substitution, Rational::one());
+  }
+  this->context = newContext;
+  return true;
+}
+
+bool Expression::setContextAtLeastEqualTo(
+  ExpressionContext& inputOutputMinContext, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
   if (!this->isBuiltInType()) {
-    global.fatal << "This is a programming error: calling "
+    global.fatal << "Calling "
     << "Expression::setContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
     << "Contexts are Reserved for built-in data types. " << global.fatal;
   }
-  ExpressionContext newContext(*this->owner);
-  ExpressionContext oldContext = this->getContext();
-  if (!oldContext.mergeContexts(inputOutputMinContext, newContext)) {
-    return false;
+  WithContext<Rational> rational;
+  if (this->isOfTypeWithContext(&rational)) {
+    return rational.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (oldContext == newContext) {
-    return true;
+  WithContext<ElementZmodP> modularElement;
+  if (this->isOfTypeWithContext(&modularElement)) {
+    return modularElement.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  inputOutputMinContext = newContext;
-  if (this->isOfType<Rational>()) {
-    this->setChild(1, inputOutputMinContext.toExpression());
-    return true;
-  }
-  if (this->isOfType<ElementWeylGroup>()) {
-    return this->assignValueWithContext(
-      this->getValue<ElementWeylGroup>(), inputOutputMinContext, *this->owner
+  WithContext<double> floatingPointNumber;
+  if (this->isOfTypeWithContext(&floatingPointNumber)) {
+    return floatingPointNumber.setContextAndSerialize(
+      inputOutputMinContext, *this, commentsOnFailure
     );
   }
-  if (this->isOfType<AlgebraicNumber>()) {
-    return this->setChild(1, inputOutputMinContext.toExpression());
+  WithContext<ElementWeylGroup> elementWeylGroup;
+  if (this->isOfTypeWithContext(&elementWeylGroup)) {
+    return elementWeylGroup.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<ElementUniversalEnveloping<RationalFunction<Rational> > > ()) {
-    ElementUniversalEnveloping<RationalFunction<Rational> > newUE = this->getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
-    newUE.substitution(subPolyPart);
-    return this->assignValueWithContext(newUE, inputOutputMinContext, *this->owner);
+  WithContext<AlgebraicNumber> algebraicNumber;
+  if (this->isOfTypeWithContext(&algebraicNumber)) {
+    return algebraicNumber.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> newPoly = this->getValue<Polynomial<Rational> >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
-    if (!newPoly.substitution(subPolyPart)) {
-      return false;
-    }
-    return this->assignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
+  WithContext<ElementUniversalEnveloping<RationalFunction<Rational> > > elementUniversalEnveloping;
+  if (this->isOfTypeWithContext(&elementUniversalEnveloping)) {
+    return elementUniversalEnveloping.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<Polynomial<AlgebraicNumber> >()) {
-    Polynomial<AlgebraicNumber> newPoly = this->getValue<Polynomial<AlgebraicNumber> >();
-    PolynomialSubstitution<AlgebraicNumber> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure<AlgebraicNumber>(newContext, subPolyPart);
-    if (!newPoly.substitution(subPolyPart)) {
-      return false;
-    }
-    return this->assignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
+  WithContext<Polynomial<Rational> > polynomial;
+  if (this->isOfTypeWithContext(&polynomial)) {
+    return polynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<ElementWeylAlgebra<Rational> >()) {
-    PolynomialSubstitution<Rational> subEWApart;
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialAndWeylAlgebraSubstitutionNoFailure(newContext, subPolyPart, subEWApart);
-    ElementWeylAlgebra<Rational> outputEWA = this->getValue<ElementWeylAlgebra<Rational> >();
-    if (!outputEWA.substitution(subPolyPart, subEWApart)) {
-      this->owner->comments << "<hr>Failed to convert "
-      << outputEWA.toString() << ": failed to carry out substitution "
-      << subEWApart.toString() << ", " << subPolyPart.toString();
-      return false;
-    }
-    return this->assignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
+  WithContext<Polynomial<ElementZmodP> > polynomialModular;
+  if (this->isOfTypeWithContext(&polynomialModular)) {
+    return polynomialModular.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<RationalFunction<Rational> >()) {
-    RationalFunction<Rational>  newRF = this->getValue<RationalFunction<Rational> >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
-    newRF.substitution(subPolyPart);
-    return this->assignValueWithContext(newRF, inputOutputMinContext, *this->owner);
+  WithContext<Polynomial<AlgebraicNumber> > polynomialAlgebraic;
+  if (this->isOfTypeWithContext(&polynomialAlgebraic)) {
+    return polynomialAlgebraic.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >()) {
-    ElementTensorsGeneralizedVermas<RationalFunction<Rational> > newETGV;
-    newETGV = this->getValue<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure(newContext, subPolyPart);
-    newETGV.substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
-    return this->assignValueWithContext(newETGV, inputOutputMinContext, *this->owner);
+  WithContext<RationalFunction<Rational> > rationalFunction;
+  if (this->isOfTypeWithContext(&rationalFunction)) {
+    return rationalFunction.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
-  if (this->isOfType<Weight<Polynomial<Rational> > >()) {
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitution(newContext, subPolyPart);
-    Weight<Polynomial<Rational> > theWeight = this->getValue<Weight<Polynomial<Rational> > >();
-    for (int i = 0; i < theWeight.weightFundamentalCoordS.size; i ++) {
-      theWeight.weightFundamentalCoordS[i].substitution(subPolyPart);
-    }
-    return this->assignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
+  WithContext<ElementWeylAlgebra<Rational> > elementWeylAlgebra;
+  if (this->isOfTypeWithContext(&elementWeylAlgebra)) {
+    return elementWeylAlgebra.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > elementTensorProductGeneralizedVermaModules;
+  if (this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)) {
+    return elementTensorProductGeneralizedVermaModules.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
+  }
+  WithContext<Weight<Polynomial<Rational> > > weightPolynomial;
+  if (this->isOfTypeWithContext(&weightPolynomial)) {
+    return weightPolynomial.setContextAndSerialize(inputOutputMinContext, *this, commentsOnFailure);
   }
   if (this->isMatrixOfType<RationalFunction<Rational> >()) {
+    ExpressionContext newContext(*this->owner);
+    ExpressionContext oldContext = this->getContext();
+    if (!oldContext.mergeContexts(inputOutputMinContext, newContext)) {
+      return false;
+    }
+    if (oldContext == newContext) {
+      return true;
+    }
+    inputOutputMinContext = newContext;
     Matrix<RationalFunction<Rational> > newMat;
     this->owner->functionGetMatrix(*this, newMat, &newContext);
-    PolynomialSubstitution<Rational> subPolyPart;
-    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, subPolyPart);
+    PolynomialSubstitution<Rational> substitution;
+    oldContext.polynomialSubstitutionNoFailure<Rational>(newContext, substitution, Rational::one());
     for (int i = 0; i < newMat.numberOfRows; i ++) {
       for (int j = 0; j < newMat.numberOfColumns; j ++) {
-        if (!newMat(i, j).substitution(subPolyPart)) {
+        if (!newMat(i, j).substitution(substitution, Rational::one(), commentsOnFailure)) {
           return *this->owner << "Failed to carry out the substitution "
-          << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";
+          << substitution.toString() << " in the matrix " << this->toString() << ". ";
         }
       }
     }

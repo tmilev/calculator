@@ -600,7 +600,8 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
-  List<Polynomial<Coefficient> >& inputSystem, PolynomialSubstitution<Coefficient>& outputSub
+  List<Polynomial<Coefficient> >& inputSystem,
+  PolynomialSubstitution<Coefficient>& outputSub
 ) {
   int numVars = this->systemSolution.size;
   MonomialP tempM;
@@ -640,11 +641,15 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
           outputSub.makeIdentitySubstitution(numVars);
           outputSub[oneVarIndex].makeConstant(theCF);
           //check our work:
-          tempP.substitution(outputSub);
+          tempP.substitution(outputSub, 1);
           if (!tempP.isEqualToZero()) {
-            global.fatal << "I was solving the polynomial equation " << inputSystem[i].toString()
-            << ", which resulted in the substitution " << outputSub.toString()
-            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.toString() << ". "
+            global.fatal << "I was solving the polynomial equation "
+            << inputSystem[i].toString()
+            << ", which resulted in the substitution "
+            << outputSub.toString()
+            << ". However, after carrying out the "
+            << "substitution in the polynomial, I got "
+            << tempP.toString() << ". "
             << global.fatal;
           }
           //
@@ -703,7 +708,9 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
-  Polynomial<Coefficient>& thePoly, int theIndex, PolynomialSubstitution<Coefficient>& theFinalSub
+  Polynomial<Coefficient>& thePoly,
+  int theIndex,
+  PolynomialSubstitution<Coefficient>& theFinalSub
 ) {
   MacroRegisterFunctionWithName("PolynomialSystem::backSubstituteIntoSinglePolynomial");
   Polynomial<Coefficient> tempP;
@@ -711,7 +718,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   if (thePoly == tempP) {
     return;
   }
-  thePoly.substitution(theFinalSub);
+  thePoly.substitution(theFinalSub, 1);
   bool changed = false;
   for (int i = 0; i < thePoly.size(); i ++) {
     for (int j = 0; j < thePoly[i].minimalNumberOfVariables(); j ++) {
@@ -720,8 +727,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
           this->setSerreLikeSolutionIndex(j, 0);
         } else {
           if (this->systemSolution[j] != 0) {
-            global.fatal << "This is a programming error: variable index " << j + 1
-            << " is supposed to be a free parameter, i.e., be set to zero, but "
+            global.fatal << "Variable index " << j + 1
+            << " is supposed to be a free parameter, "
+            << "i.e., be set to zero, but "
             << "instead it has a non-zero value. " << global.fatal;
           }
         }
@@ -731,11 +739,11 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
     }
   }
   if (changed) {
-    thePoly.substitution(theFinalSub);
+    thePoly.substitution(theFinalSub, 1);
   }
   Coefficient tempCF;
   if (!thePoly.isConstant(&tempCF)) {
-    global.fatal << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
+    global.fatal << "After carrying all implied substitutions "
     << "the polynomial is not a constant, rather equals "
     << thePoly.toString() << ". " << global.fatal;
   }
@@ -745,14 +753,14 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
-  List<PolynomialSubstitution<Coefficient> >& theImpliedSubs
+  List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::backSubstituteIntoPolynomialSystem");
-  PolynomialSubstitution<Coefficient> FinalSub;
-  this->getSubstitutionFromPartialSolutionSerreLikeSystem(FinalSub);
-  for (int i = theImpliedSubs.size - 1; i >= 0; i --) {
-    for (int j = 0; j < theImpliedSubs[i].size; j ++) {
-      this->backSubstituteIntoSinglePolynomial(theImpliedSubs[i][j], j, FinalSub);
+  MacroRegisterFunctionWithName("PolynomialSystem::backSubstituteIntoPolynomialSystem");
+  PolynomialSubstitution<Coefficient> finalSubstitution;
+  this->getSubstitutionFromPartialSolutionSerreLikeSystem(finalSubstitution);
+  for (int i = impliedSubstitutions.size - 1; i >= 0; i --) {
+    for (int j = 0; j < impliedSubstitutions[i].size; j ++) {
+      this->backSubstituteIntoSinglePolynomial(impliedSubstitutions[i][j], j, finalSubstitution);
     }
   }
 }
@@ -772,9 +780,9 @@ void PolynomialSystem<Coefficient>::getVariablesToSolveFor(const List<Polynomial
     NumVars = MathRoutines::maximum(NumVars, input[i].minimalNumberOfVariables());
   }
   output.initialize(NumVars);
-  for (int i = 0; i < input.size && output.cardinalitySelection < output.maximumSize; i ++) {
-    for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.maximumSize; j ++) {
-      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.maximumSize; k ++) {
+  for (int i = 0; i < input.size && output.cardinalitySelection < output.numberOfElements; i ++) {
+    for (int j = 0; j < input[i].size() && output.cardinalitySelection < output.numberOfElements; j ++) {
+      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.cardinalitySelection < output.numberOfElements; k ++) {
         if (input[i][j](k) != 0) {
           output.addSelectionAppendNewIndex(k);
         }
@@ -797,7 +805,7 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::polynomialSystemSolutionSimplificationPhase");
+  MacroRegisterFunctionWithName("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
   ProgressReport theReport1, theReport2, theReport3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -870,7 +878,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase(
       }
       this->impliedSubstitutions.addOnTop(theSub);
       for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(theSub);
+        inputSystem[i].substitution(theSub, 1);
       }
     }
   }
@@ -983,7 +991,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   }
   theHeuristicAttempt.setSerreLikeSolutionIndex(theVarIndex, aValueToTryOnPreferredVariable);
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitution(theSub);
+    inputSystem[i].substitution(theSub, 1);
   }
   theHeuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations += theHeuristicAttempt.numberOfSerreSystemComputations;
@@ -1023,32 +1031,33 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
   List<Polynomial<Coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
   for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
-    if (theMon(i) != 0) {
-      if (this->shouldReport()) {
-        std::stringstream out;
-        MonomialP tempMon(i);
-        out << "The system has the single monomial: " << theMon.toString(&this->format())
-        << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
-        theReport1.report(out.str());
-      }
-      PolynomialSubstitution<Coefficient> theSub;
-      theSub.makeIdentitySubstitution(this->systemSolution.size);
-      theSub[i] = 0;
-      PolynomialSystem<Coefficient>& theCase = this->computationUsedInRecursiveCalls.getElement();
-      this->setUpRecursiveComputation(theCase);
-      theCase.setSerreLikeSolutionIndex(i, 0);
-      inputSystem = inputSystemCopy;
-      for (int i = 0; i < inputSystem.size; i ++) {
-        inputSystem[i].substitution(theSub);
-      }
-      theCase.solveSerreLikeSystemRecursively(inputSystem);
-      this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theCase);
-      if (!theCase.flagSystemProvenToHaveNoSolution) {
-        allProvenToHaveNoSolution = false;
-      }
-      if (this->flagSystemSolvedOverBaseField) {
-        return;
-      }
+    if (theMon(i) == 0) {
+      continue;
+    }
+    if (this->shouldReport()) {
+      std::stringstream out;
+      MonomialP tempMon(i);
+      out << "The system has the single monomial: " << theMon.toString(&this->format())
+      << "<br>Trying case:<br>" << tempMon.toString(&this->format()) << "= 0;";
+      theReport1.report(out.str());
+    }
+    PolynomialSubstitution<Coefficient> theSub;
+    theSub.makeIdentitySubstitution(this->systemSolution.size);
+    theSub[i] = 0;
+    PolynomialSystem<Coefficient>& theCase = this->computationUsedInRecursiveCalls.getElement();
+    this->setUpRecursiveComputation(theCase);
+    theCase.setSerreLikeSolutionIndex(i, 0);
+    inputSystem = inputSystemCopy;
+    for (int i = 0; i < inputSystem.size; i ++) {
+      inputSystem[i].substitution(theSub, 1);
+    }
+    theCase.solveSerreLikeSystemRecursively(inputSystem);
+    this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(theCase);
+    if (!theCase.flagSystemProvenToHaveNoSolution) {
+      allProvenToHaveNoSolution = false;
+    }
+    if (this->flagSystemSolvedOverBaseField) {
+      return;
     }
   }
   if (allProvenToHaveNoSolution) {
@@ -1067,8 +1076,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   this->numberOfVariablesToSolveForStart = this->getNumberOfVariablesToSolveFor(inputSystem);
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
-    out << "Solving Serre-like polynomial system with " << this->numberOfVariablesToSolveForStart
-    << " variables at recursion depth: " << this->recursionCounterSerreLikeSystem << ". ";
+    out << "Solving Serre-like polynomial system with "
+    << this->numberOfVariablesToSolveForStart
+    << " variables at recursion depth: "
+    << this->recursionCounterSerreLikeSystem << ". ";
     theReport1.report(out.str());
   }
   this->polynomialSystemSolutionSimplificationPhase(inputSystem);
@@ -1192,8 +1203,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     }
   }
   if (this->flagSystemSolvedOverBaseField) {
-    if (this->solutionsFound.cardinalitySelection != this->solutionsFound.maximumSize) {
-      for (int i = 0; i < this->solutionsFound.maximumSize; i ++) {
+    if (this->solutionsFound.cardinalitySelection != this->solutionsFound.numberOfElements) {
+      for (int i = 0; i < this->solutionsFound.numberOfElements; i ++) {
         if (!this->solutionsFound.selected[i]) {
           this->setSerreLikeSolutionIndex(i, 0);
         }
@@ -1203,9 +1214,9 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->getSubstitutionFromPartialSolutionSerreLikeSystem(theSub);
     workingSystem = inputSystem;
     for (int i = 0; i < workingSystem.size; i ++) {
-      workingSystem[i].substitution(theSub);
+      workingSystem[i].substitution(theSub, 1);
       if (!workingSystem[i].isEqualToZero()) {
-        global.fatal << "<br>This is a programming error. "
+        global.fatal << "<br>"
         << "Function solveSerreLikeSystem reports to have found a solution over the base field, "
         << "but substituting the solution back to the original "
         << "system does not yield a zero system of equations. More precisely, "
@@ -1376,12 +1387,62 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
-  const Polynomial<Coefficient>& input,
+template <class Coefficient, class OneFactorFinder>
+PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::PolynomialFactorizationUnivariate() {
+  this->maximumDegree = OneFactorFinder::maximumDegreeDefault;
+}
+
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::basicChecks(
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::factor");
+  if (this->current.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "I haven't been taught how to factor polynomials "
+      << "with more than 1 variable. ";
+    }
+    return false;
+  }
+  if (this->current.minimalNumberOfVariables() == 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Factoring constant polynomials is not allowed. ";
+    }
+    return false;
+  }
+  if (this->current.isEqualToZero()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Factoring zero is not allowed. ";
+    }
+    return false;
+  }
+  if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Polynomial is expected to have sufficiently "
+      << "small non-negative integer powers. ";
+    }
+    return false;
+  }
+  if (this->current.totalDegree() > this->maximumDegree) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The degree of the input is larger than the "
+      << "maximum allowed for the " << OneFactorFinder::name() << " algorithm: "
+      << this->maximumDegree << ". ";
+    }
+    return false;
+  }
+  return true;
+}
+
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
+  const Polynomial<Coefficient>& input,
+  std::stringstream* comments,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::factor");
   this->original = input;
   if (this->original.isConstant(&this->constantFactor)) {
     return true;
@@ -1390,11 +1451,16 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   this->constantFactor = this->current.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   this->constantFactor.invert();
   this->nonReduced.addOnTop(this->current);
+  if (!this->basicChecks(commentsOnFailure)) {
+    return false;
+  }
+  OneFactorFinder algorithm;
+  algorithm.output = this;
   while (this->nonReduced.size > 0) {
     this->current = this->nonReduced.popLastObject();
-    oneFactorFinder algorithm;
-    algorithm.output = this;
-    if (!algorithm.oneFactor(commentsOnFailure)) {
+    // The algorithm is allowed to store state between factorization attempts.
+    if (!algorithm.oneFactor(comments, commentsOnFailure)) {
+      global.comments << "DEBUG: GOT TO HERE";
       return false;
     }
   }
@@ -1404,11 +1470,11 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::factor(
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountNonReducedFactor(
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountNonReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::accountNonReducedFactor");
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountNonReducedFactor");
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
   this->current.divideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
@@ -1425,13 +1491,13 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountNonReducedFac
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor(
-  Polynomial<Coefficient>& incoming
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::accountReducedFactor(
+  Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
 ) {
-  MacroRegisterFunctionWithName("PolynomialFactorization::accountReducedFactor");
-  if (incoming.isEqualToZero()) {
-    global.fatal << "zero is not a valid factor. " << global.fatal;
+  MacroRegisterFunctionWithName("PolynomialFactorizationUnivariate::accountReducedFactor");
+  if (incoming.isConstant()) {
+    global.fatal << "Constant factors are not to be accounted. " << global.fatal;
   }
   incoming.scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
   Polynomial<Coefficient> quotient, remainder;
@@ -1442,17 +1508,20 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::accountReducedFactor
     return false;
   }
   this->reduced.addOnTop(incoming);
-  Coefficient extraFactor;
-  if (quotient.isConstant(&extraFactor)) {
-    this->constantFactor *= extraFactor;
-  } else {
-    this->nonReduced.addOnTop(quotient);
+  if (accountQuotientAsNonReduced || quotient.isConstant()) {
+    Coefficient extraFactor;
+    if (quotient.isConstant(&extraFactor)) {
+      this->constantFactor *= extraFactor;
+    } else {
+      this->nonReduced.addOnTop(quotient);
+    }
   }
+  this->current = quotient;
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-bool PolynomialFactorization<Coefficient, oneFactorFinder>::checkFactorization() const {
+template <class Coefficient, class OneFactorFinder>
+bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::checkFactorization() const {
   MacroRegisterFunctionWithName("Polynomial::checkFactorization");
   Polynomial<Coefficient> checkComputations;
   checkComputations.makeConstant(this->constantFactor);
@@ -1463,16 +1532,17 @@ bool PolynomialFactorization<Coefficient, oneFactorFinder>::checkFactorization()
     checkComputations *= this->reduced[i];
   }
   if (!checkComputations.isEqualTo(this->original)) {
-    global.fatal << "Error in polynomial factorization function."
+    global.fatal << "Error in polynomial factorization function. "
     << "Product of factorization: " << this->toStringResult(nullptr)
-    << " equals " << checkComputations
+    << " equals " << checkComputations << "; expected: "
+    << this->original
     << global.fatal;
   }
   return true;
 }
 
-template <class Coefficient, class oneFactorFinder>
-std::string PolynomialFactorization<Coefficient, oneFactorFinder>::toStringResult(
+template <class Coefficient, class OneFactorFinder>
+std::string PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::toStringResult(
   FormatExpressions *theFormat
 ) const {
   std::stringstream out;

@@ -38,22 +38,6 @@ public:
     output << theLIU.toString();
     return output;
   }
-  class Test {
-    public:
-    static bool all();
-    static bool serializationToHex(const LargeIntegerUnsigned& input);
-    static bool serializationToHex();
-    static bool comparisons();
-    static bool factor();
-    static bool factorSmall(
-      const LargeIntegerUnsigned& input,
-      const std::string& expectedFactors,
-      const std::string& expectedMultiplicities,
-      int maximumDivisorToTry,
-      int numberMillerRabinRuns,
-      int64_t maximumRunningTime
-    );
-  };
   void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
   void subtractSmallerPositive(const LargeIntegerUnsigned& x);
@@ -70,7 +54,11 @@ public:
   bool isEven() const;
   bool isPositive() const;
   bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool isCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
+  bool isCompositePrimeDivision(
+    List<unsigned int>& primesGenerated,
+    bool& outputGuaranteedPrime,
+    std::stringstream* comments
+  );
   bool isPossiblyPrime(int millerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
   bool isPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = nullptr);
   bool isPossiblyPrimeMillerRabinOnce(
@@ -148,10 +136,12 @@ public:
   LargeIntegerUnsigned();
   // LargeIntUnsigned(unsigned int value){this->operator=(value); }
   // LargeIntUnsigned(unsigned int x) {this->assignShiftedUInt(x,0);}
-  static LargeIntegerUnsigned GetOne();
+  static LargeIntegerUnsigned getOne();
   bool operator<(int other) const;
+  bool operator<=(int other) const;
   bool operator>(int other) const;
   bool operator<(const LargeIntegerUnsigned& other) const;
+  bool operator<(const LargeInteger& other) const;
   bool operator>=(const LargeIntegerUnsigned& other) const;
   bool operator>(const LargeIntegerUnsigned& other) const;
   void writeBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const;
@@ -163,6 +153,35 @@ public:
   void getHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output) const;
   //must be rewritten:
   double getDoubleValue() const;
+  class Test {
+    public:
+    static bool all();
+    static bool serializationToHex(const LargeIntegerUnsigned& input);
+    static bool serializationToHex();
+    static bool comparisons();
+    static bool isPossiblyPrime();
+    static bool guaranteedPrime();
+    static bool isPossiblyPrimeFast(
+      const List<LargeIntegerUnsigned>& input,
+      bool mustBeTrue,
+      int millerRabinTries,
+      int64_t maximumRunningTimeMilliseconds
+    );
+    static bool isPossiblyPrimeMillerRabinOnly(
+      const List<LargeIntegerUnsigned>& input,
+      bool mustBeTrue,
+      int millerRabinTries
+    );
+    static bool factor();
+    static bool factorSmall(
+      const LargeIntegerUnsigned& input,
+      const std::string& expectedFactors,
+      const std::string& expectedMultiplicities,
+      int maximumDivisorToTry,
+      int numberMillerRabinRuns,
+      int64_t maximumRunningTime
+    );
+  };
 };
 
 class LargeInteger {
@@ -296,7 +315,7 @@ public:
   inline void operator*=(int x) {
     this->multiplyByInt(x);
   }
-  inline void minus() {
+  void negate() {
     if (!this->isEqualToZero()) {
       this->sign *= - 1;
     }
@@ -311,10 +330,10 @@ public:
   inline bool operator!=(const LargeInteger& other) const {
     return !(*this == other);
   }
-  inline void operator-=(const LargeInteger& other) {
-    this->minus();
+  void operator-=(const LargeInteger& other) {
+    this->negate();
     *this += (other);
-    this->minus();
+    this->negate();
   }
   inline bool operator<=(const LargeInteger& other) const {
     return !(other<*this);
@@ -432,8 +451,8 @@ private:
   friend bool operator<(int left, const Rational& right) {
     return Rational(left) < right;
   }
-  bool tryToAddQuickly(int OtherNum, int OtherDen);
-  bool tryToMultiplyQuickly(int OtherNum, int OtherDen);
+  bool tryToAddQuickly(int otherNumerator, int otherDenominator);
+  bool tryToMultiplyQuickly(int otherNumerator, int otherDenominator);
   void allocateExtended() {
     if (this->extended != nullptr) {
       return;
@@ -563,7 +582,7 @@ public:
     return true;
   }
   bool isGreaterThan(const Rational& r) const;
-  inline void AssignNumeratorAndDenominator(int n, int d) {
+  inline void assignNumeratorAndDenominator(int n, int d) {
     if (d < 0) {
       d = - d;
       n = - n;
@@ -603,8 +622,8 @@ public:
     this->simplify();
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringFrac() const;
-  std::string ToStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
+  std::string toStringFrac() const;
+  std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
   bool isEqualTo(const Rational& r) const;
   bool isGreaterThanOrEqualTo(const Rational& right) const;
   bool isEven() const {
@@ -659,7 +678,7 @@ public:
   }
   void simplify();
   void invert();
-  void minus() {
+  void negate() {
     if (this->extended == nullptr) {
       this->numeratorShort *= - 1;
     } else {
@@ -688,7 +707,7 @@ public:
   void drawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue() {
     if (this->isNegative()) {
-      this->minus();
+      this->negate();
     }
   }
   static long long int totalAdditions() {
@@ -709,7 +728,7 @@ public:
   // extended pointer.
   Rational(int n, int d) {
     this->extended = nullptr;
-    this->AssignNumeratorAndDenominator(n, d);
+    this->assignNumeratorAndDenominator(n, d);
   }
   Rational(const LargeInteger& other) {
     this->extended = nullptr;
@@ -723,7 +742,7 @@ public:
   }
   Rational(int n) {
     this->extended = nullptr;
-    this->AssignNumeratorAndDenominator(n, 1);
+    this->assignNumeratorAndDenominator(n, 1);
   }
   Rational(const Rational& right) {
     this->extended = nullptr;
@@ -775,7 +794,6 @@ public:
     return this->isEqualTo(right);
   }
   inline void operator+=(const Rational& r) {
-    //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
     if (r.extended == nullptr && this->extended == nullptr) {
       if (this->tryToAddQuickly(r.numeratorShort, r.denominatorShort)) {
         return;

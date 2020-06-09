@@ -1415,7 +1415,7 @@ bool WeylGroupData::loadConjugacyClassesHelper() {
   for (int i = 0; i < this->theGroup.conjugacyClasses.size; i ++) {
     this->theGroup.sizePrivate += this->theGroup.conjugacyClasses[i].size;
   }
-  if (this->theGroup.sizePrivate != this->theGroup.GetSizeByFormula(this->theGroup)) {
+  if (this->theGroup.sizePrivate != this->theGroup.getSizeByFormula(this->theGroup)) {
     global.fatal << "Corrupt hard-coded data: the size of the "
     << "group does not work out according to formula. " << global.fatal;
   }
@@ -1773,11 +1773,11 @@ bool WeylGroupData::loadGAPRootSystem(HashedList<Vector<Rational> >& outputPosit
   if (!result) {
     return result;
   }
-  if (outputPositiveRootSystem.size != this->RootsOfBorel.size) {
+  if (outputPositiveRootSystem.size != this->rootsOfBorel.size) {
     global.fatal << "Wrong number of GAP roots! " << global.fatal;
   }
-  for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    if (!outputPositiveRootSystem.contains(this->RootsOfBorel[i])) {
+  for (int i = 0; i < this->rootsOfBorel.size; i ++) {
+    if (!outputPositiveRootSystem.contains(this->rootsOfBorel[i])) {
       global.fatal << " Positive root " << outputPositiveRootSystem[i].toString() << " is not a GAP root. " << global.fatal;
     }
   }

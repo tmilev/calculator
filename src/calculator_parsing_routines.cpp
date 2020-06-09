@@ -36,28 +36,35 @@ std::string SyntacticElement::toStringHumanReadable(Calculator& theBoss, bool in
   return out.str();
 }
 
-Calculator::EvaluationStats::EvaluationStats() {
-  this->expressionEvaluated = 0;
+Calculator::EvaluationStatistics::EvaluationStatistics() {
+  this->reset();
+}
+
+void Calculator::EvaluationStatistics::reset() {
+  this->expressionsEvaluated = 0;
   this->maximumCallsBeforeReportGeneration = 5000;
   this->callsSinceReport = 0;
+  this->totalSubstitutions = 0;
+  this->numberOfListsStart = - 1;
+  this->numberListResizesStart = - 1;
+  this->numberHashResizesStart = - 1;
+  this->numberOfSmallAdditionsStart = - 1;
+  this->numberOfSmallMultiplicationsStart = - 1;
+  this->numberOfSmallGreatestCommonDivisorsStart = - 1;
+  this->numberOfLargeAdditionsStart = - 1;
+  this->numberOfLargeMultiplicationsStart = - 1;
+  this->numberOfLargeGreatestCommonDivisorsStart = - 1;
+  this->millisecondsLastLog = - 1;
 }
 
 void Calculator::reset() {
-  this->MaxAlgTransformationsPerExpression = 100;
+  this->statistics.reset();
+  this->maximumAlgebraicTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
   this->MaxCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
-  this->RecursionDeptH = 0;
-  this->numberOfListsStart               = - 1;
-  this->numberListResizesStart         = - 1;
-  this->numberHashResizesStart         = - 1;
-  this->numberOfSmallAdditionsStart      = - 1;
-  this->numberOfSmallMultiplicationsStart = - 1;
-  this->numberOfSmallGreatestCommonDivisorsStart       = - 1;
-  this->numberOfLargeAdditionsStart      = - 1;
-  this->numberOfLargeMultiplicationsStart = - 1;
-  this->numberOfLargeGreatestCommonDivisorsStart       = - 1;
-  this->millisecondsLastLog = - 1;
+  this->recursionDepth = 0;
+
   this->DepthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
@@ -72,7 +79,7 @@ void Calculator::reset() {
   this->flagDisplayFullExpressionTree = false;
   this->flagHidePolynomialBuiltInTypeIndicator = false;
   this->flagUseFracInRationalLaTeX = true;
-  this->flagforkingprocessAllowed = true;
+  this->flagForkingprocessAllowed = true;
   this->flagNoApproximations = false;
   this->flagDefaultRulesWereTamperedWith = false;
   this->flagUsePredefinedWordSplits = true;
@@ -123,8 +130,11 @@ void Calculator::reset() {
   this->RuleStackCacheIndex = - 1;
   this->ruleStack.reset(*this,this->MaxRuleStacksCached);
   this->cachedRuleStacks.clear();
-  // The expression container must be cleared last!
-  this->theExpressionContainer.clear();
+  // The expression container must be cleared second to last.
+  this->allChildExpressions.clear();
+  // The hashes list below is used in computing the hashes of the list above.
+  // It must therefore be cleared last.
+  this->allChildExpressionHashes.clear();
 }
 
 void Calculator::initialize() {
@@ -232,7 +242,7 @@ void Calculator::initialize() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew(" ");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{{}}");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Variable");
-  this->controlSequences.addOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addListOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Expression");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("Integer");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("{}");

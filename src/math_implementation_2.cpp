@@ -255,12 +255,14 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   if (*this == theBase) {
     return true;
   }
-  ElementZmodP thePower, theOne;
+  if (this->isEqualToOne()) {
+    return false;
+  }
+  ElementZmodP thePower, one;
   thePower.modulus = *this;
-  thePower.value = theBase;
-  theOne.modulus = *this;
-  theOne.value = 1;
-  MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, theOne);
+  thePower = theBase;
+  one.makeOne(*this);
+  MathRoutines::raiseToPower(thePower, theOddFactorOfNminusOne, one);
   if (thePower == 1) {
     return true;
   }
@@ -339,11 +341,21 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabin(int numberOfTries, std::st
 }
 
 bool LargeIntegerUnsigned::isCompositePrimeDivision(
-  List<unsigned int>& primesGenerated, std::stringstream* comments
+  List<unsigned int>& primesGenerated,
+  bool& outputGuaranteedPrime,
+  std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isCompositePrimeDivision");
+  outputGuaranteedPrime = false;
+  if (this->isEqualToOne() || this->isEqualToZero()) {
+    return false;
+  }
   if (this->isEven()) {
-    return *this == 2;
+    if (*this == 2) {
+      outputGuaranteedPrime = true;
+      return false;
+    }
+    return true;
   }
   int maximumDivisor = this->maximumDivisorToTryWhenFactoring(- 1);
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(
@@ -352,6 +364,7 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
   for (int i = 0; i < primesGenerated.size; i ++) {
     LargeIntegerUnsigned current = primesGenerated[i];
     if (current >= *this) {
+      outputGuaranteedPrime = true;
       return false;
     }
     if (!this->isDivisibleBy(current)) {
@@ -363,6 +376,10 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
     }
     return true;
   }
+  LargeIntegerUnsigned lastPrime = *primesGenerated.lastObject();
+  if (lastPrime * lastPrime >= *this) {
+    outputGuaranteedPrime = true;
+  }
   return false;
 }
 
@@ -372,6 +389,12 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::isPossiblyPrime");
+  if (this->isEqualToOne()) {
+    if (comments != nullptr) {
+      *comments << "1 is not prime by definition. ";
+    }
+    return false;
+  }
   if (this->isEven()) {
     if (*this != 2 && comments != nullptr) {
       *comments << "Number " << *this << " is even but not two. ";
@@ -380,8 +403,12 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   }
   List<unsigned int> aFewPrimes;
   if (tryDivisionSetTrueFaster) {
-    if (this->isCompositePrimeDivision(aFewPrimes, comments)) {
+    bool guaranteedPrime = false;
+    if (this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)) {
       return false;
+    }
+    if (guaranteedPrime) {
+      return true;
     }
   } else {
     LargeIntegerUnsigned::getPrimesEratosthenesSieve(1000, aFewPrimes);
@@ -435,7 +462,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   }
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::GetOne() {
+LargeIntegerUnsigned LargeIntegerUnsigned::getOne() {
   LargeIntegerUnsigned tempI;
   tempI.makeOne();
   return tempI;
@@ -450,6 +477,10 @@ bool LargeIntegerUnsigned::operator<(int other) const {
   return *this < tempUI;
 }
 
+bool LargeIntegerUnsigned::operator<=(int other) const {
+  return !(*this > other);
+}
+
 bool LargeIntegerUnsigned::operator>(int other) const {
   if (other < 0) {
     return true;
@@ -461,6 +492,13 @@ bool LargeIntegerUnsigned::operator>(int other) const {
 
 bool LargeIntegerUnsigned::operator<(const LargeIntegerUnsigned& other) const {
   return !this->isGreaterThanOrEqualTo(other);
+}
+
+bool LargeIntegerUnsigned::operator<(const LargeInteger& other) const {
+  if (other.isNegative()) {
+    return false;
+  }
+  return (*this) < other.value;
 }
 
 bool LargeIntegerUnsigned::operator>=(const LargeIntegerUnsigned& other) const {
@@ -1063,6 +1101,8 @@ int LargeIntegerUnsigned::maximumDivisorToTryWhenFactoring(int desiredByUser) co
       result = 10;
     } else if (*this < 1000) {
       result = 32;
+    } else if (*this < 10000) {
+      result = 100;
     } else {
       this->isIntegerFittingInInt(&result);
     }
@@ -1423,7 +1463,8 @@ void LargeInteger::makeZero() {
 
 void LargeInteger::operator=(const Rational& other) {
   if (!other.isInteger(this)) {
-    global.fatal << "This is a programming error: converting implicitly rational number " << other.toString()
+    global.fatal << "Attempt to convert implicitly rational number "
+    << other.toString()
     << " to integer is not possible as the Rational number is not integral. " << global.fatal;
   }
 }
@@ -1580,7 +1621,7 @@ Rational operator/(int left, const Rational& right) {
 Rational operator-(const Rational& argument) {
   Rational tempRat;
   tempRat.assign(argument);
-  tempRat.minus();
+  tempRat.negate();
   return tempRat;
 }
 
@@ -1705,7 +1746,7 @@ GlobalStatistics::checkPointerCounters();
 
 void Rational::addInteger(int x) {
   Rational tempRat;
-  tempRat.AssignNumeratorAndDenominator(x, 1);
+  tempRat.assignNumeratorAndDenominator(x, 1);
   this->operator+=(tempRat);
 }
 
@@ -1719,7 +1760,7 @@ bool Rational::isGreaterThan(const Rational& r) const {
 void Rational::subtract(const Rational& r) {
   Rational temp;
   temp.assign(r);
-  temp.minus();
+  temp.negate();
   this->operator+=(temp);
 }
 
@@ -1760,17 +1801,17 @@ bool Rational::getSquareRootIfRational(Rational& output) const {
   return true;
 }
 
-bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
-  int OtherNumAbs, thisNumAbs;
-  if (this->denominatorShort <= 0 || OtherDen <= 0) {
+bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
+  int otherNumeratorAbsoluteValue, thisNumAbs;
+  if (this->denominatorShort <= 0 || otherDenominator <= 0) {
     global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
-    << this->denominatorShort << " and " << OtherDen
+    << this->denominatorShort << " and " << otherDenominator
     << ". The cause of the error should be in some of the calling functions. " << global.fatal;
   }
-  if (OtherNum < 0) {
-    OtherNumAbs = - OtherNum;
+  if (otherNumerator < 0) {
+    otherNumeratorAbsoluteValue = - otherNumerator;
   } else {
-    OtherNumAbs = OtherNum;
+    otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
     thisNumAbs = - this->numeratorShort;
@@ -1781,13 +1822,13 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
     this->extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->numeratorShort * OtherDen + this->denominatorShort * OtherNum;
-  int D = this->denominatorShort * OtherDen;
+  int N = this->numeratorShort * otherDenominator + this->denominatorShort * otherNumerator;
+  int D = this->denominatorShort * otherDenominator;
   if (N == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
@@ -1806,10 +1847,10 @@ bool Rational::tryToAddQuickly(int OtherNum, int OtherDen) {
   return true;
 }
 
-bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
-  int OtherNumAbs, thisNumAbs;
-  if (this->denominatorShort <= 0 || OtherDen <= 0) {
-    if (denominatorShort == 0 || OtherDen == 0) {
+bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
+  int otherNumeratorAbsoluteValue, thisNumAbs;
+  if (this->denominatorShort <= 0 || otherDenominator <= 0) {
+    if (denominatorShort == 0 || otherDenominator == 0) {
       global.fatal << "This is a programming error: division by zero. ";
     } else {
       global.fatal << "This is a programming error during rational number multiplication: "
@@ -1817,10 +1858,10 @@ bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
     }
     global.fatal << global.fatal;
   }
-  if (OtherNum < 0) {
-    OtherNumAbs = - OtherNum;
+  if (otherNumerator < 0) {
+    otherNumeratorAbsoluteValue = - otherNumerator;
   } else {
-    OtherNumAbs = OtherNum;
+    otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
     thisNumAbs = - this->numeratorShort;
@@ -1831,13 +1872,13 @@ bool Rational::tryToMultiplyQuickly(int OtherNum, int OtherDen) {
     this->extended != nullptr ||
     thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-    OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
+    otherNumeratorAbsoluteValue >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    otherDenominator >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
-  int N = this->numeratorShort * OtherNum;
-  int D = this->denominatorShort * OtherDen;
+  int N = this->numeratorShort * otherNumerator;
+  int D = this->denominatorShort * otherDenominator;
   if (N == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
@@ -2108,7 +2149,7 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
 std::string Rational::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (theFormat->flagUseFrac) {
-      return this->ToStringFrac();
+      return this->toStringFrac();
     }
   }
   std::stringstream out;
@@ -2129,7 +2170,7 @@ std::string Rational::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) const {
+std::string Rational::toStringForFileOperations(FormatExpressions* notUsed) const {
   (void) notUsed; //portable way of avoiding unused parameter warning
   std::stringstream out;
   if (this->extended == nullptr) {
@@ -2157,7 +2198,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
   return out.str();
 }
 
-std::string Rational::ToStringFrac() const {
+std::string Rational::toStringFrac() const {
   std::stringstream out;
   if (this->extended == nullptr) {
     if (this->numeratorShort < 0) {

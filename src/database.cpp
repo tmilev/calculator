@@ -783,9 +783,9 @@ std::string ProblemData::store(){
     out << HtmlRoutines::convertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
-    << "numCorrectSubmissions =" << currentA.numCorrectSubmissions
-    << "&numSubmissions =" << currentA.numSubmissions
-    << "&firstCorrectAnswer =" << HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
+    << "&numSubmissions=" << currentA.numSubmissions
+    << "&firstCorrectAnswer=" << HtmlRoutines::convertStringToURLString(currentA.firstCorrectAnswerClean, false);
     out << HtmlRoutines::convertStringToURLString(questionsStream.str(), false);
   }
   return out.str();
@@ -796,7 +796,7 @@ JSData ProblemData::storeJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
-    result[WebAPI::problem::randomSeed] = std::to_string(this->randomSeed);
+    result[WebAPI::problem::randomSeed] = static_cast<int>(this->randomSeed);
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     Answer& currentA = this->theAnswers.theValues[i];
@@ -1003,7 +1003,7 @@ bool ProblemData::loadFromOldFormat(const std::string& inputData, std::stringstr
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (theMap.contains(WebAPI::problem::randomSeed)) {
-      this->randomSeed = static_cast<unsigned>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
+      this->randomSeed = static_cast<uint32_t>(atoi(theMap.getValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
@@ -1051,7 +1051,7 @@ bool ProblemData::loadFromJSON(const JSData& inputData, std::stringstream& comme
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
-      this->randomSeed = static_cast<unsigned>(atoi(
+      this->randomSeed = static_cast<uint32_t>(atoi(
         inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).theString.c_str()
       ));
       this->flagRandomSeedGiven = true;

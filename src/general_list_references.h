@@ -39,14 +39,14 @@ public:
   Object& operator[](int i) const {
     if (i < 0 || i >= this->size) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "This is a programing error: attempting to access element of index "
+      commentsOnCrash << "Attempt to access element of index "
       << i << " in ListReferences that has only " << this->size << " elements. ";
       fatalCrash(commentsOnCrash.str());
     }
     if (this->references[i] == 0) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "This is a programing error: element of index "
-      << i << " in ListReferences has zero pointer. This is not allowed. ";
+      commentsOnCrash << "Element of index "
+      << i << " in ListReferences has zero pointer. ";
       fatalCrash(commentsOnCrash.str());
     }
     return *this->references[i];
@@ -214,8 +214,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline void addOnTop(const Object& o) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);
   }
-  inline void addOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(theList);
+  inline void addListOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addListOnTop(theList);
   }
   inline bool contains(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::contains(o);

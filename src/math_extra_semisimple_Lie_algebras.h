@@ -140,10 +140,10 @@ public:
   std::string toStringLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
   inline int getNumberOfGenerators() const {
-    return this->theWeyl.cartanSymmetric.numberOfRows + this->theWeyl.RootSystem.size;
+    return this->theWeyl.cartanSymmetric.numberOfRows + this->theWeyl.rootSystem.size;
   }
   inline int getNumberOfPositiveRoots() const {
-    return this->theWeyl.RootsOfBorel.size;
+    return this->theWeyl.rootsOfBorel.size;
   }
   inline int getRank() const {
     return this->theWeyl.cartanSymmetric.numberOfRows;
@@ -158,10 +158,10 @@ public:
 
   void orderSSalgebraForHWbfComputation();
   int getCartanGeneratorIndex(int simpleRootIndex) {
-    return this->theWeyl.RootsOfBorel.size + simpleRootIndex;
+    return this->theWeyl.rootsOfBorel.size + simpleRootIndex;
   }
   int getGeneratorFromRoot(const Vector<Rational>& input) {
-    return this->getGeneratorFromRootIndex(this->theWeyl.RootSystem.getIndex(input));
+    return this->getGeneratorFromRootIndex(this->theWeyl.rootSystem.getIndex(input));
   }
   int getRootIndexFromDisplayIndex(int theIndex);
   int getGeneratorFromDisplayIndex(int theIndex) {
@@ -175,7 +175,7 @@ public:
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int getRootIndexFromGenerator(int theIndex) const;
   int getCartanIndexFromGenerator(int theIndex) {
-    return theIndex + this->theWeyl.RootsOfBorel.size;
+    return theIndex + this->theWeyl.rootsOfBorel.size;
   }
   int getDisplayIndexFromGenerator(int theIndex) const {
     if (theIndex < this->getNumberOfPositiveRoots()) {
@@ -196,7 +196,7 @@ public:
     }
     int left = this->getRootIndexFromGenerator(leftIndex);
     int right = this->getRootIndexFromGenerator(rightIndex);
-    return (this->theWeyl.RootSystem[left] + this->theWeyl.RootSystem[right]).isEqualToZero();
+    return (this->theWeyl.rootSystem[left] + this->theWeyl.rootSystem[right]).isEqualToZero();
   }
   void computeChevalleyConstants();
   template<class Coefficient>
@@ -225,10 +225,10 @@ public:
   Rational getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
   Vector<Rational> getWeightOfGenerator(int index) {
     if (index < this->getNumberOfPositiveRoots()) {
-      return this->theWeyl.RootSystem[index];
+      return this->theWeyl.rootSystem[index];
     }
     if (index >= this->getRank() + this->getNumberOfPositiveRoots()) {
-      return this->theWeyl.RootSystem[index - this->getRank()];
+      return this->theWeyl.rootSystem[index - this->getRank()];
     }
     Vector<Rational> result;
     result.makeZero(this->getRank());

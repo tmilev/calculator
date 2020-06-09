@@ -200,7 +200,7 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
     int den = 1;
     for (int i = 0; i < cartanSymmetric.numberOfRows; i ++) {
       for (int j = 0; j < cartanSymmetric.numberOfColumns; j ++) {
-        den = MathRoutines::lcm(den,cartanSymmetric.elements[i][j].getDenominator().getUnsignedIntValueTruncated());
+        den = MathRoutines::leastCommonMultiple(den,cartanSymmetric.elements[i][j].getDenominator().getUnsignedIntValueTruncated());
       }
     }
     unrationalCartanSymmetric.initialize(cartanSymmetric.numberOfRows, cartanSymmetric.numberOfColumns);
@@ -408,11 +408,11 @@ Rational AnotherWeylGroup<scalar, templateVector>::getHermitianProduct(const Vec
   return acc / this->size();
 }
 
-List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf= 0);
+List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkDivisorsOf = 0);
 
 
 template <typename Coefficient>
-List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient> &M) {
+List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient>& M) {
   List<List<Vector<Coefficient> > > es = eigenspaces(M);
   List<VectorSpace<Coefficient> > vs;
   for (int spi = 0; spi < es.size; spi ++) {
@@ -428,7 +428,7 @@ List<VectorSpace<Coefficient> > getEigenspaces(const Matrix<Coefficient> &M) {
 // As in Schneider, 1990
 // well, so far not using any of his improvements
 template <typename somegroup>
-List<ClassFunction<somegroup, Rational> > computeCharacterTable(somegroup &G) {
+List<ClassFunction<somegroup, Rational> > computeCharacterTable(somegroup& G) {
   if (G.conjugacyClassCount() == 0) {
     G.computeConjugacyClassesFromAllElements();
   }
@@ -623,7 +623,7 @@ void getTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
 void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo = false) {
   Selection sel;
   sel.initialize(G->cartanSymmetric.numberOfColumns);
-  int numCycles = MathRoutines::twoToTheNth(sel.maximumSize);
+  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
   List<List<bool> > tss;
   tss.setSize(numCycles);
   List<ElementWeylGroup> theGenerators;
@@ -646,7 +646,7 @@ void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 
   if (pseudo) {
     global.comments << "pseudo-parabolics" << "\n";
-    ElementWeylGroup hr = G->getRootReflection(G->RootSystem.size- 1);
+    ElementWeylGroup hr = G->getRootReflection(G->rootSystem.size- 1);
     sel.initialize(G->cartanSymmetric.numberOfColumns);
     for (int i = 0; i < numCycles - 1; i ++) {
       theGenerators.setSize(sel.cardinalitySelection);
@@ -682,7 +682,7 @@ void computeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 }
 
 template <typename elementSomeGroup>
-void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data) {
+void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData& data) {
   data.theType = JSData::token::tokenObject;
   JSData& representatives = data.objects.getValueCreate("representatives");
   JSData& sizes = data.objects.getValueCreate("sizes");

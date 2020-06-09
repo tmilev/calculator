@@ -17,8 +17,8 @@ public:
   Vectors<double> basisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
   MapList<std::string, List<int>, MathRoutines::hashString> frames;
-  double ClickToleranceX;
-  double ClickToleranceY;
+  double clickToleranceX;
+  double clickToleranceY;
   double centerX;
   double centerY;
   double graphicsUnit;
@@ -96,20 +96,20 @@ public:
     if (y1 < 0) {
       y1 = - y1;
     }
-    return x1 <= this->ClickToleranceX && y1 <= this->ClickToleranceY;
+    return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
   }
-  bool mouseMoveRedraw(int X, int Y) {
+  bool mouseMoveRedraw(int x, int y) {
     if (this->SelectedCircleMinus2noneMinus1Center == - 2) {
       return false;
     }
     if (this->SelectedCircleMinus2noneMinus1Center == - 1) {
-      this->centerX = X;
-      this->centerY = Y;
+      this->centerX = x;
+      this->centerY = y;
       return true;
     }
     if (this->SelectedCircleMinus2noneMinus1Center >= 0) {
       if (this->flagRotatingPreservingAngles) {
-        this->changeBasisPReserveAngles(static_cast<double>(X) , static_cast<double>(Y));
+        this->changeBasisPReserveAngles(static_cast<double>(x), static_cast<double>(y));
         return true;
       }
     }
@@ -119,9 +119,9 @@ public:
   void click(double x, double y);
   void drawHighlightGroup(Vectors<double>& highlightGroup, List<std::string>& labels, const std::string& color, int radius);
   void drawLineBuffer(
-    double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+    double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
   );
-  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  void drawTextBuffer(double x1, double y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& vector1, const Vector<Rational>& vector2, const std::string& color, double lineWidth = 1
   );
@@ -210,7 +210,6 @@ public:
   enum TextStyles {
     TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber
   };
-  //MutexRecursiveWrapper lockedWhileDrawing;
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;
@@ -251,25 +250,34 @@ public:
 
   std::string getHTMLDiv(int theDimension);
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
-  void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
-  void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);
+  void drawCoordSystemBuffer(DrawingVariables& variables, int theDimension);
   void drawLineDirectly(
-    double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+    double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, double lineWidth
   );
   void drawLineBuffer(
-    double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+    double x1,
+    double y1,
+    double x2,
+    double y2,
+    uint32_t thePenStyle,
+    int colorIndex,
+    double lineWidth
   );
-  void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
+  void drawTextDirectly(double x1, double y1, const std::string& inputText, int color, std::fstream* latexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color);
   //if the LatexOutFile is zero then the procedure defaults to the screen
-  void drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
+  void drawLineBufferOld(double x1, double y1, double x2, double y2, uint32_t thePenStyle, int colorIndex, std::fstream* latexOutFile);
   void drawLineBetweenTwoVectorsBufferRational(
     const Vector<Rational>& r1, const Vector<Rational>& r2, const std::string& color, double lineWidth = 1
   ) {
     this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, color, lineWidth);
   }
   void drawCircleAtVector(
-    const Vector<Rational>& point, const std::string& color, double radius, const std::string& frameId = "", int frameIndex = - 1
+    const Vector<Rational>& point,
+    const std::string& color,
+    double radius,
+    const std::string& frameId = "",
+    int frameIndex = - 1
   ) {
     this->theBuffer.drawCircleAtVectorBufferRational(point, color, radius, frameId, frameIndex);
   }

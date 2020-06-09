@@ -40,7 +40,15 @@ public:
   static RationalFunction zero();
   static RationalFunction zeroStatic();
   int minimalNumberOfVariables() const;
-  bool substitution(const PolynomialSubstitution<Rational>& theSubstitution);
+  bool substitution(
+    const PolynomialSubstitution<Rational>& substitution,
+    const Coefficient& one
+  );
+  bool substitution(
+    const PolynomialSubstitution<Rational>& substitution,
+    const Coefficient& one,
+    std::stringstream* commentsOnFailure
+  );
   RationalFunction(const RationalFunction<Rational>& other);
   RationalFunction();
   RationalFunction(int other);
@@ -138,7 +146,7 @@ public:
   void operator/=(int other);
   void operator/=(const Polynomial<Coefficient>& other);
   void operator/=(const RationalFunction<Coefficient>& other);
-  void minus();
+  void negate();
   class Test {
   public:
     static bool all();

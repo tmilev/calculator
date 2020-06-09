@@ -6,6 +6,7 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_universal_enveloping.h"
+#include "math_rational_function_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
@@ -76,7 +77,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::c
   if (inputExternalAutos != nullptr) {
     this->ExternalAutomorphisms = *inputExternalAutos;
   }
-  this->AmbientWeyl->transformToSimpleBasisGenerators(this->simpleRootsInner, this->AmbientWeyl->RootSystem);
+  this->AmbientWeyl->transformToSimpleBasisGenerators(this->simpleRootsInner, this->AmbientWeyl->rootSystem);
   this->computeRootSubsystem();
   ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms currentElement;
   currentElement.owner = this;
@@ -269,9 +270,15 @@ void DrawOperations::drawTextAtVectorBufferDouble(
 }
 
 void DrawingVariables::drawLineDirectly(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawOperations::drawHighlightGroup(
@@ -287,23 +294,29 @@ void DrawOperations::drawHighlightGroup(
 }
 
 void DrawOperations::drawLineBuffer(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
   (void) thePenStyle;
-  (void) ColorIndex;
+  (void) colorIndex;
   (void) lineWidth;
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
   theOperation[DrawOperations::fieldPoints].theType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldPoints][0][0] = X1;
-  theOperation[DrawOperations::fieldPoints][0][1] = Y1;
-  theOperation[DrawOperations::fieldPoints][1][0] = X2;
-  theOperation[DrawOperations::fieldPoints][1][1] = Y2;
+  theOperation[DrawOperations::fieldPoints][0][0] = x1;
+  theOperation[DrawOperations::fieldPoints][0][1] = y1;
+  theOperation[DrawOperations::fieldPoints][1][0] = x2;
+  theOperation[DrawOperations::fieldPoints][1][1] = y2;
   this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawTextBuffer(
-  double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
+  double x1, double y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle
 ) {
   (void) theFontSize;
   (void) ColorIndex;
@@ -311,8 +324,8 @@ void DrawOperations::drawTextBuffer(
   JSData theOperation;
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeSegment2DFixed;
   theOperation[DrawOperations::fieldLocation].theType = JSData::token::tokenArray;
-  theOperation[DrawOperations::fieldLocation][0] = X1;
-  theOperation[DrawOperations::fieldLocation][1] = Y1;
+  theOperation[DrawOperations::fieldLocation][0] = x1;
+  theOperation[DrawOperations::fieldLocation][1] = y1;
   theOperation[DrawOperations::fieldText] = inputText;
   this->theOperations.addOnTop(theOperation);
 }
@@ -380,9 +393,15 @@ int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
 }
 
 void DrawingVariables::drawLineBuffer(
-  double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth
+  double x1,
+  double y1,
+  double x2,
+  double y2,
+  uint32_t thePenStyle,
+  int colorIndex,
+  double lineWidth
 ) {
-  this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
+  this->theBuffer.drawLineBuffer(x1, y1, x2, y2, thePenStyle, colorIndex, lineWidth);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color) {
@@ -400,8 +419,8 @@ void DrawingVariables::drawString(
     std::string tempS;
     tempS = input.at(i);
     this->theBuffer.drawTextBuffer(
-      theDrawData.outputWidth + theDrawData.TopLeftCornerX,
-      theDrawData.outputHeight + theDrawData.TopLeftCornerY,
+      theDrawData.outputWidth + theDrawData.topLeftCornerX,
+      theDrawData.outputHeight + theDrawData.topLeftCornerY,
       tempS,
       0,
       theFontSize,
@@ -431,7 +450,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
 //  Rational tempRat;
 //  theDet.computeDeterminantOverwriteMatrix(tempRat);
   Selection NonExplored;
-  int numRoots = this->theWeyl.RootSystem.size;
+  int numRoots = this->theWeyl.rootSystem.size;
   NonExplored.initialize(numRoots);
   NonExplored.makeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
@@ -448,8 +467,8 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
     Domain[numRoots + i] = tempElt;
     tempElt.makeCartanGenerator(rangeRoot, *this);
     Range[numRoots + i] = tempElt;
-    for (int i = 0; i < 2; i ++, domainRoot.minus(), rangeRoot.minus()) {
-      int theIndex = this->theWeyl.RootSystem.getIndex(rangeRoot);
+    for (int i = 0; i < 2; i ++, domainRoot.negate(), rangeRoot.negate()) {
+      int theIndex = this->theWeyl.rootSystem.getIndex(rangeRoot);
       tempElt.makeGGenerator(rangeRoot, *this);
       Range[theIndex] = tempElt;
       tempElt.makeGGenerator(domainRoot, *this);
@@ -461,14 +480,14 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(Matrix<Rational>& outputAuto, 
   while (NonExplored.cardinalitySelection > 0) {
     for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
-      const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
+      const Vector<Rational>& current = this->theWeyl.rootSystem[theIndex];
       for (int j = 0; j < theDimension; j ++) {
         left.makeEi(theDimension, j);
-        for (int k = 0; k < 2; k ++, left.minus()) {
+        for (int k = 0; k < 2; k ++, left.negate()) {
           right = current - left;
           if (this->theWeyl.isARoot(right)) {
-            int leftIndex = this->theWeyl.RootSystem.getIndex(left);
-            int rightIndex = this->theWeyl.RootSystem.getIndex(right);
+            int leftIndex = this->theWeyl.rootSystem.getIndex(left);
+            int rightIndex = this->theWeyl.rootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = Domain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = Domain[rightIndex];
@@ -595,7 +614,7 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   this->theRange().computeChevalleyConstants();
   int theDomainDimension = this->theDomain().theWeyl.cartanSymmetric.numberOfRows;
   Selection NonExplored;
-  int numRoots = this->theDomain().theWeyl.RootSystem.size;
+  int numRoots = this->theDomain().theWeyl.rootSystem.size;
   NonExplored.initialize(numRoots);
   NonExplored.makeFullSelection();
   List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
@@ -604,8 +623,8 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   Vector<Rational> tempRoot;
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.makeEi(theDomainDimension, i);
-    for (int j = 0; j < 2; j ++, tempRoot.minus()) {
-      int index = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
+    for (int j = 0; j < 2; j ++, tempRoot.negate()) {
+      int index = this->theDomain().theWeyl.rootSystem.getIndex(tempRoot);
       tempDomain[index].makeZero();
       ChevalleyGenerator tempGen;
       tempGen.makeGenerator(this->theDomain(), this->theDomain().getGeneratorFromRoot(tempRoot));
@@ -618,14 +637,14 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   while (NonExplored.cardinalitySelection > 0) {
     for (int i = 0; i < NonExplored.cardinalitySelection; i ++) {
       int theIndex = NonExplored.elements[i];
-      const Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
-      for (int j = 0; j < NonExplored.maximumSize; j ++) {
+      const Vector<Rational>& current = this->theDomain().theWeyl.rootSystem[theIndex];
+      for (int j = 0; j < NonExplored.numberOfElements; j ++) {
         if (!NonExplored.selected[j]) {
-          const Vector<Rational>& left = this->theDomain().theWeyl.RootSystem[j];
+          const Vector<Rational>& left = this->theDomain().theWeyl.rootSystem[j];
           right = current - left;
           if (this->theDomain().theWeyl.isARoot(right)) {
-            int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(left);
-            int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(right);
+            int leftIndex = this->theDomain().theWeyl.rootSystem.getIndex(left);
+            int rightIndex = this->theDomain().theWeyl.rootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = tempDomain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = tempDomain[rightIndex];
@@ -643,8 +662,8 @@ bool HomomorphismSemisimpleLieAlgebra::computeHomomorphismFromImagesSimpleCheval
   }
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.makeEi(theDomainDimension, i);
-    int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
-    int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(- tempRoot);
+    int leftIndex = this->theDomain().theWeyl.rootSystem.getIndex(tempRoot);
+    int rightIndex = this->theDomain().theWeyl.rootSystem.getIndex(- tempRoot);
     this->theDomain().lieBracket(tempDomain[leftIndex], tempDomain[rightIndex], tempDomain[numRoots + i]);
     this->theRange().lieBracket(tempRange[leftIndex], tempRange[rightIndex], tempRange[numRoots + i]);
   }
@@ -686,7 +705,7 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(Vector<Rational>& 
   output.makeZero(theSmallDimension);
   for (int i = 0; i < theSmallDimension; i ++) {
     output[i] = this->theRange().theWeyl.rootScalarCartanRoot(
-      this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size + i].getCartanPart(), input
+      this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.rootsOfBorel.size + i].getCartanPart(), input
     );
   }
   invertedSmallCartan.actOnVectorColumn(output, output);
@@ -700,7 +719,7 @@ bool HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   ElementUniversalEnveloping<RationalFunction<Rational> > tempElt;
   output.makeZero(this->theRange());
   RationalFunction<Rational> polyOne;
-  polyOne = theCoeff.one();
+  polyOne.makeOne();
   output.makeConstant(theCoeff, this->theRange());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
@@ -732,7 +751,7 @@ void HomomorphismSemisimpleLieAlgebra::applyHomomorphism(
   }
   output.makeZero();
   for (int i = 0; i < input.size(); i ++) {
-    int currentIndex = input[i].theGeneratorIndex;
+    int currentIndex = input[i].generatorIndex;
     output += this->imagesAllChevalleyGenerators[currentIndex] * input.coefficients[i];
   }
 }
@@ -741,7 +760,7 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(Ma
   output.initialize(this->theRange().getRank(), this->theDomain().getRank());
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i = 0; i < this->theDomain().getRank(); i ++) {
-    domainElt.makeCartanGenerator(Vector<Rational>::GetEi(this->theDomain().getRank(), i), this->theDomain());
+    domainElt.makeCartanGenerator(Vector<Rational>::getEi(this->theDomain().getRank(), i), this->theDomain());
     this->applyHomomorphism(domainElt, imageElt);
     output.assignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.getCartanPart());
   }
@@ -775,7 +794,7 @@ void HomomorphismSemisimpleLieAlgebra::makeGinGWithIdentity(
   this->rangeAlg = this->domainAlg;
   this->domainAlg->theWeyl.makeArbitrarySimple(theWeylLetter, theWeylDim);
   this->theDomain().computeChevalleyConstants();
-  int numPosRoots = this->theDomain().theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theDomain().theWeyl.rootsOfBorel.size;
   this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
   this->domainAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
   this->imagesSimpleChevalleyGenerators.setSize(theWeylDim * 2);
@@ -824,12 +843,12 @@ void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtm
 class SlTwoInSlN;
 
 void HomomorphismSemisimpleLieAlgebra::getRestrictionAmbientRootSystemToTheSmallercartanSubalgebra(Vectors<Rational>& output) {
-  List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.RootSystem;
+  List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.rootSystem;
   int rankSA = this->theDomain().theWeyl.getDimension();
   Matrix<Rational> tempMat;
   tempMat = this->theDomain().theWeyl.cartanSymmetric;
   tempMat.invert();
-  int numPosRootsDomain = this->theDomain().theWeyl.RootsOfBorel.size;
+  int numPosRootsDomain = this->theDomain().theWeyl.rootsOfBorel.size;
   output.setSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;
   theScalarProducts.setSize(rankSA);
@@ -882,11 +901,11 @@ bool ChevalleyGenerator::checkInitialization() const {
 
 std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
   this->checkInitialization();
-  return this->owner->getStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+  return this->owner->getStringFromChevalleyGenerator(this->generatorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other) const {
-  return this->theGeneratorIndex>other.theGeneratorIndex;
+  return this->generatorIndex>other.generatorIndex;
 }
 
 std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
@@ -916,7 +935,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending(const Selec
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = - i - this->getNumberOfGenerators() * 5;
     }
   }
@@ -927,7 +946,7 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(const Select
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = i - this->getNumberOfGenerators() * 5;
     }
   }
@@ -937,7 +956,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(const Selection& pa
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff = this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
+    Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
@@ -948,7 +967,7 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(const Selection& p
   Vector<Rational> tempVect;
   tempVect = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff = this->getWeightOfGenerator(i).ScalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
+    Rational translationCoeff = this->getWeightOfGenerator(i).scalarEuclidean(tempVect) * this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->UEGeneratorOrderIncludingCartanElts[i] = - i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
     }
@@ -1002,7 +1021,7 @@ bool SemisimpleLieAlgebra::areOrderedProperly(int leftIndex, int rightIndex) {
 }
 
 int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int theIndex) {
-  int numPosRoots = this->theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theWeyl.rootsOfBorel.size;
   if (theIndex < 0) {
     return theIndex + numPosRoots;
   }
@@ -1013,7 +1032,7 @@ int SemisimpleLieAlgebra::getRootIndexFromDisplayIndex(int theIndex) {
 }
 
 int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex) const {
-  int numPosRoots = this->theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theWeyl.rootsOfBorel.size;
   if (theIndex >= numPosRoots) {
     return theIndex - numPosRoots + 1;
   }
@@ -1024,11 +1043,11 @@ int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex) const {
 }
 
 int SemisimpleLieAlgebra::getGeneratorFromRootIndex(int theIndex) const {
-  if (theIndex < 0 || theIndex >= this->theWeyl.RootSystem.size) {
+  if (theIndex < 0 || theIndex >= this->theWeyl.rootSystem.size) {
     return - 1;
   }
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
-  int numPosRoots = this->theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theWeyl.rootsOfBorel.size;
   if (theIndex >= numPosRoots) {
     return theIndex + theDimension;
   }
@@ -1036,7 +1055,7 @@ int SemisimpleLieAlgebra::getGeneratorFromRootIndex(int theIndex) const {
 }
 
 int SemisimpleLieAlgebra::getRootIndexFromGenerator(int theIndex) const {
-  int numPosRoots = this->theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theWeyl.rootsOfBorel.size;
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
   if (theIndex < numPosRoots) {
     return theIndex;
@@ -1171,7 +1190,7 @@ std::string VectorPartition::toStringAllPartitions(bool useHtml) {
 
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
   int theRank = theAlgebra.theWeyl.cartanSymmetric.numberOfRows;
-  int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
+  int numPosRoots = theAlgebra.theWeyl.rootsOfBorel.size;
   output.makeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
 }
 
@@ -1206,7 +1225,7 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   this->checkInitialization();
   theCoeffs.makeZero(this->theOwner->getNumberOfGenerators());
   for (int i = 0; i < input.size(); i ++) {
-    int theIndex = input[i].theGeneratorIndex;
+    int theIndex = input[i].generatorIndex;
     theCoeffs[this->theOwner->getGeneratorFromRootIndex(theIndex)] = input.coefficients[i];
   }
   int numPosRoots = this->theOwner->getNumberOfPositiveRoots();
@@ -1214,7 +1233,7 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   for (int i = 0; i < this->theOwner->getRank(); i ++) {
     theCoeffs[numPosRoots + i] = tempH[i];
   }
-  this->ChevalleyGeneratorsInCurrentCoords.actOnVectorColumn(theCoeffs);
+  this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(theCoeffs);
 }
 
 int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(int GeneratorIndex) {
@@ -1238,15 +1257,15 @@ void SemisimpleLieAlgebraOrdered::initialize(
   }
   this->theOwner = &owner;
   this->theOrder = inputOrder;
-  this->ChevalleyGeneratorsInCurrentCoords.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
-  this->ChevalleyGeneratorsInCurrentCoords.makeZero();
+  this->chevalleyGeneratorsInCurrentCoordinates.initialize(owner.getNumberOfGenerators(), owner.getNumberOfGenerators());
+  this->chevalleyGeneratorsInCurrentCoordinates.makeZero();
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
     currentElt.makeGenerator(i, owner);
     currentElt.getCoordinatesInBasis(this->theOrder, coordsInCurrentBasis);
     for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
-      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i] = coordsInCurrentBasis[j];
+      this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] = coordsInCurrentBasis[j];
     }
   }
 }
@@ -1978,8 +1997,8 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
     return point.isEqualToZero();
   }
   Rational tempRat;
-  for (int i = 0; i < this->Normals.size; i ++) {
-    tempRat = point.ScalarEuclidean(this->Normals[i]);
+  for (int i = 0; i < this->normals.size; i ++) {
+    tempRat = point.scalarEuclidean(this->normals[i]);
     if (tempRat.isNegative()) {
       return false;
     }
@@ -1998,7 +2017,7 @@ std::string MonomialP::toString(FormatExpressions* theFormat) const {
   }
   for (int i = 0; i < this->monBody.size; i ++) {
     if (!(this->monBody[i].isEqualToZero())) {
-      out << theFormat->GetPolyLetter(i);
+      out << theFormat->getPolynomialLetter(i);
       if (!(this->monBody[i] == 1)) {
         out << "^{" << this->monBody[i] << "}";
       } else {

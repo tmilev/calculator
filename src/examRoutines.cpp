@@ -437,13 +437,10 @@ bool CalculatorHTML::loadMe(
     }
   }
   this->theProblemData.checkConsistency();
-  if (!this->flagIsForReal) {
-    std::string randString = inputRandomSeed;
-    if (randString != "") {
-      std::stringstream randSeedStream(randString);
-      randSeedStream >> this->theProblemData.randomSeed;
-      this->theProblemData.flagRandomSeedGiven = true;
-    }
+  if (!this->flagIsForReal && inputRandomSeed != "") {
+    std::stringstream randSeedStream(inputRandomSeed);
+    randSeedStream >> this->theProblemData.randomSeed;
+    this->theProblemData.flagRandomSeedGiven = true;
   }
   return true;
 }
@@ -464,7 +461,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     << this->MaxInterpretationAttempts << " for performance reasons; "
     << "with bad luck, some finicky problems require more. "
     << "Random seeds tried: "
-    << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
+    << this->randomSeedPerAttempt.toStringCommaDelimited()
     << "<br> <b>Please refresh the page.</b><br>";
     if (!this->flagIsForReal) {
       out
@@ -667,11 +664,11 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblemGiveUp");
   if (input.size() != 4) {
-    return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
+    return calculator << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
   std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
   std::string testedProblem = input[1].toString();
@@ -686,20 +683,20 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   out << WebAPI::problem::answerGenerationSuccess
   << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
   out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].theString;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblem");
   CalculatorHTML theProblem;
   if (!input.isOfType<std::string>(&theProblem.inputHtml)) {
-    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+    return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
   theProblem.theProblemData.flagRandomSeedGiven = true;
-  theProblem.theProblemData.randomSeed = static_cast<unsigned>(theCommands.theObjectContainer.currentRandomSeed);
-  theProblem.interpretHtml(&theCommands.comments);
+  theProblem.theProblemData.randomSeed = calculator.theObjectContainer.pseudoRandom.getRandomSeed();
+  theProblem.interpretHtml(&calculator.comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
@@ -712,7 +709,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem(
   }
   out << "<br>Interpretation times (per attempt): "
   << theProblem.timePerAttempt.toStringCommaDelimited();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 std::string CalculatorHTML::ToStringExtractedCommands() {
@@ -1787,17 +1784,17 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   }
   this->timeToParseHtml = global.getElapsedSeconds() - startTime;
   this->MaxInterpretationAttempts = 25;
-  this->randomSeedsIfInterpretationFails.setSize(this->MaxInterpretationAttempts);
+  this->randomSeedPerAttempt.setSize(this->MaxInterpretationAttempts);
+  this->randomSeedCurrent = 0;
+  UnsecurePseudoRandomGenerator generator;
   if (!this->theProblemData.flagRandomSeedGiven) {
-    int randomSeedFromTime = static_cast<signed>(time(nullptr));
-    global.unsecurePseudoRandomGenerator.setRandomSeed(103 + randomSeedFromTime);
-    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
+    generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
   } else {
-    this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
+    generator.setRandomSeedSmall(this->theProblemData.randomSeed);
   }
-  global.unsecurePseudoRandomGenerator.setRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
-  for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.getRandomLessThanBillion()) % 100000000;
+  this->randomSeedPerAttempt[0] = generator.getRandomSeed();
+  for (int i = 1; i < this->randomSeedPerAttempt.size; i ++) {
+    this->randomSeedPerAttempt[i] = generator.getRandomNonNegativeLessThanMaximumSeed();
   }
   this->timePerAttempt.setSize(0);
   this->timeIntermediatePerAttempt.setSize(0);
@@ -1821,7 +1818,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     if (this->numberOfInterpretationAttempts >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->numberOfInterpretationAttempts
       << " to interpret your file. Attempted random seeds: "
-      << this->randomSeedsIfInterpretationFails.toStringCommaDelimited()
+      << this->randomSeedPerAttempt.toStringCommaDelimited()
       << "Last interpretation failure follows. <br>"
       << commentsOnLastFailure.str();
     }
@@ -2622,17 +2619,17 @@ std::string CalculatorHTML::cleanUpCommandString(const std::string& inputCommand
 }
 
 bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
   if (!input.isOfType<std::string>(&theFile.inputHtml)) {
-    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+    return calculator << "Extracting calculator expressions from html takes as input strings. ";
   }
-  if (!theFile.parseHTML(&theCommands.comments)) {
+  if (!theFile.parseHTML(&calculator.comments)) {
     return false;
   }
-  return output.assignValue(theFile.ToStringExtractedCommands(), theCommands);
+  return output.assignValue(theFile.ToStringExtractedCommands(), calculator);
 }
 
 std::string CalculatorHTML::answerLabels::properties = "properties";
@@ -2766,9 +2763,9 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->flagIsExamHome =
   global.requestType == "template" ||
   global.requestType == "templateNoLogin";
-  this->theProblemData.randomSeed = static_cast<unsigned>(this->randomSeedsIfInterpretationFails[
+  this->theProblemData.randomSeed = this->randomSeedPerAttempt[
     this->numberOfInterpretationAttempts - 1
-  ]);
+  ];
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(global.getElapsedSeconds() - startTime);
   this->timeIntermediateComments.lastObject()->addOnTop("Time before after loading problem list");
@@ -3159,7 +3156,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   if (this->currentUseR.theProblemData.contains(theFileName)) {
     theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
-    percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
+    percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
       this->currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
     );

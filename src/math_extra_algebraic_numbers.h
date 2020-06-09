@@ -99,7 +99,7 @@ class AlgebraicNumber {
     AlgebraicClosureRationals& inputOwner,
     std::stringstream* commentsOnFailure
   );
-  AlgebraicNumber one();
+  AlgebraicNumber one() const;
   bool assignRationalQuadraticRadical(
     const Rational& input,
     AlgebraicClosureRationals& inputOwner,
@@ -136,7 +136,7 @@ class AlgebraicNumber {
   bool operator!= (int other) const {
     return !(*this == other);
   }
-  void minus() {
+  void negate() {
     this->element *= - 1;
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
@@ -200,9 +200,9 @@ public:
   // coordinates relative to the latest basis e_{n, 1}, ..., e_{n, n}.
   List<List<VectorSparse<Rational> > > basisInjections;
 
-  MatrixTensor<Rational> GeneratingElementTensorForm;
-  Matrix<Rational> GeneratingElementMatForm;
-  AlgebraicNumber GeneratingElemenT;
+  MatrixTensor<Rational> generatingElementTensorForm;
+  Matrix<Rational> generatingElementMatrixForm;
+  AlgebraicNumber generatingElement;
   Vectors<Rational> theGeneratingElementPowersBasis;
 
   bool flagIsQuadraticRadicalExtensionRationals;
@@ -232,7 +232,7 @@ public:
   );
   void getMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
   void getAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
-  void convertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
+  void convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
@@ -265,6 +265,7 @@ public:
     output << input.toString();
     return output;
   }
+  static const int maximumModulusForUserFacingPolynomialDivision;
   LargeIntegerUnsigned modulus;
   LargeIntegerUnsigned value;
   bool flagDeallocated;
@@ -288,11 +289,15 @@ public:
   bool isEqualToZero() const {
     return this->value.isEqualToZero();
   }
+  bool isEqualToOne() const {
+    return this->value.isEqualToOne();
+  }
   // Returns the number by which the vector was multiplied.
   static ElementZmodP scaleNormalizeIndex(
     List<ElementZmodP>& toBeScaled, int indexNonZeroElement
   );
-  // Required by RationalFunction.
+  // Required by RationalFunction when scaling simultaneously
+  // numerator and denominator.
   // Returns a copy of the number.
   ElementZmodP getNumerator() const;
   // Required by RationalFunction.
@@ -304,7 +309,7 @@ public:
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
   void checkEqualModuli(const ElementZmodP& other);
-
+  void negate();
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
@@ -336,6 +341,22 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
+  static void convertPolynomialModularToPolynomialIntegral(
+    const Polynomial<ElementZmodP>& input,
+    Polynomial<Rational>& output,
+    bool useNegatives
+  );
+  // Convert modular polynomial to another modular polynomial by copying all values
+  // using the new modulus.
+  static void convertLiftPolynomialModular(
+    const Polynomial<ElementZmodP>& input,
+    Polynomial<ElementZmodP>& output,
+    const LargeIntegerUnsigned& newModulus
+  );
+  // Format a polynomial with modular coefficients.
+  // The modulo information will not be repeated for all coefficients, but will be put
+  // at the end of the expression.
+  std::string toStringPolynomial(const Polynomial<ElementZmodP>& input, FormatExpressions* format) const;
   ElementZmodP zero() const;
   static ElementZmodP zeroStatic();
   ElementZmodP one() const;
@@ -350,19 +371,87 @@ public:
 
 class PolynomialFactorizationCantorZassenhaus {
 public:
+  static const int maximumDegreeDefault = 512;
   ElementZmodP one;
   int degree;
   int degreeUnknownFactor;
-  static const int maximumtotalDegree;
-  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialFactorizationUnivariate<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  PolynomialModuloPolynomial<ElementZmodP> baseLetter;
+  PolynomialModuloPolynomial<ElementZmodP> oneQuotientRing;
+
   Polynomial<ElementZmodP> current;
+  List<Polynomial<ElementZmodP> > factorCandidatesPreviousRuns;
   bool oneFactor(
+    std::stringstream* comments,
     std::stringstream* commentsOnFailure
   );
-  bool oneFactorGo(std::stringstream* commentsOnFailure);
-  PolynomialFactorizationCantorZassenhaus() {
-    this->output = nullptr;
+  // Input is either irreuducible polynomial of prime degree, or a product
+  // of linear polynomials.
+  bool handlePrimeDegreeSeparatedFactor(Polynomial<ElementZmodP>& input);
+  bool oneFactorGo(std::stringstream* comments, std::stringstream* commentsOnFailure);
+  bool hasFactorsOfDifferentDegree(std::stringstream* comments);
+  bool oneFactorProbabilityHalf(
+    unsigned int constant,
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  bool divisorFromCandidate(
+    const Polynomial<ElementZmodP>& candidate,
+    const std::string& candidateDisplayName,
+    std::stringstream* comments
+  );
+  PolynomialFactorizationCantorZassenhaus();
+  static std::string name() {
+    return "Cantor-Zassenhaus";
   }
 };
 
+class PolynomialFactorizationFiniteFields {
+public:
+  static const int maximumDegreeDefault = 100;
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields>* output;
+  Polynomial<Rational> current;
+  Polynomial<ElementZmodP> modularization;
+  ElementZmodP oneModular;
+  LargeIntegerUnsigned modulusHenselLift;
+  LargeInteger leadingCoefficient;
+  LargeInteger largestCoefficient;
+  LargeInteger upperBoundAbsoluteValueRoot;
+  LargeInteger coefficientBound;
+  ElementZmodP scaleProductLift;
+  int degree;
+  int factorsLiftedTries;
+  int maximumFactorsLiftedTries;
+  FormatExpressions format;
+  List<Polynomial<ElementZmodP> > factorsOverPrime;
+  List<Polynomial<ElementZmodP> > factorsLifted;
+  Polynomial<ElementZmodP> desiredLift;
+  Matrix<ElementZmodP> sylvesterMatrix;
+  Matrix<ElementZmodP> sylvesterMatrixInverted;
+  bool factorizationFromHenselLift(
+    std::stringstream* comments, std::stringstream* commentsOnFailure
+  );
+  bool factorizationFromHenselLiftOnce(
+    std::stringstream* comments, std::stringstream* commentsOnFailure
+  );
+  bool tryFactor(SelectionFixedRank& selection);
+  void henselLift(std::stringstream* comments);
+  void henselLiftOnce(
+    const LargeIntegerUnsigned& oldModulus,
+    std::stringstream* comments
+  );
+  bool oneFactor(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  void computeCoefficientBounds();
+  bool oneFactorFromModularization(
+    std::stringstream* comments,
+    std::stringstream* commentsOnFailure
+  );
+  static std::string name() {
+    return "finite field factorization";
+  }
+  PolynomialFactorizationFiniteFields();
+};
 #endif

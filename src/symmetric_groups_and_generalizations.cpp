@@ -798,7 +798,7 @@ void PermutationGroupData::makeSymmetricGroup(int n) {
   this->flagHasGenerators1j = true;
   this->theGroup->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
   this->theGroup->areConjugateByFormula = PermutationR2::areConjugate;
-  this->theGroup->GetSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
+  this->theGroup->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
   this->theGroup->specificDataPointer = this;
 }
 
@@ -812,8 +812,8 @@ void PermutationGroupData::makeSymmetricGroupGeneratorsjjPlus1(int n) {
   this->flagHasGeneratorsjjPlus1 = true;
   this->theGroup->computeConjugacyClassSizesAndRepresentativesByFormula = PermutationGroupData::computeCCSizesAndRepresentativesByFormulaImplementation;
   this->theGroup->areConjugateByFormula = PermutationR2::areConjugate;
-  this->theGroup->GetSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
-  this->theGroup->GetWordByFormula = PermutationGroupData::getWordjjPlus1Implementation;
+  this->theGroup->getSizeByFormula = PermutationGroupData::getSizeByFormulaImplementation;
+  this->theGroup->getWordByFormula = PermutationGroupData::getWordjjPlus1Implementation;
   this->theGroup->specificDataPointer = this;
 }
 
@@ -1112,8 +1112,8 @@ std::string ElementHyperoctahedralGroup::toString(FormatExpressions* unused) con
 // in hyperoctahedral groups means
 //this->computeConjugacyClassSizesAndRepresentativesByFormula = HyperoctahedralGroup::computeCCSizesAndRepresentativesByFormulaImplementation;
 //  this->areConjugateByFormula = ElementHyperoctahedralGroup::areConjugate;
-  this->GetWordByFormula = HyperoctahedralGroup::getWordByFormulaImplementation;
-  this->GetSizeByFormula = HyperoctahedralGroup::getSizeByFormulaImplementation;
+  this->getWordByFormula = HyperoctahedralGroup::getWordByFormulaImplementation;
+  this->getSizeByFormula = HyperoctahedralGroup::getSizeByFormulaImplementation;
   this->N = n;
   this->generators.setSize(n- 1+n);
   for (int i = 0; i < n- 1; i ++) {
@@ -1173,15 +1173,15 @@ void HyperoctahedralGroup::spechtModuleOfPartititons(const Partition &positive, 
 
   GroupRepresentation<Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
-  pxmr.generatorS = pozm;
-  pxmr.generatorS.addListOnTop(negm);
+  pxmr.generators = pozm;
+  pxmr.generators.addListOnTop(negm);
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> snr;
   PxM.induceRepresentation(pxmr,snr);
   GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
   Sn.induceRepresentation(snr,outreboxme);
 
   out.ownerGroup = this;
-  out.generatorS = outreboxme.generatorS;
+  out.generators = outreboxme.generators;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
@@ -1213,26 +1213,26 @@ void HyperoctahedralGroup::spechtModuleOfPartititons(const Partition &positive, 
 
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
-  pxmr.generatorS.setExpectedSize(PxM.generators.size);
-  pxmr.generatorS.addListOnTop(pozm);
-  pxmr.generatorS.addListOnTop(negm);
-  int cur = pxmr.generatorS.size;
-  pxmr.generatorS.setSize(PxM.generators.size);
-  int repRank = pxmr.generatorS[0].numberOfRows;
+  pxmr.generators.setExpectedSize(PxM.generators.size);
+  pxmr.generators.addListOnTop(pozm);
+  pxmr.generators.addListOnTop(negm);
+  int cur = pxmr.generators.size;
+  pxmr.generators.setSize(PxM.generators.size);
+  int repRank = pxmr.generators[0].numberOfRows;
   if (repRank == 0)
     repRank = 1;
   for (int i = 0; i < this->N; i ++)
     if (i < positive.n)
-      pxmr.generatorS[cur+ i].makeIdentityMatrix(repRank);
+      pxmr.generators[cur+ i].makeIdentityMatrix(repRank);
     else {
-      pxmr.generatorS[cur+ i].makeIdentityMatrix(repRank);
-      pxmr.generatorS[cur+ i] *= - 1;
+      pxmr.generators[cur+ i].makeIdentityMatrix(repRank);
+      pxmr.generators[cur+ i] *= - 1;
     }
   if (!pxmr.verifyRepresentation())
     global.fatal << "lol" << global.fatal;
   auto outreboxme = PxM.induceRepresentation(pxmr);
   out.ownerGroup = this;
-  out.generatorS = outreboxme.generatorS;
+  out.generators = outreboxme.generators;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
@@ -1258,21 +1258,21 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   }
   auto PxM = this->theGroup->parabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->getEmptyRationalRepresentation();
-  pxmr.generatorS.setExpectedSize(PxM.theSubgroup->generators.size);
-  pxmr.generatorS.addListOnTop(pozm);
-  pxmr.generatorS.addListOnTop(negm);
-  int cur = pxmr.generatorS.size;
-  pxmr.generatorS.setSize(PxM.theSubgroup->generators.size);
-  int repRank = pxmr.generatorS[0].numberOfRows;
+  pxmr.generators.setExpectedSize(PxM.theSubgroup->generators.size);
+  pxmr.generators.addListOnTop(pozm);
+  pxmr.generators.addListOnTop(negm);
+  int cur = pxmr.generators.size;
+  pxmr.generators.setSize(PxM.theSubgroup->generators.size);
+  int repRank = pxmr.generators[0].numberOfRows;
   if (repRank == 0) {
     repRank = 1;
   }
   for (int i = 0; i < this->N; i ++) {
     if (i < positive.n) {
-      pxmr.generatorS[cur + i].makeIdentityMatrix(repRank);
+      pxmr.generators[cur + i].makeIdentityMatrix(repRank);
     } else {
-      pxmr.generatorS[cur + i].makeIdentityMatrix(repRank);
-      pxmr.generatorS[cur + i] *= - 1;
+      pxmr.generators[cur + i].makeIdentityMatrix(repRank);
+      pxmr.generators[cur + i] *= - 1;
     }
   }
   if (!pxmr.verifyRepresentation()) {
@@ -1324,10 +1324,10 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   for (int i = 0; i < PxM.generators.size; i ++)
     global.Comments << i << " " << PxM.generators[i] << '\n';
   //PxM.cosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
-  PxM.GetWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
+  PxM.getWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
   GroupRepresentation<Subgroup<PermutationGroup, PermutationR2>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
-  pxmr.generatorS.setSize(PxM.generators.size);
+  pxmr.generators.setSize(PxM.generators.size);
   Matrix<Rational> hid, kid;
   if (pozm.size == 0)
     hid.makeIdentityMatrix(1);
@@ -1339,10 +1339,10 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
     kid.makeIdentity(negm[0]);
   int i = 0;
   for (int pi = 0; pi < pozm.size; i ++, pi ++)
-    pxmr.generatorS[i].assignTensorProduct(pozm[pi], kid);
+    pxmr.generators[i].assignTensorProduct(pozm[pi], kid);
   for (int ni = 0; ni < negm.size; i ++, ni ++) {
-    pxmr.generatorS[i].assignTensorProduct(hid, negm[ni]);
-    pxmr.generatorS[i] *= - 1;
+    pxmr.generators[i].assignTensorProduct(hid, negm[ni]);
+    pxmr.generators[i] *= - 1;
   }
   GroupRepresentation<PermutationGroup, Rational> subsnr;
   PxM.induceRepresentation(pxmr,subsnr);

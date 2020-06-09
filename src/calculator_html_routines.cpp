@@ -6,19 +6,19 @@
 #include "calculator_html_functions.h"
 
 bool CalculatorHtmlFunctions::innerUserInputBox(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapList<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.comments)) {
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(calculator, input, theArguments, &calculator.comments)) {
     return false;
   }
   if (!theArguments.contains("name")) {
-    return theCommands << "User input name not specified in: " << input.toString();
+    return calculator << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
-    return output.assignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName), theCommands);
+  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
+    return output.assignValue(calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName), calculator);
   }
   InputBox newBox;
   newBox.name = boxName;
@@ -36,11 +36,11 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
       newBox.step = theArguments.theValues[i];
     }
   }
-  return output.assignValue(newBox, theCommands);
+  return output.assignValue(newBox, calculator);
 }
 
 bool CalculatorHtmlFunctions::innerEvaluateSymbols(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
   if (input.size() != 2) {
@@ -52,18 +52,18 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
     return false;
   }
   List<SyntacticElement> theElts;
-  theCommands.parseFillDictionary(theString, theElts);
+  calculator.parseFillDictionary(theString, theElts);
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger = false;
   for (int i = 0; i < theElts.size; i ++) {
     SyntacticElement& currentElt = theElts[i];
-    if (currentElt.controlIndex == theCommands.conVariable()) {
-      theCommands.evaluateExpression(theCommands, currentElt.theData, evaluatedE);
+    if (currentElt.controlIndex == calculator.conVariable()) {
+      calculator.evaluateExpression(calculator, currentElt.theData, evaluatedE);
       out << evaluatedE.toString();
       continue;
     }
-    if (currentElt.controlIndex == theCommands.conInteger()) {
+    if (currentElt.controlIndex == calculator.conInteger()) {
       if (!previousWasInteger) {
         out << "{";
       }
@@ -75,41 +75,41 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
       out << "}";
     }
     previousWasInteger = false;
-    out << theCommands.controlSequences[currentElt.controlIndex];
+    out << calculator.controlSequences[currentElt.controlIndex];
   }
   if (previousWasInteger) {
     out << "}";
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool CalculatorHtmlFunctions::innerSetInputBox(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(
-    theCommands, input, theArguments, &theCommands.comments
+    calculator, input, theArguments, &calculator.comments
   )) {
     return false;
   }
   if (!theArguments.contains("name")) {
-    return theCommands << "User input name not specified in: " << input.toString();
+    return calculator << "User input name not specified in: " << input.toString();
   }
   if (!theArguments.contains("value")) {
-    return theCommands << "Input box value not specified in: " << input.toString();
+    return calculator << "Input box value not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
-    return theCommands << "Input box with name: " << boxName << " already has value.";
+  if (calculator.theObjectContainer.theUserInputTextBoxesWithValues.contains(boxName)) {
+    return calculator << "Input box with name: " << boxName << " already has value.";
   }
   InputBox& theBox =
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName);
+  calculator.theObjectContainer.theUserInputTextBoxesWithValues.getValueCreate(boxName);
   theBox.name = boxName;
   theBox.value = theArguments.getValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBox) {
@@ -117,9 +117,9 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& theBo
   if (theBox.owner == nullptr) {
     return "non-initialized-expression";
   }
-  Calculator& theCommands = *theBox.owner;
+  Calculator& calculator = *theBox.owner;
   MapList<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments)) {
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(calculator, theBox, theArguments)) {
     return "corrupt-box";
   }
   if (!theArguments.contains("name")) {

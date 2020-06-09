@@ -112,8 +112,8 @@ public:
 
   List<DynkinType> parabolicallyAllowedHeirs;
 
-  int NumNilradicalsAllowed;
-  int NumConeConditionFailures;
+  int numberOfNilradicalsAllowed;
+  int numberOfConeConditionFailures;
   int NumRelationsWithStronglyPerpendicularDecomposition;
   //int NumRelationsgreaterLengthThan2;
   int NumGmodKtableRowsAllowedLatex;
@@ -149,25 +149,25 @@ public:
   FinitelyGeneratedMatrixMonoid<Rational> outerSAautosExtendingToAmbientAutosGenerators;
   FinitelyGeneratedMatrixMonoid<Rational> outerSAautos;
   Vectors<Rational> genK;
-  Vectors<Rational> SimpleBasisK;
+  Vectors<Rational> simpleRootsReductiveSubalgebra;
   Vectors<Rational> SimpleBasisKScaledToActByTwo;
   Vectors<Rational> SimpleBasisKinOrderOfGeneration;
-  Vectors<Rational> PositiveRootsK;
-  HashedList<Vector<Rational> > AllRootsK;
+  Vectors<Rational> positiveRootsReductiveSubalgebra;
+  HashedList<Vector<Rational> > allRootsSubalgebra;
   Selection NilradicalKmods;
   Selection CentralizerKmods;
   Vectors<Rational> HighestRootsK;
-  Vectors<Rational> TestedRootsAlpha;
+  Vectors<Rational> testedRootsAlpha;
   Vectors<Rational> CentralizerRoots;
   Vectors<Rational> SimpleBasisCentralizerRoots;
   Vectors<Rational> SimpleBasisKEpsCoords;
   Vectors<Rational> SimpleBasisgEpsCoords;
   List<Vectors<Rational> > kModulesKepsCoords;
   List<Vectors<Rational> > kModulesgEpsCoords;
-  List<Vectors<Rational> > PosRootsKConnectedComponents;
+  List<Vectors<Rational> > positiveRootsKConnectedComponents;
   List<Selection> theKEnumerations;
   List<int> theKComponentRanks;
-  RootSubalgebras* ownEr;
+  RootSubalgebras* owner;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
   Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
   Matrix<Rational> scalarProdInvertedMatrixOrdered;
@@ -236,11 +236,11 @@ public:
     Vectors<Rational>* additionalRange
   );
   static bool attemptExtensionToIsomorphism(
-    Vectors<Rational>& Domain,
-    Vectors<Rational>& Range,
+    Vectors<Rational>& domain,
+    Vectors<Rational>& range,
     SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms* outputAutomorphisms,
     RootSubalgebras& inputOwner,
-    bool* DomainAndRangeGenerateNonIsoSAs
+    bool* domainAndRangeGenerateNonIsoSAs
   );
   bool checkForSmallRelations(ConeRelation& theRel, Vectors<Rational>& nilradicalRoots);
   int numberOfRootsInNilradical();
@@ -341,11 +341,11 @@ public:
 class RootSubalgebras {
 public:
   List<RootSubalgebra> theSubalgebras;
-  ConeRelations theBadRelations;
-  ConeRelations theGoodRelations;
+  ConeRelations badRelations;
+  ConeRelations goodRelations;
   ConeRelations theMinRels;
   List<List<int> > ActionsNormalizerCentralizerNilradical;
-  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> CentralizerOuterIsomorphisms;
+  ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> centralizerOuterIsomorphisms;
   ListReferences<SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
@@ -362,7 +362,7 @@ public:
   List<RootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
   int RecursionDepthNilradicalsGeneration;
   int NumSubalgebrasProcessed;
-  int NumConeConditionFailures;
+  int numberOfConeConditionFailures;
   int NumSubalgebrasCounted;
   int NumLinesPerTableLatex;
   int NumColsPerTableLatex;

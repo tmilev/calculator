@@ -26,7 +26,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     for (int i = 0; i < this->getRank(); i ++) {
       genWeight.makeEi(this->getRank(), i);
       if (theWeight.isPositive()) {
-        genWeight.minus();
+        genWeight.negate();
       }
       newWeight = theWeight + genWeight;
       if (newWeight.isEqualToZero() || this->theWeyl.isARoot(newWeight)) {
@@ -34,7 +34,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
         int theIndex = this->getGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.isEqualToZero()) {
-          int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
+          int currentIndex = this->theWeyl.rootSystem.getIndex(theWeight);
           theIndex = this->getRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal << "This is a programming error. "
@@ -48,7 +48,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
 }
 
-bool PartFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
+bool PartialFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong) {
   if (theArguments.size < 1) {
     return false;
   }
@@ -58,12 +58,12 @@ bool PartFractions::argumentsAllowed(Vectors<Rational>& theArguments, std::strin
     outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
   }
-  for (int i = 0; i < tempCone.Vertices.size; i ++) {
-    if (tempCone.isInCone(tempCone.Vertices[i]) && tempCone.isInCone(- tempCone.Vertices[i])) {
+  for (int i = 0; i < tempCone.vertices.size; i ++) {
+    if (tempCone.isInCone(tempCone.vertices[i]) && tempCone.isInCone(- tempCone.vertices[i])) {
       std::stringstream out;
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
-      << tempCone.Vertices[i].toString() << " as well as its opposite vector "
-      << (- tempCone.Vertices[i]).toString()
+      << tempCone.vertices[i].toString() << " as well as its opposite vector "
+      << (- tempCone.vertices[i]).toString()
       << "), hence the vector partition function is " << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();
       return false;
@@ -114,7 +114,7 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   WeylGroupData& theWeyl = *this->owner;
   theWeyl.computeRho(true);
-  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = theWeyl.rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
@@ -189,7 +189,7 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   Rational theMin = 0;
   int minIndex = - 1;
   WeylGroupData& theWeyl = *this->owner;
-  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Vector<Rational>& alpha = theWeyl.rootsOfBorel[indexAlpha];
   Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
   for (int i = 0; i < this->Waypoints.size; i ++) {
@@ -260,9 +260,9 @@ void LittelmannPath::simplify() {
     Vector<Rational>& right = this->Waypoints[rightIndex];
     d1 = left - middle;
     d2 = right - middle;
-    d11 = d1.ScalarEuclidean(d1);
-    d12 = d1.ScalarEuclidean(d2);
-    d22 = d2.ScalarEuclidean(d2);
+    d11 = d1.scalarEuclidean(d1);
+    d12 = d1.scalarEuclidean(d2);
+    d22 = d2.scalarEuclidean(d2);
     bool isBad = ((d11 * d22 - d12 * d12).isEqualToZero() && (d12 <= 0));
     if (!isBad) {
       leftIndex ++;
@@ -448,8 +448,8 @@ bool MonomialUniversalEnvelopingOrdered<Coefficient>::modOutFDRelationsExperimen
     if (!this->powers[k].isSmallInteger(thePower)) {
       return false;
     }
-    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
-    const Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
+    int rootIndex = this->owner->theOwner->getRootIndexFromGenerator(currentElt[0].generatorIndex);
+    const Vector<Rational>& currentRoot = theWeyl.rootSystem[rootIndex];
     for (int j = 0; j < thePower; j ++) {
       currentWeight += currentRoot;
       testWeight = currentWeight;
@@ -771,7 +771,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   int numB3NegGenerators = this->theHmm.theRange().getNumberOfPositiveRoots();
   int numG2NegGenerators = this->theHmm.theDomain().getNumberOfPositiveRoots();
   for (int i = 0; i < numB3NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
+    const Vector<Rational>& currentWeight = theLargeWeyl.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selInducing.cardinalitySelection; k ++) {
       if (!currentWeight[this->selInducing.elements[k]].isEqualToZero()) {
@@ -787,7 +787,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     }
   }
   for (int i = 0; i < numG2NegGenerators; i ++) {
-    const Vector<Rational>& currentWeight = theSmallWeyl.RootSystem[i];
+    const Vector<Rational>& currentWeight = theSmallWeyl.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->selSmallParSel.cardinalitySelection; k ++) {
       if (!currentWeight[this->selSmallParSel.elements[k]].isEqualToZero()) {

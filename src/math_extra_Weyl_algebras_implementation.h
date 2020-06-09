@@ -297,26 +297,30 @@ bool ElementWeylAlgebra<Coefficient>::substitution(
   const PolynomialSubstitution<Rational>& substitutionDifferentialPart
 ) {
   MacroRegisterFunctionWithName("ElementWeylAlgebra::substitution");
-  Polynomial<Rational> DOpart, polyPart;
+  Polynomial<Rational> differentialOperatorPart, polyPart;
   MonomialWeylAlgebra theMon;
   ElementWeylAlgebra output;
   output.makeZero();
   Coefficient theNewCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!currentMon.polynomialPart.substitution(substitutionPolynomialPart, polyPart)) {
+    if (!currentMon.polynomialPart.substitution(
+      substitutionPolynomialPart, polyPart, Rational::one()
+    )) {
       return false;
     }
-    if (!currentMon.differentialPart.substitution(substitutionDifferentialPart, DOpart)) {
+    if (!currentMon.differentialPart.substitution(
+      substitutionDifferentialPart, differentialOperatorPart, Rational::one()
+    )) {
       return false;
     }
     for (int j = 0; j < polyPart.size(); j ++) {
-      for (int k = 0; k < DOpart.size(); k ++) {
+      for (int k = 0; k < differentialOperatorPart.size(); k ++) {
         theMon.polynomialPart = polyPart[j];
-        theMon.differentialPart = DOpart[k];
+        theMon.differentialPart = differentialOperatorPart[k];
         theNewCoeff = this->coefficients[i];
         theNewCoeff *= polyPart.coefficients[j];
-        theNewCoeff *= DOpart.coefficients[k];
+        theNewCoeff *= differentialOperatorPart.coefficients[k];
         output.addMonomial(theMon, theNewCoeff);
       }
     }

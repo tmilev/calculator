@@ -9,7 +9,7 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
   std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot, tempRoot2;
-  int numRoots = this->theWeyl.RootSystem.size;
+  int numRoots = this->theWeyl.rootSystem.size;
   int theDimension = this->theWeyl.cartanSymmetric.numberOfRows;
   ElementSemisimpleLieAlgebra<Rational> tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
@@ -247,7 +247,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < fundamentalWeights.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].toString()
     << "</td><td> =</td><td style =\"white-space: nowrap\"> "
-    << HtmlRoutines::getMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+    << HtmlRoutines::getMathSpanPure(fundamentalWeightsEpsForm[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -263,7 +263,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()
     << " </td><td>=</td> <td style =\"white-space: nowrap\">"
-    << HtmlRoutines::getMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+    << HtmlRoutines::getMathSpanPure(simplebasisEpsCoords[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -392,12 +392,12 @@ std::string SemisimpleLieAlgebra::toStringDisplayFileNameWithPathStructureConsta
 void SemisimpleLieAlgebra::computeChevalleyConstants() {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::computeChevalleyConstants");
   this->theWeyl.computeRho(true);
-  this->ChevalleyConstants.initialize(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
-  this->Computed.initialize(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
+  this->ChevalleyConstants.initialize(this->theWeyl.rootSystem.size, this->theWeyl.rootSystem.size);
+  this->Computed.initialize(this->theWeyl.rootSystem.size, this->theWeyl.rootSystem.size);
   this->Computed.makeZero(false);
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic = false;
-  Vectors<Rational>& posRoots = this->theWeyl.RootsOfBorel;
+  Vectors<Rational>& posRoots = this->theWeyl.rootsOfBorel;
   nonExploredRoots.makeFullSelection(posRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;
@@ -408,9 +408,9 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     startTimer = global.getElapsedSeconds();
     theReport.report(out.str());
   }
-  for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
-    for (int j = i; j < this->theWeyl.RootSystem.size; j ++) {
-      tempRoot = this->theWeyl.RootSystem[i] + this->theWeyl.RootSystem[j];
+  for (int i = 0; i < this->theWeyl.rootSystem.size; i ++) {
+    for (int j = i; j < this->theWeyl.rootSystem.size; j ++) {
+      tempRoot = this->theWeyl.rootSystem[i] + this->theWeyl.rootSystem[j];
       if (!tempRoot.isEqualToZero()) {
         if (!this->theWeyl.isARoot(tempRoot)) {
           this->Computed.elements[i][j] = true;
@@ -431,30 +431,30 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   Rational tempRat;
   while (nonExploredRoots.cardinalitySelection > 0) {
     int theBorelIndex = nonExploredRoots.elements[0];
-    Rational theHeight = posRoots[theBorelIndex].SumCoords();
+    Rational theHeight = posRoots[theBorelIndex].sumCoordinates();
     for (int i = 1; i < nonExploredRoots.cardinalitySelection; i ++) {
-      tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
+      tempRat = posRoots[nonExploredRoots.elements[i]].sumCoordinates();
       if (theHeight.isGreaterThan(tempRat)) {
         theHeight = tempRat;
         theBorelIndex = nonExploredRoots.elements[i];
       }
     }
     Vector<Rational>& theRoot = posRoots[theBorelIndex];
-    int theIndex = this->theWeyl.RootSystem.getIndex(theRoot);
+    int theIndex = this->theWeyl.rootSystem.getIndex(theRoot);
     Vector<Rational> smallRoot2;
     int FirstIndexFirstPosChoice = - 1;
     int SecondIndexFirstPosChoice = - 1;
     Rational CurrentHeight;
-    for (int i = 0; i < this->theWeyl.RootsOfBorel.size; i ++) {
-      Vector<Rational>& smallRoot1 = this->theWeyl.RootsOfBorel[i];
-      CurrentHeight = smallRoot1.SumCoords();
-      int FirstPosIndex = this->theWeyl.RootSystem.getIndex(smallRoot1);
-      int FirstNegIndex = this->theWeyl.RootSystem.getIndex(- smallRoot1);
+    for (int i = 0; i < this->theWeyl.rootsOfBorel.size; i ++) {
+      Vector<Rational>& smallRoot1 = this->theWeyl.rootsOfBorel[i];
+      CurrentHeight = smallRoot1.sumCoordinates();
+      int FirstPosIndex = this->theWeyl.rootSystem.getIndex(smallRoot1);
+      int FirstNegIndex = this->theWeyl.rootSystem.getIndex(- smallRoot1);
       if (theHeight.isGreaterThan(CurrentHeight)) {
         smallRoot2 = theRoot - smallRoot1;
-        int SecondPosIndex = this->theWeyl.RootSystem.getIndex(smallRoot2);
+        int SecondPosIndex = this->theWeyl.rootSystem.getIndex(smallRoot2);
         if (FirstPosIndex<SecondPosIndex) {
-          int SecondNegIndex = this->theWeyl.RootSystem.getIndex(- smallRoot2);
+          int SecondNegIndex = this->theWeyl.rootSystem.getIndex(- smallRoot2);
           if (FirstIndexFirstPosChoice == - 1) {
             FirstIndexFirstPosChoice = FirstPosIndex;
             SecondIndexFirstPosChoice = SecondPosIndex;
@@ -495,7 +495,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
 }
 
 void SemisimpleLieAlgebra::computeLieBracketTable() {
-  int numPosRoots = this->theWeyl.RootsOfBorel.size;
+  int numPosRoots = this->theWeyl.rootsOfBorel.size;
   int theRank = this->theWeyl.cartanSymmetric.numberOfRows;
   int numRoots = numPosRoots * 2;
   int numGenerators = numRoots + theRank;
@@ -560,8 +560,8 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
 }
 
 void SemisimpleLieAlgebra::exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ) {
-  const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
-  const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
+  const Vector<Rational>& rootI = this->theWeyl.rootSystem[indexI];
+  const Vector<Rational>& rootJ = this->theWeyl.rootSystem[indexJ];
   if ((rootI + rootJ).isEqualToZero())
     global.fatal << "Sum or roots not allowed to be zero here. " << global.fatal;
   //int indexMinusI = this->theWeyl.RootSystem.getIndex(-rootI);
@@ -570,7 +570,7 @@ void SemisimpleLieAlgebra::exploitSymmetryAndCyclicityChevalleyConstants(int ind
   this->exploitSymmetryChevalleyConstants(indexI, indexJ);
   //this->ComputeDebugString();
   //int indexRootIPlusRootJ = this->theWeyl.RootSystem.getIndex(rootI + rootJ);
-  int indexMinusIMinusJ = this->theWeyl.RootSystem.getIndex(- rootI - rootJ);
+  int indexMinusIMinusJ = this->theWeyl.rootSystem.getIndex(- rootI - rootJ);
   this->exploitTheCyclicTrick(indexI, indexJ, indexMinusIMinusJ);
   //this->ComputeDebugString();
   //this->exploitTheCyclicTrick(indexMinusI, indexMinusJ, indexRootIPlusRootJ);
@@ -578,13 +578,13 @@ void SemisimpleLieAlgebra::exploitSymmetryAndCyclicityChevalleyConstants(int ind
 }
 
 void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(int indexI, int indexJ) {
-  const Vector<Rational>& rootI = this->theWeyl.RootSystem[indexI];
-  const Vector<Rational>& rootJ = this->theWeyl.RootSystem[indexJ];
+  const Vector<Rational>& rootI = this->theWeyl.rootSystem[indexI];
+  const Vector<Rational>& rootJ = this->theWeyl.rootSystem[indexJ];
   if (!this->Computed.elements[indexI][indexJ]) {
     global.fatal << "Structure constants computed in a wrong order. " << global.fatal;
   }
-  int indexMinusI = this->theWeyl.RootSystem.getIndex(- rootI);
-  int indexMinusJ = this->theWeyl.RootSystem.getIndex(- rootJ);
+  int indexMinusI = this->theWeyl.rootSystem.getIndex(- rootI);
+  int indexMinusJ = this->theWeyl.rootSystem.getIndex(- rootJ);
   this->ChevalleyConstants.elements[indexJ][indexI] = (this->ChevalleyConstants.elements[indexI][indexJ] * (- 1));
   this->Computed.elements[indexJ][indexI] = true;
   if ((rootI + rootJ).isEqualToZero()) {
@@ -592,7 +592,7 @@ void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(int indexI, int ind
   }
   int thePower;
   this->getMaxQForWhichBetaMinusQAlphaisARoot(
-    this->theWeyl.RootSystem[indexMinusI], this->theWeyl.RootSystem[indexMinusJ], thePower
+    this->theWeyl.rootSystem[indexMinusI], this->theWeyl.rootSystem[indexMinusJ], thePower
   );
   int i = 1 + thePower;
   this->ChevalleyConstants.elements[indexMinusI][indexMinusJ] = - i * i;
@@ -603,9 +603,9 @@ void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(int indexI, int ind
 }
 
 void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
-  const Vector<Rational>& rootI = this->theWeyl.RootSystem[i];
-  const Vector<Rational>& rootK = this->theWeyl.RootSystem[k];
-  const Vector<Rational>& rootJ = this->theWeyl.RootSystem[j];
+  const Vector<Rational>& rootI = this->theWeyl.rootSystem[i];
+  const Vector<Rational>& rootK = this->theWeyl.rootSystem[k];
+  const Vector<Rational>& rootJ = this->theWeyl.rootSystem[j];
   //the following three checks can be commented out to increase speed. They have never failed so far.
   if (!(rootI + rootK + rootJ).isEqualToZero()) {
     global.fatal << "Three roots do not sum to zero as required. " << global.fatal;
@@ -646,11 +646,11 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
   int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta
 ) {
  //using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
-  const Vector<Rational>& gamma = this->theWeyl.RootSystem[indexGamma];
-  const Vector<Rational>& delta = this->theWeyl.RootSystem[indexDelta];
-  const Vector<Rational>& minusEpsilon = this->theWeyl.RootSystem[indexMinusEpsilon];
-  const Vector<Rational>& eta = this->theWeyl.RootSystem[indexEta];
-  const Vector<Rational>& minusZeta = this->theWeyl.RootSystem[indexMinusZeta];
+  const Vector<Rational>& gamma = this->theWeyl.rootSystem[indexGamma];
+  const Vector<Rational>& delta = this->theWeyl.rootSystem[indexDelta];
+  const Vector<Rational>& minusEpsilon = this->theWeyl.rootSystem[indexMinusEpsilon];
+  const Vector<Rational>& eta = this->theWeyl.rootSystem[indexEta];
+  const Vector<Rational>& minusZeta = this->theWeyl.rootSystem[indexMinusZeta];
   if (eta != gamma + delta) {
     global.fatal << "Eta must equal gamma plus delta. " << global.fatal;
   }
@@ -667,8 +667,8 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
   if (this->ChevalleyConstants.elements[indexGamma][indexDelta].isEqualToZero()) {
     global.fatal << "Unexpected zero structure constants" << global.fatal;
   }
-  int indexDeltaMinusEpsilon = this->theWeyl.RootSystem.getIndex(delta + minusEpsilon);
-  int indexGammaMinusEpsilon = this->theWeyl.RootSystem.getIndex(gamma + minusEpsilon);
+  int indexDeltaMinusEpsilon = this->theWeyl.rootSystem.getIndex(delta + minusEpsilon);
+  int indexGammaMinusEpsilon = this->theWeyl.rootSystem.getIndex(gamma + minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon != - 1) {
     if (
@@ -743,8 +743,8 @@ bool SemisimpleLieAlgebra::testForConsistency() {
 }
 
 Rational SemisimpleLieAlgebra::getConstant(const Vector<Rational>& root1, const Vector<Rational>& root2) {
-  int index1 = this->theWeyl.RootSystem.getIndex(root1);
-  int index2 = this->theWeyl.RootSystem.getIndex(root2);
+  int index1 = this->theWeyl.rootSystem.getIndex(root1);
+  int index2 = this->theWeyl.rootSystem.getIndex(root2);
   if (index1 == - 1 || index2 == - 1) {
     return 0;
   }
@@ -758,7 +758,7 @@ bool SemisimpleLieAlgebra::getConstantOrHElement(
     outputRat = this->getConstant(root1, root2);
     return true;
   }
-  if (this->theWeyl.RootSystem.getIndex(root1) == - 1 || this->theWeyl.RootSystem.getIndex(root2) == - 1) {
+  if (this->theWeyl.rootSystem.getIndex(root1) == - 1 || this->theWeyl.rootSystem.getIndex(root2) == - 1) {
     outputRat.makeZero();
     return true;
   }

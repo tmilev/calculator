@@ -146,17 +146,19 @@ std::string Calculator::toStringRuleStatusUser() {
 
 void Calculator::logTime() {
   int64_t currentMilliseconds = global.getElapsedMilliseconds();
-  *this << "<br>" << currentMilliseconds - this->millisecondsLastLog
-  << " ms since last log; " << currentMilliseconds - this->startTimeEvaluationMilliseconds
+  *this << "<br>" << currentMilliseconds - this->statistics.millisecondsLastLog
+  << " ms since last log; " << currentMilliseconds - this->statistics.startTimeEvaluationMilliseconds
   << " ms since start. ";
-  this->millisecondsLastLog = currentMilliseconds;
+  this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
 void Calculator::logFunctionWithTime(Function& inputF) {
+  this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
     return;
   }
-  *this << "<hr>Built-in substitution: " << inputF.toStringSummary();
+  *this << "<hr>Built-in substitution " << this->statistics.totalSubstitutions
+  << ": " << inputF.toStringSummary();
   this->logTime();
   *this << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->ruleStack.size();
@@ -191,7 +193,7 @@ const List<Function>* Calculator::getOperationHandlers(int theOp) {
 }
 
 bool Calculator::outerStandardCompositeHandler(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -204,7 +206,7 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* theHandlers = theCommands.getOperationCompositeHandlers(functionNameNode[0].theData);
+  const List<Function>* theHandlers = calculator.getOperationCompositeHandlers(functionNameNode[0].theData);
   if (theHandlers == nullptr) {
     return false;
   }
@@ -212,9 +214,9 @@ bool Calculator::outerStandardCompositeHandler(
     Function& currentHandler = (*theHandlers)[i];
     if (currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
       if (currentHandler.apply(
-        theCommands, input, output, opIndexParentIfAvailable, outputHandler
+        calculator, input, output, opIndexParentIfAvailable, outputHandler
       )) {
-        theCommands.logFunctionWithTime(currentHandler);
+        calculator.logFunctionWithTime(currentHandler);
         return true;
       }
     }
@@ -230,7 +232,7 @@ bool Function::checkConsistency() const {
 }
 
 bool Function::apply(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -243,10 +245,10 @@ bool Function::apply(
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
   if (!this->options.flagIsInner) {
-    if (this->theFunction(theCommands, input, output)) {
+    if (this->theFunction(calculator, input, output)) {
       if (output != input) {
         output.checkConsistency();
-        theCommands.logFunctionWithTime(*this);
+        calculator.logFunctionWithTime(*this);
         if (outputHandler != nullptr) {
           *outputHandler = this;
         }
@@ -256,9 +258,9 @@ bool Function::apply(
     return false;
   }
   if (this->inputFitsMyInnerType(input)) {
-    if (this->theFunction(theCommands, input, output)) {
+    if (this->theFunction(calculator, input, output)) {
       output.checkConsistency();
-      theCommands.logFunctionWithTime(*this);
+      calculator.logFunctionWithTime(*this);
       if (outputHandler != nullptr) {
         *outputHandler = this;
       }
@@ -269,7 +271,7 @@ bool Function::apply(
 }
 
 bool Calculator::outerStandardHandler(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
@@ -280,14 +282,14 @@ bool Calculator::outerStandardHandler(
   if (!functionNameNode.isOperation(operationIndex)) {
     return false;
   }
-  if (theCommands.operations.theValues[operationIndex].isZeroPointer()) {
+  if (calculator.operations.theValues[operationIndex].isZeroPointer()) {
     return false;
   }
-  const List<Function>& handlers = theCommands.operations.theValues[operationIndex].getElement().handlers;
+  const List<Function>& handlers = calculator.operations.theValues[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.apply(
-      theCommands, input, output, opIndexParentIfAvailable, outputHandler
+      calculator, input, output, opIndexParentIfAvailable, outputHandler
     )) {
       return true;
     }
@@ -296,25 +298,25 @@ bool Calculator::outerStandardHandler(
 }
 
 bool Calculator::outerStandardFunction(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  theCommands.checkInputNotSameAsOutput(input, output);
+  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
     return false;
   }
-  if (theCommands.outerStandardCompositeHandler(
-    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  if (calculator.outerStandardCompositeHandler(
+    calculator, input, output, opIndexParentIfAvailable, outputHandler
   )) {
     return true;
   }
-  if (theCommands.outerStandardHandler(
-    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  if (calculator.outerStandardHandler(
+    calculator, input, output, opIndexParentIfAvailable, outputHandler
   )) {
     return true;
   }
@@ -328,14 +330,15 @@ bool Calculator::expressionMatchesPattern(
   std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Calculator::expressionMatchesPattern");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.owner == this && input.owner == this)) {
     global.fatal << "This is a programming error. "
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.toString() << " and the input is "
     << input.toString() << ". The error is certainly in the preceding code; here "
-    << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
+    << "is a stack trace, however beware that the error "
+    << "might be in code preceding the stack loading. "
     << global.fatal;
   }
   if (commentsGeneral != nullptr) {
@@ -343,15 +346,13 @@ bool Calculator::expressionMatchesPattern(
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.toStringHtml();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (this->RecursionDeptH>this->maximumRecursionDepth) {
+  if (this->recursionDepth>this->maximumRecursionDepth) {
     std::stringstream out;
     out << "Max recursion depth of " << this->maximumRecursionDepth << " exceeded whlie trying to match expression pattern "
     << thePattern.toString() << " onto expression " << input.toString();
     this->evaluationErrors.addOnTop(out.str());
     return false;
   }
-//  if (this->opDefine() == input.theOperation)
-//    return false;
   int opVarB = this->opBind();
   if (thePattern.isListStartingWithAtom(opVarB)) {
     if (!matchedExpressions.contains(thePattern)) {
@@ -520,8 +521,8 @@ bool Calculator::accountRule(
   const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer
 ) {
   MacroRegisterFunctionWithName("Calculator::accountRule");
-  RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH > this->maximumRecursionDepth) {
+  RecursionDepthCounter theRecursionCounter(&this->recursionDepth);
+  if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }
   if (ruleE.isCalculatorStatusChanger()) {
@@ -545,11 +546,11 @@ bool Calculator::accountRule(
 }
 
 bool Calculator::evaluateExpression(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
   bool notUsed = false;
-  return theCommands.evaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
+  return calculator.evaluateExpression(calculator, input, output, notUsed, - 1, nullptr);
 }
 
 bool Calculator::isTimedOut() {
@@ -579,7 +580,7 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->indexInCache = - 1;
   this->reductionOccurred = false;
   this->history = nullptr;
-  this->outpuT = nullptr;
+  this->output = nullptr;
 }
 
 void Calculator::EvaluateLoop::accountHistoryChildTransformation(
@@ -619,7 +620,7 @@ void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::stri
       global.fatal << "Unexpected history expression: "
       << lastHistory.toString() << global.fatal;
     }
-    if (lastHistory[1] == *(this->outpuT)) {
+    if (lastHistory[1] == *(this->output)) {
       // Expression hasn't changed since last assignment.
       return;
     }
@@ -639,7 +640,7 @@ void Calculator::EvaluateLoop::accountHistory(Function* handler, const std::stri
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySet(),
-    *(this->outpuT),
+    *(this->output),
     extraInformation
   );
   incomingHistory.checkConsistency();
@@ -650,10 +651,10 @@ bool Calculator::EvaluateLoop::setOutput(
   const Expression& input, Function* handler, const std::string& info
 ) {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::setOutput");
-  if (this->outpuT == nullptr) {
+  if (this->output == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
-  *(this->outpuT) = input;
+  *(this->output) = input;
   this->accountHistory(handler, info);
   return true;
 }
@@ -662,7 +663,7 @@ void Calculator::EvaluateLoop::initializeOneRun() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::initializeOneRun");
   this->numberOfTransformations ++;
   std::string atomValue;
-  if (this->outpuT->isOperation(&atomValue)) {
+  if (this->output->isOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.contains(atomValue)) {
       this->flagIsNonCacheable = true;
     }
@@ -684,7 +685,7 @@ void Calculator::EvaluateLoop::initializeOneRun() {
     this->indexInCache = - 1;
   }
   if (this->indexInCache != - 1) {
-    this->owner->imagesCachedExpressions[indexInCache] = *(this->outpuT);
+    this->owner->imagesCachedExpressions[indexInCache] = *(this->output);
   }
 }
 
@@ -695,17 +696,17 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
   }
   if (
     this->numberOfTransformations <=
-    this->owner->MaxAlgTransformationsPerExpression
+    this->owner->maximumAlgebraicTransformationsPerExpression
   ) {
     return false;
   }
   if (!this->owner->flagMaxTransformationsErrorEncountered) {
     std::stringstream out;
     out << " While simplifying "
-    << this->outpuT->toString(&this->owner->formatVisibleStrings)
+    << this->output->toString(&this->owner->formatVisibleStrings)
     << "<br>maximum number of algebraic transformations of "
-    << this->owner->MaxAlgTransformationsPerExpression << " exceeded.";
-    this->outpuT->makeError(out.str(), *this->owner);
+    << this->owner->maximumAlgebraicTransformationsPerExpression << " exceeded.";
+    this->output->makeError(out.str(), *this->owner);
     this->reductionOccurred = true;
     this->owner->flagAbortComputationASAP = true;
     this->owner->flagMaxTransformationsErrorEncountered = true;
@@ -738,13 +739,13 @@ bool Calculator::EvaluateLoop::evaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::evaluateChildren");
-  if (this->outpuT->isFrozen()) {
+  if (this->output->isFrozen()) {
     return true;
   }
   int indexOp = - 1;
-  if (this->outpuT->size() > 0) {
-    if ((*this->outpuT)[0].isAtom()) {
-      indexOp = (*this->outpuT)[0].theData;
+  if (this->output->size() > 0) {
+    if ((*this->output)[0].isAtom()) {
+      indexOp = (*this->output)[0].theData;
     }
   }
   Expression childEvaluation, historyContainer;
@@ -752,23 +753,23 @@ bool Calculator::EvaluateLoop::evaluateChildren(
   if (this->history != nullptr) {
     historyChild = &historyContainer;
   }
-  for (int i = 0; i < this->outpuT->size(); i ++) {
+  for (int i = 0; i < this->output->size(); i ++) {
     if (i > 0) {
-      this->reportChildEvaluation(*this->outpuT, i);
+      this->reportChildEvaluation(*this->output, i);
     }
     bool childIsNonCacheable = false;
     if (this->history != nullptr) {
-      this->currentChild = (*this->outpuT)[i];
+      this->currentChild = (*this->output)[i];
     }
     if (this->owner->evaluateExpression(
       *this->owner,
-      (*this->outpuT)[i],
+      (*this->output)[i],
       childEvaluation,
       childIsNonCacheable,
       indexOp,
       historyChild
     )) {
-      this->outpuT->setChild(i, childEvaluation);
+      this->output->setChild(i, childEvaluation);
     }
     this->accountHistoryChildTransformation(childEvaluation, historyContainer, i);
     // If the child is non-cache-able, so is the current one.
@@ -777,17 +778,17 @@ bool Calculator::EvaluateLoop::evaluateChildren(
     if (childIsNonCacheable) {
       this->flagIsNonCacheable = true;
     }
-    if ((*this->outpuT)[i].isError()) {
+    if ((*this->output)[i].isError()) {
       this->owner->flagAbortComputationASAP = true;
       return false;
     }
-    if (this->outpuT->startsWith(this->owner->opEndStatement())) {
-      if (!this->owner->accountRule((*this->outpuT)[i], maintainRuleStack)) {
+    if (this->output->startsWith(this->owner->opEndStatement())) {
+      if (!this->owner->accountRule((*this->output)[i], maintainRuleStack)) {
         std::stringstream out;
         out
-        << "Failed to account rule: " << (*this->outpuT)[i].toString()
+        << "Failed to account rule: " << (*this->output)[i].toString()
         << ". Most likely the cause is too deeply nested recursion. ";
-        this->outpuT->makeError(out.str(), *this->owner);
+        this->output->makeError(out.str(), *this->owner);
         this->owner->flagAbortComputationASAP = true;
       }
     }
@@ -809,11 +810,11 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     const Expression& currentPattern = this->owner->ruleStack[i];
     this->owner->totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluation) {
-      beforepatternMatch = *this->outpuT;
+      beforepatternMatch = *this->output;
     }
     MapList<Expression, Expression> bufferPairs;
     std::stringstream* theLog = this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
-    afterpatternMatch = *(this->outpuT);
+    afterpatternMatch = *(this->output);
     if (this->owner->processOneExpressionOnePatternOneSub(
       currentPattern, afterpatternMatch, bufferPairs, theLog
     )) {
@@ -828,7 +829,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
         << "<br>Rule: " << currentPattern.toString() << "<br>"
         << HtmlRoutines::getMathSpanPure(beforepatternMatch.toString())
-        << " -> " << HtmlRoutines::getMathSpanPure(this->outpuT->toString());
+        << " -> " << HtmlRoutines::getMathSpanPure(this->output->toString());
       }
       return true;
     }
@@ -837,7 +838,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
 }
 
 bool Calculator::EvaluateLoop::checkInitialization() {
-  if (this->owner == nullptr || this->outpuT == nullptr) {
+  if (this->owner == nullptr || this->output == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
   return true;
@@ -849,7 +850,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   Expression result;
   Function* handlerContainer = nullptr;
   if (!this->owner->outerStandardFunction(
-    *(this->owner), *(this->outpuT), result, this->opIndexParent, &handlerContainer
+    *(this->owner), *(this->output), result, this->opIndexParent, &handlerContainer
   )) {
     return false;
   }
@@ -857,7 +858,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   if (this->owner->flagLogEvaluation) {
     *(this->owner) << "<br>Rule context identifier: "
     << this->owner->RuleStackCacheIndex
-    << "<br>" << HtmlRoutines::getMathMouseHover(this->outpuT->toString())
+    << "<br>" << HtmlRoutines::getMathMouseHover(this->output->toString())
     << " -> " << HtmlRoutines::getMathMouseHover(result.toString());
   }
   return this->setOutput(result, handlerContainer, "");
@@ -887,24 +888,24 @@ bool Calculator::EvaluateLoop::reduceOnce() {
 }
 
 void Calculator::EvaluateLoop::lookUpCache() {
-  this->owner->evaluatedExpressionsStack.addOnTop(*(this->outpuT));
+  this->owner->evaluatedExpressionsStack.addOnTop(*(this->output));
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
   theExpressionWithContext.addChildAtomOnTop(this->owner->opSequence());
   theExpressionWithContext.addChildValueOnTop(this->owner->RuleStackCacheIndex);
-  theExpressionWithContext.addChildOnTop(*(this->outpuT));
+  theExpressionWithContext.addChildOnTop(*(this->output));
   this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
   if (this->indexInCache != - 1) {
     if (this->owner->flagLogCache) {
       *this->owner << "<hr>Cache hit with state identifier "
       << this->owner->RuleStackCacheIndex << ": "
-      << this->outpuT->toString() << " -> "
+      << this->output->toString() << " -> "
       << this->owner->imagesCachedExpressions[this->indexInCache].toString();
     }
     std::stringstream comment;
     if (this->history != nullptr) {
       comment << "Previously computed that \\("
-      << this->outpuT->toString() << " = "
+      << this->output->toString() << " = "
       << this->owner->imagesCachedExpressions[this->indexInCache].toString()
       << "\\)";
     }
@@ -913,8 +914,8 @@ void Calculator::EvaluateLoop::lookUpCache() {
   }
   if (
     this->owner->cachedExpressions.size > this->owner->MaxCachedExpressionPerRuleStack ||
-    this->outpuT->isBuiltInType() ||
-    this->outpuT->isBuiltInAtom()
+    this->output->isBuiltInType() ||
+    this->output->isBuiltInAtom()
   ) {
     return;
   }
@@ -925,61 +926,61 @@ void Calculator::EvaluateLoop::lookUpCache() {
 }
 
 bool Calculator::evaluateExpression(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& outpuT,
   bool& outputIsNonCacheable,
   int opIndexParentIfAvailable,
   Expression* outputHistory
 ) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::evaluateExpression");
-  theCommands.stats.expressionEvaluated ++;
-  theCommands.stats.callsSinceReport ++;
-  Calculator::EvaluateLoop state(theCommands);
-  state.outpuT = &outpuT;
+  calculator.statistics.expressionsEvaluated ++;
+  calculator.statistics.callsSinceReport ++;
+  Calculator::EvaluateLoop state(calculator);
+  state.output = &outpuT;
   state.history = outputHistory;
   if (state.history != nullptr) {
-    state.history->reset(theCommands);
+    state.history->reset(calculator);
   }
   state.opIndexParent = opIndexParentIfAvailable;
   if (
-    theCommands.stats.callsSinceReport >=
-    theCommands.stats.maximumCallsBeforeReportGeneration
+    calculator.statistics.callsSinceReport >=
+    calculator.statistics.maximumCallsBeforeReportGeneration
   ) {
-    theCommands.stats.callsSinceReport = 0;
+    calculator.statistics.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
     state.theReport.report(reportStream.str());
   }
-  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
-    theCommands << "<br>";
-    for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
-      theCommands << "&nbsp&nbsp&nbsp&nbsp";
+  if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
+    calculator << "<br>";
+    for (int i = 0; i < calculator.recursionDepth; i ++) {
+      calculator << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "Evaluating " << input.lispify()
+    calculator << "Evaluating " << input.lispify()
     << " with rule stack cache index "
-    << theCommands.RuleStackCacheIndex; // << this->ruleStack.toString();
+    << calculator.RuleStackCacheIndex; // << this->ruleStack.toString();
   }
-  if (theCommands.recursionDepthExceededHandleRoughly()) {
-    return theCommands << " Evaluating expression: " << input.toString() << " aborted. ";
+  if (calculator.recursionDepthExceededHandleRoughly()) {
+    return calculator << " Evaluating expression: " << input.toString() << " aborted. ";
   }
   state.setOutput(input, nullptr, "");
-  if (state.outpuT->isError()) {
-    theCommands.flagAbortComputationASAP = true;
+  if (state.output->isError()) {
+    calculator.flagAbortComputationASAP = true;
     return true;
   }
-  if (theCommands.evaluatedExpressionsStack.contains(input)) {
+  if (calculator.evaluatedExpressionsStack.contains(input)) {
     std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
     << input.toString()
     << " but I have already seen that expression in the expression stack. ";
-    theCommands.flagAbortComputationASAP = true;
+    calculator.flagAbortComputationASAP = true;
     Expression errorE;
-    errorE.makeError(errorStream.str(), theCommands);
+    errorE.makeError(errorStream.str(), calculator);
     return state.setOutput(errorE, nullptr, "Error");
   }
-  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
+  //bool logEvaluationStepsRequested = calculator.logEvaluationSteps.size > 0;
   state.lookUpCache();
   // reduction phase:
   //////////////////////////////////
@@ -989,13 +990,13 @@ bool Calculator::evaluateExpression(
   while (state.reduceOnce()) {
   }
   outputIsNonCacheable = state.flagIsNonCacheable;
-  theCommands.evaluatedExpressionsStack.removeLastObject();
-  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
-    theCommands << "<br>";
-    for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
-      theCommands << "&nbsp&nbsp&nbsp&nbsp";
+  calculator.evaluatedExpressionsStack.removeLastObject();
+  if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
+    calculator << "<br>";
+    for (int i = 0; i < calculator.recursionDepth; i ++) {
+      calculator << "&nbsp&nbsp&nbsp&nbsp";
     }
-    theCommands << "to get: " << state.outpuT->lispify();
+    calculator << "to get: " << state.output->lispify();
   }
   return true;
 }
@@ -1008,8 +1009,8 @@ Expression* Calculator::patternMatch(
   std::stringstream* theLog
 ) {
   MacroRegisterFunctionWithName("Calculator::patternMatch");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH >= this->maximumRecursionDepth) {
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
+  if (this->recursionDepth >= this->maximumRecursionDepth) {
     std::stringstream out;
     out << "Error: while trying to evaluate expression, "
     << "the maximum recursion depth of "
@@ -1055,7 +1056,7 @@ Expression* Calculator::patternMatch(
 
 void Calculator::specializeBoundVariables(Expression& toBeSubbedIn, MapList<Expression, Expression>& matchedPairs) {
   MacroRegisterFunctionWithName("Calculator::specializeBoundVariables");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
       toBeSubbedIn = matchedPairs.getValueCreate(toBeSubbedIn);
@@ -1079,7 +1080,7 @@ bool Calculator::processOneExpressionOnePatternOneSub(
   std::stringstream* theLog
 ) {
   MacroRegisterFunctionWithName("Calculator::processOneExpressionOnePatternOneSub");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (
     !thePattern.startsWith(this->opDefine(), 3) &&
     !thePattern.startsWith(this->opDefineConditional(), 4)
@@ -1137,7 +1138,7 @@ bool Calculator::parseAndExtractExpressions(
   return result;
 }
 
-void Calculator::initializeComputationStatistics() {
+void Calculator::EvaluationStatistics::initialize() {
   this->startTimeEvaluationMilliseconds      = global.getElapsedMilliseconds();
   this->millisecondsLastLog                  = this->startTimeEvaluationMilliseconds;
   this->numberOfListsStart                   = static_cast<signed>( GlobalStatistics::numListsCreated    );
@@ -1153,7 +1154,7 @@ void Calculator::initializeComputationStatistics() {
 
 void Calculator::evaluate(const std::string& theInput) {
   MacroRegisterFunctionWithName("Calculator::evaluate");
-  this->initializeComputationStatistics();
+  this->statistics.initialize();
   this->inputString = theInput;
   this->parseAndExtractExpressions(
     theInput, this->theProgramExpression, this->syntacticSoup, this->syntacticStacK, &this->syntaxErrors
@@ -1182,10 +1183,10 @@ void Calculator::evaluateCommands() {
     theReport.report("Evaluating expressions, current expression stack:\n");
   }
   this->evaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
-  if (this->RecursionDeptH != 0) {
+  if (this->recursionDepth != 0) {
     global.fatal << "This is a programming error: the starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "
-    << this->RecursionDeptH << "." << global.fatal;
+    << this->recursionDepth << "." << global.fatal;
   }
   global.theDefaultFormat.getElement().flagMakingExpressionTableWithLatex = true;
   global.theDefaultFormat.getElement().flagUseLatex = true;

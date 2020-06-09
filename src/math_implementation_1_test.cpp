@@ -27,23 +27,153 @@ bool LargeIntegerUnsigned::Test::all() {
   MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::all");
   LargeIntegerUnsigned::Test::serializationToHex(LargeIntegerUnsigned(100));
   LargeIntegerUnsigned::Test::comparisons();
+  LargeIntegerUnsigned::Test::guaranteedPrime();
   LargeIntegerUnsigned::Test::factor();
+  LargeIntegerUnsigned::Test::isPossiblyPrime();
   return true;
 }
 
 bool LargeIntegerUnsigned::Test::comparisons() {
-  LargeIntegerUnsigned x = 1;
-  LargeIntegerUnsigned y = 0;
-  List<LargeIntegerUnsigned> toTest = {x, y};
+  List<LargeIntegerUnsigned> toTest = {
+    LargeIntegerUnsigned(0),
+    LargeIntegerUnsigned(1),
+    LargeIntegerUnsigned(2),
+    LargeIntegerUnsigned(3)
+  };
   for (int i = 0; i < toTest.size; i ++) {
     LargeIntegerUnsigned& current = toTest[i];
     if (!current.isGreaterThanOrEqualTo(current)) {
       global.fatal << "Number: " << current
-      << " not greater than or equal to itself. " << global.fatal;
+      << " not greater than or equal to itself. "
+      << global.fatal;
+    }
+  }
+  for (int i = 0; i < toTest.size; i ++) {
+    for (int j = i + 1; j < toTest.size; j ++) {
+      bool mustBeTrue = toTest[j] > toTest[i];
+      if (! mustBeTrue) {
+        global.fatal << "Number: " << toTest[j]
+        << " not greater than " << toTest[i] << ". "
+        << global.fatal;
+      }
+      mustBeTrue = toTest[i] < toTest[j] ;
+      if (!mustBeTrue) {
+        global.fatal << "Number: " << toTest[i]
+        << " not less than " << toTest[j] << ". "
+        << global.fatal;
+      }
     }
   }
   return true;
 }
+
+bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
+  List<LargeIntegerUnsigned> mustReturnTrue, mustReturnFalse;
+  mustReturnTrue.addOnTop(2);
+  mustReturnTrue.addOnTop(3);
+  mustReturnTrue.addOnTop(5);
+  mustReturnTrue.addOnTop(7);
+  mustReturnTrue.addOnTop(1009);
+  mustReturnFalse.addOnTop(0);
+  mustReturnFalse.addOnTop(1);
+  mustReturnFalse.addOnTop(4);
+  mustReturnFalse.addOnTop(6);
+  mustReturnFalse.addOnTop(9989);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 100, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(mustReturnTrue, true, 100);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(mustReturnFalse, false, 100);
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+  const List<LargeIntegerUnsigned>& input,
+  bool mustBeTrue,
+  int millerRabinTries,
+  int64_t maximumRunningTimeMilliseconds
+) {
+  for (int i = 0; i < input.size; i ++) {
+    int64_t millisecondsStart = global.getElapsedMilliseconds();
+    bool result = input[i].isPossiblyPrime(millerRabinTries, true, nullptr);
+    if (result != mustBeTrue) {
+      std::string compositeOrPrime = "composite";
+      if (!mustBeTrue) {
+        compositeOrPrime = "prime";
+      }
+      global.fatal << "Input " << input[i] << " is incorrectly computed to be "
+      << compositeOrPrime << ". Miller-Rabin tries: "
+      << millerRabinTries << ". "
+      << global.fatal;
+    }
+    int64_t ellapsed = global.getElapsedMilliseconds() - millisecondsStart;
+    if (ellapsed > maximumRunningTimeMilliseconds) {
+      global.fatal << "It took longer than " << maximumRunningTimeMilliseconds
+      << " to determine " << input[i] << " is prime."
+      << global.fatal;
+    }
+  }
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
+  const List<LargeIntegerUnsigned> &input, bool mustBeTrue, int millerRabinTries
+) {
+  for (int i = 0; i < input.size; i ++) {
+    bool result = input[i].isPossiblyPrimeMillerRabin(millerRabinTries, nullptr);
+    if (result != mustBeTrue) {
+      std::string compositeOrPrime = "composite";
+      if (!mustBeTrue) {
+        compositeOrPrime = "prime";
+      }
+      global.fatal << "Input " << input[i] << " is incorrectly computed via Miller-Rabin to be "
+      << compositeOrPrime << ". Miller-Rabin tries: "
+      << millerRabinTries << ". "
+      << global.fatal;
+    }
+  }
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::guaranteedPrime() {
+  List<LargeIntegerUnsigned> primes;
+  primes.addOnTop(2);
+  primes.addOnTop(3);
+  primes.addOnTop(11);
+  primes.addOnTop(17);
+  primes.addOnTop(31);
+  primes.addOnTop(1009);
+  primes.addOnTop(65537);
+  primes.addOnTop(999983);
+  primes.addOnTop(1000003);
+  LargeIntegerUnsigned guaranteedPrime;
+  guaranteedPrime.assignString("9998200061");
+  primes.addOnTop(guaranteedPrime);
+  for (int i = 0; i < primes.size; i ++) {
+    List<unsigned int> notUsed;
+    bool mustBeTrue = false;
+    bool mustBeFalse = primes[i].isCompositePrimeDivision(notUsed, mustBeTrue, nullptr);
+    if (mustBeFalse) {
+      global.fatal << "Prime number: " << primes[i] << " computed as composite." << global.fatal;
+    }
+    if (!mustBeTrue) {
+      global.fatal << "Prime number: " << primes[i] << " not reported as guaranteed prime." << global.fatal;
+    }
+  }
+  LargeIntegerUnsigned notGuaranteedPrime;
+  notGuaranteedPrime.assignString("10000000019");
+  bool guaranteed = true;
+  List<unsigned int> notUsed;
+  bool mustBeFalse = notGuaranteedPrime.isCompositePrimeDivision(notUsed, guaranteed, nullptr);
+  if (mustBeFalse) {
+    global.fatal << "Prime number: " << notGuaranteedPrime
+    << " should be too large to be a guaranteed prime." << global.fatal;
+  }
+
+  return true;
+}
+
 
 bool LargeIntegerUnsigned::Test::factor() {
   LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 100, 100, 3);
@@ -246,6 +376,30 @@ bool RationalFunction<Rational>::Test::scaleNormalizeIndex() {
       << " produced: " << toScale[i].toStringCommaDelimited()
       << " instead of the expected: " << expected[i] << global.fatal;
     }
+  }
+  return true;
+}
+
+bool Selection::Test::all() {
+  Selection::Test::testNElements(0);
+  Selection::Test::testNElements(1);
+  Selection::Test::testNElements(2);
+  Selection::Test::testNElements(3);
+  Selection::Test::testNElements(4);
+  return true;
+}
+
+bool Selection::Test::testNElements(int n) {
+  Selection selection;
+  selection.initialize(n);
+  int counter = 0;
+  do {
+    counter ++;
+  } while (selection.incrementReturnFalseIfPastLast());
+  LargeInteger twoToTheNth = 2;
+  twoToTheNth.raiseToPower(n);
+  if (twoToTheNth != counter) {
+    global.fatal << "Got " << counter << " subsets of " << n << " elements, expected: " << twoToTheNth << global.fatal;
   }
   return true;
 }

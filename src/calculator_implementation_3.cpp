@@ -25,7 +25,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
   this->checkInitialization();
   Vector<RationalFunction<Rational> > tempVect;
   RationalFunction<Rational> tempRF;
-  tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
+  tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
   tempRF = this->AmbientWeyl->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
@@ -116,15 +116,15 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoords().isSmallInteger()) {
+  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     return false;
   }
-  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.SumCoords().getDoubleValue()) + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.lastObject()->SumCoords().numeratorShort;
+  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -134,7 +134,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
-  int numPosRoots = this->AmbientWeyl->RootsOfBorel.size;
+  int numPosRoots = this->AmbientWeyl->rootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
     int lowestUnexploredHeightDiff = 0;
@@ -150,13 +150,13 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
-        currentWeight -= this->AmbientWeyl->RootsOfBorel[i];
+        currentWeight -= this->AmbientWeyl->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
           this->AmbientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().numeratorShort;
+            int currentIndexShift = this->AmbientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
@@ -166,7 +166,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
         }
       }
     }
-    outputWeightsSimpleCoords.addOnTop(currentHashes);
+    outputWeightsSimpleCoords.addListOnTop(currentHashes);
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
   }
@@ -182,23 +182,23 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
 }
 
 bool Calculator::innerAnimateLittelmannPaths(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
-    return output.makeError("This function takes 2 arguments", theCommands);
+    return output.makeError("This function takes 2 arguments", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra* theSSowner = algebra.content;
   Vector<Rational> theWeight;
-  ExpressionContext tempContext(theCommands);
-  if (!theCommands.getVector<Rational>(
+  ExpressionContext tempContext(calculator);
+  if (!calculator.getVector<Rational>(
     input[2],
     theWeight,
     &tempContext,
@@ -207,65 +207,65 @@ bool Calculator::innerAnimateLittelmannPaths(
   )) {
     return output.makeError(
       "Failed to convert the argument of the function to a highest weight vector",
-      theCommands
+      calculator
     );
   }
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
-  theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
+  calculator << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
   thePath.makeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  return output.assignValue(thePath.generateOrbitAndAnimate(), theCommands);
+  return output.assignValue(thePath.generateOrbitAndAnimate(), calculator);
 }
 
-bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerCasimir(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerCasimir");
   if (input.size() != 2) {
-    return theCommands << "Casimir function expects a single input. ";
+    return calculator << "Casimir function expects a single input. ";
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra& algebraReference = *algebra.content;
   ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
   theCasimir.makeCasimir(algebraReference);
-  theCommands << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
+  calculator << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
   << ". The coefficient: " << algebraReference.theWeyl.getKillingDividedByTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
-  ExpressionContext context(theCommands);
+  ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(algebraReference);
-  return output.assignValueWithContext(theCasimir, context, theCommands);
+  return output.assignValueWithContext(theCasimir, context, calculator);
 }
 
-bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
   }
 
   output = input[1];
   if (!output.isOfType < ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
-    return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
+    return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", calculator);
   }
   SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
   if (!ownerSS.isOfSimpleType('G', 2)) {
-    return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
+    return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", calculator);
   }
   HomomorphismSemisimpleLieAlgebra theHmm;
-  theCommands.makeHmmG2InB3(theHmm);
+  calculator.makeHmmG2InB3(theHmm);
 
   ElementUniversalEnveloping<RationalFunction<Rational> > argument = output.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
   ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
   if (!theHmm.applyHomomorphism(argument, outputUE)) {
-    return output.makeError("Failed to apply homomorphism for unspecified reason", theCommands);
+    return output.makeError("Failed to apply homomorphism for unspecified reason", calculator);
   }
   outputUE.simplify();
-  ExpressionContext context(theCommands);
+  ExpressionContext context(calculator);
   context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
-  return output.assignValueWithContext(outputUE, context, theCommands);
+  return output.assignValueWithContext(outputUE, context, calculator);
 }
 
 std::string HtmlRoutines::getSliderSpanStartsHidden(
@@ -426,7 +426,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     MatrixTensor<Coefficient> currentOp, tempMat;
     currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
-      tempMat = this->getActionGeneratorIndex(currentElt[j].theGeneratorIndex);
+      tempMat = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
       tempMat *= currentElt.coefficients[j];
       currentOp += tempMat;
     }
@@ -542,7 +542,7 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
 }
 
 bool Calculator::innerPrintB3G2branchingIntermediate(
-  Calculator& theCommands,
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vectors<RationalFunction<Rational> >& theHWs,
@@ -596,7 +596,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   << "\\endhead";
   for (int i = 0; i < theHWs.size; i ++) {
     theG2B3Data.theWeightFundCoords = theHWs[i];
-    theCommands.innerSplitFDpartB3overG2inner(theCommands, theG2B3Data, tempExpression);
+    calculator.innerSplitFDpartB3overG2inner(calculator, theG2B3Data, tempExpression);
     timeReport << tempExpression.getValue<std::string>();
     RationalFunction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
@@ -730,36 +730,36 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   out << "<br><br><br>";
   out << latexTable.str();
   out << "<br>";
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool Calculator::innerPrintB3G2branchingTable(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTable");
   Vectors<RationalFunction<Rational> > theHWs;
   BranchingData theG2B3Data;
-  ExpressionContext context(theCommands);
-  if (!theCommands.innerPrintB3G2branchingTableCommon(
-    theCommands, input, output, theHWs, theG2B3Data, context
+  ExpressionContext context(calculator);
+  if (!calculator.innerPrintB3G2branchingTableCommon(
+    calculator, input, output, theHWs, theG2B3Data, context
   )) {
     return false;
   }
   if (output.isError()) {
     return true;
   }
-  return theCommands.innerPrintB3G2branchingIntermediate(
-    theCommands, input, output, theHWs, theG2B3Data, context
+  return calculator.innerPrintB3G2branchingIntermediate(
+    calculator, input, output, theHWs, theG2B3Data, context
   );
 }
 
-bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCharsOnly");
   BranchingData theg2b3data;
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   Vectors<RationalFunction<Rational> > theHWs;
-  theCommands.innerPrintB3G2branchingTableCommon(
-    theCommands, input, output, theHWs, theg2b3data, theContext
+  calculator.innerPrintB3G2branchingTableCommon(
+    calculator, input, output, theHWs, theg2b3data, theContext
   );
   if (output.isError()) {
     return true;
@@ -884,7 +884,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   out << "<br><b>Ready for LaTeX consumption:</b><br>%preamble: "
   << "<br>\\documentclass{article}<br>\\usepackage{longtable, amssymb}"
   << "<br>\\begin{document}<br>%text body<br>" << latexTable.str() << "<br>%end of text body <br>\\end{document}";
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 void BranchingData::resetOutputData() {
@@ -918,7 +918,7 @@ bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping
   return true;
 }
 
-bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, BranchingData& theG2B3Data, Expression& output) {
+bool Calculator::innerSplitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunction<Rational> > theModCopy;
   theModCopy.makeFromHW(
@@ -934,12 +934,12 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
   Vector<Rational> splittingParSel;
   splittingParSel = theG2B3Data.SelSplittingParSel;
 
-  theCommands.theObjectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
-  int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
-  ModuleSSalgebra<RationalFunction<Rational> >& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
+  calculator.theObjectContainer.theCategoryOmodules.addNoRepetitionOrReturnIndexFirst(theModCopy);
+  int theModIndex = calculator.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
+  ModuleSSalgebra<RationalFunction<Rational> >& theMod = calculator.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.getOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
-  theCommands << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
+  calculator << "<hr>Time elapsed before making B3 irrep: " << global.getElapsedSeconds();
   double timeAtStart = global.getElapsedSeconds();
   theMod.splitFDpartOverFKLeviRedSubalg(
     theG2B3Data.theHmm,
@@ -949,7 +949,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
     &theG2B3Data.leviEigenSpace,
     nullptr
   );
-  theCommands << "<br>Time needed to make B3 irrep: " << global.getElapsedSeconds() - timeAtStart;
+  calculator << "<br>Time needed to make B3 irrep: " << global.getElapsedSeconds() - timeAtStart;
   theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
@@ -1045,13 +1045,13 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, Branchin
       currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
     );
   }
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
-bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
   global.fatal << "Function not implemented yet." << global.fatal;
-  (void) theCommands;
+  (void) calculator;
   (void) output;
   if (input.children.size != 3) {
     return false;
@@ -1065,25 +1065,25 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
   return true;
 }
 
-bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   if (input.size() != 3) {
-    return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
+    return output.makeError("Function innerPrintAllPartitions expects 2 arguments.", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra* theSSowner = algebra.content;
 
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   Vector<Rational> theHW;
-  if (!theCommands.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.getRank())) {
-    return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
+  if (!calculator.getVector<Rational>(input[2], theHW, &theContext, theSSalgebra.getRank())) {
+    return output.makeError("Failed to extract weight you want partitioned from " + input[2].toString(), calculator);
   }
   Vector<int> theHWint;
   theHWint.setSize(theHW.size);
@@ -1092,7 +1092,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
       return output.makeError(
         "The input weight you gave is bad: "
         "it must consist of non-negative small integers",
-        theCommands
+        calculator
       );
     }
   }
@@ -1104,7 +1104,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
     thePartition[i] = 0;
   }
   Vector<Rational> theWeight, tmpWt;
-  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.RootsOfBorel;
+  Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
   theWeight.makeZero(theSSalgebra.getRank());
@@ -1132,7 +1132,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   }
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
@@ -1162,24 +1162,24 @@ void WeylGroupData::getHighestWeightsAllRepresentationsDimensionLessThanOrEqualT
   outputHighestWeightsFundCoords = output;
 }
 
-bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerTestMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
-    return output.makeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
+    return output.makeError("innerTestMonomialBaseConjecture takes two arguments as input", calculator);
   }
   const Expression& rankE = input[1];
   const Expression& dimE = input[2];
   int rankBound = 0;
   int dimBound = 0;
   if (!rankE.isSmallInteger(&rankBound) || !dimE.isSmallInteger(&dimBound)) {
-    return output.makeError("The rank and  dim bounds must be small integers", theCommands);
+    return output.makeError("The rank and  dim bounds must be small integers", calculator);
   }
   if (rankBound < 2 || rankBound > 100 || dimBound < 1 || dimBound > 10000) {
     return output.makeError(
       "The rank bound must be an integer between 2 and 100, "
       "and the dim bound must be an integer between 1 and 10000. ",
-      theCommands
+      calculator
     );
   }
   std::stringstream out;
@@ -1227,7 +1227,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   for (int i = 0; i < theRanks.size; i ++) {
     currentType.makeSimpleType(theWeylLetters[i], theRanks[i]);
     SemisimpleLieAlgebra& currentAlg =
-    theCommands.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
+    calculator.theObjectContainer.getLieAlgebraCreateIfNotPresent(currentType);
     currentAlg.computeChevalleyConstants();
     currentAlg.theWeyl.getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.toStringLieAlgebraName() << "$}\\\\\\hline\n\n"
@@ -1276,7 +1276,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
         out << "<td>has non-adapted string</td>";
       }
 /*      if (theMod.makeFromHW
-          (theCommands.theObjectContainer.theLieAlgebras, i,
+          (calculator.theObjectContainer.theLieAlgebras, i,
            currentHW, tempSel, 1, 0, 0, true)) {
         out << "<td>is good</td>";
         if (!theMod.flagConjectureBholds) {
@@ -1328,12 +1328,12 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   }
   latexReport << "\\end{document}";
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
-bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerLittelmannOperator(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerLittelmannOperator");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (input.hasBoundVariables()) {
     return false;
   }
@@ -1343,88 +1343,44 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
       "The argument of the Littelmann root operator is "
       "expected to be a small integer, instead you gave me " +
       input.toString(),
-      theCommands
+      calculator
     );
   }
   if (theIndex == 0) {
-    return output.makeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
+    return output.makeError("The index of the Littelmann root operator is expected to be non-zero", calculator);
   }
-  return output.assignValue(theIndex, theCommands);
+  return output.assignValue(theIndex, calculator);
 }
 
-bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
+bool Calculator::innerLSPath(Calculator& calculator, const Expression& input, Expression& output) {
+  RecursionDepthCounter theRecutionIncrementer(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::innerLSPath");
   if (input.size() < 3) {
-    return output.makeError("LSPath needs at least two arguments.", theCommands);
+    return output.makeError("LSPath needs at least two arguments.", calculator);
   }
   WithContext<SemisimpleLieAlgebra*> theSSowner;
-  if (!theCommands.convert(
+  if (!calculator.convert(
     input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSowner
   )) {
-    return output.makeError("Error extracting Lie algebra.", theCommands);
+    return output.makeError("Error extracting Lie algebra.", calculator);
   }
   SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner.content;
   Vectors<Rational> waypoints;
   waypoints.setSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
-    if (!theCommands.getVector<Rational>(
+    if (!calculator.getVector<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.getRank(), nullptr
     )) {
-      return output.makeError("Failed to extract waypoints", theCommands);
+      return output.makeError("Failed to extract waypoints", calculator);
     }
   }
   waypoints = ownerSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
   theLSpath.makeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
-  return output.assignValue(theLSpath, theCommands);
+  return output.assignValue(theLSpath, calculator);
 }
 
-template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
-
-bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
-  WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.convert(
-    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
-  )) {
-    return false;
-  }
-  if (polynomial.content.minimalNumberOfVariables() > 1) {
-    return output.makeError(
-      "I have been taught to factor one variable polynomials only. ",
-      theCommands
-    );
-  }
-  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
-  if (!factorization.factor(
-    polynomial.content,
-    &theCommands.comments
-  )) {
-    return false;
-  }
-  List<Expression> resultSequence;
-  Expression constantFactor;
-  constantFactor.assignValue(factorization.constantFactor, theCommands);
-  resultSequence.addOnTop(constantFactor);
-  Expression polynomialE, expressionE(theCommands);
-
-  for (int i = 0; i < factorization.reduced.size; i ++) {
-    polynomialE.assignValueWithContext(
-      factorization.reduced[i], polynomial.context, theCommands
-    );
-    expressionE.children.clear();
-    expressionE.addChildAtomOnTop("MakeExpression");
-    expressionE.addChildOnTop(polynomialE);
-    resultSequence.addOnTop(expressionE);
-  }
-  return output.makeSequence(theCommands, &resultSequence);
-}
-
-bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerZmodP(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerZmodP");
   if (!input.isListNElements(3)) {
     return false;
@@ -1445,28 +1401,31 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   if (theGCD > 1) {
     return false;
   }
-  ElementZmodP outputElt;
-  outputElt.modulus = base.value;
-  outputElt = left.getNumerator();
-  return output.assignValue(outputElt, theCommands);
+  ElementZmodP outputElement;
+  outputElement.modulus = base.value;
+  outputElement = left.getNumerator();
+  ExpressionContext context;
+  context.initialize(calculator);
+  context.setDefaultModulus(outputElement.modulus);
+  return output.assignValueWithContext(outputElement, context, calculator);
 }
 
 bool Calculator::innerInterpolatePoly(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   if (input.size() < 2) {
     return false;
   }
   Expression convertedE;
-  if (!CalculatorConversions::innerMakeMatrix(theCommands, input, convertedE)) {
+  if (!CalculatorConversions::innerMakeMatrix(calculator, input, convertedE)) {
     return false;
   }
   Matrix<Rational> pointsOfInterpoly;
-  if (!theCommands.functionGetMatrix(
+  if (!calculator.functionGetMatrix(
     convertedE, pointsOfInterpoly, nullptr, 2
   )) {
-    return theCommands
+    return calculator
     << "<hr>Failed to extract points of interpolation from "
     << convertedE.toString();
   }
@@ -1475,13 +1434,13 @@ bool Calculator::innerInterpolatePoly(
   pointsOfInterpoly.getVectorFromColumn(0, theArgs);
   pointsOfInterpoly.getVectorFromColumn(1, theValues);
   interPoly.interpolate(theArgs, theValues);
-  ExpressionContext theContext(theCommands);
+  ExpressionContext theContext(calculator);
   theContext.makeOneVariableFromString("x");
-  return output.assignValueWithContext(interPoly, theContext, theCommands);
+  return output.assignValueWithContext(interPoly, theContext, calculator);
 }
 
 bool Calculator::innerPrintZnEnumeration(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
   if (!input.isListNElements(3)) {
@@ -1508,7 +1467,7 @@ bool Calculator::innerPrintZnEnumeration(
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();
-  return output.assignValue(out.str(), theCommands);
+  return output.assignValue(out.str(), calculator);
 }
 
 bool Expression::assignMatrixExpressions(
@@ -1533,8 +1492,8 @@ bool Expression::assignMatrixExpressions(
   Expression theMatType(owner);
   theMatType.addChildAtomOnTop(owner.opMatriX());
   this->addChildOnTop(theMatType);
-  enum mType{typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
-  mType outType = typeUnknown;
+  enum matrixType {typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
+  matrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {
     currentRow.reset(owner);
@@ -1542,7 +1501,7 @@ bool Expression::assignMatrixExpressions(
     currentRow.addChildAtomOnTop(owner.opSequence());
     for (int j = 0; j < input.numberOfColumns; j ++) {
       currentRow.addChildOnTop(input(i, j));
-      mType inType;
+      matrixType inType;
       if (input(i, j).isOfType<Rational>()) {
         inType = typeRat;
       } else if (input(i, j).isOfType<AlgebraicNumber>()) {
@@ -1708,21 +1667,21 @@ bool Calculator::getMatrixExpressions(
   return true;
 }
 
-bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly) {
+bool Calculator::innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly) {
   MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
   if (!input.isListNElements(3)) {
     return false;
   }
   Vector<Polynomial<Rational> > inputPolForm;
-  ExpressionContext startContext(theCommands);
-  if (!theCommands.getVectorFromFunctionArguments(
+  ExpressionContext startContext(calculator);
+  if (!calculator.getVectorFromFunctionArguments(
     input,
     inputPolForm,
     &startContext,
     2,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    return theCommands
+    return calculator
     << "<hr>Failed to extract polynomials from arguments of "
     << input.toString();
   }
@@ -1732,11 +1691,11 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     !inputPolForm[1].isOneLetterFirstDegree(&letterPol) ||
     letterDiff == letterPol
   ) {
-    return theCommands
+    return calculator
     << "<hr>Failed to get different one-variable polynomials from input. "
     << input.toString();
   }
-  ExpressionContext endContext(theCommands);
+  ExpressionContext endContext(calculator);
   endContext.makeOneVariableOneDifferentialOperator(
     startContext.getVariable(letterPol),
     startContext.getVariable(letterDiff)
@@ -1747,7 +1706,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   } else {
     outputEWA.makedi(0, 1);
   }
-  return output.assignValueWithContext(outputEWA, endContext, theCommands);
+  return output.assignValueWithContext(outputEWA, endContext, calculator);
 }
 
 bool Calculator::Test::processOneTest(JSData& input) {
@@ -1858,29 +1817,29 @@ Calculator::Test::Test(Calculator& inputOwner) {
 }
 
 bool Calculator::innerAutomatedTest(
-  Calculator& theCommands, const Expression& input, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
   if (!global.userDefaultHasAdminRights()) {
-    return theCommands << "Automated test requires administrator access";
+    return calculator << "Automated test requires administrator access";
   }
   if (input.size() != 3) {
-    return theCommands << "Automated test expects two arguments: "
+    return calculator << "Automated test expects two arguments: "
     << "index of first test to run and number of tests to run. ";
   }
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access
-  Calculator::Test test(theCommands);
+  Calculator::Test test(calculator);
   if (
     !input[1].isSmallInteger(&test.startIndex) ||
     !input[2].isSmallInteger(&test.numberOfTests)
   ) {
-    return theCommands
+    return calculator
     << "Automated test takes two arguments: "
     << "index of the first test to run and total "
     << "number of tests to run after that. ";
   }
   test.calculatorTestRun();
-  return output.assignValue(test.reportHtml, theCommands);
+  return output.assignValue(test.reportHtml, calculator);
 }
 
 bool Calculator::Test::processResults() {
@@ -2010,4 +1969,3 @@ int Calculator::getNumberOfBuiltInFunctions() {
   }
   return result;
 }
-

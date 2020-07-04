@@ -252,7 +252,6 @@ public:
   static void checkSystemInstallationOpenSSL();
   static void checkMongoDatabaseSetup();
   static void checkMathJaxSetup();
-  static void checkUnzipInstall();
   static void checkFreecalcSetup();
   static void analyzeMainArguments(int argC, char** argv);
   static bool analyzeMainArgumentsTimeString(const std::string& timeLimitString);

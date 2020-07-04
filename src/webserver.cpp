@@ -3783,28 +3783,12 @@ void WebServer::checkFreecalcSetup() {
   global.configurationStore();
 }
 
-void WebServer::checkUnzipInstall() {
-  WebServer::figureOutOperatingSystem();
-  if (global.operatingSystem == "Ubuntu") {
-    global.externalCommandNoOutput("sudo apt-get install unzip", true);
-  } else if (global.operatingSystem == "CentOS") {
-    global.externalCommandNoOutput("sudo yum install unzip", true);
-  }
-
-}
-
 void WebServer::checkMathJaxSetup() {
   MacroRegisterFunctionWithName("WebServer::checkMathJaxSetup");
-  std::string checkForMathJaxAndAutoInstall = "check for mathjax on every boot.";
-  if (
-    global.configuration[Configuration::mathJaxSetup].theString !=
-    checkForMathJaxAndAutoInstall
-  ) {
+  if (!global.configuration[
+    Configuration::installMathJax
+  ].isTrueRepresentationInJSON()) {
     return;
-  }
-  global.configurationStore();
-  if ((false)) {
-    WebServer::checkUnzipInstall();
   }
   std::string mathjaxBase;
   std::string mathjaxZipSource;
@@ -3821,24 +3805,15 @@ void WebServer::checkMathJaxSetup() {
     << Logger::endL << commentsOnFailure.str() << Logger::endL;
     return;
   }
-  std::string toDisableMathJaxChecks = "change: "
-  "file: configuration/configuration.json "
-  "key: " + Configuration::mathJaxSetup +
-  " to any string different from its current value.";
 
   if (FileOperations::fileExistsUnsecure(mathjaxBase)) {
     // Mathjax folder is there.
     // We assume it is correctly installed.
-    global << Logger::yellow
-    << "MathJax found. To disable futher checks for mathjax: "
-    << toDisableMathJaxChecks << Logger::endL;
     return;
   }
   global << Logger::red << "MathJax not found. "
   << Logger::green << "Attempting to auto-install it for you. "
-  << Logger::endL
-  << "To disable mathjax checks/auto-installation: "
-  << toDisableMathJaxChecks << Logger::endL;
+  << Logger::endL;
   if (!FileOperations::getPhysicalFileNameFromVirtual(
     Configuration::publicHTML, publicHtmlFolder, false, false, & commentsOnFailure
   )) {
@@ -4027,7 +4002,8 @@ void WebServer::analyzeMainArguments(int argC, char **argv) {
   arguments.currentIndex = 1;
   arguments.commandLineConfigurations.addListOnTop(List<std::string> ({
     Configuration::portHTTP,
-    Configuration::portHTTPSOpenSSL
+    Configuration::portHTTPSOpenSSL,
+    Configuration::installMathJax
   }));
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {
   }

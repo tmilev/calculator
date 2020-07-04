@@ -155,7 +155,7 @@ public:
   static std::string disableDatabaseLogEveryoneAsAdmin       ;
   static std::string serverDetailedLog                       ;
   static std::string gitRepository                           ;
-  static std::string mathJaxSetup                            ;
+  static std::string installMathJax                          ;
   static std::string portHTTP                                ;
   static std::string portHTTPSOpenSSL                        ;
   static std::string portHTTPSBuiltIn                        ;

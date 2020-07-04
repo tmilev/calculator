@@ -34,6 +34,7 @@ function initializeGlobals() {
     themes: null,
     pageNavigation: null,
     globalMQ: MathQuill.getInterface(2),
+    equationEditor: null,
     MathQuillHasMatrixSupport: true,
     hardCodedServerAddress: "",
   };
@@ -71,6 +72,7 @@ function loadGlobals() {
   window.calculator.graphicsNDimensions = require('./graphics_n_dimensions');
   window.calculator.processMonitoring = require('./process_monitoring');
   window.calculator.pageNavigation = require('./page_navigation');
+  window.calculator.equationEditor = require('./equation_editor');
   //initialize everything not initilized while loading:
   window.calculator.crypto = require('./crypto');
   require('./external/build/output-min');

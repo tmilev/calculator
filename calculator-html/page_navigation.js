@@ -820,7 +820,7 @@ AllScripts.prototype.injectScript = function(scriptId, scriptContent) {
   }
   var theScript = this.scriptsInjected[scriptId];
   var scriptChild = document.createElement('script');
-  scriptChild.setAttribute('id', scriptId)
+  scriptChild.setAttribute('id', scriptId);
   scriptChild.innerHTML = theScript.content;
   scriptChild.type = 'text/javascript';
   document.getElementsByTagName('head')[0].appendChild(scriptChild);

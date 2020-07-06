@@ -20,7 +20,7 @@ class MathNodeType {
       return;
     }
     for (let label in knownTypeDefaultsArrows) {
-      if (!label in input["arrows"]) {
+      if (!(label in input["arrows"])) {
         input["arrows"][label] = knownTypeDefaultsArrows[label];
       }
     }
@@ -52,20 +52,18 @@ const knownTypeDefaults = {
 class ArrowMotionTypes {
   constructor() {
     this.parentForward = "parentForward";
-    this.parent = "parent";
-    this.leftmostChild = "leftmostChild";
-    this.leftSibling = "leftSibling";
-    this.rightSibling = "rightSibling";
+    this.firstAtomToTheLeft = "firstAtomToTheLeft";
+    this.firstAtomToTheRight = "firstAtomToTheRight";
   }
 }
 
 let arrowMotion = new ArrowMotionTypes();
 
 const knownTypeDefaultsArrows = {
-  "arrowUp": [arrowMotion.parent],
-  "arrowDown": [arrowMotion.leftmostChild],
-  "arrowLeft": [arrowMotion.leftSibling],
-  "arrowRight": [arrowMotion.rightSibling],
+  "ArrowUp": [arrowMotion.parentForward],
+  "ArrowDown": [arrowMotion.parentForward],
+  "ArrowLeft": [arrowMotion.firstAtomToTheLeft],
+  "ArrowRight": [arrowMotion.firstAtomToTheRight],
 };
 
 const knownTypes = {
@@ -78,6 +76,10 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
+    "minHeightScale": 1,
+  }),
+  atomImmutable: new MathNodeType({
+    "type": "atomImmutable",
     "minHeightScale": 1,
   }),
   // Horizontally laid out math such as "x+2".
@@ -96,6 +98,10 @@ const knownTypes = {
     "display": "block",
     "borderBottom": "1px solid black",
     "scale": 0.93,
+    "arrows": {
+      "ArrowUp": [arrowMotion.firstAtomToTheLeft],
+      "ArrowDown": [arrowMotion.firstAtomToTheRight],
+    },
   }),
   // Represents the denominator y of a fraction x/y.
   denominator: new MathNodeType({
@@ -103,7 +109,8 @@ const knownTypes = {
     "display": "block",
     "scale": 0.93,
     "arrows": {
-      "arrowUp": [arrowMotion.parent, arrowMotion]
+      "ArrowUp": [arrowMotion.firstAtomToTheLeft],
+      "ArrowDown": [arrowMotion.firstAtomToTheRight],
     },
   }),
 };
@@ -123,6 +130,14 @@ class MathNodeFactory {
   rootMath() {
     const result = new MathNode(knownTypes.root);
     result.appendChild(this.horizontalMath(null));
+    return result;
+  }
+  atomImmutable(
+    /** @type {string} */
+    content
+  ) {
+    const result = new MathNode(knownTypes.atomImmutable);
+    result.operator = content;
     return result;
   }
   atom() {
@@ -149,7 +164,6 @@ class EquationEditor {
     /** @type{HTMLElement} */
     container,
   ) {
-    console.log("DEBUG: Hello world!!!");
     this.container = container;
     this.container.innerHTML = "";
     this.container.style.display = "inline-block";
@@ -168,18 +182,22 @@ class MathNode {
     /** @type {MathNodeType} */
     type
   ) {
-    /** @type{Array<MathNode>} */
+    /** @type {Array<MathNode>} */
     this.children = [];
     /** @type {MathNodeType} */
     this.type = type;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.element = null;
     /** @type {MathNode} */
     this.parent = null;
     /** @type {number} */
     this.indexInParent = - 1;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.externalDOM = null;
+    /** @type {number} */
+    this.positionCaretBeforeKeyEvents = - 1;
+    /** @type {string} */
+    this.operator = "";
   }
 
   createDOMElementIfMissing() {
@@ -210,11 +228,18 @@ class MathNode {
       this.element.style.transform = `scale(${this.type.scale},${this.type.scale})`;
     }
     this.element.innerHTML = "";
+    if (this.operator !== "") {
+      this.element.textContent = this.operator;
+    }
     this.element.setAttribute("mathTagName", this.type.type);
     this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
     this.element.addEventListener("keydown", (e) => { this.handleKeyDown(e); });
     this.element.addEventListener("focus", (e) => { this.handleFocus(e); });
     this.element.addEventListener("blur", (e) => { this.handleBlur(e); });
+  }
+
+  updateDOM() {
+    this.updateDOMRecursive(0);
   }
 
   updateDOMRecursive(/** @type {number} */ depth) {
@@ -250,7 +275,7 @@ class MathNode {
     if (parentElement === null) {
       return;
     }
-    if (parentElement.contains(this.element)) {
+    if (parentElement.contains(oldElement)) {
       parentElement.replaceChild(this.element, oldElement);
     } else {
       parentElement.appendChild(this.element);
@@ -279,13 +304,18 @@ class MathNode {
     let key = event.key;
     switch (key) {
       case "/":
-        this.makeFractionNumerator(event);
+        this.makeFractionNumerator();
         return;
-      case "ArrowUp":
-      case "ArrowDown":
+      case "*":
+      case "+":
+      case "-":
+        this.makeHorizontalOperator(key);
+        return;
       case "ArrowLeft":
       case "ArrowRight":
-        this.arrow(event, key);
+      case "ArrowUp":
+      case "ArrowDown":
+        this.arrow(key);
         return;
       case "Backspace":
         this.updateBackspace(event);
@@ -295,7 +325,50 @@ class MathNode {
     }
   }
 
+  arrowRight(
+    /** @type {string} */
+    key,
+  ) {
+    if (this.type.type !== knownTypes.atom.type) {
+      this.arrow(key);
+      return;
+    }
+    if (this.isAtomWithRightmostCursor()) {
+      this.arrow(key);
+      return;
+    }
+  }
+
   arrow(
+    /** @type {string} */
+    key,
+  ) {
+    if (this.arrowAbsorbedByAtom(key)) {
+      return;
+    }
+    const childToFocus = this.getChildToFocusFromKey(key);
+    if (childToFocus !== null) {
+      childToFocus.focus(null);
+    }
+  }
+
+  arrowAbsorbedByAtom(
+    /** @type {string} */
+    key
+  ) {
+    if (this.type.type !== knownTypes.atom.type) {
+      return false;
+    }
+    if (key === "ArrowLeft") {
+      return this.positionCaretBeforeKeyEvents !== 0;
+    }
+    if (key === "ArrowRight") {
+      return this.positionCaretBeforeKeyEvents !== this.element.textContent.length
+    }
+    return false;
+  }
+
+  getChildToFocusFromKey(
     /** @type {string} */
     key,
   ) {
@@ -303,53 +376,98 @@ class MathNode {
     const arrowArray = this.type.arrows[key];
     let childToFocus = this;
     for (let i = 0; i < arrowArray.length; i++) {
-      childToFocus = this.processOneArrow(childToFocus, arrowArray[i]);
+      childToFocus = this.getChildToFocusFromAction(key, childToFocus, arrowArray[i]);
     }
-    childToFocus.focus();
+    return childToFocus;
   }
 
-  processOneArrow(
-    /** @type {string}*/ key,
+  getChildToFocusFromAction(
+    /** @type {string} */ key,
     /** @type {MathNode}*/ childToFocus,
-    /** @type {string} */ type,
+    /** @type {string} */ arrowType,
   ) {
-    if (type === arrowMotion.parent) {
+    if (arrowType === arrowMotion.parentForward) {
       if (childToFocus.parent === null) {
         return childToFocus;
       }
-      return childToFocus.parent;
+      return childToFocus.parent.getChildToFocusFromKey(key);
     }
-    if (type === arrowMotion.parentForward) {
-      if (childToFocus.parent === null) {
-        return childToFocus;
-      }
-      return childToFocus.parent(key);
+    if (arrowType === arrowMotion.firstAtomToTheLeft) {
+      return childToFocus.firstAtomToTheLeft();
     }
-    if (type === arrowMotion.rightSibling) {
-      return childToFocus.toTheRightOrSelf();
+    if (arrowType === arrowMotion.firstAtomToTheRight) {
+      return childToFocus.firstAtomToTheRight();
     }
+    return null;
   }
 
   // Returns first MathNode atom that lies to the right of 
   // the present element or null if there is no such element. 
-  atomToTheRight() {
+  firstAtomToTheRight() {
     if (this.parent === null) {
       return null;
     }
-    return this.parent.to
+    return this.parent.firstAtomToTheRightOf(this.indexInParent);
   }
 
-  toTheRightOf(/** @type{number}*/ childIndex) {
-    childIndex++;
-    if (childIndex < this.children.length) {
-      return this.children[childIndex];
+  firstAtomToTheRightOf(/** @type{number}*/ childIndex) {
+    for (let i = childIndex + 1; i < this.children.length; i++) {
+      let candidate = this.children[i].leftmostAtomChild();
+      if (candidate !== null) {
+        return candidate;
+      }
     }
+    return this.firstAtomToTheRight();
+  }
+
+  firstAtomToTheLeft() {
+    if (this.parent === null) {
+      return null;
+    }
+    return this.parent.firstAtomToTheLeftOf(this.indexInParent);
+  }
+
+  firstAtomToTheLeftOf(/** @type {number} */ childIndex) {
+    for (let i = childIndex - 1; i >= 0; i--) {
+      let candidate = this.children[i].rightmostAtomChild(i);
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return this.firstAtomToTheLeft();
+  }
+
+  leftmostAtomChild() {
+    if (this.type.type === knownTypes.atom.type) {
+      return this;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      let candidate = this.children[i].leftmostAtomChild();
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  rightmostAtomChild() {
+    if (this.type.type === knownTypes.atom.type) {
+      return this;
+    }
+    for (let i = this.children.length - 1; i >= 0; i--) {
+      let candidate = this.children[i].rightmostAtomChild();
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return null;
   }
 
   handleKeyDown(
     /** @type {KeyboardEvent} */
     event,
   ) {
+    this.storePositionCarretBeforeKeyEvents();
     this.handleKeyDownCases(event);
     event.stopPropagation();
     writeDebugInfo();
@@ -361,10 +479,20 @@ class MathNode {
   ) {
     let key = event.key;
     switch (key) {
+      case "+":
+      case "-":
+      case "*":
       case "/":
         event.preventDefault();
         return;
     }
+  }
+  storePositionCarretBeforeKeyEvents() {
+    if (this.type.type !== knownTypes.atom.type) {
+      this.positionCaretBeforeKeyEvents = - 1;
+      return;
+    }
+    this.positionCaretBeforeKeyEvents = window.getSelection().getRangeAt(0).startOffset;
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -395,48 +523,81 @@ class MathNode {
     /** @type {MathNode} */
     child,
   ) {
-    this.replaceChildAtPositionWithChildren(index, [child]);
+    this.replaceChildRangeWithChildren(index, index, [child]);
   }
 
-  replaceChildAtPositionWithChildren(
+  insertChildAtPosition(
     /** @type {number} */
     index,
+    /** @type {MathNode} */
+    child,
+  ) {
+    this.replaceChildRangeWithChildren(index, index - 1, [child]);
+  }
+
+  replaceChildRangeWithChildren(
+    /** @type {number} */
+    fromIndex,
+    /** @type {number} */
+    toIndex,
     /** @type {Array<MathNode>} */
     inputChildren
   ) {
     // Please do not modify removed as removed can
     // be in use as a member of a sub-tree of the inputChildren.
-    const removed = this.children[index];
     let toBeShiftedDown = [];
-    for (let i = index + 1; i < this.children.length; i++) {
+    for (let i = toIndex + 1; i < this.children.length; i++) {
       toBeShiftedDown.push(this.children[i]);
     }
-    this.children.length = index;
+    this.children.length = fromIndex;
     for (let i = 0; i < inputChildren.length; i++) {
       this.appendChild(inputChildren[i]);
     }
     for (let i = 0; i < toBeShiftedDown.length; i++) {
       this.appendChild(toBeShiftedDown[i]);
     }
-    return removed;
+  }
+
+  isAtomWithLeftmostCursor() {
+    if (this.type.type !== knownTypes.atom.type) {
+      return false;
+    }
+    let offset = window.getSelection().getRangeAt(0).startOffset;
+    return offset === 0;
+  }
+
+  isAtomWithRightmostCursor() {
+    if (this.type.type !== knownTypes.atom.type) {
+      return false;
+    }
+    let offset = window.getSelection().getRangeAt(0).startOffset;
+    return offset === this.element.textContent.length;
   }
 
   updateBackspace(/** @type {KeyboardEvent} */ event) {
     if (this.parent === null) {
       return;
     }
-    if (this.parent.type.type === knownTypes.denominator.type || this.parent.type.type === knownTypes.numerator.type) {
-      let offset = window.getSelection().getRangeAt(0).startOffset;
-      if (offset === 0) {
-        this.parent.parent.dissoveFraction(event);
-      }
+    if (this.positionCaretBeforeKeyEvents !== 0 || this.type.type !== knownTypes.atom.type) {
+      return;
     }
   }
 
-  dissoveFraction() {
-    let numeratorContent = this.children[0].children[0];
-    let denominatorContent = this.children[1].children[0];
-    this.parent.replaceChildAtPositionWithChildren(this.indexInParent, [numeratorContent, denominatorContent]);
+  makeHorizontalOperator(
+    /** @type {string} */
+    key,
+  ) {
+    if (this.parent === null) {
+      return;
+    }
+    const parent = this.parent;
+    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      return;
+    }
+    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.atomImmutable(key));
+    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.atom());
+    parent.updateDOM();
+    parent.children[this.indexInParent + 2].focus(null);
   }
 
   makeFractionNumerator() {
@@ -448,20 +609,20 @@ class MathNode {
     const fraction = mathNodeFactory.fractionEmptyDenominator(this);
     oldParent.replaceChildAtPosition(oldIndexInParent, fraction);
     fraction.parent.updateDOMRecursive(0);
-    fraction.children[1].focus();
+    fraction.children[1].focus(null);
   }
 
-  focus() {
+  focus(desiredPositionUnused) {
     if (this.type.type === knownTypes.atom.type) {
       if (this.element !== null) {
-        this.element.focus();
+        this.element.focus(desiredPositionUnused);
       }
       return;
     }
     if (this.children.length < 1) {
       return;
     }
-    this.children[0].focus();
+    this.children[0].focus(desiredPositionUnused);
   }
 
   toString(indentationLevel) {

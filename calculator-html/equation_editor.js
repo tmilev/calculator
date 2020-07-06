@@ -8,12 +8,27 @@ if (module === undefined) {
 }
 
 class MathNodeType {
-  constructor(input) {
+
+  normalizeConstructorInput(input) {
     for (let label in knownTypeDefaults) {
       if (!(label in input)) {
         input[label] = knownTypeDefaults[label];
       }
     }
+    if (input["arrows"] === undefined) {
+      input["arrows"] = knownTypeDefaultsArrows;
+      return;
+    }
+    for (let label in knownTypeDefaultsArrows) {
+      if (!label in input["arrows"]) {
+        input["arrows"][label] = knownTypeDefaultsArrows[label];
+      }
+    }
+  }
+
+  constructor(input) {
+    this.normalizeConstructorInput(input);
+    this.arrows = input["arrows"];
     this.type = input["type"];
     this.borderStyle = input["borderStyle"];
     this.borderBottom = input["borderBottom"];
@@ -32,7 +47,26 @@ const knownTypeDefaults = {
   "borderBottom": "",
   "borderStyle": "",
   "scale": 1,
+};
+
+class ArrowMotionTypes {
+  constructor() {
+    this.parentForward = "parentForward";
+    this.parent = "parent";
+    this.leftmostChild = "leftmostChild";
+    this.leftSibling = "leftSibling";
+    this.rightSibling = "rightSibling";
+  }
 }
+
+let arrowMotion = new ArrowMotionTypes();
+
+const knownTypeDefaultsArrows = {
+  "arrowUp": [arrowMotion.parent],
+  "arrowDown": [arrowMotion.leftmostChild],
+  "arrowLeft": [arrowMotion.leftSibling],
+  "arrowRight": [arrowMotion.rightSibling],
+};
 
 const knownTypes = {
   root: new MathNodeType({
@@ -68,6 +102,9 @@ const knownTypes = {
     "type": "denominator",
     "display": "block",
     "scale": 0.93,
+    "arrows": {
+      "arrowUp": [arrowMotion.parent, arrowMotion]
+    },
   }),
 };
 
@@ -244,11 +281,68 @@ class MathNode {
       case "/":
         this.makeFractionNumerator(event);
         return;
+      case "ArrowUp":
+      case "ArrowDown":
+      case "ArrowLeft":
+      case "ArrowRight":
+        this.arrow(event, key);
+        return;
       case "Backspace":
         this.updateBackspace(event);
         return;
       default:
         return;
+    }
+  }
+
+  arrow(
+    /** @type {string} */
+    key,
+  ) {
+    /** @type {string[]} */
+    const arrowArray = this.type.arrows[key];
+    let childToFocus = this;
+    for (let i = 0; i < arrowArray.length; i++) {
+      childToFocus = this.processOneArrow(childToFocus, arrowArray[i]);
+    }
+    childToFocus.focus();
+  }
+
+  processOneArrow(
+    /** @type {string}*/ key,
+    /** @type {MathNode}*/ childToFocus,
+    /** @type {string} */ type,
+  ) {
+    if (type === arrowMotion.parent) {
+      if (childToFocus.parent === null) {
+        return childToFocus;
+      }
+      return childToFocus.parent;
+    }
+    if (type === arrowMotion.parentForward) {
+      if (childToFocus.parent === null) {
+        return childToFocus;
+      }
+      return childToFocus.parent(key);
+    }
+    if (type === arrowMotion.rightSibling) {
+      return childToFocus.toTheRightOrSelf();
+    }
+  }
+
+  // Returns first MathNode atom that lies to the right of 
+  // the present element or null if there is no such element. 
+  atomToTheRight() {
+    if (this.parent === null) {
+      return null;
+    }
+    return this.parent.to
+  }
+
+  toTheRightOf(/** @type{number}*/ childIndex) {
+    childIndex++;
+    if (childIndex < this.children.length) {
+      return this.children[childIndex];
     }
   }
 

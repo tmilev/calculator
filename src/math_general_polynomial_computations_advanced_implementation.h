@@ -1460,7 +1460,6 @@ bool PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::factor(
     this->current = this->nonReduced.popLastObject();
     // The algorithm is allowed to store state between factorization attempts.
     if (!algorithm.oneFactor(comments, commentsOnFailure)) {
-      global.comments << "DEBUG: GOT TO HERE";
       return false;
     }
   }

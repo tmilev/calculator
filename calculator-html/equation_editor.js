@@ -38,6 +38,10 @@ class MathNodeType {
     this.display = input["display"];
     this.scale = input["scale"];
     this.padding = input["padding"];
+    this.flexDirection = input["flexDirection"];
+    this.justifyContent = input["justifyContent"];
+    this.alignContent = input["alignContent"];
+    this.alignItems = input["alignItems"];
   }
 }
 
@@ -47,6 +51,10 @@ const knownTypeDefaults = {
   "borderBottom": "",
   "borderStyle": "",
   "scale": 1,
+  "flexDirection": "",
+  "justifyContent": "",
+  "alignContent": "",
+  "alignItems": "",
 };
 
 class ArrowMotionTypes {
@@ -82,15 +90,33 @@ const knownTypes = {
     "type": "atomImmutable",
     "minHeightScale": 1,
   }),
+  verticalMath: new MathNodeType({
+    "type": "verticalMath",
+    "display": "flex",
+    "flexDirection": "column",
+    "alignContent": "center",
+    "alignItems": "center",
+    "justifyContent": "center",
+  }),
   // Horizontally laid out math such as "x+2".
   // ["x", "+" 2].
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
+    "display": "flex",
+    "flexDirection": "row",
+    "justifyContent": "center",
+    "alignContent": "center",
+    "alignItems": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
+    "display": "flex",
+    "flexDirection": "column",
+    "justifyContent": "center",
+    "alignContent": "center",
+    "alignItems": "center",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
@@ -120,10 +146,19 @@ class MathNodeFactory {
     /** @type {MathNode|null} */
     content
   ) {
+    const result = new MathNode(knownTypes.horizontalMath);
+    const element = this.verticalMath(content);
+    result.appendChild(element);
+    return result;
+  }
+  verticalMath(
+    /** @type {MathNode|null} */
+    content
+  ) {
+    const result = new MathNode(knownTypes.verticalMath);
     if (content === null) {
       content = this.atom();
     }
-    const result = new MathNode(knownTypes.horizontalMath);
     result.appendChild(content);
     return result;
   }
@@ -132,6 +167,10 @@ class MathNodeFactory {
     result.appendChild(this.horizontalMath(null));
     return result;
   }
+  verticalMathWithAtomImmutable(key) {
+    return this.verticalMath(this.atomImmutable(key));
+  }
+
   atomImmutable(
     /** @type {string} */
     content
@@ -224,6 +263,18 @@ class MathNode {
     this.element.style.display = this.type.display;
     this.element.style.minHeight = this.type.minHeightScale * fontSize;
     this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
+    if (this.type.flexDirection !== "") {
+      this.element.style.flexDirection = this.type.flexDirection;
+    }
+    if (this.type.justifyContent !== "") {
+      this.element.style.justifyContent = this.type.justifyContent;
+    }
+    if (this.type.alignContent !== "") {
+      this.element.style.alignContent = this.element.style.alignContent;
+    }
+    if (this.type.alignItems !== "") {
+      this.element.style.alignItems = this.element.style.alignItems;
+    }
     if (this.type.scale !== 1) {
       this.element.style.transform = `scale(${this.type.scale},${this.type.scale})`;
     }
@@ -496,10 +547,15 @@ class MathNode {
   }
 
   appendChild(/** @type{MathNode} */ child) {
-    if (
-      child.type.type === knownTypes.horizontalMath.type &&
-      this.type.type === knownTypes.horizontalMath.type
-    ) {
+    let needsNormalization = false;
+    if (child.type.type === knownTypes.horizontalMath.type &&
+      this.type.type === knownTypes.horizontalMath.type) {
+      needsNormalization = true;
+    }
+    if (child.type.type === knownTypes.verticalMath.type && this.type.type == knownTypes.verticalMath.type) {
+      needsNormalization = true;
+    }
+    if (needsNormalization) {
       // Horizontally laid-out math not allowed to contain other 
       // horizontally laid-out math.
       // As an example, we give the LaTeX expression a+b+{c+d},
@@ -587,15 +643,24 @@ class MathNode {
     /** @type {string} */
     key,
   ) {
-    if (this.parent === null) {
+    let parent = this.parent;
+    if (parent === null) {
       return;
     }
-    const parent = this.parent;
+    // Contained in a vertical math element?
+    if (parent.type.type !== knownTypes.verticalMath.type) {
+      return;
+    }
+    parent = parent.parent;
+    if (parent === null) {
+      return;
+    }
+    // Contained in vertical math element inside a horizontal math element?
     if (parent.type.type !== knownTypes.horizontalMath.type) {
       return;
     }
-    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.atomImmutable(key));
-    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.atom());
+    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.verticalMathWithAtomImmutable(key));
+    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.verticalMath(null));
     parent.updateDOM();
     parent.children[this.indexInParent + 2].focus(null);
   }

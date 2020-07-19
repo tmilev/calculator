@@ -1,10 +1,17 @@
 <html>
+<link type="text/css" rel="stylesheet" href="/html-common/mathquill/mathquill.css">
+<link type="text/css" rel="stylesheet" href="/html-common/jquery_ui/jquery-ui.css">
+<script src="/html-common/jquery/jquery.min.js"></script>
+<script src="/html-common/mathquill/mathquill.js"></script>
 <script type="text/javascript" src="equation_editor.js"></script>
 
-<body onload="new EquationEditor(document.getElementById('equation-editor'))">
+
+<body onload="initialize();">
   Equation editor:<div id="equation-editor" style="font-size: 36px;"></div>
 
   <div id="debug"></div>
+  <br>
+  Mathquill:<div id="mq-editor"></div>
 </body>
 
 </html>

@@ -711,6 +711,11 @@ function writeDebugInfo() {
   document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toString();
 }
 
+function initialize() {
+  new EquationEditor(document.getElementById('equation-editor'));
+  MathQuill.getInterface(2).MathField(document.getElementById('mq-editor'));
+}
+
 module.exports = {
   EquationEditor,
 };

@@ -1319,11 +1319,7 @@ unsigned int AffineHyperplane<Coefficient>::hashFunction() const {
 
 class AffineHyperplanes: public List<AffineHyperplane<Rational> > {
 public:
-  std::string DebugString;
   void toString(std::string& output);
-  void ComputeDebugString() {
-    this->toString(this->DebugString);
-  }
 };
 
 class AffineCone {
@@ -1338,7 +1334,7 @@ public:
   bool wallIsInternalInCone(AffineHyperplane<Rational>& theKillerCandidate);
   // The below function returns true if the system of homogeneous linear inequalities Ax<=b
   // has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-  //  bool systemLinearInequalitiesHasSolution
+  // bool systemLinearInequalitiesHasSolution
   //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
   bool splitByAffineHyperplane(AffineHyperplane<Rational>& theKillerPlane, AffineCones& output);
 };

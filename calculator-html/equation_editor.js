@@ -45,6 +45,9 @@ class MathNodeType {
     this.verticalAlign = input["verticalAlign"];
     this.margin = input["margin"];
     this.outline = input["outline"];
+    this.fontSize = input["fontSize"];
+    this.whiteSpace = input["whiteSpace"];
+    this.textAlign = input["textAlign"];
   }
 }
 
@@ -61,6 +64,9 @@ const knownTypeDefaults = {
   "verticalAlign": "",
   "margin": "",
   "padding": "",
+  "fontSize": "",
+  "whiteSpace": "",
+  "textAlign": "",
 };
 
 class ArrowMotionTypes {
@@ -80,29 +86,39 @@ const knownTypeDefaultsArrows = {
   "ArrowRight": [arrowMotion.firstAtomToTheRight],
 };
 
+const defaultScale = 0.9;
+const defaultScalePercent = `${defaultScale * 100}%`;
+const atomPad = 0.02;
+const verticalAlign = 0.31;
+
 const knownTypes = {
   root: new MathNodeType({
     "type": "root",
     "borderStyle": "1px solid black",
-    "padding": "2px",
+    "padding": `${atomPad}em`,
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
     "minHeightScale": 1,
-    "padding": "2px",
+    "padding": `${0.02}em`,
     "outline": "0px solid transparent",
-    "justifyContent": "center",
-    "alignContent": "center",
-    "verticalAlign": "center",
+    // "justifyContent": "center",
+    // "alignContent": "center",
+    // "verticalAlign": "center",
+    // "whiteSpace": "nowrap",
+    // "width": "100%",
   }),
   // A math expression with no children that is non-editable. 
   // Includes most math operators such as "+". 
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
     "minHeightScale": 1,
-    "padding": "2px",
+    "padding": `${atomPad}em`,
+    "justifyContent": "center",
+    "alignContent": "center",
+    "verticalAlign": "center",
   }),
   verticalMath: new MathNodeType({
     "type": "verticalMath",
@@ -117,15 +133,15 @@ const knownTypes = {
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
-    "display": "flex",
-    "flexDirection": "row",
-    "justifyContent": "center",
-    "alignContent": "center",
-    //    "alignItems": "center",
+    "verticalAlign": "top",
+    "whiteSpace": "nowrap",
+    "width": "100%",
+    "textAlign": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
+    "verticalAlign": `${verticalAlign}em`,
     // "display": "flex",
     // "flexDirection": "column",
     // "justifyContent": "center",
@@ -138,21 +154,25 @@ const knownTypes = {
     "type": "numerator",
     "display": "block",
     "borderBottom": "1px solid black",
-    "scale": 0.9,
+    "fontSize": defaultScalePercent,
+    // "scale": `${defaultScale}`,
     "arrows": {
       "ArrowUp": [arrowMotion.firstAtomToTheLeft],
       "ArrowDown": [arrowMotion.firstAtomToTheRight],
     },
+    // "verticalAlign": "-1em",
   }),
   // Represents the denominator y of a fraction x/y.
   denominator: new MathNodeType({
     "type": "denominator",
     "display": "block",
-    "scale": 0.6,
+    "fontSize": defaultScalePercent,
+    // "scale": `${defaultScale}`,
     "arrows": {
       "ArrowUp": [arrowMotion.firstAtomToTheLeft],
       "ArrowDown": [arrowMotion.firstAtomToTheRight],
     },
+    // "verticalAlign": "-1em",
   }),
 };
 
@@ -287,6 +307,15 @@ class MathNode {
     this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
+    if (this.type.textAlign !== "") {
+      this.element.style.textAlign = this.type.textAlign;
+    }
+    if (this.type.whiteSpace !== "") {
+      this.element.style.whiteSpace = this.type.whiteSpace;
+    }
+    if (this.type.fontSize !== "") {
+      this.element.style.fontSize = this.type.fontSize;
+    }
     if (this.type.flexDirection !== "") {
       this.element.style.flexDirection = this.type.flexDirection;
     }

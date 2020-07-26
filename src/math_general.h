@@ -339,7 +339,7 @@ public:
     int result = - 1;
     if (!this->totalDegree().isSmallInteger(&result)) {
       global.fatal
-      << "This is a programming error: total degree of monomial must be "
+      << "The total degree of monomial must be "
       << "a small integer to call this function. " << global.fatal;
     }
     return result;

@@ -42,6 +42,8 @@ class MathNodeType {
     this.justifyContent = input["justifyContent"];
     this.alignContent = input["alignContent"];
     this.alignItems = input["alignItems"];
+    this.verticalAlign = input["verticalAlign"];
+    this.margin = input["margin"];
   }
 }
 
@@ -55,6 +57,9 @@ const knownTypeDefaults = {
   "justifyContent": "",
   "alignContent": "",
   "alignItems": "",
+  "verticalAlign": "",
+  "margin": "",
+  "padding": "",
 };
 
 class ArrowMotionTypes {
@@ -80,50 +85,55 @@ const knownTypes = {
     "borderStyle": "1px solid black",
     "padding": "2px",
   }),
-  // A math expression with no children such as "x", "2", "+".
+  // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
     "minHeightScale": 1,
+    "padding": "2px",
   }),
+  // A math expression with no children that is non-editable. 
+  // Includes most math operators such as "+". 
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
     "minHeightScale": 1,
+    "padding": "2px",
   }),
   verticalMath: new MathNodeType({
     "type": "verticalMath",
-    "display": "flex",
-    "flexDirection": "column",
-    "alignContent": "center",
-    "alignItems": "center",
-    "justifyContent": "center",
+    // "display": "flex",
+    // "flexDirection": "column",
+    // "alignContent": "center",
+    // "alignItems": "center",
+    // "justifyContent": "center",
   }),
   // Horizontally laid out math such as "x+2".
   // ["x", "+" 2].
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
-    "display": "flex",
-    "flexDirection": "row",
-    "justifyContent": "center",
-    "alignContent": "center",
-    "alignItems": "center",
+    // "display": "flex",
+    // "flexDirection": "row",
+    //    "justifyContent": "center",
+    //    "alignContent": "center",
+    //    "alignItems": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
-    "display": "flex",
-    "flexDirection": "column",
-    "justifyContent": "center",
-    "alignContent": "center",
-    "alignItems": "center",
+    // "display": "flex",
+    // "flexDirection": "column",
+    // "justifyContent": "center",
+    // "alignContent": "center",
+    // "alignItems": "center",
+    "verticalAlign": "-1em",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
     "display": "block",
     "borderBottom": "1px solid black",
-    "scale": 0.93,
+    "scale": 0.6,
     "arrows": {
       "ArrowUp": [arrowMotion.firstAtomToTheLeft],
       "ArrowDown": [arrowMotion.firstAtomToTheRight],
@@ -133,7 +143,7 @@ const knownTypes = {
   denominator: new MathNodeType({
     "type": "denominator",
     "display": "block",
-    "scale": 0.93,
+    "scale": 0.6,
     "arrows": {
       "ArrowUp": [arrowMotion.firstAtomToTheLeft],
       "ArrowDown": [arrowMotion.firstAtomToTheRight],
@@ -147,8 +157,12 @@ class MathNodeFactory {
     content
   ) {
     const result = new MathNode(knownTypes.horizontalMath);
-    const element = this.verticalMath(content);
-    result.appendChild(element);
+    // const element = this.verticalMath(content);
+    // result.appendChild(element);
+    if (content === null) {
+      content = this.atom();
+    }
+    result.appendChild(content);
     return result;
   }
   verticalMath(
@@ -258,11 +272,15 @@ class MathNode {
     if (this.type.padding !== "") {
       this.element.style.padding = this.type.padding;
     }
+    if (this.type.margin !== "") {
+      this.element.style.margin = this.type.margin;
+    }
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
     this.element.style.minHeight = this.type.minHeightScale * fontSize;
     this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
+    this.element.style.verticalAlign = this.type.verticalAlign;
     if (this.type.flexDirection !== "") {
       this.element.style.flexDirection = this.type.flexDirection;
     }
@@ -644,19 +662,16 @@ class MathNode {
     key,
   ) {
     let parent = this.parent;
+    // Find closest ancestor node that's of type horizontal math.
+    while (parent !== null) {
+      if (parent.type.type === knownTypes.horizontalMath.type) {
+        break;
+      }
+      parent = parent.parent;
+    }
     if (parent === null) {
-      return;
-    }
-    // Contained in a vertical math element?
-    if (parent.type.type !== knownTypes.verticalMath.type) {
-      return;
-    }
-    parent = parent.parent;
-    if (parent === null) {
-      return;
-    }
-    // Contained in vertical math element inside a horizontal math element?
-    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      // No ancestor is of type horizontal math. 
+      console.log('Warning: could not find ancestor of type horizontal math.');
       return;
     }
     parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.verticalMathWithAtomImmutable(key));

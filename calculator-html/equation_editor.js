@@ -44,6 +44,7 @@ class MathNodeType {
     this.alignItems = input["alignItems"];
     this.verticalAlign = input["verticalAlign"];
     this.margin = input["margin"];
+    this.outline = input["outline"];
   }
 }
 
@@ -91,6 +92,10 @@ const knownTypes = {
     "type": "atom",
     "minHeightScale": 1,
     "padding": "2px",
+    "outline": "0px solid transparent",
+    "justifyContent": "center",
+    "alignContent": "center",
+    "verticalAlign": "center",
   }),
   // A math expression with no children that is non-editable. 
   // Includes most math operators such as "+". 
@@ -112,10 +117,10 @@ const knownTypes = {
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
-    // "display": "flex",
-    // "flexDirection": "row",
-    //    "justifyContent": "center",
-    //    "alignContent": "center",
+    "display": "flex",
+    "flexDirection": "row",
+    "justifyContent": "center",
+    "alignContent": "center",
     //    "alignItems": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
@@ -126,14 +131,14 @@ const knownTypes = {
     // "justifyContent": "center",
     // "alignContent": "center",
     // "alignItems": "center",
-    "verticalAlign": "-1em",
+    // "verticalAlign": "-2em",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
     "display": "block",
     "borderBottom": "1px solid black",
-    "scale": 0.6,
+    "scale": 0.9,
     "arrows": {
       "ArrowUp": [arrowMotion.firstAtomToTheLeft],
       "ArrowDown": [arrowMotion.firstAtomToTheRight],
@@ -281,6 +286,7 @@ class MathNode {
     this.element.style.minHeight = this.type.minHeightScale * fontSize;
     this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
     this.element.style.verticalAlign = this.type.verticalAlign;
+    this.element.style.outline = this.type.outline;
     if (this.type.flexDirection !== "") {
       this.element.style.flexDirection = this.type.flexDirection;
     }
@@ -352,7 +358,7 @@ class MathNode {
   }
 
   handleFocus(e) {
-    this.element.style.background = "lightblue";
+    this.element.style.background = "#fafafa";
   }
 
   handleBlur(e) {

@@ -86,8 +86,10 @@ const knownTypeDefaultsArrows = {
   "ArrowRight": arrowMotion.firstAtomToTheRight,
 };
 
-const defaultScale = 0.9;
-const defaultScalePercent = `${defaultScale * 100}%`;
+const defaultFractionScale = 0.9;
+const defaultFractionScalePercent = `${defaultFractionScale * 100}%`;
+const defaultSubSuperScriptScale = 0.85;
+const defaultSubSuperScriptScalePercent = `${defaultSubSuperScriptScale}%`;
 const atomPad = 0.02;
 const verticalAlign = 0.31;
 
@@ -131,8 +133,8 @@ const knownTypes = {
     "type": "numerator",
     "display": "block",
     "borderBottom": "1px solid black",
-    "fontSize": defaultScalePercent,
-    // "scale": `${defaultScale}`,
+    "fontSize": defaultFractionScalePercent,
+    "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
@@ -143,13 +145,19 @@ const knownTypes = {
   denominator: new MathNodeType({
     "type": "denominator",
     "display": "block",
-    "fontSize": defaultScalePercent,
-    // "scale": `${defaultScale}`,
+    "fontSize": defaultFractionScalePercent,
+    "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
     // "verticalAlign": "-1em",
+  }),
+  exponent: new MathNodeType({
+    "type": "exponent",
+    // "verticalAlign": "-1em",
+    "minHeightScale": defaultSubSuperScriptScale,
+    "fontSize": defaultSubSuperScriptScalePercent,
   }),
 };
 
@@ -186,6 +194,7 @@ class MathNodeFactory {
     result.initialContent = operator;
     return result;
   }
+  /** @returns {MathNode} */
   fractionEmptyDenominator(/** @type{MathNode}*/ numeratorContent) {
     const fraction = new MathNode(knownTypes.fraction);
     const numerator = new MathNode(knownTypes.numerator);
@@ -195,6 +204,12 @@ class MathNodeFactory {
     fraction.appendChild(numerator);
     fraction.appendChild(denominator);
     return fraction;
+  }
+  /** @returns {MathNode} */
+  exponent() {
+    const exponent = new MathNode(knownTypes.exponent);
+    exponent.appendChild(this.horizontalMath(null));
+    return exponent;
   }
 }
 
@@ -364,7 +379,7 @@ class MathNode {
   }
 
   handleFocus(e) {
-    this.element.style.background = "#fafafa";
+    this.element.style.background = "#f0f0f0";
   }
 
   handleBlur(e) {
@@ -391,6 +406,9 @@ class MathNode {
       case "+":
       case "-":
         this.makeHorizontalOperator(key);
+        return;
+      case "^":
+        this.makeExponent();
         return;
       case "ArrowLeft":
       case "ArrowRight":
@@ -557,6 +575,7 @@ class MathNode {
       case "-":
       case "*":
       case "/":
+      case "^":
       case "ArrowDown":
       case "ArrowUp":
         event.preventDefault();
@@ -712,10 +731,17 @@ class MathNode {
     oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(""));
     oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
     oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(""));
-    if (oldIndexInParent === oldParent.children.length - 1) {
-    }
     fraction.parent.updateDOMRecursive(0);
     fraction.children[1].focus(- 1);
+  }
+  makeExponent() {
+    if (this.parent === null) {
+      return;
+    }
+    const exponent = mathNodeFactory.exponent();
+    this.parent.insertChildAtPosition(this.indexInParent + 1, exponent);
+    this.parent.updateDOMRecursive(0);
+    exponent.focus(- 1);
   }
 
   /** Focuses the HTMLElement that belongs to the math node.

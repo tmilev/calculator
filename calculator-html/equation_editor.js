@@ -80,10 +80,10 @@ class ArrowMotionTypes {
 let arrowMotion = new ArrowMotionTypes();
 
 const knownTypeDefaultsArrows = {
-  "ArrowUp": [arrowMotion.parentForward],
-  "ArrowDown": [arrowMotion.parentForward],
-  "ArrowLeft": [arrowMotion.firstAtomToTheLeft],
-  "ArrowRight": [arrowMotion.firstAtomToTheRight],
+  "ArrowUp": arrowMotion.parentForward,
+  "ArrowDown": arrowMotion.parentForward,
+  "ArrowLeft": arrowMotion.firstAtomToTheLeft,
+  "ArrowRight": arrowMotion.firstAtomToTheRight,
 };
 
 const defaultScale = 0.9;
@@ -104,11 +104,12 @@ const knownTypes = {
     "minHeightScale": 1,
     "padding": `${0.02}em`,
     "outline": "0px solid transparent",
-    // "justifyContent": "center",
-    // "alignContent": "center",
-    // "verticalAlign": "center",
-    // "whiteSpace": "nowrap",
-    // "width": "100%",
+  }),
+  // A non-editable math expression/operator such as "+" or "-".
+  atomImmutable: new MathNodeType({
+    "type": "atomImmutable",
+    "minHeightScale": 1,
+    "padding": `${0.02}em`,
   }),
   // Horizontally laid out math such as "x+2". 
   // The example "x+2" consists of the three elements "x", "+" and 2.
@@ -133,8 +134,8 @@ const knownTypes = {
     "fontSize": defaultScalePercent,
     // "scale": `${defaultScale}`,
     "arrows": {
-      "ArrowUp": [arrowMotion.firstAtomToTheLeft],
-      "ArrowDown": [arrowMotion.firstAtomToTheRight],
+      "ArrowUp": arrowMotion.firstAtomToTheLeft,
+      "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
     // "verticalAlign": "-1em",
   }),
@@ -145,8 +146,8 @@ const knownTypes = {
     "fontSize": defaultScalePercent,
     // "scale": `${defaultScale}`,
     "arrows": {
-      "ArrowUp": [arrowMotion.firstAtomToTheLeft],
-      "ArrowDown": [arrowMotion.firstAtomToTheRight],
+      "ArrowUp": arrowMotion.firstAtomToTheLeft,
+      "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
     // "verticalAlign": "-1em",
   }),
@@ -159,7 +160,7 @@ class MathNodeFactory {
   ) {
     const result = new MathNode(knownTypes.horizontalMath);
     if (content === null) {
-      content = this.atom("");
+      content = this.atom();
     }
     result.appendChild(content);
     return result;
@@ -171,10 +172,18 @@ class MathNodeFactory {
   }
   atom(
     /** @type {string} */
-    operator
+    initialContent
   ) {
     const result = new MathNode(knownTypes.atom);
-    result.operator = operator;
+    result.initialContent = initialContent;
+    return result;
+  }
+  atomImmutable(
+    /** @type {string} */
+    operator
+  ) {
+    const result = new MathNode(knownTypes.atomImmutable);
+    result.initialContent = operator;
     return result;
   }
   fractionEmptyDenominator(/** @type{MathNode}*/ numeratorContent) {
@@ -192,6 +201,18 @@ class MathNodeFactory {
 var mathNodeFactory = new MathNodeFactory();
 /** @type {EquationEditor} */
 var lastCreatedEquationEditor = null;
+
+class AtomWithPosition {
+  constructor(
+    /** @type {MathNode|null} */
+    element,
+    /** @type {number} */
+    position,
+  ) {
+    this.element = element;
+    this.position = position;
+  }
+}
 
 class EquationEditor {
   constructor(
@@ -231,7 +252,7 @@ class MathNode {
     /** @type {number} */
     this.positionCaretBeforeKeyEvents = - 1;
     /** @type {string} */
-    this.operator = "";
+    this.initialContent = "";
   }
 
   createDOMElementIfMissing() {
@@ -288,8 +309,8 @@ class MathNode {
       this.element.style.transform = `scale(${this.type.scale},${this.type.scale})`;
     }
     this.element.innerHTML = "";
-    if (this.operator !== "") {
-      this.element.textContent = this.operator;
+    if (this.initialContent !== "") {
+      this.element.textContent = this.initialContent;
     }
     this.element.setAttribute("mathTagName", this.type.type);
     this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
@@ -406,9 +427,10 @@ class MathNode {
     if (this.arrowAbsorbedByAtom(key)) {
       return;
     }
-    const childToFocus = this.getChildToFocusFromKey(key);
-    if (childToFocus !== null) {
-      childToFocus.focus(null);
+    /** @type {AtomWithPosition} */
+    const toFocus = this.getAtomToFocus(key);
+    if (toFocus.element !== null) {
+      toFocus.element.focus(toFocus.position);
     }
   }
 
@@ -428,37 +450,29 @@ class MathNode {
     return false;
   }
 
-  getChildToFocusFromKey(
-    /** @type {string} */
-    key,
-  ) {
-    /** @type {string[]} */
-    const arrowArray = this.type.arrows[key];
-    let childToFocus = this;
-    for (let i = 0; i < arrowArray.length; i++) {
-      childToFocus = this.getChildToFocusFromAction(key, childToFocus, arrowArray[i]);
-    }
-    return childToFocus;
+  /** @returns {AtomWithPosition} */
+  getAtomToFocus(/** @type {string} */ key) {
+    return this.getAtomToFocusFromAction(key, this.type.arrows[key]);
   }
 
-  getChildToFocusFromAction(
+  /** @returns {AtomWithPosition} */
+  getAtomToFocusFromAction(
     /** @type {string} */ key,
-    /** @type {MathNode}*/ childToFocus,
     /** @type {string} */ arrowType,
   ) {
     if (arrowType === arrowMotion.parentForward) {
-      if (childToFocus.parent === null) {
-        return childToFocus;
+      if (this.parent === null) {
+        return this;
       }
-      return childToFocus.parent.getChildToFocusFromKey(key);
+      return this.parent.getAtomToFocus(key);
     }
     if (arrowType === arrowMotion.firstAtomToTheLeft) {
-      return childToFocus.firstAtomToTheLeft();
+      return new AtomWithPosition(this.firstAtomToTheLeft(), 1);
     }
     if (arrowType === arrowMotion.firstAtomToTheRight) {
-      return childToFocus.firstAtomToTheRight();
+      return new AtomWithPosition(this.firstAtomToTheRight(), - 1);
     }
-    return null;
+    return new AtomWithPosition(null, - 1);
   }
 
   // Returns first MathNode atom that lies to the right of 
@@ -543,10 +557,13 @@ class MathNode {
       case "-":
       case "*":
       case "/":
+      case "ArrowDown":
+      case "ArrowUp":
         event.preventDefault();
         return;
     }
   }
+
   storePositionCarretBeforeKeyEvents() {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
@@ -650,6 +667,13 @@ class MathNode {
     key,
   ) {
     let parent = this.parent;
+    // - 1 stands for start ("+11"), 0 for middle ("1+1"), 1 for end ("11+"). 
+    let positionOperator = 1;
+    if (this.positionCaretBeforeKeyEvents === 0 && this.element.textContent.length > 0) {
+      positionOperator = - 1;
+    } else if (this.positionCaretBeforeKeyEvents > 0 && this.positionCaretBeforeKeyEvents < this.element.textContent.length) {
+      positionOperator = 0;
+    }
     // Find closest ancestor node that's of type horizontal math.
     while (parent !== null) {
       if (parent.type.type === knownTypes.horizontalMath.type) {
@@ -662,10 +686,19 @@ class MathNode {
       console.log('Warning: could not find ancestor of type horizontal math.');
       return;
     }
-    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.atom(key));
-    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.atom(""));
+    let oldIndexInParent = this.indexInParent;
+    if (positionOperator === 1) {
+      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
+      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom());
+    } else if (positionOperator === 0) {
+      let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
+      let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
+      parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(leftContent));
+      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
+      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(rightContent));
+    }
     parent.updateDOM();
-    parent.children[this.indexInParent + 2].focus(null);
+    parent.children[oldIndexInParent + 2].focus(- 1);
   }
 
   makeFractionNumerator() {
@@ -675,22 +708,48 @@ class MathNode {
     const oldParent = this.parent;
     const oldIndexInParent = this.indexInParent;
     const fraction = mathNodeFactory.fractionEmptyDenominator(this);
-    oldParent.replaceChildAtPosition(oldIndexInParent, fraction);
+
+    oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(""));
+    oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
+    oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(""));
+    if (oldIndexInParent === oldParent.children.length - 1) {
+    }
     fraction.parent.updateDOMRecursive(0);
-    fraction.children[1].focus(null);
+    fraction.children[1].focus(- 1);
   }
 
-  focus(desiredPositionUnused) {
+  /** Focuses the HTMLElement that belongs to the math node.
+   * 
+   * The endToFocus parameter denotes where the focus should occur.
+   * At the moment, negative endToFocus indicates the caret should
+   * be on the element's left, and positive endToFocus indicates the caret 
+   * should go on the right.
+   */
+  focus(endToFocus) {
     if (this.type.type === knownTypes.atom.type) {
       if (this.element !== null) {
-        this.element.focus(desiredPositionUnused);
+        this.element.focus(null);
+        let position = 0;
+        if (endToFocus > 0) {
+          position = this.element.textContent.length;
+        }
+        this.setCursorPosition(position);
       }
       return;
     }
     if (this.children.length < 1) {
       return;
     }
-    this.children[0].focus(desiredPositionUnused);
+    this.children[0].focus(endToFocus);
+  }
+
+  setCursorPosition(/** @type {number}*/ position) {
+    var range = document.createRange();
+    var selection = window.getSelection();
+    range.setStart(this.element, position);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   toString(indentationLevel) {
@@ -721,4 +780,5 @@ function initialize() {
 
 module.exports = {
   EquationEditor,
+  initialize
 };

@@ -110,26 +110,8 @@ const knownTypes = {
     // "whiteSpace": "nowrap",
     // "width": "100%",
   }),
-  // A math expression with no children that is non-editable. 
-  // Includes most math operators such as "+". 
-  atomImmutable: new MathNodeType({
-    "type": "atomImmutable",
-    "minHeightScale": 1,
-    "padding": `${atomPad}em`,
-    "justifyContent": "center",
-    "alignContent": "center",
-    "verticalAlign": "center",
-  }),
-  verticalMath: new MathNodeType({
-    "type": "verticalMath",
-    // "display": "flex",
-    // "flexDirection": "column",
-    // "alignContent": "center",
-    // "alignItems": "center",
-    // "justifyContent": "center",
-  }),
-  // Horizontally laid out math such as "x+2".
-  // ["x", "+" 2].
+  // Horizontally laid out math such as "x+2". 
+  // The example "x+2" consists of the three elements "x", "+" and 2.
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
@@ -142,12 +124,6 @@ const knownTypes = {
   fraction: new MathNodeType({
     "type": "fraction",
     "verticalAlign": `${verticalAlign}em`,
-    // "display": "flex",
-    // "flexDirection": "column",
-    // "justifyContent": "center",
-    // "alignContent": "center",
-    // "alignItems": "center",
-    // "verticalAlign": "-2em",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
@@ -182,21 +158,8 @@ class MathNodeFactory {
     content
   ) {
     const result = new MathNode(knownTypes.horizontalMath);
-    // const element = this.verticalMath(content);
-    // result.appendChild(element);
     if (content === null) {
-      content = this.atom();
-    }
-    result.appendChild(content);
-    return result;
-  }
-  verticalMath(
-    /** @type {MathNode|null} */
-    content
-  ) {
-    const result = new MathNode(knownTypes.verticalMath);
-    if (content === null) {
-      content = this.atom();
+      content = this.atom("");
     }
     result.appendChild(content);
     return result;
@@ -206,20 +169,13 @@ class MathNodeFactory {
     result.appendChild(this.horizontalMath(null));
     return result;
   }
-  verticalMathWithAtomImmutable(key) {
-    return this.verticalMath(this.atomImmutable(key));
-  }
-
-  atomImmutable(
+  atom(
     /** @type {string} */
-    content
+    operator
   ) {
-    const result = new MathNode(knownTypes.atomImmutable);
-    result.operator = content;
+    const result = new MathNode(knownTypes.atom);
+    result.operator = operator;
     return result;
-  }
-  atom() {
-    return new MathNode(knownTypes.atom);
   }
   fractionEmptyDenominator(/** @type{MathNode}*/ numeratorContent) {
     const fraction = new MathNode(knownTypes.fraction);
@@ -605,9 +561,6 @@ class MathNode {
       this.type.type === knownTypes.horizontalMath.type) {
       needsNormalization = true;
     }
-    if (child.type.type === knownTypes.verticalMath.type && this.type.type == knownTypes.verticalMath.type) {
-      needsNormalization = true;
-    }
     if (needsNormalization) {
       // Horizontally laid-out math not allowed to contain other 
       // horizontally laid-out math.
@@ -709,8 +662,8 @@ class MathNode {
       console.log('Warning: could not find ancestor of type horizontal math.');
       return;
     }
-    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.verticalMathWithAtomImmutable(key));
-    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.verticalMath(null));
+    parent.insertChildAtPosition(this.indexInParent + 1, mathNodeFactory.atom(key));
+    parent.insertChildAtPosition(this.indexInParent + 2, mathNodeFactory.atom(""));
     parent.updateDOM();
     parent.children[this.indexInParent + 2].focus(null);
   }

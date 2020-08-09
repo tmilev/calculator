@@ -48,6 +48,9 @@ class MathNodeType {
     this.fontSize = input["fontSize"];
     this.whiteSpace = input["whiteSpace"];
     this.textAlign = input["textAlign"];
+    this.float = input["float"];
+    this.boxSizing = input["boxSizing"];
+    this.position = input["position"];
   }
 }
 
@@ -66,7 +69,10 @@ const knownTypeDefaults = {
   "padding": "",
   "fontSize": "",
   "whiteSpace": "",
+  "float": "",
   "textAlign": "",
+  "boxSizing": "border-box",
+  "position": "relative",
 };
 
 class ArrowMotionTypes {
@@ -88,23 +94,21 @@ const knownTypeDefaultsArrows = {
 
 const defaultFractionScale = 0.9;
 const defaultFractionScalePercent = `${defaultFractionScale * 100}%`;
-const defaultSubSuperScriptScale = 0.85;
-const defaultSubSuperScriptScalePercent = `${defaultSubSuperScriptScale}%`;
-const atomPad = 0.02;
-const verticalAlign = 0.31;
+const atomPad = `${0.02}em`;
 
 const knownTypes = {
   root: new MathNodeType({
     "type": "root",
     "borderStyle": "1px solid black",
-    "padding": `${atomPad}em`,
+    "padding": atomPad,
+    "position": "relative",
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
     "minHeightScale": 1,
-    "padding": `${0.02}em`,
+    "padding": atomPad,
     "outline": "0px solid transparent",
   }),
   // A non-editable math expression/operator such as "+" or "-".
@@ -118,15 +122,17 @@ const knownTypes = {
   // Not allowed to contain other horizontally laid out math elements.
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
-    "verticalAlign": "top",
     "whiteSpace": "nowrap",
     "width": "100%",
     "textAlign": "center",
+    "verticalAlign": "40%",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
-    "verticalAlign": `${verticalAlign}em`,
+    "position": "relative",
+    "verticalAlign": "-90%",
+    "float": "center",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
@@ -139,7 +145,8 @@ const knownTypes = {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
-    // "verticalAlign": "-1em",
+    "whiteSpace": "nowrap",
+    "textAlign": "center",
   }),
   // Represents the denominator y of a fraction x/y.
   denominator: new MathNodeType({
@@ -151,13 +158,15 @@ const knownTypes = {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
-    // "verticalAlign": "-1em",
+    // "float": "top",
+    //"width": "100%",
+    "textAlign": "center",
+    // "whiteSpace": "nowrap",
   }),
   exponent: new MathNodeType({
     "type": "exponent",
-    // "verticalAlign": "-1em",
-    "minHeightScale": defaultSubSuperScriptScale,
-    "fontSize": defaultSubSuperScriptScalePercent,
+    // "minHeightScale": defaultSubSuperScriptScale,
+    // "fontSize": defaultSubSuperScriptScalePercent,
   }),
 };
 
@@ -168,7 +177,7 @@ class MathNodeFactory {
   ) {
     const result = new MathNode(knownTypes.horizontalMath);
     if (content === null) {
-      content = this.atom();
+      content = this.atom("");
     }
     result.appendChild(content);
     return result;
@@ -245,6 +254,65 @@ class EquationEditor {
   toString() {
     return this.rootNode.toString(0);
   }
+  sendKeys(
+    /**@type {string[]} */
+    keys,
+  ) {
+    if (keys.length === 0) {
+      return;
+    }
+    let specialKeys = new Set(["+", "-", "*", "/", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]);
+    let key = keys[0];
+    if (!specialKeys.has(key)) {
+      this.dispatchInputToFirstFocusedChild(this.rootNode, key);
+    } else {
+      const eventsToSend = ["keydown", "keyup", "keypress"];
+      for (let i = 0; i < eventsToSend.length; i++) {
+        let event = new KeyboardEvent(
+          eventsToSend[i], {
+            key: key,
+          });
+        this.dispatchEventToFirstFocusedChild(this.rootNode, event);
+      }
+    }
+    setTimeout(() => {
+      this.sendKeys(keys.slice(1));
+    }, 400);
+  }
+  dispatchEventToFirstFocusedChild(
+    /** @type {MathNode} */
+    container,
+    event,
+  ) {
+    if (container.focused) {
+      container.element.dispatchEvent(event);
+      return true;
+    }
+    for (let i = 0; i < container.children.length; i++) {
+      if (this.dispatchEventToFirstFocusedChild(container.children[i], event)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  dispatchInputToFirstFocusedChild(
+    /** @type {MathNode} */
+    container,
+    content,
+  ) {
+    if (container.focused) {
+      container.element.textContent = content;
+      container.focus(1);
+      return true;
+    }
+    for (let i = 0; i < container.children.length; i++) {
+      if (this.dispatchInputToFirstFocusedChild(container.children[i], content)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class MathNode {
@@ -268,6 +336,8 @@ class MathNode {
     this.positionCaretBeforeKeyEvents = - 1;
     /** @type {string} */
     this.initialContent = "";
+    /** @type {boolean} */
+    this.focused = false;
   }
 
   createDOMElementIfMissing() {
@@ -295,7 +365,7 @@ class MathNode {
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
-    this.element.style.minHeight = this.type.minHeightScale * fontSize;
+    // this.element.style.minHeight = this.type.minHeightScale * fontSize;
     this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
@@ -326,6 +396,15 @@ class MathNode {
     this.element.innerHTML = "";
     if (this.initialContent !== "") {
       this.element.textContent = this.initialContent;
+    }
+    if (this.type.float !== "") {
+      this.element.style.cssFloat = this.type.float;
+    }
+    if (this.type.boxSizing !== "") {
+      this.element.style.boxSizing = this.type.boxSizing;
+    }
+    if (this.type.position !== "") {
+      this.element.style.position = this.type.position;
     }
     this.element.setAttribute("mathTagName", this.type.type);
     this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
@@ -380,10 +459,12 @@ class MathNode {
 
   handleFocus(e) {
     this.element.style.background = "#f0f0f0";
+    this.focused = true;
   }
 
   handleBlur(e) {
     this.element.style.background = "";
+    this.focused = false;
   }
 
   handleKeyUp(
@@ -708,7 +789,7 @@ class MathNode {
     let oldIndexInParent = this.indexInParent;
     if (positionOperator === 1) {
       parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
-      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom());
+      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(""));
     } else if (positionOperator === 0) {
       let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
       let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
@@ -741,7 +822,7 @@ class MathNode {
     const exponent = mathNodeFactory.exponent();
     this.parent.insertChildAtPosition(this.indexInParent + 1, exponent);
     this.parent.updateDOMRecursive(0);
-    exponent.focus(- 1);
+    exponent.children[0].focus(- 1);
   }
 
   /** Focuses the HTMLElement that belongs to the math node.
@@ -799,12 +880,24 @@ function writeDebugInfo() {
   document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toString();
 }
 
+/** @type {EquationEditor|null} */
+var defaultEquationEditorLocal = null;
+
 function initialize() {
-  new EquationEditor(document.getElementById('equation-editor'));
+  defaultEquationEditorLocal = new EquationEditor(document.getElementById('equation-editor'));
   MathQuill.getInterface(2).MathField(document.getElementById('mq-editor'));
 }
 
+function testEquationEditor() {
+  defaultEquationEditorLocal.rootNode.focus(- 1);
+  setTimeout(() => {
+    defaultEquationEditorLocal.sendKeys(["1", "+", "1", "/", "1", "+", "1", "/", "1", "+", "1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "+", "1", "/", "1"]);
+  }, 300);
+}
+
 module.exports = {
+  defaultEquationEditorLocal,
+  testEquationEditor,
   EquationEditor,
   initialize
 };

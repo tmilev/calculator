@@ -2270,7 +2270,7 @@ std::string WebWorker::toStringStatus() const {
     out << " Message at last ping: " << this->pingMessage;
   }
   if (this->status != "") {
-    out << "<br><b style =\"color:red\">Status: "
+    out << "<br><b style ='color:red'>Status: "
     << this->status << "</b><br>";
   }
   out << "Pipes: " << this->pipeWorkerToServerControls.toString()
@@ -2570,7 +2570,7 @@ std::string WebServer::toStringConnectionSummary() {
   << "<b>The following policies are quite strict and will be relaxed in the future.</b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
-  << "<br> " << this->MaxNumWorkersPerIPAdress
+  << "<br>" << this->MaxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, all connections from that IP address are terminated. ";
   return out.str();

@@ -36,7 +36,6 @@ class MathNodeType {
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
-    this.scale = input["scale"];
     this.padding = input["padding"];
     this.flexDirection = input["flexDirection"];
     this.justifyContent = input["justifyContent"];
@@ -59,7 +58,6 @@ const knownTypeDefaults = {
   "minHeightScale": 0,
   "borderBottom": "",
   "borderStyle": "",
-  "scale": 1,
   "flexDirection": "",
   "justifyContent": "",
   "alignContent": "",
@@ -72,7 +70,7 @@ const knownTypeDefaults = {
   "float": "",
   "textAlign": "",
   "boxSizing": "border-box",
-  "position": "relative",
+  "position": "",
 };
 
 class ArrowMotionTypes {
@@ -93,7 +91,6 @@ const knownTypeDefaultsArrows = {
 };
 
 const defaultFractionScale = 0.9;
-const defaultFractionScalePercent = `${defaultFractionScale * 100}%`;
 const atomPad = `${0.02}em`;
 
 const knownTypes = {
@@ -101,7 +98,6 @@ const knownTypes = {
     "type": "root",
     "borderStyle": "1px solid black",
     "padding": atomPad,
-    "position": "relative",
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -125,21 +121,17 @@ const knownTypes = {
     "whiteSpace": "nowrap",
     "width": "100%",
     "textAlign": "center",
-    "verticalAlign": "40%",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
   fraction: new MathNodeType({
     "type": "fraction",
-    "position": "relative",
-    "verticalAlign": "-90%",
-    "float": "center",
   }),
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
     "display": "block",
     "borderBottom": "1px solid black",
-    "fontSize": defaultFractionScalePercent,
+    "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
@@ -152,14 +144,12 @@ const knownTypes = {
   denominator: new MathNodeType({
     "type": "denominator",
     "display": "block",
-    "fontSize": defaultFractionScalePercent,
+    "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
       "ArrowUp": arrowMotion.firstAtomToTheLeft,
       "ArrowDown": arrowMotion.firstAtomToTheRight,
     },
-    // "float": "top",
-    //"width": "100%",
     "textAlign": "center",
     // "whiteSpace": "nowrap",
   }),
@@ -330,6 +320,12 @@ class MathNode {
     this.parent = null;
     /** @type {number} */
     this.indexInParent = - 1;
+    /** @type {number} */
+    this.fractionLineHeight = 0;
+    /** @type {number} */
+    this.heightFromChildren = 0;
+    /** @type {number} */
+    this.scale = 0;
     /** @type {HTMLElement} */
     this.externalDOM = null;
     /** @type {number} */
@@ -375,8 +371,10 @@ class MathNode {
     if (this.type.whiteSpace !== "") {
       this.element.style.whiteSpace = this.type.whiteSpace;
     }
+    this.scale = 1;
     if (this.type.fontSize !== "") {
-      this.element.style.fontSize = this.type.fontSize;
+      this.element.style.fontSize = `${this.type.fontSize * 100}%`;
+      this.scale = this.type.fontSize;
     }
     if (this.type.flexDirection !== "") {
       this.element.style.flexDirection = this.type.flexDirection;
@@ -389,9 +387,6 @@ class MathNode {
     }
     if (this.type.alignItems !== "") {
       this.element.style.alignItems = this.element.style.alignItems;
-    }
-    if (this.type.scale !== 1) {
-      this.element.style.transform = `scale(${this.type.scale},${this.type.scale})`;
     }
     this.element.innerHTML = "";
     if (this.initialContent !== "") {
@@ -406,6 +401,8 @@ class MathNode {
     if (this.type.position !== "") {
       this.element.style.position = this.type.position;
     }
+    this.fractionLineHeight = 0;
+    this.heightFromChildren = 0;
     this.element.setAttribute("mathTagName", this.type.type);
     this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
     this.element.addEventListener("keydown", (e) => { this.handleKeyDown(e); });
@@ -415,6 +412,11 @@ class MathNode {
 
   updateDOM() {
     this.updateDOMRecursive(0);
+    let current = this.parent;
+    while (current !== null) {
+      current.updateVerticalAlignment();
+      current = current.parent;
+    }
   }
 
   updateDOMRecursive(/** @type {number} */ depth) {
@@ -422,6 +424,7 @@ class MathNode {
       this.type.type === knownTypes.atom.type
     ) {
       this.createDOMElementIfMissing();
+      this.updateVerticalAlignment();
       return;
     }
     for (let i = 0; i < this.children.length; i++) {
@@ -433,8 +436,34 @@ class MathNode {
     for (let i = 0; i < this.children.length; i++) {
       this.element.appendChild(this.children[i].element);
     }
+    this.updateVerticalAlignment();
     if (depth === 0) {
       this.updateParentDOM(oldElement);
+    }
+  }
+
+  updateVerticalAlignment() {
+    this.computeMaximumHeight();
+    this.element.style.verticalAlign = `-${this.fractionLineHeight * 100}%`;
+  }
+
+  computeMaximumHeight() {
+    this.heightFromChildren = 0;
+    this.fractionLineHeight = 0;
+    if (this.type.type === knownTypes.fraction.type) {
+      for (let i = 0; i < this.children.length; i++) {
+        this.heightFromChildren += this.children[i].heightFromChildren;
+      }
+      this.fractionLineHeight = this.children[1].heightFromChildren / this.heightFromChildren;
+      return;
+    }
+    if (this.type.type === knownTypes.atom.type || this.type.type === knownTypes.atomImmutable.type) {
+      this.heightFromChildren = 1;
+      return;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      this.heightFromChildren = Math.max(child.heightFromChildren, this.heightFromChildren);
     }
   }
 

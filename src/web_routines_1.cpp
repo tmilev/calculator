@@ -47,7 +47,8 @@ public:
   void UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void FetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void initialize();
-  void PingCalculatorStatus();
+  // Ping authentication used for pings only, over localhost connections only.
+  void pingCalculatorStatus(const std::string& pingAuthentication);
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool VerifyRecaptcha(
@@ -59,17 +60,17 @@ public:
 
 class WebServerMonitor {
 public:
-  void BackupDatabaseIfNeeded();
+  void backupDatabaseIfNeeded();
   double timeAtLastBackup;
   int pidServer;
-  void Monitor(int pidServer);
-  void Restart();
+  void monitor(int pidServer, const std::string& pingAuthentication);
+  void restart();
   WebServerMonitor();
 };
 
-void monitorWebServer(int pidServer) {
+void monitorWebServer(int pidServer, const std::string& pingAuthentication) {
   WebServerMonitor theMonitor;
-  theMonitor.Monitor(pidServer);
+  theMonitor.monitor(pidServer, pingAuthentication);
 }
 
 WebServerMonitor::WebServerMonitor() {
@@ -77,7 +78,7 @@ WebServerMonitor::WebServerMonitor() {
   this->pidServer = - 1;
 }
 
-void WebServerMonitor::BackupDatabaseIfNeeded() {
+void WebServerMonitor::backupDatabaseIfNeeded() {
   MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
@@ -97,7 +98,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   this->timeAtLastBackup = global.getElapsedSeconds();
 }
 
-void WebServerMonitor::Monitor(int pidServer) {
+void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthentication) {
   if (!global.flagLocalhostConnectionMonitor) {
     return;
   }
@@ -135,8 +136,8 @@ void WebServerMonitor::Monitor(int pidServer) {
   TimeWrapper now;
   for (;;) {
     global.fallAsleep(microsecondsToSleep);
-    this->BackupDatabaseIfNeeded();
-    theCrawler.PingCalculatorStatus();
+    this->backupDatabaseIfNeeded();
+    theCrawler.pingCalculatorStatus(pingAuthentication);
     numPings ++;
     if (theCrawler.lastTransactionErrors != "") {
       now.assignLocalTime();
@@ -153,12 +154,12 @@ void WebServerMonitor::Monitor(int pidServer) {
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
-      this->Restart();
+      this->restart();
     }
   }
 }
 
-void WebServerMonitor::Restart() {
+void WebServerMonitor::restart() {
   TimeWrapper now;
   now.assignLocalTime();
   global << Logger::red << "Server stopped responding (probably locked pipe?)"
@@ -217,7 +218,7 @@ WebCrawler::~WebCrawler() {
   this->FreeAddressInfo();
 }
 
-void WebCrawler::PingCalculatorStatus() {
+void WebCrawler::pingCalculatorStatus(const std::string& pingAuthentication) {
   MacroRegisterFunctionWithName("WebCrawler::PingCalculatorStatus");
   std::stringstream reportStream;
   this->lastTransaction = "";
@@ -303,7 +304,7 @@ void WebCrawler::PingCalculatorStatus() {
     } else {
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
     }
-    std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
+    std::string getMessage = "GET /cgi-bin/calculator?request=" + pingAuthentication;
     std::stringstream errorStream1;
     numBytesWritten = Pipe::writeWithTimeoutViaSelect(this->theSocket, getMessage, 1, 10, &errorStream1);
     if (static_cast<unsigned>(numBytesWritten) != getMessage.size()) {

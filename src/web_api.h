@@ -34,6 +34,7 @@ class WebAPIResponse {
   bool processDatabaseDeleteEntry();
   bool processDatabaseModifyEntry();
   bool processProblemGiveUp();
+  bool processPing();
   bool processProblemSolution();
   bool processPauseWorker();
   bool processUnpauseWorker();

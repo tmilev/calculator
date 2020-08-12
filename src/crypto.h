@@ -357,6 +357,7 @@ public:
     // Every call of this function acquires additional randomness from the system's timer.
     static void getRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32);
     static void getRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32);
+    static std::string getRandomHexStringLeaveMemoryTrace(int numberOfBytesMax32);
     // Forget previous random bytes and the entropy of additionalRandomness.
     // We expect the extra entropy from sources such as the system timer, so
     // additionalRandomness is expected to contain considerably less

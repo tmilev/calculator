@@ -25,6 +25,12 @@ void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
   Crypto::computeSha512(global.randomBytesCurrent, global.randomBytesCurrent);
 }
 
+std::string Crypto::Random::getRandomHexStringLeaveMemoryTrace(int numberOfBytesMax32) {
+  List<unsigned char> bytes;
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(bytes, numberOfBytesMax32);
+  return Crypto::convertListUnsignedCharsToHex(bytes);
+}
+
 void Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
   Crypto::Random::acquireAdditionalRandomness(global.getElapsedMilliseconds());
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {

@@ -12,7 +12,12 @@ public:
   int indexInParent;
   int ProcessPID;
   std::string workerId;
-  int numberOfReceivesCurrentConnection;
+  class Statistics {
+  public:
+    int allReceives;
+    int pingReceives;
+  };
+  Statistics statistics;
   int lastResult;
   int64_t millisecondsServerAtWorkerStart;
   int64_t millisecondsLastPingServerSideOnly;
@@ -208,10 +213,18 @@ public:
   int listeningSocketHTTPSDefault;
   int lastListeningSocket;
   int highestSocketNumber;
-  int MaxNumWorkersPerIPAdress;
-  int MaxTotalUsedWorkers;
-  int NumConnectionsSoFar;
-  int NumberOfServerRequestsWithinAllConnections;
+  int maxNumWorkersPerIPAdress;
+  int maxTotalUsedWorkers;
+  class Statististics {
+  public:
+    static const std::string allRequestsString;
+    static const std::string pingRequestsString;
+    int allConnections;
+    int pingConnections;
+    int allRequests;
+    int pingRequests;
+  };
+  Statististics statistics;
   int NumProcessesReaped;
   int NumprocessAssassinated;
   int NumWorkersNormallyExited;
@@ -223,6 +236,7 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
   bool flagDeallocated;
+  std::string pingAuthentication;
   TransportLayerSecurity theTLS;
   LinearCombination<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
@@ -283,6 +297,7 @@ public:
   bool createProcessMutex();
   void computeActiveWorkerId();
   int forkProcess();
+  int forkRaw();
   void initializeRandomBytes();
   void writeVersionJSFile();
   WebWorker& getActiveWorker();

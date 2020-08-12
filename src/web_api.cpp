@@ -635,6 +635,16 @@ bool WebAPIResponse::processProblemGiveUp() {
   return global.theResponse.writeResponse(WebAPIResponse::getAnswerOnGiveUp());
 }
 
+bool WebAPIResponse::processPing() {
+  MacroRegisterFunctionWithName("WebAPIResponse::processProcessPing");
+  this->owner->setHeaderOKNoContentLength("");
+  JSData result;
+  result["ping"] = "ok";
+  this->owner->flagKeepAlive = false;
+  this->owner->statistics.pingReceives ++;
+  return global.theResponse.writeResponse(result);
+}
+
 bool WebAPIResponse::processProblemSolution() {
   MacroRegisterFunctionWithName("WebAPIResponse::processProblemSolution");
   this->owner->setHeaderOKNoContentLength("");

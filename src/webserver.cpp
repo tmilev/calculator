@@ -17,6 +17,9 @@
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 #include "assert.h"
 
+const std::string WebServer::Statististics::pingRequestsString = "pingsRequests";
+const std::string WebServer::Statististics::allRequestsString = "allRequests";
+
 WebServer& GlobalVariables::server() {
   static WebServer theServer;
   return theServer;
@@ -1428,7 +1431,8 @@ void WebWorker::reset() {
   global.flagLoggedIn = false;
   global.userDefault.reset();
   this->RelativePhysicalFileNamE = "";
-  this->numberOfReceivesCurrentConnection = 0;
+  this->statistics.allReceives = 0;
+  this->statistics.pingReceives = 0;
   this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
   this->release();
 }
@@ -1466,7 +1470,8 @@ void WebWorker::wrapUpConnection() {
   if (global.flagServerDetailedLog) {
     global << "Detail: wrapping up connection. " << Logger::endL;
   }
-  this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
+  this->resultWork[WebServer::Statististics::allRequestsString] = this->statistics.allReceives;
+  this->resultWork[WebServer::Statististics::pingRequestsString] = this->statistics.pingReceives;
   this->resultWork["result"] = "close";
   if (global.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
@@ -2031,6 +2036,10 @@ int WebWorker::serveClient() {
       << global.requestType << ". ";
     }
   }
+  if (global.requestType == global.server().pingAuthentication) {
+    this->response.processPing();
+    return 0;
+  }
   theUser.flagMustLogin = this->parent->requiresLogin(
     global.requestType, this->addressComputed
   );
@@ -2331,19 +2340,22 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
   this->flagReapingChildren = false;
-  this->MaxNumWorkersPerIPAdress = 24;
-  this->MaxTotalUsedWorkers = 40;
+  this->maxNumWorkersPerIPAdress = 24;
+  this->maxTotalUsedWorkers = 40;
   this->NumFailedSelectsSoFar = 0;
   this->NumSuccessfulSelectsSoFar = 0;
   this->NumProcessesReaped = 0;
   this->NumprocessAssassinated = 0;
-  this->NumConnectionsSoFar = 0;
   this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
-  this->NumberOfServerRequestsWithinAllConnections = 0;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
   this->processIdServer = - 1;
+
+  this->statistics.pingConnections = 0;
+  this->statistics.allConnections = 0;
+  this->statistics.pingRequests = 0;
+  this->statistics.allRequests = 0;
 }
 
 void WebServer::signal_SIGCHLD_handler(int s) {
@@ -2540,37 +2552,31 @@ std::string WebServer::toStringConnectionSummary() {
   std::stringstream out;
   TimeWrapper now;
   now.assignLocalTime();
-  out << "<b>Server status.</b> Server time: local: " << now.toStringLocal() << ", gm: " << now.toStringGM() << ".<br>";
-  int64_t timeRunninG = - 1;
+  out << "<b>Server status.</b> Server time: local: "
+  << now.toStringLocal() << ", gm: " << now.toStringGM() << ".<br>";
+  int64_t timeRunning = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    timeRunninG = global.getElapsedMilliseconds();
+    timeRunning = global.getElapsedMilliseconds();
   } else {
-    timeRunninG = this->getActiveWorker().millisecondsLastPingServerSideOnly;
+    timeRunning = this->getActiveWorker().millisecondsLastPingServerSideOnly;
   }
   out
-  << (double(timeRunninG) / 1000)
+  << (double(timeRunning) / 1000)
   << " seconds = "
-  << TimeWrapper::toStringSecondsToDaysHoursSecondsString(timeRunninG / 1000, false, false)
+  << TimeWrapper::toStringSecondsToDaysHoursSecondsString(timeRunning / 1000, false, false)
   << " web server uptime. ";
-  int64_t approxNumPings = timeRunninG / this->WebServerPingIntervalInSeconds / 1000;
-  if (approxNumPings < 0) {
-    approxNumPings = 0;
-  }
-  int64_t numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
-  if (numConnectionsSoFarApprox < 0) {
-    numConnectionsSoFarApprox = 0;
-  }
-  out << "~" << numConnectionsSoFarApprox << " actual connections "
-  << "(with " << this->NumberOfServerRequestsWithinAllConnections << " server requests served)" << " + ~"
-  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total) "
-  << "served since last restart. ";
+  out << this->statistics.allConnections - this->statistics.pingConnections
+  << " http connections, " << this->statistics.pingConnections << " pings connections, "
+  << " with " << this->statistics.allRequests - this->statistics.pingRequests
+  << " http requests, "
+  << this->statistics.pingRequests << " ping requests. "
+  << "Timeouts are excluded. ";
 
-  out
-  << "The number tends to be high as many browsers open more than one connection per page visit. <br>"
+  out << "<br>"
   << "<b>The following policies are quite strict and will be relaxed in the future.</b><br>"
-  << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
+  << this->maxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
-  << "<br>" << this->MaxNumWorkersPerIPAdress
+  << "<br>" << this->maxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, all connections from that IP address are terminated. ";
   return out.str();
@@ -2593,7 +2599,8 @@ std::string WebServer::toStringStatusForLogFile() {
   << "<br>kill commands: " << this->NumprocessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped
   << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
-  << ", connections so far: " << this->NumConnectionsSoFar;
+  << ", all connections so far: " << this->statistics.allConnections
+  << ", pings so far: " << this->statistics.pingConnections;
   return out.str();
 }
 
@@ -2826,7 +2833,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
     this->currentlyConnectedAddresses.getCoefficientOf(incomingAddress) >
-    this->MaxNumWorkersPerIPAdress
+    this->maxNumWorkersPerIPAdress
   );
   if (!purgeIncomingAddress) {
     return;
@@ -2861,7 +2868,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
     << "Terminating child " << theIndices[j] + 1 << " with PID "
     << this->theWorkers[theIndices[j]].ProcessPID
     << ": address: " << incomingAddress << " opened more than "
-    << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
+    << this->maxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
   }
@@ -2898,10 +2905,21 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   }
   outputNumInUse --;
   this->NumWorkersNormallyExited ++;
-  if (workerMessage["connectionsServed"].theType == JSData::token::tokenLargeInteger) {
-    this->NumberOfServerRequestsWithinAllConnections +=
-    workerMessage["connectionsServed"].theInteger.getElement().getIntValueTruncated()
-    ;
+  if (
+    workerMessage[WebServer::Statististics::allRequestsString].theType == JSData::token::tokenLargeInteger &&
+    workerMessage[WebServer::Statististics::pingRequestsString].theType == JSData::token::tokenLargeInteger
+  ) {
+    int incomingAllRequests = workerMessage[
+      WebServer::Statististics::allRequestsString
+    ].theInteger.getElement().getIntValueTruncated();
+    int incomingPingRequests = workerMessage[
+      WebServer::Statististics::pingRequestsString
+    ].theInteger.getElement().getIntValueTruncated();
+    this->statistics.allRequests += incomingAllRequests;
+    this->statistics.pingRequests += incomingPingRequests;
+    if (incomingPingRequests > 0) {
+      this->statistics.pingConnections ++;
+    }
   }
   if (
     workerMessage["stopNeeded"].isTrueRepresentationInJSON() ||
@@ -2966,7 +2984,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
 }
 
 void WebServer::handleTooManyWorkers(int& numInUse) {
-  if (numInUse <= this->MaxTotalUsedWorkers) {
+  if (numInUse <= this->maxTotalUsedWorkers) {
     if (global.flagServerDetailedLog) {
       global << Logger::green
       << "Detail: recycleChildrenIfPossible exit point 1. " << Logger::endL;
@@ -3165,7 +3183,7 @@ void SignalsInfrastructure::initializeSignals() {
   this->flagInitialized = true;
 }
 
-extern void monitorWebServer(int pidServer);
+extern void monitorWebServer(int pidServer,const std::string& pingAuthentication);
 
 void WebServer::writeVersionJSFile() {
   MacroRegisterFunctionWithName("WebServer::writeVersionJSFile");
@@ -3240,7 +3258,7 @@ int Listener::acceptWrapper() {
     if (result >= 0) {
       this->owner->lastListeningSocket = currentListeningSocket;
       global << Logger::green << "Connection candidate "
-      << this->owner->NumConnectionsSoFar + 1 << ". "
+      << this->owner->statistics.allConnections + 1 << ". "
       << "Connected via listening socket " << currentListeningSocket
       << " on socket: " << result << Logger::endL;
       return result;
@@ -3335,16 +3353,18 @@ int WebServer::run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   this->processIdServer = getpid();
+  List<unsigned char> pingBytes;
+  this->pingAuthentication = "ping" + Crypto::Random::getRandomHexStringLeaveMemoryTrace(20);
   if (global.flagLocalhostConnectionMonitor) {
     global << Logger::green << "Start monitor process." << Logger::endL;
-    this->processIdServer = this->forkProcess();
+    this->processIdServer = this->forkRaw();
     if (this->processIdServer < 0) {
       global.fatal << "Failed to create server process. " << global.fatal;
     }
     if (this->processIdServer > 0) {
       global.logs.logType = GlobalVariables::LogData::type::serverMonitor;
       global.flagIsChildProcess = true;
-      monitorWebServer(this->processIdServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
+      monitorWebServer(this->processIdServer, this->pingAuthentication); //<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
@@ -3386,13 +3406,13 @@ int WebServer::run() {
     }
     int reportCount =
     this->NumprocessAssassinated + this->NumProcessesReaped +
-    this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    this->NumWorkersNormallyExited + this->statistics.allConnections;
     if (reportCount - previousServerStatReport > 99) {
       this->previousServerStatReport = reportCount;
       global << "# kill commands: " << this->NumprocessAssassinated
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
-      << " #connections so far: " << this->NumConnectionsSoFar << Logger::endL;
+      << " #connections so far: " << this->statistics.allConnections << Logger::endL;
     }
     if (reportCount - previousServerStatDetailedReport > 499) {
       this->previousServerStatDetailedReport = reportCount;
@@ -3430,8 +3450,8 @@ int WebServer::run() {
     this->getActiveWorker().millisecondsLastPingServerSideOnly = this->getActiveWorker().millisecondsServerAtWorkerStart;
     this->getActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; // <- measured right after select()
     // <-cannot set earlier as the active worker may change after recycling.
-    this->NumConnectionsSoFar ++;
-    this->getActiveWorker().connectionID = this->NumConnectionsSoFar;
+    this->statistics.allConnections ++;
+    this->getActiveWorker().connectionID = this->statistics.allConnections;
     this->getActiveWorker().userAddress.theObject = theListener.userAddress;
     this->currentlyConnectedAddresses.addMonomial(this->getActiveWorker().userAddress, 1);
     /////////////
@@ -3529,16 +3549,19 @@ bool WebWorker::runInitialize() {
       global.flagUsingSSLinCurrentConnection = false;
       this->parent->wrapUp();
       this->parent->releaseEverything();
-      global << Logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << Logger::endL;
+      global << Logger::red << "Ssl fail #: "
+      << this->parent->statistics.allConnections << Logger::endL;
       global << commentsOnFailure.str() << Logger::endL;
       return false;
     }
   }
   if (global.flagSSLIsAvailable && global.flagUsingSSLinCurrentConnection) {
-    global << Logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << Logger::endL;
+    global << Logger::green << "ssl success #: "
+    << this->parent->statistics.allConnections
+    << ". " << Logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
-  this->numberOfReceivesCurrentConnection = 0;
+  this->statistics.allReceives = 0;
   return  true;
 }
 
@@ -3547,9 +3570,9 @@ bool WebWorker::failReceiveReturnFalse() {
   if (global.flagSSLIsAvailable) {
     sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
   }
-  if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
+  if (this->statistics.allReceives > 0 && sslWasOK) {
     global << Logger::green << "Connection timed out after successfully receiving "
-    << this->numberOfReceivesCurrentConnection << " times. " << Logger::endL;
+    << this->statistics.allReceives << " times. " << Logger::endL;
     this->lastResult = 0;
     return false;
   }
@@ -3564,16 +3587,16 @@ bool WebWorker::runOnce() {
   if (!this->receiveAll()) {
     return this->failReceiveReturnFalse();
   }
-  if (this->numberOfReceivesCurrentConnection > 0) {
+  if (this->statistics.allReceives > 0) {
     global.calculator().freeMemory();
     global.calculator().getElement().initialize();
     global.comments.resetComments();
     global << Logger::blue << "Created new calculator for connection: "
-    << this->numberOfReceivesCurrentConnection << Logger::endL;
+    << this->statistics.allReceives << Logger::endL;
   }
   if (this->messageHead.size() == 0) {
     global << Logger::red << "Empty message head. " << Logger::endL;
-    if (this->numberOfReceivesCurrentConnection == 0) {
+    if (this->statistics.allReceives == 0) {
       this->lastResult = - 1;
     }
     return false;
@@ -3583,7 +3606,7 @@ bool WebWorker::runOnce() {
     return false;
   }
   this->ensureAllBytesSent();
-  this->numberOfReceivesCurrentConnection ++;
+  this->statistics.allReceives ++;
   if (
     (!this->flagKeepAlive) ||
     global.flagRestartNeeded ||
@@ -3592,7 +3615,7 @@ bool WebWorker::runOnce() {
     return false;
   }
   this->resetConnection();
-  global << Logger::blue << "Received " << this->numberOfReceivesCurrentConnection
+  global << Logger::blue << "Received " << this->statistics.allReceives
   << " times on this connection, waiting for more. "
   << Logger::endL;
   global.millisecondOffset += global.getElapsedMilliseconds();

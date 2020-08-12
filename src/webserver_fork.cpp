@@ -40,14 +40,19 @@ void WebServer::computeActiveWorkerId() {
   }
 }
 
+int WebServer::forkRaw() {
+  return fork();
+}
+
 int WebServer::forkProcess() {
   if (!this->createProcessMutex()) {
+    global << Logger::red << "Failed to create process mutex." << Logger::endL;
     return - 1;
   }
   this->computeActiveWorkerId();
   // timer taken at server level:
   int64_t millisecondsAtfork = global.getElapsedMilliseconds();
-  int result = fork();
+  int result = this->forkRaw();
   // We need to make sure that the child retains no information
   // about the server's random bytes, and similarly the server
   // has no information on the child's random bytes.
@@ -86,6 +91,10 @@ int WebServer::forkProcess() {
       global << Logger::red << "Failed to set parent death signal. " << Logger::endL;
       exit(1);
     }
+  }
+  if (result < 0) {
+    global << Logger::red
+    << "Negative result while forking: " << result << "." << Logger::endL;
   }
   // if the result is negative, this is an error.
   return result;

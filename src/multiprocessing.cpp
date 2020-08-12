@@ -807,9 +807,9 @@ std::string Logger::getStampShort() {
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ", ";
   }
-  out << "c: " << global.server().NumConnectionsSoFar;
+  out << "c: " << global.server().statistics.allConnections;
   if (global.server().activeWorker != -1) {
-    out << "." << global.server().getActiveWorker().numberOfReceivesCurrentConnection;
+    out << "." << global.server().getActiveWorker().statistics.allReceives;
   }
   out << "] ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
@@ -825,7 +825,7 @@ std::string Logger::getStamp() {
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ",";
   }
-  out << " c: " << global.server().NumConnectionsSoFar << ". ";
+  out << " c: " << global.server().statistics.allConnections << ". ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
   return out.str();
 }

@@ -2617,9 +2617,9 @@ std::string WebServer::toStringStatusAll() {
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::getDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   if (this->activeWorker == - 1) {
-    out << "The is a server process.";
+    out << "This is a server process.";
   } else {
-    out << "The is a worker process. Active worker: " << this->activeWorker + 1 << ". ";
+    out << "This is a worker process. Active worker: " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->toStringStatusActive();
   }
   for (int i = 0; i < this->theWorkers.size; i ++) {

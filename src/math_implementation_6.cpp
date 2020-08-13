@@ -136,7 +136,6 @@ bool PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor(
   if (this->one.modulus < linearTermsToTry) {
     this->one.modulus.isIntegerFittingInInt(&linearTermsToTry);
   }
-  global.comments << "DEBUG: terms to try: " << linearTermsToTry << "<br>";
   List<ElementZmodP> foundRoots;
   Vector<ElementZmodP> rootCandidate;
   rootCandidate.addOnTop(this->one);
@@ -162,11 +161,9 @@ bool PolynomialFactorizationCantorZassenhaus::handlePrimeDegreeSeparatedFactor(
     Polynomial<ElementZmodP> linearFactor;
     linearFactor.makeMonomial(0, 1, this->one);
     linearFactor -= foundRoots[i];
-  global.comments << "DEBUG: Account factor: " << linearFactor.toString() << "<br>";
     this->output->accountReducedFactor(linearFactor, false);
   }
   if (this->current.totalDegree() > 0) {
-  global.comments << "DEBUG: Account factor: " << this->current.toString() << "<br>";
     this->output->accountNonReducedFactor(this->current);
   }
   return true;
@@ -800,12 +797,9 @@ bool PolynomialFactorizationFiniteFields::tryFactor(SelectionFixedRank& selectio
   }
   Polynomial<Rational> candidate;
   ElementZmodP::convertPolynomialModularToPolynomialIntegral(product, candidate, true);
-  global.comments << "DEBUG: Trying selection: " << selection.toString()
-  << " factor: " << candidate << " from product: " << product;
   if (!this->output->accountReducedFactor(candidate, false)) {
     return false;
   }
-  global.comments << "<hr>DEBUG: FACTOR FOUND!!!!!!!!!<br> " << candidate;
   selection.theSelection.invertSelection();
   List<Polynomial<ElementZmodP> > factorsLiftedTrimmed;
   for (int i = 0; i < selection.theSelection.cardinalitySelection; i ++) {
@@ -838,8 +832,6 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLiftOnce(
   for (int i = 1; i <= this->factorsLifted.size; i ++) {
     selection.setNumberOfItemsAndDesiredSubsetSize(i, this->factorsLifted.size);
     do {
-      global.comments << "DEBUG: Selection: " << selection.toString() << "i:" << i << "factors lifted size: "
-      << this->factorsLifted.size << "<br>";
       this->factorsLiftedTries ++;
       if (this->factorsLiftedTries > this->maximumFactorsLiftedTries) {
         if (commentsOnFailure != nullptr) {

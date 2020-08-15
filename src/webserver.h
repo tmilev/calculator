@@ -223,11 +223,15 @@ public:
     int pingConnections;
     int allRequests;
     int pingRequests;
+    // Number of processes reaped with the wait loop.
+    int processesReaped;
+    // Number of processes killed: hopefully zero or close to zero.
+    int processKilled;
+    // Number of processes that piped their exit status correctly.
+    // Hopefully equals the number of processes reaped.
+    int workersNormallyExited;
   };
   Statististics statistics;
-  int NumProcessesReaped;
-  int NumprocessAssassinated;
-  int NumWorkersNormallyExited;
   int WebServerPingIntervalInSeconds;
   int previousServerStatReport;
   int previousServerStatDetailedReport;

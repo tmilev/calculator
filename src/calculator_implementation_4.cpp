@@ -2563,7 +2563,7 @@ JSData Calculator::toJSONPerformance() {
   << " s). ";
   moreDetails << "<br>Time waiting on open connection: "
   << waitingMilliseconds << " ms (~"
-  << ( static_cast<double>(waitingMilliseconds) / 1000)
+  << (static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
   moreDetails << "<br>Expressions generated: " << this->allChildExpressions.size << ". ";
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";

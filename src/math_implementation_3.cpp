@@ -155,10 +155,10 @@ GlobalVariables::GlobalVariables() {
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
-  this->millisecondsMaxComputation = 100000; //100 seconds
+  this->millisecondsMaxComputation = 100000; // 100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
-  this->millisecondsReplyAfterComputation = 5000; //5 seconds
+  this->millisecondsReplyAfterComputation = 7000; // 7 seconds
   this->pointerExternalCommandReturnOutput = nullptr;
   this->pointerExternalCommandNoOutput = nullptr;
   this->pointerExternalCommandStream = nullptr;

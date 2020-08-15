@@ -159,12 +159,20 @@ bool WebWorker::receiveAll() {
     global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
   struct timeval tv;
-  tv.tv_sec = 3;  // 3 Secs Timeout
+  int failedReceives = 0;
+  int maximumFailedReceives = 1;
+  int secondsReplyAfter = static_cast<int>(global.millisecondsReplyAfterComputation) / 1000;
+  // The following formula ensures that all receive timeouts take 1 second less than
+  // millisecondsReplyAfterComputation. This gives ample time (1 second) for the calculator
+  // to take reset the computation time counter. This prevents the reply-after-computation
+  // mechanism from racing with browser clients that keep connections open without closing.
+  tv.tv_sec = (secondsReplyAfter - 1) / (maximumFailedReceives + 1);
+  if (tv.tv_sec < 1) {
+    tv.tv_sec = 1;
+  }
   tv.tv_usec = 0;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   std::string errorString;
-  int numFailedReceives = 0;
-  int maxNumFailedReceives = 2;
   double numSecondsAtStart = global.getElapsedSeconds();
   int numBytesInBuffer = 0;
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
@@ -173,8 +181,8 @@ bool WebWorker::receiveAll() {
     if (numBytesInBuffer >= 0) {
       break;
     }
-    numFailedReceives ++;
-    if (numFailedReceives > maxNumFailedReceives) {
+    failedReceives ++;
+    if (failedReceives > maximumFailedReceives) {
       if (errorString == TransportLayerSecurityOpenSSL::errors::errorWantRead) {
         this->error = errorString;
       } else {
@@ -183,7 +191,7 @@ bool WebWorker::receiveAll() {
         << "WebWorker::receiveAll on socket "
         << this->connectedSocketID
         << " failed (so far "
-        << numFailedReceives << " fails). "
+        << failedReceives << " fails). "
         << "Error: " << errorString << ". ";
         out << "Too many failed receives, aborting. ";
         this->error = out.str();
@@ -2344,9 +2352,6 @@ WebServer::WebServer() {
   this->maxTotalUsedWorkers = 40;
   this->NumFailedSelectsSoFar = 0;
   this->NumSuccessfulSelectsSoFar = 0;
-  this->NumProcessesReaped = 0;
-  this->NumprocessAssassinated = 0;
-  this->NumWorkersNormallyExited = 0;
   this->WebServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
@@ -2356,6 +2361,10 @@ WebServer::WebServer() {
   this->statistics.allConnections = 0;
   this->statistics.pingRequests = 0;
   this->statistics.allRequests = 0;
+  this->statistics.processesReaped = 0;
+  this->statistics.processKilled = 0;
+  this->statistics.workersNormallyExited = 0;
+
 }
 
 void WebServer::signal_SIGCHLD_handler(int s) {
@@ -2385,7 +2394,7 @@ void WebServer::reapChildren() {
       for (int i = 0; i < this->theWorkers.size; i++) {
         if (this->theWorkers[i].ProcessPID == waitResult) {
           this->theWorkers[i].flagExited = true;
-          this->NumProcessesReaped ++;
+          this->statistics.processesReaped ++;
         }
       }
     }
@@ -2596,9 +2605,9 @@ std::string WebServer::toStringStatusForLogFile() {
   << " worker(s) in use. The peak number of worker(s)/concurrent connections was "
   << this->theWorkers.size << ". ";
   out
-  << "<br>kill commands: " << this->NumprocessAssassinated
-  << ", processes reaped: " << this->NumProcessesReaped
-  << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
+  << "<br>kill commands: " << this->statistics.processKilled
+  << ", processes reaped: " << this->statistics.processesReaped
+  << ", normally reclaimed workers: " << this->statistics.workersNormallyExited
   << ", all connections so far: " << this->statistics.allConnections
   << ", pings so far: " << this->statistics.pingConnections;
   return out.str();
@@ -2862,7 +2871,7 @@ void WebServer::handleTooManyConnections(const std::string& incomingUserAddress)
     // In particular, it should not be possible to terminate by accident
     // a pid that is not owned by the server.
     this->terminateChildSystemCall(theIndices[j]);
-    this->NumprocessAssassinated ++;
+    this->statistics.processKilled ++;
     std::stringstream errorStream;
     errorStream
     << "Terminating child " << theIndices[j] + 1 << " with PID "
@@ -2904,7 +2913,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
     << ". Marking for reuse. " << Logger::endL;
   }
   outputNumInUse --;
-  this->NumWorkersNormallyExited ++;
+  this->statistics.workersNormallyExited ++;
   if (
     workerMessage[WebServer::Statististics::allRequestsString].theType == JSData::token::tokenLargeInteger &&
     workerMessage[WebServer::Statististics::pingRequestsString].theType == JSData::token::tokenLargeInteger
@@ -2980,7 +2989,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   global << Logger::red << pingTimeoutStream.str() << Logger::endL;
   currentWorker.pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
   numberInUse --;
-  this->NumprocessAssassinated ++;
+  this->statistics.processKilled ++;
 }
 
 void WebServer::handleTooManyWorkers(int& numInUse) {
@@ -3004,7 +3013,7 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     this->theWorkers[i].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
     numInUse --;
-    this->NumprocessAssassinated ++;
+    this->statistics.processKilled ++;
   }
   if (global.flagServerDetailedLog) {
     global << Logger::green
@@ -3405,13 +3414,13 @@ int WebServer::run() {
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
     int reportCount =
-    this->NumprocessAssassinated + this->NumProcessesReaped +
-    this->NumWorkersNormallyExited + this->statistics.allConnections;
+    this->statistics.processKilled + this->statistics.processesReaped +
+    this->statistics.workersNormallyExited + this->statistics.allConnections;
     if (reportCount - previousServerStatReport > 99) {
       this->previousServerStatReport = reportCount;
-      global << "# kill commands: " << this->NumprocessAssassinated
-      << " #processes reaped: " << this->NumProcessesReaped
-      << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
+      global << "# kill commands: " << this->statistics.processKilled
+      << " #processes reaped: " << this->statistics.processesReaped
+      << " #normally reclaimed workers: " << this->statistics.workersNormallyExited
       << " #connections so far: " << this->statistics.allConnections << Logger::endL;
     }
     if (reportCount - previousServerStatDetailedReport > 499) {

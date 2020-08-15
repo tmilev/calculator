@@ -745,12 +745,16 @@ void WebAPIResponse::getJSDataUserInfo(JSData& outputAppend, const std::string& 
   }
   if (global.theResponse.monitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
-    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(global.millisecondsReplyAfterComputation);
+    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(
+      global.millisecondsReplyAfterComputation
+    );
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
   if (global.getWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] = HtmlRoutines::convertStringToHtmlString(global.getWebInput(WebAPI::result::error), false);
+    outputAppend[WebAPI::result::error] = HtmlRoutines::convertStringToHtmlString(
+      global.getWebInput(WebAPI::result::error), false
+    );
   }
   if (!global.flagLoggedIn) {
     outputAppend[WebAPI::result::status] = "not logged in";

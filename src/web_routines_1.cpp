@@ -44,14 +44,14 @@ public:
   struct addrinfo *serverInfo;
   WebCrawler();
   ~WebCrawler();
-  void UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void FetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  void fetchWebPagePart2(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void initialize();
   // Ping authentication used for pings only, over localhost connections only.
   void pingCalculatorStatus(const std::string& pingAuthentication);
-  void FreeAddressInfo();
-  void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool VerifyRecaptcha(
+  void freeAddressInfo();
+  void fetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool verifyRecaptcha(
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNONsensitive,
     std::stringstream* commentsGeneralSensitive
@@ -189,7 +189,7 @@ WebCrawler::WebCrawler() {
   this->lastNumBytesRead = 0;
 }
 
-void WebCrawler::FreeAddressInfo() {
+void WebCrawler::freeAddressInfo() {
   if (this->serverInfo != nullptr) {
     freeaddrinfo(this->serverInfo);
   }
@@ -215,7 +215,7 @@ WebCrawler::~WebCrawler() {
   this->flagInitialized = false;
   close(this->theSocket);
   this->theSocket = - 1;
-  this->FreeAddressInfo();
+  this->freeAddressInfo();
 }
 
 void WebCrawler::pingCalculatorStatus(const std::string& pingAuthentication) {
@@ -232,7 +232,7 @@ void WebCrawler::pingCalculatorStatus(const std::string& pingAuthentication) {
   if (status != 0) {
     this->lastTransactionErrors = "Could not find address: getaddrinfo error: ";
     this->lastTransactionErrors += gai_strerror(status);
-    this->FreeAddressInfo();
+    this->freeAddressInfo();
     return;
   }
   if (this->serverInfo == nullptr) {
@@ -326,11 +326,11 @@ void WebCrawler::pingCalculatorStatus(const std::string& pingAuthentication) {
     this->lastTransaction = reportStream.str();
     close(this->theSocket);
   }
-  this->FreeAddressInfo();
+  this->freeAddressInfo();
 }
 
-void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
-  MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
+void WebCrawler::fetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+  MacroRegisterFunctionWithName("WebCrawler::fetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
   this->theTSL.openSSLData.checkCanInitializeToClient();
@@ -351,7 +351,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       *commentsOnFailure << this->lastTransactionErrors << ". "
       << "Server: " << this->serverToConnectTo << ", port or service: " << this->portOrService << ". ";
     }
-    this->FreeAddressInfo();
+    this->freeAddressInfo();
     return;
   }
   if (this->serverInfo == nullptr) {
@@ -442,16 +442,16 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         << this->addressToConnectTo << " port: " << this->portOrService << ". <hr>";
       }
     }
-    this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
+    this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);
     global.server().theTLS.removeLastSocket();
     close(this->theSocket);
     break;
   }
-  this->FreeAddressInfo();
+  this->freeAddressInfo();
 #endif //Macro_use_openssl
 }
 
-void WebCrawler::FetchWebPagePart2(
+void WebCrawler::fetchWebPagePart2(
   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
@@ -627,7 +627,7 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& calculator, const Exp
   << " port: " << theCrawler.portOrService
   << " resource: " << theCrawler.addressToConnectTo
   << "<br>";
-  theCrawler.FetchWebPage(&out, &out);
+  theCrawler.fetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
   return output.assignValue(out.str(), calculator);
 }
@@ -660,7 +660,7 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& calculator, const Ex
   << " resource: " << theCrawler.addressToConnectTo
   << "<br>";
   theCrawler.flagDoUseGET = false;
-  theCrawler.FetchWebPage(&out, &out);
+  theCrawler.fetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
   return output.assignValue(out.str(), calculator);
 }
@@ -677,11 +677,11 @@ bool CalculatorFunctions::innerFetchKnownPublicKeys(
   }
   WebCrawler theCrawler;
   theCrawler.theTSL.openSSLData.name = "crawler";
-  theCrawler.UpdatePublicKeys(&out, &out);
+  theCrawler.updatePublicKeys(&out, &out);
   return output.assignValue(out.str(), calculator);
 }
 
-void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+void WebCrawler::updatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
@@ -690,7 +690,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
-  this->FetchWebPage(commentsOnFailure, commentsGeneral);
+  this->fetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
     global << Logger::red << "Could not fetch the google public keys ..." << Logger::endL;
     if (commentsOnFailure != nullptr) {
@@ -806,7 +806,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     }
     WebCrawler theCrawler;
     theCrawler.theTSL.openSSLData.name = "public key fetcher";
-    theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
+    theCrawler.updatePublicKeys(commentsOnFailure, commentsGeneral);
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != nullptr) {
@@ -825,7 +825,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
   );
 }
 
-bool WebCrawler::VerifyRecaptcha(
+bool WebCrawler::verifyRecaptcha(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNONsensitive,
   std::stringstream* commentsGeneralSensitive
@@ -868,7 +868,7 @@ bool WebCrawler::VerifyRecaptcha(
   this->serverToConnectTo = "www.google.com";
   this->portOrService = "https";
   this->postMessageToSend = messageToSendStream.str();
-  this->FetchWebPage(commentsOnFailure, commentsGeneralSensitive);
+  this->fetchWebPage(commentsOnFailure, commentsGeneralSensitive);
   std::string response = this->bodyReceiveD;
   JSData theJSparser;
   if (!theJSparser.readstring(response, commentsOnFailure)) {
@@ -934,16 +934,16 @@ bool WebAPIResponse::processForgotLogin() {
   theUser.email = HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   WebCrawler theCrawler;
   out << "<br><b> "
-  << "Please excuse our verbose technical messages. </b>"
+  << "Please excuse our verbose technical messages.</b>"
   << "<br><b>We are still testing our system; "
   << "we will remove the technical garbage as soon as we are done. "
   << "</b><br>\n";
-  if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
+  if (!theCrawler.verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
     return global.theResponse.writeResponse(result, false);
   }
   if (!theUser.exists(&out)) {
-    out << "<br><b style =\"color:red\">"
+    out << "<br><b style ='color:red'>"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
@@ -987,7 +987,7 @@ JSData WebWorker::getSignUpRequestResult() {
   generalCommentsStream
   << "<b>Please excuse our technical messages, they will be removed soon.</b>";
   WebCrawler theCrawler;
-  if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
+  if (!theCrawler.verifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
     result["error"] = errorStream.str();
     result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;

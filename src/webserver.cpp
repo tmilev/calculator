@@ -2352,7 +2352,7 @@ WebServer::WebServer() {
   this->maxTotalUsedWorkers = 40;
   this->NumFailedSelectsSoFar = 0;
   this->NumSuccessfulSelectsSoFar = 0;
-  this->WebServerPingIntervalInSeconds = 10;
+  this->webServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
   this->processIdServer = - 1;
@@ -4358,13 +4358,13 @@ void GlobalVariables::configurationProcess() {
     WebServer::turnProcessMonitoringOn();
   }
   if (global.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
-    &global.server().WebServerPingIntervalInSeconds
+    &global.server().webServerPingIntervalInSeconds
   )) {
-    if (global.server().WebServerPingIntervalInSeconds < 0) {
-      global.server().WebServerPingIntervalInSeconds = 10;
+    if (global.server().webServerPingIntervalInSeconds < 0) {
+      global.server().webServerPingIntervalInSeconds = 10;
     }
   } else {
-    global.configuration[Configuration::monitorPingTime] = global.server().WebServerPingIntervalInSeconds;
+    global.configuration[Configuration::monitorPingTime] = global.server().webServerPingIntervalInSeconds;
   }
   if (global.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
     HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].theString;

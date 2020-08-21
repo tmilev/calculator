@@ -232,7 +232,7 @@ public:
     int workersNormallyExited;
   };
   Statististics statistics;
-  int WebServerPingIntervalInSeconds;
+  int webServerPingIntervalInSeconds;
   int previousServerStatReport;
   int previousServerStatDetailedReport;
   int processIdServer;

@@ -107,13 +107,12 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
   int maxNumPingFailures = 3;
   // warning: setting global.server().WebServerPingIntervalInSeconds to more than 1000
   // may overflow the variable int microsecondsToSleep.
-  // global.server().WebServerPingIntervalInSeconds=1000;
-  int microsecondsToSleep = 1000000 * global.server().WebServerPingIntervalInSeconds;//
-  if (global.server().WebServerPingIntervalInSeconds > 30) {
+  int microsecondsToSleep = 1000000 * global.server().webServerPingIntervalInSeconds;//
+  if (global.server().webServerPingIntervalInSeconds > 30) {
     global << Logger::red << "**********WARNING**************"
     << Logger::endL
     << Logger::red << " The ping interval: "
-    << global.server().WebServerPingIntervalInSeconds
+    << global.server().webServerPingIntervalInSeconds
     << " is set to a large value. "
     << "Set the ping interval to less than 30 seconds to remove this message. " << Logger::endL;
   }

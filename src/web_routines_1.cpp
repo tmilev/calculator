@@ -149,7 +149,8 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
       << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures
       << ". " << Logger::endL;
     } else {
-      std::cout << "Connection monitor: ping #" << numPings << ": received " << theCrawler.lastNumBytesRead << " bytes. " << std::endl;
+      std::cout << "Connection monitor: ping #" << numPings
+      << ": received " << theCrawler.lastNumBytesRead << " bytes. " << std::endl;
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {

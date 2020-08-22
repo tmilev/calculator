@@ -147,13 +147,13 @@ public:
    List<Vector<Coefficient> > space;
    List<SpaceTree<Coefficient> > subspaces;
 
-   void PlaceInTree(const List<Vector<Coefficient> >& V);
-   void GetLeaves(List<List<Vector<Coefficient> > >& leaves) const;
-   void DisplayTree() const;
+   void placeInTree(const List<Vector<Coefficient> >& V);
+   void getLeaves(List<List<Vector<Coefficient> > >& leaves) const;
+   void displayTree() const;
 };
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::PlaceInTree(const List<Vector<Coefficient> > &V) {
+void SpaceTree<Coefficient>::placeInTree(const List<Vector<Coefficient> > &V) {
   List<Vector<Coefficient> > U;
   for (int i = 0; i < subspaces.size; i ++) {
     intersection(V, subspaces[i].space, U);
@@ -179,7 +179,7 @@ void SpaceTree<Coefficient>::PlaceInTree(const List<Vector<Coefficient> > &V) {
 }
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::GetLeaves(List<List<Vector<Coefficient> > >& leaves) const {
+void SpaceTree<Coefficient>::getLeaves(List<List<Vector<Coefficient> > >& leaves) const {
   if (subspaces.size > 0) {
     for (int i = 0; i < subspaces.size; i ++) {
       subspaces[i].GetLeaves(leaves);
@@ -190,10 +190,10 @@ void SpaceTree<Coefficient>::GetLeaves(List<List<Vector<Coefficient> > >& leaves
 }
 
 template <typename Coefficient>
-void SpaceTree<Coefficient>::DisplayTree() const {
+void SpaceTree<Coefficient>::displayTree() const {
   global.comments << '[' << space.size << ',';
   for (int i = 0; i < subspaces.size; i ++) {
-    subspaces[i].DisplayTree();
+    subspaces[i].displayTree();
   }
 //  global.Comments << ']';
 }

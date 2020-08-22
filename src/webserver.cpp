@@ -2350,8 +2350,6 @@ WebServer::WebServer() {
   this->flagReapingChildren = false;
   this->maxNumWorkersPerIPAdress = 24;
   this->maxTotalUsedWorkers = 40;
-  this->NumFailedSelectsSoFar = 0;
-  this->NumSuccessfulSelectsSoFar = 0;
   this->webServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
@@ -2364,6 +2362,8 @@ WebServer::WebServer() {
   this->statistics.processesReaped = 0;
   this->statistics.processKilled = 0;
   this->statistics.workersNormallyExited = 0;
+  this->statistics.failedSelectsSoFar = 0;
+  this->statistics.successfulSelectsSoFar = 0;
 
 }
 
@@ -3240,7 +3240,15 @@ void Listener::zeroSocketSet() {
 }
 
 void Listener::selectWrapper() {
-  while (select(this->owner->highestSocketNumber + 1, &this->FDSetListenSockets, nullptr, nullptr, nullptr) == - 1) {
+  while (
+    select(
+      this->owner->highestSocketNumber + 1,
+      &this->FDSetListenSockets,
+      nullptr,
+      nullptr,
+      nullptr
+    ) == - 1
+  ) {
     if (this->owner->flagReapingChildren) {
       if (global.flagServerDetailedLog) {
         global << Logger::yellow << "Interrupted select loop by child exit signal. "
@@ -3251,7 +3259,7 @@ void Listener::selectWrapper() {
       global << Logger::red << "select failed: this is not expected. Error message: "
       << strerror(errno) << Logger::endL;
     }
-    this->owner->NumFailedSelectsSoFar ++;
+    this->owner->statistics.failedSelectsSoFar ++;
   }
 }
 
@@ -3392,8 +3400,8 @@ int WebServer::run() {
   }
   global << Logger::purple << "waiting for connections..." << Logger::endL;
   this->initSSL();
-  this->NumSuccessfulSelectsSoFar = 0;
-  this->NumFailedSelectsSoFar = 0;
+  this->statistics.successfulSelectsSoFar = 0;
+  this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
   Listener theListener(this);
   while (true) {
@@ -3406,12 +3414,12 @@ int WebServer::run() {
       global << Logger::green << "Detail: select success. " << Logger::endL;
     }
     int64_t millisecondsAfterSelect = global.getElapsedMilliseconds();
-    this->NumSuccessfulSelectsSoFar ++;
-    if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
-      global << Logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
-      << this->NumFailedSelectsSoFar << " bad ("
-      << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << Logger::endL;
-      previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
+    this->statistics.successfulSelectsSoFar ++;
+    if ((this->statistics.successfulSelectsSoFar + this->statistics.failedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
+      global << Logger::blue << this->statistics.successfulSelectsSoFar << " successful and "
+      << this->statistics.failedSelectsSoFar << " bad ("
+      << this->statistics.successfulSelectsSoFar + this->statistics.failedSelectsSoFar << " total) selects. " << Logger::endL;
+      previousReportedNumberOfSelects = this->statistics.successfulSelectsSoFar + this->statistics.failedSelectsSoFar;
     }
     int reportCount =
     this->statistics.processKilled + this->statistics.processesReaped +

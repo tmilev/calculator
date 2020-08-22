@@ -230,14 +230,15 @@ public:
     // Number of processes that piped their exit status correctly.
     // Hopefully equals the number of processes reaped.
     int workersNormallyExited;
+    // Statistics for the select() calls for the accept function of the server.
+    long long failedSelectsSoFar;
+    long long successfulSelectsSoFar;
   };
   Statististics statistics;
   int webServerPingIntervalInSeconds;
   int previousServerStatReport;
   int previousServerStatDetailedReport;
   int processIdServer;
-  long long NumFailedSelectsSoFar;
-  long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
   bool flagDeallocated;
   std::string pingAuthentication;

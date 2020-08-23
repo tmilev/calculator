@@ -56,8 +56,12 @@
     "output":"-{a}_{1}+a+\\frac{3}{2}"
   },
   {
-    "input":"a / b + c / d;\nz=(x-2)(x+1);\nw=(x-3)(x+1);\n1/z+1/w",
+    "input":"a/b+c/d;\nz=(x-2)(x+1);\nw=(x-3)(x+1);\n1/z+1/w",
     "output":"(\\frac{b c+a d}{b d};z=x^{2}-x-2;w=x^{2}-2 x-3;\\frac{2 x-5}{x^{3}-4 x^{2}+x+6})"
+  },
+  {
+    "input":"TurnOffRules(\"CommonDenominator\");\na/b+c/d;\nz=(x-2)(x+1);\nw=(x-3)(x+1);\n1/z+1/w",
+    "output":"(RulesOff{}\\left(\"CommonDenominator\"\\right);\\frac{c b+a d}{d b};z=x^{2}-x-2;w=x^{2}-2 x-3;\\frac{2 x^{2}-3 x-5}{x^{4}-3 x^{3}-3 x^{2}+7 x+6})"
   },
   {
     "input":"f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z",

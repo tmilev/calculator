@@ -5834,17 +5834,34 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "+",
-    CalculatorFunctions::outerCombineFractionsCommutative,
+    CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary,
     "",
     "Combines fractions on condition that all participants commute. "
+    "Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a * lcm(b,d)/b+c*lcm(b,d)/d)/(lcm(b,d)); "
+    "Please note that this transformation is not correct if b and d do not commute. ",
+    "a/b+c/d;\n"
+    "z=(x-2)(x+1);\n"
+    "w=(x-3)(x+1);\n"
+    "1/z+1/w",
+    "CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary",
+    "CommonDenominator",
+    outerStandard
+  );
+  this->addOperationHandler(
+    "+",
+    CalculatorFunctions::combineFractionsCommutative,
+    "",
+    "Combines fractions on condition that all participants commute. "
+    "Similar to the CommonDenominator rule but does not compute least common multiples."
     "Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a *d+c*b)/(d*b); "
     "Please note that this transformation is not correct if b and d do not commute. ",
-    "a / b + c / d;\n"
+    "TurnOffRules(\"CommonDenominator\");\n"
+    "a/b+c/d;\n"
     "z=(x-2)(x+1);\n"
     "w=(x-3)(x+1);\n"
     "1/z+1/w",
     "CalculatorFunctions::outerCombineFractionsCommutative",
-    "CommonDenominator",
+    "CommonDenominatorSimple",
     outerStandard
   );
   this->addOperationHandler(

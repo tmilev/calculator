@@ -1534,10 +1534,10 @@ bool CalculatorFunctions::innerConstantFunction(Calculator& calculator, const Ex
   return true;
 }
 
-bool CalculatorFunctions::outerCombineFractionsCommutative(
+bool CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::outerCombineFractionsCommutative");
+  MacroRegisterFunctionWithName("CalculatorFunctions::combineFractionsCommutativeWithInternalLibrary");
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -1550,24 +1550,38 @@ bool CalculatorFunctions::outerCombineFractionsCommutative(
     return false;
   }
   Expression converted(calculator);
-  bool isGood = true;
   if (!CalculatorConversions::functionRationalFunction(calculator, input, converted)) {
-    isGood = false;
+    return false;
   }
   WithContext<RationalFunction<Rational> > rationalFunction;
   if (!converted.isOfTypeWithContext(&rationalFunction)) {
-    isGood = false;
-  }
-  if (!isGood) {
-    // Failed to extract rational function.
-     if (leftE[2] == rightE[2]) {
-       output = (leftE[1] + rightE[1]) / leftE[2];
-       return true;
-     }
-     output = (leftE[1] * rightE[2] + rightE[1] * leftE[2]) / (leftE[2] * rightE[2]);
-     return true;
+    return false;
   }
   return CalculatorConversions::innerExpressionFromRF(calculator, rationalFunction.content, output, &rationalFunction.context);
+}
+
+bool CalculatorFunctions::combineFractionsCommutative(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::combineFractionsCommutative");
+  if (!input.startsWith(calculator.opPlus(), 3)) {
+    return false;
+  }
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if (
+    !leftE.startsWith(calculator.opDivide(), 3) ||
+    !rightE.startsWith(calculator.opDivide(), 3)
+  ) {
+    return false;
+  }
+  // Failed to extract rational function.
+  if (leftE[2] == rightE[2]) {
+    output = (leftE[1] + rightE[1]) / leftE[2];
+    return true;
+  }
+  output = (leftE[1] * rightE[2] + rightE[1] * leftE[2]) / (leftE[2] * rightE[2]);
+  return true;
 }
 
 template<class Coefficient>

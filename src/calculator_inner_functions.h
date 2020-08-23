@@ -244,7 +244,8 @@ public:
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerAtimesBpowerJplusEtcDivBpowerI(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool outerCombineFractionsCommutative(Calculator& calculator, const Expression& input, Expression& output);
+  static bool combineFractionsCommutative(Calculator& calculator, const Expression& input, Expression& output);
+  static bool combineFractionsCommutativeWithInternalLibrary(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);

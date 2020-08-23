@@ -56,8 +56,8 @@
     "output":"-{a}_{1}+a+\\frac{3}{2}"
   },
   {
-    "input":"a / b + c / d",
-    "output":"\\frac{c b+a d}{d b}"
+    "input":"a / b + c / d;\nz=(x-2)(x+1);\nw=(x-3)(x+1);\n1/z+1/w",
+    "output":"(\\frac{b c+a d}{b d};z=x^{2}-x-2;w=x^{2}-2 x-3;\\frac{2 x-5}{x^{3}-4 x^{2}+x+6})"
   },
   {
     "input":"f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z",

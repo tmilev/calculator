@@ -1560,7 +1560,6 @@ bool CalculatorFunctions::outerCombineFractionsCommutative(
   }
   if (!isGood) {
     // Failed to extract rational function.
-     calculator << "<br><b>To do: make function outerCombineFractionsCommutative work much better.</b>";
      if (leftE[2] == rightE[2]) {
        output = (leftE[1] + rightE[1]) / leftE[2];
        return true;

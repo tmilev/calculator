@@ -5839,7 +5839,10 @@ void Calculator::initPredefinedStandardOperations() {
     "Combines fractions on condition that all participants commute. "
     "Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a *d+c*b)/(d*b); "
     "Please note that this transformation is not correct if b and d do not commute. ",
-    "a / b + c / d",
+    "a / b + c / d;\n"
+    "z=(x-2)(x+1);\n"
+    "w=(x-3)(x+1);\n"
+    "1/z+1/w",
     "CalculatorFunctions::outerCombineFractionsCommutative",
     "CommonDenominator",
     outerStandard

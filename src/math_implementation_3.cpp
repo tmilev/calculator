@@ -8976,7 +8976,7 @@ void Lattice::getDualLattice(Lattice& output) const {
   tempMat = this->basisRationalForm;
   tempMat.invert();
   tempMat.transpose();
-  tempMat.getMatrixIntegerWithDenominator(output.basis, output.Den);
+  tempMat.getMatrixIntegerWithDenominator(output.basis, output.denominator);
   output.reduce();
 }
 
@@ -9231,7 +9231,7 @@ bool Lattice::reduceVector(Vector<Rational>& theVector) const {
 void Lattice::makeZn(int theDim) {
   this->basisRationalForm.makeIdentityMatrix(theDim);
   this->basis.makeIdentityMatrix(theDim, LargeInteger(1), LargeInteger(0));
-  this->Den.makeOne();
+  this->denominator.makeOne();
 }
 
 void QuasiPolynomial::makeZeroOverLattice(Lattice& theLattice) {
@@ -9699,7 +9699,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& theSub) {
       this->basisRationalForm.elements[i][j] = theEigenSpace[i][j];
     }
   }
-  this->basisRationalForm.getMatrixIntegerWithDenominator(this->basis, this->Den);
+  this->basisRationalForm.getMatrixIntegerWithDenominator(this->basis, this->denominator);
   this->reduce();
   return true;
 }
@@ -12595,12 +12595,12 @@ void Lattice::reduce() {
     }
     numRowsToTrim ++;
   }
-  this->basis.resize(this->basis.numberOfRows-numRowsToTrim, this->basis.numberOfColumns, true);
-  this->basisRationalForm.assignMatrixIntegerWithDenominator(this->basis, this->Den);
+  this->basis.resize(this->basis.numberOfRows - numRowsToTrim, this->basis.numberOfColumns, true);
+  this->basisRationalForm.assignMatrixIntegerWithDenominator(this->basis, this->denominator);
 }
 
 void Lattice::testGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output) {
-  output.assignMatrixIntegerWithDenominator(this->basis, this->Den);
+  output.assignMatrixIntegerWithDenominator(this->basis, this->denominator);
   std::stringstream out;
   global.comments << "Test output: " << output.toString();
   out << "Test output: " << output.toString();
@@ -12613,18 +12613,18 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   if (other.basis.numberOfColumns == 0) {
     return;
   }
-  if (other.basis == this->basis && this->Den == other.Den) {
+  if (other.basis == this->basis && this->denominator == other.denominator) {
     return;
   }
   if (other.getDimension() != this->getDimension()) {
     global.fatal << "Dimension mismatch. " << global.fatal;
   }
   int theDim = this->getDimension();
-  LargeIntegerUnsigned oldDen = this->Den;
-  LargeIntegerUnsigned::lcm(other.Den, oldDen, this->Den);
+  LargeIntegerUnsigned oldDen = this->denominator;
+  LargeIntegerUnsigned::leastCommonMultiple(other.denominator, oldDen, this->denominator);
   LargeIntegerUnsigned scaleThis, scaleOther;
-  scaleThis = this->Den / oldDen;
-  scaleOther = this->Den / other.Den;
+  scaleThis = this->denominator / oldDen;
+  scaleOther = this->denominator / other.denominator;
   int oldNumRows = this->basis.numberOfRows;
   LargeInteger tempI;
   tempI = scaleThis;
@@ -12640,14 +12640,14 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
 
 void Lattice::makeFromMatrix(const Matrix<Rational>& input) {
   this->basisRationalForm = input;
-  this->basisRationalForm.getMatrixIntegerWithDenominator(this->basis, this->Den);
+  this->basisRationalForm.getMatrixIntegerWithDenominator(this->basis, this->denominator);
   this->reduce();
 }
 
 void Lattice::makeFromRoots(const Vectors<Rational>& input) {
   Matrix<Rational> tempMat;
   tempMat.assignVectorsToRows(input);
-  tempMat.getMatrixIntegerWithDenominator(this->basis, this->Den);
+  tempMat.getMatrixIntegerWithDenominator(this->basis, this->denominator);
   this->reduce();
 }
 

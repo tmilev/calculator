@@ -1397,7 +1397,7 @@ bool Calculator::innerZmodP(Calculator& calculator, const Expression& input, Exp
     return false;
   }
   LargeIntegerUnsigned theGCD;
-  LargeIntegerUnsigned::gcd(left.getDenominator(), base.value, theGCD);
+  LargeIntegerUnsigned::greatestCommonDivisor(left.getDenominator(), base.value, theGCD);
   if (theGCD > 1) {
     return false;
   }

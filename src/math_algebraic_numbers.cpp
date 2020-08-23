@@ -128,7 +128,7 @@ bool AlgebraicClosureRationals::mergeRadicals(const List<LargeInteger>& theRadic
         if (radicalsNew[i] == - 1 || radicalsNew[j] == - 1) {
           continue;
         }
-        LargeIntegerUnsigned::gcd(radicalsNew[i].value, radicalsNew[j].value, candidateGCD);
+        LargeIntegerUnsigned::greatestCommonDivisor(radicalsNew[i].value, radicalsNew[j].value, candidateGCD);
         if (candidateGCD > 1) {
           leftQuotient = radicalsNew[i].value / candidateGCD;
           rightQuotient = radicalsNew[j].value / candidateGCD;

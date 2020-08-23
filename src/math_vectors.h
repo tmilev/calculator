@@ -636,7 +636,7 @@ void Vector<Coefficient>::findLeastCommonMultipleDenominators(LargeIntegerUnsign
   output.makeOne();
   for (int i = 0; i < this->size; i ++) {
     this->objects[i].getDenominator(tempI2);
-    LargeIntegerUnsigned::gcd(output, tempI2, tempI);
+    LargeIntegerUnsigned::greatestCommonDivisor(output, tempI2, tempI);
     output.multiplyBy(tempI2);
     output.divPositive(tempI, output, tempI2);
   }

@@ -1730,7 +1730,7 @@ bool CalculatorFunctions::innerLCM(Calculator& calculator, const Expression& inp
     if (theInts[i].value == 0) {
       return false;
     }
-    theResult = LargeIntegerUnsigned::lcm(theResult, theInts[i].value);
+    theResult = LargeIntegerUnsigned::leastCommonMultiple(theResult, theInts[i].value);
   }
   return output.assignValue(theResult, calculator);
 }
@@ -1756,7 +1756,7 @@ bool CalculatorFunctions::innerGCD(Calculator& calculator, const Expression& inp
     if (theInts[i].value == 0) {
       return false;
     }
-    theResult = LargeIntegerUnsigned::gcd(theResult, theInts[i].value);
+    theResult = LargeIntegerUnsigned::greatestCommonDivisor(theResult, theInts[i].value);
   }
   return output.assignValue(theResult, calculator);
 }

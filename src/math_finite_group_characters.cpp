@@ -425,7 +425,7 @@ struct DivisionResult<UDPolynomial<Coefficient> > UDPolynomial<Coefficient>::div
   }
   int r = data.size - divisor.data.size + 1;
   out.quotient.data.setSize(r);
-  for (int i = r- 1; i != - 1; i --) {
+  for (int i = r - 1; i != - 1; i --) {
     if (out.remainder.data.size - divisor.data.size != i) {
       out.quotient[i] = 0;
       continue;

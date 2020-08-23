@@ -709,11 +709,11 @@ RationalFunction<Coefficient> RationalFunction<Coefficient>::scaleNormalizeIndex
   LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].getNumerator().value;
   LargeIntegerUnsigned denominatorContentLeastCommonMultiple = scales[0].getDenominator();
   for (int i = 1; i < scales.size; i ++) {
-    numeratorContentGreatestCommonDivisor = LargeIntegerUnsigned::lcm(
+    numeratorContentGreatestCommonDivisor = LargeIntegerUnsigned::leastCommonMultiple(
       scales[i].getNumerator().value,
       numeratorContentGreatestCommonDivisor
     );
-    denominatorContentLeastCommonMultiple = LargeIntegerUnsigned::gcd(
+    denominatorContentLeastCommonMultiple = LargeIntegerUnsigned::greatestCommonDivisor(
       denominatorContentLeastCommonMultiple,
       scales[i].getDenominator()
     );

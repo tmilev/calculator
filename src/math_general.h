@@ -4009,7 +4009,7 @@ LargeIntegerUnsigned Matrix<Coefficient>::findPositiveLCMCoefficientDenominators
   LargeIntegerUnsigned result = 1;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      result = LargeIntegerUnsigned::lcm(result, (*this)(i, j).getDenominator());
+      result = LargeIntegerUnsigned::leastCommonMultiple(result, (*this)(i, j).getDenominator());
     }
   }
   return result;
@@ -4889,7 +4889,7 @@ class Lattice {
 public:
   Matrix<Rational> basisRationalForm;
   Matrix<LargeInteger> basis;
-  LargeIntegerUnsigned Den;
+  LargeIntegerUnsigned denominator;
   int getDimension() const {
     return this->basis.numberOfColumns;
   }
@@ -4977,7 +4977,7 @@ public:
   }
   void operator=(const Lattice& other) {
     this->basis = other.basis;
-    this->Den = other.Den;
+    this->denominator = other.denominator;
     this->basisRationalForm = other.basisRationalForm;
   }
   void writeToFile(std::fstream& output);

@@ -2158,7 +2158,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getLargestDe
         if (this->generators[gi](mi, mj).getDenominator() > outputDen) {
           outputDen = this->generators[gi](mi, mj).getDenominator();
         }
-        outputLCM = LargeIntegerUnsigned::lcm(outputLCM, this->generators[gi](mi, mj).getDenominator());
+        outputLCM = LargeIntegerUnsigned::leastCommonMultiple(outputLCM, this->generators[gi](mi, mj).getDenominator());
       }
     }
   }

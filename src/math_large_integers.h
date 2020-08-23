@@ -72,10 +72,10 @@ public:
   static void getPrimesEratosthenesSieve(
     unsigned int primesUpToInclusive, List<unsigned int>& output
   );
-  static void gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
-  static LargeIntegerUnsigned gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
-  static LargeIntegerUnsigned lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
-  static void lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
+  static void greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
+  static LargeIntegerUnsigned greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
+  static LargeIntegerUnsigned leastCommonMultiple(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
+  static void leastCommonMultiple(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
   unsigned int hashFunction() const;
   void multiplyBy(const LargeIntegerUnsigned& right);
   void operator*=(const LargeIntegerUnsigned& right);

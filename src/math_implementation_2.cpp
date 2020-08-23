@@ -1032,19 +1032,19 @@ double LargeIntegerUnsigned::getDoubleValue() const {
   return result;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
+LargeIntegerUnsigned LargeIntegerUnsigned::leastCommonMultiple(const LargeIntegerUnsigned &a, const LargeIntegerUnsigned &b) {
   LargeIntegerUnsigned output;
-  LargeIntegerUnsigned::lcm(a, b, output);
+  LargeIntegerUnsigned::leastCommonMultiple(a, b, output);
   return output;
 }
 
-LargeIntegerUnsigned LargeIntegerUnsigned::gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
+LargeIntegerUnsigned LargeIntegerUnsigned::greatestCommonDivisor(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
   LargeIntegerUnsigned output;
-  LargeIntegerUnsigned::gcd(a, b, output);
+  LargeIntegerUnsigned::greatestCommonDivisor(a, b, output);
   return output;
 }
 
-void LargeIntegerUnsigned::gcd(
+void LargeIntegerUnsigned::greatestCommonDivisor(
   const LargeIntegerUnsigned& a,
   const LargeIntegerUnsigned& b,
   LargeIntegerUnsigned& output
@@ -1172,7 +1172,7 @@ bool LargeIntegerUnsigned::factor(
   return true;
 }
 
-void LargeIntegerUnsigned::lcm(
+void LargeIntegerUnsigned::leastCommonMultiple(
   const LargeIntegerUnsigned& a,
   const LargeIntegerUnsigned& b,
   LargeIntegerUnsigned& output
@@ -1181,7 +1181,7 @@ void LargeIntegerUnsigned::lcm(
   if (a.isEqualToZero() || b.isEqualToZero()) {
     global.fatal << "This is a programming error: calling lcm on zero elements is not allowed. " << global.fatal;
   }
-  LargeIntegerUnsigned::gcd(a, b, tempUI);
+  LargeIntegerUnsigned::greatestCommonDivisor(a, b, tempUI);
   a.multiplyBy(b, tempUI2);
   output = tempUI2;
   output.divPositive(tempUI, output, tempUI2);
@@ -1905,12 +1905,12 @@ Rational Rational::scaleNormalizeIndex(
   LargeIntegerUnsigned denominatorLCM = output[0].getDenominator();
   LargeIntegerUnsigned numeratorGCD = output[0].getNumerator().value;
   for (int i = 1; i < output.size; i ++) {
-    LargeIntegerUnsigned::lcm(
+    LargeIntegerUnsigned::leastCommonMultiple(
       denominatorLCM,
       output[i].getDenominator(),
       denominatorLCM
     );
-    LargeIntegerUnsigned::gcd(
+    LargeIntegerUnsigned::greatestCommonDivisor(
       numeratorGCD,
       output[i].getNumerator().value,
       numeratorGCD
@@ -2102,7 +2102,7 @@ void Rational::simplify() {
   }
   if (!this->extended->denominator.isEqualToOne()) {
     LargeIntegerUnsigned tempI;
-    LargeIntegerUnsigned::gcd(this->extended->denominator, this->extended->numerator.value, tempI);
+    LargeIntegerUnsigned::greatestCommonDivisor(this->extended->denominator, this->extended->numerator.value, tempI);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic) {
       std::string tempS1, tempS2, tempS3;
       tempI.toString(tempS1);

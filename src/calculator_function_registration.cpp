@@ -2151,7 +2151,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PerturbSplittingNormal",
-    Calculator::innerPerturbSplittingNormal,
+    CalculatorFunctions::innerPerturbSplittingNormal,
     "",
     "Takes 3 arguments: normal, cone and general vectors. "
     "Attempts to perturb the normal so that the cone stays on "
@@ -2590,7 +2590,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConesIntersection",
-    Calculator::innerConesIntersect,
+    CalculatorFunctions::innerConesIntersect,
     "",
     "Takes as input two sequences of vectors, generates two cones, "
     "and intersects them using the simplex algorithm. "
@@ -3978,7 +3978,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WriteSemisimpleLieAlgebra",
-    Calculator::innerWriteSSLieAlgebraToHD,
+    CalculatorFunctions::innerWriteSSLieAlgebraToHD,
     "",
     "Writes semisimple Lie algebra structure constants to "
     "the output folder of the calculator. Available to logged-in admins only. ",
@@ -3990,7 +3990,7 @@ void Calculator::initPredefinedInnerFunctions() {
 
   this->addOperationHandler(
     "PrintSemisimpleLieAlgebra",
-    Calculator::innerPrintSSLieAlgebraVerbose,
+    CalculatorFunctions::innerPrintSSLieAlgebraVerbose,
     "",
     "Creates a printout with information about the "
     "semisimple Lie algebra, including "
@@ -4018,7 +4018,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GetChevalleyGenerator",
-    Calculator::innerGetChevGen,
+    CalculatorFunctions::innerGetChevGen,
     "",
     "First argument must be a semisimple "
     "Lie algebra, second argument must "
@@ -4038,7 +4038,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GetCartanGenerator",
-    Calculator::innerGetCartanGen,
+    CalculatorFunctions::innerGetCartanGen,
     "",
     "First argument must be a semisimple Lie algebra, "
     "second argument must "
@@ -4536,7 +4536,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "SplitFDpartB3overG2CharsOnly",
-    Calculator::innerSplitFDpartB3overG2CharsOnly,
+    CalculatorFunctions::innerSplitFDpartB3overG2CharsOnly,
     "",
     "Splits the finite dimensional part of the "
     "inducing module of the generalized "
@@ -4572,7 +4572,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintB3G2branchingTableCharsOnly",
-    Calculator::innerPrintB3G2branchingTableCharsOnly,
+    CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly,
     "",
     "Creates a table of branching of finite dimensional B_3-modules over G_2. "
     "The argument of the function gives the "
@@ -4592,7 +4592,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintB3G2branchingTable",
-    Calculator::innerPrintB3G2branchingTable,
+    CalculatorFunctions::innerPrintB3G2branchingTable,
     "",
     "Creates a table of branching of finite dimensional B_3-modules over G_2. "
     "The argument of the function gives the maximum height "
@@ -4753,7 +4753,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "RootSubsystem",
-    Calculator::innerRootSubsystem,
+    CalculatorFunctions::innerRootSubsystem,
     "",
     "Generates a root subsystem of a simple type. "
     "First argument indicates simple type, second, third,... arguments "

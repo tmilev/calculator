@@ -2,6 +2,7 @@
 // For additional information refer to the file "calculator.h".#include "calculator_interface.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "calculator_interface.h"
+#include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
@@ -242,7 +243,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   if (newlyCreated) {
     outputPointer->computeChevalleyConstants();
     Expression tempE;
-    calculator.functionWriteToHDOrPrintSSLieAlgebra(
+    CalculatorFunctions::functionWriteToHDOrPrintSSLieAlgebra(
       calculator, output, tempE, false, false
     );
     calculator << tempE.getValue<std::string>();

@@ -2370,49 +2370,6 @@ public:
     Vector<Polynomial<AlgebraicNumber> >& output,
     ExpressionContext& outputContext
   );
-  static bool innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintB3G2branchingTableCharsOnly(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  bool innerPrintB3G2branchingIntermediate(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vectors<RationalFunction<Rational> >& theHWs,
-    BranchingData& theG2B3Data,
-    ExpressionContext &theContext
-  );
-  static bool innerPrintB3G2branchingTable(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerPrintB3G2branchingTableCommon(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vectors<RationalFunction<Rational> >& outputHWs,
-    BranchingData& theG2B3Data,
-    ExpressionContext &theContext
-  );
-  static bool innerGetChevGen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetCartanGen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebraShort(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerPrintSSLieAlgebra(calculator, input, output, false);
-  }
-  static bool innerPrintSSLieAlgebraVerbose(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerPrintSSLieAlgebra(calculator, input, output, true);
-  }
-  static bool innerWriteSSLieAlgebraToHD(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
-  static bool innerWriteToHDOrPrintSSLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
-  );
-  static bool functionWriteToHDOrPrintSSLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
-  );
-  static bool innerRootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
   template<class Coefficient>
   bool getTypeWeight(
     Calculator& calculator,

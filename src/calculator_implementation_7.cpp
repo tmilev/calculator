@@ -8156,15 +8156,15 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2(
   }
   Vectors<RationalFunction<Rational> > theHWs;
   theHWs.addOnTop(theG2B3Data.theWeightFundCoords);
-  return calculator.innerPrintB3G2branchingIntermediate(calculator, input, output, theHWs, theG2B3Data, context);
+  return CalculatorFunctions::innerPrintB3G2branchingIntermediate(calculator, input, output, theHWs, theG2B3Data, context);
 }
 
-bool Calculator::innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
   BranchingData theG2B3Data;
   return CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
 }
 
-bool Calculator::innerPrintB3G2branchingTableCommon(Calculator& calculator,
+bool CalculatorFunctions::innerPrintB3G2branchingTableCommon(Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vectors<RationalFunction<Rational> >& outputHWs,

@@ -1138,21 +1138,6 @@ bool Expression::hasBoundVariables() const {
   return false;
 }
 
-bool Calculator::innerNot(Calculator& calculator, const Expression& input, Expression& output) {
-  if (input.size() != 2) {
-    return false;
-  }
-  const Expression& argument = input[1];
-  int theInt;
-  if (!argument.isSmallInteger(&theInt)) {
-    return false;
-  }
-  if (theInt == 0) {
-    return output.assignValue(1, calculator);
-  }
-  return output.assignValue(0, calculator);
-}
-
 bool Calculator::innerIsInteger(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 2) {
     return false;
@@ -2939,70 +2924,6 @@ void ObjectContainer::reset() {
 
 template <>
 bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
-
-bool Calculator::innerWriteGenVermaModAsDiffOperators(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool AllGenerators,
-  bool useNilWeight,
-  bool ascending
-) {
-  MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
-  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
-  Vectors<Polynomial<Rational> > theHWs;
-  theHWs.setSize(1);
-  Selection theParSel;
-  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
-  Expression truncatedInput = input;
-  if (truncatedInput.children.size > 4) {
-    int numEltsToCut = truncatedInput.children.size - 4;
-    for (int i = 0; i < numEltsToCut; i ++) {
-      truncatedInput.children.removeLastObject();
-    }
-  }
-  if (!calculator.getTypeHighestWeightParabolic<Polynomial<Rational> >(
-    calculator,
-    truncatedInput,
-    output,
-    theHWs[0],
-    theParSel,
-    theSSalgebra,
-    CalculatorConversions::functionPolynomial<Rational>)
-  ) {
-    return output.makeError("Failed to extract type, highest weight, parabolic selection", calculator);
-  }
-  if (output.isError()) {
-    return true;
-  }
-  std::string letterString = "x";
-  std::string partialString = "\\partial";
-  std::string exponentLetterString = "a";
-  if (input.children.size > 4) {
-    letterString = input[4].toString();
-  }
-  if (input.children.size > 5) {
-    partialString = input[5].toString();
-  }
-  if (input.children.size > 6) {
-    exponentLetterString = input[6].toString();
-  }
-  return calculator.innerWriteGenVermaModAsDiffOperatorInner(
-    calculator,
-    input,
-    output,
-    theHWs,
-    theSSalgebra.context,
-    theParSel,
-    theSSalgebra.content,
-    AllGenerators,
-    &letterString,
-    &partialString,
-    &exponentLetterString,
-    useNilWeight,
-    ascending
-  );
-}
 
 bool Calculator::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;

@@ -219,55 +219,6 @@ bool Calculator::innerAnimateLittelmannPaths(
   return output.assignValue(thePath.generateOrbitAndAnimate(), calculator);
 }
 
-bool Calculator::innerCasimir(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerCasimir");
-  if (input.size() != 2) {
-    return calculator << "Casimir function expects a single input. ";
-  }
-  WithContext<SemisimpleLieAlgebra*> algebra;
-  if (!calculator.convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
-  )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
-  }
-  SemisimpleLieAlgebra& algebraReference = *algebra.content;
-  ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
-  theCasimir.makeCasimir(algebraReference);
-  calculator << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
-  << ". The coefficient: " << algebraReference.theWeyl.getKillingDividedByTraceRatio().toString()
-  <<  ". The Casimir element of the ambient Lie algebra. ";
-  ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(algebraReference);
-  return output.assignValueWithContext(theCasimir, context, calculator);
-}
-
-bool Calculator::innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output) {
-  if (input.size() != 2) {
-    return false;
-  }
-
-  output = input[1];
-  if (!output.isOfType < ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
-    return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", calculator);
-  }
-  SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
-  if (!ownerSS.isOfSimpleType('G', 2)) {
-    return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", calculator);
-  }
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  calculator.makeHmmG2InB3(theHmm);
-
-  ElementUniversalEnveloping<RationalFunction<Rational> > argument = output.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
-  ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
-  if (!theHmm.applyHomomorphism(argument, outputUE)) {
-    return output.makeError("Failed to apply homomorphism for unspecified reason", calculator);
-  }
-  outputUE.simplify();
-  ExpressionContext context(calculator);
-  context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
-  return output.assignValueWithContext(outputUE, context, calculator);
-}
-
 std::string HtmlRoutines::getSliderSpanStartsHidden(
   const std::string& content, const std::string& label, const std::string& desiredID
 ) {
@@ -1380,35 +1331,6 @@ bool Calculator::innerLSPath(Calculator& calculator, const Expression& input, Ex
   return output.assignValue(theLSpath, calculator);
 }
 
-bool Calculator::innerZmodP(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerZmodP");
-  if (!input.isListNElements(3)) {
-    return false;
-  }
-  Rational left, right;
-  if (!input[1].isRational(&left) || !input[2].isRational(&right)) {
-    return false;
-  }
-  LargeInteger base;
-  if (!right.isInteger(&base)) {
-    return false;
-  }
-  if (base.isEqualToZero()) {
-    return false;
-  }
-  LargeIntegerUnsigned theGCD;
-  LargeIntegerUnsigned::greatestCommonDivisor(left.getDenominator(), base.value, theGCD);
-  if (theGCD > 1) {
-    return false;
-  }
-  ElementZmodP outputElement;
-  outputElement.modulus = base.value;
-  outputElement = left.getNumerator();
-  ExpressionContext context;
-  context.initialize(calculator);
-  context.setDefaultModulus(outputElement.modulus);
-  return output.assignValueWithContext(outputElement, context, calculator);
-}
 
 bool Calculator::innerInterpolatePoly(
   Calculator& calculator, const Expression& input, Expression& output
@@ -1437,37 +1359,6 @@ bool Calculator::innerInterpolatePoly(
   ExpressionContext theContext(calculator);
   theContext.makeOneVariableFromString("x");
   return output.assignValueWithContext(interPoly, theContext, calculator);
-}
-
-bool Calculator::innerPrintZnEnumeration(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
-  if (!input.isListNElements(3)) {
-    return false;
-  }
-  int grade, dimension;
-  if (!input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)) {
-    return false;
-  }
-  if (grade > 10 || dimension > 5 || grade < 0 || dimension < 0) {
-    return false;
-  }
-  SelectionPositiveIntegers theSel;
-  theSel.initialize(dimension);
-  std::stringstream out2, out;
-  LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
-  int counter = 0;
-  for (
-    theSel.setFirstInGradeLevel(gradeLarge);
-    theSel.getGrading() == gradeLarge;
-    theSel.incrementReturnFalseIfPastLast()
-  ) {
-    out2 << theSel.toString() << "<br>";
-    counter ++;
-  }
-  out << "Total " << counter << " vectors:<br>" << out2.str();
-  return output.assignValue(out.str(), calculator);
 }
 
 bool Expression::assignMatrixExpressions(

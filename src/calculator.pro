@@ -108,6 +108,7 @@ SOURCES += \
     calculator_implementation_5.cpp \
     calculator_implementation_6.cpp \
     calculator_implementation_7.cpp \
+    calculator_implementation_9.cpp \
     calculator_javascript_graphics.cpp \
     calculator_latex_routines.cpp \
     calculator_parsing_routines.cpp \

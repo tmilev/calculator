@@ -2567,7 +2567,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MakeCharacterLieAlg",
-    Calculator::innerCharacterSSLieAlgFD,
+    CalculatorFunctions::innerCharacterSSLieAlgFD,
     "",
     "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
     "First argument gives type, second argument gives highest weight in fundamental coordinates.",
@@ -2580,7 +2580,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GetLinks",
-    Calculator::innerGetLinksToSimpleLieAlgerbas,
+    CalculatorFunctions::innerGetLinksToSimpleLieAlgerbas,
     "",
     "Gets simple Lie algebra links to the calculator.",
     "GetLinks{}0",
@@ -2916,7 +2916,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ModP",
-    Calculator::innerZmodP,
+    CalculatorFunctions::innerZmodP,
     "",
     "Number modulo P. First argument = number, second argument = modulo.",
     "ModP{}(7, 3)",
@@ -2926,7 +2926,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AdCommonEigenspace",
-    Calculator::innerAdCommonEigenSpaces,
+    CalculatorFunctions::innerAdCommonEigenSpaces,
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
@@ -2937,7 +2937,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
-    Calculator::innerAttemptExtendingEtoHEFwithHinCartan,
+    CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan,
     "",
     "Attempts to embed an element E into an sl(2)-triple over "
     "the rationals, such that the element H is in the "
@@ -3854,7 +3854,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "not",
-    Calculator::innerNot,
+    CalculatorFunctions::innerNot,
     "",
     "If the argument is a small integer, "
     "returns 1 if the argument is 0 and 1 the argument is non-zero. "
@@ -3921,7 +3921,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintNonNegativeVectorsLevel",
-    Calculator::innerPrintZnEnumeration,
+    CalculatorFunctions::innerPrintZnEnumeration,
     "",
     "Prints all vectors of grade level d with n "
     "coordinates lying in Z_{>= 0}. "
@@ -4434,7 +4434,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Casimir",
-    Calculator::innerCasimir,
+    CalculatorFunctions::innerCasimir,
     "",
     "Gives the Casimir element. ",
     "Casimir{}(G_2)",
@@ -4458,7 +4458,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HmmG2inB3",
-    Calculator::innerEmbedG2inB3,
+    CalculatorFunctions::innerEmbedG2inB3,
     "",
     "Embeds elements of the Universal enveloping "
     "of G_2 in B_3, following an embedding found "
@@ -4634,7 +4634,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-    Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
+    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
     "",
     "Constructs a parabolically induced map from a "
     "semisimple Lie algebra to a Weyl algebra "
@@ -4670,7 +4670,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebra",
-    Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
+    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
     "",
     "Same as MapSemisimpleLieAlgebraInWeylAlgebra, "
     "but with a different order on the elements "
@@ -4693,7 +4693,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
-    Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
+    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
     "",
     "Constructs a parabolically induced map from "
     "a semisimple Lie algebra "
@@ -5277,7 +5277,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebras",
-    Calculator::innerPrintSSsubalgebrasRegular,
+    CalculatorFunctions::innerPrintSSsubalgebrasRegular,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
@@ -5288,7 +5288,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
-    Calculator::innerPrintSSsubalgebrasRecompute,
+    CalculatorFunctions::innerPrintSSsubalgebrasRecompute,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
@@ -5299,7 +5299,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasNoCentralizers",
-    Calculator::innerPrintSSsubalgebrasNoCentralizers,
+    CalculatorFunctions::innerPrintSSsubalgebrasNoCentralizers,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
@@ -5310,7 +5310,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasFull",
-    Calculator::innerPrintSSsubalgebrasNilradicals,
+    CalculatorFunctions::innerPrintSSsubalgebrasNilradicals,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
@@ -7107,7 +7107,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "mod",
-    Calculator::innerZmodP,
+    CalculatorFunctions::innerZmodP,
     "",
     "Same as ModP but uses the mod notation.",
     "7 mod 3",

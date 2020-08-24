@@ -2493,56 +2493,7 @@ public:
     Selection& outputInducingSel,
     Expression* outputContext = nullptr
   );
-  static bool innerPrintZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNot(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerZmodP(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAttemptExtendingEtoHEFwithHinCartan(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperators(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool AllGenerators,
-    bool useNilWeight,
-    bool ascending
-  );
-  static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
-  }
-  static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
-  }
-  static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return calculator.innerWriteGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
-  }
-  static bool innerCasimir(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCharacterSSLieAlgFD(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSSubalgebras(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doForceRecompute,
-    bool doAttemptToSolveSystems,
-    bool docomputePairingTable,
-    bool docomputeModuleDecompositionsition,
-    bool doComputeNilradicals,
-    bool doAdjustCentralizers
-  );
-  static bool innerPrintSSsubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRecompute(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output);
+
   void addEmptyHeadedCommand();
   Calculator();
   int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);

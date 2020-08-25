@@ -651,6 +651,21 @@ public:
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
+  static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctions::innerEWAorPoly(calculator, input, output, true);
+  }
+  static bool innerElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctions::innerEWAorPoly(calculator, input, output, false);
+  }
+  static bool innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
+  static bool innerOperationBinary(Calculator& calculator, const Expression& input, Expression& output, int theOp);
+  static bool innerInterpolatePoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctions::innerOperationBinary(calculator, input, output, calculator.opTimes());
+  }
+  static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 #endif
 

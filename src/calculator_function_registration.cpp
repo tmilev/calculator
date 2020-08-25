@@ -2053,7 +2053,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ElementWeylAlgebraDO",
-    Calculator::innerElementWeylAlgebra,
+    CalculatorFunctions::innerElementWeylAlgebra,
     "",
     "Creates element of a Weyl algebra = polynomial coefficient differential operator. "
     "First argument denotes differential operator letter, "
@@ -2069,7 +2069,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ElementWeylAlgebraPoly",
-    Calculator::innerPolynomialWithEWA,
+    CalculatorFunctions::innerPolynomialWithEWA,
     "",
     "Creates a monomial from the second argument whose differential "
     "operator letter is the first argument. ",
@@ -3046,7 +3046,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Interpolate",
-    Calculator::innerInterpolatePoly,
+    CalculatorFunctions::innerInterpolatePoly,
     "",
     "Constructs the one-variable polynomial of minimal degree that passes through "
     "the points. Points are given in the form "
@@ -4965,7 +4965,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Reverse",
-    Calculator::innerReverseOrder,
+    CalculatorFunctions::innerReverseOrder,
     "",
     "Reverses order of elements. This operation will reverse products, lists, etc. "
     "More precisely, the command leaves the fist child in "
@@ -4978,7 +4978,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ReverseRecursively",
-    Calculator::innerReverseOrderRecursivelY,
+    CalculatorFunctions::innerReverseOrderRecursively,
     "",
     "Same as Reverse but will apply recursively to the children expressions as well.",
     "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",

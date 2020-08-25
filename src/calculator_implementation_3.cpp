@@ -915,36 +915,6 @@ bool Calculator::innerLSPath(Calculator& calculator, const Expression& input, Ex
   return output.assignValue(theLSpath, calculator);
 }
 
-
-bool Calculator::innerInterpolatePoly(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
-  if (input.size() < 2) {
-    return false;
-  }
-  Expression convertedE;
-  if (!CalculatorConversions::innerMakeMatrix(calculator, input, convertedE)) {
-    return false;
-  }
-  Matrix<Rational> pointsOfInterpoly;
-  if (!calculator.functionGetMatrix(
-    convertedE, pointsOfInterpoly, nullptr, 2
-  )) {
-    return calculator
-    << "<hr>Failed to extract points of interpolation from "
-    << convertedE.toString();
-  }
-  Polynomial<Rational> interPoly;
-  Vector<Rational> theArgs, theValues;
-  pointsOfInterpoly.getVectorFromColumn(0, theArgs);
-  pointsOfInterpoly.getVectorFromColumn(1, theValues);
-  interPoly.interpolate(theArgs, theValues);
-  ExpressionContext theContext(calculator);
-  theContext.makeOneVariableFromString("x");
-  return output.assignValueWithContext(interPoly, theContext, calculator);
-}
-
 bool Expression::assignMatrixExpressions(
   const Matrix<Expression>& input,
   Calculator& owner,
@@ -1140,48 +1110,6 @@ bool Calculator::getMatrixExpressions(
     }
   }
   return true;
-}
-
-bool Calculator::innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly) {
-  MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
-  if (!input.isListNElements(3)) {
-    return false;
-  }
-  Vector<Polynomial<Rational> > inputPolForm;
-  ExpressionContext startContext(calculator);
-  if (!calculator.getVectorFromFunctionArguments(
-    input,
-    inputPolForm,
-    &startContext,
-    2,
-    CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return calculator
-    << "<hr>Failed to extract polynomials from arguments of "
-    << input.toString();
-  }
-  int letterDiff = 0, letterPol = 0;
-  if (
-    !inputPolForm[0].isOneLetterFirstDegree(&letterDiff) ||
-    !inputPolForm[1].isOneLetterFirstDegree(&letterPol) ||
-    letterDiff == letterPol
-  ) {
-    return calculator
-    << "<hr>Failed to get different one-variable polynomials from input. "
-    << input.toString();
-  }
-  ExpressionContext endContext(calculator);
-  endContext.makeOneVariableOneDifferentialOperator(
-    startContext.getVariable(letterPol),
-    startContext.getVariable(letterDiff)
-  );
-  ElementWeylAlgebra<Rational> outputEWA;
-  if (assignPoly) {
-    outputEWA.makexi(0, 1);
-  } else {
-    outputEWA.makedi(0, 1);
-  }
-  return output.assignValueWithContext(outputEWA, endContext, calculator);
 }
 
 bool Calculator::Test::processOneTest(JSData& input) {

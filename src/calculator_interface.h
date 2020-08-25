@@ -2118,21 +2118,7 @@ public:
     bool doDebug
   );
 
-  static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerReverseOrderRecursivelY(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerEWAorPoly(calculator, input, output, true);
-  }
-  static bool innerElementWeylAlgebra(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerEWAorPoly(calculator, input, output, false);
-  }
-  static bool innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly);
-  static bool innerOperationBinary(Calculator& calculator, const Expression& input, Expression& output, int theOp);
-  static bool innerInterpolatePoly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTimes(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerOperationBinary(calculator, input, output, calculator.opTimes());
-  }
   std::string writeFileToOutputFolderReturnLink(
     const std::string& fileContent,
     const std::string& fileName,

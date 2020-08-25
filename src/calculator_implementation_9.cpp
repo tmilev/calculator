@@ -9,6 +9,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_general.h"
 #include "math_rational_function_implementation.h"
+#include "math_extra_Weyl_algebras_implementation.h"
 
 template<class Element>
 bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
@@ -23,7 +24,8 @@ bool Matrix<Element>::systemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Rational GlobalGoal;
   GlobalGoal.makeZero();
   if (matA.numberOfRows != matb.numberOfRows) {
-    global.fatal << "The number of inequalities: " << matA.numberOfRows << " does not match the number of "
+    global.fatal << "The number of inequalities: "
+    << matA.numberOfRows << " does not match the number of "
     << "constaints: " << matb.numberOfRows << ". " << global.fatal;
   }
   for (int j = 0; j < matb.numberOfRows; j ++) {
@@ -514,7 +516,7 @@ bool CalculatorFunctions::innerConesIntersect(Calculator& calculator, const Expr
   return output.assignValue(out.str(), calculator);
 }
 
-bool Calculator::innerReverseOrderRecursivelY(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
   if (input.size() < 2) {
     return false;
@@ -549,7 +551,7 @@ bool Calculator::functionReverseOrderRecursively(
   return true;
 }
 
-bool Calculator::innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrder");
   if (!input.isSuitableForRecursion()) {
     output = input;
@@ -1320,4 +1322,142 @@ bool CalculatorFunctions::innerPrintAllVectorPartitions(Calculator& calculator, 
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
   return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorFunctions::innerInterpolatePoly(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
+  if (input.size() < 2) {
+    return false;
+  }
+  Expression convertedE;
+  if (!CalculatorConversions::innerMakeMatrix(calculator, input, convertedE)) {
+    return false;
+  }
+  Matrix<Rational> pointsOfInterpoly;
+  if (!calculator.functionGetMatrix(
+    convertedE, pointsOfInterpoly, nullptr, 2
+  )) {
+    return calculator
+    << "<hr>Failed to extract points of interpolation from "
+    << convertedE.toString();
+  }
+  Polynomial<Rational> interPoly;
+  Vector<Rational> theArgs, theValues;
+  pointsOfInterpoly.getVectorFromColumn(0, theArgs);
+  pointsOfInterpoly.getVectorFromColumn(1, theValues);
+  interPoly.interpolate(theArgs, theValues);
+  ExpressionContext theContext(calculator);
+  theContext.makeOneVariableFromString("x");
+  return output.assignValueWithContext(interPoly, theContext, calculator);
+}
+
+bool CalculatorFunctions::innerOperationBinary(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  int theOp
+) {
+  MemorySaving<Calculator::OperationHandlers>& theOperation = calculator.operations.theValues[theOp];
+  if (theOperation.isZeroPointer()) {
+    return false;
+  }
+  List<Function>& handlers = theOperation.getElement().handlers;
+  for (int i = 0; i < handlers.size; i ++) {
+    if (handlers[i].inputFitsMyInnerType(input)) {
+      if (handlers[i].theFunction(calculator, input, output)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expression& input, Expression& output, bool assignPoly) {
+  MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
+  if (!input.isListNElements(3)) {
+    return false;
+  }
+  Vector<Polynomial<Rational> > inputPolForm;
+  ExpressionContext startContext(calculator);
+  if (!calculator.getVectorFromFunctionArguments(
+    input,
+    inputPolForm,
+    &startContext,
+    2,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return calculator
+    << "<hr>Failed to extract polynomials from arguments of "
+    << input.toString();
+  }
+  int letterDiff = 0, letterPol = 0;
+  if (
+    !inputPolForm[0].isOneLetterFirstDegree(&letterDiff) ||
+    !inputPolForm[1].isOneLetterFirstDegree(&letterPol) ||
+    letterDiff == letterPol
+  ) {
+    return calculator
+    << "<hr>Failed to get different one-variable polynomials from input. "
+    << input.toString();
+  }
+  ExpressionContext endContext(calculator);
+  endContext.makeOneVariableOneDifferentialOperator(
+    startContext.getVariable(letterPol),
+    startContext.getVariable(letterDiff)
+  );
+  ElementWeylAlgebra<Rational> outputEWA;
+  if (assignPoly) {
+    outputEWA.makexi(0, 1);
+  } else {
+    outputEWA.makedi(0, 1);
+  }
+  return output.assignValueWithContext(outputEWA, endContext, calculator);
+}
+
+bool Calculator::outerExtractBaseMultiplication(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
+  MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
+  if (!input.startsWith(calculator.opTimes(), 3)) {
+    return false;
+  }
+  bool result = false;
+  // handle Anything * Rational = Rational * Anything
+  output = input;
+  if (output[2].isOfType<Rational>()) {
+    output.children.swapTwoIndices(1, 2);
+    result = true;
+  }
+  if (output[2].isOfType<double>() && !output[1].isOfType<Rational>()) {
+    output.children.swapTwoIndices(1, 2);
+    result = true;
+  }
+  if (output[2].isListStartingWithAtom(calculator.opTimes())) {
+    if (output[2].children.size != 3) {
+      return result;
+    }
+    // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 * Anything2)
+    if (output[2][1].isOfType<Rational>()) {
+      Expression tempRight;
+      tempRight.makeXOX(calculator, calculator.opTimes(), output[1], output[2][2]);
+      output.makeXOX(calculator, calculator.opTimes(), output[2][1], tempRight);
+      result = true;
+    }
+    // <- handle a * (b * anything)
+    // on condition that a*b has an inner handler
+    Expression tempExp, newExpr;
+    tempExp.makeXOX(calculator, calculator.opTimes(), output[1], output[2][1]);
+    if (CalculatorFunctions::innerTimes(calculator, tempExp, newExpr)) {
+      output.makeProduct(calculator, newExpr, output[2][2]);
+      result = true;
+    }
+  }
+  // handle 0 * anything = 0
+  if (output[1].isEqualToZero()) {
+    return output.assignValue(0, calculator);
+  }
+  return result;
 }

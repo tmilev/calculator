@@ -84,7 +84,7 @@ function loginTry() {
 function toggleAccountPanels() {
   var thePage = window.calculator.mainPage;
   var accountPanels = document.getElementsByClassName("divAccountPanel");
-  for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels ++) {
+  for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels++) {
     if (thePage.user.flagLoggedIn === true) {
       accountPanels[counterPanels].classList.remove("divInvisible");
       accountPanels[counterPanels].classList.add("divVisible");
@@ -100,7 +100,7 @@ function setAdminPanels() {
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   var currentRole = thePage.user.getRole();
   var studentView = thePage.studentView();
-  for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
+  for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels++) {
     if (currentRole === "admin" && !studentView) {
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
@@ -175,7 +175,7 @@ function loginWithServerCallback(incomingString, result) {
     }
   }
   if (!success) {
-    if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
+    if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
       document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
     }
     thePage.storage.variables.user.authenticationToken.setAndStore("");
@@ -214,21 +214,24 @@ function initGoogleLogin() {
   if (thePage.pages.login.initialized === true) {
     return;
   }
-
-  gapi.load('auth2', function() {
-    //auth2Google =
-    gapi.auth2.init({
-      client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
-      // Scopes to request in addition to 'profile' and 'email'
-      //scope: 'additional_scope'
+  try {
+    gapi.load('auth2', function () {
+      //auth2Google =
+      gapi.auth2.init({
+        client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
+        // Scopes to request in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
+      gapi.signin2.render('divGoogleLoginButton', {
+        scope: 'profile email',
+        prompt: "select_account",
+        onsuccess: onGoogleSignIn,
+        onfailure: null
+      });
     });
-    gapi.signin2.render('divGoogleLoginButton', {
-      scope: 'profile email',
-      prompt: "select_account",
-      onsuccess: onGoogleSignIn,
-      onfailure: null
-    });
-  });
+  } catch (e) {
+    console.log("Failed to execute google auth service.");
+  }
 }
 
 function showLoginCalculatorButtons() {
@@ -252,7 +255,7 @@ function hideLoginCalculatorButtons() {
 }
 
 function showLogoutButton() {
-  for (;;) {
+  for (; ;) {
     var theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
     if (theLogoutLinks.length === 0) {
       break;
@@ -263,7 +266,7 @@ function showLogoutButton() {
 }
 
 function hideLogoutButton() {
-  for (;;) {
+  for (; ;) {
     var theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
     if (theLogoutLinks.length === 0) {
       break;
@@ -285,7 +288,7 @@ function logoutGoogle() {
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split('&');
-  for (var i = 0; i < vars.length; i ++) {
+  for (var i = 0; i < vars.length; i++) {
     var pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) === variable) {
       return decodeURIComponent(pair[1]);

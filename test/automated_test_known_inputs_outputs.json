@@ -1820,6 +1820,10 @@
     "output":"(0;1;1)"
   },
   {
+    "input":"IsNonEmptySequence(2,3);IsNonEmptySequence{}((2,3));\nIsNonEmptySequence{}1;\na{}{{x}} = IsNonEmptySequence(x);\na{}((2,3))\n",
+    "output":"(1;1;0;a{}\\left({{x}}\\right)=IsNonEmptySequence{}\\left({{x}}\\right);1)"
+  },
+  {
     "input":"IsRational{}a;IsRational{}- 1;\nf{}{{a}}=IsRational{}a;\nIsRational{}1;\nIsRational{}b",
     "output":"(0;1;f{}\\left({{a}}\\right)=IsRational{}\\left({{a}}\\right);1;0)"
   },

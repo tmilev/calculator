@@ -3529,7 +3529,14 @@ bool CalculatorFunctions::innerIsNonEmptySequence(
   if (input.hasBoundVariables()) {
     return false;
   }
-  if (!input.isSequenceNElements() || input.size() < 2) {
+  if (input.size() < 2) {
+    return output.assignValue(0, calculator);
+  }
+  if (input.size() == 2) {
+    if (input[1].isSequenceNElements() && input[1].size() > 0) {
+      return output.assignValue(1, calculator);
+
+    }
     return output.assignValue(0, calculator);
   }
   return output.assignValue(1, calculator);

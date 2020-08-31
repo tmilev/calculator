@@ -3826,13 +3826,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsNonEmptySequence",
     CalculatorFunctions::innerIsNonEmptySequence,
     "",
-    "If the argument has no bound variables, returns 1 "
-    "if the argument is an integer, 0 otherwise. ",
-    "IsInteger{}a;\n"
-    "IsInteger{}1;\n"
-    "f{}{{a}}=IsInteger{}a;\n"
-    "f{}1;\n"
-    "f{}b",
+    "Returns 1 if the input is a non-empty sequence; 0 otherwise. "
+    "Does not reduce the expression if it has bound variables.",
+    "IsNonEmptySequence(2,3);"
+    "IsNonEmptySequence{}((2,3));\n"
+    "IsNonEmptySequence{}1;\n"
+    "a{}{{x}} = IsNonEmptySequence(x);\n"
+    "a{}((2,3))\n",
     "CalculatorFunctions::innerIsNonEmptySequence",
     "IsNonEmptySequence",
     innerStandard

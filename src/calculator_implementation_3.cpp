@@ -26,7 +26,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
   Vector<RationalFunction<Rational> > tempVect;
   RationalFunction<Rational> tempRF;
   tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
-  tempRF = this->AmbientWeyl->rootScalarCartanRoot(theWeight, tempVect);
+  tempRF = this->ambientWeyl->rootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeConstant) {
     global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
@@ -54,7 +54,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::i
   const Vector<Rational>& theWeight, int generatorIndex
 ) {
   this->checkInitialization();
-  return !this->AmbientWeyl->rootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
+  return !this->ambientWeyl->rootScalarCartanRoot(theWeight, this->simpleRootsInner[generatorIndex]).isNegative();
 }
 
 template <>
@@ -112,10 +112,10 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   std::stringstream out;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim= this->AmbientWeyl->getDimension();
+  int theDim = this->ambientWeyl->getDimension();
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
-  Vector<Rational> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Rational> highestWeightFundCoords = this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
     return false;
   }
@@ -124,7 +124,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
+  int topHeightRootSystem = this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -134,7 +134,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
-  int numPosRoots = this->AmbientWeyl->rootsOfBorel.size;
+  int numPosRoots = this->ambientWeyl->rootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
     int lowestUnexploredHeightDiff = 0;
@@ -150,13 +150,13 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
       for (int i = 0; i < numPosRoots; i ++) {
         currentWeight = currentHashes[lowest];
-        currentWeight -= this->AmbientWeyl->rootsOfBorel[i];
+        currentWeight -= this->ambientWeyl->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
           currentWeightRaisedToDominantWRTAmbientAlgebra = currentWeight;
-          this->AmbientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
+          this->ambientWeyl->raiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra -= highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.isNegativeOrZero()) {
-            int currentIndexShift = this->AmbientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
+            int currentIndexShift = this->ambientWeyl->rootsOfBorel[i].sumCoordinates().numeratorShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
@@ -174,7 +174,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   if (numTotalWeightsFound >= upperBoundDominantWeights) {
     out << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
-    << " a priori bound for the number of weights is WRONG. "
+    << "a priori bound for the number of weights is WRONG. "
     << "If the latter is the case, make sure to send an angry email to the author(s).";
   }
   outputDetails = out.str();

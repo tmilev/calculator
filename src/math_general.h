@@ -5843,8 +5843,8 @@ public:
 
 class DynkinDiagramRootSubalgebra {
 public:
-  Vectors<Rational> AmbientRootSystem;
-  Matrix<Rational> AmbientBilinearForm;
+  Vectors<Rational> ambientRootSystem;
+  Matrix<Rational> ambientBilinearForm;
   List<Vectors<Rational> > simpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -5899,7 +5899,7 @@ public:
 
 class VectorPartition {
 public:
-  Vectors<Rational> PartitioningRoots;
+  Vectors<Rational> partitioningRoots;
   Vector<Rational> goalVector;
   List<int> currentPartition;
   Vector<Rational> currentPartitionSum;

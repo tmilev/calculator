@@ -1566,7 +1566,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::a
   for (int i = theElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
     int tempI = theElement.generatorsLastAppliedFirst[i].index;
     if (tempI < this->simpleRootsInner.size) {
-      this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[tempI], output, false, output);
+      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[tempI], output, false, output);
     } else {
       tempI -= this->simpleRootsInner.size;
       tempRoot.makeZero(input.size);
@@ -1598,15 +1598,15 @@ Coefficient SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   Coefficient Result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   Vector<Rational> rho;
-  this->RootsOfBorel.sum(rho, this->AmbientWeyl->getDimension());
+  this->RootsOfBorel.sum(rho, this->ambientWeyl->getDimension());
   rho /= 2;
   rhoOverNewRing = rho;//<-type conversion here!
   Result = ringUnit;
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
     rootOfBorelNewRing = this->RootsOfBorel[i]; //<-type conversion here!
     sumWithRho = rhoOverNewRing + theWeightInnerSimpleCoords;
-    buffer = this->AmbientWeyl->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
-    buffer /= this->AmbientWeyl->rootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
+    buffer = this->ambientWeyl->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
+    buffer /= this->ambientWeyl->rootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
     Result *= buffer;
   }
   return Result;
@@ -1625,16 +1625,16 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   this->computeRootSubsystem();
   Vector<Coefficient> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim = this->AmbientWeyl->getDimension();
+  int theDim = this->ambientWeyl->getDimension();
   basisEi.makeEiBasis(theDim);
   this->raiseToDominantWeightInner(highestWeightTrue);
-  Vector<Coefficient> highestWeightFundCoords = this->AmbientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Coefficient> highestWeightFundCoords = this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.getVectorRational().sumCoordinates().getDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem = this->AmbientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
+  int topHeightRootSystem = this->ambientWeyl->rootsOfBorel.lastObject()->sumCoordinates().numeratorShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
   outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
@@ -1696,13 +1696,13 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::r
     *stabilizerFound = false;
   }
   Rational theScalarProd;
-//  int theDim= this->AmbientWeyl->getDimension();
+//  int theDim= this->ambientWeyl->getDimension();
   for (bool found = true; found; ) {
     found = false;
     for (int i = 0; i < this->simpleRootsInner.size; i ++) {
       if (!this->isDominantWithRespectToGenerator(theWeight, i)) {
         found = true;
-        this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[i], theWeight, false, theWeight);
+        this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[i], theWeight, false, theWeight);
         if (sign != nullptr) {
           *sign *= - 1;
         }
@@ -1735,7 +1735,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
       }
     }
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
-      this->AmbientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], theOrbit[i], false, tempRoot);
+      this->ambientWeyl->reflectBetaWithRespectToAlpha(this->simpleRootsInner[j], theOrbit[i], false, tempRoot);
       theOrbit.addOnTopNoRepetition(tempRoot);
     }
     if (restrictToInner) {
@@ -1778,8 +1778,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
       hwSimpleCoordsNilPart[i] = ringZero;
     }
   }
-  hwSimpleCoordsLeviPart = this->AmbientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
-  hwSimpleCoordsNilPart = this->AmbientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
+  hwSimpleCoordsLeviPart = this->ambientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
+  hwSimpleCoordsNilPart = this->ambientWeyl->getSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
   ///////////////////////////
   HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordsLeviPart;
 
@@ -1798,7 +1798,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
   Vector<Coefficient> Rho;
   Rho = this->getRho();//<-implicit type conversion here!
   Coefficient hwPlusRhoSquared;
-  hwPlusRhoSquared = this->AmbientWeyl->rootScalarCartanRoot(hwSimpleCoordsLeviPart + Rho, hwSimpleCoordsLeviPart + Rho);
+  hwPlusRhoSquared = this->ambientWeyl->rootScalarCartanRoot(hwSimpleCoordsLeviPart + Rho, hwSimpleCoordsLeviPart + Rho);
   Explored[0] = true;
   outputMultsSimpleCoords[0] = 1;
   Vector<Coefficient> convertor;
@@ -1830,14 +1830,14 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::f
           return false;
         }
         convertor = this->RootsOfBorel[j];//<-implicit type conversion here!
-        bufferCoeff = this->AmbientWeyl->rootScalarCartanRoot(currentWeight, convertor);
+        bufferCoeff = this->ambientWeyl->rootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff *= outputMultsSimpleCoords[theIndex];
         currentAccum += bufferCoeff;
       }
     }
     currentAccum *= 2;
     bufferCoeff = hwPlusRhoSquared;
-    bufferCoeff -= this->AmbientWeyl->rootScalarCartanRoot(
+    bufferCoeff -= this->ambientWeyl->rootScalarCartanRoot(
       outputDomWeightsSimpleCoordsLeviPart[k] + Rho, outputDomWeightsSimpleCoordsLeviPart[k] + Rho
     );
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.

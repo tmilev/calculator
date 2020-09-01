@@ -667,9 +667,9 @@ void DynkinDiagramRootSubalgebra::sort() {
 Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
   Rational result = 0;
-  for (int i = 0; i < this->AmbientRootSystem.size; i ++) {
-    if (inputVector.scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0) {
-      Rational squareLength = this->AmbientRootSystem[i].scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+  for (int i = 0; i < this->ambientRootSystem.size; i ++) {
+    if (inputVector.scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm) != 0) {
+      Rational squareLength = this->ambientRootSystem[i].scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm);
       if (result < squareLength) {
         result = squareLength;
       }
@@ -680,10 +680,10 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(const V
 
 Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo");
-  Rational result = inputVector.scalarProduct(inputVector, this->AmbientBilinearForm);
-  for (int i = 0; i < this->AmbientRootSystem.size; i ++) {
-    if (inputVector.scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0) {
-      Rational squareLength = this->AmbientRootSystem[i].scalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+  Rational result = inputVector.scalarProduct(inputVector, this->ambientBilinearForm);
+  for (int i = 0; i < this->ambientRootSystem.size; i ++) {
+    if (inputVector.scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm) != 0) {
+      Rational squareLength = this->ambientRootSystem[i].scalarProduct(this->ambientRootSystem[i], this->ambientBilinearForm);
       if (squareLength < result) {
         result = squareLength;
       }
@@ -718,15 +718,15 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     Vectors<Rational> rootsWithoutTripleNode = currentComponent;
     rootsWithoutTripleNode.removeIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
-    diagramWithoutTripleNode.AmbientBilinearForm = this->AmbientBilinearForm;
-    diagramWithoutTripleNode.AmbientRootSystem = this->AmbientRootSystem;
+    diagramWithoutTripleNode.ambientBilinearForm = this->ambientBilinearForm;
+    diagramWithoutTripleNode.ambientRootSystem = this->ambientRootSystem;
     diagramWithoutTripleNode.computeDiagramInputIsSimple(rootsWithoutTripleNode);
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents.size != 3) {
       global.fatal << "This is a programming error: Dynkin diagram has a triple "
       << "node whose removal does not yield 3 connected components. " << global.fatal;
     }
     for (int i = 0; i < 3; i ++) {
-      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
+      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[i][0].scalarProduct(tripleNode, this->ambientBilinearForm) == 0) {
         diagramWithoutTripleNode.simpleBasesConnectedComponents[i].reverseElements();
       }
     }
@@ -745,9 +745,9 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
       Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
-      tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
+      tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       currentComponent.addListOnTop(diagramWithoutTripleNode.simpleBasesConnectedComponents[0]);//<-first long component
-      if (!tripleNode.scalarProduct(currentComponent[0], this->AmbientBilinearForm).isEqualToZero()) {
+      if (!tripleNode.scalarProduct(currentComponent[0], this->ambientBilinearForm).isEqualToZero()) {
         currentComponent.reverseElements();
       }
       currentComponent.addOnTop(tripleNode);//<-then triple node
@@ -756,7 +756,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       outputType.makeArbitrary('D', currentComponent.size, theScale);
     } else {
       //the second largest component has more than one element, hence we are in type E_n.
-      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->AmbientBilinearForm);
+      Rational theScale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') / tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2) {
         global.fatal << "This is a programming error: the Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
@@ -764,13 +764,13 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       }
       if (!tripleNode.scalarProduct(
         diagramWithoutTripleNode.simpleBasesConnectedComponents[1][0],
-        this->AmbientBilinearForm).isEqualToZero()
+        this->ambientBilinearForm).isEqualToZero()
       ) {
         diagramWithoutTripleNode.simpleBasesConnectedComponents[1].reverseElements(); //<-the 2-root component has the first root perpendicular to the triple node
       }
       if (
         tripleNode.scalarProduct(diagramWithoutTripleNode.simpleBasesConnectedComponents[0][0],
-        this->AmbientBilinearForm).isEqualToZero()
+        this->ambientBilinearForm).isEqualToZero()
       ) {
         diagramWithoutTripleNode.simpleBasesConnectedComponents[0].reverseElements(); //<-the largest component has the first root non-perpendicular to the triple node
       }
@@ -784,15 +784,15 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
    return;
   }
   Rational length1, length2;
-  length1 = currentComponent[0].scalarProduct(currentComponent[0], this->AmbientBilinearForm);
+  length1 = currentComponent[0].scalarProduct(currentComponent[0], this->ambientBilinearForm);
   int numLength1 = 1;
   int numLength2 = 0;
   for (int i = 1; i < currentComponent.size; i ++) {
-    if (currentComponent[i].scalarProduct(currentComponent[i], this->AmbientBilinearForm) == length1) {
+    if (currentComponent[i].scalarProduct(currentComponent[i], this->ambientBilinearForm) == length1) {
       numLength1 ++;
     } else {
       numLength2 ++;
-      length2 = currentComponent[i].scalarProduct(currentComponent[i], this->AmbientBilinearForm);
+      length2 = currentComponent[i].scalarProduct(currentComponent[i], this->ambientBilinearForm);
     }
   }
   if (numLength2 == 0) {
@@ -831,7 +831,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   currentComponent.swapTwoIndices(0, currentEnds[0]);
   for (int i = 0; i < currentComponent.size; i ++) {
     for (int j = i + 1; j < currentComponent.size; j ++) {
-      if (!currentComponent[i].scalarProduct(currentComponent[j], this->AmbientBilinearForm).isEqualToZero()) {
+      if (!currentComponent[i].scalarProduct(currentComponent[j], this->ambientBilinearForm).isEqualToZero()) {
         currentComponent.swapTwoIndices(i + 1, j);
         break;
       }
@@ -854,8 +854,8 @@ std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) 
 
 bool DynkinDiagramRootSubalgebra::checkInitialization() const {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::checkInitialization");
-  if (this->AmbientRootSystem.size != 0) {
-    if (this->AmbientBilinearForm.numberOfRows != this->AmbientRootSystem[0].size) {
+  if (this->ambientRootSystem.size != 0) {
+    if (this->ambientBilinearForm.numberOfRows != this->ambientRootSystem[0].size) {
       global.fatal << "Ambient bilinear form of Dynkin subdiagram not initialized. " << global.fatal;
     }
   }
@@ -871,7 +871,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(const Vectors<Rati
     int indexFirstComponentConnectedToRoot = - 1;
     for (int j = 0; j < this->simpleBasesConnectedComponents.size; j ++) {
       if (this->simpleBasesConnectedComponents[j].containsVectorNonPerpendicularTo(
-        simpleBasisInput[i], this->AmbientBilinearForm)
+        simpleBasisInput[i], this->ambientBilinearForm)
       ) {
         if (indexFirstComponentConnectedToRoot == - 1) {
           indexFirstComponentConnectedToRoot = j;
@@ -979,8 +979,8 @@ void DynkinDiagramRootSubalgebra::getMapFromPermutation(
 
 void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput");
-  this->AmbientRootSystem = theWeyl.rootSystem;
-  this->AmbientBilinearForm = theWeyl.cartanSymmetric;
+  this->ambientRootSystem = theWeyl.rootSystem;
+  this->ambientBilinearForm = theWeyl.cartanSymmetric;
   theWeyl.transformToSimpleBasisGenerators(inputRoots, theWeyl.rootSystem);
   this->computeDiagramInputIsSimple(inputRoots);
 }
@@ -991,8 +991,8 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   const Matrix<Rational>& theBilinearForm
 ) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative");
-  this->AmbientRootSystem = weightSystem;
-  this->AmbientBilinearForm = theBilinearForm;
+  this->ambientRootSystem = weightSystem;
+  this->ambientBilinearForm = theBilinearForm;
   WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(inputOutputSimpleWeightSystem, weightSystem);
   this->computeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
 }
@@ -1144,13 +1144,13 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
   for (int i = 0; i < currentComponent.size; i ++) {
     int counter = 0;
     for (int j = 0; j < currentComponent.size; j ++) {
-      if (currentComponent[i].scalarProduct(currentComponent[j], this->AmbientBilinearForm).isNegative()) {
+      if (currentComponent[i].scalarProduct(currentComponent[j], this->ambientBilinearForm).isNegative()) {
         counter ++;
       }
     }
     if (counter > 3) {
       Matrix<Rational> theGram;
-      currentComponent.getGramMatrix(theGram, &this->AmbientBilinearForm);
+      currentComponent.getGramMatrix(theGram, &this->ambientBilinearForm);
       global.fatal << "This is a programming error: corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with"
       << " valency at most 3, but this diagram has node with valency "
@@ -1172,19 +1172,19 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     global.fatal << "numEnds variable equals: " << numEnds
     << ", number of three-nodes equals: "
     << result << "; this should not happen. The bilinear form is: "
-    << this->AmbientBilinearForm.toString() << global.fatal;
+    << this->ambientBilinearForm.toString() << global.fatal;
   }
   if (result == 1) {
     if (numEnds != 3) {
       global.fatal << "numEnds variable equals: " << numEnds
       << ", number of three-nodes equals: "
       << result << "; this should not happen. The bilinear form is: "
-      << this->AmbientBilinearForm.toString() << global.fatal;
+      << this->ambientBilinearForm.toString() << global.fatal;
     }
   } else {
     if (numEnds > 2) {
       global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.toString() << global.fatal;
+      << result << "; this should not happen. The bilinear form is: " << this->ambientBilinearForm.toString() << global.fatal;
     }
   }
   return result;

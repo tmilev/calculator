@@ -265,8 +265,8 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
   outputWeylSub.computeRootSubsystem();
 
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms complementGroup, theFDWeyl;
-  complementGroup.AmbientWeyl = outputWeylSub.AmbientWeyl;
-  theFDWeyl.AmbientWeyl = outputWeylSub.AmbientWeyl;
+  complementGroup.ambientWeyl = outputWeylSub.ambientWeyl;
+  theFDWeyl.ambientWeyl = outputWeylSub.ambientWeyl;
 
   Selection invertedSel;
   invertedSel = splittingParSel;
@@ -408,7 +408,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     << " out of " << splittingParSel.numberOfElements << " simple roots. " << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
-  subWeyl.AmbientWeyl = &this->owner->theWeyl;
+  subWeyl.ambientWeyl = &this->owner->theWeyl;
   MemorySaving<CharacterSemisimpleLieAlgebraModule<Coefficient> > buffer;
   CharacterSemisimpleLieAlgebraModule<Coefficient>& charWRTsubalgebra = (outputChar == 0) ? buffer.getElement() : *outputChar;
   this->theChaR.splitOverLeviMonomialsEncodeHighestWeight(
@@ -422,8 +422,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   splittingParSelectedInLevi = splittingParSel;
   splittingParSelectedInLevi.invertSelection();
   if (!splittingParSelectedInLevi.isSubset(this->parabolicSelectionSelectedAreElementsLevi)) {
-    out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
-    << " The parabolic has root of Levi given by " << splittingParSel.toString()
+    out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra. "
+    << "The parabolic has root of Levi given by " << splittingParSel.toString()
     << " while the ambient parabolic subalgebra has root of Levi given by "
     << this->parabolicSelectionNonSelectedAreElementsLevi.toString();
     if (report != nullptr) {
@@ -476,7 +476,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
         lastNonZeroIndex = i;
       }
     }
-    currentWeight = subWeyl.AmbientWeyl->getFundamentalCoordinatesFromSimple(
+    currentWeight = subWeyl.ambientWeyl->getFundamentalCoordinatesFromSimple(
       this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
     );//<-implicitTypeConversionHere
     currentWeight += hwFundCoordsNilPart;

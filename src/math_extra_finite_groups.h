@@ -1914,7 +1914,7 @@ class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms {
 public:
   bool truncated;
   bool flagDeallocated;
-  WeylGroupData* AmbientWeyl;
+  WeylGroupData* ambientWeyl;
   HashedList<ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms> allElements;
   // WeylGroupData ElementS;
   List<ElementWeylGroup> RepresentativesQuotientAmbientOrder;

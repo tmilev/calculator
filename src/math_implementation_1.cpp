@@ -742,10 +742,10 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(Eleme
 
 void BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   MacroRegisterFunctionWithName("BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.AmbientWeyl = &this->theHmm.theRange().theWeyl;
-  this->WeylFDSmall.AmbientWeyl = &this->theHmm.theDomain().theWeyl;
-  this->WeylFD.AmbientWeyl = &this->theHmm.theRange().theWeyl;
-  this->selSmallParSel.initialize(WeylFDSmall.AmbientWeyl->getDimension());
+  this->WeylFDSmallAsSubInLarge.ambientWeyl = &this->theHmm.theRange().theWeyl;
+  this->WeylFDSmall.ambientWeyl = &this->theHmm.theDomain().theWeyl;
+  this->WeylFD.ambientWeyl = &this->theHmm.theRange().theWeyl;
+  this->selSmallParSel.initialize(WeylFDSmall.ambientWeyl->getDimension());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
     this->generatorsSmallSub.addOnTop(currentV);
@@ -842,7 +842,7 @@ void BranchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
   List<Vectors<Rational> > emptyList;
   this->WeylFDSmallAsSubInLarge.computeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
   this->WeylFDSmall.makeParabolicFromSelectionSimpleRoots(
-    *this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, 1000
+    *this->WeylFDSmall.ambientWeyl, this->selSmallParSel, 1000
   );
   this->WeylFD.makeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, 1000);
   this->WeylFD.computeRootSubsystem();
@@ -913,7 +913,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::g
   output.reserve(this->allElements.size);
   output.setSize(0);
   ElementWeylGroup currentOutput;
-  currentOutput.owner = this->AmbientWeyl;
+  currentOutput.owner = this->ambientWeyl;
   Vector<int> indexShifts;
   indexShifts.setSize(this->simpleRootsInner.size);
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {

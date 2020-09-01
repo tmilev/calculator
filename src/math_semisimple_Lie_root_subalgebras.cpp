@@ -42,7 +42,7 @@ void RootSubalgebra::getCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempGroup;
   int coxeterNumber = 1;
   for (int i = 0; i < this->theDynkinDiagram.simpleBasesConnectedComponents.size; i ++) {
-    tempGroup.AmbientWeyl = &this->getAmbientWeyl();
+    tempGroup.ambientWeyl = &this->getAmbientWeyl();
     tempGroup.simpleRootsInner = this->theDynkinDiagram.simpleBasesConnectedComponents[i];
     tempGroup.computeRootSubsystem();
     Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.lastObject();
@@ -405,12 +405,12 @@ void RootSubalgebra::possibleNilradicalComputation(Selection& selKmods, RootSuba
           tempOthers.addOnTop(-this->positiveRootsReductiveSubalgebra.objects[i]);
           tempK.addOnTop(this->positiveRootsReductiveSubalgebra.objects[i]);
         }
-        if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.AmbientWeyl.cartanSymmetric.numberOfRows)) {
+        if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.ambientWeyl.cartanSymmetric.numberOfRows)) {
           Vectors<Rational> tempRoots; std::stringstream out; std::string tempS;
-          this->AmbientWeyl.getEpsilonCoordinates(tempNilradical, tempRoots);
+          this->ambientWeyl.getEpsilonCoordinates(tempNilradical, tempRoots);
           tempRoots.toStringEpsilonForm(tempS, true, false, false);
           out << tempS;
-          this->AmbientWeyl.getEpsilonCoordinates(tempK, tempRoots);
+          this->ambientWeyl.getEpsilonCoordinates(tempK, tempRoots);
           tempRoots.toStringEpsilonForm(tempS, true, false, false);
           out << "\n\n" << tempS;
           owner.ReportStringNonNilradicalParabolic = out.str();
@@ -2247,8 +2247,8 @@ void RootSubalgebra::computeEssentials() {
   MacroRegisterFunctionWithName("RootSubalgebra::computeEssentials");
   this->simpleRootsReductiveSubalgebra = this->genK;
   this->simpleRootsReductiveSubalgebra.getGramMatrix(this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric);
-  this->theDynkinDiagram.AmbientRootSystem= this->getAmbientWeyl().rootSystem;
-  this->theDynkinDiagram.AmbientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
+  this->theDynkinDiagram.ambientRootSystem= this->getAmbientWeyl().rootSystem;
+  this->theDynkinDiagram.ambientBilinearForm= this->getAmbientWeyl().cartanSymmetric;
   this->theDynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
   this->theDynkinDiagram.getDynkinType(this->theDynkinType);
   if (this->simpleRootsReductiveSubalgebra.size != 0) {
@@ -2335,8 +2335,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     reportStream << "...the candidate's roots are maximally dominant... ";
     theReport.report(reportStream.str());
   }
-  this->theDynkinDiagram.AmbientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
-  this->theDynkinDiagram.AmbientRootSystem = this->getAmbientWeyl().rootSystem;
+  this->theDynkinDiagram.ambientBilinearForm = this->getAmbientWeyl().cartanSymmetric;
+  this->theDynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
   this->theDynkinDiagram.computeDiagramInputIsSimple(this->simpleRootsReductiveSubalgebra);
   this->theDynkinDiagram.getDynkinType(this->theDynkinType);
   this->computeKModules();
@@ -2356,8 +2356,10 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     }
   }
   if (theReport.tickAndWantReport()) {
-    reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.toString()
-    << ", centralizer type: " << this->theCentralizerDynkinType.toString() << ". Computing outer automorphisms that "
+    reportStream << "...module decomposition computed, subalgebra type: "
+    << this->theDynkinType.toString()
+    << ", centralizer type: " << this->theCentralizerDynkinType.toString()
+    << ". Computing outer automorphisms that "
     << "have zero action on centralizer and extend to ambient automorphisms... ";
     theReport.report(reportStream.str());
   }
@@ -2383,7 +2385,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(bool 
   MacroRegisterFunctionWithName("RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD");
   this->theSubalgebras.size = 0;
   this->getOwnerWeyl().computeRho(true);
-  //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
+  //this->initDynkinDiagramsNonDecided(this->ambientWeyl, WeylLetter, WeylRank);
   RootSubalgebras rootSAsGenerateAll;
   rootSAsGenerateAll.theSubalgebras.setSize(this->GetOwnerSSalgebra().getRank()*2+ 1);
   rootSAsGenerateAll.theSubalgebras[0].genK.size = 0;
@@ -3457,7 +3459,7 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   this->CentralizerIsomorphisms.setSize(this->CentralizerIsomorphisms.size + 1);
   this->centralizerOuterIsomorphisms.setSize(this->CentralizerIsomorphisms.size);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& outputSubgroup = this->CentralizerIsomorphisms.lastObject();
-  outputSubgroup.AmbientWeyl = &theRootSA.getAmbientWeyl();
+  outputSubgroup.ambientWeyl = &theRootSA.getAmbientWeyl();
   this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
   theRootSA.generateIsomorphismsPreservingBorel(theRootSA, &outputSubgroup);
   outputSubgroup.computeSubGroupFromGeneratingReflections(
@@ -3465,7 +3467,7 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   );
   outputSubgroup.simpleRootsInner = selectedRootsBasisCentralizer;
   this->centralizerOuterIsomorphisms.lastObject().ExternalAutomorphisms = outputSubgroup.ExternalAutomorphisms;
-  this->centralizerOuterIsomorphisms.lastObject().AmbientWeyl = &this->getOwnerWeyl();
+  this->centralizerOuterIsomorphisms.lastObject().ambientWeyl = &this->getOwnerWeyl();
   this->makeProgressReportAutomorphisms(outputSubgroup, theRootSA);
 }
 
@@ -4131,7 +4133,7 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
   tempRoots = this->Alphas;
   tempRoots.addListOnTop(this->Betas);
   tempRoots.addListOnTop(owner.genK);
-  //owner.AmbientWeyl.transformToSimpleBasisGenerators(tempRoots);
+  //owner.ambientWeyl.transformToSimpleBasisGenerators(tempRoots);
   this->theDiagram.computeDiagramTypeModifyInput(tempRoots, owner.getAmbientWeyl());
   if (this->theDiagram.toString() == "F^{1}_4") {
     return false;
@@ -4140,7 +4142,7 @@ bool ConeRelation::IsStrictlyWeaklyProhibiting(
    //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
-  tempSubgroup.AmbientWeyl = &(owner.getAmbientWeyl());
+  tempSubgroup.ambientWeyl = &(owner.getAmbientWeyl());
   tempSubgroup.computeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.ExternalAutomorphisms, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
   tempRoots = tempSubgroup.RootSubsystem;

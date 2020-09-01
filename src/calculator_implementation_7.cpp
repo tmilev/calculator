@@ -7269,11 +7269,11 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& calcul
   << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
   out << "<br>Number of elements of the ambient Weyl: "
-  << theSubgroup.AmbientWeyl->theGroup.theElements.size;
+  << theSubgroup.ambientWeyl->theGroup.theElements.size;
   FormatExpressions theFormat;
   theSSalgPointer.context.getFormat(theFormat);
   if (theSubgroup.allElements.size > 498) {
-    if (theSubgroup.AmbientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.getSize()) {
+    if (theSubgroup.ambientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.ambientWeyl->theGroup.getSize()) {
       out << "Weyl group is too large. <br>";
     } else {
       out << "Weyl group is too large for LaTeX. <br>";
@@ -7564,7 +7564,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   formatChars.fundamentalWeightLetter = "\\omega";
   formatChars.flagUseLatex = true;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
-  theSubgroup.AmbientWeyl = theKLpolys.TheWeylGroup;
+  theSubgroup.ambientWeyl = theKLpolys.TheWeylGroup;
   for (int i = 0; i < theWeylElements.size; i ++) {
     ElementWeylGroup& currentElement = theWeylElements[i];
     out << "<tr><td>" << currentElement.toString() << "</td>";

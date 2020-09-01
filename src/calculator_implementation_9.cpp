@@ -790,8 +790,8 @@ bool CalculatorFunctions::innerRootSubsystem(Calculator& calculator, const Expre
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.rootSystem);
-  theDiagram.AmbientBilinearForm = theWeyl.cartanSymmetric;
-  theDiagram.AmbientRootSystem = theWeyl.rootSystem;
+  theDiagram.ambientBilinearForm = theWeyl.cartanSymmetric;
+  theDiagram.ambientRootSystem = theWeyl.rootSystem;
   theDiagram.computeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.toString()
   << ". Simple basis: " << theDiagram.simpleBasesConnectedComponents.toString();
@@ -1002,8 +1002,8 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
           }
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
-          Vector<RationalFunction<Rational>> theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFD.AmbientWeyl->getSimpleCoordinatesFromFundamental(
+          Vector<RationalFunction<Rational> > theSimpleCoordinates;
+          theSimpleCoordinates = theG2B3Data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
             theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
           );
           RationalFunction<Rational> theWeylSize;
@@ -1026,7 +1026,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
             latexTable << multiplicity << "\\times";
           }
           Vector<RationalFunction<Rational> > theSimpleCoordinates;
-          theSimpleCoordinates = theG2B3Data.WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
+          theSimpleCoordinates = theG2B3Data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
             tempChar[0].weightFundamentalCoordS
           );
           RationalFunction<Rational> dimension;
@@ -1181,7 +1181,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
     out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction<Rational> > simpleCoordinates;
-    simpleCoordinates = theg2b3data.WeylFD.AmbientWeyl->getSimpleCoordinatesFromFundamental(
+    simpleCoordinates = theg2b3data.WeylFD.ambientWeyl->getSimpleCoordinatesFromFundamental(
       theCharacter[0].weightFundamentalCoordS
     );
     RationalFunction<Rational> dimension;
@@ -1198,7 +1198,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
       if (!outputChar.coefficients[i].isEqualToOne()) {
         out << outputChar.coefficients[i].toString() << " x ";
       }
-      simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->getSimpleCoordinatesFromFundamental(
+      simpleCoordinates = theg2b3data.WeylFDSmall.ambientWeyl->getSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
       );
       dimension = theg2b3data.WeylFDSmall.weylDimensionFormulaInnerSimpleCoords(simpleCoordinates);

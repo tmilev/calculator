@@ -1050,15 +1050,15 @@ void LargeIntegerUnsigned::greatestCommonDivisor(
   LargeIntegerUnsigned& output
 ) {
   MacroIncrementCounter(Rational::totalLargeGreatestCommonDivisors);
-  LargeIntegerUnsigned p, q, r, temp;
-  p = a;
-  q = b;
-  while (!q.isEqualToZero()) {
-    p.divPositive(q, temp, r);
-    p = q;
-    q = r;
+  LargeIntegerUnsigned dividend, divisor, remainder, temporary;
+  dividend = a;
+  divisor = b;
+  while (!divisor.isEqualToZero()) {
+    dividend.divPositive(divisor, temporary, remainder);
+    dividend = divisor;
+    divisor = remainder;
   }
-  output = p;
+  output = dividend;
 }
 
 void LargeIntegerUnsigned::fitSize() {

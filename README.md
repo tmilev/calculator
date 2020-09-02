@@ -31,7 +31,7 @@ The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the
 If it doesn't, please do let us know by posting a bug report here.
 To explicitly request a build without mongoDB and openSSL, use the following.
 ```
-make -j10 nossl=1 nomongo=1
+make -j10 nossl=1 noMongo=1
 ```
 
 ### Run the calculator

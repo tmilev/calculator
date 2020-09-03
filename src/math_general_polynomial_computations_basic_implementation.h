@@ -1395,7 +1395,7 @@ std::string PolynomialDivisionReport<Coefficient>::getPolynomialStringSpacedMono
         &this->owner->theFormat
       );
 
-      out << HtmlRoutines::getMathSpan(monomialWithCoefficient);
+      out << HtmlRoutines::getMathNoDisplay(monomialWithCoefficient);
     } else {
       out << Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
         thePoly[theIndex],
@@ -1461,14 +1461,14 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->owner->theFormat.flagUseLatex) {
-      out << HtmlRoutines::getMathSpan(this->owner->theBasis[i].element.toString(&format), - 1);
+      out << HtmlRoutines::getMathNoDisplay(this->owner->theBasis[i].element.toString(&format), - 1);
     } else {
       out << this->owner->theBasis[i].element.toString(&format);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"
     << this->allMonomials.size + 1 << "'>";
-    out << HtmlRoutines::getMathSpan(this->owner->theQuotients[i].toString(&format));
+    out << HtmlRoutines::getMathNoDisplay(this->owner->theQuotients[i].toString(&format));
     out << "</td></tr>";
   }
   out << "</tr>";

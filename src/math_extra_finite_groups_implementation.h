@@ -1517,7 +1517,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::toStr
       std::stringstream tempStream;
       tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generators[i].toString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
-      out << HtmlRoutines::getMathSpan("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
+      out << HtmlRoutines::getMathNoDisplay("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
     } else {
       out << "Simple generator " << i + 1 << "} not computed ";
     }

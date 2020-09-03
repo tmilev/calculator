@@ -136,15 +136,19 @@ public:
   public:
     class type {
     public:
+      // Listed in approximate order of appearance.
+      // This process type initializes the system.
+      static const int initialization = 0;
+      // This optional process monitors the entire system and reboots it if it goes down.
+      static const int daemon = 1;
+      // This optional process monitors the server process over a localhost connection.
+      // Attempts to kill the server process if the localhost connection is lost.
+      static const int serverMonitor = 2;
       // This process type runs the web server and accepts connections.
-      static const int server = 0;
+      static const int server = 3;
       // This process type runs the calculator connections
       // and does the actual internet input/output.
-      static const int worker = 1;
-      // This optional process monitors the server process over a localhost connection.
-      static const int serverMonitor = 2;
-      // This optional process monitors the entire system and reboots it if it goes down.
-      static const int daemon = 3;
+      static const int worker = 4;
     };
     int logType;
     Logger server;
@@ -211,7 +215,6 @@ public:
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
-  bool flagRestartNeeded;
 
   bool flagLoggedIn;
   bool flagLogInAttempted;
@@ -446,7 +449,6 @@ public:
   int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
   std::string externalCommandReturnOutput(const std::string& systemCommand);
   void changeDirectory(const std::string& systemCommand);
-  std::string toStringCalculatorComputation(const std::string& computation, const std::string &display);
   std::string toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude);
   std::string toHTMLTopCommandLinuxSystem();
   std::string toStringFolderInfo() const;

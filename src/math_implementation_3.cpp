@@ -154,7 +154,6 @@ GlobalVariables::GlobalVariables() {
   this->flagNotAllocated = false;
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
-  this->flagRestartNeeded = false;
   this->millisecondsMaxComputation = 100000; // 100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
@@ -6935,7 +6934,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* th
     const Vector<Rational>& current = this->rootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
     out << "<tr><td>" << current.toString() << "</td><td>" << rootSystemEpsCoords[i].toStringLetterFormat("e") << "</td>"
-    << "<td>" << HtmlRoutines::getMathSpan(currentRootReflection.toString()) << "</td>" << "</tr>";
+    << "<td>" << HtmlRoutines::getMathNoDisplay(currentRootReflection.toString()) << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
@@ -7837,7 +7836,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&= &" << this->simpleRootsInner[i].toString() << "\\\\";
   }
   head << "\\end{array}";
-  out << HtmlRoutines::getMathSpan(head.str());
+  out << HtmlRoutines::getMathNoDisplay(head.str());
   if (this->ExternalAutomorphisms.size > 0) {
     out << "<br>Outer automorphisms: \n";
     Matrix<Rational> tempMat;
@@ -7848,7 +7847,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
       head2 << "a_{" << i + 1 << "}&= &" << tempMat.toString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
-    out << HtmlRoutines::getMathSpan(head2.str());
+    out << HtmlRoutines::getMathNoDisplay(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->getRho().toString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
@@ -7864,7 +7863,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
       body << currentElt.toString(nullptr) << "\\\\";
     }
     body << "\\end{array}";
-    out << HtmlRoutines::getMathSpan(body.str());
+    out << HtmlRoutines::getMathNoDisplay(body.str());
   }
   output = out.str();
 }
@@ -8165,8 +8164,8 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* theFormat) {
   if (this->theKLcoeffs.size == this->TheWeylGroup->theGroup.theElements.size) {
     out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
-    << HtmlRoutines::getMathSpan("L_{w_2 \\cdot \\lambda}")
-    << " in " <<  HtmlRoutines::getMathSpan(" M_{w_1\\cdot \\lambda }  ")
+    << HtmlRoutines::getMathNoDisplay("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  HtmlRoutines::getMathNoDisplay(" M_{w_1\\cdot \\lambda }  ")
     << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest "
@@ -11035,9 +11034,9 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   std::string whatWentWrong;
 
   theFracs.initFromRoots(theRoots);
-  out << HtmlRoutines::getMathSpan(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(theFormat));
   theFracs.split(nullptr);
-  out << HtmlRoutines::getMathSpan(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathNoDisplay(theFracs.toString(theFormat));
   // theFracs.theChambers.initializeFromDirectionsAndRefine(theRoots);
   global.fatal << "Not implemented. " << global.fatal ;
   //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;

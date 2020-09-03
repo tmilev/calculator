@@ -270,7 +270,7 @@ public:
     );
     ~WriterObjectFixedLength();
   };
-  int recursionDepthGuarD;
+  int recursionDepthGuard;
   int maxRecursionDepth;
   int dataPointer;
   bool flagMustDecodeAll;

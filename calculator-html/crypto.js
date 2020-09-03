@@ -19,7 +19,7 @@ function AbstractSyntaxOne() {
   this.positionInBinary = 0;
 }
 
-AbstractSyntaxOne.prototype.initializeAnnotation = function(
+AbstractSyntaxOne.prototype.initializeAnnotation = function (
   inputBinaryHex,
   inputInterpretation,
   /**@type {string} */
@@ -30,7 +30,7 @@ AbstractSyntaxOne.prototype.initializeAnnotation = function(
   this.interpretation = inputInterpretation;
   this.DOMElementAnnotationContainer = document.getElementById(inputIdAnnotation);
   if (this.DOMElementAnnotationContainer === null) {
-    throw(`Element of id ${inputIdAnnotation} is missing. `);
+    throw (`Element of id ${inputIdAnnotation} is missing. `);
   }
 }
 
@@ -73,10 +73,13 @@ function hideToolTip(
  *  tag: string,
  *  startByteOriginal: string,
  *  numberOfChildren: number,
- *  offset: number}} ASNElement
+ *  offsetLastRead: number,
+ *  offsetLastWrite: number,
+ *  offset: number,
+ * }} ASNElement
 */
 
-AbstractSyntaxOne.prototype.appendAnnotation = function(
+AbstractSyntaxOne.prototype.appendAnnotation = function (
   /**@type {HTMLElement} */
   container,
   /**@type  {ASNElement}*/
@@ -92,7 +95,16 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
   var tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
   tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
-  tooltipLeadingByte += `<br>Offset: ${currentInterpretation.offset}`;
+  // offsetLastWrite is the offset in the recoded stream.
+  // offsetLastRead is the offset in the original stream.
+  // offset: general offset, not clear whether in the original or recoded stream.
+  let offset = currentInterpretation.offsetLastWrite;
+  if (offset === undefined) {
+    offset = currentInterpretation.offset;
+  }
+  if (offset !== undefined) {
+    tooltipLeadingByte += `<br>Offset: ${offset}`;
+  }
   if (currentInterpretation.numberOfChildren) {
     tooltipLeadingByte += `<br># of sub-elements: ${currentInterpretation.numberOfChildren}`;
   }
@@ -126,7 +138,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   var foundContent = false;
   if (currentInterpretation.children !== undefined) {
     foundContent = true;
-    for (var i = 0; i < currentInterpretation.children.length; i ++) {
+    for (var i = 0; i < currentInterpretation.children.length; i++) {
       var interpretation = currentInterpretation.children[i];
       this.appendAnnotation(elementBody, interpretation);
     }
@@ -169,7 +181,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   container.appendChild(currentElement);
 }
 
-AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
+AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function (
   annotation,
   /**@type {HTMLElement} */
   annotationTreeElement,
@@ -180,7 +192,7 @@ AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
   annotationTreeElement.style.backgroundColor = "lightgray";
 }
 
-AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
+AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function (
   annotation,
   /**@type {HTMLElement} */
   annotationTreeElement,
@@ -191,7 +203,7 @@ AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
   annotationTreeElement.style.backgroundColor = "";
 }
 
-AbstractSyntaxOne.prototype.appendAnnotationTree = function(
+AbstractSyntaxOne.prototype.appendAnnotationTree = function (
   /**@type {HTMLElement} */
   container,
   /**@type  {ASNElement}*/
@@ -215,13 +227,13 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   var annotationElementPeer = currentInterpretation.dom;
   var elementsToAttachTo = [currentHead, annotationElementPeer.header];
   if (currentInterpretation.children !== undefined) {
-    for (var counter = 0; counter < currentInterpretation.children.length; counter ++) {
+    for (var counter = 0; counter < currentInterpretation.children.length; counter++) {
       this.appendAnnotationTree(currentElement, currentInterpretation.children[counter]);
     }
   } else {
     elementsToAttachTo.push(annotationElementPeer.body);
   }
-  for (var counter = 0; counter < elementsToAttachTo.length; counter ++) {
+  for (var counter = 0; counter < elementsToAttachTo.length; counter++) {
     var theElement = elementsToAttachTo[counter];
     theElement.addEventListener(
       'mouseover',
@@ -243,7 +255,7 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   container.appendChild(currentElement);
 }
 
-AbstractSyntaxOne.prototype.annotate = function() {
+AbstractSyntaxOne.prototype.annotate = function () {
   this.DOMElementAnnotationContainer.innerHTML = "";
   this.DOMElementAnnotation = document.createElement("SPAN");
   this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotation");
@@ -276,7 +288,7 @@ function AnnotatedBytes() {
 
 }
 
-AnnotatedBytes.prototype.getStackTop = function() {
+AnnotatedBytes.prototype.getStackTop = function () {
   while (true) {
     if (this.stack.length == 0) {
       this.top = null;
@@ -292,7 +304,7 @@ AnnotatedBytes.prototype.getStackTop = function() {
   // return null;
 }
 
-AnnotatedBytes.prototype.stackOnTop = function() {
+AnnotatedBytes.prototype.stackOnTop = function () {
   while (this.nextMarkerOffset < this.markers.length) {
     var nextMarker = this.markers[this.nextMarkerOffset];
     if (nextMarker.offset > this.nextByteOffset) {
@@ -313,7 +325,7 @@ AnnotatedBytes.prototype.stackOnTop = function() {
       );
       this.top = this.stack[this.stack.length - 1];
     }
-    this.nextMarkerOffset ++;
+    this.nextMarkerOffset++;
   }
 }
 
@@ -336,7 +348,7 @@ function StackElement(
   this.currentBody = currentBody;
 }
 
-StackElement.prototype.flushBody = function() {
+StackElement.prototype.flushBody = function () {
   if (this.currentBody === null) {
     return;
   }
@@ -355,7 +367,7 @@ StackElement.prototype.flushBody = function() {
   this.dom.appendChild(bodyElement);
 }
 
-AnnotatedBytes.prototype.writeMessageToDOM = function(
+AnnotatedBytes.prototype.writeMessageToDOM = function (
   input,
   /**@type {HTMLElement} */
   outputComponent,
@@ -384,7 +396,7 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
       break;
     }
     this.top.currentBody.push(this.bodyHex.slice(this.nextByteOffset * 2, this.nextByteOffset * 2 + 2));
-    this.nextByteOffset ++;
+    this.nextByteOffset++;
   }
   if (this.top.currentBody.length > 0) {
     this.top.flushBody();
@@ -394,7 +406,7 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
   outputComponent.appendChild(inputStringifiedElement);
 }
 
-TransportLayerSecurityServer.prototype.displayMessages = function(
+TransportLayerSecurityServer.prototype.displayMessages = function (
   /**@type {string} */
   outputId,
   input,
@@ -405,7 +417,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   var inputHeader = document.createElement("span");
   inputHeader.innerHTML = "<br>";
   outputElement.appendChild(inputHeader);
-  for (var i = 0; i < input.spoofer.inputMessages.length; i ++) {
+  for (var i = 0; i < input.spoofer.inputMessages.length; i++) {
     var currentStringHeader = document.createElement("SPAN");
     currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
     outputElement.appendChild(currentStringHeader);
@@ -418,7 +430,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   if (input.spoofer.errorsOnInput.length > 0) {
     var inputErrors = document.createElement("span");
     var errorHTML = "<br><b style = 'color:red'>Input errors:</b>";
-    for (var i = 0; i < input.spoofer.errorsOnInput.length; i ++) {
+    for (var i = 0; i < input.spoofer.errorsOnInput.length; i++) {
       errorHTML += "<br>" + input.spoofer.errorsOnInput[i];
     }
     inputErrors.innerHTML = errorHTML;
@@ -427,13 +439,13 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   var outputHeader = document.createElement("span");
   outputHeader.innerHTML = "<br>";
   outputElement.appendChild(outputHeader);
-  for (var i = 0; i < input.spoofer.outputMessages.length; i ++) {
+  for (var i = 0; i < input.spoofer.outputMessages.length; i++) {
     var outputHeader = document.createElement("span");
-    outputHeader.innerHTML = `<br><b>Output ${i+1}:</b><br>`;
+    outputHeader.innerHTML = `<br><b>Output ${i + 1}:</b><br>`;
     outputElement.appendChild(outputHeader);
     var currentOutputContainer = document.createElement("span");
     currentOutputContainer.className = "hexContainerStandard";
-    for (var j = 0; j < input.spoofer.outputMessages[i].length; j ++) {
+    for (var j = 0; j < input.spoofer.outputMessages[i].length; j++) {
       var nextOutput = document.createElement("span");
       var annotation = new AnnotatedBytes();
       annotation.writeMessageToDOM(input.spoofer.outputMessages[i][j], nextOutput);
@@ -449,7 +461,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   if (input.spoofer.errorsOnOutput.length > 0) {
     var outputErrors = document.createElement("span");
     var errorHTML = "Output errors:<br>";
-    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i ++) {
+    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
       errorHTML += input.spoofer.errorsOnOutput[i] + "<br>";
     }
     outputErrors.innerHTML = errorHTML;
@@ -458,7 +470,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   if (input.spoofer.errorsOnOutput.length > 0) {
     var inputErrors = document.createElement("span");
     var errorHTML = "<br><b style = 'color:red'>Output errors:</b><br>";
-    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i ++) {
+    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
       errorHTML += "<br>" + input.spoofer.errorsOnOutput[i];
     }
     inputErrors.innerHTML = errorHTML;
@@ -496,7 +508,7 @@ function writeSessionToDOM(
   var htmlContent = "";
   htmlContent += `<table class = '${styles.classNames.table.borderStandard}'>`;
   var labelsToIgnore = {
-    "cipherSuites" : true,
+    "cipherSuites": true,
     "algorithmSpecifications": true,
   };
   for (var label in session) {
@@ -535,7 +547,7 @@ function displaySSLRecord(
   var content = input.content;
   writeSessionToDOM(input.session, outputElement);
   var flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
-  for (var counter = 0; counter < flagNames.length; counter ++) {
+  for (var counter = 0; counter < flagNames.length; counter++) {
     var flagName = flagNames[counter];
     if (content[flagName] !== undefined) {
       extraAnnotation += `<br>${flagName}: ${content[flagName]}`;
@@ -545,7 +557,7 @@ function displaySSLRecord(
   extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
   extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
   extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>type</th><th>name</th><th width = '50%'>data</th></tr>`;
-  for (var counter = 0; counter < content.extensions.length; counter ++) {
+  for (var counter = 0; counter < content.extensions.length; counter++) {
     var label = content.extensions[counter].name;
     var type = content.extensions[counter].type;
     var data = content.extensions[counter].data;
@@ -562,7 +574,7 @@ function displaySSLRecord(
   outputElement.appendChild(annotationAnnotation);
 }
 
-module.exports =  {
+module.exports = {
   abstractSyntaxNotationAnnotate,
   displayTransportLayerSecurity,
   displaySSLRecord,

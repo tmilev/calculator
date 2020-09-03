@@ -1435,8 +1435,8 @@ std::string serialization::Marker::toString() const {
 JSData serialization::Marker::toJSON() {
   JSData result;
   result.theType = JSData::token::tokenObject;
-  result[serialization::JSLabels::offset] = this->offset;
-  result[serialization::JSLabels::length] = this->length;
+  result[serialization::JSLabels::offset] = LargeInteger(this->offset);
+  result[serialization::JSLabels::length] = LargeInteger(this->length);
   result[serialization::JSLabels::label] = this->label;
   return result;
 }

@@ -234,11 +234,11 @@ bool CalculatorHTML::mergeOneProblemAdminData(
     }
     return false;
   }
-  if (!this->currentUseR.theProblemData.contains(inputProblemName)) {
-    this->currentUseR.theProblemData.setKeyValue(inputProblemName, inputProblemInfo);
+  if (!this->currentUser.theProblemData.contains(inputProblemName)) {
+    this->currentUser.theProblemData.setKeyValue(inputProblemName, inputProblemInfo);
   }
   ProblemDataAdministrative& currentProblem =
-  this->currentUseR.theProblemData.getValueCreate(inputProblemName).adminData;
+  this->currentUser.theProblemData.getValueCreate(inputProblemName).adminData;
   MapList<std::string, std::string, MathRoutines::hashString>&
   currentDeadlines = currentProblem.deadlinesPerSection;
   MapList<std::string, std::string, MathRoutines::hashString>&
@@ -355,24 +355,24 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     comments << "Database not available (cannot load problem info). ";
     return false;
   }
-  this->currentUseR.::UserCalculatorData::operator=(global.userDefault);
+  this->currentUser.::UserCalculatorData::operator=(global.userDefault);
   if (!this->prepareSectionList(comments)) {
     return false;
   }
-  if (this->currentUseR.problemDataJSON.objects.size() != 0) {
-    if (!this->currentUseR.interpretDatabaseProblemDataJSON(this->currentUseR.problemDataJSON, comments)) {
+  if (this->currentUser.problemDataJSON.objects.size() != 0) {
+    if (!this->currentUser.interpretDatabaseProblemDataJSON(this->currentUser.problemDataJSON, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
       return false;
     }
   } else {
-    if (!this->currentUseR.interpretDatabaseProblemData(this->currentUseR.problemDataStrinG, comments)) {
+    if (!this->currentUser.interpretDatabaseProblemData(this->currentUser.problemDataStrinG, comments)) {
       comments << "Failed to interpret user's problem saved data. ";
       return false;
     }
   }
   if (!this->mergeProblemWeight(
-    this->currentUseR.problemWeights,
-    this->currentUseR.theProblemData,
+    this->currentUser.problemWeights,
+    this->currentUser.theProblemData,
     false,
     &comments
   )) {
@@ -380,16 +380,16 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
     return false;
   }
   if (!this->mergeProblemDeadline(
-    this->currentUseR.deadlines, this->currentUseR.theProblemData, &comments
+    this->currentUser.deadlines, this->currentUser.theProblemData, &comments
   )) {
     comments << "Failed to load problem deadlines. ";
     return false;
   }
 
-  if (this->currentUseR.theProblemData.contains(this->fileName)) {
-    this->theProblemData = this->currentUseR.theProblemData.getValueCreate(this->fileName);
+  if (this->currentUser.theProblemData.contains(this->fileName)) {
+    this->theProblemData = this->currentUser.theProblemData.getValueCreate(this->fileName);
   }
-  global.userDefault = this->currentUseR;
+  global.userDefault = this->currentUser;
   return true;
 }
 
@@ -647,8 +647,8 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   out << this->toStringProblemScoreFull(theFileName);
   if (global.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
-    if (this->currentUseR.theProblemData.contains(theFileName)) {
-      ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
+    if (this->currentUser.theProblemData.contains(theFileName)) {
+      ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
       if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
         problemAlreadySolved = true;
       }
@@ -1235,7 +1235,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(Calculator& theInterpreter, std::
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
-    << global.toStringCalculatorComputation(
+    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       this->theProblemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
     ) << "<br>"
     << this->theProblemData.commandsGenerateProblem
@@ -1274,17 +1274,17 @@ bool CalculatorHTML::prepareSectionList(std::stringstream& commentsOnFailure) {
   }
   this->flagSectionsPrepared = true;
   if (
-    this->currentUseR.sectionsTaught.size == 0 || (
-      this->currentUseR.userRole != UserCalculator::Roles::administator &&
-      this->currentUseR.userRole != UserCalculator::Roles::teacher
+    this->currentUser.sectionsTaught.size == 0 || (
+      this->currentUser.userRole != UserCalculator::Roles::administator &&
+      this->currentUser.userRole != UserCalculator::Roles::teacher
     )
   ) {
-    if (this->currentUseR.sectionComputed != "") {
-      this->databaseStudentSections.addOnTop(this->currentUseR.sectionComputed);
+    if (this->currentUser.sectionComputed != "") {
+      this->databaseStudentSections.addOnTop(this->currentUser.sectionComputed);
       return true;
     }
   }
-  this->databaseStudentSections.addListOnTop(this->currentUseR.sectionsTaught);
+  this->databaseStudentSections.addListOnTop(this->currentUser.sectionsTaught);
   return true;
 }
 
@@ -1458,14 +1458,14 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
     // deadline not present.
     return "";
   }
-  if (!this->currentUseR.theProblemData.contains(id)) {
+  if (!this->currentUser.theProblemData.contains(id)) {
     return "";
   }
-  ProblemDataAdministrative& currentProb = this->currentUseR.theProblemData.getValueCreateNoInit((id)).adminData;
-  if (!currentProb.deadlinesPerSection.contains(this->currentUseR.sectionComputed)) {
+  ProblemDataAdministrative& currentProb = this->currentUser.theProblemData.getValueCreateNoInit((id)).adminData;
+  if (!currentProb.deadlinesPerSection.contains(this->currentUser.sectionComputed)) {
     return "";
   }
-  return currentProb.deadlinesPerSection.getValueCreate(this->currentUseR.sectionComputed);
+  return currentProb.deadlinesPerSection.getValueCreate(this->currentUser.sectionComputed);
 }
 
 std::string CalculatorHTML::getDeadline(
@@ -1487,9 +1487,9 @@ std::string CalculatorHTML::getDeadline(
   TopicElement& currentTopic = this->topics.theTopics.getValueCreate(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
     const std::string& containerName = this->topics.theTopics.theKeys[currentTopic.parentTopics[i]];
-    if (this->currentUseR.theProblemData.contains(containerName)) {
+    if (this->currentUser.theProblemData.contains(containerName)) {
       ProblemDataAdministrative& currentProb =
-      this->currentUseR.theProblemData.getValueCreateNoInit(containerName).adminData;
+      this->currentUser.theProblemData.getValueCreateNoInit(containerName).adminData;
       result = currentProb.deadlinesPerSection.getValueCreate(sectionNumber);
       if (StringRoutines::stringTrimWhiteSpace(result) != "") {
         outputIsInherited = (containerName != problemName);
@@ -1620,7 +1620,7 @@ std::string CalculatorHTML::toStringDeadline(
   } else {
     return this->toStringOneDeadlineFormatted(
       topicID,
-      this->currentUseR.sectionComputed,
+      this->currentUser.sectionComputed,
       problemAlreadySolved,
       returnEmptyStringIfNoDeadline,
       isSection
@@ -1648,7 +1648,7 @@ void CalculatorHTML::computeDeadlinesAllSectionsNoInheritance(TopicElement& inpu
   inputOutput.deadlinesPerSectioN.initializeFillInObject(this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     ProblemDataAdministrative& currentProb =
-    this->currentUseR.theProblemData.getValueCreateNoInit(inputOutput.id).adminData;
+    this->currentUser.theProblemData.getValueCreateNoInit(inputOutput.id).adminData;
     inputOutput.deadlinesPerSectioN[i] =
     currentProb.deadlinesPerSection.getValueCreate(this->databaseStudentSections[i]);
   }
@@ -2695,8 +2695,8 @@ bool CalculatorHTML::storeRandomSeedCurrent(std::stringstream* commentsOnFailure
     return false;
   }
   this->theProblemData.flagRandomSeedGiven = true;
-  this->currentUseR.setProblemData(this->fileName, this->theProblemData);
-  if (!this->currentUseR.storeProblemData(this->fileName, commentsOnFailure)) {
+  this->currentUser.setProblemData(this->fileName, this->theProblemData);
+  if (!this->currentUser.storeProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style = 'color:red'>"
       << "Error: failed to store problem in database. "
@@ -2801,8 +2801,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   ) {
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
-      if (this->currentUseR.theProblemData.contains(this->fileName)) {
-        ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(this->fileName);
+      if (this->currentUser.theProblemData.contains(this->fileName)) {
+        ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(this->fileName);
         if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size()) {
           problemAlreadySolved = true;
         }
@@ -3101,11 +3101,11 @@ std::string CalculatorHTML::toStringProblemScoreFull(const std::string& theFileN
     return out.str();
   }
   Rational currentWeight;
-  if (this->currentUseR.theProblemData.contains(theFileName)) {
-    ProblemData& theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
+  if (this->currentUser.theProblemData.contains(theFileName)) {
+    ProblemData& theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK) {
       out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
-      if (!theProbData.adminData.getWeightFromCourse(this->currentUseR.courseComputed, currentWeight)) {
+      if (!theProbData.adminData.getWeightFromCourse(this->currentUser.courseComputed, currentWeight)) {
         currentWeight = 0;
       }
       if (theProbData.theAnswers.size() == 1) {
@@ -3153,12 +3153,12 @@ std::string CalculatorHTML::toStringProblemScoreShort(const std::string& theFile
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
-  if (this->currentUseR.theProblemData.contains(theFileName)) {
-    theProbData = this->currentUseR.theProblemData.getValueCreate(theFileName);
+  if (this->currentUser.theProblemData.contains(theFileName)) {
+    theProbData = this->currentUser.theProblemData.getValueCreate(theFileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.assignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK = theProbData.adminData.getWeightFromCourse(
-      this->currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
+      this->currentUser.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
     );
     if (!theProbData.flagProblemWeightIsOK) {
       problemWeight << "?";
@@ -4009,7 +4009,7 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(std::stringstream& comments
         }
       }
     }
-    this->currentUseR.computePointsEarned(gradableProblems, &this->topics.theTopics, commentsOnFailure);
+    this->currentUser.computePointsEarned(gradableProblems, &this->topics.theTopics, commentsOnFailure);
   }
   this->topics.initializeElementTypes();
   return true;
@@ -4304,14 +4304,14 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output[WebAPI::problem::fileName] = this->problemFileName;
   output[WebAPI::problem::idProblem] = this->id;
   if (global.flagDatabaseCompiled) {
-    if (owner.currentUseR.theProblemData.contains(this->problemFileName)) {
-      ProblemData& currentData = owner.currentUseR.theProblemData.getValueCreate(this->problemFileName);
+    if (owner.currentUser.theProblemData.contains(this->problemFileName)) {
+      ProblemData& currentData = owner.currentUser.theProblemData.getValueCreate(this->problemFileName);
       output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
       output["totalQuestions"] = currentData.theAnswers.size();
       Rational currentWeight;
       std::string currentWeightAsGivenByInstructor;
       currentData.flagProblemWeightIsOK = currentData.adminData.getWeightFromCourse(
-        owner.currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
+        owner.currentUser.courseComputed, currentWeight, &currentWeightAsGivenByInstructor
       );
       if (currentData.flagProblemWeightIsOK) {
         output["weight"] = currentWeightAsGivenByInstructor;

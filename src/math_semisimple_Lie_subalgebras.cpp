@@ -748,7 +748,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions *theFormat) {
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField == nullptr) {
-    out << HtmlRoutines::getMathSpan("\\mathbb Q");
+    out << HtmlRoutines::getMathNoDisplay("\\mathbb Q");
   } else {
     out << this->ownerField->toString();
   }
@@ -2199,7 +2199,7 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     global.fatal << "This is a programming error: the determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
-    << HtmlRoutines::getMathSpan(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
+    << HtmlRoutines::getMathNoDisplay(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
   }
 }
@@ -4397,7 +4397,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-  out << HtmlRoutines::getMathSpan((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml) {
     out << "\n<br>\n";
@@ -4405,20 +4405,20 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS = this->theH.toString(theFormat);
   tempStreamH << "\nh = " << tempS << "";
-  out << HtmlRoutines::getMathSpan(tempStreamH.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne = " << this->theE.toString(theFormat) << "\n<br>\n";
-  out << HtmlRoutines::getMathSpan(tempStreamE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.toString(theFormat) << "\n<br>\n";
-/*  out << HtmlRoutines::getMathSpan(tempStreamF.str()) << "\n<br>\n";
+/*  out << HtmlRoutines::getMathNoDisplay(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n[e, f] =" <<  this->bufferEbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::getMathSpan(tempStreamEF.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay(tempStreamEF.str()) << "\n<br>\n";
   tempStreamHE << "\n[h, e] =" << this->bufferHbracketE.toString(theFormat) << "";
-  out << HtmlRoutines::getMathSpan(tempStreamHE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay(tempStreamHE.str()) << "\n<br>\n";
   tempStreamHF << "\n[h, f] = " << this->bufferHbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::getMathSpan(tempStreamHF.str()) << "\n<br>\n";*/
+  out << HtmlRoutines::getMathNoDisplay(tempStreamHF.str()) << "\n<br>\n";*/
   //this->theSystemMatrixForm.toString(tempS);
   //out << "\nSystem matrix form we try to solve:\n" << tempS;
   //this->theSystemColumnVector.toString(tempS);
@@ -4433,7 +4433,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   if (useHtml) {
     out << "\n<br>\n";
   }
-  out << HtmlRoutines::getMathSpan(latexStreamActual.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathNoDisplay(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -5044,14 +5044,14 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
     }
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-    out << HtmlRoutines::getMathSpan((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
+    out << HtmlRoutines::getMathNoDisplay((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml) {
       out << "</td>";
     }
     out << "<td>" << theSl2.dimensionCentralizer << "</td>";
     if (theSl2.flagCentralizerTypeComputed) {
-      out << "<td> " << HtmlRoutines::getMathSpan(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
+      out << "<td> " << HtmlRoutines::getMathNoDisplay(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
     } else {
       out << "<td> not computed</td>";
     }
@@ -5477,9 +5477,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].toStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathNoDisplay(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       } else {
-        out << HtmlRoutines::getMathSpan(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathNoDisplay(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       }
       out << "</td>";
     }
@@ -5578,9 +5578,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
     for (int i = 0; i < this->CharsPrimalModules.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathNoDisplay(this->CharsPrimalModules[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::getMathSpan(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathNoDisplay(this->CharsPrimalModules[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -5596,9 +5596,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
     for (int i = 0; i < this->CharsPrimalModulesMerged.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathNoDisplay(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::getMathSpan(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathNoDisplay(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -6141,9 +6141,9 @@ std::string SemisimpleSubalgebras::toStringAlgebraLink(int actualindexSubalgebra
     << "\" id = \"semisimple_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra)
     << "\" style = \"text-decoration: none\">";
     if (useMouseHover) {
-      out << HtmlRoutines::getMathSpan(theTypeString);
+      out << HtmlRoutines::getMathNoDisplay(theTypeString);
     } else {
-      out << HtmlRoutines::getMathSpan(theTypeString);
+      out << HtmlRoutines::getMathNoDisplay(theTypeString);
     }
     out << "</a> ";
   } else {
@@ -6167,9 +6167,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathNoDisplay(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       } else {
-        out << HtmlRoutines::getMathSpan(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathNoDisplay(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       }
     } else {
       out << theSimpleTypes[i].toString(&tempFormat) << ":";
@@ -6217,9 +6217,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
       }
     } else if (!this->theCentralizerType.isEqualToZero()) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathNoDisplay(this->theCentralizerType.toString());
       } else {
-        out << HtmlRoutines::getMathSpan(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathNoDisplay(this->theCentralizerType.toString());
       }
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer -= this->theCentralizerType.getRank();
@@ -6228,9 +6228,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
       std::stringstream toralPartStream;
       toralPartStream << "T_{" << dimToralPartCentralizer.toString() << "}";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(toralPartStream.str());
+        out << HtmlRoutines::getMathNoDisplay(toralPartStream.str());
       } else {
-        out << HtmlRoutines::getMathSpan(toralPartStream.str());
+        out << HtmlRoutines::getMathNoDisplay(toralPartStream.str());
       }
       out << " (toral part, subscript = dimension)";
     }
@@ -6476,9 +6476,9 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(FormatExpressions*
   for (int i = 0; i < this->theNegGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathNoDisplay(this->theNegGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::getMathSpan(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathNoDisplay(this->theNegGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->theNegGens[i].toString(theFormat);
@@ -6491,9 +6491,9 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(FormatExpressions*
   for (int i = 0; i < this->thePosGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathNoDisplay(this->thePosGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::getMathSpan(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathNoDisplay(this->thePosGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->thePosGens[i].toString(theFormat);
@@ -6578,9 +6578,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Cartan symmetric matrix: ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathNoDisplay(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathNoDisplay(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->cartanSymmetric.toString(theFormat);
@@ -6588,9 +6588,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathNoDisplay(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathNoDisplay(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->coCartanSymmetric.toString(theFormat);
@@ -6602,9 +6602,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathSpan(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathNoDisplay(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     } else {
-      out << HtmlRoutines::getMathSpan(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathNoDisplay(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     }
   } else {
     out << this->theCharNonPrimalFundCoords.toString(&charFormatNonConst);
@@ -6614,9 +6614,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
     << "This decomposition refines the above decomposition (please note the order is not the same as above). ";
     if (useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathSpan(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathNoDisplay(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       } else {
-        out << HtmlRoutines::getMathSpan(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathNoDisplay(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       }
     } else
       out << this->thePrimalChaR.toString(&charFormatNonConst);
@@ -6840,7 +6840,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
         reportStream << "... and so on, only the first 100 elements printed out of total "
         << theOuterAutos.theElements.size << ". ";
       } else {
-        reportStream << "<br>" << HtmlRoutines::getMathSpan(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
+        reportStream << "<br>" << HtmlRoutines::getMathNoDisplay(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
       }
     }
     theReport.report(reportStream.str());

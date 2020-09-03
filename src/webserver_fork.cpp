@@ -72,15 +72,15 @@ int WebServer::forkProcess() {
   // this difference grows further over time.
   if (result > 0) {
     // Parent process.
-    // Forget previous random bytes, and gain a little extra entropy:
+    // Forget previous random bytes, and gain a little extra entropy.
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
   } else if (result == 0) {
     global.logs.logType = GlobalVariables::LogData::type::worker;
 
-    // child process
-    // lose 256 bits of entropy from the server:
+    // Child process.
+    // Lose 256 bits of entropy from the server.
     global.randomBytesCurrent.setSize(static_cast<signed>(global.maximumExtractedRandomBytes));
-    // Forget previous random bytes, and gain a little extra entropy:
+    // Forget previous random bytes, and gain a little extra entropy.
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
 
     // Set death signal of the parent trigger death signal of the child.

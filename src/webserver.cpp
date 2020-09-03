@@ -1481,9 +1481,6 @@ void WebWorker::wrapUpConnection() {
   this->resultWork[WebServer::Statististics::allRequestsString] = this->statistics.allReceives;
   this->resultWork[WebServer::Statististics::pingRequestsString] = this->statistics.pingReceives;
   this->resultWork["result"] = "close";
-  if (global.flagRestartNeeded) {
-    this->resultWork["restartNeeded"] = "true";
-  }
   this->pipeWorkerToServerControls.writeOnceAfterEmptying(
     this->resultWork.toString(nullptr), false
   );
@@ -2647,35 +2644,23 @@ std::string WebServer::toStringStatusAll() {
   return out.str();
 }
 
-bool WebServer::restartIsNeeded() {
+bool WebServer::restartNeeded() {
   MacroRegisterFunctionWithName("WebServer::restartIsNeeded");
   struct stat theFileStat;
   if (stat(global.physicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+    global << Logger::red << "Failed to extract executable statistics from: "
+    << global.physicalNameExecutableWithPath << "." << Logger::endL;
     return false;
   }
-  if (this->timeLastExecutableModification == - 1) {
-    return false;
+  bool result = false;
+  if (
+    this->timeLastExecutableModification != - 1 &&
+    this->timeLastExecutableModification != theFileStat.st_ctime
+  ) {
+    result = true;
   }
-  if (this->timeLastExecutableModification == theFileStat.st_ctime) {
-    return false;
-  }
-  std::stringstream out;
-  out << "<html>";
-  out << "<head><script language =\"javascript\">setTimeout(resubmit, 500); "
-  << " function resubmit() { location.reload(true);}</script></head>";
-  out << "<body>";
-
-  out << "<b>The server executable was updated, "
-  << "but the server has not been restarted yet. "
-  << "Restarting in 0.5 seconds...</b>";
-  out << "</body></html>";
-  global << "Current process spawned from file with time stamp: "
-  << this->timeLastExecutableModification
-  << "; latest executable has different time stamp: " << theFileStat.st_ctime
-  << ". " << Logger::red << "RESTARTING." << Logger::endL;
-  global.flagRestartNeeded = true;
-  this->getActiveWorker().writeToBody(out.str());
-  return true;
+  this->timeLastExecutableModification = theFileStat.st_ctime;
+  return result;
 }
 
 void WebServer::stopKillAll() {
@@ -2722,6 +2707,13 @@ void WebServer::stopKillAll() {
   exit(0);
 }
 
+void WebServer::stop() {
+  SignalsInfrastructure::theSignals().unblockSignals();
+  this->releaseEverything();
+  this->releaseEverything();
+  exit(0);
+}
+
 void WebServer::initPortsITry() {
   this->portHTTP = global.configuration[Configuration::portHTTP].theString;
   if (!global.flagSSLIsAvailable) {
@@ -2755,15 +2747,6 @@ void WebServer::initListeningSockets() {
       global.fatal << "Listen function failed on socket: " << this->theListeningSockets[i] << global.fatal;
     }
   }
-}
-
-void WebServer::initDates() {
-  this->timeLastExecutableModification = - 1;
-  struct stat theFileStat;
-  if (stat(global.physicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
-    return;
-  }
-  this->timeLastExecutableModification = theFileStat.st_ctime;
 }
 
 void WebServer::releaseWorkerSideResources() {
@@ -3047,7 +3030,6 @@ void WebServer::recycleChildrenIfPossible() {
 bool WebServer::initPrepareWebServerALL() {
   MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
   this->initPortsITry();
-  this->initDates();
   if (!this->initBindToPorts()) {
     return false;
   }
@@ -3319,23 +3301,48 @@ int WebServer::daemon() {
   for (int i = 2; i < global.programArguments.size; i ++) {
     restartCommand << global.programArguments[i] << " ";
   }
-  while(true) {
-    int pidChild = fork();
-    if (pidChild == 0) {
-      // Child process.
-      global << Logger::orange << "Development daemon is starting command:" << Logger::endL;
-      global << Logger::green << restartCommand.str() << Logger::endL;
-      global.externalCommandStream(restartCommand.str());
+  int pidChild = - 1;
+  while (true) {
+    if (pidChild < 0) {
+      pidChild = fork();
+      if (pidChild == 0) {
+        // Child process.
+        global << Logger::orange << "Development daemon is starting command:" << Logger::endL;
+        global << Logger::green << restartCommand.str() << Logger::endL;
+        global.externalCommandStream(restartCommand.str());
+        return 0;
+      }
     }
     int exitStatus = - 1;
-    waitpid(pidChild, &exitStatus, 0);
-    if (exitStatus != 0) {
-      global << Logger::red;
-    } else {
-      global << Logger::green;
+    int waitResult = waitpid(pidChild, &exitStatus, WNOHANG);
+    if (waitResult > 0) {
+      // Child exited.
+      pidChild = - 1;
+      if (exitStatus != 0) {
+        global << Logger::red;
+      } else {
+        global << Logger::green;
+      }
+      global << "Server exited with status: " << exitStatus << Logger::endL;
+      continue;
+    } else if (waitResult < 0) {
+      global << Logger::red << "Waitpid failed: this shouldn't happen. " << Logger::endL;
+      pidChild = - 1;
     }
-    global << "Server exited with status: " << exitStatus << Logger::endL;
-    global.fallAsleep(100000);
+    if (pidChild > 0 && global.server().restartNeeded()) {
+      global << Logger::red << "Restart is needed. " << Logger::endL;
+      // Kill the process tree of the child process.
+      int killResult = kill(pidChild, SIGTERM);
+      global << Logger::red << "Kill signal sent to child: "
+      << pidChild << ". " << Logger::endL;
+      if (killResult != 0) {
+        global << "Kill command failed: " << Logger::red
+        << this->toStringLastErrorDescription() << Logger::endL;
+      }
+      global << Logger::blue << "Sleeping for 2 seconds." << Logger::endL;
+      global.fallAsleep(1000000);
+    }
+    global.fallAsleep(1000000);
   }
 }
 
@@ -3385,6 +3392,7 @@ int WebServer::run() {
       return 0;
     }
   }
+  global.logs.logType = GlobalVariables::LogData::type::server;
   this->initializeSignals();
   global.calculator().getElement().initialize();
   // Cannot call initializeMutex here: not before we execute fork();
@@ -3626,7 +3634,6 @@ bool WebWorker::runOnce() {
   this->statistics.allReceives ++;
   if (
     (!this->flagKeepAlive) ||
-    global.flagRestartNeeded ||
     global.theResponse.isTimedOut()
   ) {
     return false;

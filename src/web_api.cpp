@@ -411,10 +411,6 @@ bool WebAPIResponse::processCalculatorOnePageJS(bool appendBuildHash) {
 bool WebAPIResponse::processApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIResponse::processApp");
   this->owner->setHeaderOKNoContentLength("", "text/html");
-  if (global.server().restartIsNeeded()) {
-    this->owner->sendPending();
-    return true;
-  }
   this->owner->writeToBody(WebAPIResponse::getApp(appendBuildHash));
   this->owner->sendPending();
   return true;
@@ -423,9 +419,6 @@ bool WebAPIResponse::processApp(bool appendBuildHash) {
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
   MacroRegisterFunctionWithName("WebAPIResponse::processLoginUserInfo");
   this->owner->setHeaderOKNoContentLength("");
-  if (global.server().restartIsNeeded()) {
-    return true;
-  }
   return global.theResponse.writeResponse(WebAPIResponse::getJSONUserInfo(comments), false);
 }
 

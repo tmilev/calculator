@@ -94,7 +94,8 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
 
     FileOperations::writeFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
     global.fatal << crashFileWriteReport.str() << "Calculator AB test failed with " << test.inconsistencies
-    << " inconsistencies. See report html in file output/crash_test.html. " << global.fatal;
+    << " inconsistencies. See report html in file:\n"
+    << "https://localhost:8166/output/crash_test.html\n" << global.fatal;
   }
   return true;
 }

@@ -620,7 +620,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
-      << HtmlRoutines::getMathSpan(genericElt.toString(&theUEformat)) << "</td> </tr>";
+      << HtmlRoutines::getMathNoDisplay(genericElt.toString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan =\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
@@ -631,7 +631,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << HtmlRoutines::getMathSpan(genericElt.toString(&theUEformat)) << "</td>";
+      out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(genericElt.toString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.toString(&theUEformat) << "$";
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
         actionOnGenericElt.assignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
@@ -639,14 +639,14 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theSSalgebra.orderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-        out << "<td>" << HtmlRoutines::getMathSpan("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::getMathNoDisplay("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.toString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << HtmlRoutines::getMathSpan(theMod.theChaR.toString()) << "</td>";
+    out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(theMod.theChaR.toString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.toStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
@@ -665,7 +665,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       totalTime += global.getElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
-      out << "<td>" << HtmlRoutines::getMathSpan("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
+      out << "<td>" << HtmlRoutines::getMathNoDisplay("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
       theWeylFormat.MaxLineLength = 300;
@@ -682,11 +682,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "</tr>";
     if (theMod.getDimension() == 1) {
       ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportfourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::getMathSpan(theMod.theChaR.toString())
+      reportfourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::getMathNoDisplay(theMod.theChaR.toString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportfourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
-      reportCalculatorCommands << "<hr>" << HtmlRoutines::getMathSpan(theMod.theChaR.toString())
+      reportCalculatorCommands << "<hr>" << HtmlRoutines::getMathNoDisplay(theMod.theChaR.toString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";

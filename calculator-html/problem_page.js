@@ -251,7 +251,7 @@ Problem.prototype.initializeProblemContent = function (problemData) {
       previousAnswers: currentVector.previousAnswers,
       answerHighlight: currentVector.answerHighlight,
       answerPanelId: currentVector.answerPanelId,
-      MQpanelButtonOptions: currentVector.MQpanelButtonOptions,
+      mathQuillPanelOptions: currentVector.mathQuillPanelOptions,
       idMQSpan: currentVector.idMQSpan,
       idMQSpanLocation: currentVector.idMQSpanLocation,
       idPureLatex: currentVector.idPureLatex,
@@ -571,7 +571,7 @@ Problem.prototype.onePanelComputeHtmlElements = function (/**@type {InputPanelDa
   thePanel.htmlPureLatex = `<button class = "accordion">details</button>`;
   thePanel.htmlPureLatex += `<textarea class = "calculatorAnswer" id = "${thePanel.idPureLatex}"></textarea>`;
   thePanel.htmlButtonContainer = `<div class = "mqButtonPanel" id = "${thePanel.idButtonContainer}" `;
-  thePanel.htmlButtonContainer += `buttons = "${thePanel.MQpanelButtonOptions}"></div>`;
+  thePanel.htmlButtonContainer += `buttons = "${thePanel.mathQuillPanelOptions}"></div>`;
   thePanel.htmlMQFieldEnclosure = `<div class = "calculatorMQfieldEnclosure"><span id = "${thePanel.idMQSpan}"></span></div>`;
 
   thePanel.htmlVerificationSpan = `<span id = "${thePanel.idVerificationSpan}">`;

@@ -3127,20 +3127,20 @@ JSData Expression::toJSData(FormatExpressions* theFormat, const Expression& star
       ) {
         out << currentE.toString(theFormat);
       } else {
-        out << HtmlRoutines::getMathSpan(currentE.toString(theFormat), 1700);
+        out << HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
       }
       out << currentE.toStringAllSlidersInExpression();
       output[i - 1] = out.str();
     }
   } else {
-    input[0] = HtmlRoutines::getMathSpan(startingExpression.toString(theFormat), 1700);
+    input[0] = HtmlRoutines::getMathNoDisplay(startingExpression.toString(theFormat), 1700);
     if (
       this->isOfType<std::string>() || this->isOfType<Plot>() ||
       this->isOfType<SemisimpleSubalgebras>() || this->isOfType<WeylGroupData>()
     ) {
       output[0] = this->toString(theFormat);
     } else {
-      output[0] = HtmlRoutines::getMathSpan(this->toString(theFormat), 1700);
+      output[0] = HtmlRoutines::getMathNoDisplay(this->toString(theFormat), 1700);
     }
   }
   result["input"] = input;
@@ -3475,7 +3475,7 @@ bool Expression::toStringEndStatement(
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
           theFormat->flagDontCollalpseProductsByUnits = true;
-          currentInput = HtmlRoutines::getMathSpan((*startingExpression)[i].toString(theFormat));
+          currentInput = HtmlRoutines::getMathNoDisplay((*startingExpression)[i].toString(theFormat));
         } else {
           currentInput = "No matching starting expression - possible use of the Melt keyword.";
         }
@@ -3503,7 +3503,7 @@ bool Expression::toStringEndStatement(
         currentOutput = currentE.toString(theFormat);
       } else {
         theFormat->flagDontCollalpseProductsByUnits = false;
-        currentOutput = HtmlRoutines::getMathSpan(currentE.toString(theFormat), 1700);
+        currentOutput = HtmlRoutines::getMathNoDisplay(currentE.toString(theFormat), 1700);
       }
       currentOutput += currentE.toStringAllSlidersInExpression();
       if (outputJS != nullptr) {
@@ -4078,7 +4078,7 @@ std::string Expression::toStringWithStartingExpression(
     if (theFormat != nullptr) {
       theFormat->flagDontCollalpseProductsByUnits = true;
     }
-    input = HtmlRoutines::getMathSpan(startingExpression->toString(theFormat), 1700);
+    input = HtmlRoutines::getMathNoDisplay(startingExpression->toString(theFormat), 1700);
     if (theFormat != nullptr) {
       theFormat->flagDontCollalpseProductsByUnits = false;
     }
@@ -4092,7 +4092,7 @@ std::string Expression::toStringWithStartingExpression(
     ) {
       output = out.str();
     } else {
-      output = HtmlRoutines::getMathSpan(out.str(), 1700);
+      output = HtmlRoutines::getMathNoDisplay(out.str(), 1700);
     }
     outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
     if (outputJS != nullptr) {

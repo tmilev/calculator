@@ -1034,7 +1034,7 @@ JSData WebAPIResponse::submitAnswersJSON(
   std::stringstream debugInputStream;
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     debugInputStream
-    << global.toStringCalculatorComputation(
+    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
     );
   }
@@ -1121,7 +1121,7 @@ JSData WebAPIResponse::submitAnswersJSON(
     << "</td></tr>\n";
   }
   if (global.flagDatabaseCompiled) {
-    UserCalculator& theUser = theProblem.currentUseR;
+    UserCalculator& theUser = theProblem.currentUser;
     theUser.::UserCalculatorData::operator=(global.userDefault);
     bool deadLinePassed = false;
     bool hasDeadline = true;
@@ -1477,7 +1477,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out << "<b style ='color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << global.toStringCalculatorComputation(
+      out << HtmlRoutines::getCalculatorComputationAnchorNewPage(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1492,7 +1492,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out << "<b style = 'color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.userDefaultHasProblemComposingRights()) {
-      out << global.toStringCalculatorComputation(
+      out << HtmlRoutines::getCalculatorComputationAnchorNewPage(
         answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
       );
     }
@@ -1569,13 +1569,13 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
     << "<hr>"
-    << global.toStringCalculatorComputation(
+    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       answerCommandsNoEnclosure.str(),
       "Calculator input no enclosures"
     );
     out << theInterpreteR.outputString << "<hr>"
     << theInterpreteR.outputCommentsString
-    << "<hr>" << global.toStringCalculatorComputation(
+    << "<hr>" << HtmlRoutines::getCalculatorComputationAnchorNewPage(
       theInterpreteR.inputString, "Raw calculator input"
     );
   }
@@ -2098,7 +2098,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   if (!global.flagDatabaseCompiled) {
     return false;
   }
-  theProblem.currentUseR.::UserCalculatorData::operator=(global.userDefault);
+  theProblem.currentUser.::UserCalculatorData::operator=(global.userDefault);
   this->theProblem.loadFileNames();
   if (!this->theProblem.loadAndParseTopicList(comments)) {
     return false;
@@ -2107,10 +2107,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     return false;
   }
   if (!this->theProblem.loadDatabaseInfo(comments)) {
-    comments << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
+    comments << "<span style ='color:red'>Could not load your problem history.</span> <br>";
   }
-  theProblem.currentUseR.computePointsEarned(
-    theProblem.currentUseR.theProblemData.theKeys,
+  theProblem.currentUser.computePointsEarned(
+    theProblem.currentUser.theProblemData.theKeys,
     &theProblem.topics.theTopics,
     comments
   );
@@ -2146,42 +2146,42 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     );
   }
   for (int i = 0; i < this->userProblemData.size; i ++) {
-    //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
-    //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
+    //currentUserRecord.currentUser.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
+    //currentUserRecord.currentUser.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach) {
-      if (currentUserRecord.currentUseR.courseComputed != this->currentCourse) {
+      if (currentUserRecord.currentUser.courseComputed != this->currentCourse) {
         continue;
       }
       if (global.userStudentVieWOn()) {
-        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
+        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
           continue;
         }
       } else {
-        if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
+        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
           continue;
         }
       }
     }
     this->userScores.addOnTop(- 1);
     this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
-    this->userInfos.addOnTop(currentUserRecord.currentUseR.sectionInDB);
+    this->userInfos.addOnTop(currentUserRecord.currentUser.sectionInDB);
     this->scoresBreakdown.setSize(this->scoresBreakdown.size + 1);
-    currentUserRecord.currentUseR.username = this->userProblemData[i][
+    currentUserRecord.currentUser.username = this->userProblemData[i][
       DatabaseStrings::labelUsername
     ].theString;
-    if (!currentUserRecord.currentUseR.interpretDatabaseProblemDataJSON(
+    if (!currentUserRecord.currentUser.interpretDatabaseProblemDataJSON(
       this->userProblemData[i][DatabaseStrings::labelProblemDataJSON],
       comments
     )) {
       continue;
     }
     currentUserRecord.mergeProblemWeight(
-      theProblem.currentUseR.problemWeights,
-      currentUserRecord.currentUseR.theProblemData,
+      theProblem.currentUser.problemWeights,
+      currentUserRecord.currentUser.theProblemData,
       false,
       &comments
     );
-    currentUserRecord.currentUseR.computePointsEarned(
+    currentUserRecord.currentUser.computePointsEarned(
       theProblem.problemNamesNoTopics,
       &theProblem.topics.theTopics,
       comments
@@ -2202,7 +2202,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
         this->numStudentsSolvedNothingInTopic[j] ++;
       }
     }
-    *this->userScores.lastObject() = currentUserRecord.currentUseR.pointsEarned;
+    *this->userScores.lastObject() = currentUserRecord.currentUser.pointsEarned;
   }
   return true;
 }
@@ -2331,7 +2331,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<tr><td><b>maximum score</b></td>"
   << "<td>-</td>";
   out
-  << "<td>" << theScores.theProblem.currentUseR.pointsMax.getDoubleValue()
+  << "<td>" << theScores.theProblem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
   for (int j = 0; j < theScores.theProblem.topics.theTopics.size(); j ++) {
     TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[j];

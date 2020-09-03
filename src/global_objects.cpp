@@ -40,7 +40,7 @@ std::string GlobalVariables::getTimeLocal() {
 }
 
 void initializeGlobalObjects() {
-  global.logs.logType = GlobalVariables::LogData::type::server;
+  global.logs.logType = GlobalVariables::LogData::type::initialization;
   global.flagIsChildProcess = false;
   initializeTimer();
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;

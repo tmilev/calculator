@@ -168,13 +168,14 @@ std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNo
 
 std::string HtmlRoutines::getCalculatorComputationAnchorSamePage(const std::string& inputNoEncoding) {
   std::stringstream out;
-  out << "<a href = \"" << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
-  << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
+  out << "<a href = '" << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
+  << "' onclick = 'window.calculator.calculator.calculatorLinkClickHandler(this);'>"
   << HtmlRoutines::convertStringToHtmlString(inputNoEncoding, false) << "</a>";
   return out.str();
 }
 
-std::string HtmlRoutines::getCalculatorComputationAnchorNewPage(
+std::string HtmlRoutines::getCalculatorComputationAnchor(
+  const std::string& urlApplication,
   const std::string& inputNoEncoding,
   const std::string& desiredAnchorTextEmptyForDefault
 ) {
@@ -183,21 +184,51 @@ std::string HtmlRoutines::getCalculatorComputationAnchorNewPage(
   if (displayText == "") {
     displayText = HtmlRoutines::convertStringToHtmlString(inputNoEncoding, false);
   }
-  out << "<a href = '" << global.displayNameExecutable
+  out << "<a href = '" << urlApplication
   << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
   << "' target='_blank'>" << displayText << "</a>";
   return out.str();
 }
 
-std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChars) {
+std::string HtmlRoutines::getCalculatorComputationAnchorNewPage(
+  const std::string& inputNoEncoding,
+  const std::string& desiredAnchorTextEmptyForDefault
+) {
+  return HtmlRoutines::getCalculatorComputationAnchor("", inputNoEncoding, desiredAnchorTextEmptyForDefault);
+}
+
+std::string HtmlRoutines::getCalculatorComputationNewPage(
+  const std::string& inputNoEncoding,
+  const std::string& desiredAnchorTextEmptyForDefault
+) {
+  return HtmlRoutines::getCalculatorComputationAnchor(
+    global.displayApplication,
+    inputNoEncoding,
+    desiredAnchorTextEmptyForDefault
+  );
+}
+
+std::string HtmlRoutines::getMathSpaN(const std::string& input, int upperNumChars, bool useDisplayStyle) {
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
     << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
-  out << "\\(\\displaystyle " << input << "\\)";
+  out << "\\(";
+  if (useDisplayStyle) {
+    out << "\\displaystyle ";
+  }
+  out << input << "\\)";
   return out.str();
+}
+
+std::string HtmlRoutines::getMathNoDisplay(const std::string &input, int upperNumChars) {
+  return HtmlRoutines::getMathSpaN(input, upperNumChars, false);
+}
+
+std::string HtmlRoutines::getMathDisplayStyle(const std::string &input, int upperNumChars) {
+  return HtmlRoutines::getMathSpaN(input, upperNumChars, true);
 }
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth) {

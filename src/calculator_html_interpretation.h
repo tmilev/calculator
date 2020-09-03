@@ -223,7 +223,7 @@ public:
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
   List<List<std::string> > timeIntermediateComments;
-  UserCalculator currentUseR;
+  UserCalculator currentUser;
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;

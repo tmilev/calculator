@@ -523,10 +523,10 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
-    << "</td><td>" << (useMathTag ? HtmlRoutines::getMathSpan(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
-    << "</td><td>" << (useMathTag ? HtmlRoutines::getMathSpan(weightEltString) : weightEltString) << "</td>";
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
+    << "</td><td>" << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << "</td><td>" << (useMathTag ? HtmlRoutines::getMathNoDisplay(weightEltString) : weightEltString) << "</td>";
     latexReport << "$" << theOuterAutos.allElements[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
     << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).toStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
     out << "</tr>";
@@ -677,12 +677,12 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     std::string weightEltString=
     theWeyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
-    << (useMathTag ? HtmlRoutines::getMathSpan(weightEltString) : weightEltString)
+    << (useMathTag ? HtmlRoutines::getMathNoDisplay(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $"
@@ -709,7 +709,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       }
       out << "<td>";
       if (isGood) {
-        out << HtmlRoutines::getMathSpan(standardElt.toString(&theFormat));
+        out << HtmlRoutines::getMathNoDisplay(standardElt.toString(&theFormat));
       } else {
         out << "-";
       }
@@ -911,7 +911,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch
   //{ //out << "<br>" << theGroup.irreps[i].theCharacter.toString();
   //  charMat.assignVectorToRowKeepOtherRowsIntactNoInitialization(i, theGroupData.irreps[i].GetCharacter().data);
   //}
-  //out << HtmlRoutines::getMathSpan(charMat.toString(&tempFormat));
+  //out << HtmlRoutines::getMathNoDisplay(charMat.toString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++) {
     out << "<hr>" << theGroupData.theGroup.irreps[i].toString(&tempFormat);
@@ -938,7 +938,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
     outCommand << "<br>s_{" << i + 1
     << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat) << ";";
     out << "<br>s_" << i + 1 << " = "
-    << HtmlRoutines::getMathSpan(groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat));
+    << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat));
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i = 0; i < groupGeneratedByMatrices.theGenerators.size; i ++) {
@@ -961,8 +961,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
       for (int i = 0; i < groupGeneratedByMatrices.theElements.size; i ++) {
         std::stringstream elementNameStream;
         elementNameStream << "t_" << i + 1;
-        out << "<tr><td>" << HtmlRoutines::getMathSpan(elementNameStream.str())<< "</td><td>"
-        << HtmlRoutines::getMathSpan(groupGeneratedByMatrices.theElements[i].toStringMatrixForm(&tempFormat)) << "</td></tr>";
+        out << "<tr><td>" << HtmlRoutines::getMathNoDisplay(elementNameStream.str())<< "</td><td>"
+        << HtmlRoutines::getMathNoDisplay(groupGeneratedByMatrices.theElements[i].toStringMatrixForm(&tempFormat)) << "</td></tr>";
       }
       out << "</table>";
     }

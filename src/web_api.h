@@ -144,7 +144,18 @@ class WebAPIResponse {
 };
 
 class HtmlRoutines {
-public:
+private:
+  static std::string getCalculatorComputationAnchor(
+    const std::string& urlApplication,
+    const std::string& inputNoEncoding,
+    const std::string& desiredAnchorTextEmptyForDefault
+  );
+  static std::string getMathSpaN(
+    const std::string& input,
+    int upperNumChars = 10000,
+    bool useDisplayStyle = false
+  );
+
 public:
   static MapList<std::string, std::string, MathRoutines::hashString>& preLoadedFiles();
   static std::stringstream outputStream;
@@ -206,6 +217,11 @@ public:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
+
+  static std::string getCalculatorComputationNewPage(
+    const std::string& inputNoEncoding,
+    const std::string& desiredAnchorTextEmptyForDefault
+  );
   static std::string getSliderSpanStartsHidden(
     const std::string& content,
     const std::string& label = "Expand/collapse",
@@ -252,7 +268,10 @@ public:
   static const std::string& getJavascriptMathQuillMatrixSupporTWithTags();
   static std::string getJavascriptVariable(const std::string& theVar);
 
-  static std::string getMathSpan(
+  static std::string getMathDisplayStyle(
+    const std::string& input, int upperNumChars = 10000
+  );
+  static std::string getMathNoDisplay(
     const std::string& input, int upperNumChars = 10000
   );
   static std::string getStyleButtonLikeHtml();

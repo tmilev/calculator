@@ -39,7 +39,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::reset() {
 AbstractSyntaxNotationOneSubsetDecoder::AbstractSyntaxNotationOneSubsetDecoder() {
   this->decodedData = nullptr;
   this->dataPointer = 0;
-  this->recursionDepthGuarD = 0;
+  this->recursionDepthGuard = 0;
   this->maxRecursionDepth = 20;
   this->flagMustDecodeAll = true;
 }
@@ -156,7 +156,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeBitString(
   AbstractSyntaxNotationOneSubsetDecoder subDecoder;
   subDecoder.flagMustDecodeAll = false;
   ASNElement subDecoderResult;
-  subDecoder.recursionDepthGuarD = this->recursionDepthGuarD + 1;
+  subDecoder.recursionDepthGuard = this->recursionDepthGuard + 1;
   bool insidePadded = false;
   if (offsetAtStart < this->rawDatA->size) {
     if ((*this->rawDatA)[offsetAtStart] == 0) {
@@ -762,8 +762,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(
   ASNElement& output
 ) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent");
-  RecursionDepthCounter recursionGuard(&this->recursionDepthGuarD);
-  if (this->recursionDepthGuarD > this->maxRecursionDepth) {
+  RecursionDepthCounter recursionGuard(&this->recursionDepthGuard);
+  if (this->recursionDepthGuard > this->maxRecursionDepth) {
     std::stringstream errorStream;
     errorStream << "Max depth of " << this->maxRecursionDepth << " exceeded. ";
     output.error = errorStream.str();
@@ -906,7 +906,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   std::stringstream out;
   out << "<script>";
   out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
-  out << "\"" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "\"";
+  out << "'" << Crypto::convertListUnsignedCharsToHex(*this->rawDatA) << "'";
   out << ", ";
   out << this->decodedData->toString();
   out << ", ";

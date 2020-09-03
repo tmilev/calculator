@@ -254,7 +254,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
 bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   Calculator& calculator, const DynkinSimpleType& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DynkinSimpleType");
+  MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerExpressionFromDynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS = input.theLetter;

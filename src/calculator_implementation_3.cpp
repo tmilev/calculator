@@ -1284,7 +1284,7 @@ bool Calculator::Test::processResults() {
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.theKeys[i] << "\n";
     currentLine << "<td style = 'min-width:200px;'>"
-    << global.toStringCalculatorComputation(
+    << HtmlRoutines::getCalculatorComputationNewPage(
       this->commands.theKeys[i], this->commands.theKeys[i]
     ) << "</td>";
     bool isBad = false;
@@ -1331,8 +1331,7 @@ bool Calculator::Test::processResults() {
     << "say, the expected results have changed since the last test run, "
     << "erase file: "
     << WebAPI::calculator::testFileNameVirtual
-    << " and rerun the present test to store the expected results. "
-    ;
+    << " and rerun the present test to store the expected results. ";
     out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
     global << Logger::red << "There were "
     << this->inconsistencies << " inconsistencies. " << Logger::endL;
@@ -1353,7 +1352,7 @@ bool Calculator::Test::processResults() {
     out << "<table>" << unknownCommands.str() << "</table>";
   }
   if (this->unknown == 0 && this->inconsistencies == 0) {
-    out << "<b style =\"color:green\">No inconsistencies or uknown computations.</b> ";
+    out << "<b style ='color:green'>No inconsistencies or uknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";
   out << "<br>Total run time: " << global.getElapsedMilliseconds() - this->startTime << " ms. ";

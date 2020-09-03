@@ -1984,6 +1984,13 @@ private:
   friend std::ostream& operator<< <templateMonomial, Coefficient>(
     std::ostream& output, const LinearCombination<templateMonomial, Coefficient>& theCollection
   );
+
+  std::string getTermString(
+    const Coefficient& coefficient,
+    const templateMonomial& monomial,
+    FormatExpressions* theFormat,
+    const std::string& customCoefficientMonomialSeparator
+  ) const;
 public:
   HashedList<templateMonomial> monomials;
   List<Coefficient> coefficients;
@@ -3426,7 +3433,9 @@ void LinearCombination<templateMonomial, Coefficient>::operator+=(
 }
 
 template <class templateMonomial, class Coefficient>
-bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(templateMonomial& m, int& whichIndex) {
+bool LinearCombination<templateMonomial, Coefficient>::hasGreaterThanOrEqualToMonomial(
+  templateMonomial& m, int& whichIndex
+) {
   for (int i = 0; i < this->size; i ++) {
     if (this->objects[i].IsGEQpartialOrder(m)) {
       whichIndex = i;
@@ -3811,8 +3820,8 @@ class Complex {
   public:
   Coefficient imaginaryPart;
   Coefficient realPart;
-  std::string toString(FormatExpressions* theFormat = nullptr) {
-    (void) theFormat; //taking care of unused parameters
+  std::string toString(FormatExpressions* unused = nullptr) const {
+    (void) unused;
     std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
@@ -3870,7 +3879,7 @@ class Complex {
     this->imaginaryPart = - this->imaginaryPart;
     this->realPart = - this->realPart;
   }
-  bool needsParenthesisForMultiplication(FormatExpressions* unused) {
+  bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     if (this->realPart == 0 && this->imaginaryPart >= 0) {
       return false;
@@ -3880,7 +3889,7 @@ class Complex {
     }
     return true;
   }
-  Complex(){}
+  Complex() {}
   Complex(int other) {
     this->operator=(other);
   }
@@ -4764,6 +4773,52 @@ std::string LinearCombination<templateMonomial, Coefficient>::getBlendCoefficien
   return out.str();
 }
 
+template <class TemplateMonomial, class Coefficient>
+std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
+  const Coefficient& coefficient,
+  const TemplateMonomial& monomial,
+  FormatExpressions* theFormat,
+  const std::string& customCoefficientMonomialSeparator
+) const {
+  bool fracSpecialDesired = false;
+  if (theFormat != nullptr) {
+    if (theFormat->flagUseFrac && theFormat->flagSuppressOneIn1overXtimesY) {
+      fracSpecialDesired = true;
+    }
+  }
+  std::string coefficientString, monomialString;
+  if (coefficient.needsParenthesisForMultiplication(theFormat)) {
+    coefficientString = "\\left(" + coefficient.toString(theFormat) + "\\right)";
+  } else {
+    coefficientString = coefficient.toString(theFormat);
+  }
+  monomialString = monomial.toString(theFormat);
+  if (monomialString == "") {
+    return coefficientString;
+  }
+  if (fracSpecialDesired) {
+    std::string denominatorString;
+    if (StringRoutines::stringBeginsWith(coefficientString, "\\frac{1}", &denominatorString)) {
+      return "\\frac{" + monomialString + "}" + denominatorString;
+    } else if (StringRoutines::stringBeginsWith(coefficientString, "-\\frac{1}", &denominatorString)) {
+      return "-\\frac{" + monomialString + "}" + denominatorString;
+    }
+  }
+  if (customCoefficientMonomialSeparator != "") {
+    return coefficientString + customCoefficientMonomialSeparator + monomialString;
+  }
+  if (monomialString == "1") {
+    return coefficientString;
+  }
+  if (coefficientString == "1") {
+    return monomialString;
+  }
+  if (coefficientString == "- 1" || coefficientString == "-1") {
+    return "-" + monomialString;
+  }
+  return coefficientString + monomialString;
+}
+
 template <class templateMonomial, class Coefficient>
 std::string LinearCombination<templateMonomial, Coefficient>::toString(
   FormatExpressions* theFormat
@@ -4773,7 +4828,6 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
   }
   MacroRegisterFunctionWithName("LinearCombination::toString");
   std::stringstream out;
-  std::string tempS1, tempS2;
   List<templateMonomial> sortedMons;
   sortedMons = this->monomials;
   // If this line fails to link, you must do the following.
@@ -4785,67 +4839,26 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
   sortedMons.quickSortDescending(theOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
-  bool useCustomTimes = false;
   int MaxLineLength = theFormat == nullptr ? 200 : theFormat->MaxLineLength;
   int NumAmpersandsPerNewLineForLaTeX = (theFormat == nullptr) ? 1 : theFormat->NumAmpersandsPerNewLineForLaTeX;
   bool flagUseLaTeX = (theFormat == nullptr) ? false : theFormat->flagUseLatex;
   bool flagUseHTML = (theFormat == nullptr) ? false : theFormat->flagUseHTML;
-  std::string oldCustomTimes = "";
+  std::string customTimes = "";
   if (theFormat != nullptr) {
     useCustomPlus = (theFormat->CustomPlusSign != "");
-    useCustomTimes = (theFormat->CustomCoeffMonSeparator != "");
     if (theFormat->flagPassCustomCoeffMonSeparatorToCoeffs == false) {
-      oldCustomTimes = theFormat->CustomCoeffMonSeparator;
+      customTimes = theFormat->CustomCoeffMonSeparator;
       theFormat->CustomCoeffMonSeparator = "";
     }
   }
   for (int i = 0; i < sortedMons.size; i ++) {
-    templateMonomial& currentMon = sortedMons[i];
-    Coefficient& currentCoeff = this->coefficients[this->monomials.getIndex(currentMon)];
-    if (currentCoeff.needsParenthesisForMultiplication(theFormat)) {
-      tempS1 = "\\left(" + currentCoeff.toString(theFormat) + "\\right)";
-    } else {
-      tempS1 = currentCoeff.toString(theFormat);
-    }
-    tempS2 = currentMon.toString(theFormat);
-    if (tempS2 != "") {
-      bool useFracSpecial = false;
-      if (theFormat != nullptr) {
-        if (theFormat->flagUseFrac && theFormat->flagSuppressOneIn1overXtimesY) {
-          useFracSpecial = true;
-        }
-      }
-      if (useFracSpecial) {
-        std::string tempS3;
-        if (StringRoutines::stringBeginsWith(tempS1, "\\frac{1}", &tempS3)) {
-          tempS1 = "\\frac{" + tempS2 + "}" + tempS3;
-        } else if (StringRoutines::stringBeginsWith(tempS1, "-\\frac{1}", &tempS3)) {
-          tempS1 = "-\\frac{" + tempS2 + "}" + tempS3;
-        } else {
-          useFracSpecial = false;
-        }
-      }
-      if (!useFracSpecial) {
-        if (!useCustomTimes) {
-          if (tempS1 == "1" && tempS2 != "1") {
-            tempS1 = "";
-          }
-          if ((tempS1 == "- 1" || tempS1 == "-1") && tempS2 != "1") {
-            tempS1 = "-";
-          }
-          if (tempS2 != "1") {
-            tempS1 += tempS2;
-          }
-        } else {
-          tempS1 += oldCustomTimes;
-          tempS1 += tempS2;
-        }
-      }
-    }
+    templateMonomial& monomial = sortedMons[i];
+    Coefficient& coefficient = this->coefficients[this->monomials.getIndex(monomial)];
+    std::string termString = this->getTermString(coefficient, monomial, theFormat, customTimes);
     if (i > 0) {
       if (!useCustomPlus) {
-        if (tempS1.size() > 0) {
-          if (tempS1[0] != '-') {
+        if (termString.size() > 0) {
+          if (termString[0] != '-') {
             out << "+";
             cutOffCounter += 1;
           }
@@ -4857,8 +4870,8 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
         out << theFormat->CustomPlusSign;
       }
     }
-    out << tempS1;
-    cutOffCounter += tempS1.size();
+    out << termString;
+    cutOffCounter += termString.size();
     if (MaxLineLength > 0) {
       if (cutOffCounter > MaxLineLength) {
         cutOffCounter = 0;
@@ -4876,7 +4889,7 @@ std::string LinearCombination<templateMonomial, Coefficient>::toString(
     }
   }
   if (theFormat != nullptr) {
-    theFormat->CustomCoeffMonSeparator = oldCustomTimes;
+    theFormat->CustomCoeffMonSeparator = customTimes;
     if (theFormat->suffixLinearCombination != "") {
       out << " " << theFormat->suffixLinearCombination;
     }

@@ -294,9 +294,9 @@ bool CalculatorFunctions::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& c
   std::stringstream out, logStream;
   bool success = ownerSemisimple->attemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
   if (success) {
-    out << HtmlRoutines::getMathSpan("F=" + theF.toString() + ";")
-    << "<br>" << HtmlRoutines::getMathSpan("H=" + theH.toString() + ";") << "<br>"
-    << HtmlRoutines::getMathSpan("E=" + theE.toString() + ";")
+    out << HtmlRoutines::getMathNoDisplay("F=" + theF.toString() + ";")
+    << "<br>" << HtmlRoutines::getMathNoDisplay("H=" + theH.toString() + ";") << "<br>"
+    << HtmlRoutines::getMathNoDisplay("E=" + theE.toString() + ";")
     << "<br><br>The log stream of the computation follows. " << logStream.str();
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
@@ -928,18 +928,18 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
     << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
     << "\\endhead \n<br>";
   } else {
-    out << "Let " << HtmlRoutines::getMathSpan("p\\subset so(7)") << " be the "
+    out << "Let " << HtmlRoutines::getMathNoDisplay("p\\subset so(7)") << " be the "
     << theG2B3Data.selInducing.toString() << "-parabolic subalgebra"
-    << " and let " << HtmlRoutines::getMathSpan("{p}'= p\\cap G_2")
-    << ". Then  " << HtmlRoutines::getMathSpan("{p}'") << " is the "
+    << " and let " << HtmlRoutines::getMathNoDisplay("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::getMathNoDisplay("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
-    << HtmlRoutines::getMathSpan("p'")
-    << "</td><td>" << HtmlRoutines::getMathSpan("p'\\cap b")
+    << HtmlRoutines::getMathNoDisplay("p'")
+    << "</td><td>" << HtmlRoutines::getMathNoDisplay("p'\\cap b")
     << "-eigenvectors</td><td>Casimir projector</td><td>Extra multiplier</td><td>corresponding "
-    << HtmlRoutines::getMathSpan("G_2\\cap b")
+    << HtmlRoutines::getMathNoDisplay("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << theG2B3Data.selInducing.toString() << "} "
@@ -1037,15 +1037,15 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
         }
         latexTable << "&";
         theG2B3Data.theFormat.CustomPlusSign = "";
-        out << "<td>" << HtmlRoutines::getMathSpan(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
+        out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
         theG2B3Data.theFormat.MaxLineLength = 20;
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD) {
           std::string tempS1 = theG2B3Data.getStringCasimirProjector(eigenIndexcounter, 12);
           std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].toString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
-          out << "<td>" << HtmlRoutines::getMathSpan(tempS1) << "</td>";
+          out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS1) << "</td>";
           out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].toString() << "</td>";
-          out << "<td>" << HtmlRoutines::getMathSpan(tempS2) << "</td>";
+          out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex = - 1;
@@ -1142,16 +1142,16 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
-    out << "Let " << HtmlRoutines::getMathSpan("p\\subset so(7)") << " be the "
+    out << "Let " << HtmlRoutines::getMathNoDisplay("p\\subset so(7)") << " be the "
     << theg2b3data.selInducing.toString() << "-parabolic subalgebra "
-    << "and let " << HtmlRoutines::getMathSpan("{p}'= p\\cap G_2")
-    << ". Then  " << HtmlRoutines::getMathSpan("{p}'") << " is the "
+    << "and let " << HtmlRoutines::getMathNoDisplay("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::getMathNoDisplay("{p}'") << " is the "
     << theg2b3data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
-    << HtmlRoutines::getMathSpan(" p")
+    << HtmlRoutines::getMathNoDisplay(" p")
     << "-module</td><td>Decomposition of inducing module over "
-    << HtmlRoutines::getMathSpan("p'")
+    << HtmlRoutines::getMathNoDisplay("p'")
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";

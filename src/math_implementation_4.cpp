@@ -327,7 +327,7 @@ std::string GlobalVariables::toStringProgressReportConsole() {
 }
 
 void GlobalVariables::initThreadsExecutableStart() {
-  //<-Stack trace forbidden this is running before anything has been initialized!
+  // <-Stack trace forbidden this is running before anything has been initialized!
   ThreadData::registerFirstThread("main");
 }
 
@@ -371,6 +371,8 @@ bool GlobalVariables::userStudentVieWOn() {
 
 std::string GlobalVariables::LogData::toStringProcessType() const {
   switch (this->logType) {
+  case GlobalVariables::LogData::type::initialization:
+    return "initialization";
   case GlobalVariables::LogData::type::server:
     return "server";
   case GlobalVariables::LogData::type::serverMonitor:
@@ -437,21 +439,6 @@ bool GlobalVariables::userRequestMustBePromptedToLogInIfNotLoggedIn() {
   return
   this->requestType == "scoredQuiz" ||
   this->requestType == "exercise";
-}
-
-std::string GlobalVariables::toStringCalculatorComputation(
-  const std::string& computation,
-  const std::string& display
-) {
-  std::stringstream out;
-  JSData request;
-  request[WebAPI::request::requestAPI] = WebAPI::request::compute;
-  request[WebAPI::request::calculatorInput] = computation;
-  request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
-  out << "<a href = \"" << global.displayApplication << "#"
-  << HtmlRoutines::convertStringToURLString(request.toString(), false) << "\">";
-  out << HtmlRoutines::convertStringToHtmlString(display, true) << "</a>";
-  return out.str();
 }
 
 std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(List<std::string>* tagsToExclude) {

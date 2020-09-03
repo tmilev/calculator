@@ -328,8 +328,8 @@ public:
   void handleTooManyConnections(const std::string& incomingUserAddress);
   void handleTooManyWorkers(int& numInUse);
   void stopKillAll();
-  bool restartIsNeeded();
-  void initDates();
+  void stop();
+  bool restartNeeded();
   std::string toStringWorkerToWorker();
   std::string toStringLastErrorDescription();
   std::string toStringStatusActive();

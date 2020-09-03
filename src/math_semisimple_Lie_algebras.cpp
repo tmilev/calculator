@@ -20,17 +20,17 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
     gLetter = theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.toString() << ".";
-  out << "The letter " << HtmlRoutines::getMathSpan(hLetter)
+  out << "The letter " << HtmlRoutines::getMathNoDisplay(hLetter)
   << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " << HtmlRoutines::getMathSpan(gLetter)
+  << " the letter " << HtmlRoutines::getMathNoDisplay(gLetter)
   << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << HtmlRoutines::getMathSpan(hLetter + "_i")
+  << " The generator " << HtmlRoutines::getMathNoDisplay(hLetter + "_i")
   << " is the element of the Cartan subalgebra dual to the <br>"
   << "i^th simple root, that is, "
-  << HtmlRoutines::getMathSpan("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")
-  << ", <br> where g is a Chevalley generator, " << HtmlRoutines::getMathSpan("\\gamma")
+  << HtmlRoutines::getMathNoDisplay("[" + hLetter + "_i, g] =\\langle \\alpha_i , \\gamma\\rangle g")
+  << ", <br> where g is a Chevalley generator, " << HtmlRoutines::getMathNoDisplay("\\gamma")
   << " is its weight, and <br>"
-  << HtmlRoutines::getMathSpan("\\alpha_i") << " is the i^th simple root. ";
+  << HtmlRoutines::getMathNoDisplay("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;
   theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
@@ -207,13 +207,13 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   }
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
-  << HtmlRoutines::getMathSpan(theWeyl.cartanSymmetric.toString(&latexFormat));
+  << HtmlRoutines::getMathNoDisplay(theWeyl.cartanSymmetric.toString(&latexFormat));
   out << "<br>Let the (i, j)^{th} entry of the symmetric Cartan matrix be a_{ij}. "
   << "<br> Then we define the co-symmetric Cartan matrix as "
   << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). "
   << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
-  << HtmlRoutines::getMathSpan(theWeyl.coCartanSymmetric.toStringLatex());
+  << HtmlRoutines::getMathNoDisplay(theWeyl.coCartanSymmetric.toStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.cartanSymmetric.getDeterminant().toString();
   /*  Rational theRatio;
     for (int j = 0; j < theWeyl.getDimension(); j ++) {
@@ -239,7 +239,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   out << "<hr> Half sum of positive roots: " << theWeyl.rho.toString();
   Vector<Rational> tempRoot;
   theWeyl.getEpsilonCoordinates(theWeyl.rho, tempRoot);
-  out << "= " << HtmlRoutines::getMathSpan(tempRoot.toStringLetterFormat("\\varepsilon"));
+  out << "= " << HtmlRoutines::getMathNoDisplay(tempRoot.toStringLetterFormat("\\varepsilon"));
   out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 "
   << "<br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
@@ -248,7 +248,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < fundamentalWeights.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].toString()
     << "</td><td> =</td><td style =\"white-space: nowrap\"> "
-    << HtmlRoutines::getMathSpan(fundamentalWeightsEpsForm[i].toStringEpsilonFormat())
+    << HtmlRoutines::getMathNoDisplay(fundamentalWeightsEpsForm[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -264,7 +264,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculator(
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
     out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()
     << " </td><td>=</td> <td style =\"white-space: nowrap\">"
-    << HtmlRoutines::getMathSpan(simplebasisEpsCoords[i].toStringEpsilonFormat())
+    << HtmlRoutines::getMathNoDisplay(simplebasisEpsCoords[i].toStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";

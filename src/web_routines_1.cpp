@@ -64,7 +64,7 @@ public:
   double timeAtLastBackup;
   int pidServer;
   void monitor(int pidServer, const std::string& pingAuthentication);
-  void restart();
+  void stop();
   WebServerMonitor();
 };
 
@@ -154,16 +154,16 @@ void WebServerMonitor::monitor(int pidServer, const std::string& pingAuthenticat
       numConsecutiveFailedPings = 0;
     }
     if (numConsecutiveFailedPings >= maxNumPingFailures) {
-      this->restart();
+      this->stop();
     }
   }
 }
 
-void WebServerMonitor::restart() {
+void WebServerMonitor::stop() {
   TimeWrapper now;
   now.assignLocalTime();
-  global << Logger::red << "Server stopped responding (probably locked pipe?)"
-  << ", restarting. " << Logger::endL;
+  global << Logger::red << "Server stopped responding. "
+  << "Logging this event and stopping the monitor." << Logger::endL;
   std::fstream theFile;
   FileOperations::openFileCreateIfNotPresentVirtual(
     theFile, "LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true

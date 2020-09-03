@@ -105,11 +105,11 @@ public:
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
   Vectors<Rational> theHsScaledToActByTwoInOrderOfCreation;
-  Matrix<Rational> BilinearFormSimplePrimal;
-  Matrix<Rational> BilinearFormFundPrimal;
-  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
-  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
-  Matrix<Rational> MatMultiplyFundCoordsToGetSimple;
+  Matrix<Rational> bilinearFormSimplePrimal;
+  Matrix<Rational> bilinearFormFundPrimal;
+  Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
+  Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
+  Matrix<Rational> matMultiplyFundCoordsToGetSimple;
 
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;

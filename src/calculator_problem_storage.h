@@ -107,7 +107,7 @@ public:
   std::string htmlSpanVerifyAnswer;
   std::string htmlAnswerHighlight;
   //////////////////////////////////////
-  std::string MQpanelButtonOptions;
+  std::string mathQuillPanelOptions;
   //////////////////////////////////////
   std::string varMQfield;
   std::string MQobject;

@@ -748,7 +748,7 @@ std::string SemisimpleSubalgebras::toStringPart2(FormatExpressions *theFormat) {
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField == nullptr) {
-    out << HtmlRoutines::getMathSpanPure("\\mathbb Q");
+    out << HtmlRoutines::getMathSpan("\\mathbb Q");
   } else {
     out << this->ownerField->toString();
   }
@@ -2199,7 +2199,7 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     global.fatal << "This is a programming error: the determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
-    << HtmlRoutines::getMathMouseHover(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
+    << HtmlRoutines::getMathSpan(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
   }
 }
@@ -2821,7 +2821,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
   Vectors<Rational> simpleSubSystem;
   simpleSubSystem = this->RootSystemCentralizerPrimalCoords;
   this->theCentralizerSubDiagram.computeDiagramTypeModifyInputRelative(
-    simpleSubSystem, this->RootSystemCentralizerPrimalCoords, this->BilinearFormFundPrimal
+    simpleSubSystem, this->RootSystemCentralizerPrimalCoords, this->bilinearFormFundPrimal
   );
   this->theCentralizerSubDiagram.getDynkinType(this->theCentralizerType);
   this->flagCentralizerTypeIsComputed = true;
@@ -3170,7 +3170,7 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(Selection& inpu
         << " and "
         << this->theNilradical[inputNilradSel.elements[j]].toString() << " of weight "
         << this->theNilradicalWeights[inputNilradSel.elements[j]].toString() << ". "
-        //<< "The bilinear form is: " << this->owner->BilinearFormFundPrimal.toString() << ". "
+        //<< "The bilinear form is: " << this->owner->bilinearFormFundPrimal.toString() << ". "
         //<< " and the subalgebra in play is: " << this->owner->toString() << ". "
         //<< global.fatal;
         */
@@ -3218,7 +3218,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   this->theLeviDiagramSmalL.computeDiagramTypeModifyInputRelative(
     this->leviRootsSmallPrimalFundCoords,
     this->owner->RootSystemCentralizerPrimalCoords,
-    this->owner->BilinearFormFundPrimal
+    this->owner->bilinearFormFundPrimal
   );
   bool ambientLeviHasBDGE = false;
   for (int i = 0; i < this->theLeviDiagramAmbienT.simpleComponentTypes.size; i ++) {
@@ -4397,7 +4397,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-  out << HtmlRoutines::getMathMouseHover((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml) {
     out << "\n<br>\n";
@@ -4405,20 +4405,20 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS = this->theH.toString(theFormat);
   tempStreamH << "\nh = " << tempS << "";
-  out << HtmlRoutines::getMathMouseHover(tempStreamH.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne = " << this->theE.toString(theFormat) << "\n<br>\n";
-  out << HtmlRoutines::getMathMouseHover(tempStreamE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.toString(theFormat) << "\n<br>\n";
-/*  out << HtmlRoutines::getMathMouseHover(tempStreamF.str()) << "\n<br>\n";
+/*  out << HtmlRoutines::getMathSpan(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n[e, f] =" <<  this->bufferEbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::getMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan(tempStreamEF.str()) << "\n<br>\n";
   tempStreamHE << "\n[h, e] =" << this->bufferHbracketE.toString(theFormat) << "";
-  out << HtmlRoutines::getMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan(tempStreamHE.str()) << "\n<br>\n";
   tempStreamHF << "\n[h, f] = " << this->bufferHbracketF.toString(theFormat) << "";
-  out << HtmlRoutines::getMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
+  out << HtmlRoutines::getMathSpan(tempStreamHF.str()) << "\n<br>\n";*/
   //this->theSystemMatrixForm.toString(tempS);
   //out << "\nSystem matrix form we try to solve:\n" << tempS;
   //this->theSystemColumnVector.toString(tempS);
@@ -4433,7 +4433,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   if (useHtml) {
     out << "\n<br>\n";
   }
-  out << HtmlRoutines::getMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
+  out << HtmlRoutines::getMathSpan(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -5044,14 +5044,14 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
     }
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
-    out << HtmlRoutines::getMathMouseHover((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
+    out << HtmlRoutines::getMathSpan((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml) {
       out << "</td>";
     }
     out << "<td>" << theSl2.dimensionCentralizer << "</td>";
     if (theSl2.flagCentralizerTypeComputed) {
-      out << "<td> " << HtmlRoutines::getMathSpanPure(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
+      out << "<td> " << HtmlRoutines::getMathSpan(theSl2.CentralizerTypeIfKnown.toString()) << "</td>";
     } else {
       out << "<td> not computed</td>";
     }
@@ -5163,7 +5163,7 @@ bool CandidateSemisimpleSubalgebra::isExtremeWeight(int moduleIndex, int indexIn
 Rational CandidateSemisimpleSubalgebra::getScalarSubalgebra(
   const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight
 ) const {
-  return primalWeightLeft.scalarProduct(primalWeightRight, this->BilinearFormFundPrimal);
+  return primalWeightLeft.scalarProduct(primalWeightRight, this->bilinearFormFundPrimal);
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const {
@@ -5207,7 +5207,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(int indexMo
       out << closeTag << "</td>";
 
       Vector<Rational> tempV;
-      this->MatMultiplyFundCoordsToGetSimple.actOnVectorColumn(this->WeightsModulesPrimal[indexModule][j],tempV);
+      this->matMultiplyFundCoordsToGetSimple.actOnVectorColumn(this->WeightsModulesPrimal[indexModule][j],tempV);
       out << "<td style =\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
       out << tempV.toString();
       out << closeTag << "</td>";
@@ -5245,11 +5245,11 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
     return "";
   }
   std::stringstream out;
-  if (thePrimalRank != this->BilinearFormFundPrimal.numberOfColumns) {
+  if (thePrimalRank != this->bilinearFormFundPrimal.numberOfColumns) {
     out << "<br>The primal rank was computed to be " << thePrimalRank
     << " but the bilinear form in fundamental coordinates relative to "
-    << " the subalgebra was not computed: this->BilinearFormFundPrimal has "
-    << this->BilinearFormFundPrimal.numberOfRows << " rows. ";
+    << " the subalgebra was not computed: this->bilinearFormFundPrimal has "
+    << this->bilinearFormFundPrimal.numberOfRows << " rows. ";
     return out.str();
   }
   out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the "
@@ -5257,7 +5257,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
   << "<br>The bilinear form is therefore given relative to the fundamental coordinates.<br> ";
 
 //  out << "Embeddings fund coords into fund coords ambient.";
-//  Matrix<Rational> theMat = this->MatMultiplyFundCoordsToGetSimple;
+//  Matrix<Rational> theMat = this->matMultiplyFundCoordsToGetSimple;
 //  theMat.
 
 
@@ -5266,7 +5266,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
   theDV.theBuffer.theBilinearForm.initialize(thePrimalRank, thePrimalRank);
   for (int i = 0; i < thePrimalRank; i ++) {
     for (int j = 0; j < thePrimalRank; j ++) {
-      theDV.theBuffer.theBilinearForm(i, j) = this->BilinearFormFundPrimal(i, j).getDoubleValue();
+      theDV.theBuffer.theBilinearForm(i, j) = this->bilinearFormFundPrimal(i, j).getDoubleValue();
     }
   }
   Vector<Rational> zeroVector;
@@ -5310,7 +5310,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
         Rational tempRat = Vector<Rational>::scalarProduct(
           cornerWeights[k] - cornerWeights[j],
           cornerWeights[k] - cornerWeights[j],
-          this->BilinearFormFundPrimal
+          this->bilinearFormFundPrimal
         );
         if (minDist == 0) {
           minDist = tempRat;
@@ -5322,7 +5322,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(FormatExpressions
         if (minDist == Vector<Rational>::scalarProduct(
           cornerWeights[k] - cornerWeights[j],
           cornerWeights[k] - cornerWeights[j],
-          this->BilinearFormFundPrimal
+          this->bilinearFormFundPrimal
         )) {
           theDV.drawLineBetweenTwoVectorsBufferRational(cornerWeights[k], cornerWeights[j], color, 1);
         }
@@ -5477,9 +5477,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].toStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathSpan(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       } else {
-        out << HtmlRoutines::getMathSpanPure(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
+        out << HtmlRoutines::getMathSpan(tempStream.str()) << " &rarr; " << this->HighestWeightsPrimal[i].toString();
       }
       out << "</td>";
     }
@@ -5578,9 +5578,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
     for (int i = 0; i < this->CharsPrimalModules.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpan(this->CharsPrimalModules[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->CharsPrimalModules[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpan(this->CharsPrimalModules[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -5596,9 +5596,9 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(FormatExp
     for (int i = 0; i < this->CharsPrimalModulesMerged.size; i ++) {
       out << "<td>";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpan(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
+        out << HtmlRoutines::getMathSpan(this->CharsPrimalModulesMerged[i].toString(&tempCharFormat));
       }
       out << "</td>";
     }
@@ -6141,9 +6141,9 @@ std::string SemisimpleSubalgebras::toStringAlgebraLink(int actualindexSubalgebra
     << "\" id = \"semisimple_subalgebra_" << this->getDisplayIndexFromActual(actualindexSubalgebra)
     << "\" style = \"text-decoration: none\">";
     if (useMouseHover) {
-      out << HtmlRoutines::getMathMouseHover(theTypeString);
+      out << HtmlRoutines::getMathSpan(theTypeString);
     } else {
-      out << HtmlRoutines::getMathSpanPure(theTypeString);
+      out << HtmlRoutines::getMathSpan(theTypeString);
     }
     out << "</a> ";
   } else {
@@ -6167,9 +6167,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathSpan(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       } else {
-        out << HtmlRoutines::getMathSpanPure(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::getMathSpan(theSimpleTypes[i].toString(&tempFormat), 1000) << ": ";
       }
     } else {
       out << theSimpleTypes[i].toString(&tempFormat) << ":";
@@ -6217,9 +6217,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
       }
     } else if (!this->theCentralizerType.isEqualToZero()) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathSpan(this->theCentralizerType.toString());
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->theCentralizerType.toString());
+        out << HtmlRoutines::getMathSpan(this->theCentralizerType.toString());
       }
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer -= this->theCentralizerType.getRank();
@@ -6228,9 +6228,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCentralizer(FormatExpressions
       std::stringstream toralPartStream;
       toralPartStream << "T_{" << dimToralPartCentralizer.toString() << "}";
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(toralPartStream.str());
+        out << HtmlRoutines::getMathSpan(toralPartStream.str());
       } else {
-        out << HtmlRoutines::getMathSpanPure(toralPartStream.str());
+        out << HtmlRoutines::getMathSpan(toralPartStream.str());
       }
       out << " (toral part, subscript = dimension)";
     }
@@ -6476,9 +6476,9 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(FormatExpressions*
   for (int i = 0; i < this->theNegGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpan(this->theNegGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->theNegGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpan(this->theNegGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->theNegGens[i].toString(theFormat);
@@ -6491,9 +6491,9 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(FormatExpressions*
   for (int i = 0; i < this->thePosGens.size; i ++) {
     if (useHtml && useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpan(this->thePosGens[i].toString(theFormat), 2000);
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->thePosGens[i].toString(theFormat), 2000);
+        out << HtmlRoutines::getMathSpan(this->thePosGens[i].toString(theFormat), 2000);
       }
     } else {
       out << this->thePosGens[i].toString(theFormat);
@@ -6578,9 +6578,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Cartan symmetric matrix: ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathMouseHover(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::getMathSpanPure(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->cartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->cartanSymmetric.toString(theFormat);
@@ -6588,9 +6588,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): ";
   if (useLaTeX && useHtml) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathMouseHover(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     } else {
-      out << HtmlRoutines::getMathSpanPure(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
+      out << HtmlRoutines::getMathSpan(this->theWeylNonEmbedded->coCartanSymmetric.toString(&tempFormat));
     }
   } else {
     out << this->theWeylNonEmbedded->coCartanSymmetric.toString(theFormat);
@@ -6602,9 +6602,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX) {
     if (useMouseHover) {
-      out << HtmlRoutines::getMathMouseHover(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathSpan(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     } else {
-      out << HtmlRoutines::getMathSpanPure(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::getMathSpan(this->theCharNonPrimalFundCoords.toString(&charFormatNonConst), 20000);
     }
   } else {
     out << this->theCharNonPrimalFundCoords.toString(&charFormatNonConst);
@@ -6614,9 +6614,9 @@ std::string CandidateSemisimpleSubalgebra::toString(FormatExpressions* theFormat
     << "This decomposition refines the above decomposition (please note the order is not the same as above). ";
     if (useLaTeX) {
       if (useMouseHover) {
-        out << HtmlRoutines::getMathMouseHover(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathSpan(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       } else {
-        out << HtmlRoutines::getMathSpanPure(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::getMathSpan(this->thePrimalChaR.toString(&charFormatNonConst), 20000);
       }
     } else
       out << this->thePrimalChaR.toString(&charFormatNonConst);
@@ -6840,7 +6840,7 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(const CandidateSemisimpleS
         reportStream << "... and so on, only the first 100 elements printed out of total "
         << theOuterAutos.theElements.size << ". ";
       } else {
-        reportStream << "<br>" << HtmlRoutines::getMathMouseHover(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
+        reportStream << "<br>" << HtmlRoutines::getMathSpan(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
       }
     }
     theReport.report(reportStream.str());
@@ -7072,19 +7072,19 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
     this->CartanOfCentralizer[i].scaleNormalizeFirstNonZero();
   }
   ////////////////
-  this->BilinearFormSimplePrimal = this->theWeylNonEmbedded->cartanSymmetric;
+  this->bilinearFormSimplePrimal = this->theWeylNonEmbedded->cartanSymmetric;
   Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;
   // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.toString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.cartanSymmetric.toString();
   this->CartanOfCentralizer.getGramMatrix(centralizerPart, &this->owner->owner->theWeyl.cartanSymmetric);
-  this->BilinearFormSimplePrimal.directSumWith(centralizerPart);
-  bilinearFormInverted = this->BilinearFormSimplePrimal;
+  this->bilinearFormSimplePrimal.directSumWith(centralizerPart);
+  bilinearFormInverted = this->bilinearFormSimplePrimal;
   bilinearFormInverted.invert();
-  diagMat.initialize(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
-  diagMatrix2.initialize(this->BilinearFormSimplePrimal.numberOfRows, this->BilinearFormSimplePrimal.numberOfColumns);
+  diagMat.initialize(this->bilinearFormSimplePrimal.numberOfRows, this->bilinearFormSimplePrimal.numberOfColumns);
+  diagMatrix2.initialize(this->bilinearFormSimplePrimal.numberOfRows, this->bilinearFormSimplePrimal.numberOfColumns);
   diagMat.makeZero();
   diagMatrix2.makeZero();
-  for (int i = 0; i < this->BilinearFormSimplePrimal.numberOfRows; i ++) {
+  for (int i = 0; i < this->bilinearFormSimplePrimal.numberOfRows; i ++) {
     if (i < this->theHs.size) {
       diagMat(i, i) = this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.cartanSymmetric(i, i) / 2;
       diagMatrix2(i, i) = this->theWeylNonEmbedded->cartanSymmetric(i, i) / 2;
@@ -7095,18 +7095,18 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   }
   matFundCoordsSimple = bilinearFormInverted;
   matFundCoordsSimple *= diagMat;
-  this->MatMultiplyFundCoordsToGetSimple = bilinearFormInverted;
-  this->MatMultiplyFundCoordsToGetSimple *= diagMatrix2;
-  this->BilinearFormFundPrimal = matFundCoordsSimple;
-  this->BilinearFormFundPrimal.transpose();
-  this->BilinearFormFundPrimal *= this->BilinearFormSimplePrimal;
-  this->BilinearFormFundPrimal *= matFundCoordsSimple;
-/*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
+  this->matMultiplyFundCoordsToGetSimple = bilinearFormInverted;
+  this->matMultiplyFundCoordsToGetSimple *= diagMatrix2;
+  this->bilinearFormFundPrimal = matFundCoordsSimple;
+  this->bilinearFormFundPrimal.transpose();
+  this->bilinearFormFundPrimal *= this->bilinearFormSimplePrimal;
+  this->bilinearFormFundPrimal *= matFundCoordsSimple;
+/*  this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
-    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
+    this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->theHs[i]);
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++)
-    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
+    this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->CartanOfCentralizer[i-this->getRank()]);
 */
 }

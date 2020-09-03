@@ -588,7 +588,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   theFormat.CustomPlusSign = "\\oplus ";
   theFormat.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
-  << HtmlRoutines::getMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
+  << HtmlRoutines::getMathSpan(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.makeZero();
   Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.setSize(WeylFDSmall.ambientWeyl->getDimension());
@@ -641,7 +641,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   }
   theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
-  << HtmlRoutines::getMathSpanPure(output.toString(&theFormat));
+  << HtmlRoutines::getMathSpan(output.toString(&theFormat));
   if (report != nullptr) {
     DrawingVariables theDV1;
     std::string tempS;

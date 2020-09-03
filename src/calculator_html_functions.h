@@ -9,12 +9,12 @@ class Answer;
 
 class CalculatorHtmlFunctions{
 public:
-  static bool innerExtractCalculatorExpressionFromHtml(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInterpretProblemGiveUp(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInterpretProblem(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUserInputBox(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSetInputBox(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEvaluateSymbols(Calculator& calculator, const Expression& input, Expression& output);
+  static bool extractCalculatorExpressionFromHtml(Calculator& calculator, const Expression& input, Expression& output);
+  static bool interpretProblemGiveUp(Calculator& calculator, const Expression& input, Expression& output);
+  static bool interpretProblem(Calculator& calculator, const Expression& input, Expression& output);
+  static bool userInputBox(Calculator& calculator, const Expression& input, Expression& output);
+  static bool setInputBox(Calculator& calculator, const Expression& input, Expression& output);
+  static bool evaluateSymbols(Calculator& calculator, const Expression& input, Expression& output);
   static std::string getUserInputBoxName(const Expression& theBox);
 };
 

@@ -663,10 +663,10 @@ std::string CalculatorHTML::toStringProblemInfo(const std::string& theFileName, 
   return out.str();
 }
 
-bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
+bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblemGiveUp");
+  MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblemGiveUp");
   if (input.size() != 4) {
     return calculator << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
@@ -686,10 +686,10 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorHtmlFunctions::innerInterpretProblem(
+bool CalculatorHtmlFunctions::interpretProblem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblem");
+  MacroRegisterFunctionWithName("CalculatorFunctions::interpretProblem");
   CalculatorHTML theProblem;
   if (!input.isOfType<std::string>(&theProblem.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
@@ -2505,7 +2505,7 @@ bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
         return false;
       }
       answerIdsSeenSoFar.addOnTopNoRepetition(currentId);
-      this->theProblemData.theAnswers.getValueCreate(currentId).MQpanelButtonOptions =
+      this->theProblemData.theAnswers.getValueCreate(currentId).mathQuillPanelOptions =
       currentE.getKeyValue("buttons");
       continue;
     }
@@ -2618,10 +2618,10 @@ std::string CalculatorHTML::cleanUpCommandString(const std::string& inputCommand
   return result;
 }
 
-bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
+bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExtractCalculatorExpressionFromHtml");
+  MacroRegisterFunctionWithName("CalculatorFunctions::extractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
   if (!input.isOfType<std::string>(&theFile.inputHtml)) {
     return calculator << "Extracting calculator expressions from html takes as input strings. ";
@@ -2638,7 +2638,7 @@ std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
 std::string CalculatorHTML::answerLabels::idMQSpan = "idMQSpan";
 std::string CalculatorHTML::answerLabels::idMQSpanLocation = "idMQSpanLocation";
 std::string CalculatorHTML::answerLabels::idButtonContainer = "idButtonContainer";
-std::string CalculatorHTML::answerLabels::MQpanelButtonOptions = "MQpanelButtonOptions";
+std::string CalculatorHTML::answerLabels::mathQuillPanelOptions = "mathQuillPanelOptions";
 std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
 std::string CalculatorHTML::answerLabels::idButtonSubmit = "idButtonSubmit";
 std::string CalculatorHTML::answerLabels::idButtonInterpret = "idButtonInterpret";
@@ -2668,7 +2668,7 @@ JSData CalculatorHTML::getJavascriptMathQuillBoxesForJSON() {
     currentAnswerJS[answerLabels::idMQSpan] = currentAnswer.idMQfielD;
     currentAnswerJS[answerLabels::idMQSpanLocation] = currentAnswer.idMQFieldLocation;
     currentAnswerJS[answerLabels::idButtonContainer] = currentAnswer.idMQButtonPanelLocation;
-    currentAnswerJS[answerLabels::MQpanelButtonOptions] = currentAnswer.MQpanelButtonOptions;
+    currentAnswerJS[answerLabels::mathQuillPanelOptions] = currentAnswer.mathQuillPanelOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
     currentAnswerJS[answerLabels::idButtonSubmit] = currentAnswer.idButtonSubmit;
     currentAnswerJS[answerLabels::idButtonInterpret] = currentAnswer.idButtonInterpret;

@@ -6935,7 +6935,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(FormatExpressions* th
     const Vector<Rational>& current = this->rootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
     out << "<tr><td>" << current.toString() << "</td><td>" << rootSystemEpsCoords[i].toStringLetterFormat("e") << "</td>"
-    << "<td>" << HtmlRoutines::getMathMouseHover(currentRootReflection.toString()) << "</td>" << "</tr>";
+    << "<td>" << HtmlRoutines::getMathSpan(currentRootReflection.toString()) << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
@@ -7837,7 +7837,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&= &" << this->simpleRootsInner[i].toString() << "\\\\";
   }
   head << "\\end{array}";
-  out << HtmlRoutines::getMathMouseHover(head.str());
+  out << HtmlRoutines::getMathSpan(head.str());
   if (this->ExternalAutomorphisms.size > 0) {
     out << "<br>Outer automorphisms: \n";
     Matrix<Rational> tempMat;
@@ -7848,7 +7848,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
       head2 << "a_{" << i + 1 << "}&= &" << tempMat.toString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
-    out << HtmlRoutines::getMathMouseHover(head2.str());
+    out << HtmlRoutines::getMathSpan(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->getRho().toString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
@@ -7864,7 +7864,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
       body << currentElt.toString(nullptr) << "\\\\";
     }
     body << "\\end{array}";
-    out << HtmlRoutines::getMathMouseHover(body.str());
+    out << HtmlRoutines::getMathSpan(body.str());
   }
   output = out.str();
 }
@@ -8165,8 +8165,8 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* theFormat) {
   if (this->theKLcoeffs.size == this->TheWeylGroup->theGroup.theElements.size) {
     out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
-    << HtmlRoutines::getMathSpanPure("L_{w_2 \\cdot \\lambda}")
-    << " in " <<  HtmlRoutines::getMathSpanPure(" M_{w_1\\cdot \\lambda }  ")
+    << HtmlRoutines::getMathSpan("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  HtmlRoutines::getMathSpan(" M_{w_1\\cdot \\lambda }  ")
     << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest "
@@ -10478,31 +10478,6 @@ std::string Cone::drawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   return out.str();
 }
 
-std::string HtmlRoutines::getHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText) {
-  std::stringstream out;
-  out << "\n<button id =\"" << buttonID << "\" " << HtmlRoutines::getStyleButtonLikeHtml()
-  << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
-  return out.str();
-}
-
-/*std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
-  const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart
-) {
-  std::stringstream out;
-  HtmlRoutines::GlobalGeneralPurposeID ++;
-  std::stringstream buttonLabel;
-  std::stringstream spanLabel;
-  spanLabel << "hidableSpan" << desiredIdStart << HtmlRoutines::GlobalGeneralPurposeID;
-  buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
-  std::string switchMenu = "window.calculator.miscellaneousFrontend.switchMenu('" + spanLabel.str() + "');";
-  out << HtmlRoutines::getHtmlButton(buttonLabel.str(), switchMenu, labelExpandButton);
-  out << "<span";
-  out << " id =\"" << spanLabel.str() << "\" class=\"hiddenClass\">";
-  out << input << "</span>";
-  return out.str();
-}
-*/
-
 int DrawOperations::getDimensionFromBilinearForm() {
   return this->theBilinearForm.numberOfRows;
 }
@@ -11060,9 +11035,9 @@ bool PiecewiseQuasipolynomial::makeVPF(Vectors<Rational>& theRoots, std::string&
   std::string whatWentWrong;
 
   theFracs.initFromRoots(theRoots);
-  out << HtmlRoutines::getMathMouseHover(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathSpan(theFracs.toString(theFormat));
   theFracs.split(nullptr);
-  out << HtmlRoutines::getMathMouseHover(theFracs.toString(theFormat));
+  out << HtmlRoutines::getMathSpan(theFracs.toString(theFormat));
   // theFracs.theChambers.initializeFromDirectionsAndRefine(theRoots);
   global.fatal << "Not implemented. " << global.fatal ;
   //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;

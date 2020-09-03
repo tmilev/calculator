@@ -166,7 +166,7 @@ std::string HtmlRoutines::getCalculatorComputationURL(const std::string& inputNo
   return out.str();
 }
 
-std::string HtmlRoutines::getCalculatorComputationAnchor(const std::string& inputNoEncoding) {
+std::string HtmlRoutines::getCalculatorComputationAnchorSamePage(const std::string& inputNoEncoding) {
   std::stringstream out;
   out << "<a href = \"" << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
   << "\" onclick = \"window.calculator.calculator.calculatorLinkClickHandler(this);\">"
@@ -174,7 +174,22 @@ std::string HtmlRoutines::getCalculatorComputationAnchor(const std::string& inpu
   return out.str();
 }
 
-std::string HtmlRoutines::getMathSpanPure(const std::string& input, int upperNumChars) {
+std::string HtmlRoutines::getCalculatorComputationAnchorNewPage(
+  const std::string& inputNoEncoding,
+  const std::string& desiredAnchorTextEmptyForDefault
+) {
+  std::stringstream out;
+  std::string displayText = desiredAnchorTextEmptyForDefault;
+  if (displayText == "") {
+    displayText = HtmlRoutines::convertStringToHtmlString(inputNoEncoding, false);
+  }
+  out << "<a href = '" << global.displayNameExecutable
+  << HtmlRoutines::getCalculatorComputationURL(inputNoEncoding)
+  << "' target='_blank'>" << displayText << "</a>";
+  return out.str();
+}
+
+std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChars) {
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
@@ -182,28 +197,6 @@ std::string HtmlRoutines::getMathSpanPure(const std::string& input, int upperNum
     return out.str();
   }
   out << "\\(\\displaystyle " << input << "\\)";
-  return out.str();
-}
-
-std::string HtmlRoutines::getMathMouseHover(const std::string& input, int upperNumChars) {
-  std::stringstream out;
-  if (input.size() > static_cast<unsigned>(upperNumChars)) {
-    out << "<b>LaTeX output is longer than " << upperNumChars
-    << " characters and I dare not process the LaTeX. Here is the output as plain (LaTeX-able) text.</b> " << input;
-    return out.str();
-  }
-//  std::stringstream idSpanStream;
-  HtmlRoutines::globalMathSpanID ++;
-//  if (HtmlRoutines::globalMathSpanID==1)
-//    out << "<span class =\"math\"></span>"; //<- empty math span class forces jsMath to load.
-//  idSpanStream << "mathFormula" << HtmlRoutines::globalMathSpanID;
-//  std::string containterString="container"+ idSpanStream.str();
-//  out << "<span id =\"" << containterString << "\">"  << "<span id =\"" << idSpanStream.str()
-//  out << "<span><span onmouseover =\"if (this.parentNode.className == 'math') return; "
-//  << "this.className ='math'; this.parentNode.className ='math';"
-//  << "window.alert('Calling jsmath.Process'); "
-//  << "jsMath.Process(this.parentNode);\" >"
-  out << "\\(" << input << "\\)";// << "</span></span>";
   return out.str();
 }
 

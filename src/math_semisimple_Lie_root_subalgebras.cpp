@@ -1281,8 +1281,8 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   ) {
     includeKEpsCoords = false;
   }
-  out << "Type: " << HtmlRoutines::getMathSpanPure(this->theDynkinDiagram.toString());
-  out << " (Dynkin type computed to be: " << HtmlRoutines::getMathSpanPure(this->theDynkinType.toString()) << ")";
+  out << "Type: " << HtmlRoutines::getMathSpan(this->theDynkinDiagram.toString());
+  out << " (Dynkin type computed to be: " << HtmlRoutines::getMathSpan(this->theDynkinType.toString()) << ")";
   out << "\n<br>\nSimple basis: " << this->simpleRootsReductiveSubalgebra.toString();
   out << "\n<br>\nSimple basis epsilon form: "
   << this->SimpleBasisgEpsCoords.toStringEpsilonForm(useLatex, useHtml, false);
@@ -1296,7 +1296,7 @@ std::string RootSubalgebra::toString(FormatExpressions* theFormat) {
   out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.toString();
   out << "<hr>\n Number of k-submodules of g: " << this->modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
-  out << HtmlRoutines::getMathSpanPure(this->ModuleDecompoHighestWeights.toString());
+  out << HtmlRoutines::getMathSpan(this->ModuleDecompoHighestWeights.toString());
   out << "<br>\n";
   out << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";

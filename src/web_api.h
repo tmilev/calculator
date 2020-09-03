@@ -199,8 +199,12 @@ public:
   static std::string getCalculatorComputationURL(
     const std::string& inputNoEncoding
   );
-  static std::string getCalculatorComputationAnchor(
+  static std::string getCalculatorComputationAnchorSamePage(
     const std::string& inputNoEncoding
+  );
+  static std::string getCalculatorComputationAnchorNewPage(
+    const std::string& inputNoEncoding,
+    const std::string& desiredAnchorTextEmptyForDefault
   );
   static std::string getSliderSpanStartsHidden(
     const std::string& content,
@@ -248,18 +252,10 @@ public:
   static const std::string& getJavascriptMathQuillMatrixSupporTWithTags();
   static std::string getJavascriptVariable(const std::string& theVar);
 
-  static std::string getMathSpanPure(
-    const std::string& input, int upperNumChars = 10000
-  );
-  static std::string getMathMouseHover(
+  static std::string getMathSpan(
     const std::string& input, int upperNumChars = 10000
   );
   static std::string getStyleButtonLikeHtml();
-  static std::string getHtmlButton(
-    const std::string& buttonID,
-    const std::string& theScript,
-    const std::string& buttonText
-  );
   static std::string clearNewLines(const std::string& theString);
   static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);

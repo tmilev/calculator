@@ -325,7 +325,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
     }
   }
   output.makeZero();
-  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::getMathMouseHover(remainingCharDominantLevi.toString());
+  out << "<br>Character w.r.t Levi part: \\(" << HtmlRoutines::getMathSpan(remainingCharDominantLevi.toString());
   Vector<Coefficient> simpleGeneratorBaseField;
   while (!remainingCharDominantLevi.isEqualToZero()) {
     localHighest = *remainingCharDominantLevi.monomials.lastObject();
@@ -359,7 +359,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitOverLeviMonomialsEnc
       remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
     }
   }
-  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::getMathMouseHover(output.toString());
+  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::getMathSpan(output.toString());
   if (report != nullptr) {
     DrawingVariables theDV;
     std::string tempS;
@@ -736,7 +736,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           theReport.report(tempStream.str());
           if (outputReport != nullptr) {
             if (this->getDimension() < 50) {
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::getMathMouseHover(theMatrix.toString(), 5000);
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::getMathSpan(theMatrix.toString(), 5000);
             } else {
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.toString();
             }
@@ -1250,7 +1250,7 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   if (this->theCharOverH.size() < 100) {
-    out << HtmlRoutines::getMathMouseHover(this->theCharOverH.toString(&latexFormat));
+    out << HtmlRoutines::getMathSpan(this->theCharOverH.toString(&latexFormat));
   } else {
     out << this->theCharOverH.toString();
   }
@@ -1290,14 +1290,14 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
       tempSSElt.makeGenerator(i, theAlgebrA);
       out << "<tr>";
       out << "<td>"
-      << HtmlRoutines::getMathMouseHover(tempSSElt.toString(theFormat))
+      << HtmlRoutines::getMathSpan(tempSSElt.toString(theFormat))
       << "</td>";
       out << "<td>";
       if (this->getDimension() < 28) {
         Matrix<Coefficient> outputMat;
         this->actionsGeneratorsMaT[i].getMatrix(outputMat, this->getDimension());
         out
-        << HtmlRoutines::getMathMouseHover(outputMat.toString(&latexFormat), 5000)
+        << HtmlRoutines::getMathSpan(outputMat.toString(&latexFormat), 5000)
         << " = ";
         out << this->actionsGeneratorsMaT[i].toString();
       } else {

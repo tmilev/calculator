@@ -478,7 +478,7 @@ bool Calculator::innerGroebner(
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
     out << "<br>"
-    << HtmlRoutines::getMathSpanPure(
+    << HtmlRoutines::getMathSpan(
       inputVector[i].toString(&theGroebnerComputation.theFormat)
     );
   }
@@ -489,7 +489,7 @@ bool Calculator::innerGroebner(
     << theGroebnerComputation.numberPolynomialDivisions
     << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << "<br> " << HtmlRoutines::getMathSpanPure(
+      out << "<br> " << HtmlRoutines::getMathSpan(
         outputGroebner[i].toString(&theGroebnerComputation.theFormat)
       );
     }

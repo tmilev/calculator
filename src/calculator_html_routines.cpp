@@ -5,10 +5,10 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"
 
-bool CalculatorHtmlFunctions::innerUserInputBox(
+bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
   MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(calculator, input, theArguments, &calculator.comments)) {
     return false;
@@ -39,10 +39,10 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
   return output.assignValue(newBox, calculator);
 }
 
-bool CalculatorHtmlFunctions::innerEvaluateSymbols(
+bool CalculatorHtmlFunctions::evaluateSymbols(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::evaluateSymbols");
   if (input.size() != 2) {
     return false;
   }
@@ -83,10 +83,10 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorHtmlFunctions::innerSetInputBox(
+bool CalculatorHtmlFunctions::setInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
+  MacroRegisterFunctionWithName("CalculatorHtmlFunctions::userInputBox");
   MapList<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(
     calculator, input, theArguments, &calculator.comments

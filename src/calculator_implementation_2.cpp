@@ -828,8 +828,8 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         *this->owner
         << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
         << "<br>Rule: " << currentPattern.toString() << "<br>"
-        << HtmlRoutines::getMathSpanPure(beforepatternMatch.toString())
-        << " -> " << HtmlRoutines::getMathSpanPure(this->output->toString());
+        << HtmlRoutines::getMathSpan(beforepatternMatch.toString())
+        << " -> " << HtmlRoutines::getMathSpan(this->output->toString());
       }
       return true;
     }
@@ -858,8 +858,8 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   if (this->owner->flagLogEvaluation) {
     *(this->owner) << "<br>Rule context identifier: "
     << this->owner->RuleStackCacheIndex
-    << "<br>" << HtmlRoutines::getMathMouseHover(this->output->toString())
-    << " -> " << HtmlRoutines::getMathMouseHover(result.toString());
+    << "<br>" << HtmlRoutines::getMathSpan(this->output->toString())
+    << " -> " << HtmlRoutines::getMathSpan(result.toString());
   }
   return this->setOutput(result, handlerContainer, "");
 }

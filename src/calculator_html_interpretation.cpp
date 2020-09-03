@@ -114,12 +114,11 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     }
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
+
     out << "<hr>"
-    << "<a href=\"" << global.displayNameExecutable
-    << "?request=calculator&mainInput="
-    << HtmlRoutines::convertStringToURLString(answerCommandsNoEnclosures.str(), false)
-    << "\">Input link</a>"
-    <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString;
+    << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+      answerCommandsNoEnclosures.str(), "Input link"
+    ) << "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString;
   }
   result[WebAPI::result::resultHtml] = out.str();
   result[WebAPI::result::millisecondsComputation] = global.getElapsedMilliseconds() - startMilliseconds;
@@ -346,10 +345,9 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   std::stringstream problemLinkStream;
   problemLinkStream
-  << "<a href=\"" << global.displayNameExecutable
-  << "?request=calculator&mainInput="
-  << HtmlRoutines::convertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
-  << "\">Input link</a>";
+  << HtmlRoutines::getCalculatorComputationAnchorNewPage(
+    calculatorInputStreamNoEnclosures.str(), "Input link"
+  );
   theInterpreterWithAdvice.evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors != "") {
     out << "<br><span style =\"color:red\"><b>"

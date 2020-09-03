@@ -239,7 +239,7 @@ public:
     static std::string idMQSpan;
     static std::string idMQSpanLocation;
     static std::string idButtonContainer;
-    static std::string MQpanelButtonOptions;
+    static std::string mathQuillPanelOptions;
     static std::string idPureLatex;
     static std::string idButtonSubmit;
     static std::string idButtonInterpret;

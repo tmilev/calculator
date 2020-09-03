@@ -203,14 +203,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "EvaluateSymbols",
-    CalculatorHtmlFunctions::innerEvaluateSymbols,
+    CalculatorHtmlFunctions::evaluateSymbols,
     "",
     "Evaluates and replaces individual symbols/variables in LaTeX string. "
     "Leaves the rest of the string intact.",
     "x = 5;\n"
     "left = a;\n"
     "EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
-    "CalculatorConversions::innerEvaluateSymbols",
+    "CalculatorConversions::evaluateSymbols",
     "EvaluateSymbols",
     innerStandard
   );
@@ -365,19 +365,19 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "InterpretProblem",
-    CalculatorHtmlFunctions::innerInterpretProblem,
+    CalculatorHtmlFunctions::interpretProblem,
     "",
     "Does as ExtractCalculatorExpressionFromHtml but in "
     "addition interprets the calculator commands. ",
     "InterpretProblem(LoadFileIntoString("
     "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
-    "CalculatorHtmlFunctions::innerInterpretProblem",
+    "CalculatorHtmlFunctions::interpretProblem",
     "InterpretProblem",
     innerNoTest
   );
   this->addOperationHandler(
     "ProblemGiveUp",
-    CalculatorHtmlFunctions::innerInterpretProblemGiveUp,
+    CalculatorHtmlFunctions::interpretProblemGiveUp,
     "",
     "Gives the predefined answer to a problem. "
     "First argument must be a string with the problem. "
@@ -388,34 +388,34 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"AlgebraAnswer\",\n"
     "\"123\"\n"
     ")",
-    "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
+    "CalculatorHtmlFunctions::interpretProblemGiveUp",
     "ProblemGiveUp",
     innerStandard
   );
   this->addOperationHandler(
     "MakeInputBox",
-    CalculatorHtmlFunctions::innerUserInputBox,
+    CalculatorHtmlFunctions::userInputBox,
     "",
     "Creates an user input text box. ",
     "MakeInputBox(name = a, value = 3);",
-    "CalculatorHtmlFunctions::innerUserInputBox",
+    "CalculatorHtmlFunctions::userInputBox",
     "MakeInputBox",
     innerStandard
   );
   this->addOperationHandler(
     Calculator::Atoms::setInputBox,
-    CalculatorHtmlFunctions::innerSetInputBox,
+    CalculatorHtmlFunctions::setInputBox,
     "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
     "SetInputBox(name = a, value =  3); "
     "MakeInputBox(name = a)",
-    "CalculatorHtmlFunctions::innerSetInputBox",
+    "CalculatorHtmlFunctions::setInputBox",
     Calculator::Atoms::setInputBox,
     innerStandard
   );
   this->addOperationHandler(
     "ExtractCalculatorExpressionFromHtml",
-    CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml,
+    CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml,
     "",
     "Reads html and extracts embedded calculator commands. Content enclosed in "
     "spans with appropriate class names is interpreted; all other content "
@@ -424,7 +424,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"calculatorHidden\", \"calculatorAnswer\".",
     "ExtractCalculatorExpressionFromHtml(LoadFileIntoString("
     "\"problems/Functions-composing-fractional-linear-1.html\"))",
-    "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml",
+    "CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml",
     "ExtractCalculatorExpressionFromHtml",
     innerStandard
   );
@@ -1268,63 +1268,63 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "RepresentElementHyperoctahedral",
-    CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral,
+    CalculatorFunctionsWeylGroup::representElementHyperOctahedral,
     "",
     "Represents element of hyperoctahedral into a representation. ",
     "V = HyperOctahedralRepresentation((1, 1), 1);\n"
     "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"
     "RepresentElementHyperoctahedral(s, V)",
-    "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral",
+    "CalculatorFunctionsWeylGroup::representElementHyperOctahedral",
     "RepresentElementHyperoctahedral",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "HyperOctahedralIrreps",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules,
+    CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules,
     "",
     "Prints all modules induced from Specht modules. ",
     "HyperOctahedralIrreps(3)",
-    "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
+    "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralIrreps",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "SpechtModule",
-    CalculatorFunctionsWeylGroup::innerSpechtModule,
+    CalculatorFunctionsWeylGroup::spechtModule,
     "",
     "Gets the Specht module of the partition. ",
     "SpechtModule((3, 2, 1))",
-    "CalculatorFunctionsWeylGroup::innerSpechtModule",
+    "CalculatorFunctionsWeylGroup::spechtModule",
     "SpechtModule",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "HyperOctahedralRepresentation",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation,
+    CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation,
     "",
     "Gets one hyperoctahedral representation from two partitions. ",
     "HyperOctahedralRepresentation((1, 1), (1))",
-    "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
+    "CalculatorFunctionsWeylGroup::hyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralRepresentation",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "HyperOctahedralGeneratorPrint",
-    CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations,
+    CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations,
     "",
     "Prints the generator commutation relations of a hyperoctahedral group. ",
     "HyperOctahedralGeneratorPrint(3)",
-    "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations",
+    "CalculatorFunctionsWeylGroup::hyperOctahedralPrintGeneratorCommutationRelations",
     "HyperOctahedralGeneratorPrint",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "PrintMacdonaldPolys",
-    CalculatorFunctionsWeylGroup::innerMacdonaldPolys,
+    CalculatorFunctionsWeylGroup::macdonaldPolys,
     "",
     "Prints macdonald polynomials from a semisimple type. ",
     "PrintMacdonaldPolys{}(B_3)",
-    "CalculatorFunctionsWeylGroup::innerMacdonaldPolys",
+    "CalculatorFunctionsWeylGroup::macdonaldPolys",
     "PrintMacdonaldPolys",
     innerStandard
   );
@@ -2186,22 +2186,22 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestSpechtModules",
-    CalculatorFunctionsWeylGroup::innerTestSpechtModules,
+    CalculatorFunctionsWeylGroup::testSpechtModules,
     "",
     "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
     "TestSpechtModules(4); ",
-    "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
+    "CalculatorFunctionsWeylGroup::testSpechtModules",
     "TestSpechtModules",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "MakeElementWeylGroup",
-    CalculatorFunctionsWeylGroup::innerWeylGroupElement,
+    CalculatorFunctionsWeylGroup::weylGroupElement,
     "",
     "Needs a group name and a list of generators",
     "s_{{i}} = MakeElementWeylGroup{}(A_2, i);\n"
     "(s_1 + s_2)(2s_1 + s_2)(3s_1 + s_2)",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
+    "CalculatorFunctionsWeylGroup::weylGroupElement",
     "MakeElementWeylGroup",
     innerStandard
   );
@@ -2219,7 +2219,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WeylGroupClassicalSignMultiplicities",
-    CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers,
+    CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers,
     "",
     "Prints the sign multiplicities of a simple Weyl group of classical type. "
     "See a common article by "
@@ -2233,115 +2233,115 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupClassicalSignMultiplicities{}(a_2);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
-    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers",
+    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers",
     "WeylGroupClassicalSignMultiplicities",
     innerStandard
   );
   this->addOperationHandler(
     "WeylGroupTauSignatures",
-    CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems,
+    CalculatorFunctionsWeylGroup::signSignatureRootSubsystems,
     "",
     "Prints the tau signatures of a Weyl group. See a common article by "
     "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
     "WeylGroupTauSignatures{}(b_3);",
-    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems",
+    "CalculatorFunctionsWeylGroup::signSignatureRootSubsystems",
     "WeylGroupTauSignatures",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "WeylGroupConjugacyClassesFromAllElements",
-    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements,
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements,
     "",
     "For small ranks, computes the conjugacy classes of a Weyl "
     "group by enumerating all elements of the group. ",
     "WeylGroupConjugacyClassesFromAllElements{}(A_2);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesFromAllElements",
     "WeylGroupConjugacyClassesFromAllElements",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "WeylGroupOuterConjugacyClassesFromAllElements",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements,
+    CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements,
     "",
     "Computes conjugacy classes, identifying classes that "
     "are conjugate using outer automorphisms. ",
     "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements",
+    "CalculatorFunctionsWeylGroup::weylGroupOuterConjugacyClassesFromAllElements",
     "WeylGroupOuterConjugacyClassesFromAllElements",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "WeylGroupConjugacyClassesRepresentatives",
-    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives,
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives,
     "",
     "Computes a representative in each conjugacy classes of a "
     "Weyl group by comparing conjugacy classes invariants and by "
     "enumerating conjugacy class orbits. ",
     "WeylGroupConjugacyClassesRepresentatives{}(A_2);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClassesRepresentatives",
     "WeylGroupConjugacyClassesRepresentatives",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "WeylGroupConjugacyClasses",
-    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS,
+    CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS,
     "",
     "Loads the conjugacy classes of a Weyl group (hard-coded), "
     "or computes them if rank<=6. ",
     "WeylGroupConjugacyClasses{}(f_4);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS",
+    "CalculatorFunctionsWeylGroup::weylGroupConjugacyClasseS",
     "WeylGroupConjugacyClasses",
     innerStandard
   );
   this->addOperationHandler(
     "WeylGroupCharTable",
-    CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable,
+    CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable,
     "",
     "Loads the character table of a Weyl group. "
     "The character tables are hard-coded.",
     "WeylGroupCharTable{}(b_3);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable",
+    "CalculatorFunctionsWeylGroup::weylGroupLoadOrComputeCharTable",
     "WeylGroupCharTable",
     innerStandard
   );
   this->addOperationHandler(
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
-    CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch,
+    CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch,
     "",
     "<b>Work in progress. Please do not use.</b> "
     "Computes from scratch the irreducible representations "
     "and the character table of a Weyl group.",
     "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch",
+    "CalculatorFunctionsWeylGroup::weylGroupIrrepsAndCharTableComputeFromScratch",
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "WeylOrbitSize",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize,
+    CalculatorFunctionsWeylGroup::weylGroupOrbitSize,
     "",
     "Computes the size of a Weyl group orbit of a weight",
     "WeylOrbitSize(E_6, (3, 3, 3, 7, 7, 11));\n"
     "WeylOrbitSize(E_8, (3, 3, 3, 7, 7, 11, 13, 13));",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitSize",
     "WeylOrbitSize",
     innerStandard
   );
   this->addOperationHandler(
     "WeylOrbitSimpleCoords",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple,
+    CalculatorFunctionsWeylGroup::weylGroupOrbitSimple,
     "",
     "Generates a Weyl orbit printout from simple coords. "
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at max 1920 elements (type D_5).",
     "WeylOrbitSimpleCoords{}(B_2, (y, y));",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitSimple",
     "WeylOrbitSimpleCoords",
     innerStandard
   );
   this->addOperationHandler(
     "WeylGroupOrbitOuterSimple",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple,
+    CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple,
     "",
     "Generates a Weyl outer orbit printout from simple coords. "
     "The outer orbit is the orbit "
@@ -2349,36 +2349,36 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at 1921*2 elements. ",
     "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple",
     "WeylGroupOrbitOuterSimple",
     innerStandard
   );
   this->addOperationHandler(
     "WeylOrbitFundCoords",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund,
+    CalculatorFunctionsWeylGroup::weylGroupOrbitFund,
     "",
     "Generates a Weyl orbit printout from fundamental coords. "
     "First argument = type. Second argument = weight in fundamental coords. ",
     "WeylOrbitFundCoords{}(B_2, (y, 0));",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitFund",
     "WeylOrbitFundCoords",
     innerStandard
   );
   this->addOperationHandler(
     "WeylOrbitFundRho",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho,
+    CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho,
     "",
     "Generates a Weyl orbit printout from fundamental coords. "
     "First argument = type. Second argument = weight in fundamental coords. "
     "Doing the rho-modified action. ",
     "WeylOrbitFundRho{}(B_2, (y, 0) )",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho",
+    "CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho",
     "WeylOrbitFundRho",
     innerStandard
   );
   this->addOperationHandler(
     "WeylRaiseToMaximallyDominant",
-    CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant,
+    CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant,
     "",
     "Raises a set of rational vectors simultaneously to maximally dominant: "
     "it raises the first vector to dominant, then each consecutive vector is "
@@ -2388,13 +2388,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, - 3, - 2, 0));\n"
     "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, - 3, - 4, - 2));\n"
     "WeylRaiseToMaximallyDominant{}(F_4, (0, - 3, - 4, - 2) , (3, 6, 8, 4));",
-    "CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant",
+    "CalculatorFunctionsWeylGroup::weylNoOuterRaiseToMaximallyDominant",
     "WeylRaiseToMaximallyDominant",
     innerStandard
   );
   this->addOperationHandler(
     "MakeWeight",
-    CalculatorFunctionsWeylGroup::innerLieAlgebraWeight,
+    CalculatorFunctionsWeylGroup::lieAlgebraWeight,
     "",
     "Makes a weight. First argument = type. "
     "Second argument = coordinate. "
@@ -2406,23 +2406,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\varepsilon_1;\n"
     "\\psi_1;\n"
     "\\eta_3",
-    "CalculatorFunctionsWeylGroup::innerLieAlgebraWeight",
+    "CalculatorFunctionsWeylGroup::lieAlgebraWeight",
     "MakeWeight",
     innerStandard
   );
   this->addOperationHandler(
     "MakeRho",
-    CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight,
+    CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight,
     "",
     "Makes the half-sum of the positive roots.",
     "\\rho = MakeRho(B_3);",
-    "CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight",
+    "CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight",
     "MakeRho",
     innerStandard
   );
   this->addOperationHandler(
     "IsOuterAuto",
-    CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup,
+    CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup,
     "",
     "Checks whether the element is outer automorphism of a root system. "
     "First argument = type. "
@@ -2435,20 +2435,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "(0, 1, 0, 0, 0, - 2),"
     "(0, 0, 0, 0, 0, - 1));"
     "IsOuterAuto{}(e_6, A);",
-    "CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup",
+    "CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup",
     "IsOuterAuto",
     innerStandard
   );
   this->addOperationHandler(
     "WeylOuterRaiseToMaximallyDominant",
-    CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant,
+    CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant,
     "",
     "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.",
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 0, 1));\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 0, 1), (1, 0, 0, 0));\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 1, 0));\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));\n",
-    "CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant",
+    "CalculatorFunctionsWeylGroup::weylOuterRaiseToMaximallyDominant",
     "WeylOuterRaiseToMaximallyDominant",
     innerStandard
   );
@@ -2514,32 +2514,32 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WeylGroupNaturalRep",
-    CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep,
+    CalculatorFunctionsWeylGroup::weylGroupNaturalRep,
     "",
     "Gets the natural representation of the Weyl group.",
     "WeylGroupNaturalRep{}(B_3)",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep",
+    "CalculatorFunctionsWeylGroup::weylGroupNaturalRep",
     "WeylGroupNaturalRep",
     innerStandard
   );
   this->addOperationHandler(
     "WeylGroupGetOuterAutoGenerators",
-    CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint,
+    CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint,
     "",
     "Gets the generators of the outer automorphism group (the group generated by "
     "the graph automorphisms of the Dynkin diagram.",
     "WeylGroupGetOuterAutoGenerators{}(2D_4)",
-    "CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint",
+    "CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint",
     "WeylGroupGetOuterAutoGenerators",
     innerStandard
   );
   this->addOperationHandler(
     "MakeVirtualWeylGroupRepresentation",
-    CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep,
+    CalculatorFunctionsWeylGroup::makeVirtualWeylRep,
     "",
     "Convert a representation into virtual one.",
     "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))",
-    "CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep",
+    "CalculatorFunctionsWeylGroup::makeVirtualWeylRep",
     "MakeVirtualWeylGroupRepresentation",
     innerAdminNoTestExperimental
   );
@@ -3889,7 +3889,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AllSelectionsFixedRank",
-    CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank,
+    CalculatorFunctionsWeylGroup::allSelectionsFixedRank,
     "",
     "Prints all selections of fixed size (given by first argument) "
     "from a collection of objects with multiplicities "
@@ -3901,13 +3901,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "AllSelectionsFixedRank(0, (0,0,0));\n"
     "AllSelectionsFixedRank(2, 5);\n"
     "AllSelectionsFixedRank(2, 1);",
-    "CalculatorFunctions::innerAllSelectionsFixedRank",
+    "CalculatorFunctions::allSelectionsFixedRank",
     "AllSelectionsFixedRank",
     innerStandard
   );
   this->addOperationHandler(
     "KostkaNumber",
-    CalculatorFunctionsWeylGroup::innerKostkaNumber,
+    CalculatorFunctionsWeylGroup::kostkaNumber,
     "",
     "Computes a Kostka number. "
     "First argument = partition given as a tuple "
@@ -6676,7 +6676,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps,
+    CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps,
     this->opWeylGroupVirtualRep(),
     this->opWeylGroupVirtualRep(),
     "Tensor and decompose two virtual Weyl group representations. ",
@@ -6684,7 +6684,7 @@ void Calculator::initPredefinedStandardOperations() {
     "V = MakeVirtualWeylGroupRepresentation{}W;\n"
     "W\\otimes W;\n"
     "V * V",
-    "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps",
+    "CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps",
     "TensorAndDecomposeWeylGroupRepresentations",
     innerExperimentalNoTest
   );
@@ -7928,13 +7928,13 @@ void Calculator::initPredefinedStandardOperations() {
 
   this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
-    CalculatorFunctionsWeylGroup::innerTensorWeylReps,
+    CalculatorFunctionsWeylGroup::tensorWeylReps,
     this->opWeylGroupRep(),
     this->opWeylGroupRep(),
     "Tensor product of two Weyl group reps. Does not decompose the tensor product. "
     "If you want decomposition, use V*V instead. ",
     "V = WeylGroupNaturalRep{}(B_3); V \\otimes V; V * V",
-    "CalculatorFunctionsWeylGroup::innerTensorWeylReps",
+    "CalculatorFunctionsWeylGroup::tensorWeylReps",
     "TensorWeylGroupRepresentationByWeylGroupRepresentation",
     innerStandard
   );
@@ -8026,9 +8026,7 @@ void Calculator::initPredefinedStandardOperations() {
   << "A small integer is defined at compile time in the "
   << "variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntegerUnsigned::SquareRootOfCarryOverBound << "). "
-//  << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
   << moreInfoOnIntegers.str();
-//  );
 
   this->addOperationHandler(
     "<",

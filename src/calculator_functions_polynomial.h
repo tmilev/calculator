@@ -22,6 +22,7 @@ public:
   static bool factorPolynomialKronecker(Calculator& calculator, const Expression& input, Expression& output);
   static bool factorPolynomialFiniteFields(Calculator& calculator, const Expression& input, Expression& output);
   static bool sylvesterMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool polynomialRelations(Calculator& calculator, const Expression& input, Expression& output);
   template<class Coefficient>
   static bool sylvesterMatrixFromPolynomials(
     Calculator& calculator,

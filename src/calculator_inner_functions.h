@@ -157,7 +157,6 @@ public:
   static bool innerCompareExpressionsNumerically(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompareExpressionsNumericallyAtPoints(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPolynomialRelations(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(
     Calculator& calculator, const Expression& input, Expression& output, bool excludeNamedConstants
   );

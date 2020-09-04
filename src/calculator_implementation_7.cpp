@@ -3923,67 +3923,6 @@ bool Calculator::innerInvertMatrixVerbose(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerPolynomialRelations(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerGroebner");
-  Vector<Polynomial<Rational> > inputVector;
-  if (input.size() < 3) {
-    return output.makeError("Function takes at least two arguments. ", calculator);
-  }
-  const Expression& numComputationsE = input[1];
-  Rational upperBound = 0;
-  if (!numComputationsE.isOfType(&upperBound)) {
-    return output.makeError("Failed to convert the first argument of the expression to rational number.", calculator);
-  }
-  if (upperBound > 1000000) {
-    return output.makeError(
-      "Error: your upper limit of polynomial operations exceeds 1000000, which is too large."
-      "You may use negative or zero number give no computation bound, but please don't. ",
-      calculator
-    );
-  }
-  output.reset(calculator);
-  for (int i = 1; i < input.size(); i ++) {
-    output.children.addOnTop(input.children[i]);
-  }
-  ExpressionContext theContext(calculator);
-  if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
-    output,
-    inputVector,
-    &theContext,
-    - 1,
-    CalculatorConversions::functionPolynomial<Rational>
-  )) {
-    return output.makeError("Failed to extract polynomial expressions", calculator);
-  }
-  Vector<Polynomial<Rational> > theRels, theGens;
-  FormatExpressions theFormat;
-  theContext.getFormat(theFormat);
-  for (char i = 0; i < 26; i ++) {
-    char currentLetter = 'a' + i;
-    std::string currentStr;
-    currentStr = currentLetter;
-    if (!theFormat.polynomialAlphabet.contains(currentStr)) {
-      theFormat.polynomialAlphabet.addOnTop(currentStr);
-    }
-  }
-  if (!RationalFunction<Rational>::getRelations(inputVector, theGens, theRels, calculator.comments)) {
-    return calculator << "Failed to extract relations. ";
-  }
-  std::stringstream out;
-  out << "Polynomials:";
-  for (int i = 0; i < theGens.size; i ++) {
-    out << "<br>" << theGens[i].toString(&theFormat) << "=" << inputVector[i].toString(&theFormat);
-  }
-  out << "<br>Relations: ";
-  for (int i = 0; i < theRels.size; i ++) {
-    theRels[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
-    out << "<br>" << theRels[i].toString(&theFormat);
-  }
-  return output.assignValue(out.str(), calculator);
-}
-
 bool CalculatorFunctions::functionPolynomialize(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

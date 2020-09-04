@@ -5194,11 +5194,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PolynomialRelationsUpperLimit",
-    CalculatorFunctions::innerPolynomialRelations,
+    CalculatorFunctionsPolynomial::polynomialRelations,
     "",
     "Finds the relations between the polynomials.",
     "PolynomialRelationsUpperLimit{}(10000, s^2+c^2+ 1, s^4, c^4 );",
-    "CalculatorFunctions::innerPolynomialRelations",
+    "CalculatorFunctionsPolynomial::polynomialRelations",
     "PolynomialRelationsUpperLimit",
     innerStandard
   );

@@ -309,7 +309,7 @@ public:
   List<std::string> programArguments;
 
   MapList<std::string, std::string, MathRoutines::hashString> webArguments;
-  MapList<std::string, std::string, MathRoutines::hashString> CookiesToSetUsingHeaders;
+  MapList<std::string, std::string, MathRoutines::hashString> cookiesToBeSent;
   UserCalculatorData userDefault;
   MapList<std::string, int, MathRoutines::hashString> problemExpectedNumberOfAnswers;
 

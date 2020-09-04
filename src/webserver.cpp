@@ -667,7 +667,7 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
       theUser, &argumentProcessingFailureComments
     );
   }
-  global.CookiesToSetUsingHeaders.setKeyValue(
+  global.cookiesToBeSent.setKeyValue(
     "username",
     HtmlRoutines::convertStringToURLString(theUser.username, false)
     // <-User name must be stored in URL-encoded fashion, NO PLUSES.
@@ -675,7 +675,7 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
   if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
     // In case the user logged in with password, we need
     // to give the user the correct authentication token.
-    global.CookiesToSetUsingHeaders.setKeyValue(
+    global.cookiesToBeSent.setKeyValue(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
       // <-URL-encoded fashion, NO PLUSES.
@@ -685,7 +685,7 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
       HtmlRoutines::convertStringToURLString(theUser.actualAuthenticationToken, false)
     );
   } else {
-    global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "0");
+    global.cookiesToBeSent.setKeyValue("authenticationToken", "0");
   }
   bool shouldDisplayMessage = false;
   if (!global.flagLoggedIn && theUser.username != "") {
@@ -705,31 +705,6 @@ bool WebWorker::loginProcedure(std::stringstream& argumentProcessingFailureComme
   theArgs.setKeyValue("password", "********************************************");
   return true;
 }
-
-std::string WebWorker::getHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken) {
-  MacroRegisterFunctionWithName("WebWorker::getHtmlHiddenInputs");
-  if (!global.flagUsingSSLinCurrentConnection) {
-    return "";
-  }
-  std::stringstream out;
-  if (includeAuthenticationToken) {
-    out << "<input type =\"hidden\" id =\"authenticationToken\" name =\"authenticationToken\">\n";
-  }
-  if (includeUserName) {
-    out << "<input type =\"hidden\" id =\"username\" name =\"username\">\n";
-  }
-  // The values of the hidden inputs will be filled in via javascript.
-  if (this->flagFoundMalformedFormInput) {
-    out << "<b>Your input formed had malformed entries.</b>";
-  }
-  out
-  << "<input type =\"hidden\" id =\"studentView\" name =\"studentView\">\n"
-  << "<input type =\"hidden\" id =\"studentSection\" name =\"studentSection\">\n"
-  << "<input type =\"hidden\" id =\"courseHome\" name =\"courseHome\">\n"
-  << "<input type =\"hidden\" id =\"fileName\" name =\"fileName\">\n";
-  return out.str();
-}
-
 
 void WebWorker::writeAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   this->pauseIfRequested();
@@ -977,12 +952,12 @@ std::string WebWorker::getHeaderConnectionKeepAlive() {
 
 std::string WebWorker::getHeaderSetCookie() {
   std::stringstream out;
-  for (int i = 0; i < global.CookiesToSetUsingHeaders.size(); i ++) {
-    out << "Set-Cookie: " << global.CookiesToSetUsingHeaders.theKeys[i]
+  for (int i = 0; i < global.cookiesToBeSent.size(); i ++) {
+    out << "Set-Cookie: " << global.cookiesToBeSent.theKeys[i]
     << "="
-    << global.CookiesToSetUsingHeaders.theValues[i]
+    << global.cookiesToBeSent.theValues[i]
     << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;Secure;SameSite=Strict;";
-    if (i != global.CookiesToSetUsingHeaders.size() - 1) {
+    if (i != global.cookiesToBeSent.size() - 1) {
       out << "\r\n";
     }
   }
@@ -2084,7 +2059,7 @@ int WebWorker::serveClient() {
       << " requires login. ";
     }
     argumentProcessingFailureComments << comments.str();
-    global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "");
+    global.cookiesToBeSent.setKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
       global.setWebInput("authenticationToken", "");
     }
@@ -2103,7 +2078,7 @@ int WebWorker::serveClient() {
       global.hostNoPort = HtmlRoutines::convertURLStringToNormal(
         global.getWebInput("spoofHostName"), false
       );
-      global.CookiesToSetUsingHeaders.setKeyValue("spoofHostName", global.hostNoPort);
+      global.cookiesToBeSent.setKeyValue("spoofHostName", global.hostNoPort);
     }
   }
   if (this->response.serveResponseFalseIfUnrecognized(

@@ -1254,7 +1254,7 @@ public:
   }
   // The following are for compatibility with the FiniteGroup class
   void getCharacteristicPolynomialStandardRepresentation(Polynomial<Coefficient>& out) {
-    out.assignCharacteristicPoly(*this);
+    out.assignCharacteristicPolynomial(*this);
   }
   bool hasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
     Polynomial<Coefficient> p, q;
@@ -2650,8 +2650,8 @@ public:
   //////////////////////////////////////////////
   void assignFloor() const {
   }
-  void assignMinPoly(const Matrix<Coefficient>& input);
-  void assignCharacteristicPoly(const Matrix<Coefficient>& input);
+  void assignMinimalPolynomial(const Matrix<Coefficient>& input);
+  void assignCharacteristicPolynomial(const Matrix<Coefficient>& input);
   void assignMonomialWithExponent(Vector<Rational>& r, const Coefficient& theCoeff = 1) {
     this->makeZero();
     this->addMonomial(r, theCoeff);

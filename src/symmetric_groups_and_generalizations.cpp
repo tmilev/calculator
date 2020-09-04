@@ -1040,7 +1040,7 @@ void ElementHyperoctahedralGroup::getCharacteristicPolynomialStandardRepresentat
     int a = this->p*i;
     M.elements[i][a] = (this->s[i])?- 1:1; // ahaha 0 is false
   }
-  out.assignCharacteristicPoly(M);
+  out.assignCharacteristicPolynomial(M);
 }
 
 

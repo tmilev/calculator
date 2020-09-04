@@ -263,7 +263,7 @@ public:
     for (int i = 0; i < n; i ++) {
       matrix(i, (*this) * i) = 1;
     }
-    out.assignCharacteristicPoly(matrix);
+    out.assignCharacteristicPolynomial(matrix);
   }
 
   bool hasDifferentConjugacyInvariantsFrom(PermutationR2& other) {

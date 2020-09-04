@@ -6384,7 +6384,7 @@ void ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation(Polynom
   this->checkInitialization();
   Matrix<Rational> standardRepMat;
   this->owner->getMatrixStandardRepresentation(*this, standardRepMat);
-  output.assignCharacteristicPoly(standardRepMat);
+  output.assignCharacteristicPolynomial(standardRepMat);
 }
 
 ElementWeylGroup ElementWeylGroup::inverse() const {

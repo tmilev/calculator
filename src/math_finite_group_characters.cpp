@@ -756,7 +756,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 //   if ((i != 0) && (checkDivisorsOf%i != 0))
 //     continue;
   UDPolynomial<Rational> p;
-  p.assignMinPoly(M);
+  p.assignMinimalPolynomial(M);
   for (int ii = 0; ii < 2 * n + 2; ii ++) {
     // lol, this did end up working though
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,- 1,2,-2,3,-3,...

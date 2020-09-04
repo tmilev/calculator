@@ -5551,7 +5551,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theMinPoly;
-  theMinPoly.assignMinPoly(theMat);
+  theMinPoly.assignMinimalPolynomial(theMat);
   return output.assignValue(theMinPoly.toString(&tempF), calculator);
 }
 
@@ -5576,7 +5576,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
   tempF.polynomialAlphabet.setSize(1);
   tempF.polynomialAlphabet[0] = "q";
   Polynomial<Rational> theCharPoly;
-  theCharPoly.assignCharacteristicPoly(theMat);
+  theCharPoly.assignCharacteristicPolynomial(theMat);
   return output.assignValue(theCharPoly.toString(&tempF), calculator);
 }
 

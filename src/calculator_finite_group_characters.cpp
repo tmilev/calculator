@@ -263,7 +263,7 @@ bool Matrix<Element>::getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   output.setSize(0);
   int found = 0;
   Polynomial<Element> theMinPoly;
-  theMinPoly.assignMinPoly(*this);
+  theMinPoly.assignMinimalPolynomial(*this);
   Vector<Element> theEigenValueCandidate;
   theEigenValueCandidate.setSize(1);
   Matrix<Rational> tempMat;

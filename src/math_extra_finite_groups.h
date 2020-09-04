@@ -2245,12 +2245,12 @@ public:
   bool operator<(const UDPolynomial<Coefficient>& right) const;
   bool operator==(int other) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  void assignMinPoly(const Matrix<Coefficient>& input);
-  void assignCharacteristicPoly(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
+  void assignMinimalPolynomial(const Matrix<Coefficient>& input);
+  void assignCharacteristicPolynomial(const Matrix<Coefficient>& input); // method due to Urbain Le Verrier
 };
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
+void UDPolynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(1);
   this->data[0] = 1;
@@ -2278,7 +2278,7 @@ void UDPolynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) 
 }
 
 template <typename Coefficient>
-void UDPolynomial<Coefficient>::assignCharacteristicPoly(const Matrix<Coefficient>& input) {
+void UDPolynomial<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coefficient>& input) {
   int n = input.numberOfColumns;
   this->data.setSize(n + 1);
   this->data[0] = 1;

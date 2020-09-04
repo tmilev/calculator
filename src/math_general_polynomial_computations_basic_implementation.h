@@ -950,8 +950,8 @@ void Polynomial<Coefficient>::divideBy(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::assignCharacteristicPoly(const Matrix<Coefficient>& input) {
-  MacroRegisterFunctionWithName("Polynomial::assignCharacteristicPoly");
+void Polynomial<Coefficient>::assignCharacteristicPolynomial(const Matrix<Coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::assignCharacteristicPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "
@@ -981,8 +981,8 @@ void Polynomial<Coefficient>::assignCharacteristicPoly(const Matrix<Coefficient>
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::assignMinPoly(const Matrix<Coefficient>& input) {
-  MacroRegisterFunctionWithName("Polynomial::assignMinPoly");
+void Polynomial<Coefficient>::assignMinimalPolynomial(const Matrix<Coefficient>& input) {
+  MacroRegisterFunctionWithName("Polynomial::assignMinimalPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal << "Programming error: requesting the "
     << "minimimal polynomial of a non-square matrix. "

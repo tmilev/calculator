@@ -9425,7 +9425,7 @@ public:
     List<int> emptyArrows;
     for (int i = 0; i < this->currentEchildrenTruncated.size; i ++) {
       this->arrows[this->indexCurrentChild].addOnTop(this->displayedExpressionStrings.size);
-      this->AddStringTruncate(
+      this->addStringTruncate(
         this->getDisplayString(this->currentEchildrenTruncated[i]),
         this->isLeaf(this->currentEchildrenTruncated[i])
       );
@@ -9444,7 +9444,7 @@ public:
     this->arrows.addOnTop(emptyArrows);
     this->currentLayer[0] = this->baseExpression;
     this->displayedExpressionStrings.clear();
-    this->AddStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
+    this->addStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
     this->displayedExpressionStrings.setExpectedSize(this->maximumDisplayedNodes);
     this->arrows.setExpectedSize(this->maximumDisplayedNodes);
@@ -9461,7 +9461,7 @@ public:
     out << "<br>Width max layer: " << this->widthMaxLayer;
     return out.str();
   }
-  void AddStringTruncate(const std::string& input, bool isLeaf) {
+  void addStringTruncate(const std::string& input, bool isLeaf) {
     this->displayedStringIsLeaf.addOnTop(isLeaf);
     if (input.size() <= static_cast<unsigned>(this->maxNumCharsInString)) {
       this->displayedExpressionStrings.addOnTop(input);
@@ -9491,14 +9491,14 @@ public:
     this->ComputeCurrentEContributionToNextLayer();
     return true;
   }
-  Rational GetStringWidthTruncated(int theIndex) {
+  Rational getStringWidthTruncated(int theIndex) {
     return this->charWidth *
     MathRoutines::minimum(
       this->maxNumCharsInString,
       static_cast<signed>(this->displayedExpressionStrings[theIndex].size())
     );
   }
-  Rational GetLayerWidth(int layerIndex) {
+  Rational getLayerWidth(int layerIndex) {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
     Rational result = 0;
     for (
@@ -9506,7 +9506,7 @@ public:
       i < this->layerFirstIndices[layerIndex] + this->layerSizes[layerIndex];
       i ++
     ) {
-      result += this->GetStringWidthTruncated(i) + this->padding;
+      result += this->getStringWidthTruncated(i) + this->padding;
     }
     result -= this->padding;
     if (result > this->widthMaxLayer) {
@@ -9514,22 +9514,22 @@ public:
     }
     return result;
   }
-  void ComputeLayerPositions(int layerIndex) {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeLayerPositions");
-    Rational currentX = - this->GetLayerWidth(layerIndex) / 2;
+  void computeLayerPositions(int layerIndex) {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::computeLayerPositions");
+    Rational currentX = - this->getLayerWidth(layerIndex) / 2;
     for (
       int i = this->layerFirstIndices[layerIndex];
       i < this->layerFirstIndices[layerIndex] + this->layerSizes[layerIndex];
       i ++
     ) {
       this->nodePositions[i].setSize(2);
-      this->nodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
+      this->nodePositions[i][0] = currentX + this->getStringWidthTruncated(i) / 2;
       this->nodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
       currentX += this->charWidth * static_cast<int>(this->displayedExpressionStrings[i].size()) + this->padding;
     }
   }
-  void DrawToDV() {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::ExtractDisplayedExpressions");
+  void drawToDrawingVariables() {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::drawToDrawingVariables");
     this->initialize();
     while (this->incrementReturnFalseIfPastLast()) {
     }
@@ -9537,7 +9537,7 @@ public:
     this->thePlot.flagIncludeCoordinateSystem = false;
     this->nodePositions.setSize(this->displayedExpressionStrings.size);
     for (int i = 0; i < this->layerFirstIndices.size; i ++) {
-      this->ComputeLayerPositions(i);
+      this->computeLayerPositions(i);
     }
     this->nodePositionsDouble.setSize(this->nodePositions.size);
     for (int i = 0; i < this->nodePositionsDouble.size; i ++) {
@@ -9585,7 +9585,7 @@ bool CalculatorFunctions::innerDrawExpressionGraphWithOptions(
   theEdrawer.flagUseFullTree = useFullTree;
   theEdrawer.owner = &calculator;
   theEdrawer.baseExpression = input;
-  theEdrawer.DrawToDV();
+  theEdrawer.drawToDrawingVariables();
   return output.assignValue(theEdrawer.thePlot, calculator);
 }
 

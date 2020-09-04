@@ -21,7 +21,7 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
   if (theFormat == nullptr) {
     tempFormat.polyDefaultLetter = "\\partial";
   } else {
-    tempFormat.polyDefaultLetter = theFormat->WeylAlgebraDefaultLetter;
+    tempFormat.polyDefaultLetter = theFormat->weylAlgebraDefaultLetter;
     tempFormat.polynomialAlphabet = theFormat->weylAlgebraLetters;
   }
   std::string firstS = this->polynomialPart.toString(theFormat);

@@ -25,8 +25,8 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
   std::string VectorSpaceLetter = "V";
   if (theFormat != nullptr) {
     useOmega = (theFormat->fundamentalWeightLetter == "");
-    oldCustomPlus = theFormat->CustomPlusSign;
-    theFormat->CustomPlusSign = "";
+    oldCustomPlus = theFormat->customPlusSign;
+    theFormat->customPlusSign = "";
     VectorSpaceLetter = theFormat->FDrepLetter;
   }
   if (useOmega) {
@@ -36,7 +36,7 @@ std::string Weight<Coefficient>::toString(FormatExpressions* theFormat) const {
     << this->weightFundamentalCoordS.toStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   }
   if (theFormat != nullptr) {
-    theFormat->CustomPlusSign = oldCustomPlus;
+    theFormat->customPlusSign = oldCustomPlus;
   }
   return out.str();
 }
@@ -585,7 +585,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   }
   FormatExpressions theFormat;
   theFormat.flagUseLatex = true;
-  theFormat.CustomPlusSign = "\\oplus ";
+  theFormat.customPlusSign = "\\oplus ";
   theFormat.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << HtmlRoutines::getMathNoDisplay(remainingCharDominantLevI.toString(&theFormat));

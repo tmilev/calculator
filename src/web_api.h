@@ -150,7 +150,7 @@ private:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
-  static std::string getMathSpaN(
+  static std::string getMathSpan(
     const std::string& input,
     int upperNumChars = 10000,
     bool useDisplayStyle = false

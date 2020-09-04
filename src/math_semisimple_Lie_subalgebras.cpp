@@ -2641,25 +2641,25 @@ void CandidateSemisimpleSubalgebra::extendToModule(List<ElementSemisimpleLieAlge
   }
 }
 
-template <class templateMonomial, class Coefficient>
+template <class TemplateMonomial, class Coefficient>
 template <class LinearCombinationTemplate>
-void LinearCombination<templateMonomial, Coefficient>::intersectVectorSpaces(
+void LinearCombination<TemplateMonomial, Coefficient>::intersectVectorSpaces(
   const List<LinearCombinationTemplate>& vectorSpace1,
   const List<LinearCombinationTemplate>& vectorSpace2,
   List<LinearCombinationTemplate>& outputIntersection,
-  HashedList<templateMonomial>* seedMonomials
+  HashedList<TemplateMonomial>* seedMonomials
 ) {
   MacroRegisterFunctionWithName("MonomialCollection::intersectVectorSpaces");
   List<LinearCombinationTemplate> theVspaces =vectorSpace1;
   List<LinearCombinationTemplate> vectorSpace2eliminated =vectorSpace2;
-  LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, nullptr, seedMonomials);
-  LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
+  LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, nullptr, seedMonomials);
+  LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
   Matrix<Coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
   theLinCombiMat.makeIdentityMatrix(theVspaces.size +vectorSpace2eliminated.size);
   theVspaces.addListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
-  LinearCombination<templateMonomial, Coefficient>::gaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
+  LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
   int dimResult = 0;
   for (int i = theVspaces.size - 1; i >= 0; i --) {
     if (theVspaces[i].isEqualToZero()) {
@@ -3924,7 +3924,7 @@ void CandidateSemisimpleSubalgebra::computePrimalModuleDecompositionHWsHWVsOnlyL
     this->HighestWeightsNONPrimal[i] = this->getNonPrimalWeightFirstGenerator(this->modules[i][0][0]);
   }
   this->subalgebraModules = this->primalSubalgebraModules;
-  this->charFormaT.getElement().CustomPlusSign = "\\oplus ";
+  this->charFormaT.getElement().customPlusSign = "\\oplus ";
   int theRank = this->theWeylNonEmbedded->getDimension();
   this->charFormaT.getElement().vectorSpaceEiBasisNames.setSize(theRank+this->CartanOfCentralizer.size);
   for (int i = 0; i < this->charFormaT.getElement().vectorSpaceEiBasisNames.size; i ++) {
@@ -6161,8 +6161,8 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(FormatExpres
   List<DynkinSimpleType> theSimpleTypes;
   this->theWeylNonEmbedded->theDynkinType.getTypesWithMults(theSimpleTypes);
   FormatExpressions tempFormat;
-  tempFormat.AmbientWeylLetter = this->getAmbientWeyl().theDynkinType[0].theLetter;
-  tempFormat.AmbientCartanSymmetricInverseScale = this->getAmbientWeyl().theDynkinType[0].CartanSymmetricInverseScale;
+  tempFormat.ambientWeylLetter = this->getAmbientWeyl().theDynkinType[0].theLetter;
+  tempFormat.ambientCartanSymmetricInverseScale = this->getAmbientWeyl().theDynkinType[0].CartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
   for (int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i ++) {
     if (useLaTeX && useHtml) {

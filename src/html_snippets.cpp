@@ -208,7 +208,7 @@ std::string HtmlRoutines::getCalculatorComputationNewPage(
   );
 }
 
-std::string HtmlRoutines::getMathSpaN(const std::string& input, int upperNumChars, bool useDisplayStyle) {
+std::string HtmlRoutines::getMathSpan(const std::string& input, int upperNumChars, bool useDisplayStyle) {
   std::stringstream out;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
@@ -224,11 +224,11 @@ std::string HtmlRoutines::getMathSpaN(const std::string& input, int upperNumChar
 }
 
 std::string HtmlRoutines::getMathNoDisplay(const std::string &input, int upperNumChars) {
-  return HtmlRoutines::getMathSpaN(input, upperNumChars, false);
+  return HtmlRoutines::getMathSpan(input, upperNumChars, false);
 }
 
 std::string HtmlRoutines::getMathDisplayStyle(const std::string &input, int upperNumChars) {
-  return HtmlRoutines::getMathSpaN(input, upperNumChars, true);
+  return HtmlRoutines::getMathSpan(input, upperNumChars, true);
 }
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth) {

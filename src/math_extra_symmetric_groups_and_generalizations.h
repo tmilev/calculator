@@ -12,14 +12,14 @@
 
 // Dense bases for sparse spaces
 // should this carry around the
-// List<LinearCombination<templateMonomial, Coefficient> >
+// List<LinearCombination<TemplateMonomial, Coefficient> >
 // it came from?
-template <class templateVector, class templateMonomial, class Coefficient>
+template <class templateVector, class TemplateMonomial, class Coefficient>
 class SparseSubspaceBasis {
 public:
   bool flagDeallocated;
   int rank;
-  List<templateMonomial> involvedMonomials;
+  List<TemplateMonomial> involvedMonomials;
   Matrix<Coefficient> projectionOperator;
 
   void setBasis(const List<templateVector>& basis);
@@ -45,8 +45,8 @@ public:
   std::string toString() const;
 };
 
-template <class templateVector, class templateMonomial, class Coefficient>
-void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::setBasis(const List<templateVector>& basis) {
+template <class templateVector, class TemplateMonomial, class Coefficient>
+void SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>::setBasis(const List<templateVector>& basis) {
   this->checkConsistency();
   if (basis.size == 0) {
     return;
@@ -71,8 +71,8 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::setBasi
   this->rank = basis.size;
 }
 
-template <class templateVector, class templateMonomial, class Coefficient>
-void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::denseVectorInBasis(
+template <class templateVector, class TemplateMonomial, class Coefficient>
+void SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>::denseVectorInBasis(
   Vector<Coefficient>& out, const templateVector& in
 ) {
   Vector<Coefficient> inDense;
@@ -83,24 +83,24 @@ void SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::denseVe
   out = this->projectionOperator * inDense;
 }
 
-template <class templateVector, class templateMonomial, class Coefficient>
+template <class templateVector, class TemplateMonomial, class Coefficient>
 template <typename somestream>
-somestream& SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::intoStream(somestream& out) const {
+somestream& SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>::intoStream(somestream& out) const {
   out << "Sparse subspace basis object for basis of rank " << this->rank;
   out << " involving monomials " << this->involvedMonomials.toStringCommaDelimited() << '\n';
   out << " with projection operator\n" << this->projectionOperator.toStringPlainText() << '\n';
   return out;
 }
 
-template <class templateVector, class templateMonomial, class Coefficient>
-std::string SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>::toString() const {
+template <class templateVector, class TemplateMonomial, class Coefficient>
+std::string SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>::toString() const {
   std::stringstream out;
   this->intoStream(out);
   return out.str();
 }
 
-template <class templateVector, class templateMonomial, class Coefficient>
-std::ostream& operator<<(std::ostream& out, const SparseSubspaceBasis<templateVector, templateMonomial, Coefficient>& data) {
+template <class templateVector, class TemplateMonomial, class Coefficient>
+std::ostream& operator<<(std::ostream& out, const SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>& data) {
   return data.intoStream(out);
 }
 

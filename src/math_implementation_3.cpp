@@ -2701,27 +2701,25 @@ FormatExpressions::getMonomialOrder<MonomialUniversalEnveloping<Polynomial<Ratio
 }
 
 FormatExpressions::FormatExpressions() {
-  this->AmbientWeylLetter = 'X';
-  this->ExtraLinesCounterLatex = 0;
+  this->ambientWeylLetter = 'X';
+  this->extraLinesCounterLatex = 0;
   this->chevalleyGgeneratorLetter = "g";
   this->chevalleyHgeneratorLetter = "h";
   this->polyDefaultLetter = "x";
-  this->WeylAlgebraDefaultLetter = "\\partial";
+  this->weylAlgebraDefaultLetter = "\\partial";
   this->FDrepLetter = "V";
   this->simpleRootLetter = "\\eta";
-  this->MaxLineLength = 100;
+  this->maximumLineLength = 100;
   this->flagPassCustomCoeffMonSeparatorToCoeffs = false;
   this->flagUseCalculatorFormatForUEOrdered = true;
   this->flagUseHTML = true;
   this->flagUseLatex = false;
   this->flagUsePNG = false;
   this->flagUsePmatrix = true;
-  this->MatrixColumnVerticalLineIndex = - 1;
+  this->matrixColumnVerticalLineIndex = - 1;
   this->flagQuasiDiffOpCombineWeylPart = true;
   this->flagMakingExpressionTableWithLatex = false;
-  this->MaxLinesPerPage = 40;
-  this->NumAmpersandsPerNewLineForLaTeX = 0;
-  this->MaxRecursionDepthPerExpression = 500;
+  this->numberOfAmpersandsPerNewLineForLaTeX = 0;
   this->monomialOrder = nullptr;
   this->flagExpressionIsFinal = true;
   this->flagExpressionNewLineAllowed = false;
@@ -2742,8 +2740,8 @@ FormatExpressions::FormatExpressions() {
   this->flagLatexDetailsInHtml = false;
   this->flagUseQuotes = true;
   this->flagSuppressModP = false;
-  this->MaxMatrixDisplayedRows = 20;
-  this->MaxMatrixLineLength = 20;
+  this->maximumMatrixDisplayedRows = 20;
+  this->maximumMatrixLineLength = 20;
   this->monomialOrder.leftGreaterThanRight = MonomialP::orderDefault().leftGreaterThanRight;
 }
 
@@ -2948,7 +2946,7 @@ std::string PartFraction::toString(
   tempS = out.str();
   if (LatexFormat) {
     out << stringPoly;
-    if (stringPoly.size() > static_cast<unsigned>(PolyFormatLocal.MaxLineLength)) {
+    if (stringPoly.size() > static_cast<unsigned>(PolyFormatLocal.maximumLineLength)) {
       out << ("\\\\\n&&");
       NumLinesUsed++;
     }
@@ -3960,7 +3958,7 @@ int PartialFractions::toStringBasisChange(
   std::stringstream out;
   std::string tempS;
   int TotalLines = 0;
-  PolyFormatLocal.ExtraLinesCounterLatex = 0;
+  PolyFormatLocal.extraLinesCounterLatex = 0;
   if (LatexFormat) {
     out << "\\begin{eqnarray*}\n";
   }
@@ -4009,7 +4007,7 @@ int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool LatexFo
   std::string tempS;
   int TotalLines = 0;
   FormatExpressions PolyFormatLocal;
-  PolyFormatLocal.ExtraLinesCounterLatex = 0;
+  PolyFormatLocal.extraLinesCounterLatex = 0;
   if (LatexFormat) {
     output << "\\begin{eqnarray*}\n";
   }
@@ -4042,11 +4040,11 @@ int PartialFractions::toFileOutputBasisChange(std::fstream& output, bool LatexFo
 }
 
 int PartFraction::controlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = static_cast<signed>(output.size()) % PolyFormatLocal.MaxLineLength;
+  int numCutOffs = static_cast<signed>(output.size()) % PolyFormatLocal.maximumLineLength;
   int LastCutOffIndex = 0;
   int NumLinesAdded = 0;
   for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < static_cast<signed>(output.size()) - 1; j ++) {
+    for (int j = LastCutOffIndex + PolyFormatLocal.maximumLineLength; j < static_cast<signed>(output.size()) - 1; j ++) {
       unsigned k = static_cast<unsigned>(j);
       if (output[k] == '\\' && output[k + 1] == 'f') {
         output.insert(k, "\\\\\n&&");
@@ -4060,11 +4058,11 @@ int PartFraction::controlLineSizeFracs(std::string& output, FormatExpressions& P
 }
 
 int PartFraction::controlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal) {
-  int numCutOffs = static_cast<int>(static_cast<int>(output.size()) % PolyFormatLocal.MaxLineLength);
+  int numCutOffs = static_cast<int>(static_cast<int>(output.size()) % PolyFormatLocal.maximumLineLength);
   int LastCutOffIndex = 0;
   int NumLinesAdded = 0;
   for (int i = 0; i < numCutOffs; i ++) {
-    for (int j = LastCutOffIndex + PolyFormatLocal.MaxLineLength; j < static_cast<int>(output.size()) - 1; j ++) {
+    for (int j = LastCutOffIndex + PolyFormatLocal.maximumLineLength; j < static_cast<int>(output.size()) - 1; j ++) {
       unsigned k = static_cast<unsigned>(j);
       if ((output[k] == '+' || output[k] == '-') && output[k - 1] != '{') {
         output.insert(k, "\\\\\n&&");
@@ -5414,7 +5412,7 @@ std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
   bool supressDynkinIndexOne = theFormat == nullptr ? false : theFormat->flagSupressDynkinIndexOne;
   bool hasAmbient = false;
   if (theFormat != nullptr) {
-    hasAmbient = (theFormat->AmbientWeylLetter != 'X');
+    hasAmbient = (theFormat->ambientWeylLetter != 'X');
   }
   if (includeTechnicalNames) {
     if (!hasAmbient) {
@@ -5430,8 +5428,8 @@ std::string DynkinSimpleType::toString(FormatExpressions* theFormat) const {
       }
     } else {
       DynkinSimpleType ambientType;
-      ambientType.theLetter = theFormat->AmbientWeylLetter;
-      ambientType.CartanSymmetricInverseScale = theFormat->AmbientCartanSymmetricInverseScale;
+      ambientType.theLetter = theFormat->ambientWeylLetter;
+      ambientType.CartanSymmetricInverseScale = theFormat->ambientCartanSymmetricInverseScale;
       Rational theDynkinIndex = ambientType.getLongRootLengthSquared() / this->getLongRootLengthSquared();
 //      (this->CartanSymmetricInverseScale/this->getDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.getDefaultLongRootLengthSquared());

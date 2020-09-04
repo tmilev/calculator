@@ -77,13 +77,13 @@ std::ostream& operator<< (std::ostream& output, const Matrix<Coefficient>& theMa
   int lastMatColIndexToHide = theMat.numberOfColumns;
   FormatExpressions& theFormat = global.theDefaultFormat.getElement();
   if (theFormat.flagSuppressLongMatrices) {
-    if (theMat.numberOfRows > theFormat.MaxMatrixDisplayedRows) {
-      firstMatRowIndexToHide = theFormat.MaxMatrixDisplayedRows / 2;
-      lastMatRowIndexToHide = theMat.numberOfRows - 1 - theFormat.MaxMatrixDisplayedRows / 2;
+    if (theMat.numberOfRows > theFormat.maximumMatrixDisplayedRows) {
+      firstMatRowIndexToHide = theFormat.maximumMatrixDisplayedRows / 2;
+      lastMatRowIndexToHide = theMat.numberOfRows - 1 - theFormat.maximumMatrixDisplayedRows / 2;
     }
-    if (theMat.numberOfColumns > theFormat.MaxMatrixLineLength) {
-      firstMatColIndexToHide = theFormat.MaxMatrixLineLength / 2;
-      lastMatColIndexToHide = theMat.numberOfColumns - 1 - theFormat.MaxMatrixLineLength / 2;
+    if (theMat.numberOfColumns > theFormat.maximumMatrixLineLength) {
+      firstMatColIndexToHide = theFormat.maximumMatrixLineLength / 2;
+      lastMatColIndexToHide = theMat.numberOfColumns - 1 - theFormat.maximumMatrixLineLength / 2;
     }
   }
   for (int i = 0; i < theMat.numberOfRows; i ++) {
@@ -171,12 +171,12 @@ void MathRoutines::raiseToPower(
   }
 }
 
-template <class templateMonomial, class Coefficient>
-void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
-  const ElementMonomialAlgebra<templateMonomial, Coefficient>& other,
-  ElementMonomialAlgebra<templateMonomial, Coefficient>& output,
-  ElementMonomialAlgebra<templateMonomial, Coefficient>& bufferPoly,
-  templateMonomial& bufferMon
+template <class TemplateMonomial, class Coefficient>
+void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
+  const ElementMonomialAlgebra<TemplateMonomial, Coefficient>& other,
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output,
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient>& bufferPoly,
+  TemplateMonomial& bufferMon
 ) const {
   MacroRegisterFunctionWithName("ElementMonomialAlgebra::multiplyBy");
   if (other.isEqualToZero()) {
@@ -227,18 +227,18 @@ void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
   output = bufferPoly;
 }
 
-template <class templateMonomial, class Coefficient>
-void ElementMonomialAlgebra<templateMonomial, Coefficient>::multiplyBy(
-  const templateMonomial& other,
-  ElementMonomialAlgebra<templateMonomial, Coefficient>& output
+template <class TemplateMonomial, class Coefficient>
+void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
+  const TemplateMonomial& other,
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output
 ) const {
   if (this == &output) {
-    ElementMonomialAlgebra<templateMonomial, Coefficient> thisCopy = *this;
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> thisCopy = *this;
     thisCopy.multiplyBy(other, output);
     return;
   }
   output.makeZero();
-  templateMonomial currentMonomial;
+  TemplateMonomial currentMonomial;
   for (int i = 0; i < this->size(); i ++) {
     currentMonomial = this->monomials[i];
     currentMonomial *= other;

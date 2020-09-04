@@ -952,7 +952,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
   }
   theContext.getFormat(theG2B3Data.theFormat);
   theG2B3Data.theFormat.flagUseLatex = true;
-  theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX = 0;
+  theG2B3Data.theFormat.numberOfAmpersandsPerNewLineForLaTeX = 0;
   Expression tempExpression;
   RationalFunction<Rational> rfZero, rfOne;
   rfZero.makeZero();
@@ -969,7 +969,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
     for (int j = 0; j < theG2B3Data.theSmallCharFDpart.size(); j ++) {
       numEigenVectors += theG2B3Data.theSmallCharFDpart.coefficients[j];
     }
-    theG2B3Data.theFormat.CustomPlusSign = "";
+    theG2B3Data.theFormat.customPlusSign = "";
     int eigenIndexcounter = 0;
     if (i != 0) {
       latexTable2 << "\\hline\\multicolumn{3}{|c|}{$\\lambda ="
@@ -984,19 +984,19 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
       for (int counter = 0; counter < multiplicity; counter ++, eigenIndexcounter ++) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
-          theG2B3Data.theFormat.CustomPlusSign = "\\oplus ";
+          theG2B3Data.theFormat.customPlusSign = "\\oplus ";
           theG2B3Data.theFormat.fundamentalWeightLetter = "\\omega";
           out << "<td rowspan =\"" << numEigenVectors.toString() << "\">" << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "</td> ";
           if (!isFD) {
             out << "<td rowspan =\"" << numEigenVectors.toString() << "\">";
             for (int charcounter1 = 0; charcounter1 < theG2B3Data.theCharacterDifferences.size; charcounter1 ++) {
-              std::string tempS = theG2B3Data.theFormat.CustomPlusSign;
-              theG2B3Data.theFormat.CustomPlusSign = "";
+              std::string tempS = theG2B3Data.theFormat.customPlusSign;
+              theG2B3Data.theFormat.customPlusSign = "";
               out << "A_{" << charcounter1 << "}=" << theG2B3Data.theCharacterDifferences[charcounter1].toString(&theG2B3Data.theFormat) << ";";
               if (charcounter1 != theG2B3Data.theCharacterDifferences.size - 1) {
                 out << "<br>";
               }
-              theG2B3Data.theFormat.CustomPlusSign = tempS;
+              theG2B3Data.theFormat.customPlusSign = tempS;
             }
             out << "</td> ";
           }
@@ -1017,7 +1017,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
         latexTable << " & ";
         if (counter == 0) {
           theG2B3Data.theFormat.fundamentalWeightLetter = "\\psi";
-          theG2B3Data.theFormat.CustomPlusSign = "\\oplus ";
+          theG2B3Data.theFormat.customPlusSign = "\\oplus ";
           out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.toString(&theG2B3Data.theFormat) << "</td>";
           latexTable << "\\multirow{" << multiplicity  << "}{*}{$";
           latexTable << tempChar.toString(&theG2B3Data.theFormat) << "$}";
@@ -1036,9 +1036,9 @@ bool CalculatorFunctions::innerPrintB3G2branchingIntermediate(
           latexTable << "&";
         }
         latexTable << "&";
-        theG2B3Data.theFormat.CustomPlusSign = "";
+        theG2B3Data.theFormat.customPlusSign = "";
         out << "<td>" << HtmlRoutines::getMathNoDisplay(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
-        theG2B3Data.theFormat.MaxLineLength = 20;
+        theG2B3Data.theFormat.maximumLineLength = 20;
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD) {
           std::string tempS1 = theG2B3Data.getStringCasimirProjector(eigenIndexcounter, 12);
@@ -1191,7 +1191,7 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
     theg2b3data.theFormat.fundamentalWeightLetter = "\\psi";
     out << "<td>" << outputChar.toString(&theg2b3data.theFormat) << "</td>";
     out << "<td>";
-    theg2b3data.theFormat.CustomPlusSign = "\\oplus ";
+    theg2b3data.theFormat.customPlusSign = "\\oplus ";
     Vector<RationalFunction<Rational> > leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.clear();
     for (int i = 0; i < outputChar.size(); i ++) {
@@ -1224,9 +1224,9 @@ bool CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
       }
     }
     out << "</td>";
-    theg2b3data.theFormat.MaxLineLength = 80;
+    theg2b3data.theFormat.maximumLineLength = 80;
     latexTable << "& $\\begin{array}{l} " << outputChar.toString(&theg2b3data.theFormat) << "\\end{array} $ ";
-    theg2b3data.theFormat.CustomPlusSign = "";
+    theg2b3data.theFormat.customPlusSign = "";
     if (!isFD && theCentralChars.size > 0) {
       out << "<td>";
       latexTable << " \\\\\n<br> ";

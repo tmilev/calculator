@@ -530,17 +530,17 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   List<QuasiDifferentialOperator<Rational> > theQDOs;
   FormatExpressions theWeylFormat, theUEformat;
   std::stringstream out, latexReport, latexReport2;
-  theWeylFormat.MaxLineLength = 40;
+  theWeylFormat.maximumLineLength = 40;
   theWeylFormat.flagUseLatex = true;
-  theUEformat.MaxLineLength = 20;
+  theUEformat.maximumLineLength = 20;
   theUEformat.flagUseLatex = true;
   theUEformat.chevalleyGgeneratorLetter = "g";
   theUEformat.chevalleyHgeneratorLetter = "h";
   hwContext.getFormat(theUEformat);
   theUEformat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
-  theUEformat.MaxLineLength = 178;
-  theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-  theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
+  theUEformat.maximumLineLength = 178;
+  theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 2;
+  theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
   hwContext.getFormat(theWeylFormat);
   List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
   if (!AllGenerators) {
@@ -638,9 +638,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         actionOnGenericElt *= genericElt;
         theSSalgebra.orderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.simplify();
-        theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
+        theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 2;
         out << "<td>" << HtmlRoutines::getMathNoDisplay("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
-        theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
+        theUEformat.numberOfAmpersandsPerNewLineForLaTeX = 0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.toString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
@@ -663,19 +663,19 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       totalAdditions += Rational::totalAdditions() - currentAdditions;
       totalMultiplications += Rational::totalMultiplications() - currentMultiplications;
       totalTime += global.getElapsedSeconds() - currentTime;
-      theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
-      theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
+      theWeylFormat.customCoefficientMonomialSeparator = "\\otimes ";
+      theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 2;
       out << "<td>" << HtmlRoutines::getMathNoDisplay("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
       << "</td>";
-      theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
-      theWeylFormat.MaxLineLength = 300;
+      theWeylFormat.numberOfAmpersandsPerNewLineForLaTeX = 0;
+      theWeylFormat.maximumLineLength = 300;
       latexReport << " & $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$";
       if (j != 0) {
         latexReport2 << "&&";
       }
       latexReport2 << " $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$\\\\ "
       << (j != theGeneratorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
-      theWeylFormat.CustomCoeffMonSeparator = "";
+      theWeylFormat.customCoefficientMonomialSeparator = "";
     }
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";

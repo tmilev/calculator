@@ -3731,7 +3731,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   theFormat.flagUseFrac = true;
-  theFormat.MatrixColumnVerticalLineIndex = theMatrix.numberOfColumns - 1;
+  theFormat.matrixColumnVerticalLineIndex = theMatrix.numberOfColumns - 1;
   out << "Computing "
   << HtmlRoutines::getMathNoDisplay(theMatrix.toString(&theFormat) + "^{- 1}");
   extendedMatrix = theMatrix;
@@ -3806,7 +3806,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
     }
   }
   outLaTeX << "\\end{tabular}";
-  theFormat.MatrixColumnVerticalLineIndex = - 1;
+  theFormat.matrixColumnVerticalLineIndex = - 1;
   if (NumFoundPivots < theMatrix.numberOfRows) {
     out << "<br>Matrix to the right of the vertical line not "
     << "transformed to the identity matrix => "
@@ -3852,7 +3852,7 @@ bool Calculator::innerInvertMatrixVerbose(
   FormatExpressions theFormat;
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
-  theFormat.MatrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
+  theFormat.matrixColumnVerticalLineIndex = mat.numberOfColumns - 1;
   out << "Computing " << HtmlRoutines::getMathNoDisplay(mat.toString(&theFormat) + "^{- 1}");
   tempMat = mat;
   tempMat.appendMatrixOnTheRight(outputMat);
@@ -7908,10 +7908,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   theCasimir.makeCasimir(*theSSalgebra.content);
   Vector<RationalFunction<Rational> > currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
-  tempFormat.MaxLineLength = 60;
+  tempFormat.maximumLineLength = 60;
   tempFormat.flagUseLatex = true;
   tempFormat.fundamentalWeightLetter = "\\psi";
-  tempFormat.CustomPlusSign = "\\oplus ";
+  tempFormat.customPlusSign = "\\oplus ";
   hwContext.getFormat(tempFormat);
   out << "<br>Character of finite dimensional module:" << HtmlRoutines::getMathNoDisplay(theFDChaR.toString());
   if (theGenMod.parabolicSelectionSelectedAreElementsLevi.cardinalitySelection > 0) {
@@ -7923,7 +7923,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "GenVermatimes7DimCentralCharacters} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
-  tempFormat.CustomPlusSign = "";
+  tempFormat.customPlusSign = "";
   tempFormat.chevalleyGgeneratorLetter = "\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter = "\\bar{h}";
   theFDLeviSplitShifteD.makeZero();
@@ -8010,7 +8010,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << "$" << theSSalgebra.content->theWeyl.getFundamentalCoordinatesFromSimple(currentHWsimplecoords).toStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.toString();
     Polynomial<Rational> tmpGCD, tmpRF;
-    tempFormat.MaxLineLength = 80;
+    tempFormat.maximumLineLength = 80;
     if (theNumVars == 1) {
       scale = theElt.scaleNormalizeLeadingMonomial(nullptr);
       scale.getNumerator(tmpGCD);

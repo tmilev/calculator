@@ -2693,15 +2693,15 @@ public:
     const Rational& power,
     const Coefficient& inputCoefficient = 1
   );
-  void makeDegreeOne(int NVar, int NonZeroIndex, const Coefficient& coeff);
+  void makeDegreeOne(int numberOfVariables, int nonZeroIndex, const Coefficient& coefficient);
   void makeDegreeOne(
-    int NVar,
-    int NonZeroIndex1,
-    int NonZeroIndex2,
-    const Coefficient& coeff1,
-    const Coefficient& coeff2
+    int numberOfVariables,
+    int nonZeroIndex1,
+    int nonZeroIndex2,
+    const Coefficient& coefficient1,
+    const Coefficient& coefficient2
   );
-  void makeDegreeOne(int NVar, int NonZeroIndex, const Coefficient& coeff1, const Coefficient& ConstantTerm);
+  void makeDegreeOne(int numberOfVariables, int nonZeroIndex, const Coefficient& coefficient1, const Coefficient& constantTerm);
   void makeLinearNoConstant(const Vector<Rational>& inputCoefficients);
   void makeLinearWithConstantTerm(const Vector<Rational>& inputLastCoordinateConstantTerm);
   void makePolynomialFromDirectionAndNormal(

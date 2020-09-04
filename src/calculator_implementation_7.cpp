@@ -9329,9 +9329,9 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
 
 class ExpressionTreeDrawer {
 public:
-  int MaxDepth;
-  int MaxAllowedWidth;
-  int MaxDisplayedNodes;
+  int maximumRecursionDepth;
+  int maximumAllowedWidth;
+  int maximumDisplayedNodes;
   int indexInCurrentLayer;
   int indexCurrentChild;
   Rational widthMaxLayer;
@@ -9339,12 +9339,12 @@ public:
   int maxNumCharsInString;
   bool flagUseFullTree;
   Expression baseExpression;
-  HashedList<std::string, MathRoutines::hashString> DisplayedEstrings;
-  List<bool> DisplayedStringIsLeaf;
-  List<Vector<Rational> > NodePositions;
-  List<Vector<double> > NodePositionsDouble;
-  List<int> LayerSizes;
-  List<int> LayerFirstIndices;
+  HashedList<std::string, MathRoutines::hashString> displayedExpressionStrings;
+  List<bool> displayedStringIsLeaf;
+  List<Vector<Rational> > nodePositions;
+  List<Vector<double> > nodePositionsDouble;
+  List<int> layerSizes;
+  List<int> layerFirstIndices;
   List<List<int> > arrows;
   Plot thePlot;
   List<Expression> currentLayer;
@@ -9353,9 +9353,9 @@ public:
   Calculator* owner;
   Rational charWidth, padding, layerHeight, charHeight;
   ExpressionTreeDrawer() {
-    this->MaxDepth = 10;
-    this->MaxAllowedWidth = 10;
-    this->MaxDisplayedNodes = 1000;
+    this->maximumRecursionDepth = 10;
+    this->maximumAllowedWidth = 10;
+    this->maximumDisplayedNodes = 1000;
     this->flagUseFullTree = false;
     this->indexInCurrentLayer = - 1;
     this->indexCurrentChild = - 1;
@@ -9382,7 +9382,7 @@ public:
     }
     for (int i = 0; i < this->GetCurrentE().children.size; i ++) {
       this->currentEchildrenTruncated.addOnTop(this->GetCurrentE()[i]);
-      if (i + 1 + this->indexCurrentChild > this->MaxDisplayedNodes || i > this->MaxAllowedWidth) {
+      if (i + 1 + this->indexCurrentChild > this->maximumDisplayedNodes || i > this->maximumAllowedWidth) {
         Expression dotsAtom;
         dotsAtom.makeAtom(std::string("..."), *this->owner);
         this->currentEchildrenTruncated.addOnTop(dotsAtom);
@@ -9424,7 +9424,7 @@ public:
     this->nextLayer.addListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
     for (int i = 0; i < this->currentEchildrenTruncated.size; i ++) {
-      this->arrows[this->indexCurrentChild].addOnTop(this->DisplayedEstrings.size);
+      this->arrows[this->indexCurrentChild].addOnTop(this->displayedExpressionStrings.size);
       this->AddStringTruncate(
         this->getDisplayString(this->currentEchildrenTruncated[i]),
         this->isLeaf(this->currentEchildrenTruncated[i])
@@ -9436,18 +9436,18 @@ public:
     this->indexInCurrentLayer = 0;
     this->indexCurrentChild = 0;
     this->currentLayer.setSize(1);
-    this->LayerFirstIndices.setSize(1);
-    this->LayerFirstIndices[0] = 0;
-    this->LayerSizes.setSize(1);
-    this->LayerSizes[0] = 1;
+    this->layerFirstIndices.setSize(1);
+    this->layerFirstIndices[0] = 0;
+    this->layerSizes.setSize(1);
+    this->layerSizes[0] = 1;
     List<int> emptyArrows;
     this->arrows.addOnTop(emptyArrows);
     this->currentLayer[0] = this->baseExpression;
-    this->DisplayedEstrings.clear();
+    this->displayedExpressionStrings.clear();
     this->AddStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
-    this->DisplayedEstrings.setExpectedSize(this->MaxDisplayedNodes);
-    this->arrows.setExpectedSize(this->MaxDisplayedNodes);
+    this->displayedExpressionStrings.setExpectedSize(this->maximumDisplayedNodes);
+    this->arrows.setExpectedSize(this->maximumDisplayedNodes);
   }
   std::string toString() {
     std::stringstream out;
@@ -9455,22 +9455,22 @@ public:
     out << "<br>Index in displayed strings: " << this->indexCurrentChild;
     out << "<br>Current layer: " << this->currentLayer.toStringCommaDelimited();
     out << "<br>Next layer: " << this->nextLayer.toStringCommaDelimited();
-    out << "<br>Displayed strings: " << this->DisplayedEstrings.toStringCommaDelimited() ;
-    out << "<br>Node positions: " << this->NodePositions.toStringCommaDelimited() ;
+    out << "<br>Displayed strings: " << this->displayedExpressionStrings.toStringCommaDelimited() ;
+    out << "<br>Node positions: " << this->nodePositions.toStringCommaDelimited() ;
     out << "<br>Arrows: " << this->arrows.toStringCommaDelimited() ;
     out << "<br>Width max layer: " << this->widthMaxLayer;
     return out.str();
   }
   void AddStringTruncate(const std::string& input, bool isLeaf) {
-    this->DisplayedStringIsLeaf.addOnTop(isLeaf);
+    this->displayedStringIsLeaf.addOnTop(isLeaf);
     if (input.size() <= static_cast<unsigned>(this->maxNumCharsInString)) {
-      this->DisplayedEstrings.addOnTop(input);
+      this->displayedExpressionStrings.addOnTop(input);
       return;
     }
     std::string truncatedInput = input;
     truncatedInput.resize(static_cast<unsigned>(this->maxNumCharsInString) - 3);
     truncatedInput += "...";
-    this->DisplayedEstrings.addOnTop(truncatedInput);
+    this->displayedExpressionStrings.addOnTop(truncatedInput);
   }
   bool incrementReturnFalseIfPastLast() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::incrementReturnFalseIfPastLast");
@@ -9482,8 +9482,8 @@ public:
       if (this->currentLayer.size == 0) {
         return false;
       }
-      this->LayerFirstIndices.addOnTop(this->indexCurrentChild);
-      this->LayerSizes.addOnTop(this->nextLayer.size);
+      this->layerFirstIndices.addOnTop(this->indexCurrentChild);
+      this->layerSizes.addOnTop(this->nextLayer.size);
       this->nextLayer.setSize(0);
       this->ComputeCurrentEContributionToNextLayer();
       return this->currentLayer.size > 0;
@@ -9495,15 +9495,15 @@ public:
     return this->charWidth *
     MathRoutines::minimum(
       this->maxNumCharsInString,
-      static_cast<signed>(this->DisplayedEstrings[theIndex].size())
+      static_cast<signed>(this->displayedExpressionStrings[theIndex].size())
     );
   }
   Rational GetLayerWidth(int layerIndex) {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
     Rational result = 0;
     for (
-      int i = this->LayerFirstIndices[layerIndex];
-      i < this->LayerFirstIndices[layerIndex] + this->LayerSizes[layerIndex];
+      int i = this->layerFirstIndices[layerIndex];
+      i < this->layerFirstIndices[layerIndex] + this->layerSizes[layerIndex];
       i ++
     ) {
       result += this->GetStringWidthTruncated(i) + this->padding;
@@ -9518,14 +9518,14 @@ public:
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeLayerPositions");
     Rational currentX = - this->GetLayerWidth(layerIndex) / 2;
     for (
-      int i = this->LayerFirstIndices[layerIndex];
-      i < this->LayerFirstIndices[layerIndex] + this->LayerSizes[layerIndex];
+      int i = this->layerFirstIndices[layerIndex];
+      i < this->layerFirstIndices[layerIndex] + this->layerSizes[layerIndex];
       i ++
     ) {
-      this->NodePositions[i].setSize(2);
-      this->NodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
-      this->NodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
-      currentX += this->charWidth * static_cast<int>(this->DisplayedEstrings[i].size()) + this->padding;
+      this->nodePositions[i].setSize(2);
+      this->nodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
+      this->nodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
+      currentX += this->charWidth * static_cast<int>(this->displayedExpressionStrings[i].size()) + this->padding;
     }
   }
   void DrawToDV() {
@@ -9535,19 +9535,19 @@ public:
     }
     this->thePlot.dimension = 2;
     this->thePlot.flagIncludeCoordinateSystem = false;
-    this->NodePositions.setSize(this->DisplayedEstrings.size);
-    for (int i = 0; i < this->LayerFirstIndices.size; i ++) {
+    this->nodePositions.setSize(this->displayedExpressionStrings.size);
+    for (int i = 0; i < this->layerFirstIndices.size; i ++) {
       this->ComputeLayerPositions(i);
     }
-    this->NodePositionsDouble.setSize(this->NodePositions.size);
-    for (int i = 0; i < this->NodePositionsDouble.size; i ++) {
-      this->NodePositionsDouble[i] = MathRoutines::getVectorDouble(this->NodePositions[i]);
+    this->nodePositionsDouble.setSize(this->nodePositions.size);
+    for (int i = 0; i < this->nodePositionsDouble.size; i ++) {
+      this->nodePositionsDouble[i] = MathRoutines::getVectorDouble(this->nodePositions[i]);
     }
     Vector<double> arrowBase, arrowHead;
-    for (int i = 0; i < this->DisplayedEstrings.size; i ++) {
+    for (int i = 0; i < this->displayedExpressionStrings.size; i ++) {
       for (int j = 0; j < this->arrows[i].size; j ++) {
-        arrowBase = this->NodePositionsDouble[i];
-        arrowHead = this->NodePositionsDouble[this->arrows[i][j]];
+        arrowBase = this->nodePositionsDouble[i];
+        arrowHead = this->nodePositionsDouble[this->arrows[i][j]];
         arrowHead[1] += this->charHeight.getDoubleValue() / 2;
         PlotObject theSegment;
         theSegment.thePlotString = "segment";
@@ -9556,21 +9556,21 @@ public:
         theSegment.colorJS = "black";
         this->thePlot += theSegment;
       }
-      if (this->DisplayedEstrings[i] != "") {
+      if (this->displayedExpressionStrings[i] != "") {
         PlotObject theText;
         theText.thePlotType = "label";
-        theText.thePointsDouble.addOnTop(this->NodePositionsDouble[i]);
+        theText.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
         theText.colorJS =
-        this->DisplayedStringIsLeaf[i] ? "red" : "gray";
+        this->displayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString =
         HtmlRoutines::clearNewLines
-        (HtmlRoutines::backslashQuotes(HtmlRoutines::doubleBackslashes(this->DisplayedEstrings[i]) ));
+        (HtmlRoutines::backslashQuotes(HtmlRoutines::doubleBackslashes(this->displayedExpressionStrings[i]) ));
         thePlot += theText;
       } else {
         PlotObject thePoint;
         thePoint.thePlotType = "point";
         thePoint.colorJS = "blue";
-        thePoint.thePointsDouble.addOnTop(this->NodePositionsDouble[i]);
+        thePoint.thePointsDouble.addOnTop(this->nodePositionsDouble[i]);
         this->thePlot += thePoint;
       }
     }

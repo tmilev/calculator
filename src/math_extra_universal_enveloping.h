@@ -133,7 +133,7 @@ public:
   bool isEqualToZero() const {
     return this->size() == 0;
   }
-  bool HWMTAbilinearForm(
+  bool highestWeightMTAbilinearForm(
     const ElementUniversalEnveloping<Coefficient>& right,
     Coefficient& output,
     const Vector<Coefficient>* substitutionHiGoesToIthElement,

@@ -612,7 +612,7 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
 }
 
 template <class Coefficient>
-bool ElementUniversalEnveloping<Coefficient>::HWMTAbilinearForm(
+bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   const ElementUniversalEnveloping<Coefficient>& right,
   Coefficient& output,
   const Vector<Coefficient>* substitutionHiGoesToIthElement,

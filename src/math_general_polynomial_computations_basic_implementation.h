@@ -189,40 +189,42 @@ void Polynomial<Coefficient>::makeOne() {
 
 template <class Coefficient>
 void Polynomial<Coefficient>::makeDegreeOne(
-  int NVar, int NonZeroIndex, const Coefficient& coeff
+  int numberOfVariables,
+  int nonZeroIndex,
+  const Coefficient& coefficient
 ) {
   this->makeZero();
   MonomialP tempM;
-  tempM.makeEi(NonZeroIndex, 1, NVar);
-  this->addMonomial(tempM, coeff);
+  tempM.makeEi(nonZeroIndex, 1, numberOfVariables);
+  this->addMonomial(tempM, coefficient);
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::makeDegreeOne(
-  int NVar,
-  int NonZeroIndex1,
-  int NonZeroIndex2,
-  const Coefficient& coeff1,
-  const Coefficient& coeff2
+  int numberOfVariables,
+  int nonZeroIndex1,
+  int nonZeroIndex2,
+  const Coefficient& coefficient1,
+  const Coefficient& coefficient2
 ) {
-  (void) NVar;
+  (void) numberOfVariables;
   this->makeZero();
   MonomialP tempM;
-  tempM.makeEi(NonZeroIndex1);
-  this->addMonomial(tempM, coeff1);
-  tempM.makeEi(NonZeroIndex2);
-  this->addMonomial(tempM, coeff2);
+  tempM.makeEi(nonZeroIndex1);
+  this->addMonomial(tempM, coefficient1);
+  tempM.makeEi(nonZeroIndex2);
+  this->addMonomial(tempM, coefficient2);
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::makeDegreeOne(
-  int NVar,
-  int NonZeroIndex,
-  const Coefficient& coeff1,
-  const Coefficient& ConstantTerm
+  int numberOfVariables,
+  int nonZeroIndex,
+  const Coefficient& coefficient1,
+  const Coefficient& constantTerm
 ) {
-  this->makeDegreeOne(NVar, NonZeroIndex, coeff1);
-  *this += ConstantTerm;
+  this->makeDegreeOne(numberOfVariables, nonZeroIndex, coefficient1);
+  *this += constantTerm;
 }
 
 template <class Coefficient>
@@ -273,18 +275,18 @@ void Polynomial<Coefficient>::setNumberOfVariablesSubstituteDeletedByOne(int new
     << "Requesting negative number of variables (more precisely, "
     << newNumVars << ") is not allowed. " << global.fatal;
   }
-  Polynomial<Coefficient> Accum;
-  Accum.makeZero();
-  Accum.setExpectedSize(this->size());
-  MonomialP tempM;
+  Polynomial<Coefficient> accumulator;
+  accumulator.makeZero();
+  accumulator.setExpectedSize(this->size());
+  MonomialP monomial;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.makeOne();
+    monomial.makeOne();
     for (int j = 0; j < newNumVars; j ++) {
-      tempM.setVariable(j, (*this)[i](j));
+      monomial.setVariable(j, (*this)[i](j));
     }
-    Accum.addMonomial(tempM, this->coefficients[i]);
+    accumulator.addMonomial(monomial, this->coefficients[i]);
   }
-  this->operator=(Accum);
+  this->operator=(accumulator);
 }
 
 template <class Coefficient>

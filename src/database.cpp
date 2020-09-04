@@ -81,7 +81,7 @@ bool Database::User::logoutViaDatabase() {
   theUser.UserCalculatorData::operator=(global.userDefault);
   theUser.resetAuthenticationToken(nullptr);
   global.setWebInput("authenticationToken", "");
-  global.CookiesToSetUsingHeaders.setKeyValue("authenticationToken", "");
+  global.cookiesToBeSent.setKeyValue("authenticationToken", "");
   return true;
 }
 

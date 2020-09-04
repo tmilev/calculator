@@ -170,9 +170,6 @@ public:
   JSData getDatabaseJSON();
   std::string getDatabaseDeleteOneItem();
   std::string getAddUserEmails();
-  std::string getHtmlHiddenInputs(
-    bool includeUserName, bool includeAuthenticationToken
-  );
   void setHeaderOKNoContentLength(
     const std::string& extraHeader,
     const std::string& contentType = "application/json"

@@ -9368,20 +9368,20 @@ public:
     this->widthMaxLayer = 0;
     this->charHeight.assignNumeratorAndDenominator(1, 5);
   }
-  Expression& GetCurrentE() {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetCurrentE");
+  Expression& getCurrentExpression() {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::getCurrentExpression");
     return this->currentLayer[this->indexInCurrentLayer];
   }
-  void ComputeCurrentEchildrenTruncated() {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEchildrenTruncated");
+  void computeCurrentChildrenTruncated() {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::computeCurrentChildrenTruncated");
     this->currentEchildrenTruncated.setSize(0);
     if (!this->flagUseFullTree) {
-      if (this->GetCurrentE().isBuiltInType()) {
+      if (this->getCurrentExpression().isBuiltInType()) {
         return;
       }
     }
-    for (int i = 0; i < this->GetCurrentE().children.size; i ++) {
-      this->currentEchildrenTruncated.addOnTop(this->GetCurrentE()[i]);
+    for (int i = 0; i < this->getCurrentExpression().children.size; i ++) {
+      this->currentEchildrenTruncated.addOnTop(this->getCurrentExpression()[i]);
       if (i + 1 + this->indexCurrentChild > this->maximumDisplayedNodes || i > this->maximumAllowedWidth) {
         Expression dotsAtom;
         dotsAtom.makeAtom(std::string("..."), *this->owner);
@@ -9420,7 +9420,7 @@ public:
   }
   void ComputeCurrentEContributionToNextLayer() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEContributionToNextLayer");
-    this->ComputeCurrentEchildrenTruncated();
+    this->computeCurrentChildrenTruncated();
     this->nextLayer.addListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
     for (int i = 0; i < this->currentEchildrenTruncated.size; i ++) {

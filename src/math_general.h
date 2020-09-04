@@ -277,7 +277,7 @@ private:
   // by their explicit names.
   // Note that the LinearCombination::toString method uses the FormatExpressions::monomialOrder
   // to sort monomials when displaying polynomials to the screen.
-  List<Rational> monBody;
+  List<Rational> monomialBody;
 
   void setSize(int variableCount);
 public:
@@ -311,7 +311,7 @@ public:
   const Rational& operator[](int i) const;
   Rational operator()(int i) const;
   unsigned int hashFunction() const {
-    return this->monBody.hashFunction();
+    return this->monomialBody.hashFunction();
   }
   bool hasPositiveOrZeroExponents() const;
   void exponentMeBy(const Rational& theExp);
@@ -320,15 +320,15 @@ public:
   // Two such different representation may differ by extra entries filled in with zeroes.
   static unsigned int hashFunction(const MonomialP& input) {
     unsigned int result = 0;
-    int numCycles = MathRoutines::minimum(input.monBody.size, someRandomPrimesSize);
+    int numCycles = MathRoutines::minimum(input.monomialBody.size, someRandomPrimesSize);
     for (int i = 0; i < numCycles; i ++) {
-      result += input.monBody[i].hashFunction();
+      result += input.monomialBody[i].hashFunction();
     }
     return result;
   }
   std::string toString(FormatExpressions* PolyFormat = nullptr) const;
   void makeOne() {
-    this->monBody.setSize(0);
+    this->monomialBody.setSize(0);
   }
   void makeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
   void setVariable(int variableIndex, const Rational& power);
@@ -346,8 +346,8 @@ public:
   }
   Rational totalDegree() const {
     Rational result = 0;
-    for (int i = 0; i < this->monBody.size; i ++) {
-      result += this->monBody[i];
+    for (int i = 0; i < this->monomialBody.size; i ++) {
+      result += this->monomialBody[i];
     }
     return result;
   }
@@ -378,12 +378,12 @@ public:
       whichLetter = &tempI1;
     }
     *whichLetter = - 1;
-    for (int i = 0; i < this->monBody.size; i ++) {
-      if (this->monBody[i] == 0) {
+    for (int i = 0; i < this->monomialBody.size; i ++) {
+      if (this->monomialBody[i] == 0) {
         continue;
       }
       if (whichDegree != nullptr) {
-        *whichDegree = this->monBody[i];
+        *whichDegree = this->monomialBody[i];
       }
       if ((*whichLetter) == - 1) {
         *whichLetter = i;
@@ -444,19 +444,19 @@ public:
   }
 
   bool isConstant() const {
-    for (int i = 0; i < this->monBody.size; i ++) {
-      if (!this->monBody[i].isEqualToZero()) {
+    for (int i = 0; i < this->monomialBody.size; i ++) {
+      if (!this->monomialBody[i].isEqualToZero()) {
         return false;
       }
     }
     return true;
   }
   int minimalNumberOfVariables() const {
-    return this->monBody.size;
+    return this->monomialBody.size;
   }
   void invert() {
-    for (int i = 0; i < this->monBody.size; i ++) {
-      this->monBody[i].negate();
+    for (int i = 0; i < this->monomialBody.size; i ++) {
+      this->monomialBody[i].negate();
     }
   }
   bool hasSmallIntegralPositivePowers(int* whichtotalDegree) const;
@@ -466,10 +466,10 @@ public:
   bool operator==(const MonomialP& other) const;
   template <class Coefficient>
   void operator=(const Vector<Coefficient>& other) {
-    this->monBody = other;
+    this->monomialBody = other;
   }
   void operator=(const MonomialP& other) {
-    this->monBody = other.monBody;
+    this->monomialBody = other.monomialBody;
   }
   class Test {
 
@@ -2457,7 +2457,7 @@ public:
   }
   void subtractOtherTimesCoefficient(
     const LinearCombination<TemplateMonomial, Coefficient>& other,
-    Coefficient* inputcf = nullptr
+    Coefficient* inputCoefficient = nullptr
   );
   template <class otherType>
   void operator/=(const otherType& other) {
@@ -3385,23 +3385,23 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
 
 template <class TemplateMonomial, class Coefficient>
 void LinearCombination<TemplateMonomial, Coefficient>::subtractOtherTimesCoefficient(
-  const LinearCombination<TemplateMonomial, Coefficient>& other, Coefficient* inputcf
+  const LinearCombination<TemplateMonomial, Coefficient>& other, Coefficient* inputCoefficient
 ) {
   if (this == &other) {
-    if (inputcf == nullptr) {
+    if (inputCoefficient == nullptr) {
       this->makeZero();
       return;
     }
     LinearCombination<TemplateMonomial, Coefficient> otherNew = other;
-    this->subtractOtherTimesCoefficient(otherNew, inputcf);
+    this->subtractOtherTimesCoefficient(otherNew, inputCoefficient);
     return;
   }
   this->setExpectedSize(other.size() + this->size());
   Coefficient product;
   for (int i = 0; i < other.size(); i ++) {
     product = other.coefficients[i];
-    if (inputcf != nullptr) {
-      product *= *inputcf;
+    if (inputCoefficient != nullptr) {
+      product *= *inputCoefficient;
     }
     this->subtractMonomial(other[i], product);
   }

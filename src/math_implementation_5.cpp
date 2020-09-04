@@ -1736,10 +1736,10 @@ void MonomialP::makeEi(int LetterIndex, int Power, int ExpectedNumVars) {
 }
 
 void MonomialP::setVariable(int variableIndex, const Rational& power) {
-  if (variableIndex >= this->monBody.size) {
+  if (variableIndex >= this->monomialBody.size) {
     this->setSize(variableIndex + 1);
   }
-  this->monBody[variableIndex] = power;
+  this->monomialBody[variableIndex] = power;
   this->trimTrailingZeroes();
 }
 
@@ -1747,22 +1747,22 @@ void MonomialP::multiplyByVariable(int variableIndex, const Rational& variablePo
   if (variablePower.isEqualToZero()) {
     return;
   }
-  if (variableIndex >= this->monBody.size) {
+  if (variableIndex >= this->monomialBody.size) {
     this->setSize(variableIndex);
   }
-  this->monBody[variableIndex] += variablePower;
+  this->monomialBody[variableIndex] += variablePower;
   this->trimTrailingZeroes();
 }
 
 const Rational& MonomialP::operator[](int i) const {
-  if (i < 0 || i >= this->monBody.size) {
+  if (i < 0 || i >= this->monomialBody.size) {
     global.fatal << "This is a programming error: requested exponent "
     << "of monomial variable with index "
     << i << " which is out of range (size = "
-    << this->monBody.size
+    << this->monomialBody.size
     << "). " << global.fatal;
   }
-  return this->monBody[i];
+  return this->monomialBody[i];
 }
 
 Rational MonomialP::operator()(int i) const {
@@ -1771,15 +1771,15 @@ Rational MonomialP::operator()(int i) const {
     << "requested exponent of monomial variable "
     << "with index " << i << " which is negative. " << global.fatal;
   }
-  if (i >= this->monBody.size) {
+  if (i >= this->monomialBody.size) {
     return 0;
   }
-  return this->monBody[i];
+  return this->monomialBody[i];
 }
 
 bool MonomialP::hasPositiveOrZeroExponents() const {
-  for (int i = 0; i < this->monBody.size; i ++) {
-    if (this->monBody[i].isNegative()) {
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    if (this->monomialBody[i].isNegative()) {
       return false;
     }
   }
@@ -1787,8 +1787,8 @@ bool MonomialP::hasPositiveOrZeroExponents() const {
 }
 
 void MonomialP::exponentMeBy(const Rational& theExp) {
-  for (int i = 0; i < this->monBody.size; i ++) {
-    this->monBody[i] *= theExp;
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    this->monomialBody[i] *= theExp;
   }
 }
 
@@ -1797,14 +1797,14 @@ bool MonomialP::operator>(const MonomialP& other) const {
 }
 
 bool MonomialP::isDivisibleBy(const MonomialP& other) const {
-  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
-    if (other.monBody[i] > 0) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+    if (other.monomialBody[i] > 0) {
       return false;
     }
   }
-  int upperLimit = MathRoutines::minimum(this->monBody.size, other.monBody.size);
+  int upperLimit = MathRoutines::minimum(this->monomialBody.size, other.monomialBody.size);
   for (int i = 0; i < upperLimit; i ++) {
-    if (this->monBody[i] < other.monBody[i]) {
+    if (this->monomialBody[i] < other.monomialBody[i]) {
       return false;
     }
   }
@@ -1812,19 +1812,19 @@ bool MonomialP::isDivisibleBy(const MonomialP& other) const {
 }
 
 bool MonomialP::operator==(const MonomialP& other) const {
-  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
-    if (other.monBody[i] != 0) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+    if (other.monomialBody[i] != 0) {
       return false;
     }
   }
-  for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
-    if (this->monBody[i] != 0) {
+  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --) {
+    if (this->monomialBody[i] != 0) {
       return false;
     }
   }
   int highestIndex = MathRoutines::minimum(this->minimalNumberOfVariables(), other.minimalNumberOfVariables()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
-    if (this->monBody[i] != other.monBody[i]) {
+    if (this->monomialBody[i] != other.monomialBody[i]) {
       return false;
     }
   }
@@ -1861,19 +1861,19 @@ bool MonomialP::greaterThan_totalDegree_leftLargerWins(
 
 
 bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
-  for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
-    if (other.monBody[i] > 0) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --) {
+    if (other.monomialBody[i] > 0) {
       return false;
     }
-    if (other.monBody[i] < 0) {
+    if (other.monomialBody[i] < 0) {
       return true;
     }
   }
-  for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
-    if (this->monBody[i] > 0) {
+  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --) {
+    if (this->monomialBody[i] > 0) {
       return true;
     }
-    if (this->monBody[i] < 0) {
+    if (this->monomialBody[i] < 0) {
       return false;
     }
   }
@@ -1881,10 +1881,10 @@ bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
   ) - 1;
   for (int i = highestIndex; i >= 0; i --) {
-    if (this->monBody[i] > other.monBody[i]) {
+    if (this->monomialBody[i] > other.monomialBody[i]) {
       return true;
     }
-    if (this->monBody[i] < other.monBody[i]) {
+    if (this->monomialBody[i] < other.monomialBody[i]) {
       return false;
     }
   }
@@ -1911,26 +1911,26 @@ bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
     this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
   );
   for (int i = 0; i < commonSize; i ++) {
-    if (this->monBody[i] > other.monBody[i]) {
+    if (this->monomialBody[i] > other.monomialBody[i]) {
       return true;
     }
-    if (this->monBody[i] < other.monBody[i]) {
+    if (this->monomialBody[i] < other.monomialBody[i]) {
       return false;
     }
   }
-  for (int i = this->monBody.size; i < other.monBody.size; i ++) {
-    if (other.monBody[i] > 0) {
+  for (int i = this->monomialBody.size; i < other.monomialBody.size; i ++) {
+    if (other.monomialBody[i] > 0) {
       return false;
     }
-    if (other.monBody[i] < 0) {
+    if (other.monomialBody[i] < 0) {
       return true;
     }
   }
-  for (int i = other.monBody.size; i < this->monBody.size; i ++) {
-    if (this->monBody[i] > 0) {
+  for (int i = other.monomialBody.size; i < this->monomialBody.size; i ++) {
+    if (this->monomialBody[i] > 0) {
       return true;
     }
-    if (this->monBody[i] < 0) {
+    if (this->monomialBody[i] < 0) {
       return false;
     }
   }
@@ -1938,20 +1938,20 @@ bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
 }
 
 void MonomialP::trimTrailingZeroes() {
-  for (int i = this->monBody.size - 1; i >= 0; i --) {
-    if (this->monBody[i] != 0) {
+  for (int i = this->monomialBody.size - 1; i >= 0; i --) {
+    if (this->monomialBody[i] != 0) {
       break;
     }
-    this->monBody.setSize(this->monBody.size - 1);
+    this->monomialBody.setSize(this->monomialBody.size - 1);
   }
 }
 
 bool MonomialP::hasSmallIntegralPositivePowers(int* whichtotalDegree) const {
-  for (int i = 0; i < this->monBody.size; i ++) {
-    if (!this->monBody[i].isIntegerFittingInInt(nullptr)) {
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    if (!this->monomialBody[i].isIntegerFittingInInt(nullptr)) {
       return false;
     }
-    if (this->monBody[i] < 0) {
+    if (this->monomialBody[i] < 0) {
       return false;
     }
   }
@@ -1959,24 +1959,24 @@ bool MonomialP::hasSmallIntegralPositivePowers(int* whichtotalDegree) const {
 }
 
 void MonomialP::raiseToPower(const Rational& thePower) {
-  for (int i = 0; i < this->monBody.size; i ++) {
-    this->monBody[i] *= thePower;
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    this->monomialBody[i] *= thePower;
   }
   this->trimTrailingZeroes();
 }
 
 void MonomialP::operator*=(const MonomialP& other) {
-  this->setSize(MathRoutines::maximum(this->monBody.size, other.monBody.size));
-  for (int i = 0; i < other.monBody.size; i ++) {
-    this->monBody[i] += other.monBody[i];
+  this->setSize(MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size));
+  for (int i = 0; i < other.monomialBody.size; i ++) {
+    this->monomialBody[i] += other.monomialBody[i];
   }
   this->trimTrailingZeroes();
 }
 
 void MonomialP::operator/=(const MonomialP& other) {
-  this->setSize(MathRoutines::maximum(this->monBody.size, other.monBody.size));
-  for (int i = 0; i < other.monBody.size; i ++) {
-    this->monBody[i] -= other.monBody[i];
+  this->setSize(MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size));
+  for (int i = 0; i < other.monomialBody.size; i ++) {
+    this->monomialBody[i] -= other.monomialBody[i];
   }
   this->trimTrailingZeroes();
 }
@@ -1985,10 +1985,10 @@ void MonomialP::setSize(int variableCount) {
   if (variableCount < 0) {
     variableCount = 0;
   }
-  int oldSize = this->monBody.size;
-  this->monBody.setSize(variableCount);
-  for (int i = oldSize; i < this->monBody.size; i ++) {
-    this->monBody[i] = 0;
+  int oldSize = this->monomialBody.size;
+  this->monomialBody.setSize(variableCount);
+  for (int i = oldSize; i < this->monomialBody.size; i ++) {
+    this->monomialBody[i] = 0;
   }
 }
 
@@ -2015,11 +2015,11 @@ std::string MonomialP::toString(FormatExpressions* theFormat) const {
   if (this->isConstant()) {
     return "1";
   }
-  for (int i = 0; i < this->monBody.size; i ++) {
-    if (!(this->monBody[i].isEqualToZero())) {
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    if (!(this->monomialBody[i].isEqualToZero())) {
       out << theFormat->getPolynomialLetter(i);
-      if (!(this->monBody[i] == 1)) {
-        out << "^{" << this->monBody[i] << "}";
+      if (!(this->monomialBody[i] == 1)) {
+        out << "^{" << this->monomialBody[i] << "}";
       } else {
         out << " ";
       }

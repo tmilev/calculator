@@ -17,8 +17,8 @@ bool MonomialP::substitution(
     return true;
   }
   Polynomial<Coefficient> tempPoly;
-  for (int i = 0; i < this->monBody.size; i ++) {
-    if (this->monBody[i] == 0) {
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    if (this->monomialBody[i] == 0) {
       continue;
     }
     if (i >= theSubstitution.size) {
@@ -31,16 +31,16 @@ bool MonomialP::substitution(
       << theSubstitution.toString() << ". " << global.fatal;
     }
     int theExponent = 0;
-    if (!this->monBody[i].isSmallInteger(&theExponent) || this->monBody[i] < 0) {
+    if (!this->monomialBody[i].isSmallInteger(&theExponent) || this->monomialBody[i] < 0) {
       if (theSubstitution[i].isMonomialCoefficientOne()) {
         MonomialP tempMon = theSubstitution[i][0];
-        tempMon.raiseToPower(this->monBody[i]);
+        tempMon.raiseToPower(this->monomialBody[i]);
         output *= tempMon;
         continue;
       }
       global.comments << "This may or may not be a programming error. "
       << "I cannot carry out a substitution in a monomial that has exponent "
-      << "which is not a small integer: it is " << this->monBody[i]
+      << "which is not a small integer: it is " << this->monomialBody[i]
       << " instead. " << GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML();
       return false;
     }

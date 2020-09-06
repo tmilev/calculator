@@ -2419,8 +2419,8 @@ JSData Calculator::toJSONPerformance() {
   moreDetails << "<br>Expressions evaluated: " << this->statistics.expressionsEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->totalPatternMatchesPerformed << "";
-  if (this->DepthRecursionReached > 0) {
-    moreDetails << "<br>maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+  if (this->depthRecursionReached > 0) {
+    moreDetails << "<br>maximum recursion depth reached: " << this->depthRecursionReached << ".";
   }
   moreDetails << "<br>Lists created: " << "computation: "
   << (GlobalStatistics::numListsCreated - static_cast<unsigned>(this->statistics.numberOfListsStart))

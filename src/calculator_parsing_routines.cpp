@@ -61,11 +61,11 @@ void Calculator::reset() {
   this->statistics.reset();
   this->maximumAlgebraicTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
-  this->MaxCachedExpressionPerRuleStack = 100000;
+  this->maximumCachedExpressionPerRuleStack = 100000;
   this->maximumRecursionDepth = 10000;
   this->recursionDepth = 0;
 
-  this->DepthRecursionReached = 0;
+  this->depthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
   this->flagLogEvaluation = false;
@@ -88,7 +88,7 @@ void Calculator::reset() {
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
 
-  this->MaxLatexChars = 2000;
+  this->maximumLatexChars = 2000;
   this->numEmptyTokensStart = 9;
   this->theObjectContainer.reset();
   this->controlSequences.clear();

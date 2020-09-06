@@ -512,7 +512,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LogEvaluationStepsDebug",
-    Calculator::innerLogEvaluationStepsDebug,
+    CalculatorSteps::innerLogEvaluationStepsDebug,
     "",
     "Creates an expression evaluation tree. "
     "Intended for debugging the system. ",
@@ -523,7 +523,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LogEvaluationSteps",
-    Calculator::innerLogEvaluationSteps,
+    CalculatorSteps::innerLogEvaluationSteps,
     "",
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",

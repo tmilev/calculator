@@ -424,7 +424,7 @@ void StateMaintainerCalculator::addRule(const Expression& theRule) {
   }
   this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->ruleStack);
   if (this->owner->RuleStackCacheIndex == - 1) {
-    if (this->owner->cachedRuleStacks.size < this->owner->MaxCachedExpressionPerRuleStack) {
+    if (this->owner->cachedRuleStacks.size < this->owner->maximumCachedExpressionPerRuleStack) {
       this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
       this->owner->cachedRuleStacks.addOnTop(this->owner->ruleStack);
     }
@@ -913,7 +913,7 @@ void Calculator::EvaluateLoop::lookUpCache() {
     return;
   }
   if (
-    this->owner->cachedExpressions.size > this->owner->MaxCachedExpressionPerRuleStack ||
+    this->owner->cachedExpressions.size > this->owner->maximumCachedExpressionPerRuleStack ||
     this->output->isBuiltInType() ||
     this->output->isBuiltInAtom()
   ) {

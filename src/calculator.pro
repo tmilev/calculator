@@ -173,5 +173,6 @@ SOURCES += \
     crypto_public_domain_aes.cpp \
     crypto_sha3.cpp \
     calculator_expression_context.cpp \
-    calculator_implementation_8_polynomial.cpp
+    calculator_implementation_8_polynomial.cpp \
+    calculator_evaluation_steps.cpp
 

@@ -1211,10 +1211,10 @@ public:
 
   int maximumRecursionDepth;
   int recursionDepth;
-  int DepthRecursionReached;
+  int depthRecursionReached;
   int maximumAlgebraicTransformationsPerExpression;
-  int MaxLatexChars;
-  int MaxCachedExpressionPerRuleStack;
+  int maximumLatexChars;
+  int maximumCachedExpressionPerRuleStack;
   int MaxRuleStacksCached;
   int RuleStackCacheIndex;
   int numberExpectedExpressionsAtInitialization;
@@ -2105,18 +2105,6 @@ public:
     MapList<Expression, Expression>& matchedExpressions,
     std::stringstream* commentsGeneral = nullptr
   );
-  static bool innerLogEvaluationStepsDebug(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerLogEvaluationSteps(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerLogEvaluationStepsHumanReadableMerged(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doDebug
-  );
 
   static bool functionReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
   std::string writeFileToOutputFolderReturnLink(
@@ -2561,6 +2549,22 @@ public:
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
   void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void parseFillDictionary(const std::string& input);
+};
+
+class CalculatorSteps {
+public:
+  static bool innerLogEvaluationStepsDebug(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool innerLogEvaluationSteps(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool innerLogEvaluationStepsHumanReadableMerged(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doDebug
+  );
 };
 
 class CalculatorConversions {

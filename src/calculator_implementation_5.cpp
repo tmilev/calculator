@@ -14,13 +14,13 @@ class MeshTriangles {
 public:
   Expression theFun;
   Calculator* owner;
-  int XstartingGridCount;
-  int YstartingGridCount;
+  int xStartingGridCount;
+  int yStartingGridCount;
   int numBadEvaluations;
   int numGoodEvaluations;
   int maxNumTriangles;
-  double Height;
-  double Width;
+  double height;
+  double width;
   double minTriangleSideAsPercentOfWidthPlusHeight;
   List<bool> trianglesUsed;
   List<List<Vector<double> > > theTriangles;
@@ -34,29 +34,29 @@ public:
   bool flagShowGrid;
   bool flagFunctionEvaluationFailed;
   bool flagTriangleLimitReached;
-  int CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex);
-  void ComputeImplicitPlot();
-  void ComputeImplicitPlotPart2();
+  int cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex);
+  void computeImplicitPlot();
+  void computeImplicitPlotPart2();
   void plotGrid(int theColor);
   bool evaluatesToDouble(double& whichDouble);
-  double GetValueAtPoint(const Vector<double>& thePoint);
-  void EvaluateFunAtTriangleVertices(int triangleIndex);
-  double GetTriangleMaxSideLength(int triangleIndex);
+  double getValueAtPoint(const Vector<double>& thePoint);
+  void evaluateFunAtTriangleVertices(int triangleIndex);
+  double getTriangleMaxSideLength(int triangleIndex);
   void subdivide(int triangleIndex);
-  void AddPointFromVerticesValues(
+  void addPointFromVerticesValues(
     Vectors<double>& outputAppend,
     const Vector<double>& left,
     const Vector<double>& right,
     double leftVal,
     double rightVal
   );
-  bool ComputePoints(Calculator& calculator, const Expression& input, bool showGrid);
+  bool computePoints(Calculator& calculator, const Expression& input, bool showGrid);
   MeshTriangles();
 };
 
 MeshTriangles::MeshTriangles() {
-  this->XstartingGridCount = 0;
-  this->YstartingGridCount = 0;
+  this->xStartingGridCount = 0;
+  this->yStartingGridCount = 0;
   this->numBadEvaluations = 0;
   this->numGoodEvaluations = 0;
   this->minTriangleSideAsPercentOfWidthPlusHeight = 0.001;
@@ -83,7 +83,7 @@ void MeshTriangles::plotGrid(int theColor) {
   }
 }
 
-double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
+double MeshTriangles::getValueAtPoint(const Vector<double>& thePoint) {
   int theIndex = this->theEvaluatedPoints.getIndex(thePoint);
   if (theIndex != - 1) {
     return this->theEvaluatedPoints.theValues[theIndex];
@@ -101,14 +101,14 @@ double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
   return functionValue;
 }
 
-void MeshTriangles::EvaluateFunAtTriangleVertices(int triangleIndex) {
+void MeshTriangles::evaluateFunAtTriangleVertices(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::EvaluateFunAtTriangleVertices");
   for (int j = 0; j < this->theTriangles[triangleIndex].size; j ++) {
-    this->GetValueAtPoint(this->theTriangles[triangleIndex][j]);
+    this->getValueAtPoint(this->theTriangles[triangleIndex][j]);
   }
 }
 
-double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
+double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::GetTriangleMaxSideLength");
   if (this->theTriangles[triangleIndex].size != 3) {
     global.fatal << "Error: triangle needs three vertices, instead it has vertices: "
@@ -129,14 +129,13 @@ double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   return result;
 }
 
-void MeshTriangles::AddPointFromVerticesValues(
+void MeshTriangles::addPointFromVerticesValues(
   Vectors<double>& outputAppend,
   const Vector<double>& left,
   const Vector<double>& right,
   double leftVal,
   double rightVal
 ) {
-  //MacroRegisterFunctionWithName("MeshTriangles::AddPointFromVerticesValues");
   double Delta = leftVal - rightVal;
   if (Delta == 0.0) {
     outputAppend.addOnTop(left);
@@ -153,8 +152,8 @@ void MeshTriangles::AddPointFromVerticesValues(
   outputAppend.addOnTop(left * contributionLeft + right * contributionRight);
 }
 
-int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
-  MacroRegisterFunctionWithName("MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex");
+int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
+  MacroRegisterFunctionWithName("MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex");
   if (this->flagTriangleLimitReached || this->theTriangles.size< this->maxNumTriangles * 2) {
     return currentIndex;
   }
@@ -214,7 +213,7 @@ void MeshTriangles::subdivide(int triangleIndex) {
   this->trianglesUsed.addOnTop(true);
 }
 
-void MeshTriangles::ComputeImplicitPlotPart2() {
+void MeshTriangles::computeImplicitPlotPart2() {
   MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlotPart2");
   this->theTriangles.setExpectedSize(this->maxNumTriangles * 2);
   this->trianglesUsed.setExpectedSize(this->maxNumTriangles * 2);
@@ -222,13 +221,13 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
   this->theEvaluatedPoints.setExpectedSize(this->maxNumTriangles * 4);
   this->flagTriangleLimitReached = false;
   for (int i = 0; i < this->theTriangles.size; i ++) {
-    this->EvaluateFunAtTriangleVertices(i);
+    this->evaluateFunAtTriangleVertices(i);
   }
   if (this->numGoodEvaluations < 5) {
     this->flagFunctionEvaluationFailed = true;
     return;
   }
-  double minSide = MathRoutines::minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
+  double minSide = MathRoutines::minimum(this->height, this->width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
   currentPlot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(255, 0, 0));
   Vectors<double>& theSegment = currentPlot.thePointsDouble;
@@ -240,7 +239,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
     }
     bool isGood = true;
     for (int j = 0; j < currentTriangle.size; j ++) {
-      if (this->GetValueAtPoint(currentTriangle[j]) == std::nan("")) {
+      if (this->getValueAtPoint(currentTriangle[j]) == std::nan("")) {
         isGood = false;
         break;
       }
@@ -249,9 +248,9 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
       this->trianglesUsed[i] = false;
       continue;
     }
-    double val0 = this->GetValueAtPoint(currentTriangle[0]);
-    double val1 = this->GetValueAtPoint(currentTriangle[1]);
-    double val2 = this->GetValueAtPoint(currentTriangle[2]);
+    double val0 = this->getValueAtPoint(currentTriangle[0]);
+    double val1 = this->getValueAtPoint(currentTriangle[1]);
+    double val2 = this->getValueAtPoint(currentTriangle[2]);
     double prod01 = val0 * val1;
     double prod12 = val1 * val2;
     double prod20 = val2 * val0;
@@ -259,20 +258,20 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
       this->trianglesUsed[i] = false;
       continue;
     }
-    i = this->CleanUpTrianglesReturnUpdatedCurrentIndex(i);
-    if (this->GetTriangleMaxSideLength(i) > minSide && !this->flagTriangleLimitReached) {
+    i = this->cleanUpTrianglesReturnUpdatedCurrentIndex(i);
+    if (this->getTriangleMaxSideLength(i) > minSide && !this->flagTriangleLimitReached) {
       this->subdivide(i);
       continue;
     }
     theSegment.setSize(0);
     if (prod01 <= 0) {
-      this->AddPointFromVerticesValues(theSegment, currentTriangle[0], currentTriangle[1], val0, val1);
+      this->addPointFromVerticesValues(theSegment, currentTriangle[0], currentTriangle[1], val0, val1);
     }
     if (prod12 <= 0) {
-      this->AddPointFromVerticesValues(theSegment, currentTriangle[1], currentTriangle[2], val1, val2);
+      this->addPointFromVerticesValues(theSegment, currentTriangle[1], currentTriangle[2], val1, val2);
     }
     if (prod20 <= 0 && theSegment.size < 2) {
-      this->AddPointFromVerticesValues(theSegment, currentTriangle[2], currentTriangle[0], val2, val0);
+      this->addPointFromVerticesValues(theSegment, currentTriangle[2], currentTriangle[0], val2, val0);
     }
     if (theSegment.size != 2) {
       continue;
@@ -281,30 +280,30 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
   }
 }
 
-void MeshTriangles::ComputeImplicitPlot() {
+void MeshTriangles::computeImplicitPlot() {
   MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlot");
-  if (this->XstartingGridCount == 0 || this->YstartingGridCount == 0) {
+  if (this->xStartingGridCount == 0 || this->yStartingGridCount == 0) {
     return;
   }
-  this->Width = this->upperRightCorner[0] - this->lowerLeftCorner[0];
-  this->Height = this->upperRightCorner[1] - this->lowerLeftCorner[1];
-  double DeltaX = (this->Width) / this->XstartingGridCount;
-  double DeltaY = (this->Height) / this->YstartingGridCount;
+  this->width = this->upperRightCorner[0] - this->lowerLeftCorner[0];
+  this->height = this->upperRightCorner[1] - this->lowerLeftCorner[1];
+  double deltaX = (this->width) / this->xStartingGridCount;
+  double deltaY = (this->height) / this->yStartingGridCount;
   Vector<double> currentPoint;
   currentPoint.initializeFillInObject(2, 0);
   List<Vector<double> > currentTriangle;
   currentTriangle.initializeFillInObject(3, currentPoint);
-  for (int i = 0; i < this->XstartingGridCount; i ++) {
-    for (int j = 0; j < this->YstartingGridCount; j ++) {
-      currentTriangle[0][0] = this->lowerLeftCorner[0] + DeltaX * i;
-      currentTriangle[0][1] = this->lowerLeftCorner[1] + DeltaY * j;
+  for (int i = 0; i < this->xStartingGridCount; i ++) {
+    for (int j = 0; j < this->yStartingGridCount; j ++) {
+      currentTriangle[0][0] = this->lowerLeftCorner[0] + deltaX * i;
+      currentTriangle[0][1] = this->lowerLeftCorner[1] + deltaY * j;
       currentTriangle[1] = currentTriangle[0];
-      currentTriangle[1][0] += DeltaX;
+      currentTriangle[1][0] += deltaX;
       currentTriangle[2] = currentTriangle[1];
-      currentTriangle[2][1] += DeltaY;
+      currentTriangle[2][1] += deltaY;
       this->theTriangles.addOnTop(currentTriangle);
       currentTriangle[1] = currentTriangle[0];
-      currentTriangle[1][1] += DeltaY;
+      currentTriangle[1][1] += deltaY;
       this->theTriangles.addOnTop(currentTriangle);
     }
   }
@@ -312,7 +311,7 @@ void MeshTriangles::ComputeImplicitPlot() {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(240, 240, 0)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
-  this->ComputeImplicitPlotPart2();
+  this->computeImplicitPlotPart2();
   if (this->flagShowGrid) {
     this->plotGrid(static_cast<int>(HtmlRoutines::redGreenBlue(100, 100, 100)));
     this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
@@ -362,7 +361,7 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPointsImplicitly");
   MeshTriangles theMesh;
-  if (!theMesh.ComputePoints(calculator, input, false)) {
+  if (!theMesh.computePoints(calculator, input, false)) {
     return false;
   }
   HashedList<Vector<double>, MathRoutines::hashVectorDoubles> thePoints;
@@ -387,7 +386,7 @@ bool CalculatorFunctions::innerPlotImplicitShowGridFunction(
   return CalculatorFunctions::innerPlotImplicitFunctionFull(calculator, input, output, true);
 }
 
-bool MeshTriangles::ComputePoints(
+bool MeshTriangles::computePoints(
   Calculator& calculator, const Expression& input, bool showGrid
 ) {
   MacroRegisterFunctionWithName("MeshTriangles::ComputePoints");
@@ -439,8 +438,8 @@ bool MeshTriangles::ComputePoints(
   if (theGridCount.size != 2) {
     return calculator << "Failed to extract pair of small integers from: " << input[4].toString();
   }
-  this->XstartingGridCount = theGridCount[0];
-  this->YstartingGridCount = theGridCount[1];
+  this->xStartingGridCount = theGridCount[0];
+  this->yStartingGridCount = theGridCount[1];
   if (input.size() >= 6) {
     if (!input[5].isSmallInteger(&this->maxNumTriangles)) {
       return calculator << "Failed to extract small integer from: " << input[5].toString();
@@ -452,7 +451,7 @@ bool MeshTriangles::ComputePoints(
       << " line: " << __LINE__ << ". ";
     }
   }
-  this->ComputeImplicitPlot();
+  this->computeImplicitPlot();
   calculator << "Evaluated function in: "
   << this->numGoodEvaluations << " points and failed to evaluate it at: "
   << this->numBadEvaluations << " points. ";
@@ -464,7 +463,7 @@ bool CalculatorFunctions::innerPlotImplicitFunctionFull(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotImplicitFunctionFull");
   MeshTriangles theMesh;
-  if (!theMesh.ComputePoints(calculator, input, showGrid)) {
+  if (!theMesh.computePoints(calculator, input, showGrid)) {
     return false;
   }
   return output.assignValue(theMesh.thePlot, calculator);

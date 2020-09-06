@@ -444,25 +444,25 @@ bool Calculator::innerGroebner(
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
   if (order == MonomialP::Order::gradedLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_totalDegree_leftLargerWins
     );
   } else if (order == MonomialP::Order::gradedReverseLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_totalDegree_rightSmallerWins
     );
   } else if (order == MonomialP::Order::lexicographicOpposite) {
-    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_rightLargerWins
     );
   } else if (order == MonomialP::Order::lexicographic){
-    theGroebnerComputation.thePolynomialOrder.monomialOrder.setComparison(
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialP::greaterThan_leftLargerWins
     );
   } else {
     global.fatal << "Unexpected order value: " << order << global.fatal;
   }
-  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.monomialOrder;
+  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.polynomialOrder.monomialOrder;
   theGroebnerComputation.maximumPolynomialComputations = upperBoundComputations;
   bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;

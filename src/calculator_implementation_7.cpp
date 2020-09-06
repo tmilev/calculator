@@ -1403,7 +1403,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   polynomials = polynomialsRational;
   system.groebner.maximumPolynomialComputations = upperLimit;
   system.maximumSerreSystemComputationsPreferred = upperLimit;
-  system.groebner.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+  system.groebner.polynomialOrder.monomialOrder = MonomialP::orderDefault();
   system.theAlgebraicClosure = &calculator.theObjectContainer.theAlgebraicClosure;
   system.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.getElement() = system.groebner.theFormat;
@@ -2113,10 +2113,10 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition() 
     GroebnerBasisComputation<Rational> computation;
     computation.flagDoLogDivision = true;
     computation.flagStoreQuotients = true;
-    computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+    computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
     computation.addBasisElementNoReduction(this->theDen);
     computation.theFormat = this->currentFormaT;
-    computation.thePolynomialOrder.monomialOrder = monomialOrder;
+    computation.polynomialOrder.monomialOrder = monomialOrder;
     Polynomial<Rational> theNumCopy = this->theNum;
     computation.remainderDivisionByBasis(theNumCopy, computation.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";

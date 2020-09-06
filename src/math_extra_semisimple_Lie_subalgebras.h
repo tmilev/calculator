@@ -95,7 +95,7 @@ class CandidateSemisimpleSubalgebra {
   }
 
 public:
-  WeylGroupData* theWeylNonEmbedded;
+  WeylGroupData* weylNonEmbedded;
   SemisimpleLieAlgebra* theSubalgebraNonEmbeddedDefaultScale;
   DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
   DynkinType theCentralizerType;

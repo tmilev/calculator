@@ -242,7 +242,7 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder(bool addD
   for (int i = 0; i < variables.size; i ++) {
     variables[i].makeEi(i, 1);
   }
-  variables.quickSortAscending(&this->thePolynomialOrder.monomialOrder);
+  variables.quickSortAscending(&this->polynomialOrder.monomialOrder);
   FormatExpressions tempFormat = this->theFormat;
   if (addDollars) {
     out << "$";
@@ -351,7 +351,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   int indexLeadingMonomial = currentRemainder.getIndexLeadingMonomial(
     &highestMonomial,
     &leadingCoefficient,
-    &this->thePolynomialOrder.monomialOrder
+    &this->polynomialOrder.monomialOrder
   );
   if (indexLeadingMonomial == - 1) {
     // Remainder is zero.
@@ -460,18 +460,18 @@ bool GroebnerBasisComputation<Coefficient>::addRemainderToBasis() {
   }
   this->flagFoundNewBasisElements = true;
   this->remainderDivision.scaleNormalizeLeadingMonomial(
-    &this->thePolynomialOrder.monomialOrder
+    &this->polynomialOrder.monomialOrder
   );
   MonomialP newLeadingMonomial;
   this->remainderDivision.getIndexLeadingMonomial(
     &newLeadingMonomial,
     nullptr,
-    &this->thePolynomialOrder.monomialOrder
+    &this->polynomialOrder.monomialOrder
   );
   int indexToAddAt = 0;
   for (; indexToAddAt < this->theBasis.size; indexToAddAt ++) {
     MonomialP& otherLeadingMonomial = this->theBasis[indexToAddAt].leadingMonomial;
-    if (this->thePolynomialOrder.monomialOrder.greaterThan(
+    if (this->polynomialOrder.monomialOrder.greaterThan(
       otherLeadingMonomial, newLeadingMonomial
     )) {
       break;
@@ -539,7 +539,7 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
   const Polynomial<Coefficient>& input
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::addBasisElementNoReduction");
-  if (this->thePolynomialOrder.monomialOrder.leftGreaterThanRight == nullptr) {
+  if (this->polynomialOrder.monomialOrder.leftGreaterThanRight == nullptr) {
     global.fatal << "Uninitialized monomial order. " << global.fatal;
   }
   if (input.isEqualToZero()) {
@@ -551,7 +551,7 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
   last.element.getIndexLeadingMonomial(
     &last.leadingMonomial,
     &last.leadingCoefficient,
-    &this->thePolynomialOrder.monomialOrder
+    &this->polynomialOrder.monomialOrder
   );
 }
 
@@ -943,7 +943,7 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   toBeModified.groebner.maximumPolynomialComputations = this->groebner.maximumPolynomialComputations;
   toBeModified.groebner.maximumBasisReductionComputations = this->groebner.maximumBasisReductionComputations;
   toBeModified.groebner.theFormat = this->groebner.theFormat;
-  toBeModified.groebner.thePolynomialOrder = this->groebner.thePolynomialOrder;
+  toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
 }
 
 template <class Coefficient>
@@ -1292,7 +1292,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   computation.theFormat.polynomialAlphabet.addOnTop("y");
   computation.theFormat.polynomialAlphabet.addOnTop("z");
   computation.theFormat.polynomialAlphabet.addOnTop("w");
-  computation.thePolynomialOrder.monomialOrder = MonomialP::orderForGreatestCommonDivisor();
+  computation.polynomialOrder.monomialOrder = MonomialP::orderForGreatestCommonDivisor();
   computation.maximumPolynomialComputations = - 1;
   if (!computation.transformToReducedGroebnerBasis(theBasis)) {
     if (commentsOnFailure != nullptr) {
@@ -1306,7 +1306,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   MonomialP currentLeading;
   for (int i = theBasis.size - 1; i >= 0; i --) {
     theBasis[i].getIndexLeadingMonomial(
-      &currentLeading, nullptr, &computation.thePolynomialOrder.monomialOrder
+      &currentLeading, nullptr, &computation.polynomialOrder.monomialOrder
     );
     if (currentLeading(numberOfVariables) == 0) {
       if (maximalMonomialNoTIndex == - 1) {

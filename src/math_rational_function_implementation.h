@@ -1176,7 +1176,7 @@ bool RationalFunction<Coefficient>::getRelations(
     currentPoly -= currentGenerator;
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.monomialOrder.setComparison(
+  theComputation.polynomialOrder.monomialOrder.setComparison(
     MonomialP::greaterThan_leftLargerWins
   );
   if (!theComputation.transformToReducedGroebnerBasis(theGroebnerBasis)) {

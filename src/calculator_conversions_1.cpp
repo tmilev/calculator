@@ -471,7 +471,7 @@ bool CalculatorConversions::innerStoreCandidateSubalgebra(
   List<Expression> values;
   input.checkBasicInitialization();
   CalculatorConversions::innerExpressionFromDynkinType(
-    calculator, input.theWeylNonEmbedded->theDynkinType, currentE
+    calculator, input.weylNonEmbedded->theDynkinType, currentE
   );
   keys.addOnTop("DynkinType");
   values.addOnTop(currentE);
@@ -532,25 +532,25 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
   }
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.toString() << ". ";
   theReport.report(reportStream.str());
-  outputSubalgebra.theWeylNonEmbedded = &
+  outputSubalgebra.weylNonEmbedded = &
   calculator.theObjectContainer.getWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
-  outputSubalgebra.theWeylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
+  outputSubalgebra.weylNonEmbedded->makeFromDynkinType(theNonEmbeddedDynkinType);
   int theRank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   theReport.report(reportStream.str());
   Matrix<Rational> theHs;
   if (!calculator.functionGetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return calculator << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
-    << outputSubalgebra.theWeylNonEmbedded->theDynkinType << "<hr>";
+    << outputSubalgebra.weylNonEmbedded->theDynkinType << "<hr>";
   }
-  if (theHs.numberOfRows != outputSubalgebra.theWeylNonEmbedded->getDimension()) {
+  if (theHs.numberOfRows != outputSubalgebra.weylNonEmbedded->getDimension()) {
     return calculator << "<hr>Failed to load Cartan elements: I expected "
-    << outputSubalgebra.theWeylNonEmbedded->getDimension() << " elements, but failed to get them.";
+    << outputSubalgebra.weylNonEmbedded->getDimension() << " elements, but failed to get them.";
   }
   List<int> theRanks, theMults;
-  outputSubalgebra.theWeylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
+  outputSubalgebra.weylNonEmbedded->theDynkinType.getLettersTypesMultiplicities(nullptr, &theRanks, &theMults, nullptr);
   outputSubalgebra.cartanSubalgebrasByComponentScaledToActByTwo.setSize(
-    outputSubalgebra.theWeylNonEmbedded->theDynkinType.getNumberOfSimpleComponents()
+    outputSubalgebra.weylNonEmbedded->theDynkinType.getNumberOfSimpleComponents()
   );
   int componentCounter = - 1;
   int counter = - 1;
@@ -591,11 +591,11 @@ bool CalculatorConversions::innerCandidateSubalgebraPrecomputed(
     return calculator << "<hr>Failed to extract subalgebra generators from expression " << input.toString() << ". ";
   }
   SemisimpleLieAlgebra& currentNonEmbededSA =
-  owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
+  owner.theSubalgebrasNonEmbedded->getValueCreateNoInit(outputSubalgebra.weylNonEmbedded->theDynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
-  owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
+  owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.weylNonEmbedded->theDynkinType);
   currentNonEmbededSA.theWeyl.computeRho(true);
-  outputSubalgebra.theWeylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
+  outputSubalgebra.weylNonEmbedded->computeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
   //some time soon.
   outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
@@ -691,7 +691,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     currentCandidate.checkFullInitialization();
     if (theSAs.theSubalgebras.contains(currentCandidate.theHs)) {
       calculator << "<hr>Did not load subalgebra of type "
-      << currentCandidate.theWeylNonEmbedded->toString()
+      << currentCandidate.weylNonEmbedded->toString()
       << " because I've already loaded a subalgebra with "
       << "the same Cartan subalgebra. ";
       continue;

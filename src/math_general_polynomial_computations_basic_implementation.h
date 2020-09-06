@@ -1305,7 +1305,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->thePolynomialOrder.monomialOrder;
+  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string highlightedColor = "red";
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -1316,7 +1316,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasis.size);
-  this->allMonomials.quickSortDescending(&this->owner->thePolynomialOrder.monomialOrder);
+  this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   this->owner->theFormat.flagUseLatex = true;
   out << this->owner->toStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
@@ -1433,7 +1433,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->thePolynomialOrder.monomialOrder;
+  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
@@ -1445,7 +1445,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.setSize(this->theBasis.size);
-  this->allMonomials.quickSortDescending(&this->owner->thePolynomialOrder.monomialOrder);
+  this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   out << this->owner->toStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";

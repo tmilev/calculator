@@ -3137,7 +3137,7 @@ public:
 template<class Coefficient>
 class GroebnerBasisComputation {
   public:
-  PolynomialOrder<Coefficient> thePolynomialOrder;
+  PolynomialOrder<Coefficient> polynomialOrder;
   Polynomial<Coefficient> remainderDivision;
   Polynomial<Coefficient> bufPolyForGaussianElimination;
   List<Polynomial<Coefficient> > theQuotients;

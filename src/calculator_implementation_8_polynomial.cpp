@@ -22,7 +22,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainder(
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+  computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomials.size; i ++) {
     if (polynomials[i].isEqualToZero()) {
@@ -105,7 +105,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   GroebnerBasisComputation<AlgebraicNumber> computation;
   computation.flagDoLogDivision = true;
   computation.flagStoreQuotients = true;
-  computation.thePolynomialOrder.monomialOrder = *monomialOrder;
+  computation.polynomialOrder.monomialOrder = *monomialOrder;
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
       return output.makeError("Division by zero.", calculator);
@@ -113,7 +113,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
     computation.addBasisElementNoReduction(polynomialsRational[i]);
   }
   if (monomialOrder != nullptr) {
-    computation.thePolynomialOrder.monomialOrder = *monomialOrder;
+    computation.polynomialOrder.monomialOrder = *monomialOrder;
   }
   computation.remainderDivisionByBasis(polynomialsRational[0], computation.remainderDivision, - 1);
   theContext.getFormat(computation.theFormat);
@@ -151,7 +151,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   GroebnerBasisComputation<AlgebraicNumber> computation;
   computation.flagDoLogDivision = true;
   computation.flagStoreQuotients = true;
-  computation.thePolynomialOrder.monomialOrder.setComparison(
+  computation.polynomialOrder.monomialOrder.setComparison(
     MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
   for (int i = 2; i < polynomialsRational.size; i ++) {
@@ -255,7 +255,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
     return output.makeError("Failed to extract list of polynomials. ", calculator);
   }
   GroebnerBasisComputation<AlgebraicNumber> computation;
-  computation.thePolynomialOrder.monomialOrder = MonomialP::orderDefault();
+  computation.polynomialOrder.monomialOrder = MonomialP::orderDefault();
   computation.flagStoreQuotients = true;
   for (int i = 1; i < polynomialsRational.size; i ++) {
     if (polynomialsRational[i].isEqualToZero()) {
@@ -452,7 +452,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   std::stringstream out;
   List<Polynomial<Coefficient> >& theRemainders = this->intermediateRemainders;
   List<Polynomial<Coefficient> >& theSubtracands = this->intermediateSubtractands;
-  this->owner->theFormat.monomialOrder = this->owner->thePolynomialOrder.monomialOrder;
+  this->owner->theFormat.monomialOrder = this->owner->polynomialOrder.monomialOrder;
   bool oneDivisor = (this->owner->theBasis.size == 1);
   this->allMonomials.clear();
   this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
@@ -476,7 +476,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     constMon.makeOne();
     this->allMonomials.addOnTopNoRepetition(constMon);
   }
-  this->allMonomials.quickSortDescending(&this->owner->thePolynomialOrder.monomialOrder);
+  this->allMonomials.quickSortDescending(&this->owner->polynomialOrder.monomialOrder);
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.setSize(this->allMonomials.size);
@@ -506,7 +506,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].getIndexLeadingMonomial(
       nullptr,
       nullptr,
-      &this->owner->thePolynomialOrder.monomialOrder
+      &this->owner->polynomialOrder.monomialOrder
     );
   }
   this->owner->theFormat.flagUseLatex = true;
@@ -832,7 +832,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   Polynomial<Coefficient>& currentDivisor = basis[indexCurrentDivisor].element;
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.getIndexLeadingMonomial(
-    &divisorLeadingMonomial, nullptr, &this->owner->thePolynomialOrder.monomialOrder
+    &divisorLeadingMonomial, nullptr, &this->owner->polynomialOrder.monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
     divisorLeadingMonomial
@@ -840,7 +840,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   MonomialP maxMonCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
   currentRemainder.getIndexLeadingMonomial(
-    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->owner->thePolynomialOrder.monomialOrder
+    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->owner->polynomialOrder.monomialOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.getIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].addOnTop(currentSlideNumber);

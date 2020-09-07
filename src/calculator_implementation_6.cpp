@@ -2017,7 +2017,7 @@ bool CalculatorFunctions::innerUnionEmptySet(Calculator& calculator, const Expre
 
 bool CalculatorFunctions::innerIntersectUnion(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntersectUnion");
-  return calculator.outerDistribute(calculator, input, output, calculator.opUnion(), calculator.opIntersection(), false);
+  return CalculatorBasics::distribute(calculator, input, output, calculator.opUnion(), calculator.opIntersection(), false);
 }
 
 bool CalculatorFunctions::innerCompareIntervalsNumerically(

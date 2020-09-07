@@ -1059,22 +1059,22 @@ bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
   return result;
 }
 
-bool Calculator::outerTensorProductStandard(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::tensorProductStandard(Calculator& calculator, const Expression& input, Expression& output) {
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
-  if (calculator.outerDistribute(calculator, input, output, calculator.opPlus(), calculator.opTensor())) {
+  if (CalculatorBasics::distribute(calculator, input, output, calculator.opPlus(), calculator.opTensor())) {
     return true;
   }
-  if (calculator.outerAssociate(calculator, input, output)) {
+  if (CalculatorBasics::associate(calculator, input, output)) {
     return true;
   }
-  if (calculator.outerExtractBaseMultiplication(calculator, input, output)) {
+  if (CalculatorBasics::extractBaseMultiplication(calculator, input, output)) {
     return true;
   }
   return false;
 }
 
-bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
+bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
@@ -1140,7 +1140,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   return false;
 }
 
-bool Calculator::outerCombineFractions(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::combineFractions(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -1163,7 +1163,7 @@ bool Calculator::outerCombineFractions(Calculator& calculator, const Expression&
   return output.makeXOX(calculator, calculator.opDivide(), outputNumE, quotientDenominatorE);
 }
 
-bool Calculator::outerCheckRule(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::checkRule(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opDefine(), 3)) {
     return false;
   }
@@ -1176,7 +1176,7 @@ bool Calculator::outerCheckRule(Calculator& calculator, const Expression& input,
   return output.makeError(out.str(), calculator);
 }
 
-bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::subZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -1188,7 +1188,7 @@ bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& calculator, const E
   return false;
 }
 
-bool Calculator::innerCancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::cancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -1202,7 +1202,7 @@ bool Calculator::innerCancelMultiplicativeInverse(Calculator& calculator, const 
   return false;
 }
 
-bool Calculator::outerAssociateTimesDivision(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associateTimesDivision(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -1215,7 +1215,7 @@ bool Calculator::outerAssociateTimesDivision(Calculator& calculator, const Expre
   return true;
 }
 
-bool Calculator::outerAssociate(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associate(Calculator& calculator, const Expression& input, Expression& output) {
   if (input.size() != 3) {
     return false;
   }
@@ -1234,7 +1234,7 @@ bool Calculator::outerAssociate(Calculator& calculator, const Expression& input,
   return true;
 }
 
-bool Calculator::standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::standardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opIsDenotedBy(), 3)) {
@@ -1259,7 +1259,7 @@ bool Calculator::standardIsDenotedBy(Calculator& calculator, const Expression& i
   return true;
 }
 
-bool Calculator::innerMultiplyByOne(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::multiplyByOne(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerMultiplyByOne");
   if (!input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3) {
     return false;
@@ -1303,7 +1303,7 @@ bool Calculator::getVectorInt(const Expression& input, List<int>& output) {
   return true;
 }
 
-bool Calculator::outerTimesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::timesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
   if (!input.startsWith(calculator.opTimes())) {
     return false;
@@ -1333,7 +1333,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& calculator, const E
   return true;
 }
 
-bool Calculator::outerDistribute(
+bool CalculatorBasics::distribute(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1341,7 +1341,7 @@ bool Calculator::outerDistribute(
   int theMultiplicativeOp,
   bool constantsOnly
 ) {
-  if (calculator.outerLeftDistributeBracketIsOnTheLeft(
+  if (CalculatorBasics::leftDistributeBracketIsOnTheLeft(
     calculator,
     input,
     output,
@@ -1351,7 +1351,7 @@ bool Calculator::outerDistribute(
   )) {
     return true;
   }
-  return calculator.outerRightDistributeBracketIsOnTheRight(
+  return CalculatorBasics::rightDistributeBracketIsOnTheRight(
     calculator,
     input,
     output,
@@ -1361,8 +1361,8 @@ bool Calculator::outerDistribute(
   );
 }
 
-bool Calculator::outerDistributeTimes(Calculator& calculator, const Expression& input, Expression& output) {
-  return Calculator::outerDistribute(
+bool CalculatorBasics::distributeTimes(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorBasics::distribute(
     calculator,
     input,
     output,
@@ -1372,11 +1372,11 @@ bool Calculator::outerDistributeTimes(Calculator& calculator, const Expression& 
   );
 }
 
-bool Calculator::outerDistributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output) {
-  return Calculator::outerDistribute(calculator, input, output,calculator.opPlus(), calculator.opTimes(), true);
+bool CalculatorBasics::distributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorBasics::distribute(calculator, input, output,calculator.opPlus(), calculator.opTimes(), true);
 }
 
-bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
+bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1384,7 +1384,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
   int theMultiplicativeOp,
   bool constantsOnly
 ) {
-  MacroRegisterFunctionWithName("Calculator::outerLeftDistributeBracketIsOnTheLeft");
+  MacroRegisterFunctionWithName("CalculatorBasics::leftDistributeBracketIsOnTheLeft");
   if (theAdditiveOp == - 1) {
     theAdditiveOp = calculator.opPlus();
   }
@@ -1408,7 +1408,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(
   return output.makeXOX(calculator, theAdditiveOp, leftE, rightE);
 }
 
-bool Calculator::outerRightDistributeBracketIsOnTheRight(
+bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1565,7 +1565,7 @@ bool Calculator::functionCollectSummands(
   return !hasNAN;
 }
 
-bool Calculator::innerAssociateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
   int opPower = calculator.opThePower();
   if (!input.startsWith(opPower, 3)) {
@@ -1675,7 +1675,7 @@ bool Calculator::outerPlus(Calculator& calculator, const Expression& input, Expr
   return true;
 }
 
-bool Calculator::evaluateIf(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::evaluateIf(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opDefineConditional(), 4)) {
     return output.makeError("Error: operation :if = takes three arguments.", calculator);
   }
@@ -1694,7 +1694,7 @@ bool Calculator::evaluateIf(Calculator& calculator, const Expression& input, Exp
   return false;
 }
 
-bool Calculator::outerMinus(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::minus(Calculator& calculator, const Expression& input, Expression& output) {
   if (!(input.startsWith(calculator.opMinus(), 3) || input.startsWith(calculator.opMinus(), 2))) {
     return false;
   }
@@ -2939,7 +2939,7 @@ bool Calculator::convertExpressionsToCommonContext(
   return true;
 }
 
-bool Calculator::outerMeltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&calculator.recursionDepth);
   if (!input.startsWith(calculator.opEndStatement())) {

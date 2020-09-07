@@ -2156,7 +2156,6 @@ public:
   static bool innerAutomatedTest(Calculator& calculator, const Expression& input, Expression& output);
   int getNumberOfBuiltInFunctions();
   static bool innerTranspose(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetElementWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerStandardFunction(
     Calculator& calculator,
     const Expression& input,
@@ -2192,56 +2191,6 @@ public:
     const Expression& input,
     LinearCombination<Expression, Rational>& outputSum
   );
-  static bool outerTensorProductStandard(Calculator& calculator, const Expression& input, Expression& output);
-  static bool standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerMinus(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerCombineFractions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerCheckRule(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerAssociate(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSubZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAssociateExponentExponent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerAssociateTimesDivision(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFlattenCommandEnclosuresOneLayeR(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool functionFlattenCommandEnclosuresOneLayer(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool outerExtractBaseMultiplication(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerMeltBrackets(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerMultiplyByOne(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerTimesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerDistributeTimes(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerDistributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerDistribute(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
-    bool constantsOnly = false
-  );
-  static bool outerLeftDistributeBracketIsOnTheLeft(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
-    bool constantsOnly = false
-  );
-  static bool outerRightDistributeBracketIsOnTheRight(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int theAdditiveOp = - 1,
-    int theMultiplicativeOp = - 1,
-    bool constantsOnly = false
-  );
-  static bool evaluateIf(Calculator& calculator, const Expression& input, Expression& output);
   template<class theType>
   bool functionGetMatrix(
     const Expression& input,
@@ -2304,7 +2253,6 @@ public:
   static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerKillingForm(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
     Calculator& calculator,
     const Expression& input,
@@ -2549,6 +2497,60 @@ public:
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
   void parseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void parseFillDictionary(const std::string& input);
+};
+
+class CalculatorBasics {
+public:
+  static bool tensorProductStandard(Calculator& calculator, const Expression& input, Expression& output);
+  static bool standardIsDenotedBy(Calculator& calculator, const Expression& input, Expression& output);
+  static bool minus(Calculator& calculator, const Expression& input, Expression& output);
+  static bool combineFractions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool checkRule(Calculator& calculator, const Expression& input, Expression& output);
+  static bool associate(Calculator& calculator, const Expression& input, Expression& output);
+  static bool subZeroDivAnythingWithZero(Calculator& calculator, const Expression& input, Expression& output);
+  static bool cancelMultiplicativeInverse(Calculator& calculator, const Expression& input, Expression& output);
+  static bool associateExponentExponent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool associateTimesDivision(Calculator& calculator, const Expression& input, Expression& output);
+  static bool flattenCommandEnclosuresOneLayeR(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool functionFlattenCommandEnclosuresOneLayer(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool multiplyAtoXtimesAtoYequalsAtoXplusY(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool extractBaseMultiplication(Calculator& calculator, const Expression& input, Expression& output);
+  static bool meltBrackets(Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyByOne(Calculator& calculator, const Expression& input, Expression& output);
+  static bool timesToFunctionApplication(Calculator& calculator, const Expression& input, Expression& output);
+  static bool distributeTimes(Calculator& calculator, const Expression& input, Expression& output);
+  static bool distributeTimesConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool distribute(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int theAdditiveOp = - 1,
+    int theMultiplicativeOp = - 1,
+    bool constantsOnly = false
+  );
+  static bool leftDistributeBracketIsOnTheLeft(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int theAdditiveOp = - 1,
+    int theMultiplicativeOp = - 1,
+    bool constantsOnly = false
+  );
+  static bool rightDistributeBracketIsOnTheRight(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int theAdditiveOp = - 1,
+    int theMultiplicativeOp = - 1,
+    bool constantsOnly = false
+  );
+  static bool evaluateIf(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorSteps {

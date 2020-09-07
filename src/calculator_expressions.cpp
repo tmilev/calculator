@@ -2976,18 +2976,18 @@ bool Expression::needsParenthesisForMultiplication(FormatExpressions* theFormat)
   return false;
 }
 
-bool Calculator::innerFlattenCommandEnclosuresOneLayeR(
+bool CalculatorBasics::flattenCommandEnclosuresOneLayeR(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (input.size() != 2) {
     return false;
   }
-  return Calculator::functionFlattenCommandEnclosuresOneLayer(
+  return CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
     calculator, input[1], output
   );
 }
 
-bool Calculator::functionFlattenCommandEnclosuresOneLayer(
+bool CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
@@ -4520,8 +4520,8 @@ std::string Expression::toString(
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
     if (
-      this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
-      this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
+      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
+      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
     ) {
       return newMe.toString(theFormat, &newStart, false, outputJS);
     }

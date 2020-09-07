@@ -55,6 +55,13 @@ public:
   static bool isOuterAutoWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
   static bool signSignatureRootSubsystems(Calculator& calculator, const Expression& input, Expression& output);
   static bool signSignatureRootSubsystemsFromKostkaNumbers(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getElementWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
+};
+
+class CalculatorLieTheory {
+public:
+  static bool killingForm(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 
 #endif

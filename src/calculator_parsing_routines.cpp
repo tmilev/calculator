@@ -2389,7 +2389,7 @@ bool Calculator::applyOneRule() {
   ) {
     this->replaceEEXBy_CofEE_X(this->conTimes());
     Expression impliedFunApplication;
-    if (this->outerTimesToFunctionApplication(
+    if (CalculatorBasics::timesToFunctionApplication(
       *this,
       (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].theData,
       impliedFunApplication

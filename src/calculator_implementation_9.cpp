@@ -1416,7 +1416,7 @@ bool CalculatorFunctions::innerEWAorPoly(Calculator& calculator, const Expressio
   return output.assignValueWithContext(outputEWA, endContext, calculator);
 }
 
-bool Calculator::outerExtractBaseMultiplication(
+bool CalculatorBasics::extractBaseMultiplication(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);

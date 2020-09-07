@@ -558,7 +558,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FlattenCommandEnclosuresOneLayer",
-    Calculator::innerFlattenCommandEnclosuresOneLayeR,
+    CalculatorBasics::flattenCommandEnclosuresOneLayeR,
     "",
     "Flattens command enclosures. ",
     "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); "
@@ -5479,13 +5479,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Killing",
-    Calculator::innerKillingForm,
+    CalculatorLieTheory::killingForm,
     "",
     "Computes the Killing form product of two elements of semisimple Lie algebra. ",
     "h_{{i}}= GetCartanGenerator{}(F_1, i);"
     "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
     "FunctionToMatrix(KF, 4, 4)",
-    "Calculator::innerKillingForm",
+    "CalculatorLieTheory::killingForm",
     "Killing",
     innerStandard
   );
@@ -5615,7 +5615,7 @@ void Calculator::initPredefinedStandardOperations() {
 
   this->addOperationHandler(
     ";",
-    Calculator::outerMeltBrackets,
+    CalculatorBasics::meltBrackets,
     "",
     "Melts down a layer of parenthesis around a list of "
     "commands prepended with the Melt operation.\n "
@@ -5641,7 +5641,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "=",
-    Calculator::outerCheckRule,
+    CalculatorBasics::checkRule,
     "",
     "Checks whether the rule is of the form A = A, and substitutes "
     "the expression with an error if that is the case. "
@@ -5866,7 +5866,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "+",
-    this->outerCombineFractions,
+    CalculatorBasics::combineFractions,
     "",
     "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; ",
     "f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z",
@@ -6227,11 +6227,11 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "-",
-    Calculator::outerMinus,
+    CalculatorBasics::minus,
     "",
     "Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule "
     "-{{b}}=MinusOne * b; {{a}}-{{b}}=a + MinusOne * b", "- 1 + (- 5)",
-    "Calculator::outerMinus",
+    "CalculatorBasics::minus",
     "Minus",
     outerStandard
   );
@@ -6690,7 +6690,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY,
+    CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY,
     "",
     "Collects multiplicand exponents. ",
     "x*(x*y)*x*(x*x^3*x);\n"
@@ -6704,7 +6704,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::innerMultiplyByOne,
+    CalculatorBasics::multiplyByOne,
     "",
     "Rule 1*{{anything}} = anything.",
     "x*1;\n"
@@ -6736,7 +6736,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::outerAssociate,
+    CalculatorBasics::associate,
     "",
     "Associative law: reorders the multiplicative tree in standard form. ",
     "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
@@ -6771,7 +6771,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::outerExtractBaseMultiplication,
+    CalculatorBasics::extractBaseMultiplication,
     "",
     "Pulls rationals in the front of multiplicative terms.",
     "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)",
@@ -6781,7 +6781,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::outerAssociateTimesDivision,
+    CalculatorBasics::associateTimesDivision,
     "",
     "Associative law w.r.t. division. ",
     "a*(b/c); (a*b)/c-a*(b/c)",
@@ -6791,7 +6791,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::innerCancelMultiplicativeInverse,
+    CalculatorBasics::cancelMultiplicativeInverse,
     "",
     "Cancels multiplicative inverse. ",
     "(a*b)/b; (a/b)*b",
@@ -6801,7 +6801,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::outerDistributeTimes,
+    CalculatorBasics::distributeTimes,
     "",
     "Distributive law (left and right).",
     "(a + b) * c;\n"
@@ -6812,7 +6812,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    Calculator::outerDistributeTimesConstant,
+    CalculatorBasics::distributeTimesConstant,
     "",
     "Distributive law (left and right), acts only if the "
     "multiplicand is a constant. This rule is "
@@ -7258,7 +7258,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "/",
-    Calculator::innerSubZeroDivAnythingWithZero,
+    CalculatorBasics::subZeroDivAnythingWithZero,
     "",
     "Provided that x is not equal to zero, substitutes 0/x with 0. ",
     "0/b; ",
@@ -7713,7 +7713,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "^",
-    Calculator::innerAssociateExponentExponent,
+    CalculatorBasics::associateExponentExponent,
     "",
     "If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. "
     "The rule acts when one of the following holds:\n"
@@ -7958,7 +7958,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "\\otimes",
-    Calculator::outerTensorProductStandard,
+    CalculatorBasics::tensorProductStandard,
     "",
     "Please do note use (or use at your own risk): this is work-in-progress. "
     "Will be documented when implemented and tested. Tensor product of "
@@ -7974,7 +7974,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "=:",
-    Calculator::standardIsDenotedBy,
+    CalculatorBasics::standardIsDenotedBy,
     "",
     "The operation =: is the \"is denoted by\" operation. "
     "The expression a =:b always reduces to a =b. "

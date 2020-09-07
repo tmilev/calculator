@@ -2229,7 +2229,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketDistribute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketDistribute");
-  return calculator.outerDistribute(
+  return CalculatorBasics::distribute(
     calculator, input, output, calculator.opPlus(), calculator.opLieBracket()
   );
 }

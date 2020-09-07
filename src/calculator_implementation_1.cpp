@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
+#include "calculator_Weyl_group_characters.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
 #include "math_extra_semisimple_Lie_algebras.h"
@@ -1804,7 +1805,7 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
   return result;
 }
 
-bool Calculator::innerKillingForm(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::killingForm(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKillingForm");
   if (!input.isListNElements(3)) {
     return false;

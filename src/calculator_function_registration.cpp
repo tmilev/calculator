@@ -2454,7 +2454,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GenerateFiniteMultiplicativelyClosedSet",
-    Calculator::innerGenerateMultiplicativelyClosedSet,
+    CalculatorFunctions::innerGenerateMultiplicativelyClosedSet,
     "",
     "The first argument gives upper_bound to the number of elements of the set. "
     "Generates a finite multiplicatively closed set of at most upper_bound elements, "
@@ -2998,7 +2998,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GCDPoly",
-    Calculator::innerGCDPoly,
+    CalculatorFunctions::innerGCDPoly,
     "",
     "Greatest common divisor polynomial of two polynomials. "
     "The divisor is scaled so that all coefficients are relatively prime integers, "
@@ -3026,7 +3026,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LCMPoly",
-    Calculator::innerLCMPoly,
+    CalculatorFunctions::innerLCMPoly,
     "",
     "Least common multiple of two polynomials. "
     "The output is scaled so that all coefficients are relatively prime integers, "
@@ -3154,11 +3154,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "SuffixNotationForPostScript",
-    Calculator::innerSuffixNotationForPostScript,
+    CalculatorFunctions::innerSuffixNotationForPostScript,
     "",
     "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.",
     "suffixNotationForPostScript{}((1/3 + a + b) * c)",
-    "Calculator::innerSuffixNotationForPostScript",
+    "CalculatorFunctions::innerSuffixNotationForPostScript",
     "SuffixNotationForPostScript",
     innerStandard
   );
@@ -3707,7 +3707,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "IsInteger",
-    Calculator::innerIsInteger,
+    CalculatorFunctions::innerIsInteger,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an integer, 0 otherwise. ",
@@ -3839,7 +3839,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "IsRational",
-    Calculator::innerIsRational,
+    CalculatorFunctions::innerIsRational,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an rational, 0 otherwise. ",
@@ -4058,7 +4058,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FunctionToMatrix",
-    Calculator::innerFunctionToMatrix,
+    CalculatorFunctions::innerFunctionToMatrix,
     "",
     "Creates a matrix from a function. "
     "The first argument gives the function, "
@@ -4070,7 +4070,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     Calculator::Atoms::transpose,
-    Calculator::innerTranspose,
+    CalculatorFunctions::transpose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
@@ -4094,7 +4094,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "DeterminantPolynomial",
-    Calculator::innerDeterminantPolynomial,
+    CalculatorFunctions::innerDeterminantPolynomial,
     "",
     "Attempts to convert the entries of the matrix "
     "to polynomials and computes the determinant polynomial. "
@@ -4914,7 +4914,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "InvertMatrixVerbose",
-    Calculator::innerInvertMatrixVerbose,
+    CalculatorFunctions::innerInvertMatrixVerbose,
     "",
     "<b>Calculus teaching function.</b> "
     "Inverts a matrix of rationals if invertible, "
@@ -5482,7 +5482,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Freudenthal",
-    Calculator::innerFreudenthalFormula,
+    CalculatorFunctions::innerFreudenthalFormula,
     "",
     "Computes the dominant weights with multiplicities of a "
     "finite dimensional module of a highest weight "
@@ -5508,7 +5508,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "FreudenthalFull",
-    Calculator::innerFreudenthalFull,
+    CalculatorFunctions::innerFreudenthalFull,
     "",
     "Computes the full character and prints it to screen. "
     "Argument format same as the Freudenthal function. ",

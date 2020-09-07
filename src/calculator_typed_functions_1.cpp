@@ -1451,23 +1451,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   return output.assignValueWithContext(outputUE, copyBase.getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
-  calculator.checkInputNotSameAsOutput(input, output);
-  if (!input.startsWith(calculator.opThePower(), 3)) {
-    return false;
-  }
-  if (!input[1].isSequenceNElements() && !input[1].isMatrix()) {
-    return false;
-  }
-  if (!input[2].isOperationGiven("t")  && !input[2].isOperationGiven("T")) {
-    return false;
-  }
-  return calculator.innerTranspose(calculator, input[1], output);
-}
-
 bool CalculatorFunctionsBinaryOps::innerPowerMatrixExpressionsBySmallInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

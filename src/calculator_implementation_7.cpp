@@ -3826,10 +3826,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   return output.assignValue(out.str(), calculator);
 }
 
-bool Calculator::innerInvertMatrixVerbose(
+bool CalculatorFunctions::innerInvertMatrixVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerInvertMatrixVerbose");
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(calculator, input, converted)) {
     return calculator << "Failed to get matrix from: " << input.toString();
@@ -6305,7 +6305,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& calculator, const Expression& 
   }
   Expression functionSuffixNotationE;
   if (!calculator.callCalculatorFunction(
-    calculator.innerSuffixNotationForPostScript, input[1], functionSuffixNotationE
+    CalculatorFunctions::innerSuffixNotationForPostScript, input[1], functionSuffixNotationE
   )) {
     calculator << "No LaTeX version: failed to convert: "
     << input[1].toString() << " to postfix notation. ";
@@ -6703,7 +6703,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   bool isGoodLatexWise = true;
   for (int i = 0; i < thePlot.dimension; i ++) {
     if (!calculator.callCalculatorFunction(
-      Calculator::innerSuffixNotationForPostScript,
+      CalculatorFunctions::innerSuffixNotationForPostScript,
       thePlot.coordinateFunctionsE[i],
       theConvertedExpressions[i]
     )) {
@@ -9148,6 +9148,48 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   return output.assignValue(out.str(), calculator);
 }
 
+bool CalculatorFunctions::transpose(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::innerTranspose");
+  if (
+    !input.isSequenceNElements() &&
+    !input.isMatrix() &&
+    !input.startsWithGivenOperation(Calculator::Atoms::transpose)
+  ) {
+    return false;
+  }
+  Matrix<Expression> theMat;
+  if (input.startsWithGivenOperation(Calculator::Atoms::transpose)) {
+    calculator.getMatrixExpressionsFromArguments(input, theMat);
+  } else {
+    calculator.getMatrixExpressions(input, theMat);
+  }
+  // The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
+  // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
+  // If the commented code needs to be restored, please document why.
+  // if (input.isSequenceNElements())
+  //   if (theMat.numberOfRows !=1)
+  //     return false;
+  theMat.transpose();
+  return output.assignMatrixExpressions(theMat, calculator, true, true);
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!input.startsWith(calculator.opThePower(), 3)) {
+    return false;
+  }
+  if (!input[1].isSequenceNElements() && !input[1].isMatrix()) {
+    return false;
+  }
+  if (!input[2].isOperationGiven("t")  && !input[2].isOperationGiven("T")) {
+    return false;
+  }
+  return CalculatorFunctions::transpose(calculator, input[1], output);
+}
+
 bool CalculatorFunctions::innerdrawRootSystem(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -9201,7 +9243,7 @@ template <class Coefficient>
 int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
 ) {
-  MacroRegisterFunctionWithName("charSSAlgMod_Coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
+  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight");
   int result = - 1;
   Weight<Coefficient> currentWeight;
   currentWeight = theWeightInFundCoords;
@@ -9256,7 +9298,8 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharac
       out << "<td>" << outputSimpleStringCoords.toString() << "</td>";
     }
     if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS) {
-      out << "<td><b style =\"color:red\">" << outputSimpleHalfStringCoords.toString() << "</b></td>" ;
+      out << "<td><b style =\"color:red\">"
+      << outputSimpleHalfStringCoords.toString() << "</b></td>" ;
     } else {
       out << "<td>" << outputSimpleHalfStringCoords.toString() << "</td>";
     }
@@ -9357,8 +9400,8 @@ public:
     }
     return out.str();
   }
-  void ComputeCurrentEContributionToNextLayer() {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEContributionToNextLayer");
+  void computeCurrentEContributionToNextLayer() {
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::computeCurrentEContributionToNextLayer");
     this->computeCurrentChildrenTruncated();
     this->nextLayer.addListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
@@ -9384,7 +9427,7 @@ public:
     this->currentLayer[0] = this->baseExpression;
     this->displayedExpressionStrings.clear();
     this->addStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
-    this->ComputeCurrentEContributionToNextLayer();
+    this->computeCurrentEContributionToNextLayer();
     this->displayedExpressionStrings.setExpectedSize(this->maximumDisplayedNodes);
     this->arrows.setExpectedSize(this->maximumDisplayedNodes);
   }
@@ -9424,10 +9467,10 @@ public:
       this->layerFirstIndices.addOnTop(this->indexCurrentChild);
       this->layerSizes.addOnTop(this->nextLayer.size);
       this->nextLayer.setSize(0);
-      this->ComputeCurrentEContributionToNextLayer();
+      this->computeCurrentEContributionToNextLayer();
       return this->currentLayer.size > 0;
     }
-    this->ComputeCurrentEContributionToNextLayer();
+    this->computeCurrentEContributionToNextLayer();
     return true;
   }
   Rational getStringWidthTruncated(int theIndex) {
@@ -9438,7 +9481,7 @@ public:
     );
   }
   Rational getLayerWidth(int layerIndex) {
-    MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
+    MacroRegisterFunctionWithName("ExpressionTreeDrawer::getLayerWidth");
     Rational result = 0;
     for (
       int i = this->layerFirstIndices[layerIndex];

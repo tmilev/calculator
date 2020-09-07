@@ -2422,61 +2422,6 @@ bool CalculatorFunctionsWeylGroup::weylGroupElement(
   return output.assignValue(theElt, calculator);
 }
 
-bool Calculator::innerGenerateMultiplicativelyClosedSet(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerGenerateMultiplicativelyClosedSet");
-  if (input.size() <= 2) {
-    return output.makeError("I need at least two arguments - upper bound and at least one element to multiply. ", calculator);
-  }
-  int upperLimit;
-  if (!input[1].isSmallInteger(&upperLimit)) {
-    return output.makeError("First argument must be a small integer, serving as upper bound for the set. ", calculator);
-  }
-  if (upperLimit <= 0) {
-    upperLimit = 10000;
-    calculator << "The upper computation limit I got was 0 or less; I replaced it with the default value "
-    << upperLimit << ".";
-  }
-  HashedList<Expression> theSet;
-  theSet.setExpectedSize(input.size() - 2);
-  for (int i = 2; i < input.size(); i ++) {
-    theSet.addOnTop(input[i]);
-  }
-  int numGenerators = theSet.size;
-  Expression theProduct, evaluatedProduct;
-  ProgressReport theReport;
-  for (int i = 0; i < theSet.size; i ++) {
-    for (int j = 0; j < numGenerators; j ++) {
-      theProduct.makeProduct(calculator, theSet[j], theSet[i]);
-      std::stringstream reportStream;
-      reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
-      reportStream << "<br>Evaluating: " << theProduct.toString();
-      theReport.report(reportStream.str());
-      calculator.evaluateExpression(calculator, theProduct, evaluatedProduct);
-      //if (evaluatedProduct == theSet[0])
-      //{
-      //}
-      theSet.addOnTopNoRepetition(evaluatedProduct);
-      if (theSet.size >upperLimit) {
-        std::stringstream out;
-        out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
-        << upperLimit << " elements.";
-        evaluatedProduct.makeError(out.str(), calculator);
-        theSet.addOnTop(evaluatedProduct);
-        i = theSet.size; break;
-      }
-    }
-  }
-  calculator << "<hr>Generated a list of " << theSet.size << " elements";
-  output.reset(calculator, theSet.size + 1);
-  output.addChildAtomOnTop(calculator.opSequence());
-  for (int i = 0; i < theSet.size; i ++) {
-    output.addChildOnTop(theSet[i]);
-  }
-  return true;
-}
-
 template <typename somegroup, typename Coefficient>
 void VirtualRepresentation<somegroup, Coefficient>::operator*=(const VirtualRepresentation<somegroup, Coefficient>& other) {
   MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");

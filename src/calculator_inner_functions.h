@@ -664,6 +664,53 @@ public:
   }
   static bool innerReverseOrder(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursively(Calculator& calculator, const Expression& input, Expression& output);
+  static bool transpose(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGenerateMultiplicativelyClosedSet(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool innerDeterminantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerInvertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIsInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  template<class Coefficient>
+  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    Calculator& calculator,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    const ExpressionContext& context,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+    Calculator& calculator, const Expression& input, Expression& output, bool doGCD
+  );
+  static bool innerLCMPoly(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, false
+    );
+  }
+  static bool innerGCDPoly(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, true
+    );
+  }
 
 };
 #endif

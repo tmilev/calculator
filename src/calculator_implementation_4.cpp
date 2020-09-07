@@ -856,46 +856,6 @@ bool Calculator::checkConsistencyAfterInitialization() {
   return this->theObjectContainer.checkConsistencyAfterReset();
 }
 
-bool Calculator::innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
-  if (!input.isListNElements(4)) {
-    return false;
-  }
-  const Expression& leftE   = input[1];
-  const Expression& middleE = input[2];
-  const Expression& rightE  = input[3];
-  int numRows, numCols;
-  if (!middleE.isIntegerFittingInInt(&numRows) || !rightE.isIntegerFittingInInt(&numCols)) {
-    return false;
-  }
-  if (numRows <= 0 || numCols <= 0) {
-    return false;
-  }
-  LargeInteger numRowsTimesCols = numRows;
-  numRowsTimesCols *= numCols ;
-  if (numRowsTimesCols > 10000) {
-    calculator << "Max number of matrix entries is 10000. You requested " << numRows
-    << " rows and " << numCols
-    << " columns, total: " << numRowsTimesCols.toString() << " entries<br>";
-    return false;
-  }
-  Matrix<Expression> resultMat;
-  resultMat.initialize(numRows, numCols);
-  Expression leftIE, rightIE;
-  for (int i = 0; i < numRows; i ++) {
-    for (int j = 0; j < numCols; j ++) {
-      leftIE.assignValue(i + 1, calculator);
-      rightIE.assignValue(j + 1, calculator);
-      resultMat.elements[i][j].reset(calculator, 3);
-      resultMat.elements[i][j].addChildOnTop(leftE);
-      resultMat.elements[i][j].addChildOnTop(leftIE);
-      resultMat.elements[i][j].addChildOnTop(rightIE);
-    }
-  }
-  return output.assignMatrixExpressions(resultMat, calculator, true, true);
-}
-
-
 bool Calculator::innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
   if (input.size() != 2) {
@@ -1002,38 +962,6 @@ bool Expression::hasBoundVariables() const {
     }
   }
   return false;
-}
-
-bool Calculator::innerIsInteger(Calculator& calculator, const Expression& input, Expression& output) {
-  if (input.size() != 2) {
-    return false;
-  }
-  const Expression& argument = input[1];
-  if (argument.hasBoundVariables()) {
-    return false;
-  }
-  if (argument.isInteger()) {
-    output.assignValue(1, calculator);
-  } else {
-    output.assignValue(0, calculator);
-  }
-  return true;
-}
-
-bool Calculator::innerIsRational(Calculator& calculator, const Expression& input, Expression& output) {
-  if (input.size() != 2) {
-    return false;
-  }
-  const Expression& argument = input[1];
-  if (argument.hasBoundVariables()) {
-    return false;
-  }
-  if (argument.isRational()) {
-    output.assignValue(1, calculator);
-  } else {
-    output.assignValue(0, calculator);
-  }
-  return true;
 }
 
 bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
@@ -2771,61 +2699,6 @@ void ObjectContainer::reset() {
   this->canvasPlotCounter = 0;
   this->resetPlots();
   this->resetSliders();
-}
-
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& calculator, const Expression& input, Expression& output);
-
-bool Calculator::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
-  Vector<Rational> hwFundamental, hwSimple;
-  Selection tempSel;
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
-  )) {
-    return output.makeError("Failed to extract highest weight and algebra", calculator);
-  }
-  if (output.isError()) {
-    return true;
-  }
-  if (tempSel.cardinalitySelection > 0) {
-    return output.makeError("Failed to extract highest weight. ", calculator);
-  }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.makeFromWeight(hwSimple, theSSalg.content);
-  std::string reportString;
-  if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
-    return output.makeError(reportString, calculator);
-  }
-  std::stringstream out;
-  out << resultChar.toString();
-  return output.assignValue(out.str(), calculator);
-}
-
-bool Calculator::innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
-  Vector<Rational> hwFundamental, hwSimple;
-  Selection tempSel;
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!calculator.getTypeHighestWeightParabolic<Rational>(
-    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
-  )) {
-    return output.makeError("Failed to extract highest weight and algebra", calculator);
-  }
-  if (output.isError()) {
-    return true;
-  }
-  if (tempSel.cardinalitySelection > 0) {
-    return output.makeError("Failed to extract highest weight. ", calculator);
-  }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
-  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.makeFromWeight(hwSimple, theSSalg.content);
-  std::string reportString;
-  if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
-    return output.makeError(reportString, calculator);
-  }
-  return output.assignValue(resultChar, calculator);
 }
 
 bool Expression::isMeltable(int* numResultingChildren) const {

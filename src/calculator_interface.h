@@ -2155,7 +2155,6 @@ public:
   };
   static bool innerAutomatedTest(Calculator& calculator, const Expression& input, Expression& output);
   int getNumberOfBuiltInFunctions();
-  static bool innerTranspose(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerStandardFunction(
     Calculator& calculator,
     const Expression& input,
@@ -2242,51 +2241,6 @@ public:
     int targetDimNonMandatory = - 1,
     Expression::FunctionAddress conversionFunction = nullptr
   );
-  static bool innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGenerateMultiplicativelyClosedSet(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerDeterminantPolynomial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInvertMatrixVerbose(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
-  );
-  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
-  );
-  template<class Coefficient>
-  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    Calculator& calculator,
-    const Polynomial<Coefficient>& left,
-    const Polynomial<Coefficient>& right,
-    const ExpressionContext& context,
-    Expression& output,
-    bool doGCD
-  );
-  static bool innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-    Calculator& calculator, const Expression& input, Expression& output, bool doGCD
-  );
-  static bool innerLCMPoly(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-      calculator, input, output, false
-    );
-  }
-  static bool innerGCDPoly(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
-      calculator, input, output, true
-    );
-  }
   bool getListPolynomialVariableLabelsLexicographic(
     const Expression& input,
     Vector<Polynomial<AlgebraicNumber> >& output,

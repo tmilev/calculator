@@ -2772,6 +2772,468 @@ bool CalculatorFunctions::innerTestASN1Decode(
   return output.assignValue(out.str(), calculator);
 }
 
+template <class Coefficient>
+bool CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+  Calculator& calculator,
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  const ExpressionContext &context,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("Calculator::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo");
+  Polynomial<Coefficient> outputPolynomial;
+  if (left.isEqualToZero()) {
+    return calculator << "Not allowed to take gcd/lcm of zero. ";
+  }
+  Coefficient one = left.coefficients[0].one();
+  if (doGCD) {
+    Polynomial<Coefficient>::greatestCommonDivisor(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
+  } else {
+    Polynomial<Coefficient>::leastCommonMultiple(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
+  }
+  return output.assignValueWithContext(outputPolynomial, context, calculator);
+}
+
+bool CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.mergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.mergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<ElementZmodP> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  if (leftPolynomial.isEqualToZero() || rightPolynomial.isEqualToZero()) {
+    calculator
+    << "Greatest common divisor / "
+    << "least common multiple with zero not allowed. ";
+    return output.makeError("Error in least common multiple / greatest common divisor.", calculator);
+  }
+  LargeIntegerUnsigned modulus = leftPolynomial.coefficients[0].modulus;
+
+  if (modulus > static_cast<unsigned>(ElementZmodP::maximumModulusForUserFacingPolynomialDivision)) {
+    return calculator
+    << "Polynomial modulus exceeds the maximum allowed "
+    << "for user-facing polynomial division: "
+    << ElementZmodP::maximumModulusForUserFacingPolynomialDivision << ". ";
+  }
+  if (!modulus.isPossiblyPrime(0, true)) {
+    return calculator << "Cannot do GCD / lcm: modulus "
+    << modulus << " is not prime. ";
+  }
+  return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool CalculatorFunctions::innerIsInteger(Calculator& calculator, const Expression& input, Expression& output) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.hasBoundVariables()) {
+    return false;
+  }
+  if (argument.isInteger()) {
+    output.assignValue(1, calculator);
+  } else {
+    output.assignValue(0, calculator);
+  }
+  return true;
+}
+
+bool CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomial");
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression& left = input[1];
+  if (left.isOfType<Polynomial<ElementZmodP> >()) {
+    return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultipleModular(calculator, input, output, doGCD);
+  }
+  if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
+    return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
+  }
+  Vector<Polynomial<Rational> > polynomials;
+  ExpressionContext theContext(calculator);
+  if (!calculator.getVectorFromFunctionArguments(
+    input,
+    polynomials,
+    &theContext,
+    2,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return output.makeError("Failed to extract a list of 2 polynomials. ", calculator);
+  }
+  return CalculatorFunctions::innerGreatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, polynomials[0], polynomials[1], theContext, output, doGCD
+  );
+}
+
+bool CalculatorFunctions::innerDeterminantPolynomial(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerDeterminantPolynomial");
+  if (input.size() != 2) {
+    return false;
+  }
+  Matrix<Polynomial<Rational> > matPol;
+  ExpressionContext context(calculator);
+  if (!calculator.functionGetMatrix(
+    input[1],
+    matPol,
+    &context,
+    - 1,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return calculator << "<hr>Failed to convert the input to "
+    << "matrix of polynomials. ";
+  }
+  if (matPol.numberOfRows != matPol.numberOfColumns) {
+    return output.makeError("<hr>Failed to compute determinant: matrix is non-square. ", calculator);
+  }
+  if (matPol.numberOfRows > 8) {
+    return calculator << "<hr>Failed to compute determinant: "
+    << "matrix is larger than 8 x 8, and your matrix had "
+    << matPol.numberOfRows << " rows. Note that you can compute "
+    << "determinant using the \\det function which "
+    << "does Gaussian elimination "
+    << "and will work for large rational matrices. "
+    << "This function is meant to be used with honest "
+    << "polynomial entries. ";
+  }
+  Polynomial<Rational> outputPoly;
+  outputPoly.makeDeterminantFromSquareMatrix(matPol);
+  return output.assignValueWithContext(outputPoly, context, calculator);
+}
+
+bool CalculatorFunctions::innerGenerateMultiplicativelyClosedSet(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerGenerateMultiplicativelyClosedSet");
+  if (input.size() <= 2) {
+    return output.makeError("I need at least two arguments - upper bound and at least one element to multiply. ", calculator);
+  }
+  int upperLimit;
+  if (!input[1].isSmallInteger(&upperLimit)) {
+    return output.makeError("First argument must be a small integer, serving as upper bound for the set. ", calculator);
+  }
+  if (upperLimit <= 0) {
+    upperLimit = 10000;
+    calculator << "The upper computation limit I got was 0 or less; I replaced it with the default value "
+    << upperLimit << ".";
+  }
+  HashedList<Expression> theSet;
+  theSet.setExpectedSize(input.size() - 2);
+  for (int i = 2; i < input.size(); i ++) {
+    theSet.addOnTop(input[i]);
+  }
+  int numGenerators = theSet.size;
+  Expression theProduct, evaluatedProduct;
+  ProgressReport theReport;
+  for (int i = 0; i < theSet.size; i ++) {
+    for (int j = 0; j < numGenerators; j ++) {
+      theProduct.makeProduct(calculator, theSet[j], theSet[i]);
+      std::stringstream reportStream;
+      reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
+      reportStream << "<br>Evaluating: " << theProduct.toString();
+      theReport.report(reportStream.str());
+      calculator.evaluateExpression(calculator, theProduct, evaluatedProduct);
+      //if (evaluatedProduct == theSet[0])
+      //{
+      //}
+      theSet.addOnTopNoRepetition(evaluatedProduct);
+      if (theSet.size >upperLimit) {
+        std::stringstream out;
+        out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
+        << upperLimit << " elements.";
+        evaluatedProduct.makeError(out.str(), calculator);
+        theSet.addOnTop(evaluatedProduct);
+        i = theSet.size; break;
+      }
+    }
+  }
+  calculator << "<hr>Generated a list of " << theSet.size << " elements";
+  output.reset(calculator, theSet.size + 1);
+  output.addChildAtomOnTop(calculator.opSequence());
+  for (int i = 0; i < theSet.size; i ++) {
+    output.addChildOnTop(theSet[i]);
+  }
+  return true;
+}
+
+bool CalculatorFunctions::innerFunctionToMatrix(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerFunctionToMatrix");
+  if (!input.isListNElements(4)) {
+    return false;
+  }
+  const Expression& leftE   = input[1];
+  const Expression& middleE = input[2];
+  const Expression& rightE  = input[3];
+  int numRows, numCols;
+  if (!middleE.isIntegerFittingInInt(&numRows) || !rightE.isIntegerFittingInInt(&numCols)) {
+    return false;
+  }
+  if (numRows <= 0 || numCols <= 0) {
+    return false;
+  }
+  LargeInteger numRowsTimesCols = numRows;
+  numRowsTimesCols *= numCols ;
+  if (numRowsTimesCols > 10000) {
+    calculator << "Max number of matrix entries is 10000. You requested " << numRows
+    << " rows and " << numCols
+    << " columns, total: " << numRowsTimesCols.toString() << " entries<br>";
+    return false;
+  }
+  Matrix<Expression> resultMat;
+  resultMat.initialize(numRows, numCols);
+  Expression leftIE, rightIE;
+  for (int i = 0; i < numRows; i ++) {
+    for (int j = 0; j < numCols; j ++) {
+      leftIE.assignValue(i + 1, calculator);
+      rightIE.assignValue(j + 1, calculator);
+      resultMat.elements[i][j].reset(calculator, 3);
+      resultMat.elements[i][j].addChildOnTop(leftE);
+      resultMat.elements[i][j].addChildOnTop(leftIE);
+      resultMat.elements[i][j].addChildOnTop(rightIE);
+    }
+  }
+  return output.assignMatrixExpressions(resultMat, calculator, true, true);
+}
+
+bool CalculatorFunctions::innerSuffixNotationForPostScript(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
+  RecursionDepthCounter theCounter(&calculator.recursionDepth);
+  if (*theCounter.theCounter == calculator.maximumRecursionDepth - 2) {
+    return output.assignValue(std::string("..."), calculator);
+  }
+  std::string currentString;
+  if (input.isOperation(&currentString)) {
+    if (input.toString() == "e") {
+      return output.assignValue<std::string>(" 2.718281828 ", calculator);
+    }
+    if (input.toString() == "\\pi") {
+      return output.assignValue<std::string>(" 3.141592654 ", calculator);
+    }
+    if (input.theData >= calculator.numberOfPredefinedAtoms) {
+      return output.assignValue(currentString, calculator);
+    }
+    if (currentString == "|") {
+      return output.assignValue<std::string>("abs ", calculator);
+    }
+    if (currentString == "+") {
+      return output.assignValue<std::string>("add ", calculator);
+    }
+    if (currentString == "*") {
+      return output.assignValue<std::string>("mul ", calculator);
+    }
+    if (currentString == "-") {
+      return output.assignValue<std::string>("sub ", calculator);
+    }
+    if (currentString == "/") {
+      return output.assignValue<std::string>("div ", calculator);
+    }
+    if (currentString == "^") {
+      return output.assignValue<std::string>("exp ", calculator);
+    }
+    if (currentString == "\\log") {
+      return output.assignValue<std::string>("ln ", calculator);
+    }
+    if (currentString == "\\sin") {
+      return output.assignValue<std::string>(" 57.29578 mul sin ", calculator);
+    }
+    if (currentString == "\\cos") {
+      return output.assignValue<std::string>(" 57.29578 mul cos ", calculator);
+    }
+    if (currentString == "\\tan") {
+      return output.assignValue<std::string>(" 57.29578 mul tan ", calculator);
+    }
+    if (currentString == "\\arctan") {
+      return output.assignValue<std::string>("ATAN ", calculator);
+    }
+    if (currentString == "\\arcsin") {
+      return output.assignValue<std::string>("ASIN ", calculator);
+    }
+    if (currentString == "\\arccos") {
+      return output.assignValue<std::string>("ACOS ", calculator);
+    }
+    if (currentString == "\\sqrt") {
+      return output.assignValue<std::string>("sqrt ", calculator);
+    }
+    return output.makeError("Cannot convert " + currentString + " to suffix notation.", calculator);
+  }
+  std::stringstream out;
+  out.precision(7);
+  bool hasDoubleValue = false;
+  double theDoubleValue = - 1;
+  Rational theRat;
+  if (input.isOfType<Rational>(&theRat)) {
+    if (
+      theRat.getDenominator().isIntegerFittingInInt(nullptr) &&
+      theRat.getNumerator().isIntegerFittingInInt(nullptr)
+    ) {
+      out << " " << theRat.getNumerator().toString() << " " << theRat.getDenominator() << " div ";
+      return output.assignValue(out.str(), calculator);
+    }
+    hasDoubleValue = true;
+    theDoubleValue = input.getValue<Rational>().getDoubleValue();
+  }
+  if (input.isOfType<AlgebraicNumber>()) {
+    hasDoubleValue = input.getValue<AlgebraicNumber>().evaluatesToDouble(&theDoubleValue);
+  }
+  if (input.isOfType<double>()) {
+    hasDoubleValue = true;
+    theDoubleValue = input.getValue<double>();
+  }
+  if (hasDoubleValue) {
+    out << " " << FloatingPoint::doubleToString(theDoubleValue);
+    return output.assignValue(out.str(), calculator);
+  }
+  Expression currentE;
+  bool useUsualOrder =
+    !input[0].isOperationGiven(calculator.opDivide()) &&
+    !input[0].isOperationGiven(calculator.opThePower());
+  if (useUsualOrder) {
+    for (int i = input.size() - 1; i >= 1; i --) {
+      if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[i], currentE)) {
+        return output.makeError("Failed to convert " + input[i].toString(), calculator);
+      }
+      if (!currentE.isOfType(&currentString)) {
+        return output.makeError("Failed to convert " + input[i].toString(), calculator);
+      }
+      out << currentString << " ";
+    }
+  } else {
+    for (int i = 1; i < input.size(); i ++) {
+      if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[i], currentE)) {
+        return output.makeError("Failed to convert " + input[i].toString(), calculator);
+      }
+      if (!currentE.isOfType(&currentString)) {
+        return output.makeError("Failed to convert " + input[i].toString(), calculator);
+      }
+      out << currentString << " ";
+    }
+  }
+  if (!CalculatorFunctions::innerSuffixNotationForPostScript(calculator, input[0], currentE)) {
+    return output.makeError("Failed to convert " + input[0].toString(), calculator);
+  }
+  if (!currentE.isOfType(&currentString)) {
+    return output.makeError("Failed to convert " + input[0].toString(), calculator);
+  }
+  out << currentString << " ";
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorFunctions::innerIsRational(Calculator& calculator, const Expression& input, Expression& output) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.hasBoundVariables()) {
+    return false;
+  }
+  if (argument.isRational()) {
+    output.assignValue(1, calculator);
+  } else {
+    output.assignValue(0, calculator);
+  }
+  return true;
+}
+
+bool CalculatorFunctions::innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output) {
+  Vector<Rational> hwFundamental, hwSimple;
+  Selection tempSel;
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!calculator.getTypeHighestWeightParabolic<Rational>(
+    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
+  )) {
+    return output.makeError("Failed to extract highest weight and algebra", calculator);
+  }
+  if (output.isError()) {
+    return true;
+  }
+  if (tempSel.cardinalitySelection > 0) {
+    return output.makeError("Failed to extract highest weight. ", calculator);
+  }
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
+  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
+  startingChar.makeFromWeight(hwSimple, theSSalg.content);
+  std::string reportString;
+  if (!startingChar.freudenthalEvaluateMeFullCharacter(resultChar, 10000, &reportString)) {
+    return output.makeError(reportString, calculator);
+  }
+  std::stringstream out;
+  out << resultChar.toString();
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorFunctions::innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output) {
+  Vector<Rational> hwFundamental, hwSimple;
+  Selection tempSel;
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!calculator.getTypeHighestWeightParabolic<Rational>(
+    calculator, input, output, hwFundamental, tempSel, theSSalg, nullptr
+  )) {
+    return output.makeError("Failed to extract highest weight and algebra", calculator);
+  }
+  if (output.isError()) {
+    return true;
+  }
+  if (tempSel.cardinalitySelection > 0) {
+    return output.makeError("Failed to extract highest weight. ", calculator);
+  }
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
+  hwSimple = theSSalg.content->theWeyl.getSimpleCoordinatesFromFundamental(hwFundamental);
+  startingChar.makeFromWeight(hwSimple, theSSalg.content);
+  std::string reportString;
+  if (!startingChar.freudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
+    return output.makeError(reportString, calculator);
+  }
+  return output.assignValue(resultChar, calculator);
+}
+
 std::string StringRoutines::convertStringToCalculatorDisplay(
   const std::string& input
 ) {

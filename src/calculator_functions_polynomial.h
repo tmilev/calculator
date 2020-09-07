@@ -39,6 +39,40 @@ public:
     ExpressionContext* context,
     Expression& output
   );
+  template<class Coefficient>
+  static bool greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    Calculator& calculator,
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    const ExpressionContext& context,
+    Expression& output,
+    bool doGCD
+  );
+  static bool greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+    Calculator& calculator, const Expression& input, Expression& output, bool doGCD
+  );
+  static bool leastCommonMultiplePolynomial(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, false
+    );
+  }
+  static bool greatestCommonDivisorPolynomial(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+      calculator, input, output, true
+    );
+  }
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
+  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doGCD
+  );
 };
 
 #endif // vpfHeaderCalculatorFunctionsPolynomial

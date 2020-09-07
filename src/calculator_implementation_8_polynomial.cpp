@@ -1093,3 +1093,127 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   }
   return output.assignValue(out.str(), calculator);
 }
+
+template <class Coefficient>
+bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+  Calculator& calculator,
+  const Polynomial<Coefficient>& left,
+  const Polynomial<Coefficient>& right,
+  const ExpressionContext &context,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo");
+  Polynomial<Coefficient> outputPolynomial;
+  if (left.isEqualToZero()) {
+    return calculator << "Not allowed to take gcd/lcm of zero. ";
+  }
+  Coefficient one = left.coefficients[0].one();
+  if (doGCD) {
+    Polynomial<Coefficient>::greatestCommonDivisor(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
+  } else {
+    Polynomial<Coefficient>::leastCommonMultiple(
+      left, right, outputPolynomial, one, &calculator.comments
+    );
+  }
+  return output.assignValueWithContext(outputPolynomial, context, calculator);
+}
+
+bool CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.mergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  if (input.size() != 3) {
+    return false;
+  }
+  Expression left = input[1];
+  Expression right = input[2];
+  if (!input.mergeContexts(left, right)) {
+    return false;
+  }
+  Polynomial<ElementZmodP> leftPolynomial, rightPolynomial;
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
+    return false;
+  }
+  if (leftPolynomial.isEqualToZero() || rightPolynomial.isEqualToZero()) {
+    calculator
+    << "Greatest common divisor / "
+    << "least common multiple with zero not allowed. ";
+    return output.makeError("Error in least common multiple / greatest common divisor.", calculator);
+  }
+  LargeIntegerUnsigned modulus = leftPolynomial.coefficients[0].modulus;
+
+  if (modulus > static_cast<unsigned>(ElementZmodP::maximumModulusForUserFacingPolynomialDivision)) {
+    return calculator
+    << "Polynomial modulus exceeds the maximum allowed "
+    << "for user-facing polynomial division: "
+    << ElementZmodP::maximumModulusForUserFacingPolynomialDivision << ". ";
+  }
+  if (!modulus.isPossiblyPrime(0, true)) {
+    return calculator << "Cannot do GCD / lcm: modulus "
+    << modulus << " is not prime. ";
+  }
+  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output, doGCD
+  );
+}
+
+bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomial");
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression& left = input[1];
+  if (left.isOfType<Polynomial<ElementZmodP> >()) {
+    return CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleModular(calculator, input, output, doGCD);
+  }
+  if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
+    return CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
+  }
+  Vector<Polynomial<Rational> > polynomials;
+  ExpressionContext theContext(calculator);
+  if (!calculator.getVectorFromFunctionArguments(
+    input,
+    polynomials,
+    &theContext,
+    2,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return output.makeError("Failed to extract a list of 2 polynomials. ", calculator);
+  }
+  return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
+    calculator, polynomials[0], polynomials[1], theContext, output, doGCD
+  );
+}

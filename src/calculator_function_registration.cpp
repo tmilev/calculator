@@ -2998,7 +2998,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GCDPoly",
-    CalculatorFunctions::innerGCDPoly,
+    CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial,
     "",
     "Greatest common divisor polynomial of two polynomials. "
     "The divisor is scaled so that all coefficients are relatively prime integers, "
@@ -3020,13 +3020,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
     "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
-    "Calculator::innerGCDPoly",
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial",
     "GCDPoly",
     innerStandard
   );
   this->addOperationHandler(
     "LCMPoly",
-    CalculatorFunctions::innerLCMPoly,
+    CalculatorFunctionsPolynomial::leastCommonMultiplePolynomial,
     "",
     "Least common multiple of two polynomials. "
     "The output is scaled so that all coefficients are relatively prime integers, "
@@ -3040,7 +3040,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
     "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
-    "Calculator::innerLCMPoly",
+    "CalculatorFunctionsPolynomial::leastCommonMultiplePolynomial",
     "LCMPoly",
     innerStandard
   );

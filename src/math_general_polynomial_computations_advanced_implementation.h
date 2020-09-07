@@ -1390,6 +1390,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
 template <class Coefficient, class OneFactorFinder>
 PolynomialFactorizationUnivariate<Coefficient, OneFactorFinder>::PolynomialFactorizationUnivariate() {
   this->maximumDegree = OneFactorFinder::maximumDegreeDefault;
+  this->computations = 0;
+  this->maximumComputations = - 1;
 }
 
 template <class Coefficient, class OneFactorFinder>

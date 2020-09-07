@@ -5435,8 +5435,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "11015 x^{7}+453344 x^{6}+106241 x^{5}+115598 x^{4}+"
     "102 x^{3}+145 x^{2}+12276 x+261632"
     ");\n",
-    "CalculatorFunctionsPolynomial::factorPolynomial",
+    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFields",
     "FactorUnivariatePolynomialOverRationals",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "FactorPolynomialOverRationals",
+    CalculatorFunctionsPolynomial::factorPolynomialRational,
+    "",
+    "Runs the Kronecker algorithm with a computation throttle; "
+    "if unsuccessful, runs finite field algorithms. ",
+    "%HideLHS\n"
+    "FactorPolynomialOverRationals{}(\n"
+    "169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}"
+    "-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56\n"
+    ");\n",
+    "CalculatorFunctionsPolynomial::factorPolynomialRational",
+    "FactorPolynomialOverRationals",
     innerStandard
   );
   this->addOperationHandler(

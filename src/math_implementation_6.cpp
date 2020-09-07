@@ -435,9 +435,24 @@ bool PolynomialFactorizationKronecker::oneFactor(
   do {
     if (theReport.tickAndWantReport()) {
       std::stringstream report;
-      report << "Total trying divisor combination "
+      report << "Trying divisor combination "
       << theReport.ticks << " out of " << total.toString();
       theReport.report(report.str());
+    }
+    this->output->computations ++;
+    if (
+      this->output->maximumComputations > 0 &&
+      this->output->computations > this->output->maximumComputations
+    ) {
+      // We've exceeded our computational budget.
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Kronecker factorization ran too "
+        << "many combinations: maximum allowed was: "
+        << this->output->maximumComputations
+        << ", but the total computations was "
+        << total.toString() << ". ";
+      }
+      return false;
     }
     theValuesAtPointsLeft.makeZero(theValuesAtPoints.size);
     Rational firstValue;

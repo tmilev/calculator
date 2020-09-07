@@ -68,7 +68,7 @@ Support for arbitrary symbolic integration may be added in the future, if anyone
 
 ### Extras
 Factor one-variable polynomials:
-[FactorUnivariatePolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22FactorUnivariatePolynomialOverRationals(169%20x%5E%7B11%7D-312%20x%5E%7B10%7D%2B430%20x%5E%7B9%7D-524%20x%5E%7B8%7D%2B595%20x%5E%7B7%7D-644%20x%5E%7B6%7D%2B581%20x%5E%7B5%7D-440%20x%5E%7B4%7D%2B318%20x%5E%7B3%7D-214%20x%5E%7B2%7D%2B127%20x-56)%22%2C%22monitoring%22%3A%22true%22%7D)
+[FactorPolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22FactorPolynomialOverRationals(169%20x%5E%7B11%7D-312%20x%5E%7B10%7D%2B430%20x%5E%7B9%7D-524%20x%5E%7B8%7D%2B595%20x%5E%7B7%7D-644%20x%5E%7B6%7D%2B581%20x%5E%7B5%7D-440%20x%5E%7B4%7D%2B318%20x%5E%7B3%7D-214%20x%5E%7B2%7D%2B127%20x-56)%22%2C%22monitoring%22%3A%22true%22%7D)
 
 ... to be continued.
 

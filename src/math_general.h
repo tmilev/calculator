@@ -2958,6 +2958,16 @@ public:
   List<Polynomial<Coefficient> > reduced;
   List<Polynomial<Coefficient> > nonReduced;
   int maximumDegree;
+  // An integer that measures the amount of
+  // computations carried out by the OneFactorFinder algorithm.
+  // The integer should be a reasonably good measure of computation
+  // and need not be a precise measure of CPU cycles.
+  // The details on what measure of computation is stored by
+  // the OneFactorFinder here remain unspecified.
+  int64_t computations;
+  // Upper limit for the number of computations to carry out before giving up.
+  // Set to non-posiive for no computation limits.
+  int64_t maximumComputations;
   FormatExpressions format;
   bool basicChecks(
     std::stringstream* commentsOnFailure

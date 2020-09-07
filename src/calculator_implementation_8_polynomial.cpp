@@ -365,6 +365,75 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   return output.makeSequence(calculator, &resultSequence);
 }
 
+bool CalculatorFunctionsPolynomial::factorPolynomialRational(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::factorPolynomialRational");
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!calculator.convert(
+    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
+  )) {
+    return false;
+  }
+  if (polynomial.content.minimalNumberOfVariables() > 1) {
+    return output.makeError(
+      "I have been taught to factor one variable polynomials only. ",
+      calculator
+    );
+  }
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationKronecker> factorizationKronecker;
+  factorizationKronecker.maximumComputations = 10000;
+  if (factorizationKronecker.factor(
+    polynomial.content,
+    &calculator.comments,
+    &calculator.comments
+  )) {
+    return CalculatorFunctionsPolynomial::factorPolynomialProcess(
+      calculator,
+      polynomial,
+      factorizationKronecker.constantFactor,
+      factorizationKronecker.reduced,
+      output
+    );
+  }
+  PolynomialFactorizationUnivariate<Rational, PolynomialFactorizationFiniteFields> factorizationFiniteFields;
+  if (!factorizationFiniteFields.factor(polynomial.content, &calculator.comments, & calculator.comments)) {
+    return false;
+  }
+  return CalculatorFunctionsPolynomial::factorPolynomialProcess(
+    calculator,
+    polynomial,
+    factorizationFiniteFields.constantFactor,
+    factorizationFiniteFields.reduced,
+    output
+  );
+}
+
+bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
+  Calculator& calculator,
+  WithContext<Polynomial<Rational> >& originalPolynomial,
+  const Rational& constantFactor,
+  List<Polynomial<Rational> >& factors,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::factorPolynomialProcess");
+  List<Expression> resultSequence;
+  Expression constantFactorExpression;
+  constantFactorExpression.assignValue(constantFactor, calculator);
+  resultSequence.addOnTop(constantFactorExpression);
+  Expression polynomialE, expressionE(calculator);
+  for (int i = 0; i < factors.size; i ++) {
+    polynomialE.assignValueWithContext(
+      factors[i], originalPolynomial.context, calculator
+    );
+    expressionE.children.clear();
+    expressionE.addChildAtomOnTop("MakeExpression");
+    expressionE.addChildOnTop(polynomialE);
+    resultSequence.addOnTop(expressionE);
+  }
+  return output.makeSequence(calculator, &resultSequence);
+}
+
 template <class Coefficient>
 bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   Calculator& calculator,

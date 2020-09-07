@@ -1,10 +1,17 @@
 # calculator
 
+
+
 An online computer algebra system and homework server. 
 Our mission is to construct a free and open source computer 
 algebra system that serves the computational needs of 
 both researchers and teachers.
 We aspire to get our system to be as powerful and useful as Mathematica and SAGE.
+
+## Programming the calculator
+The calculator runs on a math expression substitution and interpretation engine capable of expressing arbitrarily complex mathematical constructs.
+
+More details on the calculator substitution engine can be found [here](wiki/README.md).
 
 ## calculator installation 
 1. Download the `courses_calculator` repository:

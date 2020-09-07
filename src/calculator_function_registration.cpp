@@ -5407,12 +5407,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
     "assume the poly has integer coefficients. If looking "
-    "for an integer coefficient divisor of degree k, "
-    "plug in k different integer values of the poly and "
-    "finds the set of all possible divisors of "
-    "the value of poly at the k points. This gives a "
-    "finite set of possibilities for the divisors, "
-    "as interpolated by Lagrange polynomials.",
+    "for a divisor of degree k, "
+    "plug in k+1 different integer values of the poly to find k+1 "
+    "integer values. Factor them. "
+    "Each selection of k+1 factors of these integer values "
+    "determines the potential values of a divisor polynomial; "
+    "the polynomial of degree k can be reconstructed from k+1 values "
+    "through Lagrange interpolation. "
+    "Try all possible divisors found in this way.",
     "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
     "CalculatorFunctionsPolynomial::factorPolynomial",

@@ -435,7 +435,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   do {
     if (theReport.tickAndWantReport()) {
       std::stringstream report;
-      report << "Trying divisor combination "
+      report << "Total trying divisor combination "
       << theReport.ticks << " out of " << total.toString();
       theReport.report(report.str());
     }

@@ -2946,19 +2946,19 @@ bool CalculatorBasics::meltBrackets(Calculator& calculator, const Expression& in
     return false;
   }
   int tempInt;
-  int ChildIncrease = 0;
+  int childIncrease = 0;
   bool found = false;
   for (int i = 0; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];
     if (currentChild.isMeltable(&tempInt)) {
       found = true;
-      ChildIncrease += tempInt - 1;
+      childIncrease += tempInt - 1;
     }
   }
   if (!found) {
     return false;
   }
-  output.reset(calculator, input.children.size + ChildIncrease);
+  output.reset(calculator, input.children.size + childIncrease);
   output.addChildAtomOnTop(calculator.opEndStatement());
   for (int i = 1; i < input.children.size; i ++) {
     const Expression& currentChild = input[i];

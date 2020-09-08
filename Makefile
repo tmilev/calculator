@@ -117,6 +117,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_expression_context.cpp \
     calculator_expressions_test.cpp \
     calculator_evaluation_steps.cpp \
+    calculator_lie_theory.cpp \
     calculator_finite_group_characters.cpp \
     calculator_function_registration.cpp \
     calculator_html_interpretation.cpp \

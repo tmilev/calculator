@@ -668,4 +668,23 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::splitCharacterOverReducti
   return true;
 }
 
+template <class Coefficient>
+Coefficient SemisimpleLieAlgebra::getKillingForm(
+  const ElementSemisimpleLieAlgebra<Coefficient>& left,
+  const ElementSemisimpleLieAlgebra<Coefficient>& right
+) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::getKillingForm");
+  Coefficient result = 0;
+  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMon, tempElt;
+  ChevalleyGenerator baseGen;
+  for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
+    baseGen.makeGenerator(*this, i);
+    adadAppliedToMon.makeZero();
+    adadAppliedToMon.addMonomial(baseGen, 1);
+    this->lieBracket(right, adadAppliedToMon, tempElt);
+    this->lieBracket(left, tempElt, adadAppliedToMon);
+    result += adadAppliedToMon.getCoefficientOf(baseGen);
+  }
+  return result;
+}
 #endif

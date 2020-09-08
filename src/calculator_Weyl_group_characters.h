@@ -1,7 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfCharacterHeaderCalculatorInterface
-#define vpfCharacterHeaderCalculatorInterface
+#ifndef CALCULATOR_WEYL_GROUP_CHARACTERS_INCLUDED
+#define CALCULATOR_WEYL_GROUP_CHARACTERS_INCLUDED
 #include "calculator.h"
 
 class CalculatorFunctionsWeylGroup {
@@ -56,12 +56,6 @@ public:
   static bool signSignatureRootSubsystems(Calculator& calculator, const Expression& input, Expression& output);
   static bool signSignatureRootSubsystemsFromKostkaNumbers(Calculator& calculator, const Expression& input, Expression& output);
   static bool getElementWeylGroup(Calculator& calculator, const Expression& input, Expression& output);
-};
-
-class CalculatorLieTheory {
-public:
-  static bool killingForm(Calculator& calculator, const Expression& input, Expression& output);
-
 };
 
 #endif

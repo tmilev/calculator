@@ -430,13 +430,6 @@ public:
   static bool innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerWeylDimFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDecomposeCharGenVerma(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2Init(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    BranchingData& theG2B3Data,
-    ExpressionContext& outputContext
-  );
   static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -456,24 +449,7 @@ public:
   );
 
   static bool innerDeterminant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintGenVermaModule(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHighestWeightVector(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitGenericGenVermaTensorFD(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHighestWeightTransposeAntiAutomorphismBilinearForm(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2CharsOutput(
-    Calculator& calculator, const Expression& input, Expression& output, BranchingData& theG2B3Data
-  );
-  static bool innerPrintB3G2branchingTableInit(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    BranchingData& theG2B3data,
-    int& desiredHeight,
-    ExpressionContext& outputContext
-  );
-  static bool innerSplitFDpartB3overG2(Calculator& calculator, const Expression& input, Expression& output);
-
   static bool innerCoefficientsPowersOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalOpenFromSequence(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntervalClosedFromSequence(Calculator& calculator, const Expression& input, Expression& output);
@@ -555,7 +531,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
 
-    static bool innerPrintZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerPrintZnEnumeration(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNot(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerZmodP(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAttemptExtendingEtoHEFwithHinCartan(
@@ -563,29 +539,6 @@ public:
   );
   static bool innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperators(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool AllGenerators,
-    bool useNilWeight,
-    bool ascending
-  );
-  static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return CalculatorFunctions::innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
-  }
-  static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return CalculatorFunctions::innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
-  }
-  static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return CalculatorFunctions::innerWriteGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
-  }
   static bool innerCasimir(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCharacterSSLieAlgFD(Calculator& calculator, const Expression& input, Expression& output);
@@ -606,9 +559,8 @@ public:
   static bool innerPrintSSsubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output);
 
-    static bool innerGetChevGen(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerGetChevGen(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetCartanGen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPrintSSLieAlgebraShort(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctions::innerPrintSSLieAlgebra(calculator, input, output, false);
   }
@@ -628,28 +580,6 @@ public:
   static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerPrintAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintB3G2branchingTableCharsOnly(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerPrintB3G2branchingIntermediate(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vectors<RationalFunction<Rational> >& theHWs,
-    BranchingData& theG2B3Data,
-    ExpressionContext &theContext
-  );
-  static bool innerPrintB3G2branchingTable(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerPrintB3G2branchingTableCommon(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vectors<RationalFunction<Rational> >& outputHWs,
-    BranchingData& theG2B3Data,
-    ExpressionContext &theContext
-  );
   static bool innerPolynomialWithEWA(Calculator& calculator, const Expression& input, Expression& output) {
     return CalculatorFunctions::innerEWAorPoly(calculator, input, output, true);
   }
@@ -677,6 +607,7 @@ public:
   static bool innerIsRational(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFormula(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
 };
 #endif
 

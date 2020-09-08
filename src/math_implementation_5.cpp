@@ -11,6 +11,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
+#include "math_extra_differential_operators.h"
 
 std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
   if (this->isConstant()) {
@@ -32,6 +33,13 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
   if (secondS != "1") {
     out << secondS;
   }
+  return out.str();
+}
+
+std::string QuasiDifferentialMononomial::toString(FormatExpressions* theFormat) const {
+  std::stringstream out;
+  out << this->theWeylMon.toString(theFormat) << "\\otimes ";
+  out << this->theMatMon.toString(theFormat);
   return out.str();
 }
 

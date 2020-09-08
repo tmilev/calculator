@@ -2264,69 +2264,6 @@ public:
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
-  static bool innerGroebnerGradedLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::gradedLexicographic);
-  }
-  static bool innerGroebnerGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::gradedReverseLexicographic);
-  }
-  static bool innerGroebnerLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographic);
-  }
-  static bool innerGroebnerLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographicOpposite);
-  }
-  static bool innerGroebnerModZpLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
-    return calculator.innerGroebner(calculator, input, output, MonomialP::Order::lexicographic, true);
-  }  
-  static bool innerGroebner(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int order,
-    bool useModZp = false
-  );
-  static bool innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2old(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output);
-  static bool innerLittelmannOperator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAnimateLittelmannPaths(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLSPath(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHWVCommon(Calculator& calculator,
-    Expression& output,
-    Vector<RationalFunction<Rational> >& highestWeightFundCoords,
-    Selection& selectionParSel,
-    ExpressionContext& hwContext,
-    SemisimpleLieAlgebra* owner,
-    bool Verbose = true
-  );
-  bool innerWriteGenVermaModAsDiffOperatorInner(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vectors<Polynomial<Rational> >& theHws,
-    ExpressionContext& hwContext,
-    Selection& selInducing,
-    SemisimpleLieAlgebra* owner,
-    bool AllGenerators,
-    std::string* xLetter,
-    std::string* partialLetter,
-    std::string* exponentVariableLetter,
-    bool useNilWeight,
-    bool ascending
-  );
-  template<class Coefficient>
-  static bool typeHighestWeightParabolic(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    Vector<Coefficient>& outputWeight,
-    Selection& outputInducingSel,
-    Expression* outputContext = nullptr
-  );
-
   void addEmptyHeadedCommand();
   Calculator();
   int addOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);

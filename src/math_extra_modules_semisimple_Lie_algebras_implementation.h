@@ -4,6 +4,7 @@
 #define vpfHeader_ImplementationHeaderModulesSSLielgebras
 #include "math_extra_modules_semisimple_Lie_algebras.h"
 #include "math_extra_drawing_variables.h"
+#include "math_extra_differential_operators.h"
 
 template<class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::hwTrace(
@@ -1354,5 +1355,566 @@ std::string ModuleSSalgebra<Coefficient>::toString(FormatExpressions* theFormat)
   out << "<br>Cached Shapovalov products final: "
   << this->cachedPairs.size << "; dimension : " << this->getDimension();
   return out.str();
+}
+
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::isNotInParabolic(int theGeneratorIndex) {
+  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
+    if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::isNotInLevi(int theGeneratorIndex) {
+  Vector<Rational> theWeight = this->getOwner().getWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.cardinalitySelection; j ++) {
+    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].isEqualToZero()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <class Coefficient>
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
+  bool shiftPowersByNumVarsBaseField,
+  ElementUniversalEnveloping<RationalFunction<Rational> >& output,
+  bool useNilWeight,
+  bool ascending
+) {
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
+  this->getElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
+  RationalFunction<Rational> tempRF;
+  output.makeZero(*this->theAlgebras, this->indexAlgebra);
+  MonomialUniversalEnveloping<RationalFunction<Rational> > tempMon;
+  tempMon.makeConstant(*this->theAlgebras, this->indexAlgebra);
+  int varShift = 0;
+  if (shiftPowersByNumVarsBaseField) {
+    varShift = this->minimalNumberOfVariables();
+  }
+  for (int i = 0; i < eltsNilrad.size; i ++) {
+    tempRF.makeOneLetterMonomial(i + varShift, 1);
+    tempMon.multiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+  }
+  tempRF.makeOne();
+  output.addMonomial(tempMon, tempRF);
+}
+
+template <class Coefficient>
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
+  bool shiftPowersByNumVarsBaseField,
+  ElementUniversalEnveloping<Polynomial<Rational> >& output,
+  bool useNilWeight,
+  bool ascending
+) {
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getGenericUnMinusElt");
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
+  this->getElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
+  Polynomial<Rational> tempRF;
+  output.makeZero(*this->owner);
+  MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
+  tempMon.makeOne(*this->owner);
+  int varShift = 0;
+  if (shiftPowersByNumVarsBaseField) {
+    varShift = this->minimalNumberOfVariables();
+  }
+  for (int i = 0; i < eltsNilrad.size; i ++) {
+    tempRF.makeMonomial(i + varShift, 1, 1);
+    tempMon.multiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+  }
+  tempRF.makeOne();
+  output.addMonomial(tempMon, tempRF);
+}
+
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::getActionGeneralizedVermaModuleAsDifferentialOperator(
+  ElementSemisimpleLieAlgebra<Rational>& inputElt,
+  QuasiDifferentialOperator<Rational>& output,
+  bool useNilWeight,
+  bool ascending
+) {
+  MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::getActionGeneralizedVermaModuleAsDifferentialOperator");
+  List<ElementUniversalEnveloping<Coefficient> > eltsNilrad;
+  List<int> indicesNilrad;
+  this->getElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
+  ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
+  this->getGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
+  result.assignElementLieAlgebra(inputElt, *this->owner, 1);
+  theGenElt.simplify();
+  result *= theGenElt;
+  result.simplify();
+  MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
+  idMT.makeIdentitySpecial();
+  MatrixTensor<RationalFunction<Rational> > tempMat1;
+
+  int varShift = this->minimalNumberOfVariables();
+  ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
+  eulerOperatorContribution;
+  Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
+  QuasiDifferentialMononomial monQDO, monQDO2;
+  Rational tempRat;
+  output.makeZero();
+  Rational currentShift;
+  for (int i = 0; i < result.size(); i ++) {
+    //problemCounter ++;
+    const MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon = result[i];
+    endoPart = idMT;
+    for (int j = currentMon.powers.size - 1; j >= indicesNilrad.size; j --) {
+      int thePower = 0;
+      if (!currentMon.powers[j].isSmallInteger(&thePower)) {
+        return false;
+      }
+      tempMat1 = this->getActionGeneratorIndex(currentMon.generatorsIndices[j]);
+      tempMT.makeZero();
+      for (int k = 0; k < tempMat1.size(); k ++) {
+        if (tempMat1.coefficients[k].expressionType == RationalFunction<Rational>::typeRationalFunction) {
+          return false;
+        }
+        tempMat1.coefficients[k].getNumerator(tempP1);
+        tempMT.addMonomial(tempMat1[k], tempP1);
+      }
+      MathRoutines::raiseToPower(tempMT, thePower, idMT);
+      endoPart *= tempMT;
+    }
+    exponentContribution.makeOne();
+    theCoeff = result.coefficients[i];
+    for (int j = 0; j < indicesNilrad.size; j ++) {
+      currentMon.powers[j].getConstantTerm(currentShift);
+      ElementWeylAlgebra<Rational>::getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
+        currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
+      );
+      exponentContribution *= oneIndexContribution;
+      theCoeff.divideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, &MonomialP::orderDefault());
+      if (!tempP1.isEqualToZero()) {
+        global.fatal << "This is a mathematical error! "
+        << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
+        << global.fatal;
+      }
+    }
+    for (int l = 0; l < theCoeff.size(); l ++) {
+      if (!this->getActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution)) {
+        return false;
+      }
+      weylPartSummand = exponentContribution;
+      weylPartSummand *= eulerOperatorContribution;
+      weylPartSummand *= theCoeff.coefficients[l];
+      for (int j = 0; j < weylPartSummand.size(); j ++) {
+        for (int k = 0; k < endoPart.size(); k ++) {
+          monQDO.theMatMon = endoPart[k];
+          monQDO.theWeylMon = weylPartSummand[j];
+          Polynomial<Rational>& currentEndoCoeff = endoPart.coefficients[k];
+          for (int m = 0; m < currentEndoCoeff.size(); m ++) {
+            monQDO2 = monQDO;
+            monQDO2.theWeylMon.polynomialPart *= currentEndoCoeff[m];
+            tempRat = currentEndoCoeff.coefficients[m];
+            tempRat *= weylPartSummand.coefficients[j];
+            output.addMonomial(monQDO2, tempRat);
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
+template<class Coefficient>
+void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
+  HomomorphismSemisimpleLieAlgebra& theHmm,
+  Selection& LeviInSmall,
+  List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors,
+  Vectors<Coefficient>* outputWeightsFundCoords,
+  Vectors<Coefficient>* outputEigenSpace,
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg");
+  if (this->theChaR.size() != 1) {
+    if (comments != nullptr) {
+      std::stringstream out;
+      out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
+      out << " Instead I got the character " << this->theChaR.toString()
+      << " (" << this->theChaR.size() << " monomials)";
+      *comments << out.str();
+    }
+    return;
+  }
+  std::string tempS;
+  std::stringstream out;
+  if (comments != nullptr) {
+    out << tempS;
+  }
+  out << "<br>Parabolic selection: " << LeviInSmall.toString();
+  std::stringstream tempStream1;
+  tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().toStringLieAlgebraName() << "-module with highest weight in fund coords "
+  << this->theChaR[0].weightFundamentalCoordS.toString();
+  ProgressReport theReport;
+  theReport.report(tempStream1.str());
+  List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
+  Selection InvertedLeviInSmall;
+  InvertedLeviInSmall = LeviInSmall;
+  InvertedLeviInSmall.invertSelection();
+  eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.cardinalitySelection);
+  Vectors<Coefficient> tempSpace1, tempSpace2;
+  MemorySaving<Vectors<Coefficient> > tempEigenVects;
+  Vectors<Coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.getElement() : *outputEigenSpace;
+  theFinalEigenSpace.setSize(0);
+  if (InvertedLeviInSmall.cardinalitySelection == 0) {
+    theFinalEigenSpace.makeEiBasis(this->getDimension());
+  }
+  for (int i = 0; i < InvertedLeviInSmall.cardinalitySelection; i ++) {
+    ElementSemisimpleLieAlgebra<Rational>& currentElt =
+    theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
+    MatrixTensor<Coefficient> currentOp, tempMat;
+    currentOp.makeZero();
+    for (int j = 0; j < currentElt.size(); j ++) {
+      tempMat = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
+      tempMat *= currentElt.coefficients[j];
+      currentOp += tempMat;
+    }
+    std::stringstream tempStream3;
+    double timeAtStart1 = global.getElapsedSeconds();
+    tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
+    theReport.report(tempStream3.str());
+    Matrix<Coefficient> currentOpMat;
+    currentOp.getMatrix(currentOpMat, this->getDimension());
+    currentOpMat.getZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
+    tempStream3 << " done in " << global.getElapsedSeconds() - timeAtStart1 << " seconds. ";
+    theReport.report(tempStream3.str());
+    if (i == 0) {
+      theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
+    } else {
+      std::stringstream tempStream4;
+      double timeAtStart2 = global.getElapsedSeconds();
+      tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
+      tempSpace1 = theFinalEigenSpace;
+      theReport.report(tempStream4.str());
+      tempSpace2 = eigenSpacesPerSimpleGenerator[i];
+      theFinalEigenSpace.intersectTwoLinearSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
+      tempStream4 << " done in " << global.getElapsedSeconds() - timeAtStart2 << " seconds. ";
+      theReport.report(tempStream4.str());
+    }
+  }
+  out << "<br>Eigenvectors: <table>";
+  std::stringstream readyForLatexComsumption;
+  readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
+  readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
+  << this->theHWFundamentalCoordsBaseField.toStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
+  Vector<Coefficient> currentWeight;
+  Vector<Coefficient> hwFundCoordsNilPart;
+  hwFundCoordsNilPart = this->theHWFundamentalCoordsBaseField;
+  hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
+  ElementUniversalEnveloping<Coefficient> currentElt, tempElt;
+  if (outputEigenVectors != nullptr) {
+    outputEigenVectors->setSize(0);
+  }
+  for (int j = 0; j < theFinalEigenSpace.size; j ++) {
+    out << "<tr><td>";
+    currentElt.makeZero(this->getOwner());
+    Vector<Coefficient>& currentVect = theFinalEigenSpace[j];
+    int lastNonZeroIndex = - 1;
+    for (int i = 0; i < currentVect.size; i ++) {
+      if (!(currentVect[i].isEqualToZero())) {
+        tempElt.makeZero(this->getOwner());
+        tempElt.addMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        tempElt *= currentVect[i];
+        currentElt += tempElt;
+        lastNonZeroIndex = i;
+      }
+    }
+    currentWeight = theHmm.theRange().theWeyl.getFundamentalCoordinatesFromSimple(
+      this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]
+    );//<-implicit type conversion here
+    currentWeight += hwFundCoordsNilPart;
+    readyForLatexComsumption <<  "$" << currentWeight.toStringLetterFormat("\\omega") << "$&$" << currentVect.toStringLetterFormat("m") << "$";
+    if (currentElt.size() > 1) {
+      out << "(";
+    }
+    if (outputEigenVectors != nullptr) {
+      outputEigenVectors->addOnTop(currentElt);
+    }
+    if (outputWeightsFundCoords != nullptr) {
+      outputWeightsFundCoords->addOnTop(currentWeight);
+    }
+    out << currentElt.toString(&global.theDefaultFormat.getElement());
+    if (currentElt.size() > 1) {
+      out << ")";
+    }
+    out << " v_\\lambda";
+    out << "</td><td>(weight: " << currentWeight.toStringLetterFormat("\\omega") << ")</td></tr>";
+    readyForLatexComsumption << "\\\\\n<br>";
+  }
+  out << "</table>";
+  readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
+  out << "<br>Your ready for LaTeX consumption text follows.<br>";
+  out << readyForLatexComsumption.str();
+  theReport.report("splitFDpartOverFKLeviRedSubalg done!");
+  if (comments != nullptr) {
+    *comments << out.str();
+  }
+}
+
+template <class Coefficient>
+bool ModuleSSalgebra<Coefficient>::getActionEulerOperatorPart(
+  const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO
+) {
+  MacroRegisterFunctionWithName("ModuleSSalgebra::getActionEulerOperatorPart");
+  int powerMonCoeff = 0;
+  ElementWeylAlgebra<Rational> currentMonContribution;
+  outputDO.makeOne();
+  for (int i = 0; i < theCoeff.minimalNumberOfVariables(); i ++) {
+    if (!theCoeff(i).isSmallInteger(&powerMonCoeff)) {
+      global.fatal
+      << "Getting Euler operator part of action on generalized Verma module: "
+      << "I have an exponent with non-small integer entry. "
+      << global.fatal;
+    }
+    currentMonContribution.makexidj(i, i, 0);
+    currentMonContribution.raiseToPower(powerMonCoeff);
+    outputDO *= currentMonContribution;
+  }
+  return true;
+}
+
+template <class Coefficient>
+std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+  std::stringstream out;
+  if (this->theMons.size > 1) {
+    for (int i = 0; i < this->theMons.size; i ++) {
+      bool ishwv = this->theMons[i].isHWV();
+      if (!ishwv) {
+        out << "(";
+      }
+      out << this->theMons[i].toString(theFormat, includeV);
+      if (!ishwv) {
+        out  << ")";
+      }
+      if (i != this->theMons.size - 1) {
+        out << "\\otimes ";
+      }
+    }
+  } else {
+    out << this->theMons[0].toString(theFormat, includeV);
+  }
+  return out.str();
+}
+
+template <class Coefficient>
+std::string MonomialGeneralizedVerma<Coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
+  if (this->owner == nullptr) {
+    global.fatal << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
+  }
+  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
+  std::string tempS;
+  if (tempS == "1") {
+    tempS = "";
+  }
+  if (tempS == "- 1" || tempS == "-1") {
+    tempS = "-";
+  }
+  tempS += this->theMonCoeffOne.toString(theFormat);
+  if (tempS == "1") {
+    tempS = "";
+  }
+  if (tempS == "- 1" || tempS == "-1") {
+    tempS = "-";
+  }
+  bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
+  std::stringstream out;
+  out << tempS;
+  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].toString(theFormat);
+  if (tempS != "1") {
+    out << tempS;
+  }
+  needsCdot = needsCdot || (tempS != "1" && tempS != "-");
+  if (needsCdot) {
+    out << "\\cdot ";
+  }
+  if (includeV) {
+    out << theMod.elementToStringHWV(theFormat);
+  }
+  return out.str();
+}
+
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::substitution(
+  const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+) {
+  this->theMonCoeffOne.substitution(theSub);
+  ModuleSSalgebra<Coefficient> newOwner;
+  newOwner = *this->owner;
+  newOwner.substitution(theSub);
+  int newModIndex = theMods.addNoRepetitionOrReturnIndexFirst(newOwner);
+  this->owner = &theMods[newModIndex];
+}
+
+template <class Coefficient>
+void MonomialTensorGeneralizedVermas<Coefficient>::operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
+  this->theMons.setSize(1);
+  this->theMons[0] = other;
+}
+
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
+  const ElementUniversalEnveloping<Coefficient>& theUE,
+  ElementSumGeneralizedVermas<Coefficient>& output
+) const {
+  MacroRegisterFunctionWithName("MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft");
+  MonomialGeneralizedVerma<Coefficient> currentMon;
+  output.makeZero();
+  ElementSumGeneralizedVermas<Coefficient> buffer;
+  ProgressReport theReport;
+  if (!this->getOwner().owner->flagHasNilradicalOrder) {
+    global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
+    << global.fatal;
+  }
+  for (int j = 0; j < theUE.size(); j ++) {
+    currentMon.theMonCoeffOne = theUE[j];
+    currentMon.theMonCoeffOne *= this->theMonCoeffOne;
+    currentMon.owner = this->owner;
+    currentMon.indexFDVector = this->indexFDVector;
+    currentMon.owner = this->owner;
+    std::stringstream reportStream;
+    reportStream << "reducing mon: " << currentMon.toString()
+    << ", index" << j + 1 << " out of " << theUE.size() << "...";
+    theReport.report(reportStream.str());
+    currentMon.reduceMe(buffer);
+    reportStream << " done.";
+    theReport.report(reportStream.str());
+    buffer *= theUE.coefficients[j];
+    output += buffer;
+  }
+}
+
+template <class Coefficient>
+void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft(
+  const ElementUniversalEnveloping<Coefficient>& theUE
+) {
+  MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft");
+  ElementSumGeneralizedVermas<Coefficient> buffer, Accum;
+  Accum.makeZero();
+  for (int i = 0; i < this->size(); i ++) {
+    (*this)[i].multiplyMeByUEEltOnTheLeft(theUE, buffer);
+    buffer *= this->coefficients[i];
+    Accum += buffer;
+  }
+  *this = Accum;
+}
+
+template <class Coefficient>
+void MonomialGeneralizedVerma<Coefficient>::reduceMe(
+  ElementSumGeneralizedVermas<Coefficient>& output
+) const {
+  MacroRegisterFunctionWithName("MonomialGeneralizedVerma::reduceMe");
+  ModuleSSalgebra<Coefficient>& theMod = *this->owner;
+  output.makeZero();
+  MonomialUniversalEnveloping<Coefficient> tempMon;
+  tempMon = this->theMonCoeffOne;
+  tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
+  int indexCheck = theMod.theGeneratingWordsNonReduced.getIndex(tempMon);
+  if (!this->owner->owner->flagHasNilradicalOrder) {
+    global.fatal << "Owner needs nilradical order!!!" << global.fatal;
+  }
+  if (indexCheck != - 1) {
+    MonomialGeneralizedVerma<Coefficient> basisMon;
+    basisMon.makeConstant(*this->owner);
+    basisMon.indexFDVector = indexCheck;
+    output.addMonomial(basisMon, 1);
+    return;
+  }
+  ElementUniversalEnveloping<Coefficient> theUEelt;
+  theUEelt.makeZero(*this->getOwner().owner);
+  theUEelt.addMonomial(this->theMonCoeffOne, 1);
+  theUEelt.simplify();
+
+  MonomialUniversalEnveloping<Coefficient> currentMon;
+  MonomialGeneralizedVerma<Coefficient> newMon;
+  MatrixTensor<Coefficient> tempMat1, tempMat2;
+  ProgressReport theReport;
+  Coefficient theCF;
+  for (int l = 0; l < theUEelt.size(); l ++) {
+    currentMon = theUEelt[l];
+    tempMat1.makeIdentitySpecial();
+    for (int k = currentMon.powers.size - 1; k >= 0; k --) {
+      std::stringstream reportStream;
+      reportStream << "accounting monomial " << currentMon.toString() << " of index "
+      << l + 1 << " out of "
+      << theUEelt.size() << " and letter index " << currentMon.powers.size - k
+      << " out of " << currentMon.powers.size << "...";
+      theReport.report(reportStream.str());
+      int thePower = - 1;
+      if (!currentMon.powers[k].isSmallInteger(&thePower)) {
+        break;
+      }
+      int theIndex = currentMon.generatorsIndices[k];
+      if (theMod.hasFreeAction(theIndex)) {
+        break;
+      }
+      tempMat2 = tempMat1;
+      tempMat1 = theMod.getActionGeneratorIndex(theIndex);
+      tempMat1.raiseToPower(thePower);
+      tempMat1 *= tempMat2;
+      currentMon.powers.size --;
+      currentMon.generatorsIndices.size --;
+      reportStream << "done!";
+      theReport.report(reportStream.str());
+    }
+    newMon.owner = this->owner;
+    for (int i = 0; i < tempMat1.size(); i ++) {
+      int otherIndex = - 1;
+      if (tempMat1[i].dualIndex == this->indexFDVector) {
+        otherIndex = tempMat1[i].vIndex;
+      }
+      if (tempMat1[i].isIdentity) {
+        otherIndex = this->indexFDVector;
+      }
+      if (otherIndex != - 1) {
+        newMon.theMonCoeffOne = currentMon;
+        newMon.indexFDVector = otherIndex;
+        theCF = theUEelt.coefficients[l];
+        theCF *= tempMat1.coefficients[i];
+        output.addMonomial(newMon, theCF);
+      }
+    }
+  }
+  theMod.getOwner().orderStandardAscending();
+}
+
+template <class Coefficient>
+void ElementSumGeneralizedVermas<Coefficient>::makeHWV(
+  ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit
+) {
+  this->makeZero();
+  MonomialGeneralizedVerma<Coefficient> theMon;
+  theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
+  theMon.theMonCoeffOne.makeOne(theOwner.getOwner());
+  theMon.owner = &theOwner;
+  this->addMonomial(theMon, ringUnit);
+}
+
+template<class Coefficient>
+bool ElementSumGeneralizedVermas<Coefficient>::extractElementUniversalEnveloping(
+  ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner
+) {
+  output.makeZero(theOwner);
+  ModuleSSalgebra<Coefficient>* theModPtr = nullptr;
+  MonomialUniversalEnveloping<Coefficient> tempMon;
+  for (int i = 0; i < this->size(); i ++) {
+    const MonomialGeneralizedVerma<Coefficient>& currentMon = (*this)[i];
+    if (i == 0) {
+      theModPtr = currentMon.owner;
+    }
+    if (currentMon.owner != theModPtr) {
+      return false;
+    }
+    tempMon = currentMon.theMonCoeffOne;
+    tempMon *= currentMon.getOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
+    output.addMonomial(tempMon, this->coefficients[i]);
+  }
+  return true;
 }
 #endif

@@ -2035,4 +2035,30 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelations(
     }
   }
 }
+
+template <class Coefficient>
+Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
+  const ElementUniversalEnveloping<Coefficient>& right
+) const {
+  MacroRegisterFunctionWithName("ElementUniversalEnveloping::getKillingFormProduct");
+  if (this->isEqualToZero()) {
+    return 0;
+  }
+  Coefficient result = 0;
+  ElementUniversalEnveloping<Coefficient> adadAppliedToMon, tempElt;
+  SemisimpleLieAlgebra* theOwner;
+  theOwner = &this->getOwner();
+  MonomialUniversalEnveloping<Coefficient> baseGen;
+  for (int i = 0; i < theOwner->getNumberOfGenerators(); i ++) {
+    baseGen.makeGenerator(i, *theOwner);
+    adadAppliedToMon.makeZero(*theOwner);
+    adadAppliedToMon.addMonomial(baseGen, 1);
+    right.adjointRepresentationAction(adadAppliedToMon, tempElt);
+    tempElt.simplify();
+    this->adjointRepresentationAction(tempElt, adadAppliedToMon);
+    adadAppliedToMon.simplify();
+    result += adadAppliedToMon.getCoefficientOf(baseGen);
+  }
+  return result;
+}
 #endif

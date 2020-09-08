@@ -1036,7 +1036,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
 bool CalculatorFunctionsPolynomial::polynomialRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerGroebner");
+  MacroRegisterFunctionWithName("Calculator::groebner");
   Vector<Polynomial<Rational> > inputVector;
   if (input.size() < 3) {
     return output.makeError("Function takes at least two arguments. ", calculator);
@@ -1121,7 +1121,7 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
   return output.assignValueWithContext(outputPolynomial, context, calculator);
 }
 
-bool CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1144,7 +1144,7 @@ bool CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMulti
   );
 }
 
-bool CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleModular(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1197,10 +1197,10 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
   }
   const Expression& left = input[1];
   if (left.isOfType<Polynomial<ElementZmodP> >()) {
-    return CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleModular(calculator, input, output, doGCD);
+    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleModular(calculator, input, output, doGCD);
   }
   if (left.isOfType<Polynomial<AlgebraicNumber> >()) {
-    return CalculatorFunctionsPolynomial::innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
+    return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultipleAlgebraic(calculator, input, output, doGCD);
   }
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext theContext(calculator);
@@ -1216,4 +1216,164 @@ bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePo
   return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     calculator, polynomials[0], polynomials[1], theContext, output, doGCD
   );
+}
+
+bool CalculatorFunctionsPolynomial::groebner(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  int order,
+  bool useModZp
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPolynomial::groebner");
+  Vector<Polynomial<Rational> > inputVector;
+  Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
+  ExpressionContext theContext(calculator);
+  if (input.size() < 3) {
+    return output.makeError("Function takes at least two arguments. ", calculator);
+  }
+  const Expression& numComputationsE = input[1];
+  Rational upperBound = 0;
+  if (!numComputationsE.isOfType(&upperBound)) {
+    return output.makeError(
+      "Failed to convert the first argument of "
+      "the expression to rational number. ",
+      calculator
+    );
+  }
+  if (upperBound > 1000000) {
+    return output.makeError(
+      "Error: your upper limit of polynomial "
+      "operations exceeds 1000000, which is too large. "
+      "You may use negative or zero number "
+      "give no computation bound, but please don't. ",
+      calculator
+    );
+  }
+  int upperBoundComputations = int(upperBound.getDoubleValue());
+  output.reset(calculator);
+  for (int i = 1; i < input.children.size; i ++) {
+    output.children.addOnTop(input.children[i]);
+  }
+  int theMod = 0;
+  if (useModZp) {
+    if (!output[1].isSmallInteger(&theMod)) {
+      return output.makeError(
+        "Error: failed to extract modulo from the second argument. ",
+        calculator
+      );
+    }
+    if (!MathRoutines::isPrime(theMod)) {
+      return output.makeError("Error: modulus not prime. ", calculator);
+    }
+  }
+  if (!calculator.getVectorFromFunctionArguments<Polynomial<Rational> >(
+    output,
+    inputVector,
+    &theContext,
+    - 1,
+    CalculatorConversions::functionPolynomial<Rational>
+  )) {
+    return output.makeError(
+      "Failed to extract polynomial expressions",
+      calculator
+    );
+  }
+  for (int i = 0; i < inputVector.size; i ++) {
+    inputVector[i].scaleNormalizeLeadingMonomial(&MonomialP::orderDefault());
+  }
+  GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
+  theContext.getFormat(theGroebnerComputation.theFormat);
+  theContext.getFormat(global.theDefaultFormat.getElement());
+  if (useModZp) {
+    ElementZmodP tempElt;
+    tempElt.makeMinusOne(static_cast<unsigned>(theMod));
+    inputVectorZmodP.setSize(inputVector.size);
+    for (int i = 0; i < inputVector.size; i ++) {
+      inputVectorZmodP[i].makeZero();
+      for (int j = 0; j < inputVector[i].size(); j ++) {
+        tempElt = inputVector[i].coefficients[j];
+        inputVectorZmodP[i].addMonomial(inputVector[i][j], tempElt);
+      }
+    }
+  }
+  List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
+  outputGroebner = inputVector;
+  outputGroebner2 = inputVector;
+  if (order == MonomialP::Order::gradedLexicographic) {
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+      MonomialP::greaterThan_totalDegree_leftLargerWins
+    );
+  } else if (order == MonomialP::Order::gradedReverseLexicographic) {
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+      MonomialP::greaterThan_totalDegree_rightSmallerWins
+    );
+  } else if (order == MonomialP::Order::lexicographicOpposite) {
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+      MonomialP::greaterThan_rightLargerWins
+    );
+  } else if (order == MonomialP::Order::lexicographic){
+    theGroebnerComputation.polynomialOrder.monomialOrder.setComparison(
+      MonomialP::greaterThan_leftLargerWins
+    );
+  } else {
+    global.fatal << "Unexpected order value: " << order << global.fatal;
+  }
+  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.polynomialOrder.monomialOrder;
+  theGroebnerComputation.maximumPolynomialComputations = upperBoundComputations;
+  bool success = theGroebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
+  std::stringstream out;
+  out << theGroebnerComputation.toStringLetterOrder(false);
+  out << "Letter/expression order: ";
+  int numberOfVariables = theContext.numberOfVariables();
+  for (int i = 0; i < numberOfVariables; i ++) {
+    out << theContext.getVariable(i).toString();
+    if (i != numberOfVariables - 1) {
+      out << "&lt;";
+    }
+  }
+  out << "<br>Starting basis (" << inputVector.size  << " elements): ";
+  for (int i = 0; i < inputVector.size; i ++) {
+    out << "<br>"
+    << HtmlRoutines::getMathNoDisplay(
+      inputVector[i].toString(&theGroebnerComputation.theFormat)
+    );
+  }
+  if (success) {
+    out << "<br>Minimal Groebner basis with "
+    << outputGroebner.size
+    << " elements, computed using algorithm 1, using "
+    << theGroebnerComputation.numberPolynomialDivisions
+    << " polynomial divisions. ";
+    for (int i = 0; i < outputGroebner.size; i ++) {
+      out << "<br> " << HtmlRoutines::getMathNoDisplay(
+        outputGroebner[i].toString(&theGroebnerComputation.theFormat)
+      );
+    }
+    out << "<br>Output in calculator-ready format: ";
+    out << "<br>(";
+    for (int i = 0; i < outputGroebner.size; i ++) {
+      out << outputGroebner[i].toString(&theGroebnerComputation.theFormat);
+      if (i != outputGroebner.size - 1) {
+        out << ", <br>";
+      }
+    }
+    out << ")";
+  } else {
+    out << "<br>Minimal Groebner basis not computed: "
+    << "exceeded the user-given limit of "
+    << upperBoundComputations << " polynomial operations. ";
+    out << "<br>An intermediate non-Groebner basis containing total "
+    << theGroebnerComputation.theBasis.size
+    << " basis elements: ";
+    out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
+    for (int i = 0; i < theGroebnerComputation.theBasis.size; i ++) {
+      out << theGroebnerComputation.theBasis[i].element.toString(&theGroebnerComputation.theFormat);
+      if (i != theGroebnerComputation.theBasis.size - 1) {
+        out << ", <br>";
+      }
+    }
+    out << ");";
+  }
+  return output.assignValue(out.str(), calculator);
 }

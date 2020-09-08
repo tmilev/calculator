@@ -5,6 +5,192 @@
 #include "math_general.h"
 #include "math_extra_semisimple_Lie_algebras.h"
 
+template<class Coefficient>
+class MonomialGeneralizedVerma {
+  public:
+  ModuleSSalgebra<Coefficient>* owner;
+  MonomialUniversalEnveloping<Coefficient> theMonCoeffOne;
+  int indexFDVector;
+  MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
+  }
+  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<Coefficient>& theGen) {
+    output << theGen.toString();
+    return output;
+  }
+  void multiplyMeByUEEltOnTheLeft(
+    const ElementUniversalEnveloping<Coefficient>& theUE,
+    ElementSumGeneralizedVermas<Coefficient>& output
+  ) const;
+  void operator=(const MonomialGeneralizedVerma<Coefficient>& other) {
+    this->owner = other.owner;
+    this->indexFDVector = other.indexFDVector;
+    this->theMonCoeffOne = other.theMonCoeffOne;
+  }
+
+  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
+    if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
+      return this->theMonCoeffOne == other.theMonCoeffOne;
+    }
+    return false;
+  }
+  void setNumberOfVariables(int goalNumVars) {
+    if (this->owner->size <= this->indexInOwner) {
+      global.fatal << "Crash in setNumberOfVariables: bad number of variables. " << global.fatal;
+    }
+    this->theMonCoeffOne.setNumberOfVariables(goalNumVars);
+    this->owner->objects[this->indexInOwner].setNumberOfVariables(goalNumVars);
+  }
+  void substitution(
+    const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+  );
+  unsigned int hashFunction() const {
+    return this->indexFDVector * someRandomPrimes[0] + (static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->owner))) * someRandomPrimes[1];
+  }
+  static unsigned int hashFunction(const MonomialGeneralizedVerma<Coefficient>& input) {
+    return input.hashFunction();
+  }
+  bool operator>(const MonomialGeneralizedVerma<Coefficient>& other) const {
+    if (this->owner != other.owner) {
+      return reinterpret_cast<unsigned long>(this->owner) > reinterpret_cast<unsigned long>(other.owner);
+    }
+    if (this->indexFDVector != other.indexFDVector) {
+      return this->indexFDVector > other.indexFDVector;
+    }
+    return this->theMonCoeffOne > other.theMonCoeffOne;
+  }
+  void reduceMe(ElementSumGeneralizedVermas<Coefficient>& output) const;
+  bool isHWV() const {
+    if (!this->theMonCoeffOne.isEqualToOne()) {
+      return false;
+    }
+    return this->getOwner().getDimension() - 1 == this->indexFDVector;
+  }
+  void makeConstant(ModuleSSalgebra<Coefficient>& inputOwner) {
+    this->owner = &inputOwner;
+    this->theMonCoeffOne.makeOne(*inputOwner.owner);
+  }
+  ModuleSSalgebra<Coefficient>& getOwner() const {
+    return *this->owner;
+  }
+};
+
+template<class Coefficient>
+class ElementSumGeneralizedVermas : public LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient> {
+public:
+  void multiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<Coefficient>& theUE);
+  unsigned int hashFunction() const {
+    return this->LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::hashFunction();
+  }
+  static unsigned int hashFunction(const ElementSumGeneralizedVermas<Coefficient>& input) {
+    return input.hashFunction();
+  }
+  ElementSumGeneralizedVermas() {
+  }
+  void makeHWV(ModuleSSalgebra<Coefficient>& theOwner, const Coefficient& ringUnit);
+  int minimalNumberOfVariables() {
+    if (this->owner == nullptr) {
+      return - 1;
+    }
+    if (this->owner->size == 0) {
+      return - 1;
+    }
+    int theAnswer = this->owner->objects[0].minimalNumberOfVariables();
+    for (int i = 1; i < this->owner->size; i ++) {
+      if (theAnswer != this->owner->objects[i].minimalNumberOfVariables()) {
+        return - 1;
+      }
+    }
+    return theAnswer;
+  }
+  bool extractElementUniversalEnveloping(ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra& theOwner);
+  void operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
+    this->::LinearCombination<MonomialGeneralizedVerma<Coefficient>, Coefficient>::operator=(other);
+  }
+};
+
+template <class Coefficient>
+class MonomialTensorGeneralizedVermas {
+public:
+  List<MonomialGeneralizedVerma<Coefficient> > theMons;
+  friend std::ostream& operator<<(std::ostream& output, const MonomialTensorGeneralizedVermas<Coefficient>& input) {
+    output << input.toString();
+    return output;
+  }
+  void operator*=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
+    if (this == &other) {
+      MonomialTensorGeneralizedVermas<Coefficient> tempMon1;
+      tempMon1 = other;
+      *this *= tempMon1;
+      return;
+    }
+    this->theMons.addListOnTop(other.theMons);
+  }
+  void operator*=(const MonomialGeneralizedVerma<Coefficient>& other) {
+    this->theMons.addOnTop(other);
+  }
+  unsigned int hashFunction() const {
+    int numCycles = MathRoutines::minimum(someRandomPrimesSize, this->theMons.size);
+    unsigned int result = 0;
+    for (int i = 0; i < numCycles; i ++) {
+      result += someRandomPrimes[i] * this->theMons[i].hashFunction();
+    }
+    return result;
+  }
+  static unsigned int hashFunction(const MonomialTensorGeneralizedVermas<Coefficient>& input) {
+    return input.hashFunction();
+  }
+  void setNumberOfVariables(int goalNumVars) {
+    for (int i = 0; i < this->theMons.size; i ++) {
+      this->theMons[i].setNumberOfVariables(goalNumVars);
+    }
+  }
+  void substitution(
+    const PolynomialSubstitution<Rational>& theSub,
+    ListReferences<ModuleSSalgebra<Coefficient> >& theMods
+  ) {
+    for (int i = 0; i < this->theMons.size; i ++) {
+      this->theMons[i].substitution(theSub, theMods);
+    }
+  }
+  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  MonomialTensorGeneralizedVermas() {
+  }
+  void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
+    this->theMons = other.theMons;
+  }
+  void operator=(const MonomialGeneralizedVerma<Coefficient>& other);
+  bool operator==(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
+    if (this->theMons.size != other.theMons.size) {
+      return false;
+    }
+    for (int i = 0; i < this->theMons.size; i ++) {
+      if (!(this->theMons[i] == other.theMons[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool isHWV() const {
+    if (this->theMons.size != 1) {
+      return false;
+    }
+    return this->theMons[0].isHWV();
+  }
+  bool operator>(const MonomialTensorGeneralizedVermas<Coefficient>& other) const {
+    if (this->theMons.size > other.theMons.size) {
+      return true;
+    }
+    if (other.theMons.size > this->theMons.size) {
+      return false;
+    }
+    ///This might need a rewrite. As it is, it will cause monomials to be sorted according to the
+    ///alphabetical order of their human-readable strings. If I have time, I will make a better scheme for
+    ///comparison.
+    return this->toString() > other.toString();
+  }
+};
+
 template <class Coefficient>
 class ModuleSSalgebra {
   List<MatrixTensor<Coefficient> > actionsGeneratorsMaT;

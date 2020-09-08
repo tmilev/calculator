@@ -6,6 +6,7 @@
 #include "math_extra_graph.h"
 #include "calculator_Weyl_group_characters.h"
 #include "math_extra_universal_enveloping_implementation.h"
+#include "math_extra_differential_operators.h"
 
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*
@@ -2489,4 +2490,3 @@ bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
   outputRep.assignRepresentation(inputRep);
   return output.assignValue(outputRep, calculator);
 }
-

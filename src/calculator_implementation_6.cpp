@@ -3149,3 +3149,20 @@ std::string StringRoutines::convertStringToHexIfNonReadable(
   }
   return Crypto::convertStringToHex(input, lineWidthZeroForNone, useHTML);
 }
+
+bool CalculatorFunctions::innerJacobiSymbol(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
+  global.fatal << "Function not implemented yet." << global.fatal;
+  (void) calculator;
+  (void) output;
+  if (input.children.size != 3) {
+    return false;
+  }
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  int leftInt, rightInt;
+  if (!leftE.isSmallInteger(&leftInt) || !rightE.isSmallInteger(&rightInt)) {
+    return false;
+  }
+  return true;
+}

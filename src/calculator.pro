@@ -89,7 +89,9 @@ HEADERS += \
     crypto_public_domain.h \
     math_rational_function.h \
     math_rational_function_implementation.h \
-    calculator_functions_polynomial.h
+    calculator_functions_polynomial.h \
+    math_extra_differential_operators.h \
+    calculator_lie_theory.h
 
 
 SOURCES += \
@@ -174,5 +176,6 @@ SOURCES += \
     crypto_sha3.cpp \
     calculator_expression_context.cpp \
     calculator_implementation_8_polynomial.cpp \
-    calculator_evaluation_steps.cpp
+    calculator_evaluation_steps.cpp \
+    calculator_lie_theory.cpp
 

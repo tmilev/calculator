@@ -61,17 +61,39 @@ public:
       calculator, input, output, true
     );
   }
-  static bool innerGreatestCommonDivisorOrLeastCommonMultipleAlgebraic(
+  static bool greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool doGCD
   );
-  static bool innerGreatestCommonDivisorOrLeastCommonMultipleModular(
+  static bool greatestCommonDivisorOrLeastCommonMultipleModular(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool doGCD
+  );
+  static bool groebnerGradedLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::gradedLexicographic);
+  }
+  static bool groebnerGradedReverseLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::gradedReverseLexicographic);
+  }
+  static bool groebnerLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographic);
+  }
+  static bool groebnerLexicographicOpposite(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographicOpposite);
+  }
+  static bool groebnerModZpLexicographic(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorFunctionsPolynomial::groebner(calculator, input, output, MonomialP::Order::lexicographic, true);
+  }
+  static bool groebner(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int order,
+    bool useModZp = false
   );
 };
 

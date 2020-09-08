@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
+#include "calculator_lie_theory.h"
 #include "math_general_implementation.h"
 #include "calculator_Weyl_group_characters.h"
 #include "calculator_inner_typed_functions.h"
@@ -4321,7 +4322,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HeighestWeightVector",
-    CalculatorFunctions::innerHighestWeightVector,
+    CalculatorLieTheory::innerHighestWeightVector,
     "",
     "Highest weight vector in a generalized Verma module. "
     "The first argument gives the semisimple Lie algebra. "
@@ -4344,7 +4345,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintModule",
-    CalculatorFunctions::innerPrintGenVermaModule,
+    CalculatorLieTheory::innerPrintGenVermaModule,
     "",
     "Makes a report on a finite dimensional Lie algebra module, "
     "or more generally, on a generalized Verma module "
@@ -4400,14 +4401,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AnimateLittelmannPaths",
-    Calculator::innerAnimateLittelmannPaths,
+    CalculatorLieTheory::innerAnimateLittelmannPaths,
     "",
     "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. "
     "Presented first on the seminar in Charles University Prague. "
     "The first argument gives the type of the semisimple Lie algebra, "
     "the second gives the highest weight. ",
     "AnimateLittelmannPaths{}(G_2, (2, 0));",
-    "Calculator::innerAnimateLittelmannPaths",
+    "CalculatorLieTheory::innerAnimateLittelmannPaths",
     "AnimateLittelmannPaths",
     innerStandard
   );
@@ -4536,7 +4537,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "SplitFDpartB3overG2CharsOnly",
-    CalculatorFunctions::innerSplitFDpartB3overG2CharsOnly,
+    CalculatorLieTheory::innerSplitFDpartB3overG2CharsOnly,
     "",
     "Splits the finite dimensional part of the "
     "inducing module of the generalized "
@@ -4548,13 +4549,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "indicate the non-selected "
     "roots of the inducing parabolic subalgebra of B_3. ",
     "SplitFDpartB3overG2CharsOnly(x_1, 2, 0)",
-    "Calculator::innerSplitFDpartB3overG2CharsOnly",
+    "CalculatorLieTheory::innerSplitFDpartB3overG2CharsOnly",
     "SplitFDpartB3overG2CharsOnly",
     innerStandard
   );
   this->addOperationHandler(
     "SplitFDpartB3overG2",
-    CalculatorFunctions::innerSplitFDpartB3overG2,
+    CalculatorLieTheory::innerSplitFDpartB3overG2,
     "",
     "Splits the finite dimensional part of the inducing "
     "module of the generalized Verma module of "
@@ -4572,7 +4573,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintB3G2branchingTableCharsOnly",
-    CalculatorFunctions::innerPrintB3G2branchingTableCharsOnly,
+    CalculatorLieTheory::innerPrintB3G2branchingTableCharsOnly,
     "",
     "Creates a table of branching of finite dimensional B_3-modules over G_2. "
     "The argument of the function gives the "
@@ -4586,13 +4587,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "is used as the corresponding highest weight. ",
     "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); "
     "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
-    "Calculator::innerPrintB3G2branchingTableCharsOnly",
+    "CalculatorLieTheory::innerPrintB3G2branchingTableCharsOnly",
     "PrintB3G2branchingTableCharsOnly",
     innerInvisibleExperimental
   );
   this->addOperationHandler(
     "PrintB3G2branchingTable",
-    CalculatorFunctions::innerPrintB3G2branchingTable,
+    CalculatorLieTheory::innerPrintB3G2branchingTable,
     "",
     "Creates a table of branching of finite dimensional B_3-modules over G_2. "
     "The argument of the function gives the maximum height "
@@ -4606,7 +4607,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "SplitFDTensorGenericGeneralizedVerma",
-    CalculatorFunctions::innerSplitGenericGenVermaTensorFD,
+    CalculatorLieTheory::innerSplitGenericGenVermaTensorFD,
     "",
     "Experimental, please don't use. Splits generic generalized "
     "Verma module tensor finite dimensional module. ",
@@ -4617,7 +4618,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel,
+    CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorUpToLevel,
     "",
     "<b>Experimental, please don't use</b>. "
     "Embeds a Lie algebra in the Weyl algebra "
@@ -4634,7 +4635,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
+    CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
     "",
     "Constructs a parabolically induced map from a "
     "semisimple Lie algebra to a Weyl algebra "
@@ -4664,13 +4665,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "accepts further optional arguments, "
     "customizing the notation of the final printout.",
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    "Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder",
+    "CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder",
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
     innerStandard
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebra",
-    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
+    CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
     "",
     "Same as MapSemisimpleLieAlgebraInWeylAlgebra, "
     "but with a different order on the elements "
@@ -4693,7 +4694,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
-    CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
+    CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
     "",
     "Constructs a parabolically induced map from "
     "a semisimple Lie algebra "
@@ -4728,7 +4729,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "KLcoeffs",
-    Calculator::innerKLcoeffs,
+    CalculatorLieTheory::innerKLcoeffs,
     "",
     "Computes the n by n tables of "
     "1) Kazhdan-Lusztig polynomials, "
@@ -4833,7 +4834,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestMonomialBasisConjecture",
-    Calculator::innerTestMonomialBaseConjecture,
+    CalculatorLieTheory::innerTestMonomialBaseConjecture,
     "",
     "Tests the monomial basis conjecture from a common work by Jackson and Milev paper. "
     "First argument gives rank bound. "
@@ -4845,7 +4846,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LSpath",
-    Calculator::innerLSPath,
+    CalculatorLieTheory::innerLSPath,
     "",
     "Lakshmibai-Seshadri path starting at 0. "
     "The first argument gives the semisimple Lie algebra, "
@@ -4857,7 +4858,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LROdefine",
-    Calculator::innerLittelmannOperator,
+    CalculatorLieTheory::innerLittelmannOperator,
     "",
     "Littelmann root operator e_i, where e_i is the Littelmann "
     "root operator with respect to root of index i. "
@@ -5118,7 +5119,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GroebnerLexUpperLimit",
-    Calculator::innerGroebnerLexicographic,
+    CalculatorFunctionsPolynomial::groebnerLexicographic,
     "",
     "Transforms to a reduced Groebner basis using the "
     "lexicographic order. The lexicographic order is "
@@ -5188,7 +5189,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "3. Return changedMainBucket.  <br><b>End of algorithm description.</b>",
     "GroebnerLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\n"
     "GroebnerLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "Calculator::innerGroebnerLex",
+    "Calculator::groebnerLex",
     "GroebnerLexUpperLimit",
     innerStandard
   );
@@ -5204,18 +5205,18 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GroebnerLexOppositeUpperLimit",
-    Calculator::innerGroebnerLexicographicOpposite,
+    CalculatorFunctionsPolynomial::groebnerLexicographicOpposite,
     "",
     "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
     "GroebnerLexOppositeUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
     "\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "Calculator::innerGroebnerLexicographicOpposite",
+    "Calculator::groebnerLexicographicOpposite",
     "GroebnerLexOppositeUpperLimit",
     innerStandard
   );
   this->addOperationHandler(
     "GroebnerGrLexUpperLimit",
-    Calculator::innerGroebnerGradedLexicographic,
+    CalculatorFunctionsPolynomial::groebnerGradedLexicographic,
     "",
     "Transforms to a reduced Groebner basis relative to the graded "
     "lexicographic order. In the graded lexicographic order, "
@@ -5234,7 +5235,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "the description of function GroebnerLexUpperLimit.",
     "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n "
     "GroebnerGrLexUpperLimit{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
-    "Calculator::innerGroebnerGrLex",
+    "CalculatorFunctionsPolynomial::groebnerGrLex",
     "GroebnerGrLexUpperLimit",
     innerStandard
   );

@@ -7,14 +7,14 @@
 class CalculatorLieTheory {
 public:
   static bool killingForm(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2old(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output);
-  static bool innerLittelmannOperator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAnimateLittelmannPaths(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLSPath(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHWVCommon(Calculator& calculator,
+  static bool kazhdanLuzstigCoeffificents(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitFDpartB3overG2old(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output);
+  static bool littelmannOperator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool animateLittelmannPaths(Calculator& calculator, const Expression& input, Expression& output);
+  static bool LSPath(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output);
+  static bool highestWeightVectorCommon(Calculator& calculator,
     Expression& output,
     Vector<RationalFunction<Rational> >& highestWeightFundCoords,
     Selection& selectionParSel,
@@ -22,7 +22,7 @@ public:
     SemisimpleLieAlgebra* owner,
     bool Verbose = true
   );
-  static bool innerWriteGenVermaModAsDiffOperatorInner(
+  static bool writeGenVermaModAsDiffOperatorInner(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -46,10 +46,10 @@ public:
     Selection& outputInducingSel,
     Expression* outputContext = nullptr
   );
-  static bool innerPrintB3G2branchingTableCharsOnly(
+  static bool printB3G2branchingTableCharsOnly(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerPrintB3G2branchingIntermediate(
+  static bool printB3G2branchingIntermediate(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -57,10 +57,10 @@ public:
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
-  static bool innerPrintB3G2branchingTable(
+  static bool printB3G2branchingTable(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool innerPrintB3G2branchingTableCommon(
+  static bool printB3G2branchingTableCommon(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -68,7 +68,7 @@ public:
     BranchingData& theG2B3Data,
     ExpressionContext &theContext
   );
-  static bool innerWriteGenVermaModAsDiffOperators(
+  static bool writeGenVermaModAsDiffOperators(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -76,34 +76,34 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder(
+  static bool writeGenVermaModAsDiffOperatorsGeneratorOrder(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, false, false, true);
   }
-  static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending(
+  static bool writeGenVermaModAsDiffOperatorsNilOrderDescending(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, false, true, false);
   }
-  static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
+  static bool writeGenVermaModAsDiffOperatorsAllGensNilOrderDescending(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
-    return CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
+    return CalculatorLieTheory::writeGenVermaModAsDiffOperators(calculator, input, output, true, false, false);
   }
-  static bool innerPrintGenVermaModule(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHighestWeightVector(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitGenericGenVermaTensorFD(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSplitFDpartB3overG2Init(
+  static bool printGeneralizedVermaModule(Calculator& calculator, const Expression& input, Expression& output);
+  static bool writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(Calculator& calculator, const Expression& input, Expression& output);
+  static bool highestWeightVector(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitGenericGeneralizedVermaTensorFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitFDpartB3overG2(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitFDpartB3overG2Init(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     BranchingData& theG2B3Data,
     ExpressionContext& outputContext
   );
-  static bool innerPrintB3G2branchingTableInit(
+  static bool printB3G2branchingTableInit(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
@@ -111,10 +111,10 @@ public:
     int& desiredHeight,
     ExpressionContext& outputContext
   );
-  static bool innerSplitFDpartB3overG2CharsOutput(
+  static bool splitFDpartB3overG2CharsOutput(
     Calculator& calculator, const Expression& input, Expression& output, BranchingData& theG2B3Data
   );
-  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool splitFDpartB3overG2CharsOnly(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif

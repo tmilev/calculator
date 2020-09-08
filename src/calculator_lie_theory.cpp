@@ -7,7 +7,7 @@
 #include "math_extra_Weyl_algebras_implementation.h"
 #include "math_rational_function_implementation.h"
 
-bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner(
+bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -22,7 +22,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
   if (theHws.size == 0) {
@@ -237,7 +237,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner(
   return output.assignValue<std::string>(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerHWVCommon(
+bool CalculatorLieTheory::highestWeightVectorCommon(
   Calculator& calculator,
   Expression& output,
   Vector<RationalFunction<Rational> >& highestWeightFundCoords,
@@ -246,7 +246,7 @@ bool CalculatorLieTheory::innerHWVCommon(
   SemisimpleLieAlgebra* owner,
   bool Verbose
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
+  MacroRegisterFunctionWithName("Calculator::highestWeightVectorCommon");
   RecursionDepthCounter therecursionIncrementer(&calculator.recursionDepth);
   RationalFunction<Rational> RFOne, RFZero;
   RFOne.makeOne();
@@ -294,10 +294,10 @@ bool CalculatorLieTheory::innerHWVCommon(
   return output.assignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > >(theElt, hwContext, calculator);
 }
 
-bool CalculatorLieTheory::innerAnimateLittelmannPaths(
+bool CalculatorLieTheory::animateLittelmannPaths(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
+  MacroRegisterFunctionWithName("Calculator::animateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return output.makeError("This function takes 2 arguments", calculator);
@@ -325,15 +325,15 @@ bool CalculatorLieTheory::innerAnimateLittelmannPaths(
   }
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
-  calculator << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
+  calculator << "<br>Function animateLittelmannPaths: your input in simple coords: "
   << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
   thePath.makeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
   return output.assignValue(thePath.generateOrbitAndAnimate(), calculator);
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
+bool CalculatorLieTheory::splitFDpartB3overG2inner(Calculator& calculator, BranchingData& theG2B3Data, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2inner");
   ModuleSSalgebra<RationalFunction<Rational> > theModCopy;
   theModCopy.makeFromHW(
     theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, nullptr, false
@@ -462,11 +462,11 @@ bool CalculatorLieTheory::innerSplitFDpartB3overG2inner(Calculator& calculator, 
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerTestMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
+bool CalculatorLieTheory::testMonomialBaseConjecture(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::testMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
-    return output.makeError("innerTestMonomialBaseConjecture takes two arguments as input", calculator);
+    return output.makeError("testMonomialBaseConjecture takes two arguments as input", calculator);
   }
   const Expression& rankE = input[1];
   const Expression& dimE = input[2];
@@ -631,8 +631,8 @@ bool CalculatorLieTheory::innerTestMonomialBaseConjecture(Calculator& calculator
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerLittelmannOperator(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerLittelmannOperator");
+bool CalculatorLieTheory::littelmannOperator(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::littelmannOperator");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (input.hasBoundVariables()) {
     return false;
@@ -652,9 +652,9 @@ bool CalculatorLieTheory::innerLittelmannOperator(Calculator& calculator, const 
   return output.assignValue(theIndex, calculator);
 }
 
-bool CalculatorLieTheory::innerLSPath(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::LSPath(Calculator& calculator, const Expression& input, Expression& output) {
   RecursionDepthCounter theRecutionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("Calculator::innerLSPath");
+  MacroRegisterFunctionWithName("Calculator::LSPath");
   if (input.size() < 3) {
     return output.makeError("LSPath needs at least two arguments.", calculator);
   }
@@ -680,8 +680,8 @@ bool CalculatorLieTheory::innerLSPath(Calculator& calculator, const Expression& 
   return output.assignValue(theLSpath, calculator);
 }
 
-bool CalculatorLieTheory::innerKLcoeffs(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
+bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::kazhdanLuzstigCoeffificents");
   if (input.size() != 2) {
     return calculator
     << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
@@ -717,7 +717,7 @@ bool CalculatorLieTheory::innerKLcoeffs(Calculator& calculator, const Expression
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(
+bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -725,7 +725,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(
   bool useNilWeight,
   bool ascending
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::writeGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.setSize(1);
@@ -764,7 +764,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(
   if (input.children.size > 6) {
     exponentLetterString = input[6].toString();
   }
-  return CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner(
+  return CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
     calculator,
     input,
     output,
@@ -781,7 +781,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperators(
   );
 }
 
-bool CalculatorLieTheory::innerPrintB3G2branchingIntermediate(
+bool CalculatorLieTheory::printB3G2branchingIntermediate(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -789,7 +789,7 @@ bool CalculatorLieTheory::innerPrintB3G2branchingIntermediate(
   BranchingData& theG2B3Data,
   ExpressionContext& theContext
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingIntermediate");
+  MacroRegisterFunctionWithName("Calculator::printB3G2branchingIntermediate");
   (void) input;
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
@@ -836,7 +836,7 @@ bool CalculatorLieTheory::innerPrintB3G2branchingIntermediate(
   << "\\endhead";
   for (int i = 0; i < theHWs.size; i ++) {
     theG2B3Data.theWeightFundCoords = theHWs[i];
-    CalculatorLieTheory::innerSplitFDpartB3overG2inner(calculator, theG2B3Data, tempExpression);
+    CalculatorLieTheory::splitFDpartB3overG2inner(calculator, theG2B3Data, tempExpression);
     timeReport << tempExpression.getValue<std::string>();
     RationalFunction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
@@ -973,14 +973,14 @@ bool CalculatorLieTheory::innerPrintB3G2branchingIntermediate(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerPrintB3G2branchingTable(
+bool CalculatorLieTheory::printB3G2branchingTable(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTable");
+  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTable");
   Vectors<RationalFunction<Rational> > theHWs;
   BranchingData theG2B3Data;
   ExpressionContext context(calculator);
-  if (!CalculatorLieTheory::innerPrintB3G2branchingTableCommon(
+  if (!CalculatorLieTheory::printB3G2branchingTableCommon(
     calculator, input, output, theHWs, theG2B3Data, context
   )) {
     return false;
@@ -988,17 +988,17 @@ bool CalculatorLieTheory::innerPrintB3G2branchingTable(
   if (output.isError()) {
     return true;
   }
-  return CalculatorLieTheory::innerPrintB3G2branchingIntermediate(
+  return CalculatorLieTheory::printB3G2branchingIntermediate(
     calculator, input, output, theHWs, theG2B3Data, context
   );
 }
 
-bool CalculatorLieTheory::innerPrintB3G2branchingTableCharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCharsOnly");
+bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCharsOnly");
   BranchingData theg2b3data;
   ExpressionContext theContext(calculator);
   Vectors<RationalFunction<Rational> > theHWs;
-  CalculatorLieTheory::innerPrintB3G2branchingTableCommon(
+  CalculatorLieTheory::printB3G2branchingTableCommon(
     calculator, input, output, theHWs, theg2b3data, theContext
   );
   if (output.isError()) {
@@ -1128,10 +1128,10 @@ bool CalculatorLieTheory::innerPrintB3G2branchingTableCharsOnly(Calculator& calc
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerPrintGenVermaModule(
+bool CalculatorLieTheory::printGeneralizedVermaModule(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::innerPrintGenVermaModule");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::printGeneralizedVermaModule");
   Selection selectionParSel;
   Vector<RationalFunction<Rational> > theHWfundcoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
@@ -1150,7 +1150,7 @@ bool CalculatorLieTheory::innerPrintGenVermaModule(
       return true;
     }
   }
-  if (!CalculatorLieTheory::innerHWVCommon(
+  if (!CalculatorLieTheory::highestWeightVectorCommon(
     calculator,
     output,
     theHWfundcoords,
@@ -1170,14 +1170,14 @@ bool CalculatorLieTheory::innerPrintGenVermaModule(
   return output.assignValue(theModule.toString(), calculator);
 }
 
-bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorUpToLevel(
+bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel");
+  MacroRegisterFunctionWithName("CalculatorFunctions::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.makeError(
-      "Function innerSplitGenericGenVermaTensorFD is expected "
+      "Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected "
       "to have three arguments: SS algebra type, Number, List{}. ",
       calculator
     );
@@ -1205,7 +1205,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   )) {
     return calculator
     << "Failed to convert the third argument of "
-    << "innerSplitGenericGenVermaTensorFD to a list of " << theRank
+    << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of " << theRank
     << " polynomials. The second argument you gave is "
     << genVemaWeightNode.toString() << ".";
   }
@@ -1246,7 +1246,7 @@ bool CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   }
   FormatExpressions theFormat;
   hwContext.getFormat(theFormat);
-  return CalculatorLieTheory::innerWriteGenVermaModAsDiffOperatorInner(
+  return CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
     calculator,
     input,
     output,
@@ -1297,7 +1297,7 @@ bool CalculatorLieTheory::killingForm(Calculator& calculator, const Expression& 
   return output.assignValueWithContext(left.getKillingFormProduct(right), theContext, calculator);
 }
 
-bool CalculatorLieTheory::innerHighestWeightVector(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorLieTheory::highestWeightVector(Calculator& calculator, const Expression& input, Expression& output) {
   Selection selectionParSel;
   Vector<RationalFunction<Rational> > theHWfundcoords;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
@@ -1316,7 +1316,7 @@ bool CalculatorLieTheory::innerHighestWeightVector(Calculator& calculator, const
       return true;
     }
   }
-  return CalculatorLieTheory::innerHWVCommon(
+  return CalculatorLieTheory::highestWeightVectorCommon(
     calculator,
     output,
     theHWfundcoords,
@@ -1326,14 +1326,14 @@ bool CalculatorLieTheory::innerHighestWeightVector(Calculator& calculator, const
   );
 }
 
-bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
+bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitGenericGenVermaTensorFD");
+  MacroRegisterFunctionWithName("CalculatorFunctions::splitGenericGeneralizedVermaTensorFiniteDimensional");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (!input.isListNElements(4))
     return output.makeError(
-      "Function innerSplitGenericGenVermaTensorFD is expected to "
+      "Function splitGenericGeneralizedVermaTensorFiniteDimensional is expected to "
       "have three arguments: SS algebra type, weight, weight. ",
       calculator
     );
@@ -1358,7 +1358,7 @@ bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
   )) {
     return calculator
     << "Failed to convert the third argument of "
-    << "innerSplitGenericGenVermaTensorFD to a list of "
+    << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of "
     << theRank
     << " polynomials. The second argument you gave is "
     << genVemaWeightNode.toString() << ".";
@@ -1367,7 +1367,7 @@ bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
   if (!calculator.getVector<Rational>(fdWeightNode, theFDhw, nullptr, theRank, nullptr)) {
     return calculator
     << "Failed to convert the second argument of "
-    << "innerSplitGenericGenVermaTensorFD to a list of "
+    << "splitGenericGeneralizedVermaTensorFiniteDimensional to a list of "
     << theRank
     << " rationals. The second argument you gave is "
     << fdWeightNode.toString() << ".";
@@ -1397,14 +1397,14 @@ bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
     }
     if (!isGood) {
       return output.makeError(
-        "Error: the third argument of innerSplitGenericGenVermaTensorFD "
+        "Error: the third argument of splitGenericGeneralizedVermaTensorFiniteDimensional "
         "must be a list of small non-negative integers.",
         calculator
       );
     }
   }
   theSSalgebra.content->flagHasNilradicalOrder = true;
-  if (!CalculatorLieTheory::innerHWVCommon(
+  if (!CalculatorLieTheory::highestWeightVectorCommon(
     calculator, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra.content
   )) {
     return false;
@@ -1415,7 +1415,7 @@ bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
   }
   Vector<RationalFunction<Rational> > theFDhwRF;
   theFDhwRF = theFDhw;
-  if (!CalculatorLieTheory::innerHWVCommon(calculator, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra.content)) {
+  if (!CalculatorLieTheory::highestWeightVectorCommon(calculator, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra.content)) {
     return false;
   }
   if (hwvFD.isError()) {
@@ -1590,33 +1590,33 @@ bool CalculatorLieTheory::innerSplitGenericGenVermaTensorFD(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2(
+bool CalculatorLieTheory::splitFDpartB3overG2(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2");
+  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2");
   BranchingData theG2B3Data;
   ExpressionContext context(calculator);
-  CalculatorLieTheory::innerSplitFDpartB3overG2Init(calculator, input, output, theG2B3Data, context);
+  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, input, output, theG2B3Data, context);
   if (output.isError()) {
     return true;
   }
   Vectors<RationalFunction<Rational> > theHWs;
   theHWs.addOnTop(theG2B3Data.theWeightFundCoords);
-  return CalculatorLieTheory::innerPrintB3G2branchingIntermediate(calculator, input, output, theHWs, theG2B3Data, context);
+  return CalculatorLieTheory::printB3G2branchingIntermediate(calculator, input, output, theHWs, theG2B3Data, context);
 }
 
-bool CalculatorLieTheory::innerPrintB3G2branchingTableCommon(Calculator& calculator,
+bool CalculatorLieTheory::printB3G2branchingTableCommon(Calculator& calculator,
   const Expression& input,
   Expression& output,
   Vectors<RationalFunction<Rational> >& outputHWs,
   BranchingData& theG2B3Data,
   ExpressionContext& theContext
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCommon");
+  MacroRegisterFunctionWithName("Calculator::printB3G2branchingTableCommon");
   Vector<RationalFunction<Rational> > theHWrf;
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight = 0;
-  if (!CalculatorLieTheory::innerPrintB3G2branchingTableInit(
+  if (!CalculatorLieTheory::printB3G2branchingTableInit(
     calculator, input, output, theG2B3Data, desiredHeight, theContext
   )) {
     return false;
@@ -1634,25 +1634,26 @@ bool CalculatorLieTheory::innerPrintB3G2branchingTableCommon(Calculator& calcula
     LargeInteger numberOfCycles = theHWenumerator.numberOfCombinationsOfCardinality(j);
     for (int i = 0; i < numberOfCycles; i ++, theHWenumerator.incrementSubsetFixedCardinality(j)) {
       theHWrf = theG2B3Data.theWeightFundCoords;
-      for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++)
+      for (int k = 0; k < invertedSelInducing.cardinalitySelection; k ++) {
         theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.multiplicities[k];
+      }
       outputHWs.addOnTop(theHWrf);
     }
   }
   return true;
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2old(
+bool CalculatorLieTheory::splitFDpartB3overG2old(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2old");
+  MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2old");
   BranchingData theG2B3Data;
-  CalculatorLieTheory::innerSplitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
+  CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
   if (output.isError()) {
     return true;
   }
   std::stringstream out;
-  CalculatorLieTheory::innerSplitFDpartB3overG2inner(calculator, theG2B3Data, output);
+  CalculatorLieTheory::splitFDpartB3overG2inner(calculator, theG2B3Data, output);
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.toString() << "<br>Parabolic selection: "
   << theG2B3Data.selInducing.toString() << "<br>common Levi part of G_2 and B_3: "
   << theG2B3Data.selSmallParSel.toString();
@@ -1662,7 +1663,7 @@ bool CalculatorLieTheory::innerSplitFDpartB3overG2old(
   std::stringstream readyForLatexConsumptionTable1;
 
   readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  <<  theG2B3Data.theWeightFundCoords.toStringLetterFormat("\\omega")
+  << theG2B3Data.theWeightFundCoords.toStringLetterFormat("\\omega")
   << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction<Rational> >& currentWeightSimpleB3coords = theG2B3Data.outputWeightsSimpleCoords[i];
@@ -1704,7 +1705,7 @@ bool CalculatorLieTheory::innerSplitFDpartB3overG2old(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerPrintB3G2branchingTableInit(
+bool CalculatorLieTheory::printB3G2branchingTableInit(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
@@ -1712,7 +1713,7 @@ bool CalculatorLieTheory::innerPrintB3G2branchingTableInit(
   int& desiredHeight,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintB3G2branchingTableInit");
+  MacroRegisterFunctionWithName("CalculatorFunctions::printB3G2branchingTableInit");
   if (input.size() != 3) {
     return output.makeError("I need two arguments: first is height, second is parabolic selection. ", calculator);
   }
@@ -1724,22 +1725,22 @@ bool CalculatorLieTheory::innerPrintB3G2branchingTableInit(
     desiredHeight = 0;
   }
   const Expression& weightNode = input[2];
-  CalculatorLieTheory::innerSplitFDpartB3overG2Init(calculator, weightNode, output, theG2B3data, outputContext);
+  CalculatorLieTheory::splitFDpartB3overG2Init(calculator, weightNode, output, theG2B3data, outputContext);
   if (output.isError()) {
     return true;
   }
   return false;
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2CharsOutput(
+bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   BranchingData& theG2B3Data
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput");
+  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2CharsOutput");
   ExpressionContext context(calculator);
-  CalculatorLieTheory::innerSplitFDpartB3overG2Init(
+  CalculatorLieTheory::splitFDpartB3overG2Init(
     calculator, input, output, theG2B3Data, context
   );
   if (output.isError()) {
@@ -1759,14 +1760,14 @@ bool CalculatorLieTheory::innerSplitFDpartB3overG2CharsOutput(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2Init(
+bool CalculatorLieTheory::splitFDpartB3overG2Init(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   BranchingData& theG2B3Data,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2Init");
+  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2Init");
   if (!input.isListNElements(4)) {
     return output.makeError(
       "Splitting the f.d. part of a B_3-representation "
@@ -1797,9 +1798,9 @@ bool CalculatorLieTheory::innerSplitFDpartB3overG2Init(
   return true;
 }
 
-bool CalculatorLieTheory::innerSplitFDpartB3overG2CharsOnly(
+bool CalculatorLieTheory::splitFDpartB3overG2CharsOnly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   BranchingData theG2B3Data;
-  return CalculatorLieTheory::innerSplitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
+  return CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
 }

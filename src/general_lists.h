@@ -2116,7 +2116,7 @@ void List<Object>::addOnTop(const Object& o) {
   if (this->size > this->actualSize) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
-    << "This is a programming error: the actual size of the list is "
+    << "The actual size of the list is "
     << this->actualSize << " but this->size equals " << this->size
     << ". ";
     fatalCrash(commentsOnCrash.str());

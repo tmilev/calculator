@@ -3,13 +3,20 @@
 ## Examples first please!
 
 ### Arithmetics
-[1+1](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B1%22%7D)
+```1+1```
+Link: [1+1](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B1%22%7D)
 
 Default computations are over the rational numbers:
-[1+2-3*4/5^{6}](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B2-3*4%2F5%5E%7B6%7D%22%7D)
+```
+1+2-3*4/5^{6}
+```
+Link: [1+2-3*4/5^{6}](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B2-3*4%2F5%5E%7B6%7D%22%7D)
 
-Large number arithmetic works as expected:
-[101! / (101!+1)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22101!%20%2F%20(101!%2B1)%22%7D)
+Large number arithmetic works without approximations:
+```
+101!/(101!+1)
+```
+Link: [101!/(101!+1)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22101!%20%2F%20(101!%2B1)%22%7D)
 
 Floating point conversions need to be invoked explicitly:
 [DoubleValue( 100! / (101!+1))](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22DoubleValue(%20100!%20%2F%20(101!%2B1))%22%7D)
@@ -30,6 +37,23 @@ Radical rationalization:
 
 No special treatment of sqrt(-1):
 [1/(1+sqrt(-1)+sqrt(2))](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2F(1%2Bsqrt(-1)%2Bsqrt(2))%22%7D)
+
+### Trigonometry, inverse trig, logarithms
+
+Trig works with algebraic numbers if available; pi is built-in:
+```
+\sin (pi/3);
+\cos (\pi/5);
+```
+
+Link: [\sin (pi/3); \cos (\pi/5);](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22%5C%5Csin%20(pi%2F3)%3B%5Cn%5C%5Ccos%20(%5C%5Cpi%2F5)%3B%22%2C%22monitoring%22%3A%22true%22%7D)
+
+Degrees work as expected:
+```
+\tan 30^\circ
+```
+
+Link: [\tan 30^\circ](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22%5C%5Ctan%2030%5E%5C%5Ccirc%22%2C%22monitoring%22%3A%22true%22%2C%22inputFocus%22%3Atrue%7D)
 
 ### Computations with matrices
 [A=\begin{pmatrix}1&2\\ 3&4\end{pmatrix}; A+A; A-A; 2*A; A^5; A^-1; A \otimes A; A \oplus A; \det A](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22A%3D%5C%5Cbegin%7Bpmatrix%7D1%262%5C%5C%5C%5C%203%264%5C%5Cend%7Bpmatrix%7D%3B%5CnA%2BA%3B%5CnA-A%3B%5Cn2*A%3B%5CnA%5E5%3B%5CnA%5E-1%3B%5CnA%20%5C%5Cotimes%20A%3B%5CnA%20%5C%5Coplus%20A%3B%5Cn%5C%5Cdet%20A%22%7D)
@@ -84,3 +108,4 @@ The calculator engine math substitution engine - i.e., an engine designed to mak
 It keeps on applying a set of rules - mathematical transformations - to the starting expression, until no more rules can be applied. Thus, it is able to model mathematical operations such as uncovering parenthesis and substitutions. 
 
 Calculator programs - a sequence of mathematical expressions with earlier expressions affecting the interpretation of later expressions - are expressions by themselves.
+

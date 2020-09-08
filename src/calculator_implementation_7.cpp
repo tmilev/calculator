@@ -190,10 +190,10 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerTestLoadPEMCertificates(
+bool CalculatorFunctionsCrypto::testLoadPEMCertificates(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestLoadPEMCertificates");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testLoadPEMCertificates");
   if (input.size() != 2) {
     return false;
   }
@@ -215,10 +215,10 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
   return output.assignValue(resultStream.str(), calculator);
 }
 
-bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
+bool CalculatorFunctionsCrypto::testTLSDecodeSSLRecord(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTLSDecodeSSLRecord");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testTLSDecodeSSLRecord");
   if (input.size() != 2) {
     return false;
   }
@@ -245,10 +245,10 @@ bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerTestTLSMessageSequence(
+bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTLSMessageSequence");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testTLSMessageSequence");
   Vector<std::string> inputMessages;
   if (!calculator.getVectorFromFunctionArguments(input, inputMessages)) {
     return calculator << "Failed to extract input vector of strings. ";
@@ -288,10 +288,10 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
+bool CalculatorFunctionsCrypto::testLoadPEMPrivateKey(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestLoadPEMPrivateKey");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testLoadPEMPrivateKey");
   if (input.size() != 2) {
     return  false;
   }
@@ -316,10 +316,10 @@ bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
   return output.assignValue(resultStream.str(), calculator);
 }
 
-bool CalculatorFunctions::innerLoadKnownCertificates(
+bool CalculatorFunctionsCrypto::loadKnownCertificates(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLoadKnownCertificates");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::loadKnownCertificates");
   (void) input;
   std::stringstream out;
   Crypto::loadKnownCertificates(&out, &out);
@@ -368,10 +368,10 @@ bool CalculatorFunctions::innerSha256OfStringVerbose(
   return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA256", true);
 }
 
-bool CalculatorFunctions::innerSha224OfString(
+bool CalculatorFunctionsCrypto::sha224OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSha224OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::sha224OfString");
   if (input.size() != 2) {
     return false;
   }
@@ -473,10 +473,10 @@ bool CalculatorFunctions::functionHashString(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerConvertBase64ToString(
+bool CalculatorFunctions::convertBase64ToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertBase64ToString");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertBase64ToString");
   if (input.size() != 2) {
     return false;
   }
@@ -490,10 +490,10 @@ bool CalculatorFunctions::innerConvertBase64ToString(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerNISTEllipticCurveOrder(
+bool CalculatorFunctions::nistEllipticCurveOrder(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerNISTEllipticCurveGenerator");
+  MacroRegisterFunctionWithName("CalculatorFunctions::nistEllipticCurveGenerator");
   if (input.size() != 2) {
     return false;
   }
@@ -517,10 +517,10 @@ bool ElementEllipticCurve<ElementZmodP>::makeGeneratorNISTCurve(
   const std::string& input, std::stringstream* commentsOnFailure
 );
 
-bool CalculatorFunctions::innerNISTEllipticCurveGenerator(
+bool CalculatorFunctions::nistEllipticCurveGenerator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerNISTEllipticCurveGenerator");
+  MacroRegisterFunctionWithName("CalculatorFunctions::nistEllipticCurveGenerator");
   if (input.size() != 2) {
     return false;
   }
@@ -542,12 +542,12 @@ bool CalculatorFunctions::innerNISTEllipticCurveGenerator(
   return output.assignValueWithContext(generator, theContext, calculator);
 }
 
-bool CalculatorFunctions::innerStringDifference(
+bool CalculatorFunctions::stringDifference(
   Calculator& calculator,
   const Expression& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerStringDifference");
+  MacroRegisterFunctionWithName("CalculatorFunctions::stringDifference");
   if (input.size() != 3) {
     return false;
   }
@@ -563,8 +563,8 @@ bool CalculatorFunctions::innerStringDifference(
   );
 }
 
-bool CalculatorFunctions::innerSliceString(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSliceString");
+bool CalculatorFunctions::sliceString(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::sliceString");
   if (input.size() < 3) {
     return false;
   }
@@ -602,10 +602,10 @@ bool CalculatorFunctions::innerSliceString(Calculator& calculator, const Express
   );
 }
 
-bool CalculatorFunctions::innerConvertIntegerUnsignedToBase58(
+bool CalculatorFunctions::convertIntegerUnsignedToBase58(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertIntegerUnsignedToBase58");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertIntegerUnsignedToBase58");
   if (input.size() != 2) {
     return false;
   }
@@ -621,7 +621,7 @@ bool CalculatorFunctions::innerConvertIntegerUnsignedToBase58(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerAppendDoubleSha256Check(
+bool CalculatorFunctions::appendDoubleSha256Check(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAppendSha256Check");
@@ -687,10 +687,10 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
   return output.assignValue(cipherText, calculator);
 }
 
-bool CalculatorFunctions::innerConvertBase58ToHex(
+bool CalculatorFunctions::convertBase58ToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertBase58ToHex");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertBase58ToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -707,10 +707,10 @@ bool CalculatorFunctions::innerConvertBase58ToHex(
   return output.assignValue(outputString, calculator);
 }
 
-bool CalculatorFunctions::innerConvertHexToBase58(
+bool CalculatorFunctions::convertHexToBase58(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertHexToBase58");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertHexToBase58");
   if (input.size() != 2) {
     return false;
   }
@@ -728,10 +728,10 @@ bool CalculatorFunctions::innerConvertHexToBase58(
   return output.assignValue(outputString, calculator);
 }
 
-bool CalculatorFunctions::innerConvertStringToHex(
+bool CalculatorFunctions::convertStringToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertStringToHex");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertStringToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -742,10 +742,10 @@ bool CalculatorFunctions::innerConvertStringToHex(
   return output.assignValue(Crypto::convertStringToHex(inputString, 0, false), calculator);
 }
 
-bool CalculatorFunctions::innerCharToBase64(
+bool CalculatorFunctions::charToBase64(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCharToBase64");
+  MacroRegisterFunctionWithName("CalculatorFunctions::charToBase64");
   if (input.size() != 2) {
     return false;
   }
@@ -758,10 +758,10 @@ bool CalculatorFunctions::innerCharToBase64(
   return output.assignValue(Crypto::convertListUnsignedCharsToBase64(theBitStream, false), calculator);
 }
 
-bool CalculatorFunctions::innerBase64ToCharToBase64Test(
+bool CalculatorFunctions::base64ToCharToBase64Test(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToCharToBase64Test");
+  MacroRegisterFunctionWithName("CalculatorFunctions::base64ToCharToBase64Test");
   if (input.size() != 2) {
     return false;
   }
@@ -783,10 +783,10 @@ bool CalculatorFunctions::innerBase64ToCharToBase64Test(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive(
+bool CalculatorFunctions::urlKeyValuePairsToNormalRecursive(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive");
+  MacroRegisterFunctionWithName("CalculatorFunctions::urlKeyValuePairsToNormalRecursive");
   if (input.size() != 2) {
     return false;
   }
@@ -798,10 +798,10 @@ bool CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive(
   return output.assignValue(HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theString), calculator);
 }
 
-bool CalculatorFunctions::innerConvertElementZmodPToInteger(
+bool CalculatorFunctions::convertElementZmodPToInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertElementZmodPToInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctions::convertElementZmodPToInteger");
   if (input.size() != 2) {
     return false;
   }
@@ -813,10 +813,10 @@ bool CalculatorFunctions::innerConvertElementZmodPToInteger(
   return output.assignValue(theElement.value, calculator);
 }
 
-bool CalculatorFunctions::innerUrlStringToNormalString(
+bool CalculatorFunctions::urlStringToNormalString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUrlStringToNormalString");
+  MacroRegisterFunctionWithName("CalculatorFunctions::urlStringToNormalString");
   if (input.size() != 2) {
     return false;
   }
@@ -828,8 +828,8 @@ bool CalculatorFunctions::innerUrlStringToNormalString(
   return output.assignValue(HtmlRoutines::convertURLStringToNormal(theString, false), calculator);
 }
 
-bool CalculatorFunctions::innerStringToURL(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerStringToURL");
+bool CalculatorFunctions::stringToURL(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::stringToURL");
   if (input.size() != 2) {
     return false;
   }
@@ -841,8 +841,8 @@ bool CalculatorFunctions::innerStringToURL(Calculator& calculator, const Express
   return output.assignValue(HtmlRoutines::convertStringToURLString(theString, false), calculator);
 }
 
-bool CalculatorFunctions::innerStringToAtom(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerStringToAtom");
+bool CalculatorFunctions::stringToAtom(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::stringToAtom");
   if (input.size() != 2) {
     return false;
   }
@@ -854,18 +854,18 @@ bool CalculatorFunctions::innerStringToAtom(Calculator& calculator, const Expres
   return output.makeAtom(theString, calculator);
 }
 
-bool CalculatorFunctions::innerExpressionToString(
+bool CalculatorFunctions::expressionToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionToString");
+  MacroRegisterFunctionWithName("CalculatorFunctions::expressionToString");
   if (input.size() != 2) {
     return false;
   }
   return output.assignValue(input[1].toString(), calculator);
 }
 
-bool CalculatorFunctions::innerQuoteToString(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerQuoteToString");
+bool CalculatorFunctions::quoteToString(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::quoteToString");
   std::string operation;
   if (input.size() != 2) {
     calculator << "<b>Warning: this shouldn't happen: "
@@ -8419,18 +8419,18 @@ bool Calculator::Test::calculatorTestRun() {
   return this->processResults();
 }
 
-bool CalculatorFunctions::innerPrintRuleStack(
+bool CalculatorFunctions::printRuleStack(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintRuleStack");
+  MacroRegisterFunctionWithName("CalculatorFunctions::printRuleStack");
   (void) input;//portable way of avoiding unused parameter warning
   return output.assignValue(calculator.ruleStack.toString(), calculator);
 }
 
-bool CalculatorFunctions::innerCrash(
+bool CalculatorFunctions::crash(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrash");
+  MacroRegisterFunctionWithName("CalculatorFunctions::crash");
   (void) input;
   global.fatal << "This is a test of the crashing mechanism. "
   << "A file report must have been written. "
@@ -8441,10 +8441,10 @@ bool CalculatorFunctions::innerCrash(
   return output.assignValue(std::string("Crashed succesfully"), calculator);
 }
 
-bool CalculatorFunctions::innerCrashByListOutOfBounds(
+bool CalculatorFunctions::crashByListOutOfBounds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrashByListOutOfBounds");
+  MacroRegisterFunctionWithName("CalculatorFunctions::crashByListOutOfBounds");
   (void) input;//portable way of avoiding unused parameter warning
   List<int> theList;
   std::vector<int> theVector;
@@ -8459,10 +8459,10 @@ bool CalculatorFunctions::innerCrashByListOutOfBounds(
   return output.assignValue(std::string("Crashing: list out of bounds."), calculator);
 }
 
-bool CalculatorFunctions::innerCrashByVectorOutOfBounds(
+bool CalculatorFunctions::crashByVectorOutOfBounds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCrashByVectorOutOfBounds");
+  MacroRegisterFunctionWithName("CalculatorFunctions::crashByVectorOutOfBounds");
   (void) input;//portable way of avoiding unused parameter warning
   std::vector<int> theVector;
   theVector[1] = 1;
@@ -8979,10 +8979,10 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerSetRandomSeed(
+bool CalculatorFunctions::setRandomSeed(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSetRandomSeed");
+  MacroRegisterFunctionWithName("CalculatorFunctions::setRandomSeed");
   if (input.size() != 2) {
     return false;
   }
@@ -9084,12 +9084,12 @@ bool CalculatorFunctions::innerIfFrozen(
   return false;
 }
 
-bool CalculatorFunctions::innerTurnRulesOnOff(
+bool CalculatorFunctions::turnRulesOnOff(
   Calculator& calculator,
   const Expression& input,
   Expression& output, bool turnOff
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnRulesOnOff");
+  MacroRegisterFunctionWithName("CalculatorFunctions::turnRulesOnOff");
   List<std::string> rulesToConsider;
   std::string currentRule;
   if (
@@ -9142,42 +9142,42 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
   return true;
 }
 
-bool CalculatorFunctions::innerTurnOnApproximations(
+bool CalculatorFunctions::turnOnApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOnApproximations");
+  MacroRegisterFunctionWithName("CalculatorFunctions::turnOnApproximations");
   (void) input;
   calculator.flagNoApproximations = false;
   return output.assignValue(std::string("Approximations have been turned on. "), calculator);
 }
 
-bool CalculatorFunctions::innerTurnOffApproximations(
+bool CalculatorFunctions::turnOffApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOffApproximations");
+  MacroRegisterFunctionWithName("CalculatorFunctions::turnOffApproximations");
   (void) input;
   calculator.flagNoApproximations = true;
   return output.assignValue(std::string("Approximations have been turned off. "), calculator);
 }
 
-bool CalculatorFunctions::innerTurnOffRules(
+bool CalculatorFunctions::turnOffRules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOffRules");
-  return CalculatorFunctions::innerTurnRulesOnOff(calculator, input, output, true);
+  MacroRegisterFunctionWithName("CalculatorFunctions::turnOffRules");
+  return CalculatorFunctions::turnRulesOnOff(calculator, input, output, true);
 }
 
-bool CalculatorFunctions::innerTurnOnRules(
+bool CalculatorFunctions::turnOnRules(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTurnOnRules");
-  return CalculatorFunctions::innerTurnRulesOnOff(calculator, input, output, false);
+  MacroRegisterFunctionWithName("CalculatorFunctions::turnOnRules");
+  return CalculatorFunctions::turnRulesOnOff(calculator, input, output, false);
 }
 
-bool CalculatorFunctions::innerEqualityToArithmeticExpression(
+bool CalculatorFunctions::equalityToArithmeticExpression(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualityToArithmeticExpression");
+  MacroRegisterFunctionWithName("CalculatorFunctions::equalityToArithmeticExpression");
   if (input.size() != 2) {
     return false;
   }
@@ -9195,10 +9195,10 @@ bool CalculatorFunctions::functionEqualityToArithmeticExpression(
   return output.makeXOX(calculator, calculator.opMinus(), input[1], input[2]);
 }
 
-bool CalculatorFunctions::innerRandomInteger(
+bool CalculatorFunctions::randomInteger(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRandomInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctions::randomInteger");
   Matrix<Expression> theMat;
   if (!calculator.getMatrixExpressionsFromArguments(input, theMat, - 1, 2)) {
     return calculator << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
@@ -9259,10 +9259,10 @@ bool CalculatorFunctions::innerRandomInteger(
   return output.assignValue(resultRandomValue, calculator);
 }
 
-bool CalculatorFunctions::innerSelectAtRandom(
+bool CalculatorFunctions::selectAtRandom(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSelectAtRandom");
+  MacroRegisterFunctionWithName("CalculatorFunctions::selectAtRandom");
   if (!input.startsWith(calculator.operations.getIndex("SelectAtRandom"))) {
     output = input; // only one item to select from: returning the item
     return true;

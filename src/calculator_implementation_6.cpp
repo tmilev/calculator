@@ -15,6 +15,7 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 #include <iomanip>
+#include "math_extra_semisimple_Lie_algebras_implementation.h"
 
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;
@@ -489,12 +490,12 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
   return true;
 }
 
-bool CalculatorFunctions::innerTestTopicListProblems(
+bool CalculatorFunctions::testTopicListProblems(
   Calculator& calculator,
   const Expression& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTopicListProblems");
+  MacroRegisterFunctionWithName("CalculatorFunctions::testTopicListProblems");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Topic list tests available to logged-in admins only. ";
   }
@@ -504,12 +505,12 @@ bool CalculatorFunctions::innerTestTopicListProblems(
   return output.assignValue(tester.comments, calculator);
 }
 
-bool CalculatorFunctions::innerTestProblemInterpretation(
+bool CalculatorFunctions::testProblemInterpretation(
   Calculator& calculator,
   const Expression& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestProblemInterpretation");
+  MacroRegisterFunctionWithName("CalculatorFunctions::testProblemInterpretation");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "Automated tests available to logged-in admins only. ";
   }
@@ -523,7 +524,7 @@ bool CalculatorFunctions::innerTestProblemInterpretation(
     ;
   }
   if (global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by innerTestProblemInterpretation.");
+    global.theResponse.initiate("Triggered by testProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
@@ -807,10 +808,10 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(
+bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerJWTverifyAgainstRSA256");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256");
   if (input.size() != 4) {
     return calculator << "The JWT verify command expects 3 arguments: "
     << "string with the token in the usual format (\"a.b.c\"), "
@@ -847,10 +848,10 @@ bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerJWTVerifyAgainstKnownKeys(
+bool CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerJWTverifyAgainstKnownKeys");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerJWTverifyAgainstKnownKeys");
   if (!global.userDefaultHasAdminRights()) {
     return calculator << "This function is only available to logged-in admins. ";
   }
@@ -1033,10 +1034,10 @@ bool CalculatorFunctions::innerTestRSASign(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerRSAEncrypt(
+bool CalculatorFunctionsCrypto::RSAEncrypt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRSAEncrypt");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::RSAEncrypt");
   if (input.size() != 4) {
     return false;
   }
@@ -2339,10 +2340,10 @@ bool CalculatorFunctions::innerIsReal(Calculator& calculator, const Expression& 
   return output.assignValue(1, calculator);
 }
 
-bool CalculatorFunctions::innerExpressiontoUTF8String(
+bool CalculatorFunctions::expressiontoUTF8String(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressiontoUTF8String");
+  MacroRegisterFunctionWithName("CalculatorFunctions::expressiontoUTF8String");
   if (input.size() > 2) {
     Expression argumentSequence = input;
     argumentSequence.setChildAtomValue(0, calculator.opSequence());
@@ -2551,7 +2552,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
   //    return calculator << "Couldn't get single free variable from " << xEcandidates.toStringCommaDelimited()
   //    << " and/or " << yEcandidates.toStringCommaDelimited();
-  //  if (CalculatorFunctions::innerEqualityToArithmeticExpression())
+  //  if (CalculatorFunctions::equalityToArithmeticExpression())
   if (!xDefE.startsWith(calculator.opDefine(), 3)) {
     return calculator << "Failed to extract variable form " << xDefE.toString();
   }
@@ -2674,12 +2675,12 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   return false;
 }
 
-bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
+bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
+  MacroRegisterFunctionWithName("CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure");
   if (!global.theResponse.monitoringAllowed()) {
-    global.theResponse.initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
+    global.theResponse.initiate("Triggered by precomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;
   List<DynkinType> theTypes;
@@ -2734,10 +2735,10 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerShowKnownObjectIds(
+bool CalculatorFunctionsCrypto::showKnownObjectIds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerShowKnownObjectIds");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::showKnownObjectIds");
   (void) input;
   return output.assignValue(ASNObject::toStringAllRecognizedObjectIds(), calculator);
 }

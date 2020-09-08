@@ -8,68 +8,69 @@ class CalculatorFunctionsCrypto {
 public:
   static bool innerAES_CBC_256_Encrypt(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAES_CBC_256_Decrypt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool loadKnownCertificates(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testLoadPEMCertificates(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testLoadPEMPrivateKey(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testTLSMessageSequence(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testTLSDecodeSSLRecord(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool jwtVerifyAgainstKnownKeys(Calculator& calculator, const Expression& input, Expression& output);
+  static bool jwtVerifyAgainstRSA256(Calculator& calculator, const Expression& input, Expression& output);
+  static bool RSAEncrypt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool RSASign(Calculator& calculator, const Expression& input, Expression& output);
+  static bool showKnownObjectIds(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha224OfString(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 
 class CalculatorFunctions {
 public:
   static bool leftIntervalGreaterThanRight(const Expression& left, const Expression& right);
-  static bool innerPrintRuleStack(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCrash(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCrashByListOutOfBounds(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCrashByVectorOutOfBounds(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestProblemInterpretation(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestTopicListProblems(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrecomputeSemisimpleLieAlgebraStructure(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printRuleStack(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crash(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crashByListOutOfBounds(Calculator& calculator, const Expression& input, Expression& output);
+  static bool crashByVectorOutOfBounds(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testProblemInterpretation(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testTopicListProblems(Calculator& calculator, const Expression& input, Expression& output);
+  static bool precomputeSemisimpleLieAlgebraStructure(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTurnRulesOnOff(Calculator& calculator, const Expression& input, Expression& output, bool turnOff);
+  static bool turnRulesOnOff(Calculator& calculator, const Expression& input, Expression& output, bool turnOff);
 
-  static bool innerTurnOffRules(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTurnOnRules(Calculator& calculator, const Expression& input, Expression& output);
+  static bool turnOffRules(Calculator& calculator, const Expression& input, Expression& output);
+  static bool turnOnRules(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTurnOnApproximations(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTurnOffApproximations(Calculator& calculator, const Expression& input, Expression& output);
+  static bool turnOnApproximations(Calculator& calculator, const Expression& input, Expression& output);
+  static bool turnOffApproximations(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerEqualityToArithmeticExpression(Calculator& calculator, const Expression& input, Expression& output);
+  static bool equalityToArithmeticExpression(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionEqualityToArithmeticExpression(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerRandomInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSelectAtRandom(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSetRandomSeed(Calculator& calculator, const Expression& input, Expression& output);
+  static bool randomInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool selectAtRandom(Calculator& calculator, const Expression& input, Expression& output);
+  static bool setRandomSeed(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerConvertElementZmodPToInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUrlStringToNormalString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerStringToURL(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerURLKeyValuePairsToNormalRecursive(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertElementZmodPToInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool urlStringToNormalString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool stringToURL(Calculator& calculator, const Expression& input, Expression& output);
+  static bool urlKeyValuePairsToNormalRecursive(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerStringToAtom(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressionToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExpressiontoUTF8String(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerQuoteToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerBase64ToCharToBase64Test(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertBase64ToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertStringToHex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCharToBase64(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAppendDoubleSha256Check(Calculator& calculator, const Expression& input, Expression& output);
+  static bool stringToAtom(Calculator& calculator, const Expression& input, Expression& output);
+  static bool expressionToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool expressiontoUTF8String(Calculator& calculator, const Expression& input, Expression& output);
+  static bool quoteToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool base64ToCharToBase64Test(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertBase64ToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertStringToHex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool charToBase64(Calculator& calculator, const Expression& input, Expression& output);
+  static bool appendDoubleSha256Check(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerConvertBase58ToHex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertHexToBase58(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertIntegerUnsignedToBase58(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSliceString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerStringDifference(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNISTEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNISTEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLoadKnownCertificates(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestLoadPEMCertificates(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestLoadPEMPrivateKey(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestTLSMessageSequence(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestTLSDecodeSSLRecord(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerJWTVerifyAgainstKnownKeys(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerJWTVerifyAgainstRSA256(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRSAEncrypt(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRSASign(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerShowKnownObjectIds(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha224OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertBase58ToHex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertHexToBase58(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertIntegerUnsignedToBase58(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sliceString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool stringDifference(Calculator& calculator, const Expression& input, Expression& output);
+  static bool nistEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool nistEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGenerateRandomPrime(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTestRSASign(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& calculator, const Expression& input, Expression& output);

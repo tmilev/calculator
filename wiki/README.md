@@ -76,7 +76,7 @@ Trig works with algebraic numbers if available; pi is built-in.
 
 [\sin (pi/3); \cos (\pi/5);](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22%5C%5Csin%20(pi%2F3)%3B%5Cn%5C%5Ccos%20(%5C%5Cpi%2F5)%3B%22%2C%22monitoring%22%3A%22true%22%7D)
 
-Degrees work as expectedzz.
+Degrees work as expected.
 ```
 \tan 30^\circ
 ```
@@ -185,6 +185,7 @@ Plot two-d graphics:
 ```
 Plot2D(x^3, -2, 2, blue)
 ```
+[Plot2D(x^3, -2, 2, blue)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22Plot2D(x%5E3%2C%20-2%2C%202%2C%20blue)%22%2C%22monitoring%22%3A%22true%22%2C%22inputFocus%22%3Atrue%7D)
 
 Superimpose two-d graphics by adding them.
 ```
@@ -226,9 +227,20 @@ All computations handled by the calculator are held in a universal and arbitrari
 
 The fundamental math `Expression` is very simple: it contains a data entry, a single signed 32-bit or 64-bit integer, and an arbitrary array (allowed to be empty) of other `Expression`s (sub-expressions). Expressions that contain no sub-expressions are called atoms / leafs.
 
-The calculator engine math substitution engine - i.e., an engine designed to make one of the most powerful mathematical techniques - the mathematical substitution - as straightforward as possible.
+Here's a plot of the math expression `a+b`.
+```
+PlotExpressionTree(a+b)
+```
+[PlotExpressionTree(a+b)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22PlotExpressionTree(a%2Bb)%22%2C%22monitoring%22%3A%22true%22%7D)
 
-It keeps on applying a set of rules - mathematical transformations - to the starting expression, until no more rules can be applied. Thus, it is able to model mathematical operations such as uncovering parenthesis and substitutions. 
+Here is more complicated mathematical expression - an integral.
+```
+PlotExpressionTree(\int_a^b f{}x dx)
+```
+[PlotExpressionTree(\int_a^b f{}x dx)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22PlotExpressionTree(%5C%5Cint_a%5Eb%20f%7B%7Dx%20dx)%5Cn%22%2C%22monitoring%22%3A%22true%22%7D)
+
+The calculator engine is a math substitution engine - i.e., an engine designed to make one of the most powerful mathematical techniques - the mathematical substitution - as straightforward as possible.
+
+It keeps on applying a set of rules - mathematical transformations - to the starting expression, until no more rules can be applied. Thus, it easily models mathematical operations such as uncovering parenthesis and substitutions. 
 
 Calculator programs - a sequence of mathematical expressions with earlier expressions affecting the interpretation of later expressions - are expressions by themselves.
-

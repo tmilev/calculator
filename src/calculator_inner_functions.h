@@ -36,7 +36,21 @@ public:
     const std::string& hashId,
     bool verbose
   );
+};
 
+class CalculatorFunctionsTrigonometry {
+public:
+  static bool sin(Calculator& calculator, const Expression& input, Expression& output);
+  static bool cos(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sec(Calculator& calculator, const Expression& input, Expression& output);
+  static bool csc(Calculator& calculator, const Expression& input, Expression& output);
+  static bool tan(Calculator& calculator, const Expression& input, Expression& output);
+  static bool cotangent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool arcsinAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool arccosAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
+  static bool arcsin(Calculator& calculator, const Expression& input, Expression& output);
+  static bool arccos(Calculator& calculator, const Expression& input, Expression& output);
+  static bool arctan(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -124,12 +138,6 @@ public:
   static bool innerLogBase(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLog(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAbs(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSin(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCos(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSec(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCsc(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTan(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCot(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
@@ -141,11 +149,6 @@ public:
   static bool innerLogarithmBaseNCeiling(Calculator& calculator, const Expression& input, Expression& output);
 
 
-  static bool innerArcsinAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerArccosAlgebraic(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerArcsin(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerArccos(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerArctan(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output
   );

@@ -1357,8 +1357,8 @@ bool CalculatorFunctions::innerApplyToList(Calculator& calculator, const Express
   return output.makeSequence(calculator, &result);
 }
 
-bool CalculatorFunctions::innerArccosAlgebraic(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerArccosAlgebraic");
+bool CalculatorFunctionsTrigonometry::arccosAlgebraic(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::arccosAlgebraic");
   if (input.size() != 2) {
     return false;
   }
@@ -1428,10 +1428,10 @@ bool CalculatorFunctions::innerArccosAlgebraic(Calculator& calculator, const Exp
   return false;
 }
 
-bool CalculatorFunctions::innerArcsinAlgebraic(
+bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerArcsinAlgebraic");
+  MacroRegisterFunctionWithName("CalculatorFunctions::arcsinAlgebraic");
   if (input.size() != 2) {
     return false;
   }

@@ -2757,51 +2757,51 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\arctan",
-    CalculatorFunctions::innerArctan,
+    CalculatorFunctionsTrigonometry::arctan,
     "",
     "Arctan function. Tries to evaluate the arctan function. ",
     "\\arctan(3/4)",
-    "CalculatorFunctions::innerArctan",
+    "CalculatorFunctions::arctan",
     "\\arctan",
     innerStandard
   );
   this->addOperationHandler(
     "\\arcsin",
-    CalculatorFunctions::innerArcsinAlgebraic,
+    CalculatorFunctionsTrigonometry::arcsinAlgebraic,
     "",
     "Arcsin function for special angles. ",
     "\\arcsin(1/2)",
-    "CalculatorFunctions::innerArcsinAlgebraic",
+    "CalculatorFunctions::arcsinAlgebraic",
     "arcsinAlgebraic",
     innerStandard
   );
   this->addOperationHandler(
     "\\arccos",
-    CalculatorFunctions::innerArccosAlgebraic,
+    CalculatorFunctionsTrigonometry::arccosAlgebraic,
     "",
     "Arccos function for special angles. ",
     "\\arccos(\\sqrt{2}/2)",
-    "CalculatorFunctions::innerArccosAlgebraic",
+    "CalculatorFunctions::arccosAlgebraic",
     "arccosAlgebraic",
     innerStandard
   );
   this->addOperationHandler(
     "\\arccos",
-    CalculatorFunctions::innerArccos,
+    CalculatorFunctionsTrigonometry::arccos,
     "",
     "Arccos function. Tries to evaluate the arccos function. ",
     "\\arccos(3/4)",
-    "CalculatorFunctions::innerArccos",
+    "CalculatorFunctions::arccos",
     "\\arccos",
     innerStandard
   );
   this->addOperationHandler(
     "\\arcsin",
-    CalculatorFunctions::innerArcsin,
+    CalculatorFunctionsTrigonometry::arcsin,
     "",
     "Arcsin function. Tries to evaluate the arcsin function. ",
     "\\arcsin(3/4)",
-    "CalculatorFunctions::innerArcsin",
+    "CalculatorFunctions::arcsin",
     "\\arcsin",
     innerStandard
   );
@@ -2817,61 +2817,61 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\sin",
-    CalculatorFunctions::innerSin,
+    CalculatorFunctionsTrigonometry::sin,
     "",
     "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
     "\\sin{}(3.1415)",
-    "CalculatorFunctions::innerSin",
+    "CalculatorFunctions::sin",
     "Sine",
     innerStandard
   );
   this->addOperationHandler(
     "\\cos",
-    CalculatorFunctions::innerCos,
+    CalculatorFunctionsTrigonometry::cos,
     "",
     "Cosine function. Evaluates to a decimal approximation if the input is a double number. ",
     "\\cos{}(3.1415)",
-    "CalculatorFunctions::innerCos",
+    "CalculatorFunctions::cos",
     "Cosine",
     innerStandard
   );
   this->addOperationHandler(
     "\\tan",
-    CalculatorFunctions::innerTan,
+    CalculatorFunctionsTrigonometry::tan,
     "",
     "Tangent function. Substitutes \\tan{}{{x}}=\\sin{}x/\\cos x. ",
     "\\tan{}(3.1415); \\tan 1.570796327",
-    "CalculatorFunctions::innerTan",
+    "CalculatorFunctions::tan",
     "ExpressTanViaSineCosine",
     innerStandard
   );
   this->addOperationHandler(
     "\\cot",
-    CalculatorFunctions::innerCot,
+    CalculatorFunctionsTrigonometry::cotangent,
     "",
     "Tangent function. Substitutes \\tan{}{{x}}=\\cos{}x/\\sin x. ",
     "\\cot{}(3.1415); \\cot 1.570796327",
-    "CalculatorFunctions::innerCot",
+    "CalculatorFunctions::cotangent",
     "ExpressCotViaSineCosine",
     innerStandard
   );
   this->addOperationHandler(
     "\\csc",
-    CalculatorFunctions::innerCsc,
+    CalculatorFunctionsTrigonometry::csc,
     "",
     "Cosecant function. Substitutes \\csc{}{{x}}=1/\\sin x. ",
     "\\csc{}(3.1415); \\csc 1.570796327",
-    "CalculatorFunctions::innerCsc",
+    "CalculatorFunctions::csc",
     "ExpressCscViaSine",
     innerStandard
   );
   this->addOperationHandler(
     "\\sec",
-    CalculatorFunctions::innerSec,
+    CalculatorFunctionsTrigonometry::sec,
     "",
     "Secant function. Substitutes \\sec{}{{x}}=1/\\sec x. ",
     "\\sec{}(3.1415); \\sec 1.570796327",
-    "CalculatorFunctions::innerSec",
+    "CalculatorFunctions::sec",
     "ExpressSecViaCosine",
     innerStandard
   );

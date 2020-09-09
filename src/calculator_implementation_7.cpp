@@ -998,8 +998,8 @@ bool CalculatorFunctions::innerFactorial(Calculator& calculator, const Expressio
   return output.assignValue(result.factorial(inputInt), calculator);
 }
 
-bool CalculatorFunctions::innerArctan(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerArctan");
+bool CalculatorFunctionsTrigonometry::arctan(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::arctan");
   if (input.size() != 2) {
     return false;
   }
@@ -1025,8 +1025,8 @@ bool CalculatorFunctions::innerArctan(Calculator& calculator, const Expression& 
   return output.assignValue(FloatingPoint::arctan(theArgument), calculator);
 }
 
-bool CalculatorFunctions::innerArccos(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerArccos");
+bool CalculatorFunctionsTrigonometry::arccos(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::arccos");
   if (calculator.flagNoApproximations) {
     return false;
   }
@@ -1041,8 +1041,8 @@ bool CalculatorFunctions::innerArccos(Calculator& calculator, const Expression& 
   return output.assignValue(FloatingPoint::arccos(doubleArgument), calculator);
 }
 
-bool CalculatorFunctions::innerArcsin(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerArcsin");
+bool CalculatorFunctionsTrigonometry::arcsin(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::arcsin");
   if (input.size() != 2) {
     return false;
   }
@@ -1084,8 +1084,8 @@ bool CalculatorFunctions::innerAbs(Calculator& calculator, const Expression& inp
   return false;
 }
 
-bool CalculatorFunctions::innerSin(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSin");
+bool CalculatorFunctionsTrigonometry::sin(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::sin");
   if (input.size() != 2) {
     return false;
   }
@@ -1121,8 +1121,8 @@ bool CalculatorFunctions::innerSin(Calculator& calculator, const Expression& inp
   return output.assignValue(FloatingPoint::sinFloating(theArgument), calculator);
 }
 
-bool CalculatorFunctions::innerCos(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCos");
+bool CalculatorFunctionsTrigonometry::cos(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::cos");
   if (input.size() != 2) {
     return false;
   }
@@ -1158,8 +1158,8 @@ bool CalculatorFunctions::innerCos(Calculator& calculator, const Expression& inp
   return output.assignValue(FloatingPoint::cosFloating(theArgument), calculator );
 }
 
-bool CalculatorFunctions::innerTan(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTan");
+bool CalculatorFunctionsTrigonometry::tan(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::tan");
   if (input.size() != 2) {
     return false;
   }
@@ -1170,8 +1170,8 @@ bool CalculatorFunctions::innerTan(Calculator& calculator, const Expression& inp
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
 }
 
-bool CalculatorFunctions::innerCot(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTan");
+bool CalculatorFunctionsTrigonometry::cotangent(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::tan");
   if (input.size() != 2) {
     return false;
   }
@@ -1182,8 +1182,8 @@ bool CalculatorFunctions::innerCot(Calculator& calculator, const Expression& inp
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
 }
 
-bool CalculatorFunctions::innerSec(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSec");
+bool CalculatorFunctionsTrigonometry::sec(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::sec");
   if (input.size() != 2) {
     return false;
   }
@@ -1194,8 +1194,8 @@ bool CalculatorFunctions::innerSec(Calculator& calculator, const Expression& inp
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
 }
 
-bool CalculatorFunctions::innerCsc(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCsc");
+bool CalculatorFunctionsTrigonometry::csc(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::csc");
   if (input.size() != 2) {
     return false;
   }

@@ -32,6 +32,35 @@ DoubleValue( 1000! / (1001!+1))
 ```
 [DoubleValue( 1000! / (1001!+1))](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22DoubleValue(%201000!%20%2F%20(1001!%2B1))%22%7D)
 
+### Get the LaTeX from any computation
+Enter your input in loose syntax, get it beautifully formatted. Double-click the formatted formula to get the underlying LaTeX.
+```
+1+1/(1+1/(1+1/(1+1/(1+1/x))))
+```
+[1+1/(1+1/(1+1/(1+1/(1+1/x))))](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B1%2F(1%2B1%2F(1%2B1%2F(1%2B1%2F(1%2B1%2Fx))))%22%2C%22monitoring%22%3A%22true%22%7D)
+
+LaTeX output is re-entrant: take the LaTeX from the previous computation and paste it back into the input box.
+```
+1+1/(1+1/(1+1/(1+1/(1+1/x))));
+1+\frac{1}{1+\frac{1}{1+\frac{1}{1+\frac{1}{1+\frac{1}{x}}}}}
+```
+[1+1/(1+1/(1+1/(1+1/(1+1/x))));1+\frac{1}{1+\frac{1}{1+\frac{1}{1+\frac{1}{1+\frac{1}{x}}}}}](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%221%2B1%2F(1%2B1%2F(1%2B1%2F(1%2B1%2F(1%2B1%2Fx))))%3B%5Cn1%2B%5C%5Cfrac%7B1%7D%7B1%2B%5C%5Cfrac%7B1%7D%7B1%2B%5C%5Cfrac%7B1%7D%7B1%2B%5C%5Cfrac%7B1%7D%7B1%2B%5C%5Cfrac%7B1%7D%7Bx%7D%7D%7D%7D%7D%22%2C%22monitoring%22%3A%22true%22%7D)
+
+The syntax is loose - and although there haven't been major changes in the last few years, we do not assume syntax is set in stone, just as in regular mathematics.
+For single-line formulas, we guarantee the calculator's interpretation of your input is:
+
+- well-formed LaTeX that displays nicely;
+- can be parsed back by the calculator;
+- forms a valid normalized input equivalent to the entered one.
+```
+log 10;
+\log 10;
+sin x;
+\sin^2 x;
+(\sin{}(x))^2
+``` 
+[log 10; \log 10; sin x; \sin^2 x; (\sin{}(x))^2](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22log%2010%3B%5Cn%5C%5Clog%2010%3B%5Cnsin%20x%3B%5Cn%5C%5Csin%5E2%20x%3B%5Cn(%5C%5Csin%7B%7D(x))%5E2%22%2C%22monitoring%22%3A%22true%22%7D)
+
 ### Algebra
 Basic symbolic computation.
 ```
@@ -95,7 +124,13 @@ log_{8} 128
 ```
 [log_{8} 128](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22log_%7B8%7D%20128%22%2C%22monitoring%22%3A%22true%22%7D)
 ### Computations with matrices
-Use LaTeX syntax to enter matrices. All basic operations work.
+Enter a matrix. Double-click the output matrix to get the LaTeX used in the next example. 
+```
+MakeMatrix ((1, 2), (3, 4))
+```
+[MakeMatrix ((1, 2), (3, 4))](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22MakeMatrix%20((1%2C%202)%2C%20(3%2C%204))%22%2C%22monitoring%22%3A%22true%22%7D)
+
+All basic operations work. Latex matrix parsing works as expected.
 ```
 A=\begin{pmatrix}1&2\\ 3&4\end{pmatrix}; 
 A+A; 
@@ -111,7 +146,7 @@ A \oplus A;
 [A=\begin{pmatrix}1&2\\ 3&4\end{pmatrix}; A+A; A-A; 2*A; A^5; A^t; A^-1; A \otimes A; A \oplus A; \det A](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22A%3D%5C%5Cbegin%7Bpmatrix%7D1%262%5C%5C%5C%5C%203%264%5C%5Cend%7Bpmatrix%7D%3B%5CnA%2BA%3B%5CnA-A%3B%5Cn2*A%3B%5CnA%5E5%3B%5CnA%5Et%3B%5CnA%5E-1%3B%5CnA%20%5C%5Cotimes%20A%3B%5CnA%20%5C%5Coplus%20A%3B%5Cn%5C%5Cdet%20A%22%2C%22monitoring%22%3A%22true%22%7D)
 
 
-Works as well with radicals.
+Matrices work just as well with radicals.
 ```
 A=\begin{pmatrix}sqrt(1)&sqrt(2)\\ sqrt(3)&sqrt(4)\end{pmatrix}; 
 A+A; 
@@ -121,6 +156,16 @@ A^5;
 A^-1;
 ```
 [A=\begin{pmatrix}sqrt(1)&sqrt(2)\\ sqrt(3)&sqrt(4)\end{pmatrix}; A+A; A-A; 2*A; A^5; A^-1;](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22A%3D%5C%5Cbegin%7Bpmatrix%7Dsqrt(1)%26sqrt(2)%5C%5C%5C%5C%20sqrt(3)%26sqrt(4)%5C%5Cend%7Bpmatrix%7D%3B%5CnA%2BA%3B%5CnA-A%3B%5Cn2*A%3B%5CnA%5E5%3B%5CnA%5E-1%3B%5Cn%5Cn%20%22%7D)
+
+
+Matrices over the rational functions work as well.
+```
+a=MakeMatrix ((1-x, 2), (3, 4-x));
+\det a;
+SolveFor(x,MakeExpression( \det a));
+```
+[a=MakeMatrix ((1-x, 2), (3, 4-x));\det a;SolveFor(x,MakeExpression( \det a));](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22a%3DMakeMatrix%20((1-x%2C%202)%2C%20(3%2C%204-x))%3B%5Cn%5C%5Cdet%20a%3B%5CnSolveFor(x%2CMakeExpression(%20%5C%5Cdet%20a))%3B%5Cn%22%2C%22monitoring%22%3A%22true%22%7D)
+
 
 ### Define your own function
 Define a two-variable function and evaluate it. Evaluation/substitution need not be numerical. {} Syntax is used to denote function application - carefully chosen so it has no visible artifacts in LaTeX (recall that in math texts, function application vs multiplication is implied from context, not from the notation).
@@ -139,7 +184,7 @@ A= FunctionToMatrix(f,10,10);
 ```
 [f{}({{a}}, {{b}}) = 1/(a+b);A= FunctionToMatrix(f,10,10);\det A](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22f%7B%7D(%7B%7Ba%7D%7D%2C%20%7B%7Bb%7D%7D)%20%3D%201%2F(a%2Bb)%3B%5CnA%3D%20FunctionToMatrix(f%2C10%2C10)%3B%5Cn%5C%5Cdet%20A%22%7D)
 
-Recursive function just work. Here's the Fibonacci sequence.
+Recursive functions just work. Here's the Fibonacci sequence.
 ```
 Fib{}0=1; 
 Fib{}1=1; 
@@ -198,9 +243,9 @@ Plot2D(x^3, -2, 2, blue)+Plot2D(x, -2, 2, green)+PlotPoint((1,1), red)+PlotPoint
 Fill a plot.
 ```
 p{}{{x}} = (\cos (2pi x), \sin (2pi x));
-PlotFill( PlotPath( (p{}0, p{}(4/7), p{}(8/7), p{}(12/7), p{}(16/7), p{}(20/7), p{}(24/7), p{}(28/7)), blue), blue)
+PlotFill( PlotPath( (p{}0, p{}(4/7), p{}(8/7), p{}(12/7), p{}(16/7), p{}(20/7), p{}(24/7), p{}(28/7)), blue), red)
 ```
-[p{}{{x}} = (\cos (2pi x), \sin (2pi x));PlotFill( PlotPath( (p{}0, p{}(4/7), p{}(8/7), p{}(12/7), p{}(16/7), p{}(20/7), p{}(24/7), p{}(28/7)), blue), blue)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22p%7B%7D%7B%7Bx%7D%7D%20%3D%20(%5C%5Ccos%20(2pi%20x)%2C%20%5C%5Csin%20(2pi%20x))%3B%5CnPlotFill(%20PlotPath(%20(p%7B%7D0%2C%20p%7B%7D(4%2F7)%2C%20p%7B%7D(8%2F7)%2C%20p%7B%7D(12%2F7)%2C%20p%7B%7D(16%2F7)%2C%20p%7B%7D(20%2F7)%2C%20p%7B%7D(24%2F7)%2C%20p%7B%7D(28%2F7))%2C%20blue)%2C%20blue)%22%2C%22monitoring%22%3A%22true%22%7D)
+[p{}{{x}} = (\cos (2pi x), \sin (2pi x));PlotFill( PlotPath( (p{}0, p{}(4/7), p{}(8/7), p{}(12/7), p{}(16/7), p{}(20/7), p{}(24/7), p{}(28/7)), blue), red)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22p%7B%7D%7B%7Bx%7D%7D%20%3D%20(%5C%5Ccos%20(2pi%20x)%2C%20%5C%5Csin%20(2pi%20x))%3B%5CnPlotFill(%20PlotPath(%20(p%7B%7D0%2C%20p%7B%7D(4%2F7)%2C%20p%7B%7D(8%2F7)%2C%20p%7B%7D(12%2F7)%2C%20p%7B%7D(16%2F7)%2C%20p%7B%7D(20%2F7)%2C%20p%7B%7D(24%2F7)%2C%20p%7B%7D(28%2F7))%2C%20blue)%2C%20red)%22%2C%22monitoring%22%3A%22true%22%7D)
 
 Create slidebars that allow to explore parameter changes.
 

@@ -6,8 +6,8 @@
 
 class CalculatorFunctionsCrypto {
 public:
-  static bool innerAES_CBC_256_Encrypt(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAES_CBC_256_Decrypt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool aes_cbc_256_encrypt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool aes_cbc_256_decrypt(Calculator& calculator, const Expression& input, Expression& output);
   static bool loadKnownCertificates(Calculator& calculator, const Expression& input, Expression& output);
   static bool testLoadPEMCertificates(Calculator& calculator, const Expression& input, Expression& output);
   static bool testLoadPEMPrivateKey(Calculator& calculator, const Expression& input, Expression& output);
@@ -20,6 +20,22 @@ public:
   static bool RSASign(Calculator& calculator, const Expression& input, Expression& output);
   static bool showKnownObjectIds(Calculator& calculator, const Expression& input, Expression& output);
   static bool sha224OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool generateRandomPrime(Calculator& calculator, const Expression& input, Expression& output);
+  static bool testRSASign(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha256OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha512(Calculator& calculator, const Expression& input, Expression& output);
+  static bool ripemd160OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha3_256OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool keccak256OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha256OfStringVerbose(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sha1OfString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool functionHashString(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    const std::string& hashId,
+    bool verbose
+  );
 
 };
 
@@ -71,22 +87,6 @@ public:
   static bool stringDifference(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGenerateRandomPrime(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestRSASign(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha256OfString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha512(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRIPEMD160OfString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha3_256OfString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerKeccak256OfString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha256OfStringVerbose(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSha1OfString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool functionHashString(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    const std::string& hashId,
-    bool verbose
-  );
   static bool innerTestJSON(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerBase64ToHex(Calculator& calculator, const Expression& input, Expression& output );
   static bool innerIntegerToHex(Calculator& calculator, const Expression& input, Expression& output);

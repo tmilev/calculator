@@ -723,7 +723,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AESCBCEncrypt",
-    CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt,
+    CalculatorFunctionsCrypto::aes_cbc_256_encrypt,
     "",
     "Encodes using aes 256 bit in cbc (cipher block chain) mode. "
     "First argument = key. Second argument = text. Reference: NIST SP 800-38A.",
@@ -731,13 +731,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
-    "CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt",
+    "CalculatorFunctionsCrypto::aes_cbc_256_encrypt",
     "AESCBCEncrypt",
     innerStandard
   );
   this->addOperationHandler(
     "AESCBCDecrypt",
-    CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt,
+    CalculatorFunctionsCrypto::aes_cbc_256_decrypt,
     "",
     "AES decryption. First argument key, second argument - text. ",
     "text = \"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710\";\n"
@@ -747,7 +747,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
     "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, ConvertHexToString cipherText);\n"
     "text",
-    "CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt",
+    "CalculatorFunctionsCrypto::aes_cbc_256_decrypt",
     "AESCBCDecrypt",
     innerStandard
   );
@@ -941,13 +941,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Sha1",
-    CalculatorFunctions::innerSha1OfString,
+    CalculatorFunctionsCrypto::sha1OfString,
     "",
     "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. "
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
     "Sha1(\"The quick brown fox jumps over the lazy cog\");",
-    "CalculatorFunctions::innerSha1OfString",
+    "CalculatorFunctions::sha1OfString",
     "Sha1",
     innerStandard
   );
@@ -987,7 +987,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestRSASign",
-    CalculatorFunctions::innerTestRSASign,
+    CalculatorFunctionsCrypto::testRSASign,
     "",
     "Tests the RSA signature function. "
     "Input has three arguments: 1) message to sign "
@@ -1004,17 +1004,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "619744890606270245172389068191436591061733904616135797"
     "438741188808884326847918800555526459128765065042606467"
     "292598531117932066982164093023)",
-    "CalculatorFunctions::innerTestRSASign",
+    "CalculatorFunctions::testRSASign",
     "TestRSASign",
     innerStandard
   );
   this->addOperationHandler(
     "GenerateRandomPrime",
-    CalculatorFunctions::innerGenerateRandomPrime,
+    CalculatorFunctionsCrypto::generateRandomPrime,
     "",
     "Generate random prime. Argument = desired number of bytes, max 128. ",
     "GenerateRandomPrime(10)",
-    "CalculatorFunctions::innerGenerateRandomPrime",
+    "CalculatorFunctionsCrypto::generateRandomPrime",
     "GenerateRandomPrime",
     innerNoTest
   );
@@ -1032,20 +1032,20 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Ripemd160",
-    CalculatorFunctions::innerRIPEMD160OfString,
+    CalculatorFunctionsCrypto::ripemd160OfString,
     "",
     "Ripemd160 hash function. See wikipedia page. ",
     "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy dog\");\n"
     "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
     "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy cog\");\n"
     "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
-    "CalculatorFunctions::innerRIPEMD160OfString",
+    "CalculatorFunctionsCrypto::ripemd160OfString",
     "Ripemd160",
     innerStandard
   );
   this->addOperationHandler(
     "ShaThree256",
-    CalculatorFunctions::innerSha3_256OfString,
+    CalculatorFunctionsCrypto::sha3_256OfString,
     "",
     "SHA3 of input string, 256 bit version. See the wikipedia page on SHA3. ",
     "%HideLHS\n"
@@ -1061,13 +1061,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    "CalculatorFunctions::innerSha3_256OfString",
+    "CalculatorFunctionsCrypto::sha3_256OfString",
     "ShaThree256",
     innerStandard
   );
   this->addOperationHandler(
     "Keccak256",
-    CalculatorFunctions::innerKeccak256OfString,
+    CalculatorFunctionsCrypto::keccak256OfString,
     "",
     "Keccak256 of input string, 256 bit version. This is ``non-stardard sha3'' "
     "and is different from the sha3. See the wikipedia page on SHA3/Keccak. ",
@@ -1079,13 +1079,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    "CalculatorFunctions::innerKeccak256OfString",
+    "CalculatorFunctionsCrypto::keccak256OfString",
     "Keccak256",
     innerStandard
   );
   this->addOperationHandler(
     "Sha256",
-    CalculatorFunctions::innerSha256OfString,
+    CalculatorFunctionsCrypto::sha256OfString,
     "",
     "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. "
     "Reference: Wikipedia. ",
@@ -1096,13 +1096,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\";\n"
     "ConvertStringToHex Sha256(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
     "\"cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1\";\n",
-    "CalculatorFunctions::innerSha256OfString",
+    "CalculatorFunctionsCrypto::sha256OfString",
     "Sha256",
     innerStandard
   );
   this->addOperationHandler(
     "Sha512",
-    CalculatorFunctions::innerSha512,
+    CalculatorFunctionsCrypto::sha512,
     "",
     "Converts characters to a sequence of bits and computes SHA512. "
     "UTF8 encoding is used for example space bar is converted to 0x32. "
@@ -1114,17 +1114,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f\";\n"
     "ConvertStringToHex Sha512(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
     "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n",
-    "CalculatorFunctions::innerSha512",
+    "CalculatorFunctionsCrypto::sha512",
     "Sha512",
     innerStandard
   );
   this->addOperationHandler(
     "Sha256Verbose",
-    CalculatorFunctions::innerSha256OfStringVerbose,
+    CalculatorFunctionsCrypto::sha256OfStringVerbose,
     "",
     "Same as Sha256 but more verbose. ",
     "Sha256Verbose(\"\");",
-    "CalculatorFunctions::innerSha256OfStringVerbose",
+    "CalculatorFunctionsCrypto::sha256OfStringVerbose",
     "Sha256Verbose",
     innerStandard
   );

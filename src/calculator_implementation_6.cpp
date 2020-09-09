@@ -963,10 +963,10 @@ bool CalculatorFunctions::innerBase64ToHex(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerGenerateRandomPrime(
+bool CalculatorFunctionsCrypto::generateRandomPrime(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGenerateRandomPrime");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::generateRandomPrime");
   if (input.size() != 2) {
     return false;
   }
@@ -986,10 +986,10 @@ bool CalculatorFunctions::innerGenerateRandomPrime(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerTestRSASign(
+bool CalculatorFunctionsCrypto::testRSASign(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestRSASign");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::testRSASign");
   if (input.size() != 4) {
     return calculator << "RSA signature takes as input 3 arguments: message and two primes. ";
   }

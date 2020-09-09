@@ -326,46 +326,46 @@ bool CalculatorFunctionsCrypto::loadKnownCertificates(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerSha1OfString(
+bool CalculatorFunctionsCrypto::sha1OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSha1OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::sha1OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(
+  return CalculatorFunctionsCrypto::functionHashString(
     calculator, input[1], output, "SHA1", false
   );
 }
 
-bool CalculatorFunctions::innerSha256OfString(
+bool CalculatorFunctionsCrypto::sha256OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSha256OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::sha256OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA256", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "SHA256", false);
 }
 
-bool CalculatorFunctions::innerSha512(
+bool CalculatorFunctionsCrypto::sha512(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha512String");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA512", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "SHA512", false);
 }
 
-bool CalculatorFunctions::innerSha256OfStringVerbose(
+bool CalculatorFunctionsCrypto::sha256OfStringVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSha256OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::sha256OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA256", true);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "SHA256", true);
 }
 
 bool CalculatorFunctionsCrypto::sha224OfString(
@@ -375,47 +375,47 @@ bool CalculatorFunctionsCrypto::sha224OfString(
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA224", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "SHA224", false);
 }
 
-bool CalculatorFunctions::innerRIPEMD160OfString(
+bool CalculatorFunctionsCrypto::ripemd160OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRIPEMD160OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::ripemd160OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "RIPEMD160", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "RIPEMD160", false);
 }
 
-bool CalculatorFunctions::innerSha3_256OfString(
+bool CalculatorFunctionsCrypto::sha3_256OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSha3_256OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::sha3_256OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "SHA3_256", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "SHA3_256", false);
 }
 
-bool CalculatorFunctions::innerKeccak256OfString(
+bool CalculatorFunctionsCrypto::keccak256OfString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerKeccak256OfString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::keccak256OfString");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorFunctions::functionHashString(calculator, input[1], output, "KECCAK256", false);
+  return CalculatorFunctionsCrypto::functionHashString(calculator, input[1], output, "KECCAK256", false);
 }
 
-bool CalculatorFunctions::functionHashString(
+bool CalculatorFunctionsCrypto::functionHashString(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
   const std::string& hashId,
   bool verbose
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::functionHashString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::functionHashString");
   std::string inputString;
   if (!input.isOfType(&inputString)) {
     return false;
@@ -637,10 +637,10 @@ bool CalculatorFunctions::appendDoubleSha256Check(
   return output.assignValue(outputString, calculator);
 }
 
-bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
+bool CalculatorFunctionsCrypto::aes_cbc_256_decrypt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::aes_cbc_256_decrypt");
   if (input.size() != 3) {
     return calculator << "AES decrypt function expects two arguments: key and plain text. ";
   }
@@ -662,10 +662,10 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
   return output.assignValue(cipherText, calculator);
 }
 
-bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
+bool CalculatorFunctionsCrypto::aes_cbc_256_encrypt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::aes_cbc_256_encrypt");
   if (input.size() != 3) {
     return calculator << "AES function expects two arguments: key and plain text. ";
   }

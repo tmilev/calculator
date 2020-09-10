@@ -134,6 +134,15 @@ public:
   );
   static bool parabolicWeylGroups(Calculator& calculator, const Expression& input, Expression& output);
   static bool parabolicWeylGroupsBruhatGraph(Calculator& calculator, const Expression& input, Expression& output);
+  static bool growDynkinType(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getDynkinIndicesSlTwoSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool constructCartanSubalgebra(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool getCentralizerChainsSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
+  static bool computeSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
+  static bool computePairingTablesAndFKFTsubalgebras(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif

@@ -2201,3 +2201,255 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   out << "Final char: " << HtmlRoutines::getMathNoDisplay(theChar.toString(&formatChars));
   return output.assignValue<std::string>(out.str(), calculator);
 }
+
+template <>
+bool Expression::convertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
+) const;
+
+bool CalculatorLieTheory::constructCartanSubalgebra(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::constructCartanSubalgebra");
+  SubalgebraSemisimpleLieAlgebra theSA;
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
+  if (input.convertsInternally(&element)) {
+    theSA.theGenerators.addOnTop(element.content);
+  } else {
+    for (int i = 1; i < input.size(); i ++) {
+      if (input[i].convertsInternally(&element)) {
+        theSA.theGenerators.addOnTop(element.content);
+      } else {
+        return calculator
+        << "Failed to extract element of a semisimple Lie algebra from "
+        << input[i].toString();
+      }
+    }
+  }
+  for (int i = 0; i < theSA.theGenerators.size; i ++) {
+    if (!theSA.theGenerators[i].isEqualToZero()) {
+      if (theSA.owner != nullptr) {
+        if (theSA.owner != theSA.theGenerators[i].getOwner()) {
+          return calculator << "The input elements in " << input.toString()
+          << " belong to different semisimple Lie algebras";
+        }
+      }
+      theSA.owner = theSA.theGenerators[i].getOwner();
+    }
+  }
+  if (theSA.owner == nullptr) {
+    return calculator << "Failed to extract input semisimple Lie algebra "
+    << "elements from the inputs of " << input.toString();
+  }
+  theSA.computeBasis();
+  theSA.computeCartanSubalgebra();
+  return output.assignValue(theSA.toString(), calculator);
+}
+
+bool CalculatorLieTheory::growDynkinType(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::growDynkinType");
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression& theSmallerTypeE = input[1];
+  DynkinType theSmallDynkinType;
+  if (!CalculatorConversions::functionDynkinType(
+    calculator, theSmallerTypeE, theSmallDynkinType
+  )) {
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!calculator.convert(
+    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
+  )) {
+    return output.makeError("Error extracting ambient Lie algebra.", calculator);
+  }
+  SemisimpleSubalgebras tempSas;
+  tempSas.initHookUpPointers(
+    *theSSalg.content,
+    &calculator.theObjectContainer.theAlgebraicClosure,
+    &calculator.theObjectContainer.semisimpleLieAlgebras,
+    &calculator.theObjectContainer.theSltwoSAs
+  );
+  tempSas.computeSl2sInitOrbitsForComputationOnDemand();
+  if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
+    return output.makeError(
+      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.toString(),
+      calculator
+    );
+  }
+  List<DynkinType> largerTypes;
+  List<List<int> > imagesSimpleRoots;
+  if (!tempSas.growDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
+    return output.makeError(
+      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->theWeyl.theDynkinType.toString() + " failed. ",
+      calculator
+    );
+  }
+  std::stringstream out;
+  out << "Inside " << theSSalg.content->theWeyl.theDynkinType.toString()
+  << ", input type " << theSmallDynkinType.toString();
+  if (largerTypes.size == 0) {
+    out << " cannot grow any further. ";
+  } else {
+    CandidateSemisimpleSubalgebra tempCandidate;
+    out << " can grow to the following types. <br>";
+    out << "<table border =\"1\">"
+    << "<td>Larger type</td>"
+    << "<td>Root injection</td>"
+    << "<td>Highest weight module containing new simple generator</td></tr>";
+    for (int i = 0; i < largerTypes.size; i ++) {
+      out << "<tr><td>" << largerTypes[i].toString() << "</td>";
+      out << "<td>";
+      for (int j = 0; j < imagesSimpleRoots[i].size; j ++) {
+        out << "r_" << j + 1 << " -> " << "r_" << imagesSimpleRoots[i][j] + 1;
+        if (j != imagesSimpleRoots[i].size) {
+          out << ", ";
+        }
+      }
+      out << "</td><td>";
+      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
+        largerTypes[i], imagesSimpleRoots[i], tempCandidate
+      );
+      out << HtmlRoutines::getMathNoDisplay(
+        currentHighestWeight.toStringLetterFormat("\\omega")
+      );
+      out << "</td></tr>";
+    }
+    out << "</table>";
+  }
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::computeSemisimpleSubalgebras(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::computeSemisimpleSubalgebras");
+  if (input.size() != 2) {
+    return calculator << "Semisimple subalgebras function expects 1 argument. ";
+  }
+  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerSSPointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
+  std::stringstream out;
+  if (ownerSS.getRank() > 6) {
+    out << "<b>This code is completely experimental and has been set to run up to rank 6. "
+    << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    return output.assignValue(out.str(), calculator);
+  } else {
+    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
+  }
+  SemisimpleSubalgebras& theSSsubalgebras =
+  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+  theSSsubalgebras.flagcomputePairingTable = false;
+  theSSsubalgebras.flagComputeNilradicals = false;
+  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
+    ownerSS,
+    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.theObjectContainer.semisimpleLieAlgebras,
+    calculator.theObjectContainer.theSltwoSAs,
+    nullptr
+  );
+  return output.assignValue(theSSsubalgebras, calculator);
+}
+
+template < >
+SemisimpleSubalgebras& Expression::getValueNonConst() const;
+
+bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras");
+  if (!input.isOfType<SemisimpleSubalgebras>()) {
+    return calculator << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
+  }
+  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
+  theSAs.flagcomputePairingTable = true;
+  theSAs.flagComputeNilradicals = true;
+  theSAs.computePairingTablesAndFKFTtypes();
+  output = input;
+  std::fstream theFile;
+  std::string theFileName;
+  theFileName = "FKFTcomputation.html";
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML = true;
+  tempFormat.flagUseLatex = true;
+  tempFormat.flagUseHTML = true;
+  tempFormat.flagCandidateSubalgebraShortReportOnly = false;
+  FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
+  theFile << theSAs.toString(&tempFormat);
+  std::stringstream out;
+  out << "<a href=\"" << global.displayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras");
+  if (!input.isOfType<SemisimpleSubalgebras>()) {
+    return calculator << "<hr>Input of getCentralizerChains must be of type semisimple subalgebras. ";
+  }
+  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
+  List<List<int> > theChains;
+  std::stringstream out;
+  theSAs.getCentralizerChains(theChains);
+  Expression currentChainE;
+  out << theChains.size << " chains total. <br>";
+  for (int i = 0; i < theChains.size; i ++) {
+    out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
+    << theSAs.owner->theWeyl.theDynkinType.toString() << ", (";
+    for (int j = 0; j < theChains[i].size; j ++) {
+      CalculatorConversions::innerStoreCandidateSubalgebra(
+        calculator, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE
+      );
+      out << currentChainE.toString();
+      if (j != theChains[i].size - 1) {
+        out << ", ";
+      }
+    }
+    out << ")  )";
+  }
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::getPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::getPrincipalSl2Index");
+  DynkinType theType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+    return calculator << "Failed to convert "
+    << input.toString() << " to DynkinType.";
+  }
+  return output.assignValue(theType.getPrincipalSlTwoCartanSymmetricInverseScale(), calculator);
+}
+
+bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras");
+  DynkinType theType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+    return calculator << "Failed to convert "
+    << input.toString() << " to DynkinType.";
+  }
+  if (theType.getRank() > 20) {
+    return calculator
+    << "Getting absolute Dynkin indices of sl(2)-subalgebras "
+    << "is restricted up to rank 20 "
+    << "(for computational feasibility reasons). ";
+  }
+  List<List<Rational> > bufferIndices;
+  HashedList<DynkinSimpleType> bufferTypes;
+  HashedList<Rational> theIndices;
+  theType.getDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
+  std::stringstream out;
+  out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
+  << theIndices.toStringCommaDelimited();
+  return output.assignValue(out.str(), calculator);
+}

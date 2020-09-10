@@ -22,11 +22,6 @@
 #include "math_rational_function_implementation.h"
 
 template <>
-bool Expression::convertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
-  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
-) const;
-
-template <>
 bool Expression::convertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
 template <>
 bool Expression::convertInternally<Polynomial<Rational> >(Expression& output) const;
@@ -70,45 +65,6 @@ bool MathRoutines::generateVectorSpaceClosedWRTOperation(
   }
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   return true;
-}
-
-bool CalculatorFunctions::innerConstructCartanSubalgebra(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConstructCartanSubalgebra");
-  SubalgebraSemisimpleLieAlgebra theSA;
-  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
-  if (input.convertsInternally(&element)) {
-    theSA.theGenerators.addOnTop(element.content);
-  } else {
-    for (int i = 1; i < input.size(); i ++) {
-      if (input[i].convertsInternally(&element)) {
-        theSA.theGenerators.addOnTop(element.content);
-      } else {
-        return calculator
-        << "Failed to extract element of a semisimple Lie algebra from "
-        << input[i].toString();
-      }
-    }
-  }
-  for (int i = 0; i < theSA.theGenerators.size; i ++) {
-    if (!theSA.theGenerators[i].isEqualToZero()) {
-      if (theSA.owner != nullptr) {
-        if (theSA.owner != theSA.theGenerators[i].getOwner()) {
-          return calculator << "The input elements in " << input.toString()
-          << " belong to different semisimple Lie algebras";
-        }
-      }
-      theSA.owner = theSA.theGenerators[i].getOwner();
-    }
-  }
-  if (theSA.owner == nullptr) {
-    return calculator << "Failed to extract input semisimple Lie algebra "
-    << "elements from the inputs of " << input.toString();
-  }
-  theSA.computeBasis();
-  theSA.computeCartanSubalgebra();
-  return output.assignValue(theSA.toString(), calculator);
 }
 
 bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
@@ -2533,8 +2489,8 @@ bool CalculatorFunctions::innerCrossProduct(Calculator& calculator, const Expres
   return output.makeSequence(calculator, &outputSequence);
 }
 
-bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateConstPower");
+bool CalculatorFunctionsDifferentiation::differentiateConstPower(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateConstPower");
   //////////////////////
   if (input.size() != 3) {
     return false;
@@ -2561,8 +2517,8 @@ bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& calculator, c
   return output.makeXOX(calculator, calculator.opTimes(), theTerm, basePrime);
 }
 
-bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateAPowerB");
+bool CalculatorFunctionsDifferentiation::differentiateAPowerB(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateAPowerB");
   //////////////////////
   if (input.size() != 3) {
     return false;
@@ -2587,8 +2543,8 @@ bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& calculator, cons
   return output.makeXOX(calculator, calculator.opTimes(), theArgument, derivativeExponentTimesLogBase);
 }
 
-bool CalculatorFunctions::innerDifferentiateConstant(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateConstant");
+bool CalculatorFunctionsDifferentiation::differentiateConstant(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateConstant");
   //////////////////////
   if (input.size() != 3) {
     return false;
@@ -2605,8 +2561,8 @@ bool CalculatorFunctions::innerDifferentiateConstant(Calculator& calculator, con
   return output.assignValue<Rational>(0, calculator);
 }
 
-bool CalculatorFunctions::innerDifferentiateX(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateX");
+bool CalculatorFunctionsDifferentiation::differentiateX(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateX");
   //////////////////////
   if (input.size() != 3) {
     return false;
@@ -2623,10 +2579,10 @@ bool CalculatorFunctions::innerDifferentiateX(Calculator& calculator, const Expr
   return output.assignValue<Rational>(1, calculator);
 }
 
-bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
+bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateTrigAndInverseTrig");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig");
   /////////////////////
   if (input.size() != 3) {
     return false;
@@ -2918,10 +2874,10 @@ bool CalculatorFunctions::outerAssociateDivisionDivision(
   return false;
 }
 
-bool CalculatorFunctions::innerDifferentiateChainRule(
+bool CalculatorFunctionsDifferentiation::differentiateChainRule(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateChainRule");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateChainRule");
   /////////////////////
   if (input.size() != 3) {
     return false;
@@ -2949,10 +2905,10 @@ bool CalculatorFunctions::innerDifferentiateChainRule(
   return output.makeXOX(calculator, calculator.opTimes(), multiplicandleft, multiplicandright);
 }
 
-bool CalculatorFunctions::innerDifferentiateAplusB(
+bool CalculatorFunctionsDifferentiation::differentiateAplusB(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateAplusB");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateAplusB");
   /////////////////////
   if (input.size() != 3) {
     return false;
@@ -2974,10 +2930,10 @@ bool CalculatorFunctions::innerDifferentiateAplusB(
   return output.makeXOX(calculator, calculator.opPlus(), leftSummand, rightSummand);
 }
 
-bool CalculatorFunctions::innerDifferentiateAtimesB(
+bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateAtimesB");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateAtimesB");
     //////////////////////
   if (input.size() != 3) {
     return false;
@@ -3020,10 +2976,10 @@ bool CalculatorFunctions::innerPowerAnyToZero(Calculator& calculator, const Expr
   return output.assignValue<Rational>(1, calculator);
 }
 
-bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
+bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateAdivideBCommutative");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative");
     //////////////////////
   if (input.size() != 3) {
     return false;
@@ -3079,10 +3035,10 @@ bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
   return output.makeXOX(calculator, calculator.opDivide(), numerator, theDenominatorFinal);
 }
 
-bool CalculatorFunctions::innerDifferentiateAdivideBNONCommutative(
+bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentiateAdivideBNONCommutative");
+  MacroRegisterFunctionWithName("CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative");
     //////////////////////
   if (input.size() != 3) {
     return false;
@@ -5080,10 +5036,10 @@ bool CalculatorFunctions::outerDifferentiateWRTxTimesAny(
   return output.addChildOnTop(input[2]);
 }
 
-bool CalculatorFunctions::innerDiffdivDiffxToDifferentiation(
+bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerDiffdivDiffxToDifferentiation");
+  MacroRegisterFunctionWithName("CalculatorFunctions::diffdivDiffxToDifferentiation");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
@@ -5123,7 +5079,9 @@ bool CalculatorFunctions::innerDiffdivDiffxToDifferentiation(
   return true;
 }
 
-bool CalculatorFunctions::innerDdivDxToDiffDivDiffx(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDdivDxToDifferentiation");
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
@@ -5313,82 +5271,6 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   return output.makeSum(calculator, numeratorsNew);
 }
 
-bool CalculatorFunctions::innerGrowDynkinType(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGrowDynkinType");
-  if (input.size() != 3) {
-    return false;
-  }
-  const Expression& theSmallerTypeE = input[1];
-  DynkinType theSmallDynkinType;
-  if (!CalculatorConversions::functionDynkinType(
-    calculator, theSmallerTypeE, theSmallDynkinType
-  )) {
-    return false;
-  }
-  WithContext<SemisimpleLieAlgebra*> theSSalg;
-  if (!calculator.convert(
-    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
-  )) {
-    return output.makeError("Error extracting ambient Lie algebra.", calculator);
-  }
-  SemisimpleSubalgebras tempSas;
-  tempSas.initHookUpPointers(
-    *theSSalg.content,
-    &calculator.theObjectContainer.theAlgebraicClosure,
-    &calculator.theObjectContainer.semisimpleLieAlgebras,
-    &calculator.theObjectContainer.theSltwoSAs
-  );
-  tempSas.computeSl2sInitOrbitsForComputationOnDemand();
-  if (!tempSas.ranksAndIndicesFit(theSmallDynkinType)) {
-    return output.makeError(
-      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.toString(),
-      calculator
-    );
-  }
-  List<DynkinType> largerTypes;
-  List<List<int> > imagesSimpleRoots;
-  if (!tempSas.growDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
-    return output.makeError(
-      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->theWeyl.theDynkinType.toString() + " failed. ",
-      calculator
-    );
-  }
-  std::stringstream out;
-  out << "Inside " << theSSalg.content->theWeyl.theDynkinType.toString()
-  << ", input type " << theSmallDynkinType.toString();
-  if (largerTypes.size == 0) {
-    out << " cannot grow any further. ";
-  } else {
-    CandidateSemisimpleSubalgebra tempCandidate;
-    out << " can grow to the following types. <br>";
-    out << "<table border =\"1\">"
-    << "<td>Larger type</td>"
-    << "<td>Root injection</td>"
-    << "<td>Highest weight module containing new simple generator</td></tr>";
-    for (int i = 0; i < largerTypes.size; i ++) {
-      out << "<tr><td>" << largerTypes[i].toString() << "</td>";
-      out << "<td>";
-      for (int j = 0; j < imagesSimpleRoots[i].size; j ++) {
-        out << "r_" << j + 1 << " -> " << "r_" << imagesSimpleRoots[i][j] + 1;
-        if (j != imagesSimpleRoots[i].size) {
-          out << ", ";
-        }
-      }
-      out << "</td><td>";
-      Vector<Rational> currentHighestWeight = tempSas.getHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
-        largerTypes[i], imagesSimpleRoots[i], tempCandidate
-      );
-      out << HtmlRoutines::getMathNoDisplay(
-        currentHighestWeight.toStringLetterFormat("\\omega")
-      );
-      out << "</td></tr>";
-    }
-    out << "</table>";
-  }
-  return output.assignValue(out.str(), calculator);
-}
 
 void Expression::getBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList) const {
   MacroRegisterFunctionWithName("Expression::getBlocksOfCommutativity");
@@ -5475,42 +5357,6 @@ bool CalculatorFunctions::innerGetUserDefinedSubExpressions(
   HashedListSpecialized<Expression> theList;
   input[1].getBlocksOfCommutativity(theList);
   return output.makeSequence(calculator, &theList);
-}
-
-bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerComputeSemisimpleSubalgebras");
-  if (input.size() != 2) {
-    return calculator << "Semisimple subalgebras function expects 1 argument. ";
-  }
-  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
-  if (!calculator.convert(
-    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerSSPointer
-  )) {
-    return output.makeError("Error extracting Lie algebra.", calculator);
-  }
-  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
-  std::stringstream out;
-  if (ownerSS.getRank() > 6) {
-    out << "<b>This code is completely experimental and has been set to run up to rank 6. "
-    << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    return output.assignValue(out.str(), calculator);
-  } else {
-    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  }
-  SemisimpleSubalgebras& theSSsubalgebras =
-  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
-  theSSsubalgebras.flagcomputePairingTable = false;
-  theSSsubalgebras.flagComputeNilradicals = false;
-  theSSsubalgebras.findTheSemisimpleSubalgebrasFromScratch(
-    ownerSS,
-    calculator.theObjectContainer.theAlgebraicClosure,
-    calculator.theObjectContainer.semisimpleLieAlgebras,
-    calculator.theObjectContainer.theSltwoSAs,
-    nullptr
-  );
-  return output.assignValue(theSSsubalgebras, calculator);
 }
 
 bool CalculatorFunctions::innerLispify(Calculator& calculator, const Expression& input, Expression& output) {
@@ -6810,66 +6656,6 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   return output.assignValue(outputPlot, calculator);
 }
 
-template < >
-SemisimpleSubalgebras& Expression::getValueNonConst() const;
-
-bool CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras");
-  if (!input.isOfType<SemisimpleSubalgebras>()) {
-    return calculator << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
-  }
-  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
-  theSAs.flagcomputePairingTable = true;
-  theSAs.flagComputeNilradicals = true;
-  theSAs.computePairingTablesAndFKFTtypes();
-  output = input;
-  std::fstream theFile;
-  std::string theFileName;
-  theFileName = "FKFTcomputation.html";
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = true;
-  tempFormat.flagUseLatex = true;
-  tempFormat.flagUseHTML = true;
-  tempFormat.flagCandidateSubalgebraShortReportOnly = false;
-  FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
-  theFile << theSAs.toString(&tempFormat);
-  std::stringstream out;
-  out << "<a href=\"" << global.displayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
-  return output.assignValue(out.str(), calculator);
-}
-
-bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras");
-  if (!input.isOfType<SemisimpleSubalgebras>()) {
-    return calculator << "<hr>Input of getCentralizerChains must be of type semisimple subalgebras. ";
-  }
-  SemisimpleSubalgebras& theSAs = input.getValueNonConst<SemisimpleSubalgebras>();
-  List<List<int> > theChains;
-  std::stringstream out;
-  theSAs.getCentralizerChains(theChains);
-  Expression currentChainE;
-  out << theChains.size << " chains total. <br>";
-  for (int i = 0; i < theChains.size; i ++) {
-    out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
-    << theSAs.owner->theWeyl.theDynkinType.toString() << ", (";
-    for (int j = 0; j < theChains[i].size; j ++) {
-      CalculatorConversions::innerStoreCandidateSubalgebra(
-        calculator, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE
-      );
-      out << currentChainE.toString();
-      if (j != theChains[i].size - 1) {
-        out << ", ";
-      }
-    }
-    out << ")  )";
-  }
-  return output.assignValue(out.str(), calculator);
-}
-
 bool CalculatorFunctions::innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Expression::innerEvaluateToDoublE");
   if (input.size() != 2) {
@@ -6930,41 +6716,6 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& calculator, const 
   theType.getCoCartanSymmetric(outputCoMat);
   out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex(), 10000)
   << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex(), 10000);
-  return output.assignValue(out.str(), calculator);
-}
-
-bool CalculatorFunctions::innerGetPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPrincipalSl2Index");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
-    return calculator << "Failed to convert "
-    << input.toString() << " to DynkinType.";
-  }
-  return output.assignValue(theType.getPrincipalSlTwoCartanSymmetricInverseScale(), calculator);
-}
-
-bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras");
-  DynkinType theType;
-  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
-    return calculator << "Failed to convert "
-    << input.toString() << " to DynkinType.";
-  }
-  if (theType.getRank() > 20) {
-    return calculator
-    << "Getting absolute Dynkin indices of sl(2)-subalgebras "
-    << "is restricted up to rank 20 "
-    << "(for computational feasibility reasons). ";
-  }
-  List<List<Rational> > bufferIndices;
-  HashedList<DynkinSimpleType> bufferTypes;
-  HashedList<Rational> theIndices;
-  theType.getDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
-  std::stringstream out;
-  out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
-  << theIndices.toStringCommaDelimited();
   return output.assignValue(out.str(), calculator);
 }
 

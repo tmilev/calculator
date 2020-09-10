@@ -1529,17 +1529,17 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrincipalSlTwoIndex",
-    CalculatorFunctions::innerGetPrincipalSl2Index,
+    CalculatorLieTheory::getPrincipalSl2Index,
     "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "PrincipalSlTwoIndex(G_2^3 + D_4^2);",
-    "CalculatorFunctions::innerGetPrincipalSl2Index",
+    "CalculatorFunctions::getPrincipalSl2Index",
     "PrincipalSlTwoIndex",
     innerStandard
   );
   this->addOperationHandler(
     "DynkinIndicesSlTwoSubalgebras",
-    CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras,
+    CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras,
     "",
     "Fetches the absolute Dynkin indices of the sl(2) subalgebras of the input Dynkin type. "
     "The indices of each simple component are computed by actually constructing "
@@ -1549,7 +1549,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^2);\n"
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\n"
     "DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
-    "CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras",
+    "CalculatorFunctions::getDynkinIndicesSlTwoSubalgebras",
     "DynkinIndicesSlTwoSubalgebras",
     innerStandard
   );
@@ -1565,13 +1565,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GrowDynkinType",
-    CalculatorFunctions::innerGrowDynkinType,
+    CalculatorLieTheory::growDynkinType,
     "",
     "This is a calculator testing function. Grows a Dynkin "
     "type inside an ambient Dynkin type. ",
     "GrowDynkinType(A^30_1+d^30_4, e_6);\n"
     "GrowDynkinType(g^35_2+B^30_2, e_6);",
-    "CalculatorFunctions::innerGrowDynkinType",
+    "CalculatorFunctions::growDynkinType",
     "GrowDynkinType",
     innerStandard
   );
@@ -1940,37 +1940,37 @@ void Calculator::initPredefinedInnerFunctions() {
 
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateTrigAndInverseTrig,
+    CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig,
     "",
     "Differentiation - product rule. ",
     "Differentiate(x, (\\sin x) \\cos x )",
-    "CalculatorFunctions::innerDifferentiateTrigAndInverseTrig",
+    "CalculatorFunctions::differentiateTrigAndInverseTrig",
     "DifferentiateTrigAndInverseTrig",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateChainRule,
+    CalculatorFunctionsDifferentiation::differentiateChainRule,
     "",
     "Differentiation - chain rule.  ",
     "Differentiate(x, \\sin x^2 \\cos (\\sin x))",
-    "CalculatorFunctions::innerDifferentiateChainRule",
+    "CalculatorFunctions::differentiateChainRule",
     "DifferentiateChainRule",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateAtimesB,
+    CalculatorFunctionsDifferentiation::differentiateAtimesB,
     "",
     "Differentiation - product rule.  ",
     "Differentiate(x, f * g)",
-    "CalculatorFunctions::innerDifferentiateAtimesB",
+    "CalculatorFunctions::differentiateAtimesB",
     "DifferentiateProductRule",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateAdivideBCommutative,
+    CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative,
     "",
     "Differentiation - division rule, commutative. "
     "For the time being differentiation is assumed to be over commutative rings. "
@@ -1980,65 +1980,65 @@ void Calculator::initPredefinedInnerFunctions() {
     "Differentiate(x, f / g);\n"
     "Differentiate(x, f / g^5);\n"
     "Differentiate(x, f / g^n)",
-    "CalculatorFunctions::innerDifferentiateAdivideBCommutative",
+    "CalculatorFunctions::differentiateAdivideBCommutative",
     "DifferentiateQuotientRule",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateAplusB,
+    CalculatorFunctionsDifferentiation::differentiateAplusB,
     "",
     "Differentiation - sum rule.  ",
     "Differentiate(x, f + g)",
-    "CalculatorFunctions::innerDifferentiateAplusB",
+    "CalculatorFunctions::differentiateAplusB",
     "DifferentiateSum",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateConstant,
+    CalculatorFunctionsDifferentiation::differentiateConstant,
     "",
     "Differentiation - constant rule. ",
     "Differentiate(x, 5 );\n"
     "d/dx \\sqrt{5}",
-    "CalculatorFunctions::innerDifferentiateConstant",
+    "CalculatorFunctions::differentiateConstant",
     "DifferentiateConstant",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateX,
+    CalculatorFunctionsDifferentiation::differentiateX,
     "",
     "Differentiation - d/dx x = 1.",
     "Differentiate(x, x )\n;"
     "d/dx x",
-    "CalculatorFunctions::innerDifferentiateX",
+    "CalculatorFunctions::differentiateX",
     "DifferentiateIdentity",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateConstPower,
+    CalculatorFunctionsDifferentiation::differentiateConstPower,
     "",
     "Differentiation - d/dx x^n = n x^{n - 1}.",
     "Differentiate(x, x^2 );\n"
     "d/dx x^- 1;\n"
     "d/dt t^{\\sqrt{2}};\n"
     "d/dc c^{DoubleValue 3.14}",
-    "CalculatorFunctions::innerDifferentiateConstPower",
+    "CalculatorFunctions::differentiateConstPower",
     "DifferentiateConstPower",
     innerStandard
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateAPowerB,
+    CalculatorFunctionsDifferentiation::differentiateAPowerB,
     "",
     "Differentiation - d/dx a^b = d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
     "Differentiate(x, x^2);\n"
     "d/dx x^- 1;\n"
     "d/dt t^{\\sqrt{2}};\n"
     "d/dc c^{DoubleValue 3.14}",
-    "CalculatorFunctions::innerDifferentiateAPowerB",
+    "CalculatorFunctions::differentiateAPowerB",
     "DifferentiateApowerB",
     innerStandard
   );
@@ -2471,13 +2471,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CartanSA",
-    CalculatorFunctions::innerConstructCartanSubalgebra,
+    CalculatorLieTheory::constructCartanSubalgebra,
     "",
     "Generates a Cartan subalgebra, code is still experimental.",
     "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
     "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
     "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
-    "CalculatorFunctions::innerConstructCartanSubalgebra",
+    "CalculatorFunctions::constructCartanSubalgebra",
     "CartanSA",
     innerAdminNoTestExperimental
   );
@@ -2979,7 +2979,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GCD",
-    CalculatorFunctions::leastCommonMultipleInteger,
+    CalculatorFunctions::greatestCommonDivisorInteger,
     "",
     "Greatest common divisor of two integers.",
     "GCD(100!+ 1, 101 * 103)",
@@ -5241,30 +5241,30 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ComputeFKFT",
-    CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras,
+    CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras,
     "",
     "Attempts to compute all Fernando-Kac subalgebras according "
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
     "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    "CalculatorFunctions::innercomputePairingTablesAndFKFTsubalgebras",
+    "CalculatorFunctions::computePairingTablesAndFKFTsubalgebras",
     "ComputeFKFT",
     innerAdminNoTestExperimental
   );
   this->addOperationHandler(
     "ComputeSemisimpleSubalgebras",
-    CalculatorFunctions::innerComputeSemisimpleSubalgebras,
+    CalculatorLieTheory::computeSemisimpleSubalgebras,
     "",
     "Computes the semisimple subalgebras of a semisimple "
     "Lie algebra and creates a data structure containing them. ",
     "ComputeSemisimpleSubalgebras(A_2)",
-    "CalculatorFunctions::innerComputeSemisimpleSubalgebras",
+    "CalculatorFunctions::computeSemisimpleSubalgebras",
     "ComputeSemisimpleSubalgebras",
     innerInvisibleNoTest
   );
   this->addOperationHandler(
     "CentralizerChains",
-    CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras,
+    CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras,
     "",
     "This function is disabled by default (takes too long): you have to first call "
     "TurnRulesOn(CentralizerChains). "
@@ -5272,7 +5272,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "your own machine; don't use it on a public server. "
     "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
     "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
-    "CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras",
+    "CalculatorFunctions::getCentralizerChainsSemisimpleSubalgebras",
     "CentralizerChains",
     innerAdminNoTest
   );
@@ -7208,23 +7208,23 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::innerDiffdivDiffxToDifferentiation,
+    CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation,
     "",
     "Replaces Differential / Differential {}x by Differentiate{}(x). "
     "Should also work on the notation (Differential y)/(Differential x). ",
     "Differential /Differential {}x x",
-    "CalculatorFunctions::innerDiffdivDiffxToDifferentiation",
+    "CalculatorFunctions::diffdivDiffxToDifferentiation",
     "LeibnizDifferentialOperatorToDifferentialOperator",
     innerStandard
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::innerDdivDxToDiffDivDiffx,
+    CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx,
     "",
     "Replaces d/dx by Differential /Differential{}x. "
     "Note that the variable of differentiation is expected to be the string following the d letter. ",
     "d/dx x",
-    "CalculatorFunctions::innerDdivDxToDiffDivDiffx",
+    "CalculatorFunctions::ddivDxToDiffDivDiffx",
     "LeibnizDifferentialOperatorNotation",
     innerStandard
   );

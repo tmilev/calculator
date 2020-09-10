@@ -113,7 +113,22 @@ public:
 
   static bool integrateEpowerAxDiffX(Calculator& calculator, const Expression& input, Expression& output);
   static bool integrateSinPowerNCosPowerM(Calculator& calculator, const Expression& input, Expression& output);
+};
 
+class CalculatorFunctionsDifferentiation {
+public:
+  static bool differentiateTrigAndInverseTrig(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateChainRule(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateAplusB(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateAtimesB(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateAdivideBCommutative(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateAdivideBNONCommutative(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateX(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateConstPower(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateAPowerB(Calculator& calculator, const Expression& input, Expression& output);
+  static bool diffdivDiffxToDifferentiation(Calculator& calculator, const Expression& input, Expression& output);
+  static bool ddivDxToDiffDivDiffx(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -264,24 +279,11 @@ public:
   static bool innerRationalFunctionSubstitution(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerGetPointsImplicitly(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerDifferentiateTrigAndInverseTrig(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateChainRule(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateAplusB(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateAtimesB(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateAdivideBCommutative(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateAdivideBNONCommutative(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateConstant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateX(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateConstPower(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateAPowerB(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerOperatorBounds(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerAnyToZero(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerExponentToLog(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDiffdivDiffxToDifferentiation(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDdivDxToDiffDivDiffx(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTestMathMouseHover(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerNewtonsMethod(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerBuildFreecalc(Calculator& calculator, const Expression& input, Expression& output);
@@ -331,15 +333,6 @@ public:
   static bool innerSort(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSortDescending(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetUserDefinedSubExpressions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGrowDynkinType(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetPrincipalSl2Index(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetDynkinIndicesSlTwoSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerConstructCartanSubalgebra(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerGetCentralizerChainsSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerComputeSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innercomputePairingTablesAndFKFTsubalgebras(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool outerDivideByNumber(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerDivCancellations(Calculator& calculator, const Expression& input, Expression& output);
@@ -353,7 +346,6 @@ public:
   static bool innerGreaterThanOrEqualTo(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGreaterThan(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLessThan(Calculator& calculator, const Expression& input, Expression& output);
-
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& calculator, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& calculator, const Expression& input, Expression& output);

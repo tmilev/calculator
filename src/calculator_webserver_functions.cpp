@@ -6,10 +6,10 @@
 #include "system_functions_global_objects.h"
 ///////////////////////////////////
 
-bool CalculatorFunctions::innerX509CertificateServer(
+bool CalculatorFunctionsCrypto::x509CertificateServer(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerX509CertificateServer");
+  MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateServer");
   (void) input;
   //List<unsigned char> outputChars;
   //theWebServer.theTLS.theServer.certificate.writeBytesASN1(outputChars);
@@ -18,10 +18,10 @@ bool CalculatorFunctions::innerX509CertificateServer(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerX509CertificateDecode(
+bool CalculatorFunctionsCrypto::x509CertificateDecode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerX509CertificateDecode");
+  MacroRegisterFunctionWithName("CalculatorFunctions::x509CertificateDecode");
   std::string binary;
   if (!input.isOfType(&binary)) {
     return output.makeError("Input is not a string. ", calculator);

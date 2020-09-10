@@ -374,16 +374,16 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   return output.assignMatrix(theMatrix, calculator);
 }
 
-bool CalculatorFunctions::innerPlotImplicitFunction(
+bool CalculatorFunctionsPlot::plotImplicitFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctions::innerPlotImplicitFunctionFull(calculator, input, output, false);
+  return CalculatorFunctionsPlot::plotImplicitFunctionFull(calculator, input, output, false);
 }
 
-bool CalculatorFunctions::innerPlotImplicitShowGridFunction(
+bool CalculatorFunctionsPlot::plotImplicitShowGridFunction(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  return CalculatorFunctions::innerPlotImplicitFunctionFull(calculator, input, output, true);
+  return CalculatorFunctionsPlot::plotImplicitFunctionFull(calculator, input, output, true);
 }
 
 bool MeshTriangles::computePoints(
@@ -458,10 +458,10 @@ bool MeshTriangles::computePoints(
   return true;
 }
 
-bool CalculatorFunctions::innerPlotImplicitFunctionFull(
+bool CalculatorFunctionsPlot::plotImplicitFunctionFull(
   Calculator& calculator, const Expression& input, Expression& output, bool showGrid
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotImplicitFunctionFull");
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotImplicitFunctionFull");
   MeshTriangles theMesh;
   if (!theMesh.computePoints(calculator, input, showGrid)) {
     return false;
@@ -1112,8 +1112,8 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerPlotGrid(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotGrid");
+bool CalculatorFunctionsPlot::plotGrid(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotGrid");
   (void) input;
   PlotObject thePlot;
   thePlot.thePlotType = "axesGrid";
@@ -1121,10 +1121,10 @@ bool CalculatorFunctions::innerPlotGrid(Calculator& calculator, const Expression
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotRemoveCoordinateAxes(
+bool CalculatorFunctionsPlot::plotRemoveCoordinateAxes(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotRemoveCoordinateAxes");
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotRemoveCoordinateAxes");
   (void) input;
   Plot thePlotFinal;
   thePlotFinal.dimension = 2;
@@ -1132,10 +1132,10 @@ bool CalculatorFunctions::innerPlotRemoveCoordinateAxes(
   return output.assignValue(thePlotFinal, calculator);
 }
 
-bool CalculatorFunctions::innerPlotLabel(
+bool CalculatorFunctionsPlot::plotLabel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotLabel");
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotLabel");
   if (input.size() != 3) {
     return false;
   }
@@ -1156,10 +1156,10 @@ bool CalculatorFunctions::innerPlotLabel(
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotRectangle(
+bool CalculatorFunctionsPlot::plotRectangle(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotRectangle");
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotRectangle");
   if (input.size() != 3) {
     return false;
   }
@@ -1532,8 +1532,8 @@ bool CalculatorFunctions::innerRound(
   return false;
 }
 
-bool CalculatorFunctions::innerPlotPath(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotPath");
+bool CalculatorFunctionsPlot::plotPath(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotPath");
   if (input.size() < 3) {
     return false;
   }
@@ -1582,10 +1582,10 @@ bool CalculatorFunctions::innerPlotPath(Calculator& calculator, const Expression
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotMarkSegment(
+bool CalculatorFunctionsPlot::plotMarkSegment(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotMarkSegment");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotMarkSegment");
   if (input.size() < 3) {
     return false;
   }
@@ -1629,8 +1629,8 @@ bool CalculatorFunctions::innerPlotMarkSegment(
   return true;
 }
 
-bool CalculatorFunctions::innerPlotSegment(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotSegment");
+bool CalculatorFunctionsPlot::plotSegment(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSegment");
   if (input.size() < 3) {
     return false;
   }
@@ -2049,10 +2049,10 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerPlotSetProjectionScreenBasis(
+bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotSetProjectionScreenBasis");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSetProjectionScreenBasis");
   if (input.size() != 3) {
     return false;
   }
@@ -2074,8 +2074,8 @@ bool CalculatorFunctions::innerPlotSetProjectionScreenBasis(
   return output.assignValue(resultPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotCoordinateSystem");
+bool CalculatorFunctionsPlot::plotCoordinateSystem(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotCoordinateSystem");
   if (input.size() != 3) {
     return false;
   }
@@ -2116,8 +2116,8 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& calculator, cons
   return output.assignValue(resultPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotSurface(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotSurface");
+bool CalculatorFunctionsPlot::plotSurface(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSurface");
   PlotObject thePlot;
   bool found = false;
   for (int i = 0; i < input.size(); i ++) {

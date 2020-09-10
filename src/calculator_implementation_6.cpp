@@ -688,18 +688,18 @@ bool CalculatorFunctions::innerGetSummand(
   return output.makeXOX(calculator, calculator.opUnderscore(), theCommandSequence, calculator.expressionTwo());
 }
 
-bool CalculatorFunctions::innerPlotVectorField(Calculator& calculator, const Expression& input, Expression& output) {
-  return CalculatorFunctions::innerPlotDirectionOrVectorField(calculator, input, output, false);
+bool CalculatorFunctionsPlot::plotVectorField(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorFunctionsPlot::plotDirectionOrVectorField(calculator, input, output, false);
 }
 
-bool CalculatorFunctions::innerPlotDirectionField(Calculator& calculator, const Expression& input, Expression& output) {
-  return CalculatorFunctions::innerPlotDirectionOrVectorField(calculator, input, output, true);
+bool CalculatorFunctionsPlot::plotDirectionField(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorFunctionsPlot::plotDirectionOrVectorField(calculator, input, output, true);
 }
 
-bool CalculatorFunctions::innerPlotDirectionOrVectorField(
+bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   Calculator& calculator, const Expression& input, Expression& output, bool vectorsAreNormalized
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotDirectionOrVectorField");
+  MacroRegisterFunctionWithName("CalculatorFunctions::plotDirectionOrVectorField");
   (void) vectorsAreNormalized;
   if (input.size() < 5) {
     return output.makeError(
@@ -2743,10 +2743,10 @@ bool CalculatorFunctionsCrypto::showKnownObjectIds(
   return output.assignValue(ASNObject::toStringAllRecognizedObjectIds(), calculator);
 }
 
-bool CalculatorFunctions::innerTestASN1Decode(
+bool CalculatorFunctionsCrypto::testASN1Decode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestASN1Decode");
+  MacroRegisterFunctionWithName("CalculatorFunctions::testASN1Decode");
   if (input.size() != 2) {
     return false;
   }

@@ -36,6 +36,44 @@ public:
     const std::string& hashId,
     bool verbose
   );
+  static bool testASN1Decode(Calculator& calculator, const Expression& input, Expression& output);
+  static bool x509CertificateServer(Calculator& calculator, const Expression& input, Expression& output);
+  static bool x509CertificateDecode(Calculator& calculator, const Expression& input, Expression& output);
+};
+
+class CalculatorFunctionsPlot {
+public:
+  static bool plotCoordinateSystem(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotSetProjectionScreenBasis(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool plotSurface(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotImplicitFunctionFull(Calculator& calculator, const Expression& input, Expression& output, bool showGrid);
+  static bool plotImplicitFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotImplicitShowGridFunction(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotSegment(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotMarkSegment(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotPath(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotParametricCurve(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotDirectionField(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotVectorField(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotDirectionOrVectorField(
+    Calculator& calculator, const Expression& input, Expression& output, bool vectorsAreNormalized
+  );
+  static bool plotPolarRfunctionThetaExtended(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotPolarRfunctionTheta(Calculator& calculator, const Expression& input, Expression& output);
+  static bool isPlot(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plot2D(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plot2DOverIntervals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotFill(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotRectangle(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotRemoveCoordinateAxes(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotGrid(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotLabel(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotSetId(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotViewRectangle(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotViewWindow(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plotPoint(Calculator& calculator, const Expression& input, Expression& output);
+  static bool plot2DWithBars(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsTrigonometry {
@@ -107,9 +145,6 @@ public:
   static bool innerHexToInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHexToString(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTestASN1Decode(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerX509CertificateServer(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerX509CertificateDecode(Calculator& calculator, const Expression& input, Expression& output);
 
 
   static bool innerIntersection(Calculator& calculator, const Expression& input, Expression& output);
@@ -386,38 +421,6 @@ public:
 
   static bool innerMakeJavascriptExpressioN(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionMakeJavascriptExpression(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotCoordinateSystem(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotSetProjectionScreenBasis(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerPlotSurface(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotImplicitFunctionFull(Calculator& calculator, const Expression& input, Expression& output, bool showGrid);
-  static bool innerPlotImplicitFunction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotImplicitShowGridFunction(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotSegment(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotMarkSegment(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotPath(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotParametricCurve(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotDirectionField(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotVectorField(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotDirectionOrVectorField(
-    Calculator& calculator, const Expression& input, Expression& output, bool vectorsAreNormalized
-  );
-  static bool innerPlotPolarRfunctionThetaExtended(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotPolarRfunctionTheta(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIsPlot(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlot2D(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlot2DoverIntervals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotFill(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotRectangle(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotRemoveCoordinateAxes(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotGrid(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotLabel(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotSetId(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotViewRectangle(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotViewWindow(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlotPoint(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPlot2DWithBars(Calculator& calculator, const Expression& input, Expression& output);
-
   static bool innerContains(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExpressionLeafs(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLastElement(Calculator& calculator, const Expression& input, Expression& output);

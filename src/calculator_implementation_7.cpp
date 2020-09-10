@@ -5997,10 +5997,10 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& calculator, const Ex
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotViewWindow(
+bool CalculatorFunctionsPlot::plotViewWindow(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotViewWindow");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotViewWindow");
   if (input.size() < 3) {
     return false;
   }
@@ -6041,26 +6041,26 @@ bool CalculatorFunctions::innerPlotViewWindow(
   return output.assignValue(emptyPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotSetId(
+bool CalculatorFunctionsPlot::plotSetId(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotSetId");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotSetId");
   Plot emptyPlot;
   emptyPlot.priorityCanvasName = 1;
   emptyPlot.desiredHtmlHeightInPixels = 100;
   emptyPlot.desiredHtmlWidthInPixels = 100;
   std::string incomingName;
   if (!input.isOfType(&incomingName)) {
-   incomingName = input.toString();
+    incomingName = input.toString();
   }
   emptyPlot.setCanvasName(incomingName);
   return output.assignValue(emptyPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotViewRectangle(
+bool CalculatorFunctionsPlot::plotViewRectangle(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotViewRectangle");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotViewRectangle");
   if (input.size() < 3) {
     return false;
   }
@@ -6084,8 +6084,8 @@ bool CalculatorFunctions::innerPlotViewRectangle(
   return output.assignValue(emptyPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotFill(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotFill");
+bool CalculatorFunctionsPlot::plotFill(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotFill");
   if (input.size() < 3) {
     return false;
   }
@@ -6119,8 +6119,8 @@ bool CalculatorFunctions::innerPlotFill(Calculator& calculator, const Expression
   return output.assignValue(outputPlot, calculator);
 }
 
-bool CalculatorFunctions::innerIsPlot(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPlot");
+bool CalculatorFunctionsPlot::isPlot(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::isPlot");
   if (input.size() != 2) {
     return false;
   }
@@ -6130,8 +6130,8 @@ bool CalculatorFunctions::innerIsPlot(Calculator& calculator, const Expression& 
   return output.assignValue(0, calculator);
 }
 
-bool CalculatorFunctions::innerPlot2DoverIntervals(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlot2DoverIntervals");
+bool CalculatorFunctionsPlot::plot2DOverIntervals(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plot2DOverIntervals");
   if (input.size() < 3) {
     return false;
   }
@@ -6163,8 +6163,8 @@ bool CalculatorFunctions::innerPlot2DoverIntervals(Calculator& calculator, const
   return output.makeSum(calculator, finalSummands);
 }
 
-bool CalculatorFunctions::innerPlot2D(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlot2D");
+bool CalculatorFunctionsPlot::plot2D(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plot2D");
   if (input.size() < 4) {
     return output.makeError(
       "Plotting coordinates takes at least three arguments: function, lower and upper bound. ",
@@ -6324,8 +6324,8 @@ bool CalculatorFunctions::innerPlot2D(Calculator& calculator, const Expression& 
   return output.assignValue(thePlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlotPoint(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotPoint");
+bool CalculatorFunctionsPlot::plotPoint(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotPoint");
   if (input.size() != 3) {
     return output.makeError(
       "Plotting a point takes at least two arguments, location and color. ",
@@ -6369,8 +6369,8 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& calculator, const Expressio
   return output.assignValue(theFinalPlot, calculator);
 }
 
-bool CalculatorFunctions::innerPlot2DWithBars(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlot2DWithBars");
+bool CalculatorFunctionsPlot::plot2DWithBars(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plot2DWithBars");
   if (input.size() < 6) {
     return output.makeError(
       "Plotting coordinates takes the following arguments: lower function, "
@@ -6383,12 +6383,12 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& calculator, const Expr
   upperEplot.children.removeIndexShiftDown(1);
   Plot outputPlot;
   outputPlot.dimension = 2;
-  bool tempB = CalculatorFunctions::innerPlot2D(calculator, lowerEplot, output);
+  bool tempB = CalculatorFunctionsPlot::plot2D(calculator, lowerEplot, output);
   if (!tempB || !output.isOfType<Plot>(&outputPlot)) {
     return calculator << "<hr>Failed to get a plot from "
     << lowerEplot.toString() << ", not proceding with bar plot.";
   }
-  tempB = CalculatorFunctions::innerPlot2D(calculator, upperEplot, output);
+  tempB = CalculatorFunctionsPlot::plot2D(calculator, upperEplot, output);
   if (!tempB || !output.isOfType<Plot>()) {
     return calculator << "<hr>Failed to get a plot from "
     << upperEplot.toString() << ", not proceding with bar plot.";
@@ -6545,8 +6545,8 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& calculator, const Expr
   return output.assignValue(plotFinal, calculator);
 }
 
-bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotPolarRfunctionTheta");
+bool CalculatorFunctionsPlot::plotPolarRfunctionTheta(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotPolarRfunctionTheta");
   if (input.size() < 4) {
     return output.makeError(
       "Drawing polar coordinates takes at least three arguments: "
@@ -6558,7 +6558,7 @@ bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& calculator, c
     return calculator
     << "Parametric curve plots take 3+ arguments. The first argument gives "
     << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
-    << " the next two arguments stands for the variable range.";
+    << "the next two arguments stands for the variable range.";
   }
   if (input.hasBoundVariables()) {
     return false;
@@ -6594,10 +6594,10 @@ bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& calculator, c
   return true;
 }
 
-bool CalculatorFunctions::innerPlotPolarRfunctionThetaExtended(
+bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotPolarRfunctionThetaExtended");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended");
   if (input.size() < 4) {
     return output.makeError(
       "Drawing polar coordinates takes three arguments: "
@@ -6606,19 +6606,19 @@ bool CalculatorFunctions::innerPlotPolarRfunctionThetaExtended(
     );
   }
   Expression plotXYE, plotRthetaE;
-  if (!calculator.callCalculatorFunction(CalculatorFunctions::innerPlotPolarRfunctionTheta, input, plotXYE)) {
+  if (!calculator.callCalculatorFunction(CalculatorFunctionsPlot::plotPolarRfunctionTheta, input, plotXYE)) {
     return false;
   }
-  if (!calculator.callCalculatorFunction(CalculatorFunctions::innerPlot2D, input, plotRthetaE)) {
+  if (!calculator.callCalculatorFunction(CalculatorFunctionsPlot::plot2D, input, plotRthetaE)) {
     return false;
   }
   return output.makeXOX(calculator, calculator.opSequence(), plotXYE, plotRthetaE);
 }
 
-bool CalculatorFunctions::innerPlotParametricCurve(
+bool CalculatorFunctionsPlot::plotParametricCurve(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPlotParametricCurve");
+  MacroRegisterFunctionWithName("CalculatorFunctionsPlot::plotParametricCurve");
   if (input.size() < 4) {
     return calculator
     << "Parametric curve plots take 3+ arguments. The first argument gives "

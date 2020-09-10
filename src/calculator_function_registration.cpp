@@ -871,19 +871,19 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestASN1Decode",
-    CalculatorFunctions::innerTestASN1Decode,
+    CalculatorFunctionsCrypto::testASN1Decode,
     "",
     "Tests decoding of abstract syntax one. ",
     "%HideLHS\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n",
-    "CalculatorFunctions::innerTestASN1Decode",
+    "CalculatorFunctions::testASN1Decode",
     "TestASN1Decode",
     innerExperimental
   );
   this->addOperationHandler(
     "X509CertificateServerBase64",
-    CalculatorFunctions::innerX509CertificateServer,
+    CalculatorFunctionsCrypto::x509CertificateServer,
     "",
     "Returns the base 64 encoding of the X509 certificate of this server. ",
     "X509CertificateServerBase64 0; ",
@@ -893,13 +893,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "X509CertificateDecode",
-    CalculatorFunctions::innerX509CertificateDecode,
+    CalculatorFunctionsCrypto::x509CertificateDecode,
     "",
     "Decodes raw X509 certificate to a string. ",
     "%HideLHS\n"
     "X509CertificateDecode ConvertBase64ToString\n"
     "LoadFileIntoString(\"test/certificate_self_signed.pem\")",
-    "CalculatorFunctions::innerX509CertificateDecode",
+    "CalculatorFunctions::x509CertificateDecode",
     "X509CertificateDecode",
     innerStandard
   );
@@ -3216,7 +3216,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PlotDirectionField",
-    CalculatorFunctions::innerPlotDirectionField,
+    CalculatorFunctionsPlot::plotDirectionField,
     "",
     "Plots a direction field (in 2d for the time being, 3d coming soon). "
     "Direction field is like a vector field except that all vectors are "
@@ -3227,13 +3227,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "each direction line. "
     "Next arguments: color, line width. ",
     "PlotDirectionField( (- y, x), (- 2, - 2), (2, 2), (20, 20), 0.2, blue, 1);",
-    "CalculatorFunctions::innerPlotDirectionField",
+    "CalculatorFunctions::plotDirectionField",
     "PlotDirectionField",
     innerStandard
   );
   this->addOperationHandler(
     "PlotPolar",
-    CalculatorFunctions::innerPlotPolarRfunctionTheta,
+    CalculatorFunctionsPlot::plotPolarRfunctionTheta,
     "",
     "<b>Calculus teaching function.</b> Draws polar curve given in "
     "polar coordinates  in the form r = f(t), where t is the angle variable. "
@@ -3243,20 +3243,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPolar(1+sin  t, 0, \\pi);\n"
     "PlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    "CalculatorFunctions::innerPlotPolarRfunctionTheta",
+    "CalculatorFunctions::plotPolarRfunctionTheta",
     "PlotPolar",
     innerStandard
   );
   this->addOperationHandler(
     "PlotPolarExtended",
-    CalculatorFunctions::innerPlotPolarRfunctionThetaExtended,
+    CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended,
     "",
     "<b>Calculus teaching function.</b> Same as PlotPolar "
     "but also produces a graph in the (rho,theta)-plane. ",
     "PlotPolarExtended(1 + sin  t, 0, \\pi);\n"
     "PlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )\n"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    "CalculatorFunctions::innerPlotPolarRfunctionThetaExtended",
+    "CalculatorFunctions::plotPolarRfunctionThetaExtended",
     "PlotPolarExtended",
     innerStandard
   );
@@ -3328,7 +3328,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PlotImplicit",
-    CalculatorFunctions::innerPlotImplicitFunction,
+    CalculatorFunctionsPlot::plotImplicitFunction,
     "",
     "Plots implicitly a curve given by the zeros of an expression in the letters "
     "x and y. The relation between x and y is "
@@ -3344,47 +3344,47 @@ void Calculator::initPredefinedInnerFunctions() {
     "of triangles to use (max =20000, default =2000). "
     "The triangle used to generate the implicit plot is algorithmically chosen.",
     "PlotImplicit((x - 1) (y - 1) - ((x - 1)^2 (y - 1) + 1)^2, (- 2, - 2), (2, 2), (10, 10))",
-    "CalculatorFunctions::innerPlotImplicitFunction",
+    "CalculatorFunctions::plotImplicitFunction",
     "PlotImplicit",
     innerStandard
   );
   this->addOperationHandler(
     "PlotImplicitShowGrid",
-    CalculatorFunctions::innerPlotImplicitShowGridFunction,
+    CalculatorFunctionsPlot::plotImplicitShowGridFunction,
     "",
     "Same as plotImplicit but shows the underlying grid. "
     "The yellow grid is the initial one (specified by the user), "
     "and the gray grid is obtained by a subdivision which depends on the concrete function.",
     "PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10))",
-    "CalculatorFunctions::innerPlotImplicitShowGridFunction",
+    "CalculatorFunctions::plotImplicitShowGridFunction",
     "PlotImplicitShowGrid",
     innerStandard
   );
   this->addOperationHandler(
     "PlotCoordinateSystem",
-    CalculatorFunctions::innerPlotCoordinateSystem,
+    CalculatorFunctionsPlot::plotCoordinateSystem,
     "",
     "Plots a 3d coordinate system, fitting in a box given by two opposite corners.  ",
     "PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4));",
-    "CalculatorFunctions::innerPlotCoordinateSystem",
+    "CalculatorFunctions::plotCoordinateSystem",
     "PlotCoordinateSystem",
     innerStandard
   );
   this->addOperationHandler(
     "PlotSetProjectionScreen",
-    CalculatorFunctions::innerPlotSetProjectionScreenBasis,
+    CalculatorFunctionsPlot::plotSetProjectionScreenBasis,
     "",
     "Set the projection screen. Input: two 3d vectors "
     "that give the 2d-basis of the viewing screen. ",
     "PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2))\n"
     "+ PlotSetProjectionScreen((1, 0, - 0.1), (0, 1, - 0.2))",
-    "CalculatorFunctions::innerPlotSetProjectionScreenBasis",
+    "CalculatorFunctions::plotSetProjectionScreenBasis",
     "PlotSetProjectionScreen",
     innerStandard
   );
   this->addOperationHandler(
     "PlotSurface",
-    CalculatorFunctions::innerPlotSurface,
+    CalculatorFunctionsPlot::plotSurface,
     "",
     " Plots a surface. ",
     "%HideLHS x = (R+v*cos(u/2))*cos(u);\n"
@@ -3401,13 +3401,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotSurface(\n"
     "( x + 2, z, y), u \\in (0, 2 \\pi), v \\in (- r,r), \n"
     "color1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
-    "CalculatorFunctions::innerPlotSurface",
+    "CalculatorFunctions::plotSurface",
     "PlotSurface",
     innerStandard
   );
   this->addOperationHandler(
     "PlotCurve",
-    CalculatorFunctions::innerPlotParametricCurve,
+    CalculatorFunctionsPlot::plotParametricCurve,
     "",
     "Plots a curve sitting in 2-dimensional space. "
     "The first and second argument give the x and y "
@@ -3419,48 +3419,48 @@ void Calculator::initPredefinedInnerFunctions() {
     "a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\n"
     "b = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\n"
     "PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
-    "CalculatorFunctions::innerPlotParametricCurve",
+    "CalculatorFunctions::plotParametricCurve",
     "PlotCurve",
     innerStandard
   );
   this->addOperationHandler(
     "PlotSegment",
-    CalculatorFunctions::innerPlotSegment,
+    CalculatorFunctionsPlot::plotSegment,
     "",
     "Plots a segment connecting two points. ",
     "PlotSegment( (1,2), (3,4))",
-    "CalculatorFunctions::innerPlotSegment",
+    "CalculatorFunctions::plotSegment",
     "PlotSegment",
     innerStandard
   );
   this->addOperationHandler(
     "PlotMarkSegment",
-    CalculatorFunctions::innerPlotMarkSegment,
+    CalculatorFunctionsPlot::plotMarkSegment,
     "",
     "Plots a segment mark. ",
     "PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))",
-    "CalculatorFunctions::innerPlotMarkSegment",
+    "CalculatorFunctions::plotMarkSegment",
     "PlotMarkSegment",
     innerStandard
   );
   this->addOperationHandler(
     "PlotPath",
-    CalculatorFunctions::innerPlotPath,
+    CalculatorFunctionsPlot::plotPath,
     "",
     "Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. ",
     "PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
-    "CalculatorFunctions::innerPlotPath",
+    "CalculatorFunctions::plotPath",
     "PlotPath",
     innerStandard
   );
   this->addOperationHandler(
     "PlotSetId",
-    CalculatorFunctions::innerPlotSetId,
+    CalculatorFunctionsPlot::plotSetId,
     "",
     "Creates an empty plot with a given canvas id. "
     "If you add a nameless plot to a named one the the resulting plot acquires the canvas id. ",
     "PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
-    "CalculatorFunctions::innerPlotSetId",
+    "CalculatorFunctions::plotSetId",
     "PlotSetId",
     innerStandard
   );
@@ -3508,30 +3508,30 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PlotPoint",
-    CalculatorFunctions::innerPlotPoint,
+    CalculatorFunctionsPlot::plotPoint,
     "",
     "<b>Calculus teaching function.</b> Plots a point from x and y coordinate. ",
     "PlotPoint{}((1,2),blue)",
-    "CalculatorFunctions::innerPlotPoint",
+    "CalculatorFunctions::plotPoint",
     "PlotPoint",
     innerStandard
   );
   this->addOperationHandler(
     "Plot2D",
-    CalculatorFunctions::innerPlot2DoverIntervals,
+    CalculatorFunctionsPlot::plot2DOverIntervals,
     "",
     "If the second argument is a union of intervals, "
     "replaces the plot command with a sum of Plot2d's in which "
     "the second and third argument are extracted from each of the intervals. ",
     "%UseBracketForIntervals\n"
     "Plot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8)",
-    "CalculatorFunctions::innerPlot2DoverIntervals",
+    "CalculatorFunctions::plot2DOverIntervals",
     "Plot2DoverIntervals",
     innerStandard
   );
   this->addOperationHandler(
     "Plot2D",
-    CalculatorFunctions::innerPlot2D,
+    CalculatorFunctionsPlot::plot2D,
     "",
     "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form "
     "y = f(x). The the second and third argument give the upper and "
@@ -3541,76 +3541,76 @@ void Calculator::initPredefinedInnerFunctions() {
     "Next argument gives number of sample points. "
     "Plots may be added together- adding plots superimposes the plots. ",
     "Plot2D{}(\\sin{}x +cos{}x, 0, 5, \"blue\",2,8)",
-    "CalculatorFunctions::innerPlot2D",
+    "CalculatorFunctions::plot2D",
     "Plot2D",
     innerStandard
   );
   this->addOperationHandler(
     "IsPlot",
-    CalculatorFunctions::innerIsPlot,
+    CalculatorFunctionsPlot::isPlot,
     "",
     "Returns 1 if the argument is a plot, 0 otherwise.",
     "%UseBracketForIntervals \n"
     "IsPlot( Plot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8))",
-    "CalculatorFunctions::innerIsPlot",
+    "CalculatorFunctions::isPlot",
     "IsPlot",
     innerStandard
   );
   this->addOperationHandler(
     "PlotFill",
-    CalculatorFunctions::innerPlotFill,
+    CalculatorFunctionsPlot::plotFill,
     "",
     "Fills a plot with color. ",
     "PlotFill(Plot2D{}(sqrt(1 - x^2), - 1, 1, \"blue\", 2) + Plot2D(- sqrt(1 - x^2), - 1, 1), \"blue\")",
-    "CalculatorFunctions::innerPlotFill",
+    "CalculatorFunctions::plotFill",
     "PlotFill",
     innerStandard
   );
   this->addOperationHandler(
     "PlotRectangle",
-    CalculatorFunctions::innerPlotRectangle,
+    CalculatorFunctionsPlot::plotRectangle,
     "",
     "Plots a rectangle. "
     "Arguments format: "
     "PlotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), (width, height)).",
     "PlotRectangle{}((1, 2), (2, 1))",
-    "CalculatorFunctions::innerPlotRectangle",
+    "CalculatorFunctions::plotRectangle",
     "PlotRectangle",
     innerStandard
   );
   this->addOperationHandler(
     "PlotGrid",
-    CalculatorFunctions::innerPlotGrid,
+    CalculatorFunctionsPlot::plotGrid,
     "",
     "Tells the plot to show axes ticks. Takes as input dummy (non-used) argument. ",
     "PlotGrid{}(0)",
-    "CalculatorFunctions::innerPlotGrid",
+    "CalculatorFunctionsPlot::plotGrid",
     "PlotGrid",
     innerStandard
   );
   this->addOperationHandler(
     "PlotRemoveCoordinateAxes",
-    CalculatorFunctions::innerPlotRemoveCoordinateAxes,
+    CalculatorFunctionsPlot::plotRemoveCoordinateAxes,
     "",
     "Removes the coordinate axes from a plot. ",
     "PlotRemoveCoordinateAxes{}(0)",
-    "CalculatorFunctions::innerPlotRemoveCoordinateAxes",
+    "CalculatorFunctionsPlot::plotRemoveCoordinateAxes",
     "PlotRemoveCoordinateAxes",
     innerStandard
   );
   this->addOperationHandler(
     "PlotLabel",
-    CalculatorFunctions::innerPlotLabel,
+    CalculatorFunctionsPlot::plotLabel,
     "",
     "Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), \"Label\"). ",
     "PlotLabel{}((1,1), \"(1,1)\")",
-    "CalculatorFunctions::innerPlotLabel",
+    "CalculatorFunctionsPlot::plotLabel",
     "PlotLabel",
     innerStandard
   );
   this->addOperationHandler(
     "PlotViewRectangle",
-    CalculatorFunctions::innerPlotViewRectangle,
+    CalculatorFunctionsPlot::plotViewRectangle,
     "",
     "Creates an empty plot whose sole purpose is to fix "
     "the view rectangle of another plot. "
@@ -3620,13 +3620,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "left corner of the viewing rectangle, "
     "the second argument gives the upper right corner.",
     "Plot2D{}(1/x, -30, 30, \"red\") + PlotViewRectangle((-5,-5), (5,5))",
-    "CalculatorFunctions::PlotViewRectangle",
+    "CalculatorFunctionsPlot::PlotViewRectangle",
     "PlotViewRectangle",
     innerStandard
   );
   this->addOperationHandler(
     "PlotWindow",
-    CalculatorFunctions::innerPlotViewWindow,
+    CalculatorFunctionsPlot::plotViewWindow,
     "",
     "Creates an empty plot whose sole purpose is to fix the dimensions "
     "(in pixels) of the image in the format "
@@ -3634,19 +3634,19 @@ void Calculator::initPredefinedInnerFunctions() {
     "To modify the dimensions (in pixels) of another plot, "
     "add to it the PlotWindow ``plot''. ",
     "Plot2D{}(1/x, -30, 30, \"red\") + PlotWindow(400,400) + PlotViewRectangle((-5,-5), (5,5))",
-    "CalculatorFunctions::innerPlotWindow",
+    "CalculatorFunctionsPlot::innerPlotWindow",
     "PlotWindow",
     innerStandard
   );
   this->addOperationHandler(
     "Plot2DWithBars",
-    CalculatorFunctions::innerPlot2DWithBars,
+    CalculatorFunctionsPlot::plot2DWithBars,
     "",
     "<b>Calculus teaching function.</b> Same as plot2D but plots two "
     "functions with bars locked between the two functions, "
     "used to illustrate approximations to definite integrals.",
     "\nA =3/2- ((-3/4+ 1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nPlot2DWithBars{}(A, B, 0, 5, 1)",
-    "CalculatorFunctions::innerPlot2DWithBars",
+    "CalculatorFunctionsPlot::plot2DWithBars",
     "Plot2DWithBars",
     innerStandard
   );

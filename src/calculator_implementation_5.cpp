@@ -486,10 +486,10 @@ bool CalculatorConversions::functionMatrixDouble(
   return output.assignMatrix(theMat, calculator);
 }
 
-bool CalculatorFunctions::innerIntegratePullConstant(
+bool CalculatorFunctionsIntegration::integratePullConstant(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegratePullConstant");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integratePullConstant");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
@@ -505,10 +505,10 @@ bool CalculatorFunctions::innerIntegratePullConstant(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
+bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
@@ -550,10 +550,10 @@ bool CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
+bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateXpowerNePowerAx");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateXpowerNePowerAx");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
@@ -614,10 +614,10 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
+bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;
@@ -657,10 +657,10 @@ bool CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
+bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateDefiniteIntegral");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateDefiniteIntegral");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.isDefiniteIntegralOverIntervalFdx(&theVariableE, &theFunctionE, &theSetE)) {
     return false;

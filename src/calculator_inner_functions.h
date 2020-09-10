@@ -91,6 +91,31 @@ public:
   static bool arctan(Calculator& calculator, const Expression& input, Expression& output);
 };
 
+class CalculatorFunctionsIntegration {
+public:
+  static bool integrateRationalFunctionSplitToBuidingBlocks(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateRationalFunctionBuidingBlockIa(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateRationalFunctionBuidingBlockIb(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateRationalFunctionBuidingBlockIIaandIIIa(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool integrateRationalFunctionBuidingBlockIIb(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateRationalFunctionBuidingBlockIIIb(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateDefiniteIntegral(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integratePowerByUncoveringParenthesisFirst(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateSum(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integratePullImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateXnDiffX(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integratePullConstant(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateSqrtOneMinusXsquared(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateSqrtXsquaredMinusOne(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateXpowerNePowerAx(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool integrateEpowerAxDiffX(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateSinPowerNCosPowerM(Calculator& calculator, const Expression& input, Expression& output);
+
+};
+
 class CalculatorFunctions {
 public:
   static bool leftIntervalGreaterThanRight(const Expression& left, const Expression& right);
@@ -336,16 +361,6 @@ public:
   static bool innerDifferentialOfPolynomial(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIa(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIb(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& calculator, const Expression& input, Expression& output);
-
   static bool extractQuadraticCoeffsWRTvariable(
     const Expression& theQuadratic,
     const Expression& theVariable,
@@ -359,19 +374,6 @@ public:
     Expression& outputCoeffLinTerm,
     Expression& outputConstTerm
   );
-
-  static bool innerIntegrateDefiniteIntegral(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateSum(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegratePullImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateXnDiffX(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegratePullConstant(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateSqrtOneMinusXsquared(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateSqrtXsquaredMinusOne(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateXpowerNePowerAx(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerIntegrateEpowerAxDiffX(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateSinPowerNCosPowerM(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerExploitCosEvenness(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExploitSinOddness(Calculator& calculator, const Expression& input, Expression& output);

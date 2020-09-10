@@ -3951,10 +3951,10 @@ bool CalculatorFunctions::outerPolynomializE(Calculator& calculator, const Expre
   return CalculatorFunctions::functionPolynomialize(calculator, input[1], output);
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::functionIntegrateRationalFunctionSplitToBuidingBlocks");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::functionIntegrateRationalFunctionSplitToBuidingBlocks");
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
@@ -3970,7 +3970,7 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
   }
   if (!theComputation.inpuTE.isOfType<RationalFunction<Rational> >()) {
     return calculator
-    << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
+    << "<hr>CalculatorFunctions::integrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
     << theFunctionE.toString() << " to rational function. "
     << "Attempt to converted expression yielded: " << theComputation.inpuTE.toString();
@@ -4061,10 +4061,10 @@ bool CalculatorFunctions::innerConstTermRelative(Calculator& calculator, const E
   return false;
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE)) {
     return false;
@@ -4096,10 +4096,10 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE)) {
     return false;
@@ -4202,10 +4202,10 @@ bool CalculatorFunctions::extractLinearCoeffsWRTvariable(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa");
   Expression theFunctionE, x;
   if (!input.isIndefiniteIntegralFdx(&x, &theFunctionE)) {
     return false;
@@ -4225,13 +4225,17 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
     !a.isConstantNumber() || !b.isConstantNumber() || !c.isConstantNumber()||
     !A.isConstantNumber() || !B.isConstantNumber()
   ) {
-    return calculator << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
-    << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ", "
+    return calculator << "<hr>Failed to evaluate to constant "
+    << "the coefficients of the block IIa and IIIa integral. "
+    << "The coefficients are: " << a.toString()
+    << ", " << b.toString() << ", " << c.toString() << ", "
     << A.toString() << ", " << B.toString() << ". ";
   }
   double approxa, approxb, approxc;
   if (!a.evaluatesToDouble(&approxa) || !b.evaluatesToDouble(&approxb) || !c.evaluatesToDouble(&approxc)) {
-    return calculator << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
+    return calculator
+    << "<hr>Failed to evaluate "
+    << "variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
   }
   if (approxb*approxb >= approxa * approxc * 4) {
@@ -4265,10 +4269,10 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb");
   Expression theFunctionE, x, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&x, &theFunctionE, &integrationSetE)) {
     return false;
@@ -4334,10 +4338,10 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
+bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb");
   Expression theFunctionE, x, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&x, &theFunctionE, &integrationSetE)) {
     return false;
@@ -4415,10 +4419,10 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst(
+bool CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst");
   Expression theFunctionE, integrandE, newIntegralE, theVariableE, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
@@ -4465,10 +4469,10 @@ bool Expression::makeIntegral(
   return this->addChildOnTop(theDiffForm);
 }
 
-bool CalculatorFunctions::innerIntegratePullImaginaryUnit(
+bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegratePullImaginaryUnit");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integratePullImaginaryUnit");
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
@@ -4497,8 +4501,8 @@ bool CalculatorFunctions::innerIntegratePullImaginaryUnit(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateSum(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSum");
+bool CalculatorFunctionsIntegration::integrateSum(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSum");
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
@@ -4529,8 +4533,8 @@ bool CalculatorFunctions::innerIntegrateSum(Calculator& calculator, const Expres
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateXnDiffX(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateXnDiffX");
+bool CalculatorFunctionsIntegration::integrateXnDiffX(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateXnDiffX");
   Expression theFunctionE, theVariableE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE)) {
     return false;
@@ -4572,10 +4576,10 @@ bool CalculatorFunctions::innerIntegrateXnDiffX(Calculator& calculator, const Ex
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
+bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateSinPowerNCosPowerM");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM");
   Expression theFunctionE, theVariableE, integrationSet;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSet)) {
     return false;
@@ -4998,10 +5002,10 @@ bool CalculatorFunctions::innerEulerFormulaAsLaw(
   return true;
 }
 
-bool CalculatorFunctions::innerIntegrateEpowerAxDiffX(
+bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateEpowerAxDiffX");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateEpowerAxDiffX");
   Expression theFunctionE, theVariableE;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE)) {
     return false;

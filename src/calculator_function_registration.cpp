@@ -1639,81 +1639,81 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateDefiniteIntegral,
+    CalculatorFunctionsIntegration::integrateDefiniteIntegral,
     "",
     "Integrates a definite integral.  ",
     "\\int_{1}^2 (x^2+x) dx ",
-    "CalculatorFunctions::innerIntegrateDefiniteIntegral",
+    "CalculatorFunctionsIntegration::integrateDefiniteIntegral",
     "DefiniteIntegral",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst,
+    CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst,
     "",
     "Attempts to rearrange into standard polynomial form and then integrate.  ",
     "\\int \\left( \\frac{x(x + 1)}{2} \\right)^2 dx ",
-    "CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst",
+    "CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst",
     "IntegrateAfterPolynomialization",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateXnDiffX,
+    CalculatorFunctionsIntegration::integrateXnDiffX,
     "",
     "Integrates x^n dx. ",
     "\\int x dx ",
-    "CalculatorFunctions::innerIntegrateXnDiffX",
+    "CalculatorFunctionsIntegration::integrateXnDiffX",
     "IntegratePowerRule",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateEpowerAxDiffX,
+    CalculatorFunctionsIntegration::integrateEpowerAxDiffX,
     "",
     "If a is a number, integrates e^{a x} dx. ",
     "\\int x dx ",
-    "CalculatorFunctions::innerIntegrateEpowerAxDiffX",
+    "CalculatorFunctionsIntegration::integrateEpowerAxDiffX",
     "IntegrateEpowerX",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegratePullConstant,
+    CalculatorFunctionsIntegration::integratePullConstant,
     "",
     "Pulls out constants from integrals  ",
     "\\int 2\\sqrt{2-x^2} dx ",
-    "CalculatorFunctions::innerIntegratePullConstant",
+    "CalculatorFunctionsIntegration::integratePullConstant",
     "IntegratePullConstant",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateSqrtOneMinusXsquared,
+    CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared,
     "",
     "Integrates \\int \\sqrt{a-x^2}dx, a > 0.",
     "\\int 2\\sqrt{2-x^2} dx ",
-    "CalculatorFunctions::innerIntegrateSqrtOneminusXsquared",
+    "CalculatorFunctionsIntegration::innerIntegrateSqrtOneminusXsquared",
     "IntegrateSqrtOneminusXsquared",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne,
+    CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne,
     "",
     "Integrates \\int \\sqrt{x^2-a}dx, a > 0.  ",
     "\\int 2\\sqrt{3x^2-5} dx ",
-    "CalculatorFunctions::innerIntegrateSqrtXsquaredMinusOne",
+    "CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne",
     "IntegrateSqrtXsquaredMinusOne",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateXpowerNePowerAx,
+    CalculatorFunctionsIntegration::integrateXpowerNePowerAx,
     "",
     "Integrates by parts \\int x^n e^{a x} dx, where n is a positive integer.  ",
     "\\int 2 x^{3} e^{5x} dx ",
-    "CalculatorFunctions::innerIntegrateXpowerNePowerAx",
+    "CalculatorFunctionsIntegration::integrateXpowerNePowerAx",
     "IntegrateXpowerNePowerAx",
     innerStandard
   );
@@ -1825,11 +1825,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateSinPowerNCosPowerM,
+    CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM,
     "",
     "Solves/transforms an integral of the form \\int \\sin^n x \\cos^m x. ",
     "\\int \\sin^{4}x \\cos^{6}x dx ",
-    "CalculatorFunctions::innerIntegrateSinPowerNCosPowerM",
+    "CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM",
     "IntegrateSinPowerNCosPowerM",
     innerStandard
   );
@@ -1846,22 +1846,22 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateSum,
+    CalculatorFunctionsIntegration::integrateSum,
     "",
     "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. "
     "If successful, integrates the sum in the obvious way.",
     "\\int (x + 1+\\sqrt{}2) dx ",
-    "CalculatorFunctions::innerIntegrateSum",
+    "CalculatorFunctionsIntegration::integrateSum",
     "IntegrateSum",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegratePullImaginaryUnit,
+    CalculatorFunctionsIntegration::integratePullImaginaryUnit,
     "",
     "Pulls out the imaginary unit in front of the integral. ",
     "\\int i 3 e^{i x} dx ",
-    "CalculatorFunctions::innerIntegratePullImaginaryUnit",
+    "CalculatorFunctionsIntegration::integratePullImaginaryUnit",
     "IntegratePullOutImaginaryUnit",
     innerStandard
   );
@@ -1879,61 +1879,61 @@ void Calculator::initPredefinedInnerFunctions() {
   //else we risk infinite substitution cycle. The reasons are implementation-specific.
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa,
     "",
     "Integrates building block Ia.  ",
     "\\int (\\frac{3}{(x / 2 - 1)}) dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIa",
     "IntegrateBlockIa",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb,
     "",
     "Integrates building block Ib.  ",
     "\\int (\\frac{2}{(3x- 1)^2}) dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb",
     "IntegrateBlockIb",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa,
     "",
     "Integrates building blocks IIa and IIIa.  ",
     "\\int (\\frac{3x + 2}{x^2 + x + 1}) dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIaandIIIa",
     "IntegrateBlockIIaIIIa",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb,
     "",
     "Integrates building blocks IIIb.  ",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb",
     "IntegrateBlockIIIb",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb,
+    CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb,
     "",
     "Integrates building blocks IIb.  ",
     "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb",
     "IntegrateBlockIIb",
     innerStandard
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks,
+    CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks,
     "",
     "Attempts to split an integral of a rational function into building block integrals. ",
     "\\int \\frac{1}{x(x + 1)} dx ",
-    "CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks",
+    "CalculatorFunctionsIntegration::integrateRationalFunctionSplitToBuidingBlocks",
     "IntegratePartialFractions",
     innerStandard
   );

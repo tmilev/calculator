@@ -312,8 +312,8 @@ public:
 
   static bool innerIsPrimeMillerRabin(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsPossiblyPrime(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLCM(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGCD(Calculator& calculator, const Expression& input, Expression& output);
+  static bool leastCommonMultipleInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool greatestCommonDivisorInteger(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& calculator, const Expression& input, Expression& output);
   //static bool innerGramSchmidtVerbose(Calculator& calculator, const Expression& input, Expression& output);
@@ -437,13 +437,6 @@ public:
   static bool innerEvaluateToDoublE(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionEvaluateToDouble(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEmbedSemisimpleAlgebraInSemisimpleAlgebra(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerWeylDimFormula(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDecomposeCharGenVerma(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool innerParabolicWeylGroups(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerParabolicWeylGroupsBruhatGraph(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerAllPartitions(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerAllVectorPartitions(Calculator& calculator, const Expression& input, Expression& output);
@@ -484,18 +477,6 @@ public:
   static bool functionSplitToPartialFractionsOverAlgebraicReals(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTestTopCommand(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRootSAsAndSltwos(
-    Calculator& calculator, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
-  );
-  static bool innerPrintRootSAs(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerRootSAsAndSltwos(calculator, input, output, false, false);
-  }
-  static bool innerPrintRootSAsForceRecompute(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerRootSAsAndSltwos(calculator, input, output, false, true);
-  }
-  static bool innerPrintSltwos(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerRootSAsAndSltwos(calculator, input, output, true, false);
-  }
   static bool innerFindProductDistanceModN(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSolveProductSumEquationOverSetModN(Calculator& calculator, const Expression& input, Expression& output);
 

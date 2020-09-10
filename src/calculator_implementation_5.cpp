@@ -1708,8 +1708,10 @@ bool CalculatorFunctions::innerThaw(Calculator& calculator, const Expression& in
   return false;
 }
 
-bool CalculatorFunctions::innerLCM(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLCM");
+bool CalculatorFunctions::leastCommonMultipleInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::leastCommonMultipleInteger");
   if (input.size() < 3) {
     return false;
   }
@@ -1734,8 +1736,10 @@ bool CalculatorFunctions::innerLCM(Calculator& calculator, const Expression& inp
   return output.assignValue(theResult, calculator);
 }
 
-bool CalculatorFunctions::innerGCD(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGCD");
+bool CalculatorFunctions::greatestCommonDivisorInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::greatestCommonDivisorInteger");
   if (input.size() < 3) {
     return false;
   }

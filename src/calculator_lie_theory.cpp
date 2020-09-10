@@ -1,4 +1,5 @@
 #include "calculator_lie_theory.h"
+#include "calculator_inner_typed_functions.h"
 #include "math_extra_differential_operators.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
@@ -1803,4 +1804,400 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOnly(
 ) {
   BranchingData theG2B3Data;
   return CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
+}
+
+
+bool CalculatorLieTheory::rootSAsAndSltwos(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool showSLtwos,
+  bool MustRecompute
+) {
+  MacroRegisterFunctionWithName("Calculator::rootSAsAndSltwos");
+  if (input.size() != 2) {
+    return calculator << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
+  }
+  WithContext<SemisimpleLieAlgebra*> ownerSS;
+  if (!calculator.convert(
+    input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    ownerSS
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  FormatExpressions theFormat;
+  theFormat.flagUseHTML = true;
+  theFormat.flagUseLatex = false;
+  theFormat.flagUsePNG = true;
+
+  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
+
+  std::string displayFolder = ownerSS.content->toStringDisplayFolderName("");
+
+  outSltwoMainFile << displayFolder << ownerSS.content->toStringFileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << ownerSS.content->toStringFileNameNoPathRootSubalgebras();
+  if (
+    !FileOperations::fileExistsVirtual(outSltwoMainFile.str()) ||
+    !FileOperations::fileExistsVirtual(outRootHtmlFileName.str())
+  ) {
+    MustRecompute = true;
+  }
+  std::stringstream out;
+  if (MustRecompute) {
+    SltwoSubalgebras theSl2s(*ownerSS.content);
+    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
+    ownerSS.content->FindSl2Subalgebras(*ownerSS.content, theSl2s);
+    theSl2s.toHTML(&theFormat);
+  } else {
+    out << "The table is precomputed and served from the hard disk. <br>";
+  }
+  out << "<a href=\""
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
+  << "\" target = \"_blank\">"
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
+  return output.assignValue(out.str(), calculator);
+}
+
+
+bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
+  if (!input.isListNElements(5)) {
+    return output.makeError(
+      "Function decompose finite-dimensional part of "
+      "generalized Verma over Levi expects 4 arguments.",
+      calculator
+    );
+  }
+  const Expression& typeNode = input[1];
+  const Expression& weightNode = input[2];
+  const Expression& inducingParNode = input[3];
+  const Expression& splittingParNode = input[4];
+  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
+  if (!calculator.convert(
+    typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    ownerSSPointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  Vector<RationalFunction<Rational> > theWeightFundCoords;
+  Vector<Rational> inducingParSel, splittingParSel;
+  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
+  WeylGroupData& theWeyl = ownerSS.theWeyl;
+  int theDim = ownerSS.getRank();
+  ExpressionContext finalContext(calculator);
+  if (!calculator.getVector<RationalFunction<Rational> >(
+    weightNode,
+    theWeightFundCoords,
+    &finalContext,
+    theDim,
+    CalculatorConversions::functionRationalFunction
+  )) {
+    return output.makeError("Failed to extract highest weight from the second argument.", calculator);
+  }
+  if (!calculator.getVector<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, nullptr)) {
+    return output.makeError("Failed to extract parabolic selection from the third argument", calculator);
+  }
+  if (!calculator.getVector<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, nullptr)) {
+    return output.makeError("Failed to extract parabolic selection from the fourth argument", calculator);
+  }
+  calculator << "Your input weight in fundamental coordinates: " << theWeightFundCoords.toString();
+  calculator << "<br>Your input weight in simple coordinates: "
+  << theWeyl.getSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
+  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
+  << "<br>The parabolic subalgebra I should split over: " << splittingParSel.toString() << ".";
+  ModuleSSalgebra<RationalFunction<Rational> > theMod;
+  Selection selInducing = inducingParSel;
+  Selection selSplittingParSel = splittingParSel;
+  theMod.makeFromHW(ownerSS, theWeightFundCoords, selInducing, 1, 0, nullptr, false);
+  std::string report;
+  theMod.splitOverLevi(&report, selSplittingParSel);
+  return output.assignValue(report, calculator);
+}
+
+bool CalculatorLieTheory::parabolicWeylGroups(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::parabolicWeylGroups");
+  if (input.size() != 2) {
+    return false;
+  }
+  Selection selectionParSel;
+  WithContext<SemisimpleLieAlgebra*> theSSPointer;
+  if (!calculator.convert(
+    input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theSSPointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra& theSSalgebra = *theSSPointer.content;
+  int numCycles = MathRoutines::twoToTheNth(selectionParSel.numberOfElements);
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
+  std::stringstream out;
+  for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
+    theSubgroup.makeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
+    out << "<hr>" << HtmlRoutines::getMathNoDisplay(theSubgroup.toString());
+  }
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::weylDimFormula(Calculator& calculator, const Expression& input, Expression& output) {
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
+  if (input.size() != 3) {
+    return output.makeError("This function takes 2 arguments", calculator);
+  }
+  WithContext<SemisimpleLieAlgebra*> theSSowner;
+  if (!calculator.convert(
+    input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theSSowner
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  Vector<RationalFunction<Rational> > theWeight;
+  if (!calculator.getVector<RationalFunction<Rational> >(
+    input[2],
+    theWeight,
+    &theSSowner.context,
+    theSSowner.content->getRank(),
+    CalculatorConversions::functionRationalFunction
+  )) {
+    return output.makeError(
+      "Failed to convert the argument of the function to a highest weight vector",
+      calculator
+    );
+  }
+  RationalFunction<Rational> rfOne;
+  rfOne.makeOne();
+  Vector<RationalFunction<Rational> > theWeightInSimpleCoords;
+  FormatExpressions theFormat;
+  theSSowner.context.getFormat(theFormat);
+  theWeightInSimpleCoords = theSSowner.content->theWeyl.getSimpleCoordinatesFromFundamental(theWeight);
+  calculator << "<br>Weyl dim formula input: simple coords: "
+  << theWeightInSimpleCoords.toString(&theFormat)
+  << ", fundamental coords: " << theWeight.toString(&theFormat);
+  RationalFunction<Rational> tempRF = theSSowner.content->theWeyl.weylDimensionFormulaSimpleCoordinates(theWeightInSimpleCoords);
+  return output.assignValueWithContext(tempRF, theSSowner.context, calculator);
+}
+
+bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::parabolicWeylGroupsBruhatGraph");
+  RecursionDepthCounter theRecursion(&calculator.recursionDepth);
+  Selection parabolicSel;
+  Vector<RationalFunction<Rational> > theHWfundcoords, tempRoot, theHWsimplecoords;
+  WithContext<SemisimpleLieAlgebra*> theSSalgPointer;
+  if (!calculator.getTypeHighestWeightParabolic(
+    calculator,
+    input,
+    output,
+    theHWfundcoords,
+    parabolicSel,
+    theSSalgPointer,
+    CalculatorConversions::functionRationalFunction
+  )) {
+    return output.makeError("Failed to extract highest weight vector data", calculator);
+  } else {
+    if (output.isError()) {
+      return true;
+    }
+  }
+  SemisimpleLieAlgebra& theSSalgebra = *theSSalgPointer.content;
+
+  WeylGroupData& theAmbientWeyl = theSSalgebra.theWeyl;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
+  std::stringstream out;
+  if (!theSubgroup.makeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500)) {
+    return output.makeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", calculator);
+  }
+  theSubgroup.findQuotientRepresentatives(2000);
+  out << "<br>Number elements of the coset: "
+  << theSubgroup.RepresentativesQuotientAmbientOrder.size;
+  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.allElements.size;
+  out << "<br>Number of elements of the ambient Weyl: "
+  << theSubgroup.ambientWeyl->theGroup.theElements.size;
+  FormatExpressions theFormat;
+  theSSalgPointer.context.getFormat(theFormat);
+  if (theSubgroup.allElements.size > 498) {
+    if (theSubgroup.ambientWeyl->sizeByFormulaOrNegative1('E', 6) <= theSubgroup.ambientWeyl->theGroup.getSize()) {
+      out << "Weyl group is too large. <br>";
+    } else {
+      out << "Weyl group is too large for LaTeX. <br>";
+    }
+  } else {
+    std::stringstream outputFileContent, outputFileContent2;
+    std::string fileHasse, fileCosetGraph;
+    bool useJavascript = (theSubgroup.allElements.size < 100);
+    outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+    outputFileContent << "\\[" << theSubgroup.toStringBruhatGraph() << "\\]";
+    outputFileContent << "\n\\end{document}";
+    outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+    outputFileContent2 << "\\[" << theSubgroup.toStringCosetGraph() << "\\]";
+    outputFileContent2 << "\n\\end{document}";
+    calculator.writeDefaultLatexFileReturnHtmlLink(outputFileContent.str(), &fileHasse, true);
+    calculator.writeDefaultLatexFileReturnHtmlLink(outputFileContent2.str(), &fileCosetGraph, true);
+    out << "<hr>"
+    << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
+    << fileHasse << ".tex\"> "
+    << fileHasse << ".tex</a>";
+    out << ", <iframe src =\"" << fileHasse
+    << ".png\" width =\"800\" height =\"600\">"
+    << fileHasse << ".png</iframe>";
+    out << "<hr> The coset graph of the Weyl group of the Levi part follows. "
+    << "The cosets are right, i.e. a coset "
+    << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
+    << "<a href=\""
+    << fileCosetGraph
+    << ".tex\"> " << fileCosetGraph << ".tex</a>";
+    out << ", <iframe src =\"" << fileCosetGraph
+    << ".png\" width =\"800\" height =\"600\"> " << fileCosetGraph << ".png</iframe>";
+    out << "<b>The .png file might be bad if LaTeX crashed while trying to process it; "
+    << "please check whether the .tex corresponds to the .png.</b>";
+    out << "<hr>Additional printout follows.<br> ";
+    out << "<br>Representatives of the coset follow. Below them you can find "
+    << "the elements of the subgroup. <br>";
+    out << "<table><tr><td>Element</td><td>weight simple coords</td>"
+    << "<td>weight fund. coords</td></tr>";
+    theFormat.fundamentalWeightLetter = "\\omega";
+    for (int i = 0; i < theSubgroup.RepresentativesQuotientAmbientOrder.size; i ++) {
+      ElementWeylGroup& current = theSubgroup.RepresentativesQuotientAmbientOrder[i];
+      out << "<tr><td>"
+      << (useJavascript ? HtmlRoutines::getMathNoDisplay(current.toString()) : current.toString())
+      << "</td>";
+      theHWsimplecoords = theSSalgebra.theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
+      theSSalgebra.theWeyl.actOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
+      out << "<td>"
+      << (useJavascript ? HtmlRoutines::getMathNoDisplay(theHWsimplecoords.toString(&theFormat))
+      : theHWsimplecoords.toString(&theFormat))
+      << "</td>";
+      tempRoot = theSSalgebra.theWeyl.getFundamentalCoordinatesFromSimple(theHWsimplecoords);
+      std::string theFundString = tempRoot.toStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+      out << "<td>" << (useJavascript ? HtmlRoutines::getMathNoDisplay(theFundString): theFundString)
+      << "</td>";
+      out << "</tr>";
+    }
+    out << "</table><hr>";
+    out << theSubgroup.toString();
+  }
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::decomposeCharGenVerma(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
+  MacroRegisterFunctionWithName("CalculatorFunctions::decomposeCharGenVerma");
+  Vector<RationalFunction<Rational> > theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
+  Selection parSel, invertedParSel;
+  WithContext<SemisimpleLieAlgebra*> theSSlieAlg;
+  output.reset(calculator);
+  if (!calculator.getTypeHighestWeightParabolic<RationalFunction<Rational> >(
+    calculator,
+    input,
+    output,
+    theHWfundcoords,
+    parSel,
+    theSSlieAlg,
+    CalculatorConversions::functionRationalFunction
+  )) {
+   return false;
+  }
+  if (output.isError()) {
+    return true;
+  }
+  std::stringstream out;
+  FormatExpressions theFormat;
+  theSSlieAlg.context.getFormat(theFormat);
+  out << "<br>Highest weight: " << theHWfundcoords.toString(&theFormat)
+  << "<br>Parabolic selection: " << parSel.toString();
+  theHWFundCoordsFDPart = theHWfundcoords;
+  for (int i = 0; i < parSel.cardinalitySelection; i ++) {
+    theHWFundCoordsFDPart[parSel.elements[i]] = 0;
+  }
+  KazhdanLusztigPolynomials theKLpolys;
+  WeylGroupData& theWeyl = theSSlieAlg.content->theWeyl;
+  if (!theKLpolys.computeKLPolys(&theWeyl)) {
+    return output.makeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", calculator);
+  }
+  theHWSimpCoordsFDPart = theWeyl.getSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
+  theHWSimpCoordsFDPart += theWeyl.rho;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSub;
+  if (!theSub.makeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000)) {
+    return output.makeError(
+      "Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).",
+      calculator
+    );
+  }
+  theHWsimpCoords = theWeyl.getSimpleCoordinatesFromFundamental(theHWfundcoords);
+  List<ElementWeylGroup> theWeylElements;
+  theSub.getGroupElementsIndexedAsAmbientGroup(theWeylElements);
+  Vector<RationalFunction<Rational> > currentHW;
+  out << "<br>Orbit modified with small rho: "
+  << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
+  for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
+    currentHW = theHWsimpCoords;
+    currentHW += theSub.getRho();
+    theWeyl.actOn(i, currentHW);
+    currentHW -= theSub.getRho();
+    out << "<tr><td>" << currentHW.toString() << "</td><td>"
+    << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
+  }
+  out << "</table>";
+  out << "<br>The rho of the Levi part is: "
+  << theSub.getRho().toString() << "<br>Weyl group of Levi part follows. "
+  << "<br><table><tr><td>Weyl element</td>"
+  << "<td>Image hw under small rho modified action fund coords</td>"
+  << "<td>Character Verma given h.w.</td></tr>";
+  invertedParSel = parSel;
+  invertedParSel.invertSelection();
+  CharacterSemisimpleLieAlgebraModule<RationalFunction<Rational> > theChar, currentChar;
+  Weight<RationalFunction<Rational> > theMon;
+  theChar.makeZero();
+  FormatExpressions formatChars;
+  formatChars.FDrepLetter = "L";
+  formatChars.fundamentalWeightLetter = "\\omega";
+  formatChars.flagUseLatex = true;
+  SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
+  theSubgroup.ambientWeyl = theKLpolys.TheWeylGroup;
+  for (int i = 0; i < theWeylElements.size; i ++) {
+    ElementWeylGroup& currentElement = theWeylElements[i];
+    out << "<tr><td>" << currentElement.toString() << "</td>";
+
+    int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.getIndex(currentElement);
+    if (indexInWeyl == - 1) {
+      global.fatal << "This is a programming error. Something is wrong: "
+      << "I am getting that an element of the Weyl group of the Levi part of "
+      << "the parabolic does not lie in the ambient Weyl group, which is impossible. "
+      << "There is a bug somewhere; crashing in accordance. " << global.fatal;
+    }
+    currentChar.makeZero();
+    theMon.owner = theSSlieAlg.content;
+    for (int j = 0; j < theKLpolys.theKLcoeffs[indexInWeyl].size; j ++) {
+      if (!theKLpolys.theKLcoeffs[indexInWeyl][j].isEqualToZero()) {
+        currentHW = theHWsimpCoords;
+        theWeyl.actOnRhoModified(j, currentHW);
+        theMon.weightFundamentalCoordS = theWeyl.getFundamentalCoordinatesFromSimple(currentHW);
+        int sign = (currentElement.generatorsLastAppliedFirst.size - theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size) % 2 == 0 ? 1 : - 1;
+        currentChar.addMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j] * sign);
+      }
+    }
+    currentHW = theHWsimpCoords;
+    currentHW += theSub.getRho();
+    theWeyl.actOn(indexInWeyl, currentHW);
+    currentHW -= theSub.getRho();
+    out << "<td>" << theWeyl.getFundamentalCoordinatesFromSimple(currentHW).toStringLetterFormat("\\omega") << "</td>";
+    out << "<td>" << HtmlRoutines::getMathNoDisplay(currentChar.toString(&formatChars)) << "</td>";
+    if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
+      currentChar *= - 1;
+    }
+    theChar += currentChar;
+    out << "</tr>";
+  }
+  out << "</table>";
+  out << "Final char: " << HtmlRoutines::getMathNoDisplay(theChar.toString(&formatChars));
+  return output.assignValue<std::string>(out.str(), calculator);
 }

@@ -2979,17 +2979,17 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GCD",
-    CalculatorFunctions::innerGCD,
+    CalculatorFunctions::leastCommonMultipleInteger,
     "",
     "Greatest common divisor of two integers.",
     "GCD(100!+ 1, 101 * 103)",
-    "CalculatorFunctions::innerGCD",
+    "CalculatorFunctions::leastCommonMultipleInteger",
     "GCD",
     innerStandard
   );
   this->addOperationHandler(
     "LCM",
-    CalculatorFunctions::innerLCM,
+    CalculatorFunctions::leastCommonMultipleInteger,
     "",
     "Least common multiple of two integers.",
     "LCM(91, 1001)",
@@ -4388,14 +4388,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WeylDimFormula",
-    CalculatorFunctions::innerWeylDimFormula,
+    CalculatorLieTheory::weylDimFormula,
     "",
     "Weyl dimension formula. First argument gives "
     "the type of the Weyl group of the simple "
     "Lie algebra in the form Type_Rank (e.g. E_6). "
     "The second argument gives the highest weight in fundamental coordinates. ",
     "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));",
-    "CalculatorFunctions::innerWeylDimFormula",
+    "CalculatorFunctions::weylDimFormula",
     "WeylDimFormula",
     innerStandard
   );
@@ -4414,7 +4414,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "DecomposeInducingRepGenVermaModule",
-    CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart,
+    CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart,
     "",
     "Decomposes the inducing module of a generalized "
     "Verma module over the Levi part of a parabolic "
@@ -4429,7 +4429,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "gives the parabolic subalgebra with "
     "respect to whose Levi part we decompose.",
     "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
-    "CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart",
+    "CalculatorFunctions::decomposeFDPartGeneralizedVermaModuleOverLeviPart",
     "DecomposeInducingRepGenVermaModule",
     innerStandard
   );
@@ -4766,40 +4766,40 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintRootSubalgebras",
-    CalculatorFunctions::innerPrintRootSAs,
+    CalculatorLieTheory::printRootSAs,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintRootSubalgebras(E_6)",
-    "CalculatorFunctions::innerPrintRootSAs",
+    "CalculatorFunctions::printRootSAs",
     "PrintRootSubalgebras",
     innerStandard
   );
   this->addOperationHandler(
     "PrintRootSubalgebrasRecompute",
-    CalculatorFunctions::innerPrintRootSAsForceRecompute,
+    CalculatorLieTheory::printRootSAsForceRecompute,
     "",
     "Same as printRootSubalgebras but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
     "PrintRootSubalgebrasRecompute(b_3)",
-    "CalculatorFunctions::innerPrintRootSAsForceRecompute",
+    "CalculatorFunctions::printRootSAsForceRecompute",
     "PrintRootSubalgebrasRecompute",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "PrintSlTwoSubalgebras",
-    CalculatorFunctions::innerPrintSltwos,
+    CalculatorLieTheory::printSltwos,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintSlTwoSubalgebras(g_2)",
-    "CalculatorFunctions::innerPrintSltwos",
+    "CalculatorFunctions::printSltwos",
     "PrintSlTwoSubalgebras",
     innerStandard
   );
   this->addOperationHandler(
     "ParabolicsInfoBruhatGraph",
-    CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph,
+    CalculatorLieTheory::parabolicWeylGroupsBruhatGraph,
     "",
     "Makes a table with information about the Weyl group of a "
     "parabolic subalgebra of the ambient Lie algebra, "
@@ -4828,7 +4828,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "no problem handling this function up to "
     "E_6 but LaTeX crashes trying to process the output. </b>",
     "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
-    "CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph",
+    "CalculatorFunctions::parabolicWeylGroupsBruhatGraph",
     "ParabolicsInfoBruhatGraph",
     innerStandard
   );

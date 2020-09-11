@@ -2453,3 +2453,154 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
   << theIndices.toStringCommaDelimited();
   return output.assignValue(out.str(), calculator);
 }
+
+bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket");
+  Vector<ElementWeylAlgebra<Rational> > theOps;
+  if (input.size() <= 1) {
+    return false;
+  }
+  int upperBound = - 1;
+  if (!input[1].isSmallInteger(&upperBound)) {
+    return calculator << "<hr>Failed to extract upper bound "
+    << "for the vector space dimension from the first argument. ";
+  }
+  Expression inputModded = input;
+  inputModded.children.removeIndexShiftDown(1);
+
+  ExpressionContext context(calculator);
+  if (!calculator.getVectorFromFunctionArguments(inputModded, theOps, &context)) {
+    Vector<ElementUniversalEnveloping<RationalFunction<Rational> > > theLieAlgElts;
+    context.initialize(calculator);
+    if (!calculator.getVectorFromFunctionArguments(inputModded, theLieAlgElts, &context)) {
+      return calculator
+      << "<hr>Failed to extract elements of Weyl algebra and "
+      << "failed to extract elements of UE algebra from input "
+      << input.toString();
+    }
+    FormatExpressions theFormat;
+    context.getFormat(theFormat);
+    std::stringstream out;
+    out << "Starting elements: <br>";
+    for (int i = 0; i < theLieAlgElts.size; i ++) {
+      out << HtmlRoutines::getMathNoDisplay(theLieAlgElts[i].toString(&theFormat)) << "<br>";
+    }
+    bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theLieAlgElts, upperBound);
+    if (!success) {
+      out << "<br>Did not succeed with generating vector space, "
+      << "instead got a vector space with basis "
+      << theLieAlgElts.size << " exceeding the limit. "
+      << "The basis generated before exceeding the limit was: "
+      << theLieAlgElts.toString();
+    } else {
+      out << "<br>Lie bracket generates vector space of dimension "
+      << theLieAlgElts.size << " with basis:";
+      for (int i = 0; i < theLieAlgElts.size; i ++) {
+        out << "<br>";
+        if (theLieAlgElts.size > 50) {
+          out << theLieAlgElts[i].toString(&theFormat);
+        } else {
+          out << HtmlRoutines::getMathNoDisplay(theLieAlgElts[i].toString(&theFormat));
+        }
+      }
+    }
+    return output.assignValue(out.str(), calculator);
+  }
+  FormatExpressions theFormat;
+  context.getFormat(theFormat);
+  std::stringstream out;
+  out << "Starting elements: <br>";
+  for (int i = 0; i < theOps.size; i ++) {
+    out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&theFormat)) << "<br>";
+  }
+  bool success = MathRoutines::generateVectorSpaceClosedWithRespectToLieBracket(theOps, upperBound);
+  if (!success) {
+    out << "<br>Did not succeed with generating vector space, "
+    << "instead got a vector space with basis "
+    << theOps.size << " exceeding the limit. "
+    << "The basis generated before exceeding the limit was: "
+    << theOps.toString();
+  } else {
+    out << "<br>Lie bracket generates vector space of dimension "
+    << theOps.size << " with basis:";
+    for (int i = 0; i < theOps.size; i ++) {
+      out << "<br>";
+      if (theOps.size > 50) {
+        out << theOps[i].toString(&theFormat);
+      } else {
+        out << HtmlRoutines::getMathNoDisplay(theOps[i].toString(&theFormat));
+      }
+    }
+  }
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::casimirWithRespectToLevi(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::innerCasimir");
+  RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
+  if (!input.isListNElements(3)) {
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra* theSSalg = algebra.content;
+  Vector<Rational> leviSelection;
+  if (!calculator.getVector(input[2], leviSelection, nullptr, theSSalg->getRank())) {
+    return calculator << "<hr>Failed to extract parabolic selection. ";
+  }
+  Selection theParSel;
+  theParSel = leviSelection;
+  theParSel.invertSelection();
+  ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
+  theCasimir.makeCasimirWRTLeviParabolic(*theSSalg, theParSel);
+  ExpressionContext contextE(calculator);
+  contextE.setAmbientSemisimpleLieAlgebra(*theSSalg);
+  return output.assignValueWithContext(theCasimir, contextE, calculator);
+}
+
+template <class theType>
+bool MathRoutines::generateVectorSpaceClosedWRTOperation(
+  List<theType>& inputOutputElts,
+  int upperDimensionBound,
+  void (*theBinaryOperation)(const theType& left, const theType& right, theType& output)
+) {
+  MacroRegisterFunctionWithName("MathRoutines::generateVectorSpaceClosedWRTOperation");
+  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  theType theOpResult;
+  ProgressReport theReport1(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport theReport2(20, GlobalVariables::Response::ReportType::gaussianElimination);
+  if (theReport1.tickAndWantReport()) {
+    theReport1.report("Extending vector space to closed with respect to binary operation. ");
+  }
+  List<theType> theEltsForGaussianElimination = inputOutputElts;
+  for (int i = 0; i < inputOutputElts.size; i ++) {
+    for (int j = i; j < inputOutputElts.size; j ++) {
+      theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
+      //int oldNumElts = inputOutputElts.size;
+      theEltsForGaussianElimination.addOnTop(theOpResult);
+      theEltsForGaussianElimination[0].gaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
+      if (theEltsForGaussianElimination.size > inputOutputElts.size) {
+        inputOutputElts.addOnTop(theOpResult);
+      }
+      if (upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound) {
+        return false;
+      }
+      if (theReport2.tickAndWantReport()) {
+        std::stringstream reportStream;
+        reportStream << "Accounted operation between elements " << i + 1
+        << " and " << j + 1 << " out of " << inputOutputElts.size;
+        theReport2.report(reportStream.str());
+      }
+    }
+  }
+  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  return true;
+}

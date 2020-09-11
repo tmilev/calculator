@@ -1835,7 +1835,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctions::innerIntegrateTanPowerNSecPowerM,
+    CalculatorFunctionsIntegration::innerIntegrateTanPowerNSecPowerM,
     "",
     "Transforms an integral of the form \\int \\tan^n x \\sec^m x.",
     "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\");\n"
@@ -1867,11 +1867,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Differentiate",
-    CalculatorFunctions::innerDifferentiateSqrt,
+    CalculatorFunctionsDifferentiation::differentiateSqrt,
     "",
     "Differentiation - square root function. ",
     "d/dx(sqrt(x));",
-    "CalculatorFunctions::innerDifferentiateSqrt",
+    "CalculatorFunctions::differentiateSqrt",
     "DifferentiateSqrt",
     innerStandard
   );
@@ -2483,7 +2483,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GenerateVectorSpaceClosedWithRespectToLieBracket",
-    CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket,
+    CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket,
     "",
     "Generates a vector space closed with respect to the Lie bracket "
     "from input of type elements of Weyl algebra or Lie algebra. "
@@ -2509,7 +2509,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "s_- 1 = - q_{- 19} - q_{- 20};\n"
     "s_-2 = 2q_{6} + 2q_{5};\n"
     "GenerateVectorSpaceClosedWithRespectToLieBracket(52, s_1, s_2, s_- 1, s_-2);",
-    "CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket",
+    "CalculatorFunctions::generateVectorSpaceClosedWithRespectToLieBracket",
     "GenerateVectorSpaceClosedWithRespectToLieBracket",
     innerStandard
   );
@@ -4445,7 +4445,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CasimirWRTLevi",
-    CalculatorFunctions::innerCasimirWRTlevi,
+    CalculatorLieTheory::casimirWithRespectToLevi,
     "",
     "Gives the Casimir element of a Levi part of "
     "a parabolic subalgebra. First argument = ambient Lie algebra. "
@@ -4453,7 +4453,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "stands for simple root outside of the Levi "
     "component, 0 stands for simple root of the Levi component.",
     "CasimirWRTLevi{}(B_3, (1,0,0))",
-    "CalculatorFunctions::innerCasimirWRTlevi",
+    "CalculatorFunctions::casimirWithRespectToLevi",
     "CasimirWRTLevi",
     innerStandard
   );
@@ -6255,17 +6255,17 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctions::innerInterpretAsDifferential,
+    CalculatorFunctionsDifferentiation::interpretAsDifferential,
     "",
     "If circumstances imply it, interprets an atom of the form dx as Differential {} x. ",
     "(\\int x) dx; \\int x (1 + x) dx; \\int_2^3 x dx; \\int_2^3 x (1 + x) dx",
-    "CalculatorFunctions::innerInterpretAsDifferential",
+    "CalculatorFunctions::interpretAsDifferential",
     "InterpretAsDifferential",
     innerStandard
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctions::innerIntegralOperator,
+    CalculatorFunctionsIntegration::innerIntegralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
     "(\\int x)dx;\n"
@@ -6320,11 +6320,11 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctions::outerDifferentiateWRTxTimesAny,
+    CalculatorFunctionsDifferentiation::differentiateWithRespectToXTimesAny,
     "",
     "Replaces Differentiate{}(x)*a by Differentiate{}(x, a).",
     "d/dx (1/x) ",
-    "CalculatorFunctions::outerDifferentiateWRTxTimesAny",
+    "CalculatorFunctions::differentiateWithRespectToXTimesAny",
     "DifferentiateWithRespectToXTimeAny",
     outerStandard
   );
@@ -7187,7 +7187,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctions::innerIntegralOperator,
+    CalculatorFunctionsIntegration::innerIntegralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
     "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",

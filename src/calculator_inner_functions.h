@@ -113,6 +113,8 @@ public:
 
   static bool integrateEpowerAxDiffX(Calculator& calculator, const Expression& input, Expression& output);
   static bool integrateSinPowerNCosPowerM(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIntegrateTanPowerNSecPowerM(Calculator& calculator, const Expression& input, Expression& output);
+  static bool innerIntegralOperator(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsDifferentiation {
@@ -129,6 +131,10 @@ public:
   static bool differentiateAPowerB(Calculator& calculator, const Expression& input, Expression& output);
   static bool diffdivDiffxToDifferentiation(Calculator& calculator, const Expression& input, Expression& output);
   static bool ddivDxToDiffDivDiffx(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool interpretAsDifferential(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateSqrt(Calculator& calculator, const Expression& input, Expression& output);
+  static bool differentiateWithRespectToXTimesAny(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -195,12 +201,7 @@ public:
   static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDistributeSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerChoosecartanSubalgebra(Calculator& calculator, const Expression& input, Expression& output);
-
-
-  static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCasimirWRTlevi(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerFactorIntegeR(Calculator& calculator, const Expression& input, Expression& output);
@@ -377,11 +378,6 @@ public:
   static bool innerConvertCosToExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEulerFormulaAsLaw(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateTanPowerNSecPowerM(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerInterpretAsDifferential(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegralOperator(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDifferentiateSqrt(Calculator& calculator, const Expression& input, Expression& output);
-  static bool outerDifferentiateWRTxTimesAny(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerCanBeExtendedParabolicallyTo(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output);

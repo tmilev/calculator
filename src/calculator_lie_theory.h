@@ -143,6 +143,9 @@ public:
   static bool getCentralizerChainsSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
   static bool computeSemisimpleSubalgebras(Calculator& calculator, const Expression& input, Expression& output);
   static bool computePairingTablesAndFKFTsubalgebras(Calculator& calculator, const Expression& input, Expression& output);
+  static bool casimirWithRespectToLevi(Calculator& calculator, const Expression& input, Expression& output);
+  static bool generateVectorSpaceClosedWithRespectToLieBracket(Calculator& calculator, const Expression& input, Expression& output);
+  static bool chooseCartanSubalgebra(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif

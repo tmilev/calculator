@@ -1174,7 +1174,7 @@ bool CalculatorLieTheory::printGeneralizedVermaModule(
 bool CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (!input.isListNElements(4)) {
     return output.makeError(
@@ -1330,7 +1330,7 @@ bool CalculatorLieTheory::highestWeightVector(Calculator& calculator, const Expr
 bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::splitGenericGeneralizedVermaTensorFiniteDimensional");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional");
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
   if (!input.isListNElements(4))
     return output.makeError(
@@ -1594,7 +1594,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
 bool CalculatorLieTheory::splitFDpartB3overG2(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2");
   BranchingData theG2B3Data;
   ExpressionContext context(calculator);
   CalculatorLieTheory::splitFDpartB3overG2Init(calculator, input, output, theG2B3Data, context);
@@ -1647,7 +1647,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(Calculator& calculator,
 bool CalculatorLieTheory::splitFDpartB3overG2old(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::splitFDpartB3overG2old");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2old");
   BranchingData theG2B3Data;
   CalculatorLieTheory::splitFDpartB3overG2CharsOutput(calculator, input, output, theG2B3Data);
   if (output.isError()) {
@@ -1714,7 +1714,7 @@ bool CalculatorLieTheory::printB3G2branchingTableInit(
   int& desiredHeight,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::printB3G2branchingTableInit");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::printB3G2branchingTableInit");
   if (input.size() != 3) {
     return output.makeError("I need two arguments: first is height, second is parabolic selection. ", calculator);
   }
@@ -1739,7 +1739,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2CharsOutput(
   Expression& output,
   BranchingData& theG2B3Data
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2CharsOutput");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2CharsOutput");
   ExpressionContext context(calculator);
   CalculatorLieTheory::splitFDpartB3overG2Init(
     calculator, input, output, theG2B3Data, context
@@ -1768,7 +1768,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2Init(
   BranchingData& theG2B3Data,
   ExpressionContext& outputContext
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::splitFDpartB3overG2Init");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::splitFDpartB3overG2Init");
   if (!input.isListNElements(4)) {
     return output.makeError(
       "Splitting the f.d. part of a B_3-representation "
@@ -1814,7 +1814,7 @@ bool CalculatorLieTheory::rootSAsAndSltwos(
   bool showSLtwos,
   bool MustRecompute
 ) {
-  MacroRegisterFunctionWithName("Calculator::rootSAsAndSltwos");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::rootSAsAndSltwos");
   if (input.size() != 2) {
     return calculator << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
   }
@@ -1922,7 +1922,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
 bool CalculatorLieTheory::parabolicWeylGroups(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::parabolicWeylGroups");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::parabolicWeylGroups");
   if (input.size() != 2) {
     return false;
   }
@@ -2090,7 +2090,7 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   RecursionDepthCounter theRecursionIncrementer(&calculator.recursionDepth);
-  MacroRegisterFunctionWithName("CalculatorFunctions::decomposeCharGenVerma");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::decomposeCharGenVerma");
   Vector<RationalFunction<Rational> > theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
   WithContext<SemisimpleLieAlgebra*> theSSlieAlg;
@@ -2603,4 +2603,241 @@ bool MathRoutines::generateVectorSpaceClosedWRTOperation(
   }
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   return true;
+}
+
+bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::canBeExtendedParabolicallyTo");
+  if (!input.isListNElements(3)) {
+    return false;
+  }
+  DynkinType smallType, targetType;
+  if (
+    !CalculatorConversions::functionDynkinType(calculator, input[1], smallType) ||
+    !CalculatorConversions::functionDynkinType(calculator, input[2], targetType)
+  ) {
+    return calculator << "Failed to convert arguments of " << input.toString() << " to two DynkinType's.";
+  }
+  return output.assignValue(static_cast<int>(smallType.canBeExtendedParabolicallyTo(targetType)), calculator);
+}
+
+bool CalculatorLieTheory::getSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::getSymmetricCartan");
+  DynkinType theType;
+  if (!CalculatorConversions::innerDynkinTypE(calculator, input, theType)) {
+    return calculator << "Failed to convert " << input.toString() << " to DynkinType.";
+  }
+  std::stringstream out;
+  Matrix<Rational> outputMat, outputCoMat;
+  theType.getCartanSymmetric(outputMat);
+  theType.getCoCartanSymmetric(outputCoMat);
+  out << "Symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex(), 10000)
+  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex(), 10000);
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::drawWeightSupportWithMults(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  if (!input.isListNElements(3)) {
+    return output.makeError(
+      "Error: the function for drawing weight support takes two arguments (type and highest weight)",
+      calculator
+    );
+  }
+  const Expression& typeNode = input[1];
+  const Expression& hwNode = input[2];
+  WithContext<SemisimpleLieAlgebra*> theSSalgpointer;
+  if (!calculator.convert(
+    typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theSSalgpointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  Vector<Rational> highestWeightFundCoords;
+  ExpressionContext theContext(calculator);
+  if (!calculator.getVector<Rational>(
+    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer.content->getRank(), nullptr
+  )) {
+    return output.makeError("Failed to extract highest weight vector", calculator);
+  }
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroupData& theWeyl = theSSalgpointer.content->theWeyl;
+  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  std::stringstream out;
+  CharacterSemisimpleLieAlgebraModule<Rational> theChar;
+  theChar.makeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.drawMeWithMultiplicities(report, theDV, 10000);
+  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::drawRootSystem(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::drawRootSystem");
+  if (input.size() < 2) {
+    return calculator << "drawRootSystem expects at least 1 argument. ";
+  }
+  bool hasPreferredProjectionPlane = input.isListNElements(4);
+  WithContext<SemisimpleLieAlgebra*> theAlgPointer;
+  if (!calculator.convert(
+    input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theAlgPointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
+  WeylGroupData& theWeyl = theAlg.theWeyl;
+  Vectors<Rational> preferredProjectionPlane;
+  if (hasPreferredProjectionPlane) {
+    preferredProjectionPlane.setSize(2);
+    bool isGood = calculator.getVector(
+      input[2],
+      preferredProjectionPlane[0],
+      nullptr,
+      theWeyl.getDimension(),
+      nullptr
+    ) && calculator.getVector(
+      input[3],
+      preferredProjectionPlane[1],
+      nullptr,
+      theWeyl.getDimension(),
+      nullptr
+    );
+    if (!isGood) {
+      return output.makeError("Failed to convert second or third argument to vector of desired dimension", calculator);
+    }
+  }
+  std::stringstream out;
+  DrawingVariables theDV;
+  theWeyl.drawRootSystem(theDV, true, false, nullptr, true, nullptr);
+  if (hasPreferredProjectionPlane) {
+    theDV.flagFillUserDefinedProjection = true;
+    theDV.FillUserDefinedProjection = preferredProjectionPlane;
+  }
+  out << theDV.getHTMLDiv(theWeyl.getDimension());
+  return output.assignValue(out.str(), calculator);
+}
+
+template <class Coefficient>
+int CharacterSemisimpleLieAlgebraModule<Coefficient>::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
+  const Weight<Coefficient>& theWeightInFundCoords, const Vector<Coefficient>& theAlphaInFundCoords
+) {
+  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::getPositiveNStringSuchThatWeightMinusNAlphaIsWeight");
+  int result = - 1;
+  Weight<Coefficient> currentWeight;
+  currentWeight = theWeightInFundCoords;
+  for (
+    ;
+    this->monomials.contains(currentWeight);
+    result ++, currentWeight.weightFundamentalCoordS -= theAlphaInFundCoords
+  ) {
+  }
+  return result;
+}
+
+template <class Coefficient>
+std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::toStringFullCharacterWeightsTable() {
+  MacroRegisterFunctionWithName("CharacterSemisimpleLieAlgebraModule::toStringFullCharacterWeightsTable");
+  std::stringstream out;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> outputChar;
+  if (!this->freudenthalEvaluateMeFullCharacter(outputChar, 10000, nullptr)) {
+    out << "Failed to compute the character with highest weight " << this->toString()
+    << " I used Fredenthal's formula; likely the computation was too large. ";
+    return out.str();
+  }
+  out << "<table><tr><td>Weight in fund. coords</td><td>simple coords.</td>"
+  << "<td>Simple strings</td><td>Simple half-strings</td></tr>";
+  Vector<Coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
+  Vector<Coefficient> theSimpleRoot;
+  Vector<Coefficient> theSimpleRootFundCoords;
+  for (int k = 0; k < outputChar.size(); k ++) {
+    out << "<tr>";
+    out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
+    Vector<Coefficient> weightSimple = this->getOwner()->theWeyl.getSimpleCoordinatesFromFundamental
+    (outputChar[k].weightFundamentalCoordS);
+    out << "<td>" << weightSimple.toString() << "</td>";
+    outputSimpleStringCoords.makeZero(this->getOwner()->getRank());
+    outputSimpleHalfStringCoords.makeZero(this->getOwner()->getRank());
+    for (int j = 0; j < this->getOwner()->getRank(); j ++) {
+      theSimpleRoot.makeEi(this->getOwner()->getRank(), j);
+      theSimpleRootFundCoords =
+      this->getOwner()->theWeyl.getFundamentalCoordinatesFromSimple(theSimpleRoot);
+      outputSimpleStringCoords[j] = outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
+        outputChar[k], theSimpleRootFundCoords
+      ) - outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
+        outputChar[k], - theSimpleRootFundCoords
+      );
+      outputSimpleHalfStringCoords[j] = outputChar.getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
+        outputChar[k], theSimpleRootFundCoords
+      );
+    }
+    if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS) {
+      out << "<td><b style =\"color:red\">" << outputSimpleStringCoords.toString() << "</b></td>" ;
+    } else {
+      out << "<td>" << outputSimpleStringCoords.toString() << "</td>";
+    }
+    if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS) {
+      out << "<td><b style =\"color:red\">"
+      << outputSimpleHalfStringCoords.toString() << "</b></td>" ;
+    } else {
+      out << "<td>" << outputSimpleHalfStringCoords.toString() << "</td>";
+    }
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+bool CalculatorLieTheory::drawWeightSupport(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::drawWeightSupport");
+  if (!input.isListNElements(3)) {
+    return output.makeError(
+      "Wrong number of arguments, must be 2. ",
+      calculator
+    );
+  }
+  const Expression& typeNode = input[1];
+  const Expression& hwNode = input[2];
+  WithContext<SemisimpleLieAlgebra*> theAlgPointer;
+  if (!calculator.convert(
+    typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theAlgPointer
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
+  Vector<Rational> highestWeightFundCoords;
+  if (!calculator.getVector<Rational>(
+    hwNode,
+    highestWeightFundCoords,
+    nullptr,
+    theAlg.getRank(),
+    nullptr
+  )) {
+    return false;
+  }
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroupData& theWeyl = theAlg.theWeyl;
+  highestWeightSimpleCoords = theWeyl.getSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  // Vectors<Rational> theWeightsToBeDrawn;
+  std::stringstream out;
+  CharacterSemisimpleLieAlgebraModule<Rational> theChar;
+  theChar.makeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.drawMeNoMultiplicities(report, theDV, 10000);
+  out << report << theDV.getHTMLDiv(theWeyl.getDimension());
+  out << "<br>A table with the weights of the character follows. <br>";
+  out << theChar.toStringFullCharacterWeightsTable();
+  return output.assignValue(out.str(), calculator);
 }

@@ -368,6 +368,7 @@ public:
     Expression& outputConstTerm
   );
 
+  static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExploitCosEvenness(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerExploitSinOddness(Calculator& calculator, const Expression& input, Expression& output);
 
@@ -376,19 +377,13 @@ public:
   static bool innerCosineOfAngleSumToTrig(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConvertSinToExponent(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConvertCosToExponent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerEulerFormulaAsLaw(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerCanBeExtendedParabolicallyTo(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerTrace(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerMinPolyMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCharPolyMatrix(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerdrawRootSystem(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDrawWeightSupportWithMults(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerDrawWeightSupport(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDrawExpressionGraphWithOptions(
     Calculator& calculator, const Expression& input, Expression& output, bool useFullTree
   );

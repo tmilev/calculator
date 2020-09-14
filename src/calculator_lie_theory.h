@@ -146,6 +146,13 @@ public:
   static bool casimirWithRespectToLevi(Calculator& calculator, const Expression& input, Expression& output);
   static bool generateVectorSpaceClosedWithRespectToLieBracket(Calculator& calculator, const Expression& input, Expression& output);
   static bool chooseCartanSubalgebra(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool canBeExtendedParabolicallyTo(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getSymmetricCartan(Calculator& calculator, const Expression& input, Expression& output);
+  static bool drawRootSystem(Calculator& calculator, const Expression& input, Expression& output);
+  static bool drawWeightSupportWithMults(Calculator& calculator, const Expression& input, Expression& output);
+  static bool drawWeightSupport(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 
 #endif

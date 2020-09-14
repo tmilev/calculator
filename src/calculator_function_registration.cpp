@@ -1555,11 +1555,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CartanSymmetric",
-    CalculatorFunctions::innerGetSymmetricCartan,
+    CalculatorLieTheory::getSymmetricCartan,
     "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "CartanSymmetric(e^7_6);",
-    "CalculatorFunctions::innerGetSymmetricCartan",
+    "CalculatorFunctions::getSymmetricCartan",
     "CartanSymmetric",
     innerStandard
   );
@@ -4472,7 +4472,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "DrawRootSystem",
-    CalculatorFunctions::innerdrawRootSystem,
+    CalculatorLieTheory::drawRootSystem,
     "",
     "Draws the root system of a semisimple Lie algebra. "
     "Takes one or three arguments: "
@@ -4494,13 +4494,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "Clicking the obvious button creates a basis "
     "change animations ideal for presentations.",
     "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
-    "CalculatorFunctions::innerdrawRootSystem",
+    "CalculatorFunctions::drawRootSystem",
     "DrawRootSystem",
     innerStandard
   );
   this->addOperationHandler(
     "DrawWeightSupportWithMults",
-    CalculatorFunctions::innerDrawWeightSupportWithMults,
+    CalculatorLieTheory::drawWeightSupportWithMults,
     "",
     "Draws the weight support of an irreducible "
     "finite-dimensional highest weight module. "
@@ -4518,20 +4518,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "else you might hang your browser. </b>",
     "DrawWeightSupportWithMults{}(B_3, (0, 1, 1));\n"
     "DrawWeightSupportWithMults{}(G_2, (1, 0))",
-    "CalculatorFunctions::innerDrawWeightSupportWithMults",
+    "CalculatorFunctions::drawWeightSupportWithMults",
     "DrawWeightSupportWithMults",
     innerStandard
   );
   this->addOperationHandler(
     "DrawWeightSupport",
-    CalculatorFunctions::innerDrawWeightSupport,
+    CalculatorLieTheory::drawWeightSupport,
     "",
     "Same as DrawWeightSupportWithMults but displays no multiplicities. "
     "Same warning for hanging up your browser "
     "with javascript holds.",
     "DrawWeightSupport{}(B_3, (1, 1, 1));\n"
     "DrawWeightSupport{}(G_2, (1, 2))",
-    "CalculatorFunctions::innerDrawWeightSupport",
+    "CalculatorFunctions::drawWeightSupport",
     "DrawWeightSupport",
     innerStandard
   );
@@ -5322,7 +5322,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CanBeExtendedParabolicallyTo",
-    CalculatorFunctions::innerCanBeExtendedParabolicallyTo,
+    CalculatorLieTheory::canBeExtendedParabolicallyTo,
     "",
     "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
     "CanBeExtendedParabolicallyTo(A^3_1, A_5);"
@@ -5332,7 +5332,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CanBeExtendedParabolicallyTo(b_3, a_10);"
     "CanBeExtendedParabolicallyTo(c_2, c_10);"
     "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
-    "CalculatorFunctions::innerCanBeExtendedParabolicallyTo",
+    "CalculatorFunctions::canBeExtendedParabolicallyTo",
     "CanBeExtendedParabolicallyTo",
     innerStandard
   );

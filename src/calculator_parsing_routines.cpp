@@ -23,11 +23,12 @@ std::string SyntacticElement::toStringHumanReadable(Calculator& theBoss, bool in
     return controlString;
   }
   std::stringstream out;
-  out << "<table style = \"vertical-align:top;border-spacing= 0px 0px\">";
-  out << "<tr><td style = \"text-align:center\">" << this->theData.toString(nullptr) << "</td></tr>";
-  out << "<tr><td style = \"color:#AAAAAA\">" << controlString << "</td></tr>";
+  out << "<table style = 'vertical-align:top;border-spacing:0px 0px'>";
+  out << "<tr><td style = 'text-align:center'>"
+  << this->theData.toString(nullptr) << "</td></tr>";
+  out << "<tr><td style = 'color:#AAAAAA'>" << controlString << "</td></tr>";
   if (includeLispifiedExpressions) {
-    out << "<tr><td style =\"color:#AAAAAA\">" << this->theData.toStringFull() << "</td></tr>";
+    out << "<tr><td style ='color:#AAAAAA'>" << this->theData.toStringFull() << "</td></tr>";
   }
   if (this->errorString != "") {
     out << "<tr><td>" << this->errorString << "</td></tr>";

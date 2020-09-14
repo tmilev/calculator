@@ -1846,7 +1846,7 @@ bool CalculatorLieTheory::rootSAsAndSltwos(
   }
   std::stringstream out;
   if (MustRecompute) {
-    SltwoSubalgebras theSl2s(*ownerSS.content);
+    SlTwoSubalgebras theSl2s(*ownerSS.content);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
     ownerSS.content->FindSl2Subalgebras(*ownerSS.content, theSl2s);
     theSl2s.toHTML(&theFormat);

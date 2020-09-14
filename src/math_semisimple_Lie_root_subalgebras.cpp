@@ -2590,7 +2590,7 @@ void SlTwoSubalgebra::initHEFSystemFromECoeffs(
 }
 
 void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
-  SltwoSubalgebras& output, int indexRootSAinContainer
+  SlTwoSubalgebras& output, int indexRootSAinContainer
 ) {
   MacroRegisterFunctionWithName("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1 - 10.4

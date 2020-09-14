@@ -196,7 +196,7 @@ public:
   void getCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
   void getCoxeterElement(Matrix<Rational>& output);
   void computePotentialExtensions();
-  void getSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer);
+  void getSsl2SubalgebrasAppendListNoRepetition(SlTwoSubalgebras& output, int indexRootSAinContainer);
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other) const;
   void computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators();
   bool isGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
@@ -438,7 +438,7 @@ public:
   ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
   ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
   SemisimpleLieAlgebra* owner;
-  SltwoSubalgebras* container;
+  SlTwoSubalgebras* container;
   Rational LengthHsquared;
   int indexInContainer;
   int dimensionCentralizer;
@@ -472,7 +472,7 @@ public:
   }
   bool checkConsistency() const;
 
-  SltwoSubalgebras& getContainerSl2s() {
+  SlTwoSubalgebras& getContainerSl2s() {
     if (this->container == nullptr) {
       global.fatal << "Attempt to "
       << "access the container list of "
@@ -493,7 +493,7 @@ public:
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSAs(
-    bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output
+    bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
   void computeModuleDecompositionsition(
     const Vectors<Rational>& positiveRootsContainingRegularSA,
@@ -525,7 +525,7 @@ public:
     Matrix<Rational>& outputSystemColumnVector,
     PolynomialSubstitution<Rational>& outputSystemToBeSolved
   );
-  void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner);
+  void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SlTwoSubalgebras& owner);
   bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
   static bool moduleDecompositionLeftFitsIntoRight(
     const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft, const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
@@ -549,7 +549,7 @@ public:
   }
 };
 
-class SltwoSubalgebras : public HashedList<SlTwoSubalgebra> {
+class SlTwoSubalgebras : public HashedList<SlTwoSubalgebra> {
   friend class SemisimpleSubalgebras;
   SemisimpleLieAlgebra* owner;
 public:
@@ -564,15 +564,15 @@ public:
   int IndexZeroWeight;
   RootSubalgebras theRootSAs;
   // bool flagDeallocated;
-  ~SltwoSubalgebras() {
+  ~SlTwoSubalgebras() {
     // this->flagDeallocated = true;
   }
-  SltwoSubalgebras(): owner(nullptr) /*, flagDeallocated(false)*/ {
+  SlTwoSubalgebras(): owner(nullptr) /*, flagDeallocated(false)*/ {
   }
-  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner)/*, flagDeallocated(false)*/ {
+  SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner)/*, flagDeallocated(false)*/ {
    
   }
-  bool operator==(const SltwoSubalgebras& other) const {
+  bool operator==(const SlTwoSubalgebras& other) const {
     if (this->owner == nullptr) {
       return other.owner == nullptr;
     }
@@ -584,7 +584,7 @@ public:
   bool checkConsistency() const;
   void checkInitialization() const {
     if (this->owner == nullptr) {
-      global.fatal << "<br>This is a programming error. Object SltwoSubalgebras "
+      global.fatal << "<br>This is a programming error. Object SlTwoSubalgebras "
       << "is not initialized, although it is supposed to be. " << global.fatal;
     }
   }

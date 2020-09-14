@@ -821,7 +821,7 @@ bool UserCalculator::shouldCommentOnMissingUser() {
   this->username == "teacher";
 }
 
-std::string UserCalculator::FirstLoginMessage() {
+std::string UserCalculator::firstLoginMessage() {
   std::stringstream out;
   if (global.flagRequestComingLocally) {
     out << "If this is your first run, set the username to "
@@ -838,7 +838,7 @@ bool UserCalculator::authenticate(std::stringstream* commentsOnFailure) {
   if (!this->loadFromDatabase(&secondCommentsStream)) {
     if (commentsOnFailure != nullptr && this->shouldCommentOnMissingUser()) {
       *commentsOnFailure << "User " << this->username << " does not exist. ";
-      *commentsOnFailure << this->FirstLoginMessage();
+      *commentsOnFailure << this->firstLoginMessage();
     }
     return false;
   }

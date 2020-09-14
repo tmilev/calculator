@@ -357,7 +357,7 @@ public:
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
-  SltwoSubalgebras theSl2s;
+  SlTwoSubalgebras theSl2s;
   MapReferences<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
@@ -466,7 +466,7 @@ public:
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* theField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras
+    ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
   );
   void reset();
   ~SemisimpleSubalgebras() {
@@ -520,14 +520,14 @@ public:
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-    ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     const DynkinType* targetType
   );
   bool computeStructureWriteFiles(
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-    ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+    ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream,
     bool forceRecompute,
     bool doFullInit,

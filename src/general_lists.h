@@ -82,7 +82,7 @@ class CharacterSemisimpleLieAlgebraModule;
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
 template<class Coefficient>
 class ModuleSSalgebra;
-class SltwoSubalgebras;
+class SlTwoSubalgebras;
 template<class Coefficient>
 class MonomialTensorGeneralizedVermas;
 template<class Coefficient>

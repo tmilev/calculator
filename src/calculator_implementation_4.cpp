@@ -1780,10 +1780,9 @@ std::string Calculator::toStringSyntacticStackHumanReadable(
 ) {
   MacroRegisterFunctionWithName("Calculator::toStringSyntacticStackHumanReadable");
   std::stringstream out;
-  if ((*this->currentSyntacticStack).size< this->numEmptyTokensStart) {
+  if ((*this->currentSyntacticStack).size < this->numEmptyTokensStart) {
     return
-    "Error: this is a programming error: "
-    "not enough empty tokens in the start of the syntactic stack.";
+    "Not enough empty tokens in the start of the syntactic stack.";
   }
   bool isBad = ((*this->currentSyntacticStack).size > this->numEmptyTokensStart + 1);
   SyntacticElement& lastSyntacticElt = *(*this->currentSyntacticStack).lastObject();
@@ -1912,7 +1911,7 @@ bool ObjectContainer::checkConsistencyAfterReset() {
     << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
   }
   // ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
-  // ListReferences<SltwoSubalgebras> theSltwoSAs;
+  // ListReferences<SlTwoSubalgebras> theSltwoSAs;
   // HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   // HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
   // HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;

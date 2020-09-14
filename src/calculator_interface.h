@@ -1006,7 +1006,7 @@ public:
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunction<Rational> > > theCategoryOmodules;
-  ListReferences<SltwoSubalgebras> theSltwoSAs;
+  ListReferences<SlTwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > ellipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > ellipticCurveElementsRational;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction<Rational> > > theTensorElts;

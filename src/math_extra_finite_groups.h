@@ -696,7 +696,7 @@ public:
   Vector<Coefficient> getDualCoordinatesFromFundamental(const Vector<Coefficient>& inputInFundamentalCoords) {
     Vector<Coefficient> result = inputInFundamentalCoords;
     if (result.size != this->getDimension()) {
-      global.fatal << "This is a programming error. The input fundamental weight has "
+      global.fatal << "The input fundamental weight has "
       << result.size << " coordinates, while the rank of the Weyl group is "
       << this->getDimension() << ". " << global.fatal;
     }
@@ -708,7 +708,7 @@ public:
   template <class Coefficient>
   Coefficient getScalarProductSimpleRoot(const Vector<Coefficient>& input, int indexSimpleRoot) const {
     if (indexSimpleRoot < 0 || indexSimpleRoot >= this->getDimension()) {
-      global.fatal << "This is a programming error. "
+      global.fatal
       << "Attempting to take scalar product with simple root of index "
       << indexSimpleRoot
       << " which is impossible, as the rank of the Weyl group is "
@@ -979,7 +979,7 @@ public:
   void rootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const;
   double rootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2) const {
     if (r1.size != r2.size || r1.size != this->getDimension()) {
-      global.fatal << "This is a programming error: attempting to take the root system scalar product of "
+      global.fatal << "Attempt to take the root system scalar product of "
       << "vectors of different dimension or of dimension different "
       << "from that of the ambient Lie algebra. The two input vectors were "
       << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->getDimension() << ". ";
@@ -999,9 +999,9 @@ public:
     this->rootScalarCartanRoot(r1, r2, tempRat);
     return tempRat;
   }
-  //the below functions perturbs input so that inputH has
-  //non-zero scalar product with Vectors<Rational> of the Vector<Rational>  system,
-  //without changing the inputH-sign of any Vector<Rational>  that had a non-zero scalar product to begin with
+  // the below functions perturbs input so that inputH has
+  // non-zero scalar product with Vectors<Rational> of the Vector<Rational>  system,
+  // without changing the inputH-sign of any Vector<Rational>  that had a non-zero scalar product to begin with
   void perturbWeightToRegularWithRespectToRootSystem(const Vector<Rational>& inputH, Vector<Rational>& output);
   template <class Coefficient>
   bool isDominantWithRespectToGenerator(const Vector<Coefficient>& theWeight, int generatorIndex);
@@ -1022,7 +1022,7 @@ public:
 template<class leftType, class rightType>
 void WeylGroupData::rootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
   if (r1.size != r2.size || r1.size != this->getDimension()) {
-    global.fatal << "This is a programming error: attempting to get the scalar product of the weight "
+    global.fatal << "Attempt to get the scalar product of the weight "
     << r1 << " (dimension " << r1.size
     << ") with the weight " << r2 << " (dimension " << r2.size
     << "), while the dimension of the ambient Weyl group is " << this->getDimension()
@@ -1089,7 +1089,9 @@ public:
 
 template<class Coefficient>
 void ElementWeylGroupAutomorphisms::actOn(
-  const ElementWeylGroupAutomorphisms& inputElt, const Vector<Coefficient>& inputV, Vector<Coefficient>& output
+  const ElementWeylGroupAutomorphisms& inputElt,
+  const Vector<Coefficient>& inputV,
+  Vector<Coefficient>& output
 ) {
   inputElt.checkInitialization();
   inputElt.owner->actOn(inputElt, inputV, output);
@@ -1281,7 +1283,7 @@ bool GroupRepresentation<someGroup, Coefficient>::getMatrixOfElement(const eleme
 template <typename someGroup, typename Coefficient>
 bool GroupRepresentation<someGroup, Coefficient>::checkInitialization() const {
   if (this->ownerGroup == 0) {
-    global.fatal << "This is a programming error: group not initialized at a place where it should be." << global.fatal;
+    global.fatal << "Group not initialized at a place where it should be." << global.fatal;
   }
   return true;
 }
@@ -1648,7 +1650,9 @@ public:
 };
 
 template <typename elementSomeGroup>
-bool translatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out) {
+bool translatableWordsSubgroupElementGetWord(
+  FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out
+) {
   List<int> superword;
   H.parentRelationship->theGroup->getWord(g, superword);
   out.setSize(0);
@@ -1657,7 +1661,8 @@ bool translatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, c
       if (!H.hasElement(g)) {
         global.comments << "element g isn't a member of H\n";
       }
-      global.fatal << "element " << g << " is assigned parent word " << superword.toStringCommaDelimited()
+      global.fatal << "element " << g << " is assigned parent word "
+      << superword.toStringCommaDelimited()
       << " containing generator not found in subgroup " << superword[i]
       << " so if this does belong to the subgroup, we need a better algorithm. "
       << global.fatal;
@@ -2105,7 +2110,7 @@ ClassFunction<someFiniteGroup, Coefficient> ClassFunction<someFiniteGroup, Coeff
 template<class someFiniteGroup, typename Coefficient>
 void ClassFunction<someFiniteGroup, Coefficient>::operator*=(const ClassFunction<someFiniteGroup, Coefficient>& right) {
   if (this->G != right.G) {
-    global.fatal << "Attempting to multiply class functions belonging to different groups." << global.fatal;
+    global.fatal << "Attempt to multiply class functions belonging to different groups." << global.fatal;
   }
   for (int i = 0; i < this->data.size; i ++) {
     this->data[i] *= right[i];

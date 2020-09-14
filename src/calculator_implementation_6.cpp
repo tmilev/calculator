@@ -2700,7 +2700,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     theAlgebra.theWeyl.makeFromDynkinType(theTypes[i]);
     theAlgebra.computeChevalleyConstants();
     theAlgebra.toHTMLCalculator(true, true, false);
-    SltwoSubalgebras theSl2s(theAlgebra);
+    SlTwoSubalgebras theSl2s(theAlgebra);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
     theAlgebra.FindSl2Subalgebras(theAlgebra, theSl2s);
     theSl2s.toHTML();
@@ -2708,7 +2708,7 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
       if (theTypes[i].hasPrecomputedSubalgebras()) {
         SemisimpleSubalgebras theSubalgebras;
         MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
-        ListReferences<SltwoSubalgebras> sl2Conainer;
+        ListReferences<SlTwoSubalgebras> sl2Conainer;
         if (!theSubalgebras.computeStructureWriteFiles(
           theAlgebra,
           calculator.theObjectContainer.theAlgebraicClosure,

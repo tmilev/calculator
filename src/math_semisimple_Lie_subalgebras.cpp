@@ -1053,7 +1053,7 @@ bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-  ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch");
@@ -1600,7 +1600,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
   if (!dynkinSimpleTypesWithComputedSl2Subalgebras.contains(theTypeDefaultScale)) {
     HashedList<Rational> outputIndicesDefaultScale;
     SemisimpleLieAlgebra simpleAlgebra;
-    SltwoSubalgebras theSl2s;
+    SlTwoSubalgebras theSl2s;
     simpleAlgebra.theWeyl.makeArbitrarySimple(theTypeDefaultScale.theLetter, theTypeDefaultScale.theRank);
     simpleAlgebra.computeChevalleyConstants();
     simpleAlgebra.FindSl2Subalgebras(simpleAlgebra, theSl2s);
@@ -4035,7 +4035,7 @@ void SemisimpleSubalgebras::initHookUpPointers(
   SemisimpleLieAlgebra& inputOwner,
   AlgebraicClosureRationals* theField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-  ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras
+  ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
 ) {
   (void) inputSl2sOfSubalgebras;
   this->owner = &inputOwner;
@@ -4277,7 +4277,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
 }
 
 void SlTwoSubalgebra::toStringModuleDecompositionMinimalContainingRegularSAs(
-  bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output
+  bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
 ) const {
   std::stringstream out;
   std::string tempS;
@@ -4519,8 +4519,8 @@ void SlTwoSubalgebra::toHTML(std::string& filePath) {
   FileOperations::openFileCreateIfNotPresentVirtual(theFile, "output/" + filePath, false, true, false);
 }
 
-void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
-  MacroRegisterFunctionWithName("SltwoSubalgebras::reset");
+void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
+  MacroRegisterFunctionWithName("SlTwoSubalgebras::reset");
   this->IndicesSl2sContainedInRootSA.setSize(0);
   this->IndicesSl2decompositionFlas.setSize(0);
   this->BadHCharacteristics.setSize(0);
@@ -4529,7 +4529,7 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   this->theRootSAs.owner = &inputOwner;
 }
 
-void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output) {
+void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SlTwoSubalgebras& output) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
   ProgressReport theReport0;
   if (theReport0.tickAndWantReport()) {
@@ -4667,7 +4667,7 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
   return true;
 }
 
-bool SltwoSubalgebras::checkConsistency() const {
+bool SlTwoSubalgebras::checkConsistency() const {
   if (this->flagDeallocated) {
     global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
@@ -4680,7 +4680,7 @@ bool SltwoSubalgebras::checkConsistency() const {
   return true;
 }
 
-void SltwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
+void SlTwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
   this->grandMasterConsistencyCheck();
   this->checkConsistency();
   for (int i = 0; i < this->size; i ++) {
@@ -4689,7 +4689,7 @@ void SltwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
   this->grandMasterConsistencyCheck();
 }
 
-bool SltwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex) {
+bool SlTwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex) {
   if (outputIndex != nullptr) {
     *outputIndex = - 1;
   }
@@ -4707,7 +4707,7 @@ bool SltwoSubalgebras::containsSl2WithGivenH(Vector<Rational>& theH, int* output
   return false;
 }
 
-bool SltwoSubalgebras::containsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex) {
+bool SlTwoSubalgebras::containsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex) {
   if (outputIndex != nullptr) {
     *outputIndex = - 1;
   }
@@ -4768,7 +4768,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsitionAmbientLieAlgebra() {
   this->attemptToComputeCentralizer();
 }
 
-void SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner) {
+void SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs(SlTwoSubalgebras& owner) {
   MacroRegisterFunctionWithName("SlTwoSubalgebra::computeModuleDecompositionsitionOfMinimalContainingRegularSAs");
   this->moduleDecompositionMinimalContainingRootSAs.setSize(this->IndicesMinimalContainingRootSAs.size);
   List<int> buffer;
@@ -4901,7 +4901,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   }
 }
 
-void SltwoSubalgebras::toStringModuleDecompositionMinimalContainingRegularSAs(
+void SlTwoSubalgebras::toStringModuleDecompositionMinimalContainingRegularSAs(
   std::string& output, bool useLatex, bool useHtml
 ) {
   std::string tempS;
@@ -4921,18 +4921,18 @@ Rational SlTwoSubalgebra::getDynkinIndex() const {
   return this->LengthHsquared * this->getOwnerWeyl().getLongestRootLengthSquared() / 4;
 }
 
-std::string SltwoSubalgebras::descriptionHCharacteristic =
+std::string SlTwoSubalgebras::descriptionHCharacteristic =
 "Let h be in the Cartan subalgebra. Let \\(\\alpha_1, ..., \\alpha_n\\) "
 "be simple roots with respect to h. Then the h-characteristic, as defined by E. Dynkin, "
 "is the n-tuple \\((\\alpha_1(h), ..., \\alpha_n(h))\\).";
 
-std::string SltwoSubalgebras::descriptionHRealization =
+std::string SlTwoSubalgebras::descriptionHRealization =
 "The actual realization of h. "
 "The coordinates of h are given with respect to the fixed original simple basis. "
 "Note that the h-characteristic is computed using <b>a possibly different simple basis</b>, "
 "more precisely, with respect to any h-positive simple basis. ";
 
-std::string SltwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
+std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
 "A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
 "has no centralizer in the regular semisimple subalgebra, "
 "but the regular semisimple subalgebra might fail to be minimal containing. "
@@ -4941,14 +4941,14 @@ std::string SltwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
 "See Dynkin, Semisimple Lie subalgebras of semisimple "
 "Lie algebras, remark before Theorem 10.4.";
 
-std::string SltwoSubalgebras::descriptionModuleDecompositionOverSl2 =
+std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "The \\(sl(2)\\) submodules of the ambient Lie algebra are parametrized by their "
 "highest weight with respect to the Cartan element h of \\(sl(2)\\). "
 "In turn, the highest weight is a positive integer multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{l\\psi}\\) is \\(l + 1\\)-dimensional. ";
 
-std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SltwoSubalgebras::toStringSummary");
+std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SlTwoSubalgebras::toStringSummary");
   std::stringstream out;
   bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
   std::string displayPathAlgebra;
@@ -5095,7 +5095,7 @@ std::string SltwoSubalgebras::toStringSummary(FormatExpressions* theFormat) {
   return out.str();
 }
 
-std::string SltwoSubalgebras::toString(FormatExpressions* theFormat) {
+std::string SlTwoSubalgebras::toString(FormatExpressions* theFormat) {
   std::string tempS;
   std::stringstream out;
   std::stringstream body;
@@ -5119,8 +5119,8 @@ std::string SltwoSubalgebras::toString(FormatExpressions* theFormat) {
   return out.str();
 }
 
-void SltwoSubalgebras::toHTML(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SltwoSubalgebras::toHTML");
+void SlTwoSubalgebras::toHTML(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SlTwoSubalgebras::toHTML");
   std::string virtualFileName = this->owner->toStringVirtualFolderName() + this->owner->toStringFileNameRelativePathSlTwoSubalgebras();
   ProgressReport theReport;
   theReport.report("Preparing html pages for sl(2) subalgebras. This might take a while.");

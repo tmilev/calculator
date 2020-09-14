@@ -185,7 +185,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
-  ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
+  ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream,
   bool forceRecompute,
   bool doFullInit,

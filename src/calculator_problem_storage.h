@@ -226,7 +226,7 @@ public:
   bool authenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
   bool authenticateWithToken(std::stringstream* commentsOnFailure);
   bool authenticate(std::stringstream* commentsOnFailure);
-  std::string FirstLoginMessage();
+  std::string firstLoginMessage();
   bool shouldCommentOnMissingUser();
   bool resetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool setPassword(std::stringstream* commentsOnFailure);

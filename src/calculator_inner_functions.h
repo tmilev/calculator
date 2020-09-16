@@ -137,6 +137,14 @@ public:
   static bool differentiateWithRespectToXTimesAny(Calculator& calculator, const Expression& input, Expression& output);
 };
 
+class CalculatorFunctionsAlgebraic {
+public:
+  static bool convertAlgebraicNumberToMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getAlgebraicNumberFromMinPoly(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printAlgebraicClosureStatus(Calculator& calculator, const Expression& input, Expression& output);
+
+};
+
 class CalculatorFunctions {
 public:
   static bool leftIntervalGreaterThanRight(const Expression& left, const Expression& right);
@@ -190,8 +198,6 @@ public:
   static bool innerIntegerToHex(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHexToInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerHexToString(Calculator& calculator, const Expression& input, Expression& output);
-
-
 
   static bool innerIntersection(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerUnion(Calculator& calculator, const Expression& input, Expression& output);
@@ -325,9 +331,6 @@ public:
   static bool innerInvertMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDFQsEulersMethod(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerConvertAlgebraicNumberToMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetAlgebraicNumberFromMinPoly(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintAlgebraicClosureStatus(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerScaleToLeadingUnit(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerRemoveDuplicates(Calculator& calculator, const Expression& input, Expression& output);
@@ -511,44 +514,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool innerAdCommonEigenSpaces(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEmbedG2inB3(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCasimir(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCharacterSSLieAlgFD(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSSubalgebras(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doForceRecompute,
-    bool doAttemptToSolveSystems,
-    bool docomputePairingTable,
-    bool docomputeModuleDecompositionsition,
-    bool doComputeNilradicals,
-    bool doAdjustCentralizers
-  );
-  static bool innerPrintSSsubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRecompute(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerGetChevGen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerGetCartanGen(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebraShort(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerPrintSSLieAlgebra(calculator, input, output, false);
-  }
-  static bool innerPrintSSLieAlgebraVerbose(Calculator& calculator, const Expression& input, Expression& output) {
-    return CalculatorFunctions::innerPrintSSLieAlgebra(calculator, input, output, true);
-  }
-  static bool innerWriteSSLieAlgebraToHD(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerPrintSSLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
-  static bool innerWriteToHDOrPrintSSLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
-  );
-  static bool functionWriteToHDOrPrintSSLieAlgebra(
-    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
-  );
-  static bool innerRootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConesIntersect(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& calculator, const Expression& input, Expression& output);
 

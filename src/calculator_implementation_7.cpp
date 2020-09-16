@@ -1238,10 +1238,10 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
+bool CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertAlgebraicNumberToMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix");
   if (input.size() != 2) {
     return false;
   }
@@ -1259,7 +1259,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   return output.assignMatrix(result, calculator);
 }
 
-bool CalculatorFunctions::innerPrintAlgebraicClosureStatus(
+bool CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   (void) input;
@@ -1272,10 +1272,10 @@ bool CalculatorFunctions::innerPrintAlgebraicClosureStatus(
   );
 }
 
-bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
+bool CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly");
+  MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly");
   Expression polynomialExpression;
   if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(
     calculator, input, polynomialExpression

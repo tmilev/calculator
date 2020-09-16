@@ -2540,7 +2540,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
 bool CalculatorLieTheory::casimirWithRespectToLevi(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorLieTheory::innerCasimir");
+  MacroRegisterFunctionWithName("CalculatorLieTheory::casimir");
   RecursionDepthCounter recursionCounter(&calculator.recursionDepth);
   if (!input.isListNElements(3)) {
     return false;
@@ -2840,4 +2840,372 @@ bool CalculatorLieTheory::drawWeightSupport(
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.toStringFullCharacterWeightsTable();
   return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::getLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output) {
+  (void) input;
+  std::stringstream outFromHD, outRecomputeLinks;
+
+  outFromHD << "\n\n<p>\n\n<table>"
+  << "<tr><td>Structure constants</td>"
+  << "<td>Semisimple subalgebras</td> "
+  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
+  List<DynkinType> precomputedTypes;
+  DynkinType::getPrecomputedDynkinTypes(precomputedTypes);
+  for (int i = 0; i < precomputedTypes.size; i ++) {
+    outFromHD << calculator.toStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
+    if (precomputedTypes[i].hasPrecomputedSubalgebras()) {
+      std::stringstream recomputeCommand;
+      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}("
+      << precomputedTypes[i].toString() << ")";
+      outRecomputeLinks << "<br>"
+      << HtmlRoutines::getCalculatorComputationAnchorNewPage(recomputeCommand.str(), "");
+    }
+  }
+  outFromHD << "</table></p>";
+  std::string fileName = "semisimple_lie_algebra_structure.html";
+  std::stringstream out;
+  out
+  << calculator.writeFileToOutputFolderReturnLink(outFromHD.str(), fileName, "Links file");
+  out << "<br>Recompute links.";
+  out << outRecomputeLinks.str();
+  out << outFromHD.str();
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, true, true, true, true, true, true);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebrasRecompute(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, true, true, false, true, false, true);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, true, false, false, false, false, false);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, true, true, false, true, false, false);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output) {
+  return CalculatorLieTheory::printSemisimpleSubalgebras(calculator, input, output, false, true, false, true, false, true);
+}
+
+bool CalculatorLieTheory::printSemisimpleSubalgebras(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doForceRecompute,
+  bool doAttemptToSolveSystems,
+  bool docomputePairingTable,
+  bool docomputeModuleDecompositionsition,
+  bool doComputeNilradicals,
+  bool doAdjustCentralizers
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::innerPrintSSsubalgebras");
+  if (doForceRecompute) {
+    if (!global.userDefaultHasAdminRights()) {
+      return calculator << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
+    }
+  }
+  if (global.theResponse.monitoringAllowed()) {
+    global.theResponse.initiate("Triggered by printSemisimpleSubalgebras.");
+  }
+  if (input.size() != 2) {
+    return calculator << "Semisimple Lie algebra expects a single argument. ";
+  }
+  std::stringstream out;
+  WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
+  SemisimpleLieAlgebra* ownerSSPointer = nullptr;
+  bool isAlreadySubalgebrasObject = input[1].isOfType<SemisimpleSubalgebras>();
+  if (!isAlreadySubalgebrasObject) {
+    if (!calculator.convert(
+      input[1],
+      CalculatorConversions::functionSemisimpleLieAlgebra,
+      ownerAlgebra
+    )) {
+      return output.makeError("Error extracting Lie algebra.", calculator);
+    }
+    ownerSSPointer = ownerAlgebra.content;
+    if (ownerSSPointer->getRank() > 8) {
+      out << "<b>This code is completely experimental and has been set to run up to rank 6. "
+      << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+      return output.assignValue(out.str(), calculator);
+    } else {
+      out << "<b>This code is completely experimental. "
+      << "Use the following printouts on your own risk.</b><br>";
+    }
+  } else {
+    ownerSSPointer = input[1].getValue<SemisimpleSubalgebras>().owner;
+  }
+  if (ownerSSPointer == nullptr) {
+    global.fatal << "zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
+  }
+  SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
+  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.toString();
+  global.relativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
+  global.relativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
+  SemisimpleSubalgebras& theSubalgebras =
+  calculator.theObjectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
+  theSubalgebras.computeStructureWriteFiles(
+    ownerLieAlgebra,
+    calculator.theObjectContainer.theAlgebraicClosure,
+    calculator.theObjectContainer.semisimpleLieAlgebras,
+    calculator.theObjectContainer.theSltwoSAs,
+    &out,
+    doForceRecompute,
+    !isAlreadySubalgebrasObject,
+    doComputeNilradicals,
+    docomputeModuleDecompositionsition,
+    doAttemptToSolveSystems,
+    docomputePairingTable,
+    doAdjustCentralizers
+  );
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::casimir(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::casimir");
+  if (input.size() != 2) {
+    return calculator << "Casimir function expects a single input. ";
+  }
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra& algebraReference = *algebra.content;
+  ElementUniversalEnveloping<RationalFunction<Rational> > theCasimir;
+  theCasimir.makeCasimir(algebraReference);
+  calculator << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
+  << ". The coefficient: " << algebraReference.theWeyl.getKillingDividedByTraceRatio().toString()
+  <<  ". The Casimir element of the ambient Lie algebra. ";
+  ExpressionContext context(calculator);
+  context.setAmbientSemisimpleLieAlgebra(algebraReference);
+  return output.assignValueWithContext(theCasimir, context, calculator);
+}
+
+bool CalculatorLieTheory::embedG2InB3(Calculator& calculator, const Expression& input, Expression& output) {
+  if (input.size() != 2) {
+    return false;
+  }
+
+  output = input[1];
+  if (!output.isOfType < ElementUniversalEnveloping<RationalFunction<Rational> > >()) {
+    return output.makeError("Failed to convert argument to element of the Universal enveloping algebra. ", calculator);
+  }
+  SemisimpleLieAlgebra& ownerSS = *output.getAmbientSemisimpleLieAlgebraNonConstUseWithCaution();
+  if (!ownerSS.isOfSimpleType('G', 2)) {
+    return output.makeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", calculator);
+  }
+  HomomorphismSemisimpleLieAlgebra theHmm;
+  calculator.makeHmmG2InB3(theHmm);
+
+  ElementUniversalEnveloping<RationalFunction<Rational> > argument = output.getValue<ElementUniversalEnveloping<RationalFunction<Rational> > >();
+  ElementUniversalEnveloping<RationalFunction<Rational> > outputUE;
+  if (!theHmm.applyHomomorphism(argument, outputUE)) {
+    return output.makeError("Failed to apply homomorphism for unspecified reason", calculator);
+  }
+  outputUE.simplify();
+  ExpressionContext context(calculator);
+  context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
+  return output.assignValueWithContext(outputUE, context, calculator);
+}
+
+bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::characterSemisimpleLieAlgebraFiniteDimensional");
+  Vector<Rational> theHW;
+  Selection parSel;
+  WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
+  Expression tempE, tempE2;
+  if (!calculator.getTypeHighestWeightParabolic(
+    calculator, input, output, theHW, parSel, ownerSSLiealg, nullptr
+  )) {
+    return false;
+  }
+  if (output.isError()) {
+    return true;
+  }
+  if (parSel.cardinalitySelection != 0) {
+    return output.makeError("I know only to compute with finite dimensional characters, for the time being. ", calculator);
+  }
+  CharacterSemisimpleLieAlgebraModule<Rational> theElt;
+  theElt.makeFromWeight(ownerSSLiealg.content->theWeyl.getSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
+  return output.assignValue(theElt, calculator);
+}
+
+bool CalculatorLieTheory::chevalleyGenerator(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::chevalleyGenerator");
+  if (input.size() != 3) {
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  int theIndex;
+  if (!input[2].isSmallInteger(&theIndex)) {
+    return false;
+  }
+  if (theIndex > theSSalg.content->getNumberOfPositiveRoots() || theIndex == 0 || theIndex < - theSSalg.content->getNumberOfPositiveRoots()) {
+    return output.makeError("Bad Chevalley-Weyl generator index.", calculator);
+  }
+  ElementSemisimpleLieAlgebra<Rational> theElt;
+  if (theIndex > 0) {
+    theIndex += theSSalg.content->getRank() - 1;
+  }
+  theIndex += theSSalg.content->getNumberOfPositiveRoots();
+  theElt.makeGenerator(theIndex, *theSSalg.content);
+  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
+  theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
+  ExpressionContext context(calculator);
+  int indexInOwner = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(
+    theSSalg.content->theWeyl.theDynkinType
+  );
+  context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
+  return output.assignValueWithContext(theUE, context, calculator);
+}
+
+bool CalculatorLieTheory::cartanGenerator(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::cartanGenerator");
+  if (input.size() != 3) {
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  if (theSSalg.content == nullptr) {
+    global.fatal << "This is a programming error: called conversion function successfully, "
+    << "but the output is a zero pointer to a semisimple Lie algebra. "
+    << global.fatal;
+  }
+  int theIndex;
+  if (!input[2].isSmallInteger(&theIndex)) {
+    return false;
+  }
+  if (
+    theIndex == 0 ||
+    theIndex > theSSalg.content->getNumberOfPositiveRoots() ||
+    theIndex < - theSSalg.content->getNumberOfPositiveRoots()
+  ) {
+    return output.makeError("Bad Cartan subalgebra generator index.", calculator);
+  }
+  ElementSemisimpleLieAlgebra<Rational> theElt;
+  Vector<Rational> theH = theSSalg.content->theWeyl.rootSystem[theSSalg.content->getRootIndexFromDisplayIndex(theIndex)];
+  theElt.makeCartanGenerator(theH, *theSSalg.content);
+  ElementUniversalEnveloping<RationalFunction<Rational> > theUE;
+  theUE.assignElementLieAlgebra(theElt, *theSSalg.content);
+  ExpressionContext theContext(calculator);
+  int theAlgIndex = calculator.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
+  theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
+  return output.assignValueWithContext(theUE, theContext, calculator);
+}
+
+bool CalculatorLieTheory::rootSubsystem(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::rootSubsystem");
+  if (input.size() < 3) {
+    return false;
+  }
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!calculator.convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
+  )) {
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  SemisimpleLieAlgebra* theSSlieAlg = algebra.content;
+  int theRank = theSSlieAlg->getRank();
+  Vector<Rational> currentRoot;
+  Vectors<Rational> outputRoots;
+  WeylGroupData& theWeyl = theSSlieAlg->theWeyl;
+  if (!theWeyl.theDynkinType.isSimple()) {
+    return calculator << "<hr>Function root subsystem works for simple ambient types only. ";
+  }
+  for (int i = 2; i < input.size(); i ++) {
+    if (!calculator.getVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
+      return false;
+    }
+    if (!theWeyl.rootSystem.contains(currentRoot)) {
+      return output.makeError("Input vector " + currentRoot.toString() + " is not a root. ", calculator);
+    }
+    outputRoots.addOnTop(currentRoot);
+  }
+  std::stringstream out;
+  DynkinDiagramRootSubalgebra theDiagram;
+  theWeyl.transformToSimpleBasisGenerators(outputRoots, theWeyl.rootSystem);
+  theDiagram.ambientBilinearForm = theWeyl.cartanSymmetric;
+  theDiagram.ambientRootSystem = theWeyl.rootSystem;
+  theDiagram.computeDiagramInputIsSimple(outputRoots);
+  out << "Diagram final: " << theDiagram.toString()
+  << ". Simple basis: " << theDiagram.simpleBasesConnectedComponents.toString();
+  return output.assignValue(out.str(), calculator);
+}
+
+bool CalculatorLieTheory::printSemisimpleLieAlgebra(
+  Calculator& calculator, const Expression& input, Expression& output, bool Verbose
+) {
+  return CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(calculator, input, output, Verbose, false);
+}
+
+bool CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk");
+  calculator.checkInputNotSameAsOutput(input, output);
+  if (!global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
+    return output.makeError(
+      "Caching structure constants to HD available to admins only. ",
+      calculator);
+  }
+  return CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(calculator, input, output, true, true);
+}
+
+bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool Verbose,
+  bool writeToHD
+) {
+  MacroRegisterFunctionWithName("Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra");
+  if (input.size() != 2) {
+    return calculator << "Print semisimple Lie algebras expects 1 argument. ";
+  }
+  return CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
+    calculator, input[1], output, Verbose, writeToHD
+  );
+}
+
+bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool Verbose,
+  bool writeToHD
+) {
+  MacroRegisterFunctionWithName("CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra");
+  WithContext<SemisimpleLieAlgebra*> tempSSpointer;
+  input.checkInitialization();
+  if (!calculator.convert(
+    input,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    tempSSpointer
+  )) {
+    calculator << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
+    return output.makeError("Error extracting Lie algebra.", calculator);
+  }
+  tempSSpointer.content->checkConsistency();
+  tempSSpointer.context.checkInitialization();
+  SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
+  std::string result = theSSalgebra.toHTMLCalculator(Verbose, writeToHD, calculator.flagWriteLatexPlots);
+  return output.assignValue(result, calculator);
 }

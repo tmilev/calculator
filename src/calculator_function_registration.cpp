@@ -1485,7 +1485,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertAlgebraicNumberToMatrix",
-    CalculatorFunctions::innerConvertAlgebraicNumberToMatrix,
+    CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix,
     "",
     "Converts the algebraic number to its internal matrix representation. ",
     "a = \\sqrt{2};\n"
@@ -1495,13 +1495,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "c = \\sqrt{6};\n"
     "C = ConvertAlgebraicNumberToMatrix(c);\n"
     "A \\otimes B",
-    "CalculatorFunctions::innerConvertAlgebraicNumberToMatrix",
+    "CalculatorFunctions::convertAlgebraicNumberToMatrix",
     "ConvertAlgebraicNumberToMatrix",
     innerStandard
   );
   this->addOperationHandler(
     "PrintAlgebraicClosureStatus",
-    CalculatorFunctions::innerPrintAlgebraicClosureStatus,
+    CalculatorFunctionsAlgebraic::printAlgebraicClosureStatus,
     "",
     "Prints in human-redable form the state of the ambient algebraic closure. ",
     "AlgebraicNumberFromPolynomial(x^2 - 6);\n"
@@ -1510,20 +1510,20 @@ void Calculator::initPredefinedInnerFunctions() {
     "PrintAlgebraicClosureStatus 0;\n"
     "AlgebraicNumberFromPolynomial(x^2 - 3);\n"
     "PrintAlgebraicClosureStatus 0;\n",
-    "CalculatorFunctions::innerPrintAlgebraicClosureStatus",
+    "CalculatorFunctions::printAlgebraicClosureStatus",
     "PrintAlgebraicClosureStatus",
     innerStandard
   );
   this->addOperationHandler(
     "AlgebraicNumberFromPolynomial",
-    CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly,
+    CalculatorFunctionsAlgebraic::getAlgebraicNumberFromMinPoly,
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
     "AlgebraicNumberFromPolynomial{}(x^2 - 4);\n"
     "AlgebraicNumberFromPolynomial{}(x^2 - (3 + 2sqrt(2)));\n"
     "AlgebraicNumberFromPolynomial{}(x^3 - (7 + 5sqrt(2)));\n"
     "AlgebraicNumberFromPolynomial{}(x^3 + \\sqrt{2}x + 1);\n",
-    "CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly",
+    "CalculatorFunctions::getAlgebraicNumberFromMinPoly",
     "AlgebraicNumberFromPolynomial",
     innerStandard
   );
@@ -2568,24 +2568,24 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "MakeCharacterLieAlg",
-    CalculatorFunctions::innerCharacterSSLieAlgFD,
+    CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional,
     "",
     "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
     "First argument gives type, second argument gives highest weight in fundamental coordinates.",
     "x = MakeCharacterLieAlg{}(G_2, (1, 0));\n"
     "y = MakeCharacterLieAlg{}(G_2, (0, 1));\n"
     "x * y",
-    "Calculator::innerCharacterSSLieAlgFD",
+    "Calculator::characterSemisimpleLieAlgebraFiniteDimensional",
     "MakeCharacterLieAlg",
     innerStandard
   );
   this->addOperationHandler(
     "GetLinks",
-    CalculatorFunctions::innerGetLinksToSimpleLieAlgerbas,
+    CalculatorLieTheory::getLinksToSimpleLieAlgerbas,
     "",
     "Gets simple Lie algebra links to the calculator.",
     "GetLinks{}0",
-    "Calculator::innerGetLinksToSimpleLieAlgerbas",
+    "Calculator::getLinksToSimpleLieAlgerbas",
     "GetLinks",
     innerInvisible
   );
@@ -3979,19 +3979,19 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "WriteSemisimpleLieAlgebra",
-    CalculatorFunctions::innerWriteSSLieAlgebraToHD,
+    CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk,
     "",
     "Writes semisimple Lie algebra structure constants to "
     "the output folder of the calculator. Available to logged-in admins only. ",
     "WriteSemisimpleLieAlgebra(F_4)",
-    "Calculator::innerWriteToHDOrPrintSSLieAlgebra",
+    "Calculator::writeToHardDiskOrPrintSemisimpleLieAlgebra",
     "WriteSemisimpleLieAlgebra",
     innerStandard
   );
 
   this->addOperationHandler(
     "PrintSemisimpleLieAlgebra",
-    CalculatorFunctions::innerPrintSSLieAlgebraVerbose,
+    CalculatorLieTheory::printSemisimpleLieAlgebraVerbose,
     "",
     "Creates a printout with information about the "
     "semisimple Lie algebra, including "
@@ -4000,7 +4000,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "a graphics of the root system. ",
     "PrintSemisimpleLieAlgebra{}(F_4);\n"
     "PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);",
-    "Calculator::innerPrintSSLieAlgebraVerbose",
+    "Calculator::printSemisimpleLieAlgebraVerbose",
     "PrintSemisimpleLieAlgebra",
     innerStandard
   );
@@ -4019,7 +4019,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "GetChevalleyGenerator",
-    CalculatorFunctions::innerGetChevGen,
+    CalculatorLieTheory::chevalleyGenerator,
     "",
     "First argument must be a semisimple "
     "Lie algebra, second argument must "
@@ -4033,13 +4033,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "ordered displayed by the "
     "PrintSemisimpleLieAlgebra function. ",
     "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
-    "Calculator::innerGetChevGen",
+    "Calculator::chevalleyGenerator",
     "GetChevalleyGenerator",
     innerStandard
   );
   this->addOperationHandler(
     "GetCartanGenerator",
-    CalculatorFunctions::innerGetCartanGen,
+    CalculatorLieTheory::cartanGenerator,
     "",
     "First argument must be a semisimple Lie algebra, "
     "second argument must "
@@ -4053,7 +4053,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "with a coefficient of proportionality "
     "equal to 2/(simple root length squared) ).",
     "GetCartanGenerator{}(G_2, 1)",
-    "Calculator::innerGetCartanGen",
+    "Calculator::cartanGenerator",
     "GetCartanGenerator",
     innerStandard
   );
@@ -4435,11 +4435,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Casimir",
-    CalculatorFunctions::innerCasimir,
+    CalculatorLieTheory::casimir,
     "",
     "Gives the Casimir element. ",
     "Casimir{}(G_2)",
-    "Calculator::innerCasimir",
+    "Calculator::casimir",
     "Casimir",
     innerStandard
   );
@@ -4459,14 +4459,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "HmmG2inB3",
-    CalculatorFunctions::innerEmbedG2inB3,
+    CalculatorLieTheory::embedG2InB3,
     "",
     "Embeds elements of the Universal enveloping "
     "of G_2 in B_3, following an embedding found "
     "in a paper by McGovern.",
     "g_{{a}}= GetChevalleyGenerator{} (G_2, a); "
     "HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
-    "Calculator::innerEmbedG2inB3",
+    "Calculator::embedG2InB3",
     "HmmG2inB3",
     innerStandard
   );
@@ -4754,13 +4754,13 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "RootSubsystem",
-    CalculatorFunctions::innerRootSubsystem,
+    CalculatorLieTheory::rootSubsystem,
     "",
     "Generates a root subsystem of a simple type. "
     "First argument indicates simple type, second, third,... arguments "
     "give the generating roots. ",
     "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
-    "Calculator::innerRootSubsystem",
+    "Calculator::rootSubsystem",
     "RootSubsystem",
     innerStandard
   );
@@ -5278,45 +5278,45 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebras",
-    CalculatorFunctions::innerPrintSSsubalgebrasRegular,
+    CalculatorLieTheory::printSemisimpleSubalgebrasRegular,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebras(B_3)",
-    "Calculator::innerPrintSSsubalgebrasRegular",
+    "Calculator::printSemisimpleSubalgebrasRegular",
     "PrintSemisimpleSubalgebras",
     innerStandard
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
-    CalculatorFunctions::innerPrintSSsubalgebrasRecompute,
+    CalculatorLieTheory::printSemisimpleSubalgebrasRecompute,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    "Calculator::innerPrintSSsubalgebrasRecompute",
+    "Calculator::printSemisimpleSubalgebrasRecompute",
     "PrintSemisimpleSubalgebrasRecompute",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasNoCentralizers",
-    CalculatorFunctions::innerPrintSSsubalgebrasNoCentralizers,
+    CalculatorLieTheory::printSemisimpleSubalgebrasNoCentralizers,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    "Calculator::innerPrintSSsubalgebrasNoCentralizers",
+    "Calculator::printSemisimpleSubalgebrasNoCentralizers",
     "PrintSemisimpleSubalgebrasNoCentralizers",
     innerAdminNoTest
   );
   this->addOperationHandler(
     "PrintSemisimpleSubalgebrasFull",
-    CalculatorFunctions::innerPrintSSsubalgebrasNilradicals,
+    CalculatorLieTheory::printSemisimpleSubalgebrasNilradicals,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasFull{}(A_2)",
-    "Calculator::innerPrintSSsubalgebrasNilradicals",
+    "Calculator::printSemisimpleSubalgebrasNilradicals",
     "PrintSemisimpleSubalgebrasFull",
     innerAdminNoTest
   );

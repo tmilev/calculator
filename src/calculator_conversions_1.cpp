@@ -7,6 +7,7 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 #include "math_rational_function_implementation.h"
+#include "calculator_lie_theory.h"
 
 template <>
 bool Expression::convertInternally<RationalFunction<Rational> >(Expression& output) const;
@@ -243,7 +244,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
   if (newlyCreated) {
     outputPointer->computeChevalleyConstants();
     Expression tempE;
-    CalculatorFunctions::functionWriteToHDOrPrintSSLieAlgebra(
+    CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
       calculator, output, tempE, false, false
     );
     calculator << tempE.getValue<std::string>();

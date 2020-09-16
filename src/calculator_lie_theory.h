@@ -153,6 +153,44 @@ public:
   static bool drawWeightSupportWithMults(Calculator& calculator, const Expression& input, Expression& output);
   static bool drawWeightSupport(Calculator& calculator, const Expression& input, Expression& output);
 
+  static bool embedG2InB3(Calculator& calculator, const Expression& input, Expression& output);
+  static bool casimir(Calculator& calculator, const Expression& input, Expression& output);
+  static bool getLinksToSimpleLieAlgerbas(Calculator& calculator, const Expression& input, Expression& output);
+  static bool characterSemisimpleLieAlgebraFiniteDimensional(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleSubalgebras(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool doForceRecompute,
+    bool doAttemptToSolveSystems,
+    bool docomputePairingTable,
+    bool docomputeModuleDecompositionsition,
+    bool doComputeNilradicals,
+    bool doAdjustCentralizers
+  );
+  static bool printSemisimpleSubalgebrasNilradicals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleSubalgebrasRecompute(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleSubalgebrasNoCentralizers(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleSubalgebrasNoSolutions(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleSubalgebrasRegular(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool chevalleyGenerator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool cartanGenerator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleLieAlgebraShort(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorLieTheory::printSemisimpleLieAlgebra(calculator, input, output, false);
+  }
+  static bool printSemisimpleLieAlgebraVerbose(Calculator& calculator, const Expression& input, Expression& output) {
+    return CalculatorLieTheory::printSemisimpleLieAlgebra(calculator, input, output, true);
+  }
+  static bool writeSemisimpleLieAlgebraToHardDisk(Calculator& calculator, const Expression& input, Expression& output);
+  static bool printSemisimpleLieAlgebra(Calculator& calculator, const Expression& input, Expression& output, bool Verbose);
+  static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
+    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+  );
+  static bool functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
+    Calculator& calculator, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+  );
+  static bool rootSubsystem(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 #endif

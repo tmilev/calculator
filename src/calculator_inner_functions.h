@@ -89,6 +89,16 @@ public:
   static bool arcsin(Calculator& calculator, const Expression& input, Expression& output);
   static bool arccos(Calculator& calculator, const Expression& input, Expression& output);
   static bool arctan(Calculator& calculator, const Expression& input, Expression& output);
+  static bool exploitCosineEvenness(Calculator& calculator, const Expression& input, Expression& output);
+  static bool exploitSineOddness(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool trigonometricSumToTrigonometricProduct(Calculator& calculator, const Expression& input, Expression& output);
+  static bool sineOfAngleSumToTrigonometry(Calculator& calculator, const Expression& input, Expression& output);
+  static bool cosineOfAngleSumToTrigonometry(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertSineToExponent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertCosineToExponent(Calculator& calculator, const Expression& input, Expression& output);
+  static bool eulerFormulaAsLaw(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 
 class CalculatorFunctionsIntegration {
@@ -113,8 +123,8 @@ public:
 
   static bool integrateEpowerAxDiffX(Calculator& calculator, const Expression& input, Expression& output);
   static bool integrateSinPowerNCosPowerM(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegrateTanPowerNSecPowerM(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntegralOperator(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integrateTanPowerNSecPowerM(Calculator& calculator, const Expression& input, Expression& output);
+  static bool integralOperator(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsDifferentiation {
@@ -229,7 +239,6 @@ public:
   static bool innerFloor(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerRound(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerLogarithmBaseNCeiling(Calculator& calculator, const Expression& input, Expression& output);
-
 
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output
@@ -372,15 +381,6 @@ public:
   );
 
   static bool innerPowerImaginaryUnit(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExploitCosEvenness(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerExploitSinOddness(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerTrigSumToTrigProduct(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSineOfAngleSumToTrig(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerCosineOfAngleSumToTrig(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertSinToExponent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerConvertCosToExponent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerEulerFormulaAsLaw(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerTrace(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerReverseBytes(Calculator& calculator, const Expression& input, Expression& output);

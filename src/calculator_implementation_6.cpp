@@ -2177,10 +2177,10 @@ bool CalculatorFunctions::innerOrIdentical(Calculator& calculator, const Express
   return false;
 }
 
-bool CalculatorFunctions::innerSineOfAngleSumToTrig(
+bool CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerSineOfAngleSumToTrig");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry");
   if (input.size() != 2) {
     return false;
   }
@@ -2197,10 +2197,10 @@ bool CalculatorFunctions::innerSineOfAngleSumToTrig(
   return true;
 }
 
-bool CalculatorFunctions::innerTrigSumToTrigProduct(
+bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTrigSumToTrigProduct");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct");
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
@@ -2265,10 +2265,10 @@ bool CalculatorFunctions::innerTrigSumToTrigProduct(
   // return false;
 }
 
-bool CalculatorFunctions::innerCosineOfAngleSumToTrig(
+bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerCosineOfAngleSumToTrig");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry");
   if (input.size() != 2) {
     return false;
   }

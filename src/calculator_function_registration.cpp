@@ -1719,12 +1719,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "^",
-    CalculatorFunctions::innerEulerFormulaAsLaw,
+    CalculatorFunctionsTrigonometry::eulerFormulaAsLaw,
     "",
     "Trigonometrizes an exponential expression using Euler's formula.  ",
     "TurnOnRules(\"EulerFormula\");\n"
     "e^{i x}",
-    "CalculatorFunctions::innerEulerFormulaAsLaw",
+    "CalculatorFunctions::eulerFormulaAsLaw",
     "EulerFormula",
     innerStandardOffByDefault
   );
@@ -1741,7 +1741,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "+",
-    CalculatorFunctions::innerTrigSumToTrigProduct,
+    CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct,
     "",
     "Implementation of sum-to-product trig rules. ",
     "TurnOnRules(\"TrigSumToTrigProduct\");\n"
@@ -1752,34 +1752,34 @@ void Calculator::initPredefinedInnerFunctions() {
     "cos(a) + cos(b);\n"
     "cos(a) - cos(b);\n"
     "- cos(a) - cos(b)",
-    "CalculatorFunctions::innerTrigSumToTrigProduct",
+    "CalculatorFunctions::trigonometricSumToTrigonometricProduct",
     "TrigSumToTrigProduct",
     innerStandardOffByDefault
   );
   this->addOperationHandler(
     "\\sin",
-    CalculatorFunctions::innerSineOfAngleSumToTrig,
+    CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry,
     "",
     "Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).",
     "TurnOnRules(\"SineOfAngleSum\"); \\sin(a + b)",
-    "CalculatorFunctions::innerSineOfAngleSumToTrig",
+    "CalculatorFunctions::sineOfAngleSumToTrigonometry",
     "SineOfAngleSum",
     innerStandardOffByDefault
   );
   this->addOperationHandler(
     "\\cos",
-    CalculatorFunctions::innerCosineOfAngleSumToTrig,
+    CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry,
     "",
     "Implementation of cos (a + b) = cos(a)cos(b) - sin(a)sin(b).",
     "TurnOnRules(\"CosineOfAngleSum\");\n"
     "\\cos(a + b)",
-    "CalculatorFunctions::innerCosineOfAngleSumToTrig",
+    "CalculatorFunctions::cosineOfAngleSumToTrigonometry",
     "CosineOfAngleSum",
     innerStandardOffByDefault
   );
   this->addOperationHandler(
     "\\sin",
-    CalculatorFunctions::innerConvertSinToExponent,
+    CalculatorFunctionsTrigonometry::convertSineToExponent,
     "",
     "Converts sine to exponent by sin(x) = (e^{i x} - e^{- i x}) / (2 i) ",
     "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
@@ -1791,7 +1791,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\cos",
-    CalculatorFunctions::innerConvertCosToExponent,
+    CalculatorFunctionsTrigonometry::convertCosineToExponent,
     "",
     "Converts cosine to exponent by cos(x) = (e^{i x} + e^{- i x}) / 2 ",
     "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
@@ -1803,23 +1803,23 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\cos",
-    CalculatorFunctions::innerExploitCosEvenness,
+    CalculatorFunctionsTrigonometry::exploitCosineEvenness,
     "",
     "If a is negative, converts cos (a) to cos(- a).",
     "TurnOnRules(\"ExploitCosEvenness\");\n"
     "cos(- 5x)",
-    "CalculatorFunctions::innerExploitCosEvenness",
+    "CalculatorFunctions::exploitCosineEvenness",
     "ExploitCosEvenness",
     innerStandardOffByDefault
   );
   this->addOperationHandler(
     "\\sin",
-    CalculatorFunctions::innerExploitSinOddness,
+    CalculatorFunctionsTrigonometry::exploitSineOddness,
     "",
     "If a is negative, converts sin (a) to -sin(-a).",
     "TurnOnRules(\"ExploitSinOddness\");\n"
     "sin(- 5x)",
-    "CalculatorFunctions::innerExploitSinOddness",
+    "CalculatorFunctions::exploitSineOddness",
     "ExploitSinOddness",
     innerStandardOffByDefault
   );
@@ -1835,12 +1835,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctionsIntegration::innerIntegrateTanPowerNSecPowerM,
+    CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM,
     "",
     "Transforms an integral of the form \\int \\tan^n x \\sec^m x.",
     "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\");\n"
     "\\int \\tan^2 x \\sec^{2}x dx ",
-    "CalculatorFunctions::innerIntegrateTanPowerNSecPowerM",
+    "CalculatorFunctions::integrateTanPowerNSecPowerM",
     "IntegrateTanPowerNSecPowerM",
     innerStandard
   );
@@ -6265,14 +6265,14 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "*",
-    CalculatorFunctionsIntegration::innerIntegralOperator,
+    CalculatorFunctionsIntegration::integralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
     "(\\int x)dx;\n"
     "\\int x (1+x) dx;\n"
     "\\int_2^3 x dx;\n"
     "\\int_2^3 x(1+x)dx",
-    "CalculatorFunctions::innerIntegralOperator",
+    "CalculatorFunctions::integralOperator",
     "IntegralOperatorFromProduct",
     innerStandard
   );
@@ -7187,11 +7187,11 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "/",
-    CalculatorFunctionsIntegration::innerIntegralOperator,
+    CalculatorFunctionsIntegration::integralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
     "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
-    "CalculatorFunctions::innerIntegralOperator",
+    "CalculatorFunctions::integralOperator",
     "IntegralOperatorFromQuotient",
     innerStandard
   );

@@ -3439,7 +3439,7 @@ bool CalculatorFunctionsDifferentiation::interpretAsDifferential(
   return false;
 }
 
-bool CalculatorFunctionsIntegration::innerIntegralOperator(
+bool CalculatorFunctionsIntegration::integralOperator(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::innerCompositeMultiplyIntegralFbyDx");
@@ -4525,10 +4525,10 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   return true;
 }
 
-bool CalculatorFunctionsIntegration::innerIntegrateTanPowerNSecPowerM(
+bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::innerIntegrateTanPowerNSecPowerM");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM");
   Expression theFunctionE, theVariableE, integrationSet;
   if (!input.isIndefiniteIntegralFdx(&theVariableE, &theFunctionE, &integrationSet)) {
     return false;
@@ -4666,10 +4666,10 @@ bool CalculatorFunctionsIntegration::innerIntegrateTanPowerNSecPowerM(
   return true;
 }
 
-bool CalculatorFunctions::innerExploitCosEvenness(
+bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExploitCosEvenness");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::exploitCosineEvenness");
   if (input.size() != 2) {
     return false;
   }
@@ -4688,10 +4688,10 @@ bool CalculatorFunctions::innerExploitCosEvenness(
   return output.makeOX(calculator, calculator.opCos(), moneE * cfE * nonCFpart);
 }
 
-bool CalculatorFunctions::innerExploitSinOddness(
+bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExploitSinOddness");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::exploitSineOddness");
   if (input.size() != 2) {
     return false;
   }
@@ -4712,10 +4712,10 @@ bool CalculatorFunctions::innerExploitSinOddness(
   return true;
 }
 
-bool CalculatorFunctions::innerConvertSinToExponent(
+bool CalculatorFunctionsTrigonometry::convertSineToExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertSinToExponent");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::convertSineToExponent");
   if (input.size() != 2) {
     return false;
   }
@@ -4731,10 +4731,10 @@ bool CalculatorFunctions::innerConvertSinToExponent(
   return true;
 }
 
-bool CalculatorFunctions::innerConvertCosToExponent(
+bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertCosToExponent");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::convertCosineToExponent");
   if (input.size() != 2) {
     return false;
   }
@@ -4781,10 +4781,10 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& calculator, const 
   return false; //<-this shouldn't happen
 }
 
-bool CalculatorFunctions::innerEulerFormulaAsLaw(
+bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEulerFormulaAsLaw");
+  MacroRegisterFunctionWithName("CalculatorFunctionsTrigonometry::eulerFormulaAsLaw");
   if (!input.startsWith(calculator.opThePower(), 3)) {
     return false;
   }

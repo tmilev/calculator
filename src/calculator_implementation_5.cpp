@@ -1025,8 +1025,8 @@ bool CalculatorFunctions::innerSortDescending(
   return output.makeSequence(calculator, &sortedExpressions);
 }
 
-bool CalculatorFunctions::innerLength(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLength");
+bool CalculatorFunctionsListsAndSets::length(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::length");
   if (!input.isListStartingWithAtom(
     calculator.operations.getIndexNoFail("Length")
   )) {

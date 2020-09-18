@@ -39,6 +39,25 @@ public:
   static bool testASN1Decode(Calculator& calculator, const Expression& input, Expression& output);
   static bool x509CertificateServer(Calculator& calculator, const Expression& input, Expression& output);
   static bool x509CertificateDecode(Calculator& calculator, const Expression& input, Expression& output);
+  static bool appendDoubleSha256Check(Calculator& calculator, const Expression& input, Expression& output);
+};
+
+class CalculatorFunctionsEncoding {
+public:
+  static bool convertBase64ToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertStringToHex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertCharToBase64(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool testJSON(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertBase64ToHex(Calculator& calculator, const Expression& input, Expression& output );
+  static bool convertIntegerToHex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertHexToInteger(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertHexToString(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertBase58ToHex(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertHexToBase58(Calculator& calculator, const Expression& input, Expression& output);
+  static bool convertIntegerUnsignedToBase58(Calculator& calculator, const Expression& input, Expression& output);
+  static bool base64ToCharToBase64Test(Calculator& calculator, const Expression& input, Expression& output);
+
 };
 
 class CalculatorFunctionsPlot {
@@ -152,7 +171,7 @@ public:
   static bool convertAlgebraicNumberToMatrix(Calculator& calculator, const Expression& input, Expression& output);
   static bool getAlgebraicNumberFromMinPoly(Calculator& calculator, const Expression& input, Expression& output);
   static bool printAlgebraicClosureStatus(Calculator& calculator, const Expression& input, Expression& output);
-
+  static bool isAlgebraicRadical(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctionsBasic {
@@ -172,7 +191,21 @@ public:
 };
 
 class CalculatorFunctionsListsAndSets {
+public:
+  static bool intersection(Calculator& calculator, const Expression& input, Expression& output);
+  static bool listUnion(Calculator& calculator, const Expression& input, Expression& output);
+  static bool unionNoRepetition(Calculator& calculator, const Expression& input, Expression& output);
+  static bool length(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intersectUnion(Calculator& calculator, const Expression& input, Expression& output);
+  static bool unionEmptySet(Calculator& calculator, const Expression& input, Expression& output);
+};
 
+class CalculatorFunctionsIntervals {
+public:
+  static bool unionUnionIntervals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool unionIntervals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool intersectIntervals(Calculator& calculator, const Expression& input, Expression& output);
+  static bool normalizeIntervals(Calculator& calculator, const Expression& input, Expression& output);
 };
 
 class CalculatorFunctions {
@@ -210,28 +243,12 @@ public:
   static bool expressionToString(Calculator& calculator, const Expression& input, Expression& output);
   static bool expressiontoUTF8String(Calculator& calculator, const Expression& input, Expression& output);
   static bool quoteToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool base64ToCharToBase64Test(Calculator& calculator, const Expression& input, Expression& output);
-  static bool convertBase64ToString(Calculator& calculator, const Expression& input, Expression& output);
-  static bool convertStringToHex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool charToBase64(Calculator& calculator, const Expression& input, Expression& output);
-  static bool appendDoubleSha256Check(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool convertBase58ToHex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool convertHexToBase58(Calculator& calculator, const Expression& input, Expression& output);
-  static bool convertIntegerUnsignedToBase58(Calculator& calculator, const Expression& input, Expression& output);
   static bool sliceString(Calculator& calculator, const Expression& input, Expression& output);
   static bool stringDifference(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveGenerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool nistEllipticCurveOrder(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTestJSON(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerBase64ToHex(Calculator& calculator, const Expression& input, Expression& output );
-  static bool innerIntegerToHex(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHexToInteger(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerHexToString(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIntersection(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUnion(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUnionNoRepetition(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCrossProduct(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerDistributeExponent(Calculator& calculator, const Expression& input, Expression& output);
@@ -292,7 +309,6 @@ public:
   static bool innerNumerator(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerLength(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerDereferenceInterval(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceOrMatrix(Calculator& calculator, const Expression& input, Expression& output);
@@ -318,13 +334,7 @@ public:
   static bool innerCrawlTexFile(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerCompareIntervalsNumerically(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntersectUnion(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIntersectEmptySet(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUnionEmptySet(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerIntersectIntervals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUnionUnionIntervals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerUnionIntervals(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerNormalizeIntervals(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetFirstSummandContaining(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGetSummand(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(Calculator& calculator, const Expression& input, Expression& output);
@@ -462,7 +472,6 @@ public:
   static bool innerIsPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsEven(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerIsAlgebraicRadical(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsReal(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& calculator, const Expression& input, Expression& output);

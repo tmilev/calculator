@@ -634,7 +634,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestBase64",
-    CalculatorFunctions::base64ToCharToBase64Test,
+    CalculatorFunctionsEncoding::base64ToCharToBase64Test,
     "",
     "Test function: converts a base64 string to bitstream and back to base64. "
     "Output must be identical to input. ",
@@ -702,7 +702,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertIntegerToBase58",
-    CalculatorFunctions::convertIntegerUnsignedToBase58,
+    CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58,
     "",
     "Converts an unsigned integer to base58. ",
     "theInt = ConvertHexToInteger(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
@@ -713,7 +713,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertBase58ToHex",
-    CalculatorFunctions::convertBase58ToHex,
+    CalculatorFunctionsEncoding::convertBase58ToHex,
     "",
     "Converts Base58 to hex. ",
     "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",
@@ -753,7 +753,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "AppendDoubleSha256Check",
-    CalculatorFunctions::appendDoubleSha256Check,
+    CalculatorFunctionsCrypto::appendDoubleSha256Check,
     "",
     "Appends a sha 256 checksum to a string. More precisely, appends the first 4 bytes "
     "of sha256 of the string to the string. ",
@@ -767,7 +767,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertHexToBase58",
-    CalculatorFunctions::convertHexToBase58,
+    CalculatorFunctionsEncoding::convertHexToBase58,
     "",
     "Converts hex to base58. ",
     "ConvertHexToBase58(\"03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
@@ -777,7 +777,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "CharToBase64",
-    CalculatorFunctions::charToBase64,
+    CalculatorFunctionsEncoding::convertCharToBase64,
     "",
     "Converts characters to bit stream and the bitstream to base64. "
     "The character to bit stream conversion is not fixed at the moment "
@@ -798,7 +798,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertBase64ToString",
-    CalculatorFunctions::convertBase64ToString,
+    CalculatorFunctionsEncoding::convertBase64ToString,
     "",
     "Converts base64 to string",
     "ConvertBase64ToString("
@@ -1130,29 +1130,29 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "TestJSON",
-    CalculatorFunctions::innerTestJSON,
+    CalculatorFunctionsEncoding::testJSON,
     "",
     "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
     "backslashes and quotes.",
     "TestJSON(\"{a:1}\");\n"
     "TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
-    "CalculatorFunctions::innerTestJSON",
+    "CalculatorFunctions::testJSON",
     "TestJSON",
     innerStandard
   );
   this->addOperationHandler(
     "ConvertBase64ToHex",
-    CalculatorFunctions::innerBase64ToHex,
+    CalculatorFunctionsEncoding::convertBase64ToHex,
     "",
     "Converts base64 string to hexadecimal string. ",
     "ConvertBase64ToHex(\"AQAB\");",
-    "CalculatorFunctions::innerBase64ToHex",
+    "CalculatorFunctions::convertBase64ToHex",
     "ConvertBase64ToHex",
     innerStandard
   );
   this->addOperationHandler(
     "ConvertStringToHex",
-    CalculatorFunctions::convertStringToHex,
+    CalculatorFunctionsEncoding::convertStringToHex,
     "",
     "Converts a bitstream (not necessarily UTF-8 encoded) to hex. ",
     "ConvertStringToHex(Sha256(Sha256(\"hello\")));",
@@ -1162,31 +1162,31 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "ConvertHexToInteger",
-    CalculatorFunctions::innerHexToInteger,
+    CalculatorFunctionsEncoding::convertHexToInteger,
     "",
     "Converts a hex string to an integer. ",
     "ConvertHexToInteger(Base64ToHex(\"AQAB\"));",
-    "CalculatorFunctions::innerHexToInteger",
+    "CalculatorFunctions::hexToInteger",
     "ConvertHexToInteger",
     innerStandard
   );
   this->addOperationHandler(
     "ConvertIntegerToHex",
-    CalculatorFunctions::innerIntegerToHex,
+    CalculatorFunctionsEncoding::convertIntegerToHex,
     "",
     "Converts an integer to hex string. ",
     "ConvertIntegerToHex(65537);",
-    "CalculatorFunctions::innerIntegerToHex",
+    "CalculatorFunctions::integerToHex",
     "ConvertIntegerToHex",
     innerStandard
   );
   this->addOperationHandler(
     "ConvertHexToString",
-    CalculatorFunctions::innerHexToString,
+    CalculatorFunctionsEncoding::convertHexToString,
     "",
     "Converts a hex string to a string. ",
     "ConvertHexToString(\"3031300d060960864801650304020105000420\");",
-    "CalculatorFunctions::innerHexToString",
+    "CalculatorFunctions::hexToString",
     "ConvertHexToString",
     innerStandard
   );
@@ -1604,14 +1604,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "IsAlgebraicRadical",
-    CalculatorFunctions::innerIsAlgebraicRadical,
+    CalculatorFunctionsAlgebraic::isAlgebraicRadical,
     "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
     "IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
     "IsAlgebraicRadical(\\sqrt{x}); "
     "IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
-    "CalculatorFunctions::innerIsAlgebraicRadical",
+    "CalculatorFunctionsAlgebraic::isAlgebraicRadical",
     "IsAlgebraicRadical",
     innerStandard
   );
@@ -4119,7 +4119,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Length",
-    CalculatorFunctions::innerLength,
+    CalculatorFunctionsListsAndSets::length,
     "",
     "Returns the length of a sequence. ",
     "Length{}();\n"
@@ -4129,7 +4129,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Length{}(a);\n"
     "Length{}(Sequence{}a);\n"
     "Length{}(Sequence{}(a,b));\n",
-    "CalculatorFunctions::innerLength",
+    "CalculatorFunctionsListsAndSets::length",
     "Length",
     innerStandard
   );
@@ -4145,55 +4145,55 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "NormalizeIntervals",
-    CalculatorFunctions::innerNormalizeIntervals,
+    CalculatorFunctionsIntervals::normalizeIntervals,
     "",
     "Sorts interval union. ",
     "%UseBracketForIntervals\n NormalizeIntervals([2,3] \\cup [5, 7] \\cup [- 1,- 1/2]);",
-    "CalculatorFunctions::innerNormalizeIntervals",
+    "CalculatorFunctions::normalizeIntervals",
     "NormalizeIntervals",
     innerStandard
   );
   this->addOperationHandler(
     "\\cup",
-    CalculatorFunctions::innerUnionUnionIntervals,
+    CalculatorFunctionsIntervals::unionUnionIntervals,
     "",
     "In for the expression a \\cup (b\\cup c) the expression a\\cup b "
     "can be reduced to d, replaces a\\cup(b\\cup c) by a\\cup d. ",
     "%UseBracketForIntervals\n"
     "[3, 3] \\cup ( [3, 7] \\cup [6, 8] );",
-    "CalculatorFunctions::innerUnionUnionIntervals",
+    "CalculatorFunctionsIntervals::unionUnionIntervals",
     "UnionUnionIntervals",
     innerStandard
   );
   this->addOperationHandler(
     "\\cup",
-    CalculatorFunctions::innerUnionIntervals,
+    CalculatorFunctionsIntervals::unionIntervals,
     "",
     "If the union of two intervals is one interval, replaces the interval. ",
     "%UseBracketForIntervals\n"
     "[3,7] \\cup [6,8);",
-    "CalculatorFunctions::innerUnionIntervals",
+    "CalculatorFunctionsIntervals::unionIntervals",
     "UnionIntervals",
     innerStandard
   );
   this->addOperationHandler(
     "\\cup",
-    CalculatorFunctions::innerUnionEmptySet,
+    CalculatorFunctionsListsAndSets::unionEmptySet,
     "",
     "Takes union with the empty set. ",
     "%UseBracketForIntervals\n"
     "[3, 7) \\cup \\emptyset;",
-    "CalculatorFunctions::innerUnionEmptySet",
+    "CalculatorFunctions::unionEmptySet",
     "UnionEmptySet",
     innerStandard
   );
   this->addOperationHandler(
     "\\cap",
-    CalculatorFunctions::innerIntersectUnion,
+    CalculatorFunctionsListsAndSets::intersectUnion,
     "",
     "Intersects with the empty set. ",
     "%UseBracketForIntervals\n([3, 7) \\cup (9, 10)) \\cap (4, 8.5);",
-    "CalculatorFunctions::innerIntersectUnion",
+    "CalculatorFunctions::intersectUnion",
     "IntersectUnion",
     innerStandard
   );
@@ -4209,11 +4209,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\cap",
-    CalculatorFunctions::innerIntersectIntervals,
+    CalculatorFunctionsIntervals::intersectIntervals,
     "",
     "Intersects two intervals. ",
     "%UseBracketForIntervals\n[3, 7) \\cup [6, 8);",
-    "CalculatorFunctions::innerIntersectIntervals",
+    "CalculatorFunctions::intersectIntervals",
     "InersectIntervals",
     innerStandard
   );
@@ -8211,7 +8211,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "\\cap",
-    CalculatorFunctions::innerIntersection,
+    CalculatorFunctionsListsAndSets::intersection,
     "",
     "Intersects lists. For the time being, the "
     "output order is not specified (will be fixed in the future).",
@@ -8220,32 +8220,32 @@ void Calculator::initPredefinedStandardOperations() {
     "a = 1;\n"
     "d =1;\n"
     "(a, b, c)\\cap (c, d, e); x",
-    "CalculatorFunctions::innerIntersection",
+    "CalculatorFunctions::intersection",
     "\\cap",
     innerStandard
   );
   this->addOperationHandler(
     "\\cup",
-    CalculatorFunctions::innerUnion,
+    CalculatorFunctionsListsAndSets::listUnion,
     "",
     "If all arguments of \\cup are of type list, substitutes the expression with "
     "a list containing the union of all members (with repetition). "
     "If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if "
     "either of the two sequences has two elements.",
     "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))",
-    "CalculatorFunctions::innerUnion",
+    "CalculatorFunctions::union",
     "\\cup",
     innerStandard
   );
   this->addOperationHandler(
     "\\sqcup",
-    CalculatorFunctions::innerUnionNoRepetition,
+    CalculatorFunctionsListsAndSets::unionNoRepetition,
     "",
     "If all arguments of \\sqcup are of type list, substitutes the expression "
     "with a list containing the union of all members; "
     "all repeating members are discarded.",
     "(x,y,x)\\sqcup(1,x,y,2)",
-    "CalculatorFunctions::innerUnionNoRepetition",
+    "CalculatorFunctions::unionNoRepetition",
     "\\sqcup",
     innerStandard
   );

@@ -867,8 +867,10 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstKnownKeys(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerHexToString(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHexToString");
+bool CalculatorFunctionsEncoding::convertHexToString(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertHexToString");
   if (input.size() != 2) {
     return false;
   }
@@ -884,8 +886,10 @@ bool CalculatorFunctions::innerHexToString(Calculator& calculator, const Express
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerIntegerToHex(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegerToHex");
+bool CalculatorFunctionsEncoding::convertIntegerToHex(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertIntegerToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -904,8 +908,10 @@ bool CalculatorFunctions::innerIntegerToHex(Calculator& calculator, const Expres
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerHexToInteger(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHexToInteger");
+bool CalculatorFunctionsEncoding::convertHexToInteger(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertHexToInteger");
   if (input.size() != 2) {
     return false;
   }
@@ -923,10 +929,10 @@ bool CalculatorFunctions::innerHexToInteger(Calculator& calculator, const Expres
   return output.assignValue(resultRat, calculator);
 }
 
-bool CalculatorFunctions::innerTestJSON(
+bool CalculatorFunctionsEncoding::testJSON(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestJSON");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::testJSON");
   if (input.size() != 2) {
     return false;
   }
@@ -944,10 +950,10 @@ bool CalculatorFunctions::innerTestJSON(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::innerBase64ToHex(
+bool CalculatorFunctionsEncoding::convertBase64ToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToHex");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertBase64ToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -1735,10 +1741,10 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(const Expression& left, c
   return left > right;
 }
 
-bool CalculatorFunctions::innerIntersectIntervals(
+bool CalculatorFunctionsIntervals::intersectIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntersectIntervals");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntervals::intersectIntervals");
   if (!input.startsWith(calculator.opIntersection(), 3)) {
     return false;
   }
@@ -1847,10 +1853,10 @@ bool CalculatorFunctions::innerIntersectIntervals(
   return false;
 }
 
-bool CalculatorFunctions::innerUnionUnionIntervals(
+bool CalculatorFunctionsIntervals::unionUnionIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUnionUnionIntervals");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntervals::unionUnionIntervals");
   if (input.size() != 3) {
     return false;
   }
@@ -1862,16 +1868,16 @@ bool CalculatorFunctions::innerUnionUnionIntervals(
   const Expression& rightE = input[2][1];
   Expression theMiddleUnion, middleUnionReduced;
   theMiddleUnion.makeXOX(calculator, calculator.opUnion(), leftE, rightE);
-  if (!CalculatorFunctions::innerUnionIntervals(calculator, theMiddleUnion, middleUnionReduced)) {
+  if (!CalculatorFunctionsIntervals::unionIntervals(calculator, theMiddleUnion, middleUnionReduced)) {
     return false;
   }
   return output.makeXOX(calculator, calculator.opUnion(), middleUnionReduced, rightComposite[2]);
 }
 
-bool CalculatorFunctions::innerUnionIntervals(
+bool CalculatorFunctionsIntervals::unionIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUnionIntervals");
+  MacroRegisterFunctionWithName("CalculatorFunctions::unionIntervals");
   if (input.size() != 3) {
     return false;
   }
@@ -1984,10 +1990,10 @@ bool CalculatorFunctions::innerUnionIntervals(
   return false;
 }
 
-bool CalculatorFunctions::innerNormalizeIntervals(
+bool CalculatorFunctionsIntervals::normalizeIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::outerNormalizeIntervals");
+  MacroRegisterFunctionWithName("CalculatorFunctionsIntervals::outerNormalizeIntervals");
   if (input.size() != 2) {
     return false;
   }
@@ -2000,8 +2006,10 @@ bool CalculatorFunctions::innerNormalizeIntervals(
   return output.makeXOXOdotsOX(calculator, calculator.opUnion(), outputList);
 }
 
-bool CalculatorFunctions::innerUnionEmptySet(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUnionEmptySet");
+bool CalculatorFunctionsListsAndSets::unionEmptySet(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::unionEmptySet");
   if (!input.startsWith(calculator.opUnion(), 3)) {
     return false;
   }
@@ -2016,8 +2024,10 @@ bool CalculatorFunctions::innerUnionEmptySet(Calculator& calculator, const Expre
   return false;
 }
 
-bool CalculatorFunctions::innerIntersectUnion(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntersectUnion");
+bool CalculatorFunctionsListsAndSets::intersectUnion(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::intersectUnion");
   return CalculatorBasics::distribute(calculator, input, output, calculator.opUnion(), calculator.opIntersection(), false);
 }
 
@@ -2320,8 +2330,10 @@ bool CalculatorFunctions::innerDistributeSqrt(Calculator& calculator, const Expr
   return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
 }
 
-bool CalculatorFunctions::innerIsAlgebraicRadical(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsAlgebraicRadical");
+bool CalculatorFunctionsAlgebraic::isAlgebraicRadical(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsAlgebraic::isAlgebraicRadical");
   if (input.size() != 2) {
     return false;
   }

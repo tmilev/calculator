@@ -311,10 +311,10 @@ bool CalculatorFunctionsCrypto::functionHashString(
   return output.assignValue(out.str(), calculator);
 }
 
-bool CalculatorFunctions::convertBase64ToString(
+bool CalculatorFunctionsEncoding::convertBase64ToString(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::convertBase64ToString");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertBase64ToString");
   if (input.size() != 2) {
     return false;
   }
@@ -440,10 +440,10 @@ bool CalculatorFunctions::sliceString(Calculator& calculator, const Expression& 
   );
 }
 
-bool CalculatorFunctions::convertIntegerUnsignedToBase58(
+bool CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::convertIntegerUnsignedToBase58");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertIntegerUnsignedToBase58");
   if (input.size() != 2) {
     return false;
   }
@@ -459,10 +459,10 @@ bool CalculatorFunctions::convertIntegerUnsignedToBase58(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::appendDoubleSha256Check(
+bool CalculatorFunctionsCrypto::appendDoubleSha256Check(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerAppendSha256Check");
+  MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAppendSha256Check");
   if (input.size() != 2) {
     return false;
   }
@@ -525,10 +525,10 @@ bool CalculatorFunctionsCrypto::aes_cbc_256_encrypt(
   return output.assignValue(cipherText, calculator);
 }
 
-bool CalculatorFunctions::convertBase58ToHex(
+bool CalculatorFunctionsEncoding::convertBase58ToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::convertBase58ToHex");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertBase58ToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -545,10 +545,10 @@ bool CalculatorFunctions::convertBase58ToHex(
   return output.assignValue(outputString, calculator);
 }
 
-bool CalculatorFunctions::convertHexToBase58(
+bool CalculatorFunctionsEncoding::convertHexToBase58(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::convertHexToBase58");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertHexToBase58");
   if (input.size() != 2) {
     return false;
   }
@@ -566,10 +566,10 @@ bool CalculatorFunctions::convertHexToBase58(
   return output.assignValue(outputString, calculator);
 }
 
-bool CalculatorFunctions::convertStringToHex(
+bool CalculatorFunctionsEncoding::convertStringToHex(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::convertStringToHex");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertStringToHex");
   if (input.size() != 2) {
     return false;
   }
@@ -580,10 +580,10 @@ bool CalculatorFunctions::convertStringToHex(
   return output.assignValue(Crypto::convertStringToHex(inputString, 0, false), calculator);
 }
 
-bool CalculatorFunctions::charToBase64(
+bool CalculatorFunctionsEncoding::convertCharToBase64(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::charToBase64");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::convertCharToBase64");
   if (input.size() != 2) {
     return false;
   }
@@ -596,10 +596,10 @@ bool CalculatorFunctions::charToBase64(
   return output.assignValue(Crypto::convertListUnsignedCharsToBase64(theBitStream, false), calculator);
 }
 
-bool CalculatorFunctions::base64ToCharToBase64Test(
+bool CalculatorFunctionsEncoding::base64ToCharToBase64Test(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::base64ToCharToBase64Test");
+  MacroRegisterFunctionWithName("CalculatorFunctionsEncoding::base64ToCharToBase64Test");
   if (input.size() != 2) {
     return false;
   }
@@ -2236,8 +2236,8 @@ bool CalculatorFunctions::innerformatCPPDirectory(
   return output.assignValue(report.str(), calculator);
 }
 
-bool CalculatorFunctions::innerIntersection(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntersection");
+bool CalculatorFunctionsListsAndSets::intersection(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::intersection");
   if (!input.startsWith(calculator.opIntersection())) {
     return false;
   }
@@ -2268,8 +2268,10 @@ bool CalculatorFunctions::innerIntersection(Calculator& calculator, const Expres
 }
 
 
-bool CalculatorFunctions::innerUnion(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUnion");
+bool CalculatorFunctionsListsAndSets::listUnion(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::listUnion");
   if (!input.startsWith(calculator.opUnion())) {
     return false;
   }
@@ -2289,8 +2291,10 @@ bool CalculatorFunctions::innerUnion(Calculator& calculator, const Expression& i
   return true;
 }
 
-bool CalculatorFunctions::innerUnionNoRepetition(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerUnionNoRepetition");
+bool CalculatorFunctionsListsAndSets::unionNoRepetition(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsListsAndSets::unionNoRepetition");
   if (!input.isList()) {
     return false;
   }

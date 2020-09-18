@@ -964,7 +964,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "LogarithmBaseNCeiling",
-    CalculatorFunctions::innerLogarithmBaseNCeiling,
+    CalculatorFunctionsBasic::logarithmBaseNCeiling,
     "",
     "Returns ceiling(log_N (input)), i.e., the smallest integer "
     "X for which input <= N^X. First argument = N = base, "
@@ -981,7 +981,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogarithmBaseNCeiling(2, 1);\n"
     "LogarithmBaseNCeiling(- 2, 1);\n"
     "LogarithmBaseNCeiling(2, - 1);\n",
-    "CalculatorFunctions::innerLogarithmBaseNCeiling",
+    "CalculatorFunctions::logarithmBaseNCeiling",
     "LogarithmBaseNCeiling",
     innerStandard
   );
@@ -1259,11 +1259,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "!",
-    CalculatorFunctions::innerFactorial,
+    CalculatorFunctionsBasic::factorial,
     "",
     "Factorial function. ",
     "5!",
-    "CalculatorFunctions::innerFactorial",
+    "CalculatorFunctionsBasic::factorial",
     "Factorial",
     innerStandard
   );
@@ -2715,43 +2715,43 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "\\log",
-    CalculatorFunctions::innerLog,
+    CalculatorFunctionsBasic::logarithm,
     "",
     "Logarithm function. Gives a decimal approximation of the natural "
     "logarithm provided the input is a double number. ",
     "\\log{}(e); \\log 10",
-    "CalculatorFunctions::innerLog",
+    "CalculatorFunctionsBasic::logarithm",
     "\\log",
     innerStandard
   );
   this->addOperationHandler(
     "LogBase",
-    CalculatorFunctions::innerLogBaseNaturalToLn,
+    CalculatorFunctionsBasic::logarithmBaseNaturalToLn,
     "",
     "Converts \\log_e A to \\ln A. ",
     "\\log_e A",
-    "CalculatorFunctions::innerLogBaseNaturalToLn",
+    "CalculatorFunctionsBasic::logarithmBaseNaturalToLn",
     "LogBaseNaturalToLn",
     innerStandard
   );
   this->addOperationHandler(
     "LogBase",
-    CalculatorFunctions::innerLogBaseSimpleCases,
+    CalculatorFunctionsBasic::logarithmBaseSimpleCases,
     "",
     "If the argument is a power of the base does the computation. ",
     "\\log_5 25; log_5 1; log_5 (1/5)",
-    "CalculatorFunctions::innerLogBaseSimpleCases",
+    "CalculatorFunctions::logarithmBaseSimpleCases",
     "LogBaseSimpleCases",
     innerStandard
   );
   this->addOperationHandler(
     "LogBase",
-    CalculatorFunctions::innerLogBase,
+    CalculatorFunctionsBasic::logarithmBase,
     "",
     "Logarithm function (arbitrary base). Equivalent to "
     "\\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
     "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b",
-    "CalculatorFunctions::innerLogBase",
+    "CalculatorFunctions::logarithmBase",
     "LogBase",
     innerStandard
   );
@@ -2807,11 +2807,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "|",
-    CalculatorFunctions::innerAbs,
+    CalculatorFunctionsBasic::absoluteValue,
     "",
     "Absolute value function ",
     "|- 1|",
-    "CalculatorFunctions::innerAbs",
+    "CalculatorFunctionsBasic::absoluteValue",
     "AbsoluteValue",
     innerStandard
   );
@@ -2877,21 +2877,21 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->addOperationHandler(
     "Floor",
-    CalculatorFunctions::innerFloor,
+    CalculatorFunctionsBasic::floor,
     "",
     "Floor function.",
     "Floor(3/7)",
-    "CalculatorFunctions::innerFloor",
+    "CalculatorFunctionsBasic::floor",
     "Floor",
     innerStandard
   );
   this->addOperationHandler(
     "Round",
-    CalculatorFunctions::innerRound,
+    CalculatorFunctionsBasic::round,
     "",
     "Round function.",
     "Round(3/7)",
-    "CalculatorFunctions::innerRound",
+    "CalculatorFunctionsBasic::round",
     "Round",
     innerStandard
   );

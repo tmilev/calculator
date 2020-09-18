@@ -155,6 +155,26 @@ public:
 
 };
 
+class CalculatorFunctionsBasic {
+public:
+  static bool factorial(Calculator& calculator, const Expression& input, Expression& output);
+  static bool logarithmBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool logarithmBaseSimpleCases(Calculator& calculator, const Expression& input, Expression& output);
+  static bool logarithmBase(Calculator& calculator, const Expression& input, Expression& output);
+  static bool logarithm(Calculator& calculator, const Expression& input, Expression& output);
+  static bool absoluteValue(Calculator& calculator, const Expression& input, Expression& output);
+
+  static bool floor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool round(Calculator& calculator, const Expression& input, Expression& output);
+  static bool logarithmBaseNCeiling(Calculator& calculator, const Expression& input, Expression& output);
+
+};
+
+class CalculatorFunctionsListsAndSets {
+
+};
+
 class CalculatorFunctions {
 public:
   static bool leftIntervalGreaterThanRight(const Expression& left, const Expression& right);
@@ -223,22 +243,12 @@ public:
   static bool innerFactorIntegeR(Calculator& calculator, const Expression& input, Expression& output);
   static bool functionFactorInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFactorial(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLogBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output);
-
-  static bool innerLogBaseSimpleCases(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLogBase(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLog(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerAbs(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerIsProductLinearOrConstantTermsIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsProductTermsUpToPower(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerIsLinearOrConstantIn(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerCoefficientOf(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerFloor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerRound(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerLogarithmBaseNCeiling(Calculator& calculator, const Expression& input, Expression& output);
 
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(
     Calculator& calculator, const Expression& input, Expression& output

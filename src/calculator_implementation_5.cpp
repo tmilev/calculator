@@ -1464,10 +1464,10 @@ bool CalculatorFunctions::innerSqrt(
   return output.assignValue(theNumber, calculator);
 }
 
-bool CalculatorFunctions::innerFloor(
+bool CalculatorFunctionsBasic::floor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFloor");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::floor");
   if (input.size() != 2) {
     return false;
   }
@@ -1483,10 +1483,10 @@ bool CalculatorFunctions::innerFloor(
   return false;
 }
 
-bool CalculatorFunctions::innerLogarithmBaseNCeiling(
+bool CalculatorFunctionsBasic::logarithmBaseNCeiling(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLogarithmBaseNCeiling");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::logarithmBaseNCeiling");
   if (input.size() != 3) {
     return calculator << "Logarithm ceiling function expects exactly two arguments. ";
   }
@@ -1507,10 +1507,10 @@ bool CalculatorFunctions::innerLogarithmBaseNCeiling(
   return output.assignValue(result, calculator);
 }
 
-bool CalculatorFunctions::innerRound(
+bool CalculatorFunctionsBasic::round(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerRound");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::round");
   if (input.size() != 2) {
     return false;
   }
@@ -1764,7 +1764,7 @@ bool CalculatorFunctions::greatestCommonDivisorInteger(
   return output.assignValue(theResult, calculator);
 }
 
-bool CalculatorFunctions::innerLogBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBasic::logarithmBaseNaturalToLn(Calculator& calculator, const Expression& input, Expression& output) {
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
@@ -1774,10 +1774,10 @@ bool CalculatorFunctions::innerLogBaseNaturalToLn(Calculator& calculator, const 
   return output.makeOX(calculator, calculator.opLog(), input[2]);
 }
 
-bool CalculatorFunctions::innerLogBaseSimpleCases(
+bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLogBaseSimpleCases");
+  MacroRegisterFunctionWithName("CalculatorFunctions::logarithmBaseSimpleCases");
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }

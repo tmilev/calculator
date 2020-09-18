@@ -740,8 +740,8 @@ bool CalculatorFunctions::innerFourierTransformEWA(
   return output.assignValueWithContext(theElt, argument.getContext(), calculator);
 }
 
-bool CalculatorFunctions::innerLogBase(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLogBase");
+bool CalculatorFunctionsBasic::logarithmBase(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::logarithmBase");
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
@@ -751,8 +751,8 @@ bool CalculatorFunctions::innerLogBase(Calculator& calculator, const Expression&
   return output.makeXOX(calculator, calculator.opDivide(), numE, denE);
 }
 
-bool CalculatorFunctions::innerLog(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerLog");
+bool CalculatorFunctionsBasic::logarithm(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::logarithm");
   if (input.size() != 2) {
     return false;
   }
@@ -787,8 +787,8 @@ bool CalculatorFunctions::innerLog(Calculator& calculator, const Expression& inp
   return output.makeXOX(calculator, calculator.opPlus(), lnPart, ipiE);
 }
 
-bool CalculatorFunctions::innerFactorial(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorial");
+bool CalculatorFunctionsBasic::factorial(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::factorial");
   if (input.size() != 2) {
     return false;
   }
@@ -801,7 +801,7 @@ bool CalculatorFunctions::innerFactorial(Calculator& calculator, const Expressio
   }
   if (inputInt > 30000) {
     return calculator << "Computing large factorials is disabled "
-    << "(can be changed in the source code by modifying CalculatorFunctions::innerFactorial).";
+    << "(can be changed in the source code by modifying CalculatorFunctions::factorial).";
   }
   Rational result;
   return output.assignValue(result.factorial(inputInt), calculator);
@@ -865,8 +865,8 @@ bool CalculatorFunctionsTrigonometry::arcsin(Calculator& calculator, const Expre
   return output.assignValue(FloatingPoint::arcsin(theArgument), calculator);
 }
 
-bool CalculatorFunctions::innerAbs(Calculator& calculator, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerAbs");
+bool CalculatorFunctionsBasic::absoluteValue(Calculator& calculator, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBasic::absoluteValue");
   if (input.size() != 2) {
     return false;
   }
@@ -2387,11 +2387,11 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(Calculator& calcul
   if (!theArgument.startsWith(calculator.opThePower(), 3)) {
     return false;
   }
-  Expression logBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
-  logBase.reset(calculator, 2);
-  logBase.addChildAtomOnTop(calculator.opLog());
-  logBase.addChildOnTop(theArgument[1]);
-  exponentTimesLogBase.makeXOX(calculator, calculator.opTimes(), theArgument[2], logBase);
+  Expression logarithmBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
+  logarithmBase.reset(calculator, 2);
+  logarithmBase.addChildAtomOnTop(calculator.opLog());
+  logarithmBase.addChildOnTop(theArgument[1]);
+  exponentTimesLogBase.makeXOX(calculator, calculator.opTimes(), theArgument[2], logarithmBase);
   derivativeExponentTimesLogBase.makeXOX(calculator, calculator.opDifferentiate(), theDOvar, exponentTimesLogBase);
   return output.makeXOX(calculator, calculator.opTimes(), theArgument, derivativeExponentTimesLogBase);
 }

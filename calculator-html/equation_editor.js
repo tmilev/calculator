@@ -70,7 +70,7 @@ const knownTypeDefaults = {
   "float": "",
   "textAlign": "",
   "boxSizing": "border-box",
-  "position": "",
+  "position": "absolute",
 };
 
 class ArrowMotionTypes {
@@ -162,50 +162,67 @@ const knownTypes = {
 
 class MathNodeFactory {
   horizontalMath(
+    /** @type {EquationEditor} */
+    equationEditor,
     /** @type {MathNode|null} */
     content
   ) {
-    const result = new MathNode(knownTypes.horizontalMath);
+    const result = new MathNode(equationEditor, knownTypes.horizontalMath);
     if (content === null) {
-      content = this.atom("");
+      content = this.atom(equationEditor, "");
     }
     result.appendChild(content);
     return result;
   }
-  rootMath() {
-    const result = new MathNode(knownTypes.root);
-    result.appendChild(this.horizontalMath(null));
+  rootMath(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    const result = new MathNode(equationEditor, knownTypes.root);
+    result.appendChild(this.horizontalMath(equationEditor, null));
     return result;
   }
   atom(
+    /** @type {EquationEditor} */
+    equationEditor,
     /** @type {string} */
     initialContent
   ) {
-    const result = new MathNode(knownTypes.atom);
+    const result = new MathNode(equationEditor, knownTypes.atom);
     result.initialContent = initialContent;
     return result;
   }
   atomImmutable(
+    /** @type {EquationEditor} */
+    equationEditor,
     /** @type {string} */
     operator
   ) {
-    const result = new MathNode(knownTypes.atomImmutable);
+    const result = new MathNode(equationEditor, knownTypes.atomImmutable);
     result.initialContent = operator;
     return result;
   }
   /** @returns {MathNode} */
-  fractionEmptyDenominator(/** @type{MathNode}*/ numeratorContent) {
-    const fraction = new MathNode(knownTypes.fraction);
-    const numerator = new MathNode(knownTypes.numerator);
-    const denominator = new MathNode(knownTypes.denominator);
-    numerator.appendChild(this.horizontalMath(numeratorContent));
-    denominator.appendChild(this.horizontalMath(null));
+  fractionEmptyDenominator(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type{MathNode}*/
+    numeratorContent
+  ) {
+    const fraction = new MathNode(equationEditor, knownTypes.fraction);
+    const numerator = new MathNode(equationEditor, knownTypes.numerator);
+    const denominator = new MathNode(equationEditor, knownTypes.denominator);
+    numerator.appendChild(this.horizontalMath(equationEditor, numeratorContent));
+    denominator.appendChild(this.horizontalMath(equationEditor, null));
     fraction.appendChild(numerator);
     fraction.appendChild(denominator);
     return fraction;
   }
   /** @returns {MathNode} */
-  exponent() {
+  exponent(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
     const exponent = new MathNode(knownTypes.exponent);
     exponent.appendChild(this.horizontalMath(null));
     return exponent;
@@ -236,7 +253,7 @@ class EquationEditor {
     this.container = container;
     this.container.innerHTML = "";
     this.container.style.display = "inline-block";
-    this.rootNode = mathNodeFactory.rootMath();
+    this.rootNode = mathNodeFactory.rootMath(this);
     this.rootNode.externalDOM = this.container;
     this.rootNode.updateDOMRecursive(0);
     lastCreatedEquationEditor = this;
@@ -303,13 +320,33 @@ class EquationEditor {
     }
     return false;
   }
+
+  updateDOM() {
+    this.rootNode.updateDOMRecursive(0);
+    this.rootNode.updateAlignment(new BoundingBox(), true);
+  }
 }
+
+class BoundingBox {
+  constructor() {
+    this.left = 0;
+    this.top = 0;
+    this.width = 0;
+    this.height = 0;
+  }
+
+};
 
 class MathNode {
   constructor(
+    /** @type {EquationEditor} */
+    equationEditor,
     /** @type {MathNodeType} */
     type
   ) {
+    if (type === undefined) {
+      throw ("unexpected type");
+    }
     /** @type {Array<MathNode>} */
     this.children = [];
     /** @type {MathNodeType} */
@@ -334,6 +371,8 @@ class MathNode {
     this.initialContent = "";
     /** @type {boolean} */
     this.focused = false;
+    this.equationEditor = equationEditor;
+    this.boundingBox = new BoundingBox();
   }
 
   createDOMElementIfMissing() {
@@ -410,25 +449,16 @@ class MathNode {
     this.element.addEventListener("blur", (e) => { this.handleBlur(e); });
   }
 
-  updateDOM() {
-    this.updateDOMRecursive(0);
-    let current = this.parent;
-    while (current !== null) {
-      current.updateVerticalAlignment();
-      current = current.parent;
-    }
-  }
-
   updateDOMRecursive(/** @type {number} */ depth) {
     if (
       this.type.type === knownTypes.atom.type
     ) {
       this.createDOMElementIfMissing();
-      this.updateVerticalAlignment();
       return;
     }
     for (let i = 0; i < this.children.length; i++) {
-      this.children[i].updateDOMRecursive(depth + 1);
+      let child = this.children[i];
+      child.updateDOMRecursive(depth + 1);
     }
     const oldElement = this.element;
     this.element = null;
@@ -436,35 +466,43 @@ class MathNode {
     for (let i = 0; i < this.children.length; i++) {
       this.element.appendChild(this.children[i].element);
     }
-    this.updateVerticalAlignment();
     if (depth === 0) {
       this.updateParentDOM(oldElement);
     }
   }
 
-  updateVerticalAlignment() {
-    this.computeMaximumHeight();
-    this.element.style.verticalAlign = `-${this.fractionLineHeight * 100}%`;
-  }
-
-  computeMaximumHeight() {
-    this.heightFromChildren = 0;
-    this.fractionLineHeight = 0;
-    if (this.type.type === knownTypes.fraction.type) {
-      for (let i = 0; i < this.children.length; i++) {
-        this.heightFromChildren += this.children[i].heightFromChildren;
-      }
-      this.fractionLineHeight = this.children[1].heightFromChildren / this.heightFromChildren;
-      return;
+  updateAlignment(
+    /** @type {BoundingBox} */
+    boundingBoxSoFar,
+    /** @type {boolean} */
+    layoutHorizontal,
+  ) {
+    if (layoutHorizontal) {
+      this.boundingBox.left = boundingBoxSoFar.left + boundingBoxSoFar.width;
+      this.boundingBox.top = boundingBoxSoFar.top;
+    } else {
+      this.boundingBox.top = boundingBoxSoFar.top + boundingBoxSoFar.height;
+      this.boundingBox.left = boundingBoxSoFar.left;
     }
-    if (this.type.type === knownTypes.atom.type || this.type.type === knownTypes.atomImmutable.type) {
-      this.heightFromChildren = 1;
-      return;
-    }
+    this.element.style.left = this.boundingBox.left;
+    this.element.style.top = this.boundingBox.top;
+    let boundingBoxChildren = new BoundingBox();
+    boundingBoxChildren.left = this.boundingBox.left;
+    boundingBoxChildren.top = this.boundingBox.top;
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      this.heightFromChildren = Math.max(child.heightFromChildren, this.heightFromChildren);
+      child.updateAlignment(boundingBoxChildren, true);
+      boundingBoxChildren.width += child.boundingBox.width;
     }
+    this.boundingBox.width = boundingBoxChildren.width;
+    if (this.type.type === knownTypes.atom.type) {
+      this.boundingBox.width = this.element.getBoundingClientRect().width;
+      this.boundingBox.height = this.element.getBoundingClientRect().height;
+    }
+    this.element.style.width = this.boundingBox.width;
+    this.element.style.height = this.boundingBox.height;
+    this.element.style.left = this.boundingBox.left;
+    this.element.style.right = this.boundingBox.right;
   }
 
   updateParentDOM(/** @type {HTMLElement|null} */ oldElement) {
@@ -703,8 +741,10 @@ class MathNode {
 
   appendChild(/** @type{MathNode} */ child) {
     let needsNormalization = false;
-    if (child.type.type === knownTypes.horizontalMath.type &&
-      this.type.type === knownTypes.horizontalMath.type) {
+    if (
+      child.type.type === knownTypes.horizontalMath.type &&
+      this.type.type === knownTypes.horizontalMath.type
+    ) {
       needsNormalization = true;
     }
     if (needsNormalization) {
@@ -826,7 +866,7 @@ class MathNode {
       parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
       parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(rightContent));
     }
-    parent.updateDOM();
+    parent.updateDOMRecursive(0);
     parent.children[oldIndexInParent + 2].focus(- 1);
   }
 
@@ -836,7 +876,7 @@ class MathNode {
     }
     const oldParent = this.parent;
     const oldIndexInParent = this.indexInParent;
-    const fraction = mathNodeFactory.fractionEmptyDenominator(this);
+    const fraction = mathNodeFactory.fractionEmptyDenominator(this.equationEditor, this);
 
     oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(""));
     oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
@@ -848,7 +888,7 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
-    const exponent = mathNodeFactory.exponent();
+    const exponent = mathNodeFactory.exponent(this.equationEditor);
     this.parent.insertChildAtPosition(this.indexInParent + 1, exponent);
     this.parent.updateDOMRecursive(0);
     exponent.children[0].focus(- 1);

@@ -351,10 +351,10 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(
   return output.assignValue(leftD / rightD, calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
+bool CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor");
   calculator.checkInputNotSameAsOutput(input, output);
   if (input.size() != 3) {
     return false;
@@ -1928,13 +1928,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(
   return output.makeSequence(calculator, &theResult);
 }
 
-bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(
+bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input.startsWith(calculator.opTensor(), 3)) {
     return false;
   }
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::tensorMatrixByMatrix");
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   if ((!rightE.isMatrix() && !rightE.isSequenceNElements()) || (!leftE.isMatrix() && !leftE.isSequenceNElements())) {
@@ -1960,13 +1960,13 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(
   return output.assignMatrixExpressions(resultMatE, calculator, true, true);
 }
 
-bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(
+bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input.startsWith(calculator.opTensor())) {
     return false;
   }
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor");
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   if (!rightE.isOfType<MatrixTensor<Rational> >() || !leftE.isOfType<MatrixTensor<Rational> >()) {
@@ -2521,10 +2521,10 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   return output.assignMatrix(leftMatRat, calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerSetMinus(
+bool CalculatorFunctionsBinaryOps::setMinus(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerSetMinus");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::setMinus");
   if (input.size() != 3) {
     return false;
   }
@@ -2645,10 +2645,10 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerNChooseK(
+bool CalculatorFunctionsBinaryOps::binomialCoefficient(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerNChooseK");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::binomialCoefficient");
   if (input.size() != 3) {
     return false;
   }
@@ -2759,10 +2759,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   return output.assignValueWithContext(theElt, input[1].getContext(), calculator);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
+bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP");
   if (input.size() != 3) {
     return false;
   }

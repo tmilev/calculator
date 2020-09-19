@@ -129,14 +129,14 @@ public:
   static bool innerPowerEllipticCurveRationalElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
   static bool innerPowerEllipticCurveZmodPElementByInteger(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerNChooseK(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerSetMinus(Calculator& calculator, const Expression& input, Expression& output);
+  static bool binomialCoefficient(Calculator& calculator, const Expression& input, Expression& output);
+  static bool setMinus(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerTensorEltTensorByEltTensor(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTensorMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
-  static bool innerTensorMatByMatTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool tensorElementTensorByElementTensor(Calculator& calculator, const Expression& input, Expression& output);
+  static bool tensorMatrixByMatrix(Calculator& calculator, const Expression& input, Expression& output);
+  static bool tensorMatrixByMatrixTensor(Calculator& calculator, const Expression& input, Expression& output);
 
-  static bool innerPolynomialModPModuloPolynomialModP(
+  static bool polynomialModPModuloPolynomialModP(
     Calculator& calculator, const Expression& input, Expression& output
   );
 };

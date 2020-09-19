@@ -97,7 +97,8 @@ const knownTypes = {
   root: new MathNodeType({
     "type": "root",
     "borderStyle": "1px solid black",
-    "padding": atomPad,
+    "padding": "2px",
+    "margin": "2px",
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -253,9 +254,10 @@ class EquationEditor {
     this.container = container;
     this.container.innerHTML = "";
     this.container.style.display = "inline-block";
+    this.container.style.position = "relative";
     this.rootNode = mathNodeFactory.rootMath(this);
     this.rootNode.externalDOM = this.container;
-    this.rootNode.updateDOMRecursive(0);
+    this.rootNode.updateDOM();
     lastCreatedEquationEditor = this;
   }
   toString() {
@@ -277,8 +279,8 @@ class EquationEditor {
       for (let i = 0; i < eventsToSend.length; i++) {
         let event = new KeyboardEvent(
           eventsToSend[i], {
-            key: key,
-          });
+          key: key,
+        });
         this.dispatchEventToFirstFocusedChild(this.rootNode, event);
       }
     }
@@ -321,9 +323,11 @@ class EquationEditor {
     return false;
   }
 
-  updateDOM() {
-    this.rootNode.updateDOMRecursive(0);
-    this.rootNode.updateAlignment(new BoundingBox(), true);
+  updateAlignment() {
+    this.rootNode.updateAlignment(new BoundingBox());
+    let boundingRectangle = this.rootNode.element.getBoundingClientRect();
+    this.container.style.height = boundingRectangle.height;
+    this.container.style.width = boundingRectangle.width;
   }
 }
 
@@ -344,8 +348,8 @@ class MathNode {
     /** @type {MathNodeType} */
     type
   ) {
-    if (type === undefined) {
-      throw ("unexpected type");
+    if (!(equationEditor instanceof EquationEditor)) {
+      throw (`Unexpected equation editor ${equationEditor}`);
     }
     /** @type {Array<MathNode>} */
     this.children = [];
@@ -449,6 +453,25 @@ class MathNode {
     this.element.addEventListener("blur", (e) => { this.handleBlur(e); });
   }
 
+  updateDOM() {
+    this.updateDOMRecursive(0);
+    this.equationEditor.updateAlignment();
+  }
+
+  /** @returns {boolean} */
+  isAtomic() {
+    return (
+      this.type.type === knownTypes.atom.type ||
+      this.type.type === knownTypes.atomImmutable.type
+    );
+  }
+  hasHorizontalLayout() {
+    if (this.type.type === knownTypes.fraction) {
+      return false;
+    }
+    return true;
+  }
+
   updateDOMRecursive(/** @type {number} */ depth) {
     if (
       this.type.type === knownTypes.atom.type
@@ -473,11 +496,14 @@ class MathNode {
 
   updateAlignment(
     /** @type {BoundingBox} */
-    boundingBoxSoFar,
-    /** @type {boolean} */
-    layoutHorizontal,
+    boundingBoxSoFar
   ) {
-    if (layoutHorizontal) {
+
+    let parentLayoutHorizontal = true;
+    if (this.parent !== null) {
+      parentLayoutHorizontal = this.parent.hasHorizontalLayout();
+    }
+    if (parentLayoutHorizontal) {
       this.boundingBox.left = boundingBoxSoFar.left + boundingBoxSoFar.width;
       this.boundingBox.top = boundingBoxSoFar.top;
     } else {
@@ -491,11 +517,17 @@ class MathNode {
     boundingBoxChildren.top = this.boundingBox.top;
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      child.updateAlignment(boundingBoxChildren, true);
+      child.updateAlignment(boundingBoxChildren);
       boundingBoxChildren.width += child.boundingBox.width;
+      if (parentLayoutHorizontal) {
+        boundingBoxChildren.height = Math.max(boundingBoxChildren.height, child.boundingBox.height);
+      } else {
+        boundingBoxChildren.width = Math.max(boundingBoxChildren.width, child.boundingBox.width);
+      }
     }
     this.boundingBox.width = boundingBoxChildren.width;
-    if (this.type.type === knownTypes.atom.type) {
+    this.boundingBox.height = boundingBoxChildren.height;
+    if (this.isAtomic()) {
       this.boundingBox.width = this.element.getBoundingClientRect().width;
       this.boundingBox.height = this.element.getBoundingClientRect().height;
     }
@@ -826,7 +858,10 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
-    if (this.positionCaretBeforeKeyEvents !== 0 || this.type.type !== knownTypes.atom.type) {
+    if (
+      this.positionCaretBeforeKeyEvents !== 0 ||
+      this.type.type !== knownTypes.atom.type
+    ) {
       return;
     }
   }
@@ -857,16 +892,16 @@ class MathNode {
     }
     let oldIndexInParent = this.indexInParent;
     if (positionOperator === 1) {
-      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
-      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(""));
+      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(this.equationEditor, key));
+      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
     } else if (positionOperator === 0) {
       let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
       let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
-      parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(leftContent));
-      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(key));
-      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(rightContent));
+      parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
+      parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(this.equationEditor, key));
+      parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, rightContent));
     }
-    parent.updateDOMRecursive(0);
+    parent.updateDOM();
     parent.children[oldIndexInParent + 2].focus(- 1);
   }
 
@@ -878,10 +913,10 @@ class MathNode {
     const oldIndexInParent = this.indexInParent;
     const fraction = mathNodeFactory.fractionEmptyDenominator(this.equationEditor, this);
 
-    oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(""));
+    oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ""));
     oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
-    oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(""));
-    fraction.parent.updateDOMRecursive(0);
+    oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
+    fraction.parent.updateDOM();
     fraction.children[1].focus(- 1);
   }
   makeExponent() {
@@ -890,7 +925,7 @@ class MathNode {
     }
     const exponent = mathNodeFactory.exponent(this.equationEditor);
     this.parent.insertChildAtPosition(this.indexInParent + 1, exponent);
-    this.parent.updateDOMRecursive(0);
+    this.parent.updateDOM();
     exponent.children[0].focus(- 1);
   }
 
@@ -960,7 +995,13 @@ function initialize() {
 function testEquationEditor() {
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
-    defaultEquationEditorLocal.sendKeys(["1", "+", "1", "/", "1", "+", "1", "/", "1", "+", "1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "+", "1", "/", "1"]);
+    defaultEquationEditorLocal.sendKeys([
+      "1", "+", "1",
+      "1", "+", "1", "/", "1", "+", "1", "/",
+      "1", "+", "1", "/", "1",
+      "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
+      "+", "1", "/", "1"
+    ]);
   }, 300);
 }
 

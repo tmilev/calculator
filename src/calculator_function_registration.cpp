@@ -7090,11 +7090,11 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "\\binom",
-    CalculatorFunctionsBinaryOps::innerNChooseK,
+    CalculatorFunctionsBinaryOps::binomialCoefficient,
     "",
     "Evaluates the binomial coefficient if possible.",
     "\\binom{8}{3} ",
-    "CalculatorFunctionsBinaryOps::innerNChooseK",
+    "CalculatorFunctionsBinaryOps::binomialCoefficient",
     "Binom",
     innerStandard
   );
@@ -7135,7 +7135,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "mod",
-    CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP,
+    CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP,
     "",
     "A polynomial modulo another polynomial. "
     "Returns the element given by the first argument "
@@ -7155,12 +7155,12 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "\\setminus",
-    CalculatorFunctionsBinaryOps::innerSetMinus,
+    CalculatorFunctionsBinaryOps::setMinus,
     "",
     "Removes the elements of the second set from the elements of the first set. "
     "The outputs will be sorted in ascending order.",
     " (x,y,t) \\setminus Sequence{}x; (x,y)\\setminus (z,y)",
-    "CalculatorFunctionsBinaryOps::innerSetMinus",
+    "CalculatorFunctionsBinaryOps::setMinus",
     "\\setminus",
     innerStandard
   );
@@ -7845,7 +7845,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationHandler(
     "\\otimes",
-    CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
+    CalculatorFunctionsBinaryOps::tensorMatrixByMatrix,
     "",
     "Tensor product of two matrices.",
     "P = ((0, 2 ), (1, 0));\n"
@@ -7856,13 +7856,13 @@ void Calculator::initPredefinedStandardOperations() {
     "W = MakeMatrixTensorForm{}Q;\n"
     "X\\otimes Y;\n"
     "Z\\otimes W",
-    "CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix",
+    "CalculatorFunctionsBinaryOps::tensorMatrixByMatrix",
     "MatrixTensorMatrix",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
-    CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor,
+    CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor,
     this->opElementTensorGVM(),
     this->opElementTensorGVM(),
     "Tensor product of two generalized Verma modules. "
@@ -7875,7 +7875,7 @@ void Calculator::initPredefinedStandardOperations() {
     "v=HeighestWeightVector{}(G_2, (z,1), (1,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v)",
-    "CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor",
+    "CalculatorFunctionsBinaryOps::tensorElementTensorByElementTensor",
     "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule",
     innerStandard
   );
@@ -7958,7 +7958,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
-    CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
+    CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor,
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
@@ -7970,7 +7970,7 @@ void Calculator::initPredefinedStandardOperations() {
     "W = MakeMatrixTensorForm{}Q;\n"
     "X \\otimes Y;\n"
     "Z\\otimes W",
-    "CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor",
+    "CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor",
     "TensorMatrixTensorByMatrixTensor",
     innerStandard
   );

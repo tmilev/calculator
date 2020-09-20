@@ -130,7 +130,6 @@ const knownTypes = {
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
-    "display": "block",
     "borderBottom": "1px solid black",
     "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
@@ -144,7 +143,6 @@ const knownTypes = {
   // Represents the denominator y of a fraction x/y.
   denominator: new MathNodeType({
     "type": "denominator",
-    "display": "block",
     "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
@@ -279,8 +277,8 @@ class EquationEditor {
       for (let i = 0; i < eventsToSend.length; i++) {
         let event = new KeyboardEvent(
           eventsToSend[i], {
-          key: key,
-        });
+            key: key,
+          });
         this.dispatchEventToFirstFocusedChild(this.rootNode, event);
       }
     }
@@ -324,7 +322,8 @@ class EquationEditor {
   }
 
   updateAlignment() {
-    this.rootNode.updateAlignment(new BoundingBox());
+    this.rootNode.computeBoundingBox();
+    this.rootNode.doAlign();
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     this.container.style.height = boundingRectangle.height;
     this.container.style.width = boundingRectangle.width;
@@ -337,6 +336,7 @@ class BoundingBox {
     this.top = 0;
     this.width = 0;
     this.height = 0;
+    this.fractionLineHeight = 0;
   }
 
 };
@@ -363,8 +363,6 @@ class MathNode {
     this.indexInParent = - 1;
     /** @type {number} */
     this.fractionLineHeight = 0;
-    /** @type {number} */
-    this.heightFromChildren = 0;
     /** @type {number} */
     this.scale = 0;
     /** @type {HTMLElement} */
@@ -445,7 +443,6 @@ class MathNode {
       this.element.style.position = this.type.position;
     }
     this.fractionLineHeight = 0;
-    this.heightFromChildren = 0;
     this.element.setAttribute("mathTagName", this.type.type);
     this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
     this.element.addEventListener("keydown", (e) => { this.handleKeyDown(e); });
@@ -466,7 +463,7 @@ class MathNode {
     );
   }
   hasHorizontalLayout() {
-    if (this.type.type === knownTypes.fraction) {
+    if (this.type.type === knownTypes.fraction.type) {
       return false;
     }
     return true;
@@ -494,47 +491,82 @@ class MathNode {
     }
   }
 
-  updateAlignment(
-    /** @type {BoundingBox} */
-    boundingBoxSoFar
-  ) {
-
-    let parentLayoutHorizontal = true;
-    if (this.parent !== null) {
-      parentLayoutHorizontal = this.parent.hasHorizontalLayout();
-    }
-    if (parentLayoutHorizontal) {
-      this.boundingBox.left = boundingBoxSoFar.left + boundingBoxSoFar.width;
-      this.boundingBox.top = boundingBoxSoFar.top;
-    } else {
-      this.boundingBox.top = boundingBoxSoFar.top + boundingBoxSoFar.height;
-      this.boundingBox.left = boundingBoxSoFar.left;
-    }
-    this.element.style.left = this.boundingBox.left;
-    this.element.style.top = this.boundingBox.top;
-    let boundingBoxChildren = new BoundingBox();
-    boundingBoxChildren.left = this.boundingBox.left;
-    boundingBoxChildren.top = this.boundingBox.top;
+  computeBoundingBox() {
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      child.updateAlignment(boundingBoxChildren);
-      boundingBoxChildren.width += child.boundingBox.width;
-      if (parentLayoutHorizontal) {
-        boundingBoxChildren.height = Math.max(boundingBoxChildren.height, child.boundingBox.height);
-      } else {
-        boundingBoxChildren.width = Math.max(boundingBoxChildren.width, child.boundingBox.width);
-      }
+      child.computeBoundingBox();
     }
-    this.boundingBox.width = boundingBoxChildren.width;
-    this.boundingBox.height = boundingBoxChildren.height;
+    this.computeDimensions();
+  }
+
+  computeDimensionsAtomic() {
+    this.boundingBox.width = this.element.getBoundingClientRect().width;
+    this.boundingBox.height = this.element.getBoundingClientRect().height;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+  }
+
+  computeDimensionsFraction() {
+    let numerator = this.children[0];
+    let denominator = this.children[1];
+    this.boundingBox.fractionLineHeight = numerator.boundingBox.height;
+    this.boundingBox.height = numerator.boundingBox.height + denominator.boundingBox.height;
+    this.boundingBox.width = Math.max(numerator.boundingBox.width, denominator.boundingBox.width);
+    numerator.boundingBox.width = this.boundingBox.width;
+    denominator.boundingBox.width = this.boundingBox.width;
+    denominator.boundingBox.top = numerator.boundingBox.height;
+    numerator.computeDimenionsCenterSingleChild();
+    denominator.computeDimenionsCenterSingleChild();
+  }
+
+  computeDimenionsCenterSingleChild() {
+    let child = this.children[0];
+    child.boundingBox.left = (this.boundingBox.width - child.boundingBox.width) / 2;
+  }
+
+  computeDimensions() {
     if (this.isAtomic()) {
-      this.boundingBox.width = this.element.getBoundingClientRect().width;
-      this.boundingBox.height = this.element.getBoundingClientRect().height;
+      this.computeDimensionsAtomic();
+      return;
     }
+    if (
+      this.type.type === knownTypes.fraction.type &&
+      this.children.length == 2
+    ) {
+      this.computeDimensionsFraction();
+      return;
+    }
+    this.boundingBox.width = 0;
+    // Compute present element width and offsets of children.
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      this.boundingBox.fractionLineHeight = Math.max(
+        this.boundingBox.fractionLineHeight,
+        child.boundingBox.fractionLineHeight,
+      );
+      child.boundingBox.left = this.boundingBox.width;
+      this.boundingBox.width += child.boundingBox.width;
+    }
+    // Compute present element height.
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      let heightFromChild = child.boundingBox.height - child.boundingBox.fractionLineHeight + this.boundingBox.fractionLineHeight;
+      this.boundingBox.height = Math.max(this.boundingBox.height, heightFromChild);
+    }
+    // Compute top offsets of children.
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      child.boundingBox.top = this.boundingBox.fractionLineHeight - child.boundingBox.fractionLineHeight;
+    }
+  }
+
+  doAlign() {
     this.element.style.width = this.boundingBox.width;
     this.element.style.height = this.boundingBox.height;
     this.element.style.left = this.boundingBox.left;
-    this.element.style.right = this.boundingBox.right;
+    this.element.style.top = this.boundingBox.top;
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].doAlign();
+    }
   }
 
   updateParentDOM(/** @type {HTMLElement|null} */ oldElement) {
@@ -1000,7 +1032,7 @@ function testEquationEditor() {
       "1", "+", "1", "/", "1", "+", "1", "/",
       "1", "+", "1", "/", "1",
       "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
-      "+", "1", "/", "1"
+      "+", "1", "/", "1",
     ]);
   }, 300);
 }

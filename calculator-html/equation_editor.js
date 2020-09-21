@@ -507,6 +507,8 @@ class MathNode {
   }
 
   computeDimensionsAtomic() {
+    this.element.style.width = "auto";
+    this.element.style.height = "auto";
     this.boundingBox.width = this.element.getBoundingClientRect().width;
     this.boundingBox.height = this.element.getBoundingClientRect().height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
@@ -581,8 +583,12 @@ class MathNode {
   }
 
   doAlign() {
-    this.element.style.width = this.boundingBox.width;
-    this.element.style.height = this.boundingBox.height;
+    if (this.element.style.width !== 'auto') {
+      this.element.style.width = this.boundingBox.width;
+    }
+    if (this.element.style.height !== 'auto') {
+      this.element.style.height = this.boundingBox.height;
+    }
     this.element.style.left = this.boundingBox.left;
     this.element.style.top = this.boundingBox.top;
     for (let i = 0; i < this.children.length; i++) {
@@ -653,6 +659,7 @@ class MathNode {
         this.updateBackspace(event);
         return;
       default:
+        this.equationEditor.updateAlignment();
         return;
     }
   }

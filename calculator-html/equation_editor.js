@@ -152,10 +152,13 @@ const knownTypes = {
     "textAlign": "center",
     // "whiteSpace": "nowrap",
   }),
+  baseWithExponent: new MathNodeType({
+    "type": "baseWithExponent",
+  }),
   exponent: new MathNodeType({
     "type": "exponent",
-    // "minHeightScale": defaultSubSuperScriptScale,
-    // "fontSize": defaultSubSuperScriptScalePercent,
+    "fontSize": defaultFractionScale,
+    "minHeightScale": defaultFractionScale,
   }),
 };
 
@@ -218,13 +221,18 @@ class MathNodeFactory {
     return fraction;
   }
   /** @returns {MathNode} */
-  exponent(
+  baseWithExponent(
     /** @type {EquationEditor} */
     equationEditor,
+    /** @type{MathNode}*/
+    base,
   ) {
-    const exponent = new MathNode(knownTypes.exponent);
-    exponent.appendChild(this.horizontalMath(null));
-    return exponent;
+    const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
+    baseWithExponent.appendChild(base);
+    const exponent = new MathNode(equationEditor, knownTypes.exponent);
+    exponent.appendChild(this.horizontalMath(equationEditor, null));
+    baseWithExponent.appendChild(exponent);
+    return baseWithExponent;
   }
 }
 
@@ -277,8 +285,8 @@ class EquationEditor {
       for (let i = 0; i < eventsToSend.length; i++) {
         let event = new KeyboardEvent(
           eventsToSend[i], {
-            key: key,
-          });
+          key: key,
+        });
         this.dispatchEventToFirstFocusedChild(this.rootNode, event);
       }
     }
@@ -338,7 +346,6 @@ class BoundingBox {
     this.height = 0;
     this.fractionLineHeight = 0;
   }
-
 };
 
 class MathNode {
@@ -514,11 +521,23 @@ class MathNode {
     numerator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.width = this.boundingBox.width;
     denominator.boundingBox.top = numerator.boundingBox.height;
-    numerator.computeDimenionsCenterSingleChild();
-    denominator.computeDimenionsCenterSingleChild();
+    numerator.computeBoundingBoxLeftSingleChild();
+    denominator.computeBoundingBoxLeftSingleChild();
   }
 
-  computeDimenionsCenterSingleChild() {
+  computeDimensionsBaseWithExponent() {
+    let base = this.children[0];
+    let exponent = this.children[1];
+    this.boundingBox.height = exponent.boundingBox.fractionLineHeight + base.boundingBox.height;
+    if (exponent.boundingBox.height > this.boundingBox.height) {
+      this.boundingBox.height = exponent.boundingBox.height;
+    }
+    base.boundingBox.top = exponent.boundingBox.fractionLineHeight;
+    this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
+    exponent.boundingBox.left = base.boundingBox.width;
+  }
+
+  computeBoundingBoxLeftSingleChild() {
     let child = this.children[0];
     child.boundingBox.left = (this.boundingBox.width - child.boundingBox.width) / 2;
   }
@@ -528,11 +547,12 @@ class MathNode {
       this.computeDimensionsAtomic();
       return;
     }
-    if (
-      this.type.type === knownTypes.fraction.type &&
-      this.children.length == 2
-    ) {
+    if (this.type.type === knownTypes.fraction.type) {
       this.computeDimensionsFraction();
+      return;
+    }
+    if (this.type.type === knownTypes.baseWithExponent.type) {
+      this.computeDimensionsBaseWithExponent();
       return;
     }
     this.boundingBox.width = 0;
@@ -620,7 +640,7 @@ class MathNode {
         this.makeHorizontalOperator(key);
         return;
       case "^":
-        this.makeExponent();
+        this.makeBaseWithExponent();
         return;
       case "ArrowLeft":
       case "ArrowRight":
@@ -824,6 +844,9 @@ class MathNode {
       }
       return;
     }
+    if (child.parent !== null && child.indexInParent >= 0) {
+      child.parent.children[child.indexInParent] = null;
+    }
     child.parent = this;
     child.indexInParent = this.children.length;
     this.children.push(child);
@@ -951,14 +974,16 @@ class MathNode {
     fraction.parent.updateDOM();
     fraction.children[1].focus(- 1);
   }
-  makeExponent() {
+  makeBaseWithExponent() {
     if (this.parent === null) {
       return;
     }
-    const exponent = mathNodeFactory.exponent(this.equationEditor);
-    this.parent.insertChildAtPosition(this.indexInParent + 1, exponent);
-    this.parent.updateDOM();
-    exponent.children[0].focus(- 1);
+    let originalParent = this.parent;
+    let originalIndexInParent = this.indexInParent;
+    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
+    originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
+    originalParent.updateDOM();
+    baseWithExponent.children[1].focus(- 1);
   }
 
   /** Focuses the HTMLElement that belongs to the math node.
@@ -1028,11 +1053,11 @@ function testEquationEditor() {
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
     defaultEquationEditorLocal.sendKeys([
-      "1", "+", "1",
-      "1", "+", "1", "/", "1", "+", "1", "/",
-      "1", "+", "1", "/", "1",
-      "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
-      "+", "1", "/", "1",
+      /*      "1", "+", "1",
+            "1", "+", "1", "/", "1", "+", "1", "/",
+            "1", "+", "1", "/", "1",
+            "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
+            "+", "1", "/", "1",*/
     ]);
   }, 300);
 }

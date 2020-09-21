@@ -157,8 +157,8 @@ const knownTypes = {
   }),
   exponent: new MathNodeType({
     "type": "exponent",
-    "fontSize": defaultFractionScale,
-    "minHeightScale": defaultFractionScale,
+    "fontSize": 0.75,
+    "minHeightScale": 0.75,
   }),
 };
 
@@ -535,6 +535,7 @@ class MathNode {
     base.boundingBox.top = exponent.boundingBox.fractionLineHeight;
     this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
     exponent.boundingBox.left = base.boundingBox.width;
+    this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
   }
 
   computeBoundingBoxLeftSingleChild() {
@@ -930,7 +931,10 @@ class MathNode {
     let positionOperator = 1;
     if (this.positionCaretBeforeKeyEvents === 0 && this.element.textContent.length > 0) {
       positionOperator = - 1;
-    } else if (this.positionCaretBeforeKeyEvents > 0 && this.positionCaretBeforeKeyEvents < this.element.textContent.length) {
+    } else if (
+      this.positionCaretBeforeKeyEvents > 0 &&
+      this.positionCaretBeforeKeyEvents < this.element.textContent.length
+    ) {
       positionOperator = 0;
     }
     // Find closest ancestor node that's of type horizontal math.

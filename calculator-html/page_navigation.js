@@ -26,34 +26,35 @@ function User() {
   this.sectionInDB = "";
   this.deadlineSchema = "";
   this.sectionComputed = "";
+  this.flagDatabaseInactiveEveryoneIsAdmin = false;
 }
 
-User.prototype.isLoggedIn = function() {
+User.prototype.isLoggedIn = function () {
   return this.flagLoggedIn;
 }
 
-User.prototype.getRole = function() {
+User.prototype.getRole = function () {
   return mainPage().storage.variables.user.role.getValue();
 }
 
-User.prototype.hasAdminRights = function() {
+User.prototype.hasAdminRights = function () {
   return this.getRole() === "admin" && this.isLoggedIn();
 }
 
-User.prototype.hasProblemEditRights = function() {
+User.prototype.hasProblemEditRights = function () {
   return this.getRole() === "admin" && this.isLoggedIn();
 }
 
-User.prototype.hasInstructorRights = function() {
+User.prototype.hasInstructorRights = function () {
   return this.getRole() === "admin" && this.isLoggedIn();
 }
 
-User.prototype.hideProfilePicture = function() {
+User.prototype.hideProfilePicture = function () {
   document.getElementById("divProfilePicture").classList.add("divInvisible");
   document.getElementById("divProfilePicture").classList.remove("divVisible");
 }
 
-User.prototype.makeFromUserInfo = function(inputData) {
+User.prototype.makeFromUserInfo = function (inputData) {
   var thePage = window.calculator.mainPage;
   // Please note: the authentication token is silently set through the cookie headers.
   // Please do not take explicit action as
@@ -72,7 +73,7 @@ User.prototype.makeFromUserInfo = function(inputData) {
 }
 
 function StorageVariable(
-/**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
+  /**@type @{{name: string, nameURL: string, nameCookie: string, nameLocalStorage: string, associatedDOMId: string, type: string, secure: string, showInURLByDefault: bool, showInURLOnPages: Object, callbackOnValueChange: function}} */
   inputs
 ) {
   this.value = "";
@@ -97,7 +98,7 @@ function StorageVariable(
     "showInURLByDefault",
     "showInURLOnPages",
   ];
-  for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel ++) {
+  for (var counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
     var currentLabel = labelsToRead[counterLabel];
     var incoming = inputs[currentLabel];
     if (incoming !== "" && incoming !== null && incoming !== undefined) {
@@ -107,19 +108,19 @@ function StorageVariable(
 }
 
 /**@returns {Boolean}  */
-StorageVariable.prototype.isTrue = function() {
+StorageVariable.prototype.isTrue = function () {
   if (this.value === "true" || this.value === true) {
     return true;
   }
   return false;
 }
 
-StorageVariable.prototype.getValue = function() {
+StorageVariable.prototype.getValue = function () {
   return this.value;
 }
 
 /**@returns{string} */
-StorageVariable.prototype.loadMe = function(hashParsed) {
+StorageVariable.prototype.loadMe = function (hashParsed) {
   if (mainPage().flagProblemPageOnly) {
     // TODO: fix this by uncommenting the code below.
     console.log("Warning: using cookies in standalone mode.")
@@ -152,7 +153,7 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
   return candidate;
 }
 
-StorageVariable.prototype.storeMePersistent = function(
+StorageVariable.prototype.storeMePersistent = function (
   /**@type {boolean} */
   updateURL,
 ) {
@@ -179,7 +180,7 @@ StorageVariable.prototype.storeMePersistent = function(
   }
 }
 
-StorageVariable.prototype.storeMe = function(
+StorageVariable.prototype.storeMe = function (
   /**@type {boolean} */
   updateURL,
   /**@type {boolean} */
@@ -193,7 +194,7 @@ StorageVariable.prototype.storeMe = function(
   }
 }
 
-StorageVariable.prototype.setAndStore = function(
+StorageVariable.prototype.setAndStore = function (
   newValue,
   /**@type {Boolean} */
   updateURL,
@@ -364,12 +365,12 @@ function StorageCalculator() {
 }
 
 /**@returns {String} */
-StorageCalculator.prototype.getPercentEncodedURL = function(input) {
+StorageCalculator.prototype.getPercentEncodedURL = function (input) {
   return encodeURIComponent(JSON.stringify(input));
 }
 
 /**@returns {String} */
-StorageCalculator.prototype.getCleanedUpURL = function(input) {
+StorageCalculator.prototype.getCleanedUpURL = function (input) {
   var stringifiedInput = JSON.stringify(input);
   var isGood = true;
   try {
@@ -386,7 +387,7 @@ StorageCalculator.prototype.getCleanedUpURL = function(input) {
   return stringifiedInput;
 }
 
-StorageCalculator.prototype.parseURL = function() {
+StorageCalculator.prototype.parseURL = function () {
   try {
     if (
       this.currentHashRaw === window.location.hash
@@ -408,12 +409,12 @@ StorageCalculator.prototype.parseURL = function() {
   }
 }
 
-StorageCalculator.prototype.loadSettings = function() {
+StorageCalculator.prototype.loadSettings = function () {
   this.parseURL();
   this.loadSettingsRecursively(this.variables, this.urlObject);
 }
 
-StorageCalculator.prototype.loadSettingsRecursively = function(
+StorageCalculator.prototype.loadSettingsRecursively = function (
   /**@type {StorageVariable} */
   currentStorage,
   inputHashParsed,
@@ -429,12 +430,12 @@ StorageCalculator.prototype.loadSettingsRecursively = function(
   }
 }
 
-StorageCalculator.prototype.computeURLRecursively = function(currentStorage, recursionDepth) {
+StorageCalculator.prototype.computeURLRecursively = function (currentStorage, recursionDepth) {
   if (recursionDepth === undefined) {
     recursionDepth = 0;
   }
   if (recursionDepth > 100) {
-    throw("Recursion is too deeply nested. This must be a programming error. ");
+    throw ("Recursion is too deeply nested. This must be a programming error. ");
   }
   var result = {};
   if (currentStorage instanceof StorageVariable) {
@@ -494,21 +495,21 @@ function Page() {
       selectFunction: null,
       initialized: false,
     },
-    selectCourse : {
+    selectCourse: {
       name: "selectCourse",
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
       selectFunction: selectCourse.selectCoursePage,
     },
-    currentCourse : {
+    currentCourse: {
       name: "currentCourse",
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
       selectFunction: coursePage.selectCurrentCoursePage,
     },
-    problemPage : {
+    problemPage: {
       name: "problemPage",
       id: "divProblemPage",
       menuButtonId: "buttonProblemPage",
@@ -516,7 +517,7 @@ function Page() {
       selectFunction: problemPage.updateProblemPage,
       flagLoaded: false,
     },
-    editPage : {
+    editPage: {
       name: "editPage",
       id: ids.domElements.pages.editPage.div,
       menuButtonId: ids.domElements.pages.editPage.button,
@@ -603,29 +604,29 @@ function Page() {
   this.flagProblemPageOnly = false;
 }
 
-Page.prototype.isLoggedIn = function() {
+Page.prototype.isLoggedIn = function () {
   if (this.flagProblemPageOnly) {
     return false;
   }
   return this.user.isLoggedIn();
 }
 
-Page.prototype.initBuildVersion = function() {
+Page.prototype.initBuildVersion = function () {
   document.getElementById(ids.domElements.calculatorBuildVersion).innerHTML = `Build version ${serverInformation.serverInformation.version}`;
 }
 
-Page.prototype.serverIsOnLocalHost = function() {
+Page.prototype.serverIsOnLocalHost = function () {
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
     return true;
   }
   return false;
 }
 
-Page.prototype.initHandlers = function() {
+Page.prototype.initHandlers = function () {
   window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
 }
 
-Page.prototype.initMenuBar = function() {
+Page.prototype.initMenuBar = function () {
   for (var page in this.pages) {
     this.pages[page].container = document.getElementById(this.pages[page].id);
     if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
@@ -636,11 +637,11 @@ Page.prototype.initMenuBar = function() {
   }
 }
 
-Page.prototype.resetTopicProblems = function() {
+Page.prototype.resetTopicProblems = function () {
   problemPage.allProblems.resetTopicProblems();
 }
 
-Page.prototype.showProfilePicture = function() {
+Page.prototype.showProfilePicture = function () {
   document.getElementById("divProfilePicture").classList.remove("divInvisible");
   document.getElementById("divProfilePicture").classList.add("divVisible");
   if (this.user.googleProfile.picture === undefined) {
@@ -663,12 +664,12 @@ Page.prototype.showProfilePicture = function() {
   }
 }
 
-Page.prototype.initializeCalculatorPage = function() {
+Page.prototype.initializeCalculatorPage = function () {
   this.initializeCalculatorPagePartOne();
   this.initializeCalculatorPagePartTwo();
 }
 
-Page.prototype.initializeCalculatorPagePartOne = function() {
+Page.prototype.initializeCalculatorPagePartOne = function () {
   cookies.setCookie("useJSON", true, 300, false);
   this.initMenuBar();
   this.initBuildVersion();
@@ -705,17 +706,17 @@ Page.prototype.initializeCalculatorPagePartOne = function() {
   document.getElementById("divOnePageApp").className = "divOnePageApp";
 }
 
-Page.prototype.initializeCalculatorPagePartTwo = function() {
+Page.prototype.initializeCalculatorPagePartTwo = function () {
   initializeButtons.initializeButtons();
   initializeButtons.initializeCalculatorPage();
   mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
 }
 
-Page.prototype.sectionSelect = function(sectionNumber) {
+Page.prototype.sectionSelect = function (sectionNumber) {
   this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
   this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
-  for (var i = 0; i < deadlineSpans.length; i ++) {
+  for (var i = 0; i < deadlineSpans.length; i++) {
     var currentDeadlineSpan = deadlineSpans[i];
     var currentDeadlineId = currentDeadlineSpan.id.substr(
       ids.stringResources.prefixDeadlineContainer.length
@@ -735,7 +736,7 @@ Page.prototype.onStudentViewChange = function () {
   var radioHTML = "";
   if (studentView) {
     spanView.innerHTML = "Student view";
-    for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
+    for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
       radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections});" `;
       var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
@@ -795,7 +796,7 @@ function AllScripts() {
   this.scriptsInjected = {};
 }
 
-AllScripts.prototype.removeOneScript = function(scriptId) {
+AllScripts.prototype.removeOneScript = function (scriptId) {
   var theScript = document.getElementById(scriptId);
   if (theScript === null) {
     return;
@@ -804,13 +805,13 @@ AllScripts.prototype.removeOneScript = function(scriptId) {
   parent.removeChild(theScript);
 }
 
-AllScripts.prototype.removeScripts = function(scriptIds) {
-  for (var counter = 0; counter < scriptIds.length; counter ++) {
+AllScripts.prototype.removeScripts = function (scriptIds) {
+  for (var counter = 0; counter < scriptIds.length; counter++) {
     this.removeOneScript(scriptIds[counter]);
   }
 }
 
-AllScripts.prototype.injectScript = function(scriptId, scriptContent) {
+AllScripts.prototype.injectScript = function (scriptId, scriptContent) {
   this.removeOneScript(scriptId);
   if (scriptContent !== undefined && scriptContent !== null) {
     this.scriptsInjected[scriptId] = new Script();
@@ -826,19 +827,19 @@ AllScripts.prototype.injectScript = function(scriptId, scriptContent) {
   document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
-Page.prototype.removeOneScript = function(scriptId) {
+Page.prototype.removeOneScript = function (scriptId) {
   this.scriptInjector.removeOneScript(scriptId);
 }
 
-Page.prototype.removeScripts = function(scriptIds) {
+Page.prototype.removeScripts = function (scriptIds) {
   this.scriptInjector.removeScripts(scriptIds);
 }
 
-Page.prototype.injectScript = function(scriptId, scriptContent) {
+Page.prototype.injectScript = function (scriptId, scriptContent) {
   this.scriptInjector.injectScript(scriptId, scriptContent);
 }
 
-Page.prototype.selectPage = function(inputPage) {
+Page.prototype.selectPage = function (inputPage) {
   if (this.pages[inputPage] === undefined) {
     inputPage = "calculator";
   }
@@ -861,7 +862,7 @@ Page.prototype.selectPage = function(inputPage) {
   //location.href = `#${this.getHash()}`;
 }
 
-Page.prototype.getCurrentProblem = function() {
+Page.prototype.getCurrentProblem = function () {
   var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
   if (
     problemFileName === "" ||
@@ -873,11 +874,11 @@ Page.prototype.getCurrentProblem = function() {
   return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
 }
 
-Page.prototype.getProblemById = function(label) {
+Page.prototype.getProblemById = function (label) {
   return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
 }
 
-Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
+Page.prototype.cleanUpLoginSpan = function (componentToCleanUp) {
   var loginInfo = document.getElementById("spanLoginRequired");
   if (loginInfo !== null) {
     if (loginInfo.parentElement === componentToCleanUp) {
@@ -915,7 +916,7 @@ Page.prototype.setMonitoringComponent = function () {
 /**
  * @returns {Page}
  * */
-function mainPage () {
+function mainPage() {
   return window.calculator.mainPage;
 }
 

@@ -74,7 +74,10 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   thePage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
-  if (exerciseType === pathnames.urlFields.scoredQuizJSON) {
+  if (
+    exerciseType === pathnames.urlFields.scoredQuizJSON &&
+    !thePage.user.flagDatabaseInactiveEveryoneIsAdmin
+  ) {
     theProblem.flagForReal = true;
   }
   thePage.pages.problemPage.flagLoaded = false;
@@ -311,7 +314,7 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function (
 ) {
   var thePage = window.calculator.mainPage;
   var theExerciseType = pathnames.urlFields.exerciseJSON;
-  if (isScoredQuiz) {
+  if (isScoredQuiz && !thePage.user.flagDatabaseInactiveEveryoneIsAdmin) {
     theExerciseType = pathnames.urlFields.scoredQuizJSON;
   }
   var requestJSON = {
@@ -360,7 +363,7 @@ Problem.prototype.getCalculatorURLRequestPartOne = function (isScoredQuiz) {
     isScoredQuiz = this.flagForReal;
   }
   result += `${pathnames.urlFields.request}=`;
-  if (isScoredQuiz) {
+  if (isScoredQuiz && !thePage.user.flagDatabaseInactiveEveryoneIsAdmin) {
     result += pathnames.urlFields.scoredQuizJSON;
   } else {
     result += pathnames.urlFields.exerciseJSON;
@@ -472,7 +475,7 @@ Problem.prototype.getPreviousProblemButton = function (
 Problem.prototype.getProblemNavigationHints = function () {
   var thePage = window.calculator.mainPage;
   var result = new ProblemNavigationHints();
-  if (this.flagForReal && thePage.user.flagLoggedIn) {
+  if (this.flagForReal && thePage.user.flagLoggedIn && !thePage.user.flagDatabaseInactiveEveryoneIsAdmin) {
     result.defaultRequest = pathnames.urlFields.scoredQuizJSON;
     result.linkType = "problemLinkQuiz";
     result.isScoredQuiz = true;
@@ -501,7 +504,7 @@ Problem.prototype.getProblemNavigationContent = function () {
     selectedPracticeTag.innerHTML = "Practice";
     result.push(selectedPracticeTag)
   }
-  if (!this.flagForReal && thePage.user.flagLoggedIn) {
+  if (!this.flagForReal && thePage.user.flagLoggedIn && !thePage.user.flagDatabaseInactiveEveryoneIsAdmin) {
     var quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
     var quizTag = document.createElement("a");
     quizTag.className = "problemLinkQuiz";

@@ -144,6 +144,7 @@ function loginWithServerCallback(incomingString, result) {
     parsedAuthentication[pathnames.urlFields.userRole] = "admin";
     loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
     success = true;
+    thePage.user.flagDatabaseInactiveEveryoneIsAdmin = true;
   }
   if (
     parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&

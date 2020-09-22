@@ -107,12 +107,16 @@ const knownTypes = {
     "minHeightScale": 1,
     "padding": atomPad,
     "outline": "0px solid transparent",
+    "width": "auto",
+    "height": "auto",
   }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
     "minHeightScale": 1,
     "padding": `${0.02}em`,
+    "width": "auto",
+    "height": "auto",
   }),
   // Horizontally laid out math such as "x+2". 
   // The example "x+2" consists of the three elements "x", "+" and 2.
@@ -159,6 +163,9 @@ const knownTypes = {
     "type": "exponent",
     "fontSize": 0.75,
     "minHeightScale": 0.75,
+  }),
+  parentheses: new MathNodeType({
+    "type": "parentheses",
   }),
 };
 
@@ -469,6 +476,10 @@ class MathNode {
       this.type.type === knownTypes.atomImmutable.type
     );
   }
+  /** @returns {boolean} */
+  isAtomEditable() {
+    return this.type.type === knownTypes.atom.type;
+  }
   hasHorizontalLayout() {
     if (this.type.type === knownTypes.fraction.type) {
       return false;
@@ -507,8 +518,6 @@ class MathNode {
   }
 
   computeDimensionsAtomic() {
-    this.element.style.width = "auto";
-    this.element.style.height = "auto";
     this.boundingBox.width = this.element.getBoundingClientRect().width;
     this.boundingBox.height = this.element.getBoundingClientRect().height;
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
@@ -655,11 +664,13 @@ class MathNode {
       case "ArrowDown":
         this.arrow(key);
         return;
+      case "(":
+        this.makeParenthesesLeft();
+        return;
       case "Backspace":
         this.updateBackspace(event);
         return;
       default:
-        this.equationEditor.updateAlignment();
         return;
     }
   }
@@ -703,7 +714,7 @@ class MathNode {
       return this.positionCaretBeforeKeyEvents !== 0;
     }
     if (key === "ArrowRight") {
-      return this.positionCaretBeforeKeyEvents !== this.element.textContent.length
+      return this.positionCaretBeforeKeyEvents !== this.element.textContent.length;
     }
     return false;
   }
@@ -970,6 +981,20 @@ class MathNode {
     parent.updateDOM();
     parent.children[oldIndexInParent + 2].focus(- 1);
   }
+  ensureEditableAtomToTheRight() {
+    if (this.parent === null) {
+      console.log('Warning: could not find ancestor of node in ensureEditableAtomToTheRight.');
+      return;
+    }
+    let parent = this.parent;
+    let indexNext = this.indexInParent + 1;
+    if (indexNext < parent.children.length) {
+      if (parent.children[indexNext].isAtomEditable()) {
+        return;
+      }
+    }
+    parent.insertChildAtPosition(indexNext, mathNodeFactory.atom(this.equationEditor, ""));
+  }
 
   makeFractionNumerator() {
     if (this.parent === null) {
@@ -993,6 +1018,7 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
+    baseWithExponent.ensureEditableAtomToTheRight();
     originalParent.updateDOM();
     baseWithExponent.children[1].focus(- 1);
   }

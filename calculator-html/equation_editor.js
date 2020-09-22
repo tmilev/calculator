@@ -104,7 +104,6 @@ const knownTypes = {
   // This is the only element type that has contentEditable = true;
   atom: new MathNodeType({
     "type": "atom",
-    "minHeightScale": 1,
     "padding": atomPad,
     "outline": "0px solid transparent",
     "width": "auto",
@@ -113,7 +112,6 @@ const knownTypes = {
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
     "type": "atomImmutable",
-    "minHeightScale": 1,
     "padding": `${0.02}em`,
     "width": "auto",
     "height": "auto",
@@ -416,8 +414,9 @@ class MathNode {
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
-    // this.element.style.minHeight = this.type.minHeightScale * fontSize;
-    this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
+    if (this.type.minHeightScale !== 0) {
+      this.element.style.minWidth = this.type.minHeightScale * fontSize / 1.6;
+    }
     this.element.style.verticalAlign = this.type.verticalAlign;
     this.element.style.outline = this.type.outline;
     if (this.type.textAlign !== "") {
@@ -671,6 +670,7 @@ class MathNode {
         this.updateBackspace(event);
         return;
       default:
+        this.equationEditor.updateAlignment();
         return;
     }
   }
@@ -889,6 +889,15 @@ class MathNode {
     this.replaceChildRangeWithChildren(index, index - 1, [child]);
   }
 
+  /** @returns {MathNode} */
+  removeChildReplaceWithNull(childIndex) {
+    let result = this.children[childIndex];
+    result.parent = null;
+    result.indexInParent = - 1;
+    this.children[childIndex] = null;
+    return result;
+  }
+
   replaceChildRangeWithChildren(
     /** @type {number} */
     fromIndex,
@@ -901,7 +910,7 @@ class MathNode {
     // be in use as a member of a sub-tree of the inputChildren.
     let toBeShiftedDown = [];
     for (let i = toIndex + 1; i < this.children.length; i++) {
-      toBeShiftedDown.push(this.children[i]);
+      toBeShiftedDown.push(this.removeChildReplaceWithNull(i));
     }
     this.children.length = fromIndex;
     for (let i = 0; i < inputChildren.length; i++) {
@@ -1064,6 +1073,18 @@ class MathNode {
     if (this.type.type === knownTypes.atom.type) {
       if (this.element !== null) {
         content += `[${this.element.textContent}]`;
+      }
+      if (this.boundingBox.width !== 0) {
+        content += `, w: ${this.boundingBox.width}`;
+      }
+      if (this.boundingBox.height !== 0) {
+        content += `, h: ${this.boundingBox.height}`;
+      }
+      if (this.boundingBox.left !== 0) {
+        content += `, l: ${this.boundingBox.left}`;
+      }
+      if (this.boundingBox.top !== 0) {
+        content += `, t: ${this.boundingBox.top}`;
       }
     }
     result.push(content);

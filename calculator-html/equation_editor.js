@@ -384,6 +384,18 @@ class BoundingBox {
     this.width = 0;
     this.height = 0;
     this.fractionLineHeight = 0;
+    this.stretchFactor = 1;
+  }
+  verticallyStretch(
+    /** @type {nuBoundingBoxmber}*/
+    boxToEnclose,
+  ) {
+    let heightToStretchTo = boxToEnclose.height;
+    if (heightToStretchTo !== 0) {
+      this.stretchFactor = this.height / heightToStretchTo;
+    }
+    this.height = Math.max(this.height, heightToStretchTo);
+    this.fractionLineHeight = boxToEnclose.fractionLineHeight;
   }
 };
 
@@ -593,19 +605,14 @@ class MathNode {
   }
 
   computeDimensionsParentheses() {
-    let left = this.children[0];
     let contentBox = this.children[1].boundingBox;
+    let left = this.children[0];
     let right = this.children[2];
-    let stretchFactor = 1;
-    if (contentBox.height !== 0) {
-      stretchFactor = contentBox.height / left.boundingBox.height;
-    }
-    left.boundingBox.height = Math.max(left.boundingBox.height, contentBox.height);
-    left.boundingBox.fractionLineHeight = contentBox.fractionLineHeight;
-    left.element.style.transform = `scaleY(${stretchFactor})`;
-    right.boundingBox.fractionLineHeight = contentBox.fractionLineHeight;
-    right.boundingBox.height = Math.max(right.boundingBox.height, contentBox.height);
-    right.element.style.transform = `scaleY(${stretchFactor})`;
+    left.boundingBox.verticallyStretch(contentBox);
+    right.boundingBox.verticallyStretch(contentBox);
+    right.boundingBox.left = left.boundingBox.width + contentBox.width;
+    left.element.style = `scaleY(${left.boundingBox.stretchFactor})`;
+    right.element.style = `scaleY(${right.boundingBox.stretchFactor})`;
     this.computeDimensionsStandard();
   }
 
@@ -1090,18 +1097,25 @@ class MathNode {
       return;
     }
     let oldIndexInParent = this.indexInParent;
-    let parentheses = null;
     if (positionOperator === 1) {
-      parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+      let parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+      parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
+      parent.updateDOM();
+      parent.children[oldIndexInParent + 1].focus(- 1);
     } else if (positionOperator === 0) {
       let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
       let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
       parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
-      parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, rightContent));
+      let parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, rightContent));
+      parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
+      parent.updateDOM();
+      parent.children[oldIndexInParent + 1].focus(- 1);
+    } else {
+      let parentheses = mathNodeFactory.parentheses(this.equationEditor, this);
+      parent.replaceChildAtPosition(oldIndexInParent, parentheses);
+      parent.updateDOM();
+      parent.children[oldIndexInParent].focus(- 1);
     }
-    parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
-    parent.updateDOM();
-    parent.children[oldIndexInParent + 1].focus(- 1);
   }
 
   ensureEditableAtomToTheRight() {
@@ -1164,12 +1178,25 @@ class MathNode {
         }
         this.setCursorPosition(position);
       }
-      return;
+      return true;
     }
     if (this.children.length < 1) {
-      return;
+      return false;
     }
-    this.children[0].focus(endToFocus);
+    if (endToFocus === 1) {
+      for (let i = this.children.length - 1; i >= 0; i--) {
+        if (this.children[i].focus(endToFocus)) {
+          return true;
+        }
+      }
+    } else {
+      for (let i = 0; i < this.children.length; i++) {
+        if (this.children[i].focus(endToFocus)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   setCursorPosition(/** @type {number}*/ position) {
@@ -1182,25 +1209,23 @@ class MathNode {
   }
 
   toString(indentationLevel) {
-    const indentation = "--".repeat(indentationLevel);
+    const indentation = "-".repeat(indentationLevel);
     const result = [];
     let content = `${indentation}${this.type.type}`;
-    if (this.type.type === knownTypes.atom.type) {
-      if (this.element !== null) {
-        content += `[${this.element.textContent}]`;
-      }
-      if (this.boundingBox.width !== 0) {
-        content += `, w: ${this.boundingBox.width}`;
-      }
-      if (this.boundingBox.height !== 0) {
-        content += `, h: ${this.boundingBox.height}`;
-      }
-      if (this.boundingBox.left !== 0) {
-        content += `, l: ${this.boundingBox.left}`;
-      }
-      if (this.boundingBox.top !== 0) {
-        content += `, t: ${this.boundingBox.top}`;
-      }
+    if (this.element !== null) {
+      content += `[${this.element.textContent}]`;
+    }
+    if (this.boundingBox.width !== 0) {
+      content += `, w: ${this.boundingBox.width}`;
+    }
+    if (this.boundingBox.height !== 0) {
+      content += `, h: ${this.boundingBox.height}`;
+    }
+    if (this.boundingBox.left !== 0) {
+      content += `, l: ${this.boundingBox.left}`;
+    }
+    if (this.boundingBox.top !== 0) {
+      content += `, t: ${this.boundingBox.top}`;
     }
     result.push(content);
     for (let i = 0; i < this.children.length; i++) {

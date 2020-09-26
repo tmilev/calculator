@@ -116,6 +116,16 @@ const knownTypes = {
     "width": "auto",
     "height": "auto",
   }),
+  // Left delimiter (parentheses, bracket, ...)
+  leftDelimiter: new MathNodeType({
+    "type": "leftDelimiter",
+    "width": "auto",
+    "height": "auto",
+  }),
+  // Right delimiter (parentheses, bracket, ...)
+  rightDelimiter: new MathNodeType({
+    "type": "rightDelimiter",
+  }),
   // Horizontally laid out math such as "x+2". 
   // The example "x+2" consists of the three elements "x", "+" and 2.
   // Not allowed to contain other horizontally laid out math elements.
@@ -203,7 +213,7 @@ class MathNodeFactory {
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {string} */
-    operator
+    operator,
   ) {
     const result = new MathNode(equationEditor, knownTypes.atomImmutable);
     result.initialContent = operator;
@@ -214,7 +224,7 @@ class MathNodeFactory {
     /** @type {EquationEditor} */
     equationEditor,
     /** @type{MathNode}*/
-    numeratorContent
+    numeratorContent,
   ) {
     const fraction = new MathNode(equationEditor, knownTypes.fraction);
     const numerator = new MathNode(equationEditor, knownTypes.numerator);
@@ -238,6 +248,26 @@ class MathNodeFactory {
     exponent.appendChild(this.horizontalMath(equationEditor, null));
     baseWithExponent.appendChild(exponent);
     return baseWithExponent;
+  }
+  /** @returns {MathNode} */
+  parentheses(
+    /** @type {EquationEditor} */
+    equationEditor,
+    /** @type{MathNode}*/
+    content,
+  ) {
+    const leftParentheses = new MathNode(equationEditor, knownTypes.leftDelimiter);
+    leftParentheses.initialContent = "(";
+    const rightParentheses = new MathNode(equationEditor, knownTypes.rightDelimiter);
+    rightParentheses.initialContent = ")";
+    const wrappedContent = this.horizontalMath(equationEditor, content);
+    const result = new MathNode(
+      equationEditor, knownTypes.parentheses,
+    );
+    result.appendChild(leftParentheses);
+    result.appendChild(wrappedContent);
+    result.appendChild(rightParentheses);
+    return result;
   }
 }
 
@@ -281,7 +311,11 @@ class EquationEditor {
     if (keys.length === 0) {
       return;
     }
-    let specialKeys = new Set(["+", "-", "*", "/", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]);
+    let specialKeys = new Set([
+      "+", "-", "*", "/",
+      "ArrowLeft", "ArrowRight",
+      "ArrowUp", "ArrowDown",
+    ]);
     let key = keys[0];
     if (!specialKeys.has(key)) {
       this.dispatchInputToFirstFocusedChild(this.rootNode, key);
@@ -553,9 +587,38 @@ class MathNode {
     child.boundingBox.left = (this.boundingBox.width - child.boundingBox.width) / 2;
   }
 
+  computeDimensionsDelimiter() {
+    this.boundingBox.width = this.element.getBoundingClientRect().width;
+    this.boundingBox.height = this.element.getBoundingClientRect().height;
+  }
+
+  computeDimensionsParentheses() {
+    let left = this.children[0];
+    let contentBox = this.children[1].boundingBox;
+    let right = this.children[2];
+    let stretchFactor = 1;
+    if (contentBox.height !== 0) {
+      stretchFactor = contentBox.height / left.boundingBox.height;
+    }
+    left.boundingBox.height = Math.max(left.boundingBox.height, contentBox.height);
+    left.boundingBox.fractionLineHeight = contentBox.fractionLineHeight;
+    left.element.style.transform = `scaleY(${stretchFactor})`;
+    right.boundingBox.fractionLineHeight = contentBox.fractionLineHeight;
+    right.boundingBox.height = Math.max(right.boundingBox.height, contentBox.height);
+    right.element.style.transform = `scaleY(${stretchFactor})`;
+    this.computeDimensionsStandard();
+  }
+
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
+      return;
+    }
+    if (
+      this.type.type === knownTypes.leftDelimiter.type ||
+      this.type.type === knownTypes.rightDelimiter.type
+    ) {
+      this.computeDimensionsDelimiter();
       return;
     }
     if (this.type.type === knownTypes.fraction.type) {
@@ -566,6 +629,14 @@ class MathNode {
       this.computeDimensionsBaseWithExponent();
       return;
     }
+    if (this.type.type === knownTypes.parentheses.type) {
+      this.computeDimensionsParentheses();
+      return;
+    }
+    this.computeDimensionsStandard();
+  }
+
+  computeDimensionsStandard() {
     this.boundingBox.width = 0;
     // Compute present element width and offsets of children.
     for (let i = 0; i < this.children.length; i++) {
@@ -637,13 +708,16 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    this.handleKeyUpCases(event);
-    event.preventDefault();
     event.stopPropagation();
+    event.preventDefault();
+    this.handleKeyUpCases(event);
     writeDebugInfo();
   }
 
-  handleKeyUpCases() {
+  handleKeyUpCases(
+    /** @type {KeyboardEvent} */
+    event,
+  ) {
     let key = event.key;
     switch (key) {
       case "/":
@@ -827,6 +901,8 @@ class MathNode {
       case "*":
       case "/":
       case "^":
+      case "(":
+      case ")":
       case "ArrowDown":
       case "ArrowUp":
         event.preventDefault();
@@ -949,12 +1025,11 @@ class MathNode {
     }
   }
 
-  makeHorizontalOperator(
-    /** @type {string} */
-    key,
-  ) {
-    let parent = this.parent;
-    // - 1 stands for start ("+11"), 0 for middle ("1+1"), 1 for end ("11+"). 
+  /** Returns the position of the operator.
+   * 
+   * - 1 stands for start ("+11"), 0 for middle ("1+1"), 1 for end ("11+"). 
+   */
+  computePositionOfOperator() {
     let positionOperator = 1;
     if (this.positionCaretBeforeKeyEvents === 0 && this.element.textContent.length > 0) {
       positionOperator = - 1;
@@ -964,13 +1039,27 @@ class MathNode {
     ) {
       positionOperator = 0;
     }
-    // Find closest ancestor node that's of type horizontal math.
+    return positionOperator;
+  }
+
+  computeHorizontalMathParent() {
+    let parent = this.parent;
     while (parent !== null) {
       if (parent.type.type === knownTypes.horizontalMath.type) {
-        break;
+        return parent;
       }
       parent = parent.parent;
     }
+    return parent;
+  }
+
+  makeHorizontalOperator(
+    /** @type {string} */
+    key,
+  ) {
+    let positionOperator = this.computePositionOfOperator();
+    // Find closest ancestor node that's of type horizontal math.
+    let parent = this.computeHorizontalMathParent();
     if (parent === null) {
       // No ancestor is of type horizontal math. 
       console.log('Warning: could not find ancestor of type horizontal math.');
@@ -990,6 +1079,31 @@ class MathNode {
     parent.updateDOM();
     parent.children[oldIndexInParent + 2].focus(- 1);
   }
+
+  makeParenthesesLeft() {
+    let positionOperator = this.computePositionOfOperator();
+    // Find closest ancestor node that's of type horizontal math.
+    let parent = this.computeHorizontalMathParent();
+    if (parent === null) {
+      // No ancestor is of type horizontal math. 
+      console.log('Warning: could not find ancestor of type horizontal math.');
+      return;
+    }
+    let oldIndexInParent = this.indexInParent;
+    let parentheses = null;
+    if (positionOperator === 1) {
+      parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+    } else if (positionOperator === 0) {
+      let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
+      let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
+      parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
+      parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, rightContent));
+    }
+    parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
+    parent.updateDOM();
+    parent.children[oldIndexInParent + 1].focus(- 1);
+  }
+
   ensureEditableAtomToTheRight() {
     if (this.parent === null) {
       console.log('Warning: could not find ancestor of node in ensureEditableAtomToTheRight.');
@@ -1019,6 +1133,7 @@ class MathNode {
     fraction.parent.updateDOM();
     fraction.children[1].focus(- 1);
   }
+
   makeBaseWithExponent() {
     if (this.parent === null) {
       return;

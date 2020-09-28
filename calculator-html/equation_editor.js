@@ -121,6 +121,7 @@ const knownTypes = {
     "type": "leftDelimiter",
     "width": "auto",
     "height": "auto",
+    "position": "absolute",
   }),
   // Right delimiter (parentheses, bracket, ...)
   rightDelimiter: new MathNodeType({
@@ -174,6 +175,7 @@ const knownTypes = {
   }),
   parentheses: new MathNodeType({
     "type": "parentheses",
+    "whiteSpace": "nowrap",
   }),
 };
 
@@ -312,7 +314,7 @@ class EquationEditor {
       return;
     }
     let specialKeys = new Set([
-      "+", "-", "*", "/",
+      "+", "-", "*", "/", "(", ")",
       "ArrowLeft", "ArrowRight",
       "ArrowUp", "ArrowDown",
     ]);
@@ -385,17 +387,7 @@ class BoundingBox {
     this.height = 0;
     this.fractionLineHeight = 0;
     this.stretchFactor = 1;
-  }
-  verticallyStretch(
-    /** @type {nuBoundingBoxmber}*/
-    boxToEnclose,
-  ) {
-    let heightToStretchTo = boxToEnclose.height;
-    if (heightToStretchTo !== 0) {
-      this.stretchFactor = this.height / heightToStretchTo;
-    }
-    this.height = Math.max(this.height, heightToStretchTo);
-    this.fractionLineHeight = boxToEnclose.fractionLineHeight;
+    this.transform = "";
   }
 };
 
@@ -604,28 +596,39 @@ class MathNode {
     this.boundingBox.height = this.element.getBoundingClientRect().height;
   }
 
+  verticallyStretch(
+    /** @type {BoundingBox}*/
+    boxToEnclose,
+  ) {
+    this.element.style.transform = '';
+    let heightToStretchTo = boxToEnclose.height * 1.25;
+    this.computeDimensionsDelimiter();
+    if (heightToStretchTo !== 0) {
+      this.boundingBox.stretchFactor = heightToStretchTo / this.boundingBox.height;
+    }
+    // this.boundingBox.stretchFactor = 1;
+    this.boundingBox.fractionLineHeight = boxToEnclose.fractionLineHeight;
+    let translateVertical = - this.boundingBox.stretchFactor * this.boundingBox.height / 5;
+    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, ${translateVertical})`;
+  }
+
   computeDimensionsParentheses() {
     let contentBox = this.children[1].boundingBox;
     let left = this.children[0];
     let right = this.children[2];
-    left.boundingBox.verticallyStretch(contentBox);
-    right.boundingBox.verticallyStretch(contentBox);
+    left.verticallyStretch(contentBox);
+    right.verticallyStretch(contentBox);
     right.boundingBox.left = left.boundingBox.width + contentBox.width;
-    left.element.style = `scaleY(${left.boundingBox.stretchFactor})`;
-    right.element.style = `scaleY(${right.boundingBox.stretchFactor})`;
+    left.element.style.transformOrigin = "0 0";
+    left.element.style.transform = left.boundingBox.transform;
+    right.element.style.transformOrigin = "0 0";
+    right.element.style.transform = right.boundingBox.transform;
     this.computeDimensionsStandard();
   }
 
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
-      return;
-    }
-    if (
-      this.type.type === knownTypes.leftDelimiter.type ||
-      this.type.type === knownTypes.rightDelimiter.type
-    ) {
-      this.computeDimensionsDelimiter();
       return;
     }
     if (this.type.type === knownTypes.fraction.type) {
@@ -718,6 +721,7 @@ class MathNode {
     event.stopPropagation();
     event.preventDefault();
     this.handleKeyUpCases(event);
+    this.equationEditor.updateAlignment();
     writeDebugInfo();
   }
 
@@ -751,7 +755,6 @@ class MathNode {
         this.updateBackspace(event);
         return;
       default:
-        this.equationEditor.updateAlignment();
         return;
     }
   }
@@ -1227,6 +1230,9 @@ class MathNode {
     if (this.boundingBox.top !== 0) {
       content += `, t: ${this.boundingBox.top}`;
     }
+    if (this.boundingBox.fractionLineHeight !== 0) {
+      content += `, fl: ${this.boundingBox.fractionLineHeight}`;
+    }
     result.push(content);
     for (let i = 0; i < this.children.length; i++) {
       result.push(this.children[i].toString(indentationLevel + 1));
@@ -1251,6 +1257,8 @@ function testEquationEditor() {
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
     defaultEquationEditorLocal.sendKeys([
+      "(", "1", "/", "1",
+      //"1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "(",
       /*      "1", "+", "1",
             "1", "+", "1", "/", "1", "+", "1", "/",
             "1", "+", "1", "/", "1",

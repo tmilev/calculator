@@ -317,6 +317,7 @@ class EquationEditor {
       "+", "-", "*", "/", "(", ")",
       "ArrowLeft", "ArrowRight",
       "ArrowUp", "ArrowDown",
+      "Backspace"
     ]);
     let key = keys[0];
     if (!specialKeys.has(key)) {
@@ -419,6 +420,8 @@ class MathNode {
     this.externalDOM = null;
     /** @type {number} */
     this.positionCaretBeforeKeyEvents = - 1;
+    /** @type {number} */
+    this.desiredCaretPosition = -1;
     /** @type {string} */
     this.initialContent = "";
     /** @type {boolean} */
@@ -752,7 +755,7 @@ class MathNode {
         this.makeParenthesesLeft();
         return;
       case "Backspace":
-        this.updateBackspace(event);
+        this.backspace(event);
         return;
       default:
         return;
@@ -894,7 +897,7 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    this.storePositionCarretBeforeKeyEvents();
+    this.storePositionCaret();
     this.handleKeyDownCases(event);
     event.stopPropagation();
     writeDebugInfo();
@@ -920,12 +923,24 @@ class MathNode {
     }
   }
 
-  storePositionCarretBeforeKeyEvents() {
+  storePositionCaret() {
     if (this.type.type !== knownTypes.atom.type) {
       this.positionCaretBeforeKeyEvents = - 1;
       return;
     }
-    this.positionCaretBeforeKeyEvents = window.getSelection().getRangeAt(0).startOffset;
+    console.log("DEBUG: window.getSelection: " + window.getSelection().rangeCount);
+    let range = window.getSelection().getRangeAt(0);
+    console.log(`DEBUG: selected: ${range.toString()}.`);
+    let selected = range.toString().length;
+    let rangeClone = range.cloneRange();
+    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}`);
+    rangeClone.selectNodeContents(this.element);
+    rangeClone.setEnd(range.endContainer, range.endOffset);
+    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}`);
+    this.positionCaretBeforeKeyEvents = rangeClone.toString().length - selected;
+    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}. this.positionCaretBeforeKeyEvents: ${this.positionCaretBeforeKeyEvents}, start: ${rangeClone.startOffset}, end: ${rangeClone.endOffset}`);
+    // window.getSelection().removeAllRanges();
+    // window.getSelection().addRange(rangeClone);
   }
 
   appendChild(/** @type{MathNode} */ child) {
@@ -957,6 +972,55 @@ class MathNode {
     this.children.push(child);
   }
 
+  normalizeHorizontalMath() {
+    let found = false;
+    while (
+      this.normalizeHorizontalMathInHorizontalMathOnce() ||
+      this.normalizeHorizontalMathAtomNextToAtomOnce()
+    ) {
+      found = true;
+    }
+    return found;
+  }
+
+  normalizeHorizontalMathInHorizontalMathOnce() {
+    let normalizedChildren = [];
+    let found = false;
+    for (let i = 0; i < this.children.length; i++) {
+      let current = this.children[i];
+      if (current.type.type === knownTypes.horizontalMath.type) {
+        found = true;
+        for (let j = 0; j < current.children.length; j++) {
+          normalizedChildren.push(current.children[j]);
+        }
+      } else {
+        normalizedChildren.push(current);
+      }
+    }
+    if (!found) {
+      return false;
+    }
+    this.replaceChildRangeWithChildren(0, this.children.length - 1, normalizedChildren);
+  }
+
+  normalizeHorizontalMathAtomNextToAtomOnce() {
+    for (let i = 0; i < this.children.length - 1; i++) {
+      let current = this.children[i];
+      let next = this.children[i + 1];
+      if (
+        current.type.type !== knownTypes.atom.type ||
+        next.type.type != knownTypes.atom.type
+      ) {
+        continue;
+      }
+      current.desiredCaretPosition = current.element.textContent.length;
+      current.element.textContent += next.element.textContent;
+      this.removeChildRange(i + 1, i + 1);
+      return true;
+    }
+    return false;
+  }
+
   replaceChildAtPosition(
     /** @type {number} */
     index,
@@ -982,6 +1046,15 @@ class MathNode {
     result.indexInParent = - 1;
     this.children[childIndex] = null;
     return result;
+  }
+
+  removeChildRange(
+    /** @type {number} */
+    fromIndex,
+    /** @type {number} */
+    toIndex,
+  ) {
+    return this.replaceChildRangeWithChildren(fromIndex, toIndex, []);
   }
 
   replaceChildRangeWithChildren(
@@ -1023,17 +1096,43 @@ class MathNode {
     return offset === this.element.textContent.length;
   }
 
-  updateBackspace(/** @type {KeyboardEvent} */ event) {
-    if (this.parent === null) {
-      return;
-    }
+  backspace(/** @type {KeyboardEvent} */ event) {
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
       this.type.type !== knownTypes.atom.type
     ) {
       return;
     }
+    this.updateBackspace();
   }
+
+  updateBackspace() {
+    if (this.parent === null) {
+      console.log('Unexpected null parent while updating backspace.');
+      return;
+    }
+    let parent = this.parent;
+    if (parent.type.type === knownTypes.horizontalMath.type) {
+      if (this.indexInParent === 0) {
+        parent.updateBackspace();
+        return;
+      }
+      let indexPrevious = this.indexInParent - 1;
+      let previous = parent.children[indexPrevious];
+      if (previous.type.type === knownTypes.atomImmutable.type) {
+        parent.removeChildRange(indexPrevious, indexPrevious);
+        parent.normalizeHorizontalMath();
+        parent.updateDOM();
+        if (indexPrevious - 1 >= 0) {
+          parent.children[indexPrevious - 1].focus(1);
+        } else {
+          parent.focus(-1);
+        }
+        return;
+      }
+    }
+  }
+
 
   /** Returns the position of the operator.
    * 
@@ -1067,6 +1166,7 @@ class MathNode {
     /** @type {string} */
     key,
   ) {
+    this.storePositionCaret();
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
     let parent = this.computeHorizontalMathParent();
@@ -1169,14 +1269,23 @@ class MathNode {
    * The endToFocus parameter denotes where the focus should occur.
    * At the moment, negative endToFocus indicates the caret should
    * be on the element's left, and positive endToFocus indicates the caret 
-   * should go on the right.
+   * should go on the right. Zero indicates to focus at this.positionCaretBeforeKeyEvents.
    */
   focus(endToFocus) {
     if (this.type.type === knownTypes.atom.type) {
       if (this.element !== null) {
         this.element.focus(null);
         let position = 0;
+        if (endToFocus === 0) {
+          position = this.desiredCaretPosition;
+        }
         if (endToFocus > 0) {
+          position = this.element.textContent.length;
+        }
+        if (position < 0) {
+          position = 0;
+        }
+        if (position > this.element.textContent.length) {
           position = this.element.textContent.length;
         }
         this.setCursorPosition(position);
@@ -1205,8 +1314,16 @@ class MathNode {
   setCursorPosition(/** @type {number}*/ position) {
     var range = document.createRange();
     var selection = window.getSelection();
-    range.setStart(this.element, position);
-    range.collapse(true);
+    selection.removeAllRanges();
+    let start = true;
+    if (position >= this.element.textContent.length && position > 0) {
+      range.selectNodeContents(this.element);
+      range.selectNodeContents(this.element);
+      start = false;
+    } else {
+      range.setStart(this.element, position);
+    }
+    range.collapse(start);
     selection.removeAllRanges();
     selection.addRange(range);
   }
@@ -1233,15 +1350,55 @@ class MathNode {
     if (this.boundingBox.fractionLineHeight !== 0) {
       content += `, fl: ${this.boundingBox.fractionLineHeight}`;
     }
+    if (this.type.type === knownTypes.atom.type) {
+      content += `, caret: ${this.positionCaretBeforeKeyEvents}, `;
+      content += `desiredCaret: ${this.desiredCaretPosition}`;
+    }
     result.push(content);
     for (let i = 0; i < this.children.length; i++) {
       result.push(this.children[i].toString(indentationLevel + 1));
     }
-    return result.join('\n<br>\n');
+    return result.join("\n<br>\n");
+  }
+
+  toLatexFraction() {
+    let result = `\\frac{${this.children[0].toLatex()}}{${this.children[1].toLatex()}}`;
+    if (this.children.length <= 2) {
+      return result;
+    }
+    // This is not expected to happen: a fraction should have exactly two children.
+    result += "[";
+    for (let i = 2; i < this.children.length; i++) {
+      result += this.children[i].toLatex();
+    }
+    result += "]";
+    return result;
+  }
+
+  toLatexAtom() {
+    return this.element.textContent;
+  }
+
+  toLatex() {
+    if (this.type.type === knownTypes.fraction.type) {
+      return this.toLatexFraction();
+    }
+    if (
+      this.type.type === knownTypes.atom.type ||
+      this.type.type === knownTypes.atomImmutable.type
+    ) {
+      return this.toLatexAtom();
+    }
+    let toJoin = [];
+    for (let i = 0; i < this.children.length; i++) {
+      toJoin.push(this.children[i].toLatex());
+    }
+    return toJoin.join("");
   }
 }
 
 function writeDebugInfo() {
+  document.getElementById("latex").innerHTML = lastCreatedEquationEditor.rootNode.toLatex();
   document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toString();
 }
 
@@ -1257,7 +1414,8 @@ function testEquationEditor() {
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
     defaultEquationEditorLocal.sendKeys([
-      "(", "1", "/", "1",
+      //"1", "+", "1", "Backspace", "Backspace", "2",
+      // "(", "1", "/", "1",
       //"1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "(",
       /*      "1", "+", "1",
             "1", "+", "1", "/", "1", "+", "1", "/",

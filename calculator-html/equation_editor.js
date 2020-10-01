@@ -579,11 +579,12 @@ class MathNode {
   computeDimensionsBaseWithExponent() {
     let base = this.children[0];
     let exponent = this.children[1];
-    this.boundingBox.height = exponent.boundingBox.fractionLineHeight + base.boundingBox.height;
+    let overlap = base.boundingBox.height * 0.4;
+    this.boundingBox.height = exponent.boundingBox.height + base.boundingBox.height - overlap;
     if (exponent.boundingBox.height > this.boundingBox.height) {
       this.boundingBox.height = exponent.boundingBox.height;
     }
-    base.boundingBox.top = exponent.boundingBox.fractionLineHeight;
+    base.boundingBox.top = exponent.boundingBox.height - overlap;
     this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
     exponent.boundingBox.left = base.boundingBox.width;
     this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
@@ -1164,6 +1165,30 @@ class MathNode {
     return true;
   }
 
+  /** @returns {boolean} whether input was reduced */
+  applyBackspaceExponent() {
+    if (this.type.type === knownTypes.horizontalMath.type) {
+      if (
+        this.parent.type.type === knownTypes.exponent.type
+      ) {
+        return this.parent.applyBackspaceExponent();
+      }
+    }
+    if (this.type.type !== knownTypes.exponent.type) {
+      return false;
+    }
+    let parent = this.parent;
+    let indexBaseWithExponent = parent.indexInParent;
+    let horizontal = parent.children[0];
+    horizontal.appendChild(parent.children[1].children[0]);
+    horizontal.normalizeHorizontalMath();
+    parent.parent.replaceChildAtPosition(indexBaseWithExponent, horizontal);
+    parent.parent.normalizeHorizontalMath();
+    parent.parent.updateDOM();
+    horizontal.focus(0);
+    return true;
+  }
+
   applyBackspace() {
     if (this.parent === null) {
       console.log('Unexpected null parent while updating backspace.');
@@ -1173,6 +1198,9 @@ class MathNode {
       return;
     }
     if (this.applyBackspaceFraction()) {
+      return;
+    }
+    if (this.applyBackspaceExponent()) {
       return;
     }
   }

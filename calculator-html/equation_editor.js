@@ -973,6 +973,9 @@ class MathNode {
   }
 
   normalizeHorizontalMath() {
+    if (!this.type.type === knownTypes.horizontalMath.type) {
+      return false;
+    }
     let found = false;
     while (
       this.normalizeHorizontalMathInHorizontalMathOnce() ||
@@ -1103,33 +1106,74 @@ class MathNode {
     ) {
       return;
     }
-    this.updateBackspace();
+    this.applyBackspace();
   }
 
-  updateBackspace() {
+  /** @returns {boolean} whether input was reduced */
+  applyBackspaceHorizontalMathParent() {
+    let parent = this.parent;
+    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      return false;
+    }
+    if (this.indexInParent === 0) {
+      parent.applyBackspace();
+      return true;
+    }
+    let indexPrevious = this.indexInParent - 1;
+    let previous = parent.children[indexPrevious];
+    if (previous.type.type === knownTypes.atomImmutable.type) {
+      parent.removeChildRange(indexPrevious, indexPrevious);
+      parent.normalizeHorizontalMath();
+      parent.updateDOM();
+      if (indexPrevious - 1 >= 0) {
+        parent.children[indexPrevious - 1].focus(1);
+      } else {
+        parent.focus(-1);
+      }
+    }
+    return true;
+  }
+
+  /** @returns {boolean} whether input was reduced */
+  applyBackspaceFraction() {
+    if (this.type.type === knownTypes.horizontalMath.type) {
+      if (
+        this.parent.type.type === knownTypes.denominator.type ||
+        this.parent.type.type === knownTypes.numerator.type
+      ) {
+        return this.parent.applyBackspaceFraction();
+      }
+    }
+    if (
+      this.type.type === knownTypes.denominator.type ||
+      this.type.type === knownTypes.numerator.type
+    ) {
+      return this.parent.applyBackspaceFraction();
+    }
+    if (this.type.type !== knownTypes.fraction.type) {
+      return false;
+    }
+    let indexInParent = this.indexInParent;
+    let horizontal = this.children[0].children[0];
+    horizontal.appendChild(this.children[1].children[0]);
+    horizontal.normalizeHorizontalMath();
+    this.parent.replaceChildAtPosition(indexInParent, horizontal);
+    this.parent.normalizeHorizontalMath();
+    this.parent.updateDOM();
+    this.parent.focus(0);
+    return true;
+  }
+
+  applyBackspace() {
     if (this.parent === null) {
       console.log('Unexpected null parent while updating backspace.');
       return;
     }
-    let parent = this.parent;
-    if (parent.type.type === knownTypes.horizontalMath.type) {
-      if (this.indexInParent === 0) {
-        parent.updateBackspace();
-        return;
-      }
-      let indexPrevious = this.indexInParent - 1;
-      let previous = parent.children[indexPrevious];
-      if (previous.type.type === knownTypes.atomImmutable.type) {
-        parent.removeChildRange(indexPrevious, indexPrevious);
-        parent.normalizeHorizontalMath();
-        parent.updateDOM();
-        if (indexPrevious - 1 >= 0) {
-          parent.children[indexPrevious - 1].focus(1);
-        } else {
-          parent.focus(-1);
-        }
-        return;
-      }
+    if (this.applyBackspaceHorizontalMathParent()) {
+      return;
+    }
+    if (this.applyBackspaceFraction()) {
+      return;
     }
   }
 

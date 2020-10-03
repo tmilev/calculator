@@ -1176,7 +1176,7 @@ class MathNode {
     return true;
   }
 
-  /** @returns {boolean} whether input was reduced */
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceFraction() {
     if (this.type.type === knownTypes.horizontalMath.type) {
       if (
@@ -1206,7 +1206,7 @@ class MathNode {
     return true;
   }
 
-  /** @returns {boolean} whether input was reduced */
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceExponent() {
     if (this.type.type === knownTypes.horizontalMath.type) {
       if (
@@ -1230,6 +1230,27 @@ class MathNode {
     return true;
   }
 
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceParentheses() {
+    if (this.type.type === knownTypes.horizontalMath.type) {
+      if (
+        this.parent.type.type === knownTypes.parentheses.type
+      ) {
+        return this.parent.applyBackspaceParentheses();
+      }
+    }
+    if (this.type.type !== knownTypes.parentheses.type) {
+      return false;
+    }
+    let indexInParent = this.indexInParent;
+    let horizontal = this.children[1];
+    this.parent.replaceChildAtPosition(indexInParent, horizontal);
+    this.parent.normalizeHorizontalMath();
+    this.parent.updateDOM();
+    this.parent.focus(0);
+    return true;
+  }
+
   applyBackspace() {
     if (this.parent === null) {
       console.log('Unexpected null parent while updating backspace.');
@@ -1242,6 +1263,9 @@ class MathNode {
       return;
     }
     if (this.applyBackspaceExponent()) {
+      return;
+    }
+    if (this.applyBackspaceParentheses()) {
       return;
     }
   }

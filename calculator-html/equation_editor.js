@@ -30,19 +30,15 @@ class MathNodeType {
     this.normalizeConstructorInput(input);
     this.arrows = input["arrows"];
     this.type = input["type"];
-    this.borderStyle = input["borderStyle"];
-    this.borderBottom = input["borderBottom"];
     this.minHeightScale = input["minHeightScale"];
     this.width = input["width"];
     this.height = input["height"];
     this.display = input["display"];
-    this.padding = input["padding"];
     this.flexDirection = input["flexDirection"];
     this.justifyContent = input["justifyContent"];
     this.alignContent = input["alignContent"];
     this.alignItems = input["alignItems"];
     this.verticalAlign = input["verticalAlign"];
-    this.margin = input["margin"];
     this.outline = input["outline"];
     this.fontSize = input["fontSize"];
     this.whiteSpace = input["whiteSpace"];
@@ -50,27 +46,43 @@ class MathNodeType {
     this.float = input["float"];
     this.boxSizing = input["boxSizing"];
     this.position = input["position"];
+    // Padding.
+    this.paddingBottom = input["paddingBottom"];
+    this.padding = input["padding"];
+    // Margins.
+    this.margin = input["margin"];
+    this.marginBottom = input["marginBottom"];
+    // Borders
+    this.borderStyle = input["borderStyle"];
+    this.borderColor = input["borderColor"];
+    this.borderBottom = input["borderBottom"];
   }
 }
 
 const knownTypeDefaults = {
   "display": "inline-block",
   "minHeightScale": 0,
-  "borderBottom": "",
-  "borderStyle": "",
   "flexDirection": "",
   "justifyContent": "",
   "alignContent": "",
   "alignItems": "",
   "verticalAlign": "",
-  "margin": "",
-  "padding": "",
   "fontSize": "",
   "whiteSpace": "",
   "float": "",
   "textAlign": "",
   "boxSizing": "border-box",
   "position": "absolute",
+  // Padding
+  "paddingBottom": "",
+  "padding": "",
+  // Margins
+  "marginBottom": "",
+  "margin": "",
+  // Borders.
+  "borderStyle": "",
+  "borderColor": "",
+  "borderBottom": "",
 };
 
 class ArrowMotionTypes {
@@ -143,7 +155,7 @@ const knownTypes = {
   // Represents the numerator x of a fraction x/y.
   numerator: new MathNodeType({
     "type": "numerator",
-    "borderBottom": "1px solid black",
+    "borderBottom": "2px solid black",
     "fontSize": defaultFractionScale,
     "minHeightScale": defaultFractionScale,
     "arrows": {
@@ -440,17 +452,29 @@ class MathNode {
     if (this.type.type === knownTypes.atom.type) {
       this.element.contentEditable = true;
     }
-    if (this.type.borderStyle !== "") {
-      this.element.style.border = this.type.borderStyle;
+    if (this.type.paddingBottom !== "") {
+      this.element.style.paddingBottom = this.type.paddingBottom;
     }
-    if (this.type.borderBottom !== "") {
-      this.element.style.borderBottom = this.type.borderBottom;
-    }
+    // Padding.
     if (this.type.padding !== "") {
       this.element.style.padding = this.type.padding;
     }
+    // Margins
     if (this.type.margin !== "") {
       this.element.style.margin = this.type.margin;
+    }
+    if (this.type.marginBottom !== "") {
+      this.element.style.marginBottom = this.type.marginBottom;
+    }
+    // Borders.
+    if (this.type.borderStyle !== "") {
+      this.element.style.border = this.type.borderStyle;
+    }
+    if (this.type.borderColor !== "") {
+      this.element.style.borderColor = this.type.borderColor;
+    }
+    if (this.type.borderBottom !== "") {
+      this.element.style.borderBottom = this.type.borderBottom;
     }
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
@@ -498,10 +522,18 @@ class MathNode {
     }
     this.fractionLineHeight = 0;
     this.element.setAttribute("mathTagName", this.type.type);
-    this.element.addEventListener("keyup", (e) => { this.handleKeyUp(e); });
-    this.element.addEventListener("keydown", (e) => { this.handleKeyDown(e); });
-    this.element.addEventListener("focus", (e) => { this.handleFocus(e); });
-    this.element.addEventListener("blur", (e) => { this.handleBlur(e); });
+    this.element.addEventListener("keyup", (e) => {
+      this.handleKeyUp(e);
+    });
+    this.element.addEventListener("keydown", (e) => {
+      this.handleKeyDown(e);
+    });
+    this.element.addEventListener("focus", (e) => {
+      this.handleFocus(e);
+    });
+    this.element.addEventListener("blur", (e) => {
+      this.handleBlur(e);
+    });
   }
 
   updateDOM() {
@@ -630,6 +662,11 @@ class MathNode {
     this.computeDimensionsStandard();
   }
 
+  computeDimensionsNumerator() {
+    this.computeDimensionsStandard();
+    this.boundingBox.height = this.children[0].boundingBox.height + 1;
+  }
+
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
@@ -638,6 +675,9 @@ class MathNode {
     if (this.type.type === knownTypes.fraction.type) {
       this.computeDimensionsFraction();
       return;
+    }
+    if (this.type.type === knownTypes.numerator.type) {
+      this.computeDimensionsNumerator();
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       this.computeDimensionsBaseWithExponent();
@@ -901,6 +941,7 @@ class MathNode {
     this.storePositionCaret();
     this.handleKeyDownCases(event);
     event.stopPropagation();
+    this.equationEditor.updateAlignment();
     writeDebugInfo();
   }
 

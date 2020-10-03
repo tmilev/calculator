@@ -706,6 +706,17 @@ Page.prototype.initializeCalculatorPagePartOne = function () {
   document.getElementById("divOnePageApp").className = "divOnePageApp";
 }
 
+StorageCalculator.prototype.toStringProblem = function () {
+  let problemFileName = this.variables.currentCourse.problemFileName.getValue();
+  let fileName = this.variables.currentCourse.p;
+  let result = `problemFileName: ${problemFileName}. fileName: ${fileName}`;
+  return result;
+}
+
+Page.prototype.toStringProblem = function () {
+  return this.storage.toStringProblem();
+}
+
 Page.prototype.initializeCalculatorPagePartTwo = function () {
   initializeButtons.initializeButtons();
   initializeButtons.initializeCalculatorPage();

@@ -6,9 +6,9 @@ const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous");
 
 var staticWordCompleter = {
-  getCompletions: function(editor, session, pos, prefix, callback) {
+  getCompletions: function (editor, session, pos, prefix, callback) {
     var thePage = window.calculator.mainPage;
-    callback(null, thePage.aceEditorAutoCompletionWordList.map(function(word) {
+    callback(null, thePage.aceEditorAutoCompletionWordList.map(function (word) {
       return {
         caption: word,
         value: word,
@@ -50,7 +50,7 @@ function getClonePanel(
   var buttonClone = document.createElement("button");
   buttonClone.className = "buttonClone";
   buttonClone.style.width = "50px";
-  buttonClone.addEventListener("click", window.calculator.editPage.handleClone.bind(null,fileNameSource, idCloneInput, idSpanClonePageReport));
+  buttonClone.addEventListener("click", window.calculator.editPage.handleClone.bind(null, fileNameSource, idCloneInput, idSpanClonePageReport));
   buttonClone.innerHTML = "Clone";
   cellClone.appendChild(buttonClone)
   var cellFileInfo = row.insertCell(- 1);
@@ -64,7 +64,7 @@ function getClonePanel(
   cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
   nextCell = cellFileInfoTableRow.insertCell(- 1);
   nextCell.innerHTML = "to:";
-  nextCell = cellFileInfoTableRow.insertCell( - 1);
+  nextCell = cellFileInfoTableRow.insertCell(- 1);
   nextCell.innerHTML = `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
   cellFileInfo.append(cellFileInfoTable);
   result.push(table);
@@ -107,7 +107,7 @@ function getEditPanel(fileName) {
   var panelElement = document.createElement("span");
   panelElement.className = "panelDeadlines";
   var panelContent = getClonePanel(fileName, fileName);
-  for (var i = 0; i < panelContent.length; i ++) {
+  for (var i = 0; i < panelContent.length; i++) {
     panelElement.appendChild(panelContent[i]);
   }
   result.appendChild(panelElement);
@@ -152,6 +152,8 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
 
 function storeEditedPage() {
   var thePage = window.calculator.mainPage;
+  console.log('DEBUG: storeEditedPage start: ' + thePage.toStringProblem());
+
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
@@ -166,6 +168,7 @@ function storeEditedPage() {
     parameters: queryParameters,
     result: ids.domElements.spanSubmitEditPageReport,
   });
+  console.log('DEBUG: storeEditedPage end: ' + thePage.toStringProblem());
 }
 
 function initEditorAce() {
@@ -181,6 +184,8 @@ function initEditorAce() {
 
 function selectEditPageCallback(input, outputComponent) {
   var thePage = window.calculator.mainPage;
+  console.log('DEBUG: selectEditPageCallback start: ' + thePage.toStringProblem());
+
   try {
     var parsedInput = miscellaneous.jsonUnescapeParse(input);
     ace.require("ace/ext/language_tools");
@@ -203,7 +208,7 @@ function selectEditPageCallback(input, outputComponent) {
       incomingContent = decodeURIComponent(parsedInput.content);
     }
     var problemIdURLed = thePage.storage.variables.editor.currentlyEditedPage.getValue();
-    thePage.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
+    thePage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
     editor.getSession().setValue(incomingContent);
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");
@@ -217,6 +222,7 @@ function selectEditPageCallback(input, outputComponent) {
   } catch (e) {
     console.log(`Error: ${e}`);
   }
+  console.log('DEBUG: selectEditPageCallback end: ' + thePage.toStringProblem());
 }
 
 /**@returns {HTMLElement} */
@@ -267,6 +273,7 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
 
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
+  console.log('DEBUG: problems at start of select edit page: ' + thePage.toStringProblem());
   var storageVariables = thePage.storage.variables;
   var fileNameSources = [
     storageVariables.editor.currentlyEditedPage,
@@ -275,7 +282,7 @@ function selectEditPage(currentlyEditedPage) {
     storageVariables.currentCourse.courseHome,
     storageVariables.currentCourse.topicList,
   ];
-  for (var i = 0; i < fileNameSources.length; i ++) {
+  for (var i = 0; i < fileNameSources.length; i++) {
     if (
       (typeof currentlyEditedPage) === "string" &&
       currentlyEditedPage !== ""
@@ -285,8 +292,8 @@ function selectEditPage(currentlyEditedPage) {
     currentlyEditedPage = fileNameSources[i].getValue();
   }
   if (
-    currentlyEditedPage === undefined || 
-    currentlyEditedPage === null || 
+    currentlyEditedPage === undefined ||
+    currentlyEditedPage === null ||
     currentlyEditedPage === ""
   ) {
     currentlyEditedPage = "/coursesavailable/default.txt";
@@ -310,6 +317,7 @@ function selectEditPage(currentlyEditedPage) {
     callback: selectEditPageCallback,
     progress: ids.domElements.spanProgressReportGeneral,
   });
+  console.log('DEBUG: problems at END of select edit page: ' + thePage.toStringProblem());
 }
 
 function toggleClonePanel(button) {

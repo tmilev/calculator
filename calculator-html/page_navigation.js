@@ -224,263 +224,275 @@ var pageNamesOnWhichToShowProblemURLs = {
   editPage: true,
 };
 
-function StorageCalculator() {
-  this.variables = {
-    currentPage: new StorageVariable({
-      name: "currentPage",
-      nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
-      nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
-      nameURL: "currentPage", //<- when given and non-empty, url will be used to store variable
-      showInURLByDefault: true, // <- when given and true, url will be added to the window hash
-      callbackOnValueChange: mainPage().selectPage.bind(mainPage()), //<- when given will be triggered after a genuine change of the variable
-    }),
-    database: {
-      labels: new StorageVariable({
-        name: "databaseLabels",
-        nameLocalStorage: "databaseLabels"
+class StorageCalculator {
+  constructor() {
+    this.variables = {
+      currentPage: new StorageVariable({
+        name: "currentPage",
+        nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
+        nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
+        nameURL: "currentPage", //<- when given and non-empty, url will be used to store variable
+        showInURLByDefault: true, // <- when given and true, url will be added to the window hash
+        callbackOnValueChange: mainPage().selectPage.bind(mainPage()), //<- when given will be triggered after a genuine change of the variable
       }),
-    },
-    editor: {
-      currentlyEditedPage: new StorageVariable({
-        name: "currentlyEditedPage",
-        nameLocalStorage: "currentlyEditedPage"
-      })
-    },
-    currentSectionComputed: new StorageVariable({
-      name: "currentSectionComputed",
-      nameLocalStorage: "currentSectionComputed"
-    }),
-    currentCourse: {
-      courseHome: new StorageVariable({
-        name: "courseHome",
-        nameCookie: "courseHome",
-        nameURL: "courseHome",
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+      database: {
+        labels: new StorageVariable({
+          name: "databaseLabels",
+          nameLocalStorage: "databaseLabels"
+        }),
+      },
+      editor: {
+        currentlyEditedPage: new StorageVariable({
+          name: "currentlyEditedPage",
+          nameLocalStorage: "currentlyEditedPage"
+        })
+      },
+      currentSectionComputed: new StorageVariable({
+        name: "currentSectionComputed",
+        nameLocalStorage: "currentSectionComputed"
       }),
-      topicList: new StorageVariable({
-        name: "topicList",
-        nameCookie: "topicList",
-        nameURL: "topicList",
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+      currentCourse: {
+        courseHome: new StorageVariable({
+          name: "courseHome",
+          nameCookie: "courseHome",
+          nameURL: "courseHome",
+          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+        }),
+        topicList: new StorageVariable({
+          name: "topicList",
+          nameCookie: "topicList",
+          nameURL: "topicList",
+          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+        }),
+        fileName: new StorageVariable({
+          name: "fileName",
+          nameCookie: "fileName",
+          nameURL: "fileName",
+          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+        }),
+        problemFileName: new StorageVariable({
+          name: "problemFileName",
+          nameCookie: "problemFileName",
+          nameURL: "problemFileName",
+          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+        }),
+        exerciseType: new StorageVariable({
+          name: "exerciseType",
+          nameLocalStorage: "exerciseType",
+          nameURL: "exerciseType"
+        }),
+        randomSeed: new StorageVariable({
+          name: "randomSeed",
+          nameURL: "randomSeed",
+          // Since this variable has no local storage outside of the URL,
+          // to avoid wiping the variable while normalizing the URL,
+          // we need to keep it displayed there by default.
+          showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+        }),
+      },
+      flagDebug: new StorageVariable({
+        name: "debugFlag",
+        nameURL: "debugFlag",
+        nameCookie: "debugFlag",
+        secure: false,
+        callbackOnValueChange: mainPage().onDebugValueChange.bind(mainPage()),
       }),
-      fileName: new StorageVariable({
-        name: "fileName",
-        nameCookie: "fileName",
-        nameURL: "fileName",
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+      flagStudentView: new StorageVariable({
+        name: "studentView",
+        nameURL: "studentView",
+        nameCookie: "studentView",
+        secure: true,
+        callbackOnValueChange: mainPage().onStudentViewChange.bind(mainPage()),
       }),
-      problemFileName: new StorageVariable({
-        name: "problemFileName",
-        nameCookie: "problemFileName",
-        nameURL: "problemFileName",
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+      calculator: {
+        input: new StorageVariable({
+          name: "calculatorInput",
+          nameURL: "calculatorInput",
+          associatedDOMId: ids.domElements.inputMain,
+          callbackOnValueChange: calculatorPage.calculator.submitComputationPartTwo.bind(calculatorPage.calculator),
+          showInURLByDefault: true,
+        }),
+        request: new StorageVariable({
+          name: "calculatorRequest",
+          nameURL: "calculatorRequest",
+          nameLocalStorage: "calculatorRequest",
+        }),
+        monitoring: new StorageVariable({
+          name: "monitoring",
+          nameLocalStorage: "monitoring",
+          nameURL: "monitoring",
+          nameCookie: "monitoring",
+          callbackOnValueChange: mainPage().setMonitoringComponent.bind(mainPage()),
+          showInURLByDefault: true,
+        }),
+      },
+      user: {
+        activationToken: new StorageVariable({
+          name: "activationToken",
+          nameURL: "activationToken",
+        }),
+        googleToken: new StorageVariable({
+          name: "googleToken",
+        }),
+        name: new StorageVariable({
+          name: "username",
+          nameCookie: "username",
+          nameURL: "username",
+        }),
+        authenticationToken: new StorageVariable({
+          name: "authenticationToken",
+          nameCookie: "authenticationToken",
+          nameURL: "authenticationToken",
+        }),
+        role: new StorageVariable({
+          name: "userRole",
+          nameCookie: "userRole",
+          nameURL: "userRole",
+        }),
+        email: new StorageVariable({
+          name: "email",
+          nameURL: "email",
+        }),
+      },
+      theme: new StorageVariable({
+        name: "theme",
+        nameLocalStorage: "theme",
+        callbackOnValueChange: themes.theme.doChangeTheme.bind(themes.theme),
       }),
-      exerciseType: new StorageVariable({
-        name: "exerciseType",
-        nameLocalStorage: "exerciseType",
-        nameURL: "exerciseType"
-      }),
-      randomSeed: new StorageVariable({
-        name: "randomSeed",
-        nameURL: "randomSeed",
-        // Since this variable has no local storage outside of the URL,
-        // to avoid wiping the variable while normalizing the URL,
-        // we need to keep it displayed there by default.
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
-      }),
-    },
-    flagDebug: new StorageVariable({
-      name: "debugFlag",
-      nameURL: "debugFlag",
-      nameCookie: "debugFlag",
-      secure: false,
-      callbackOnValueChange: mainPage().onDebugValueChange.bind(mainPage()),
-    }),
-    flagStudentView: new StorageVariable({
-      name: "studentView",
-      nameURL: "studentView",
-      nameCookie: "studentView",
-      secure: true,
-      callbackOnValueChange: mainPage().onStudentViewChange.bind(mainPage()),
-    }),
-    calculator: {
-      input: new StorageVariable({
-        name: "calculatorInput",
-        nameURL: "calculatorInput",
-        associatedDOMId: ids.domElements.inputMain,
-        callbackOnValueChange: calculatorPage.calculator.submitComputationPartTwo.bind(calculatorPage.calculator),
-        showInURLByDefault: true,
-      }),
-      request: new StorageVariable({
-        name: "calculatorRequest",
-        nameURL: "calculatorRequest",
-        nameLocalStorage: "calculatorRequest",
-      }),
-      monitoring: new StorageVariable({
-        name: "monitoring",
-        nameLocalStorage: "monitoring",
-        nameURL: "monitoring",
-        nameCookie: "monitoring",
-        callbackOnValueChange: mainPage().setMonitoringComponent.bind(mainPage()),
-        showInURLByDefault: true,
-      }),
-    },
-    user: {
-      activationToken: new StorageVariable({
-        name: "activationToken",
-        nameURL: "activationToken",
-      }),
-      googleToken: new StorageVariable({
-        name: "googleToken",
-      }),
-      name: new StorageVariable({
-        name: "username",
-        nameCookie: "username",
-        nameURL: "username",
-      }),
-      authenticationToken: new StorageVariable({
-        name: "authenticationToken",
-        nameCookie: "authenticationToken",
-        nameURL: "authenticationToken",
-      }),
-      role: new StorageVariable({
-        name: "userRole",
-        nameCookie: "userRole",
-        nameURL: "userRole",
-      }),
-      email: new StorageVariable({
-        name: "email",
-        nameURL: "email",
-      }),
-    },
-    theme: new StorageVariable({
-      name: "theme",
-      nameLocalStorage: "theme",
-      callbackOnValueChange: themes.theme.doChangeTheme.bind(themes.theme),
-    }),
-  };
-  this.currentHashRaw = "";
-  this.currenTHashDecoded = "";
-  this.urlObject = {};
-}
+    };
+    this.currentHashRaw = "";
+    this.currenTHashDecoded = "";
+    this.urlObject = {};
+  }
 
-/**@returns {String} */
-StorageCalculator.prototype.getPercentEncodedURL = function (input) {
-  return encodeURIComponent(JSON.stringify(input));
-}
+  /**@returns {string} */
+  getPercentEncodedURL(input) {
+    return encodeURIComponent(JSON.stringify(input));
+  }
 
-/**@returns {String} */
-StorageCalculator.prototype.getCleanedUpURL = function (input) {
-  var stringifiedInput = JSON.stringify(input);
-  var isGood = true;
-  try {
-    var decodedAsURL = decodeURIComponent(stringifiedInput);
-    if (stringifiedInput !== decodedAsURL) {
+  /**@returns {string} */
+  getCleanedUpURL(input) {
+    var stringifiedInput = JSON.stringify(input);
+    var isGood = true;
+    try {
+      var decodedAsURL = decodeURIComponent(stringifiedInput);
+      if (stringifiedInput !== decodedAsURL) {
+        isGood = false;
+      }
+    } catch (e) {
       isGood = false;
     }
-  } catch (e) {
-    isGood = false;
+    if (!isGood) {
+      stringifiedInput = encodeURIComponent(stringifiedInput);
+    }
+    return stringifiedInput;
   }
-  if (!isGood) {
-    stringifiedInput = encodeURIComponent(stringifiedInput);
-  }
-  return stringifiedInput;
-}
 
-StorageCalculator.prototype.parseURL = function () {
-  try {
-    if (
-      this.currentHashRaw === window.location.hash
-    ) {
+  parseURL() {
+    try {
+      if (
+        this.currentHashRaw === window.location.hash
+      ) {
+        return;
+      }
+      this.currentHashRaw = window.location.hash;
+      this.currenTHashDecoded = decodeURIComponent(this.currentHashRaw);
+      if (this.currenTHashDecoded.startsWith('#')) {
+        this.currenTHashDecoded = this.currenTHashDecoded.slice(1);
+      }
+      if (this.currenTHashDecoded === "") {
+        this.urlObject = {
+        };
+      } else {
+        this.urlObject = JSON.parse(this.currenTHashDecoded);
+      }
+    } catch (e) {
+      console.log(`Failed to parse your url hash ${this.currenTHashDecoded} obtained from ${window.location.hash}.${e}.`);
+    }
+  }
+
+  loadSettings() {
+    this.parseURL();
+    this.loadSettingsRecursively(this.variables, this.urlObject);
+  }
+
+  loadSettingsRecursively(
+    /**@type {StorageVariable} */
+    currentStorage,
+    inputHashParsed,
+  ) {
+    if (currentStorage instanceof StorageVariable) {
+      currentStorage.loadMe(inputHashParsed);
       return;
     }
-    this.currentHashRaw = window.location.hash;
-    this.currenTHashDecoded = decodeURIComponent(this.currentHashRaw);
-    if (this.currenTHashDecoded.startsWith('#')) {
-      this.currenTHashDecoded = this.currenTHashDecoded.slice(1);
-    }
-    if (this.currenTHashDecoded === "") {
-      this.urlObject = {};
-    } else {
-      this.urlObject = JSON.parse(this.currenTHashDecoded);
-    }
-  } catch (e) {
-    console.log(`Failed to parse your url hash ${this.currenTHashDecoded} obtained from ${window.location.hash}. ${e}`);
-  }
-}
-
-StorageCalculator.prototype.loadSettings = function () {
-  this.parseURL();
-  this.loadSettingsRecursively(this.variables, this.urlObject);
-}
-
-StorageCalculator.prototype.loadSettingsRecursively = function (
-  /**@type {StorageVariable} */
-  currentStorage,
-  inputHashParsed,
-) {
-  if (currentStorage instanceof StorageVariable) {
-    currentStorage.loadMe(inputHashParsed);
-    return;
-  }
-  if (typeof currentStorage === "object") {
-    for (var subLabel in currentStorage) {
-      this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
-    }
-  }
-}
-
-StorageCalculator.prototype.computeURLRecursively = function (currentStorage, recursionDepth) {
-  if (recursionDepth === undefined) {
-    recursionDepth = 0;
-  }
-  if (recursionDepth > 100) {
-    throw ("Recursion is too deeply nested. This must be a programming error. ");
-  }
-  var result = {};
-  if (currentStorage instanceof StorageVariable) {
-    var urlName = currentStorage.nameURL;
-    if (urlName === undefined || urlName === null || urlName === "") {
-      return null;
-    }
-    var shouldShow = false;
-    if (currentStorage.showInURLByDefault === true) {
-      shouldShow = true;
-    }
-    if (currentStorage.showInURLOnPages !== null && currentStorage.showInURLOnPages !== undefined) {
-      if (mainPage().storage.variables.currentPage.value in currentStorage.showInURLOnPages) {
-        shouldShow = true;
+    if (typeof currentStorage === "object") {
+      for (var subLabel in currentStorage) {
+        this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
       }
     }
-    if (!shouldShow) {
-      return null;
+  }
+
+  setURL() {
+    this.urlObject = this.computeURLRecursively(this.variables);
+    var incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
+
+    if (incomingHashRaw !== this.currentHashRaw) {
+      window.location.hash = incomingHashRaw;
+      this.currentHashRaw = incomingHashRaw;
     }
-    if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {
-      return null;
+  }
+
+  computeURLRecursively(currentStorage, recursionDepth) {
+    if (recursionDepth === undefined) {
+      recursionDepth = 0;
     }
-    result[urlName] = currentStorage.value;
+    if (recursionDepth > 100) {
+      throw ("Recursion is too deeply nested. This must be a programming error. ");
+    }
+    var result = {
+    };
+    if (currentStorage instanceof StorageVariable) {
+      var urlName = currentStorage.nameURL;
+      if (urlName === undefined || urlName === null || urlName === "") {
+        return null;
+      }
+      var shouldShow = false;
+      if (currentStorage.showInURLByDefault === true) {
+        shouldShow = true;
+      }
+      if (currentStorage.showInURLOnPages !== null && currentStorage.showInURLOnPages !== undefined) {
+        if (mainPage().storage.variables.currentPage.value in currentStorage.showInURLOnPages) {
+          shouldShow = true;
+        }
+      }
+      if (!shouldShow) {
+        return null;
+      }
+      if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {
+        return null;
+      }
+      result[urlName] = currentStorage.value;
+      return result;
+    }
+    if (typeof currentStorage !== "object") {
+      throw (`Unexpected currentStorage input while computing url: ${currentStorage}`);
+    }
+    for (var label in currentStorage) {
+      var incoming = this.computeURLRecursively(currentStorage[label], recursionDepth + 1);
+      if (incoming === null) {
+        continue;
+      }
+      Object.assign(result, incoming);
+    }
     return result;
   }
-  if (typeof currentStorage !== "object") {
-    throw (`Unexpected currentStorage input while computing url: ${currentStorage}`);
-  }
-  for (var label in currentStorage) {
-    var incoming = this.computeURLRecursively(currentStorage[label], recursionDepth + 1);
-    if (incoming === null) {
-      continue;
-    }
-    Object.assign(result, incoming);
-  }
-  return result;
-}
 
-StorageCalculator.prototype.setURL = function () {
-  this.urlObject = this.computeURLRecursively(this.variables);
-  var incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
-
-  if (incomingHashRaw !== this.currentHashRaw) {
-    window.location.hash = incomingHashRaw;
-    this.currentHashRaw = incomingHashRaw;
+  /**@returns{string} */
+  toStringProblem() {
+    let problemFileName = this.variables.currentCourse.problemFileName.getValue();
+    let fileName = this.variables.currentCourse.p;
+    let result = `problemFileName: ${problemFileName}. fileName: ${fileName}`;
+    return result;
   }
 }
 
@@ -704,13 +716,6 @@ Page.prototype.initializeCalculatorPagePartOne = function () {
   }
   document.getElementById("divOnePageApp").style.display = "";
   document.getElementById("divOnePageApp").className = "divOnePageApp";
-}
-
-StorageCalculator.prototype.toStringProblem = function () {
-  let problemFileName = this.variables.currentCourse.problemFileName.getValue();
-  let fileName = this.variables.currentCourse.p;
-  let result = `problemFileName: ${problemFileName}. fileName: ${fileName}`;
-  return result;
 }
 
 Page.prototype.toStringProblem = function () {

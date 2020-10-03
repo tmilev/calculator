@@ -256,10 +256,16 @@ class MathNodeFactory {
     /** @type{MathNode}*/
     base,
   ) {
-    const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
-    baseWithExponent.appendChild(base);
+    // Horizontal math wrapper for the exponent.
     const exponent = new MathNode(equationEditor, knownTypes.exponent);
     exponent.appendChild(this.horizontalMath(equationEditor, null));
+    // Horizontal math wrapper for the base.
+    const baseHorizontal = new MathNode(equationEditor, knownTypes.horizontalMath);
+    baseHorizontal.appendChild(this.horizontalMath(equationEditor, base));
+    baseHorizontal.normalizeHorizontalMath();
+    // The base with the exponent.
+    const baseWithExponent = new MathNode(equationEditor, knownTypes.baseWithExponent);
+    baseWithExponent.appendChild(baseHorizontal);
     baseWithExponent.appendChild(exponent);
     return baseWithExponent;
   }
@@ -275,6 +281,7 @@ class MathNodeFactory {
     const rightParentheses = new MathNode(equationEditor, knownTypes.rightDelimiter);
     rightParentheses.initialContent = ")";
     const wrappedContent = this.horizontalMath(equationEditor, content);
+    wrappedContent.normalizeHorizontalMath();
     const result = new MathNode(
       equationEditor, knownTypes.parentheses,
     );
@@ -325,62 +332,61 @@ class EquationEditor {
     if (keys.length === 0) {
       return;
     }
-    let specialKeys = new Set([
-      "+", "-", "*", "/", "(", ")",
-      "ArrowLeft", "ArrowRight",
-      "ArrowUp", "ArrowDown",
-      "Backspace"
-    ]);
     let key = keys[0];
-    if (!specialKeys.has(key)) {
-      this.dispatchInputToFirstFocusedChild(this.rootNode, key);
-    } else {
-      const eventsToSend = ["keydown", "keyup", "keypress"];
-      for (let i = 0; i < eventsToSend.length; i++) {
-        let event = new KeyboardEvent(
-          eventsToSend[i], {
-          key: key,
-        });
-        this.dispatchEventToFirstFocusedChild(this.rootNode, event);
-      }
-    }
+    let focused = this.rootNode.findFirstFocusedChild();
+    this.dispatchKey(focused, key);
+
     setTimeout(() => {
       this.sendKeys(keys.slice(1));
     }, 400);
   }
-  dispatchEventToFirstFocusedChild(
-    /** @type {MathNode} */
-    container,
-    event,
-  ) {
-    if (container.focused) {
-      container.element.dispatchEvent(event);
-      return true;
-    }
-    for (let i = 0; i < container.children.length; i++) {
-      if (this.dispatchEventToFirstFocusedChild(container.children[i], event)) {
-        return true;
-      }
-    }
-    return false;
-  }
 
-  dispatchInputToFirstFocusedChild(
-    /** @type {MathNode} */
-    container,
-    content,
+  dispatchKey(
+    /**@type{MathNode}*/ focused,
+
+    /**@type{string} */ key,
   ) {
-    if (container.focused) {
-      container.element.textContent = content;
-      container.focus(1);
-      return true;
+    if (focused === null) {
+      console.log('DEBUG: focused should not be null!');
+      return;
     }
-    for (let i = 0; i < container.children.length; i++) {
-      if (this.dispatchInputToFirstFocusedChild(container.children[i], content)) {
-        return true;
-      }
+    let specialKeyCodes = {
+      "+": null,
+      "-": null,
+      "*": null,
+      "/": null,
+      "^": null,
+      "(": null,
+      ")": null,
+      "ArrowLeft": 37,
+      "ArrowRight": 39,
+      "ArrowUp": 38,
+      "ArrowDown": 40,
+      "Backspace": null,
+    };
+    if (!(key in specialKeyCodes)) {
+      console.log("DEBUG: simulate non-special key:" + key);
+      focused.element.textContent += key;
+      focused.focus(1);
+      return;
     }
-    return false;
+    if (key === "ArrowLeft" && focused.positionCaretBeforeKeyEvents > 0) {
+      console.log('DEBUG: simulate arrow left');
+      focused.focus(0);
+      return;
+    }
+    const eventsToSend = [
+      "keydown",
+      "keyup",
+      "keypress",
+    ];
+    for (let i = 0; i < eventsToSend.length; i++) {
+      let event = new KeyboardEvent(
+        eventsToSend[i], {
+        key: key,
+      });
+      focused.element.dispatchEvent(event);
+    }
   }
 
   updateAlignment() {
@@ -536,6 +542,20 @@ class MathNode {
     });
   }
 
+  /** @returns {MathNode} */
+  findFirstFocusedChild() {
+    if (this.focused) {
+      return this;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      let candidate = this.children[i].findFirstFocusedChild();
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
   updateDOM() {
     this.updateDOMRecursive(0);
     this.equationEditor.updateAlignment();
@@ -617,6 +637,7 @@ class MathNode {
       this.boundingBox.height = exponent.boundingBox.height;
     }
     base.boundingBox.top = exponent.boundingBox.height - overlap;
+    base.boundingBox.left = 0;
     this.boundingBox.width = base.boundingBox.width + exponent.boundingBox.width;
     exponent.boundingBox.left = base.boundingBox.width;
     this.boundingBox.fractionLineHeight = base.boundingBox.top + base.boundingBox.fractionLineHeight;
@@ -779,6 +800,7 @@ class MathNode {
     event,
   ) {
     let key = event.key;
+    console.log("DEBUG: handle key down for: " + key);
     switch (key) {
       case "/":
         this.makeFractionNumerator();
@@ -944,17 +966,12 @@ class MathNode {
       this.positionCaretBeforeKeyEvents = - 1;
       return;
     }
-    console.log("DEBUG: window.getSelection: " + window.getSelection().rangeCount);
     let range = window.getSelection().getRangeAt(0);
-    console.log(`DEBUG: selected: ${range.toString()}.`);
     let selected = range.toString().length;
     let rangeClone = range.cloneRange();
-    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}`);
     rangeClone.selectNodeContents(this.element);
     rangeClone.setEnd(range.endContainer, range.endOffset);
-    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}`);
     this.positionCaretBeforeKeyEvents = rangeClone.toString().length - selected;
-    console.log(`DEBUG: selected: ${range.toString()}. RangeClone: ${rangeClone.toString()}. this.positionCaretBeforeKeyEvents: ${this.positionCaretBeforeKeyEvents}, start: ${rangeClone.startOffset}, end: ${rangeClone.endOffset}`);
     // window.getSelection().removeAllRanges();
     // window.getSelection().addRange(rangeClone);
   }
@@ -1038,6 +1055,15 @@ class MathNode {
       return true;
     }
     return false;
+  }
+
+  replaceChildAtPositionWithChildren(
+    /** @type {number} */
+    index,
+    /** @type {MathNode[]} */
+    newChildren,
+  ) {
+    this.replaceChildRangeWithChildren(index, index, newChildren);
   }
 
   replaceChildAtPosition(
@@ -1263,15 +1289,17 @@ class MathNode {
     return positionOperator;
   }
 
+  /** @returns {ParentWithIndex} */
   computeHorizontalMathParent() {
-    let parent = this.parent;
-    while (parent !== null) {
-      if (parent.type.type === knownTypes.horizontalMath.type) {
-        return parent;
+    let result = new ParentWithIndex(this.parent, this.indexInParent);
+    while (result.parent !== null) {
+      if (result.parent.type.type === knownTypes.horizontalMath.type) {
+        return result;
       }
-      parent = parent.parent;
+      result.parent = result.parent.parent;
+      result.index = result.parent.indexInParent;
     }
-    return parent;
+    return result;
   }
 
   makeHorizontalOperator(
@@ -1281,13 +1309,14 @@ class MathNode {
     this.storePositionCaret();
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
-    let parent = this.computeHorizontalMathParent();
-    if (parent === null) {
+    let parentAndIndex = this.computeHorizontalMathParent();
+    if (parentAndIndex.parent === null) {
       // No ancestor is of type horizontal math. 
       console.log('Warning: could not find ancestor of type horizontal math.');
       return;
     }
-    let oldIndexInParent = this.indexInParent;
+    let oldIndexInParent = parentAndIndex.indexInParent;
+    let parent = parentAndIndex.parent;
     if (positionOperator === 1) {
       parent.insertChildAtPosition(oldIndexInParent + 1, mathNodeFactory.atomImmutable(this.equationEditor, key));
       parent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
@@ -1305,16 +1334,43 @@ class MathNode {
   makeParenthesesLeft() {
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
-    let parent = this.computeHorizontalMathParent();
-    if (parent === null) {
+    let parentAndIndex = this.computeHorizontalMathParent();
+    if (parentAndIndex.parent === null) {
       // No ancestor is of type horizontal math. 
       console.log('Warning: could not find ancestor of type horizontal math.');
       return;
     }
+    let oldIndexInParent = parentAndIndex.indexInParent;
+    let parent = parentAndIndex.parent;
+    if (parent.children[oldIndexInParent] !== this) {
+      parent.children[oldIndexInParent].doMakeParenthesesLeft(positionOperator);
+    } else {
+      this.doMakeParenthesesLeft(positionOperator);
+    }
+  }
+
+  doMakeParenthesesLeft(positionOperator) {
+    let parent = this.parent;
+    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      console.log('Warning: making parentheses in non-horizontal math.');
+    }
     let oldIndexInParent = this.indexInParent;
     if (positionOperator === 1) {
-      let parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
-      parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
+      let parenthesesContent = mathNodeFactory.horizontalMath(this.equationEditor, mathNodeFactory.atom(this.equationEditor, ""));
+      for (let i = oldIndexInParent + 1; i < parent.children.length; i++) {
+        parenthesesContent.children.push(parent.children[i]);
+      }
+      parenthesesContent.normalizeHorizontalMath();
+      let parentheses = mathNodeFactory.parentheses(
+        this.equationEditor,
+        parenthesesContent,
+      );
+      parent.replaceChildRangeWithChildren(
+        oldIndexInParent + 1,
+        parent.children.length,
+        [parentheses],
+      );
+      parent.ensureEditableAtomToTheRight();
       parent.updateDOM();
       parent.children[oldIndexInParent + 1].focus(- 1);
     } else if (positionOperator === 0) {
@@ -1323,29 +1379,31 @@ class MathNode {
       parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
       let parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, rightContent));
       parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
+      parent.ensureEditableAtomToTheRight();
       parent.updateDOM();
       parent.children[oldIndexInParent + 1].focus(- 1);
     } else {
       let parentheses = mathNodeFactory.parentheses(this.equationEditor, this);
       parent.replaceChildAtPosition(oldIndexInParent, parentheses);
+      parent.ensureEditableAtomToTheRight();
       parent.updateDOM();
       parent.children[oldIndexInParent].focus(- 1);
     }
   }
 
   ensureEditableAtomToTheRight() {
-    if (this.parent === null) {
-      console.log('Warning: could not find ancestor of node in ensureEditableAtomToTheRight.');
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      console.log('Warning: call ensureEditableAtomToTheRight on non-horizontal math.');
       return;
     }
-    let parent = this.parent;
-    let indexNext = this.indexInParent + 1;
-    if (indexNext < parent.children.length) {
-      if (parent.children[indexNext].isAtomEditable()) {
-        return;
-      }
+    if (this.children.length === 0) {
+      this.insertChildAtPosition(0, mathNodeFactory.atom(this.equationEditor, ""));
+      return;
     }
-    parent.insertChildAtPosition(indexNext, mathNodeFactory.atom(this.equationEditor, ""));
+    if (!this.children[this.children.length - 1].isAtomEditable()) {
+      this.insertChildAtPosition(this.children.length, mathNodeFactory.atom(this.equationEditor, ""));
+      return;
+    }
   }
 
   makeFractionNumerator() {
@@ -1371,9 +1429,8 @@ class MathNode {
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
-    baseWithExponent.ensureEditableAtomToTheRight();
     originalParent.updateDOM();
-    baseWithExponent.children[1].focus(- 1);
+    baseWithExponent.children[1].children[0].focus(- 1);
   }
 
   /** Focuses the HTMLElement that belongs to the math node.
@@ -1438,6 +1495,7 @@ class MathNode {
     range.collapse(start);
     selection.removeAllRanges();
     selection.addRange(range);
+    this.positionCaretBeforeKeyEvents = position;
   }
 
   toString(indentationLevel) {
@@ -1509,6 +1567,21 @@ class MathNode {
   }
 }
 
+class ParentWithIndex {
+  constructor(
+    /** @type{MathNode} */
+    parent,
+    /**@type{number} */
+    indexInParent,
+  ) {
+    /** @type{MathNode} */
+    this.parent = parent;
+    /** @type{number} */
+    this.indexInParent = indexInParent;
+  }
+}
+
+
 function writeDebugInfo() {
   document.getElementById("latex").innerHTML = lastCreatedEquationEditor.rootNode.toLatex();
   document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toString();
@@ -1526,6 +1599,7 @@ function testEquationEditor() {
   defaultEquationEditorLocal.rootNode.focus(- 1);
   setTimeout(() => {
     defaultEquationEditorLocal.sendKeys([
+      //"2", "^", "3", "ArrowLeft", "ArrowLeft", "ArrowLeft", "(",
       //"1", "+", "1", "Backspace", "Backspace", "2",
       // "(", "1", "/", "1",
       //"1", "/", "1", "ArrowUp", "ArrowUp", "ArrowUp", "(",

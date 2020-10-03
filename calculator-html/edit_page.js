@@ -152,8 +152,6 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
 
 function storeEditedPage() {
   var thePage = window.calculator.mainPage;
-  console.log('DEBUG: storeEditedPage start: ' + thePage.toStringProblem());
-
   var editor = thePage.pages.editPage.editor;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
@@ -168,7 +166,6 @@ function storeEditedPage() {
     parameters: queryParameters,
     result: ids.domElements.spanSubmitEditPageReport,
   });
-  console.log('DEBUG: storeEditedPage end: ' + thePage.toStringProblem());
 }
 
 function initEditorAce() {
@@ -184,8 +181,6 @@ function initEditorAce() {
 
 function selectEditPageCallback(input, outputComponent) {
   var thePage = window.calculator.mainPage;
-  console.log('DEBUG: selectEditPageCallback start: ' + thePage.toStringProblem());
-
   try {
     var parsedInput = miscellaneous.jsonUnescapeParse(input);
     ace.require("ace/ext/language_tools");
@@ -222,7 +217,6 @@ function selectEditPageCallback(input, outputComponent) {
   } catch (e) {
     console.log(`Error: ${e}`);
   }
-  console.log('DEBUG: selectEditPageCallback end: ' + thePage.toStringProblem());
 }
 
 /**@returns {HTMLElement} */
@@ -273,7 +267,6 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
 
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
-  console.log('DEBUG: problems at start of select edit page: ' + thePage.toStringProblem());
   var storageVariables = thePage.storage.variables;
   var fileNameSources = [
     storageVariables.editor.currentlyEditedPage,
@@ -317,7 +310,6 @@ function selectEditPage(currentlyEditedPage) {
     callback: selectEditPageCallback,
     progress: ids.domElements.spanProgressReportGeneral,
   });
-  console.log('DEBUG: problems at END of select edit page: ' + thePage.toStringProblem());
 }
 
 function toggleClonePanel(button) {

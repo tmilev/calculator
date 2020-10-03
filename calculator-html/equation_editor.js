@@ -522,9 +522,9 @@ class MathNode {
     }
     this.fractionLineHeight = 0;
     this.element.setAttribute("mathTagName", this.type.type);
-    this.element.addEventListener("keyup", (e) => {
-      this.handleKeyUp(e);
-    });
+    /*    this.element.addEventListener("keyup", (e) => {
+          this.handleKeyUp(e);
+        });*/
     this.element.addEventListener("keydown", (e) => {
       this.handleKeyDown(e);
     });
@@ -758,18 +758,23 @@ class MathNode {
     this.focused = false;
   }
 
-  handleKeyUp(
+  handleKeyDown(
     /** @type {KeyboardEvent} */
     event,
   ) {
+    this.storePositionCaret();
     event.stopPropagation();
-    event.preventDefault();
-    this.handleKeyUpCases(event);
-    this.equationEditor.updateAlignment();
-    writeDebugInfo();
+    if (this.handleKeyDownCases(event)) {
+      event.preventDefault();
+    }
+    setTimeout(() => {
+      this.equationEditor.updateAlignment();
+      writeDebugInfo();
+    }, 0);
   }
 
-  handleKeyUpCases(
+  /** @returns {boolean} whether default should be prevented. */
+  handleKeyDownCases(
     /** @type {KeyboardEvent} */
     event,
   ) {
@@ -777,29 +782,27 @@ class MathNode {
     switch (key) {
       case "/":
         this.makeFractionNumerator();
-        return;
+        return true;
       case "*":
       case "+":
       case "-":
         this.makeHorizontalOperator(key);
-        return;
+        return true;
       case "^":
         this.makeBaseWithExponent();
-        return;
+        return true;
       case "ArrowLeft":
       case "ArrowRight":
       case "ArrowUp":
       case "ArrowDown":
-        this.arrow(key);
-        return;
+        return this.arrow(key);
       case "(":
         this.makeParenthesesLeft();
-        return;
+        return true;
       case "Backspace":
-        this.backspace(event);
-        return;
+        return this.backspace(event);
       default:
-        return;
+        return false;
     }
   }
 
@@ -817,18 +820,20 @@ class MathNode {
     }
   }
 
+  /** @returns{boolean} whether the default should be prevented. */
   arrow(
     /** @type {string} */
     key,
   ) {
     if (this.arrowAbsorbedByAtom(key)) {
-      return;
+      return false;
     }
     /** @type {AtomWithPosition} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
       toFocus.element.focus(toFocus.position);
     }
+    return true;
   }
 
   arrowAbsorbedByAtom(
@@ -932,37 +937,6 @@ class MathNode {
       }
     }
     return null;
-  }
-
-  handleKeyDown(
-    /** @type {KeyboardEvent} */
-    event,
-  ) {
-    this.storePositionCaret();
-    this.handleKeyDownCases(event);
-    event.stopPropagation();
-    this.equationEditor.updateAlignment();
-    writeDebugInfo();
-  }
-
-  handleKeyDownCases(
-    /** @type {KeyboardEvent} */
-    event,
-  ) {
-    let key = event.key;
-    switch (key) {
-      case "+":
-      case "-":
-      case "*":
-      case "/":
-      case "^":
-      case "(":
-      case ")":
-      case "ArrowDown":
-      case "ArrowUp":
-        event.preventDefault();
-        return;
-    }
   }
 
   storePositionCaret() {
@@ -1108,7 +1082,7 @@ class MathNode {
     /** @type {number} */
     toIndex,
     /** @type {Array<MathNode>} */
-    inputChildren
+    inputChildren,
   ) {
     // Please do not modify removed as removed can
     // be in use as a member of a sub-tree of the inputChildren.
@@ -1141,14 +1115,16 @@ class MathNode {
     return offset === this.element.textContent.length;
   }
 
+  /** @returns{boolean} whether the default should be prevented. */
   backspace(/** @type {KeyboardEvent} */ event) {
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
       this.type.type !== knownTypes.atom.type
     ) {
-      return;
+      return false;
     }
     this.applyBackspace();
+    return true;
   }
 
   /** @returns {boolean} whether input was reduced */
@@ -1269,7 +1245,6 @@ class MathNode {
       return;
     }
   }
-
 
   /** Returns the position of the operator.
    * 

@@ -1220,15 +1220,16 @@ class MathNode {
     if (this.type.type !== knownTypes.exponent.type) {
       return false;
     }
-    let parent = this.parent;
-    let indexBaseWithExponent = parent.indexInParent;
-    let horizontal = parent.children[0];
-    horizontal.appendChild(parent.children[1].children[0]);
-    horizontal.normalizeHorizontalMath();
-    parent.parent.replaceChildAtPosition(indexBaseWithExponent, horizontal);
-    parent.parent.normalizeHorizontalMath();
-    parent.parent.updateDOM();
-    horizontal.focus(0);
+    let baseWithExponent = this.parent;
+    let indexBaseWithExponent = baseWithExponent.indexInParent;
+    let base = baseWithExponent.children[0];
+    base.appendChild(this.children[0]);
+    base.normalizeHorizontalMath();
+    let parent = baseWithExponent.parent;
+    parent.replaceChildAtPosition(indexBaseWithExponent, base);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.children[indexBaseWithExponent].focus(0);
     return true;
   }
 

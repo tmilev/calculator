@@ -1175,7 +1175,7 @@ class MathNode {
         parent.focus(-1);
       }
     }
-    return previous.applyBackspace();
+    return previous.applyBackSpaceNonHorizontalMath();
   }
 
   /** @returns {boolean} whether reduction ocurred. */
@@ -1262,6 +1262,10 @@ class MathNode {
     if (this.applyBackspaceHorizontalMathParent()) {
       return;
     }
+    this.applyBackSpaceNonHorizontalMath();
+  }
+
+  applyBackSpaceNonHorizontalMath() {
     if (this.applyBackspaceFraction()) {
       return;
     }
@@ -1371,7 +1375,7 @@ class MathNode {
         parent.children.length,
         [parentheses],
       );
-      parent.ensureEditableAtomToTheRight();
+      parent.ensureEditableAtomBothSides();
       parent.updateDOM();
       parent.children[oldIndexInParent + 1].focus(- 1);
     } else if (positionOperator === 0) {
@@ -1380,19 +1384,19 @@ class MathNode {
       parent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, leftContent));
       let parentheses = mathNodeFactory.parentheses(this.equationEditor, mathNodeFactory.atom(this.equationEditor, rightContent));
       parent.insertChildAtPosition(oldIndexInParent + 1, parentheses);
-      parent.ensureEditableAtomToTheRight();
+      parent.ensureEditableAtomBothSides();
       parent.updateDOM();
       parent.children[oldIndexInParent + 1].focus(- 1);
     } else {
       let parentheses = mathNodeFactory.parentheses(this.equationEditor, this);
       parent.replaceChildAtPosition(oldIndexInParent, parentheses);
-      parent.ensureEditableAtomToTheRight();
+      parent.ensureEditableAtomBothSides();
       parent.updateDOM();
-      parent.children[oldIndexInParent].focus(- 1);
+      parentheses.focus(- 1);
     }
   }
 
-  ensureEditableAtomToTheRight() {
+  ensureEditableAtomBothSides() {
     if (this.type.type !== knownTypes.horizontalMath.type) {
       console.log('Warning: call ensureEditableAtomToTheRight on non-horizontal math.');
       return;
@@ -1403,7 +1407,9 @@ class MathNode {
     }
     if (!this.children[this.children.length - 1].isAtomEditable()) {
       this.insertChildAtPosition(this.children.length, mathNodeFactory.atom(this.equationEditor, ""));
-      return;
+    }
+    if (!this.children[0].isAtomEditable()) {
+      this.insertChildAtPosition(0, mathNodeFactory.atom(this.equationEditor, ""));
     }
   }
 

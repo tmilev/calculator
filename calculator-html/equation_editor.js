@@ -1175,7 +1175,7 @@ class MathNode {
         parent.focus(-1);
       }
     }
-    return true;
+    return previous.applyBackspace();
   }
 
   /** @returns {boolean} whether reduction ocurred. */

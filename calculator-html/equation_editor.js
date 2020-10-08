@@ -332,9 +332,11 @@ class EquationEditor {
     this.rootNode.updateDOM();
     lastCreatedEquationEditor = this;
   }
+
   toString() {
     return this.rootNode.toHtml(0);
   }
+
   sendKeys(
     /**@type {string[]} */
     keys,
@@ -393,8 +395,8 @@ class EquationEditor {
     for (let i = 0; i < eventsToSend.length; i++) {
       let event = new KeyboardEvent(
         eventsToSend[i], {
-        key: key,
-      });
+          key: key,
+        });
       focused.element.dispatchEvent(event);
     }
   }
@@ -455,6 +457,8 @@ class MathNode {
     this.initialContent = "";
     /** @type {boolean} */
     this.focused = false;
+    /** @type {boolean} */
+    this.focusDesired = false;
     /** @type {boolean} 
      * Indicates whether the node was explicitly entered by the user 
      * or has been implied by a user action, such as parentheses auto-balancing.
@@ -1115,7 +1119,9 @@ class MathNode {
       ) {
         continue;
       }
-      current.desiredCaretPosition = current.element.textContent.length;
+      if (next.desiredCaretPosition !== -1) {
+        current.desiredCaretPosition = current.element.textContent.length + next.desiredCaretPosition;
+      }
       current.element.textContent += next.element.textContent;
       this.removeChildRange(i + 1, i + 1);
       return true;
@@ -1157,6 +1163,13 @@ class MathNode {
     result.indexInParent = - 1;
     this.children[childIndex] = null;
     return result;
+  }
+
+  removeChild(
+    /** @type {number} */
+    index,
+  ) {
+    return this.replaceChildRangeWithChildren(index, index, []);
   }
 
   removeChildRange(
@@ -1240,20 +1253,16 @@ class MathNode {
       } else {
         parent.focus(-1);
       }
+      return;
     }
-    return previous.applyBackSpaceNonHorizontalMath();
+    if (this.type.type === knownTypes.atom.type) {
+      this.desiredCaretPosition = 0;
+    }
+    return previous.applyBackspaceHorizontalMathParent();
   }
 
   /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceFraction() {
-    if (this.type.type === knownTypes.horizontalMath.type) {
-      if (
-        this.parent.type.type === knownTypes.denominator.type ||
-        this.parent.type.type === knownTypes.numerator.type
-      ) {
-        return this.parent.applyBackspaceFraction();
-      }
-    }
     if (
       this.type.type === knownTypes.denominator.type ||
       this.type.type === knownTypes.numerator.type
@@ -1276,47 +1285,44 @@ class MathNode {
 
   /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceExponent() {
-    if (this.type.type === knownTypes.horizontalMath.type) {
-      if (
-        this.parent.type.type === knownTypes.exponent.type
-      ) {
-        return this.parent.applyBackspaceExponent();
-      }
-    }
     if (this.type.type !== knownTypes.exponent.type) {
       return false;
     }
     let baseWithExponent = this.parent;
     let indexBaseWithExponent = baseWithExponent.indexInParent;
     let base = baseWithExponent.children[0];
+    this.children[0].children[0].desiredCaretPosition = 0;
     base.appendChild(this.children[0]);
     base.normalizeHorizontalMath();
     let parent = baseWithExponent.parent;
     parent.replaceChildAtPosition(indexBaseWithExponent, base);
+    writeDebugInfo();
     parent.normalizeHorizontalMath();
     parent.updateDOM();
-    parent.children[indexBaseWithExponent].focus(0);
+    parent.focusRestore();
     return true;
   }
 
   /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceParentheses() {
-    if (this.type.type === knownTypes.horizontalMath.type) {
-      if (
-        this.parent.type.type === knownTypes.parentheses.type
-      ) {
-        return this.parent.applyBackspaceParentheses();
-      }
-    }
-    if (this.type.type !== knownTypes.parentheses.type) {
+    if (
+      this.type.type !== knownTypes.rightDelimiter.type &&
+      this.type.type !== knownTypes.leftDelimiter.type
+    ) {
       return false;
     }
-    let indexInParent = this.indexInParent;
-    let horizontal = this.children[1];
-    this.parent.replaceChildAtPosition(indexInParent, horizontal);
-    this.parent.normalizeHorizontalMath();
+    let matchingIndex = this.parent.findIndexMatchingDelimiter(this.indexInParent);
+    if (matchingIndex === -1) {
+      console.log('Unexpected failure to find matching left parenthesis.');
+      return false;
+    }
+    let parent = this.parent;
+    let startingIndexInParent = this.indexInParent;
+    parent.removeChild(Math.max(startingIndexInParent, matchingIndex));
+    parent.removeChild(Math.min(startingIndexInParent, matchingIndex));
+    parent.normalizeHorizontalMath();
     this.parent.updateDOM();
-    this.parent.focus(0);
+    this.parent.focusRestore();
     return true;
   }
 
@@ -1328,10 +1334,14 @@ class MathNode {
     if (this.applyBackspaceHorizontalMathParent()) {
       return;
     }
-    this.applyBackSpaceNonHorizontalMath();
+    this.applyBackSpaceNonHorizontalMathParent();
   }
 
-  applyBackSpaceNonHorizontalMath() {
+  applyBackSpaceNonHorizontalMathParent() {
+    if (this.type.type === knownTypes.horizontalMath.type) {
+      this.parent.applyBackspace();
+      return;
+    }
     if (this.applyBackspaceFraction()) {
       return;
     }
@@ -1439,6 +1449,38 @@ class MathNode {
     return this.children.length;
   }
 
+  /** @returns {number}*/
+  findIndexMatchingDelimiter(
+    /**@type {number} */
+    indexStartingDelimiter,
+  ) {
+    let startingDelimiter = knownTypes.leftDelimiter.type;
+    let endingDelimiter = knownTypes.rightDelimiter.type;
+    let direction = 1;
+    if (this.children[indexStartingDelimiter].type.type === knownTypes.rightDelimiter.type) {
+      endingDelimiter = knownTypes.leftDelimiter.type;
+      startingDelimiter = knownTypes.rightDelimiter.type;
+      direction = -1;
+    }
+    let openDelimiters = 1;
+    for (
+      let i = indexStartingDelimiter + direction;
+      i < this.children.length && i >= 0;
+      i += direction
+    ) {
+      let child = this.children[i];
+      if (child.type.type === startingDelimiter) {
+        openDelimiters++;
+      } else if (child.type.type === endingDelimiter) {
+        openDelimiters--;
+      }
+      if (openDelimiters == 0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   doMakeParenthesesLeft(positionOperator) {
     let parent = this.parent;
     if (parent.type.type !== knownTypes.horizontalMath.type) {
@@ -1530,29 +1572,36 @@ class MathNode {
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
+    baseWithExponent.children[1].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
+    originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
-    baseWithExponent.children[1].children[0].focus(- 1);
+    originalParent.focusRestore();
   }
 
   focusAtom(endToFocus) {
-    if (this.element !== null) {
-      this.element.focus(null);
-      let position = 0;
-      if (endToFocus === 0) {
-        position = this.desiredCaretPosition;
-      }
-      if (endToFocus > 0) {
-        position = this.element.textContent.length;
-      }
-      if (position < 0) {
-        position = 0;
-      }
-      if (position > this.element.textContent.length) {
-        position = this.element.textContent.length;
-      }
-      this.setCursorPosition(position);
+    if (this.element === null) {
+      this.desiredCaretPosition = - 1;
+      return false;
     }
+    // The call to focus(null) will wipe the desiredCaretPosition.
+    let originalDesiredPosition = this.desiredCaretPosition;
+    // this.element.focus(null);
+    let position = 0;
+    if (endToFocus === 0) {
+      position = originalDesiredPosition;
+    }
+    if (endToFocus > 0) {
+      position = this.element.textContent.length;
+    }
+    if (position < 0) {
+      position = 0;
+    }
+    if (position > this.element.textContent.length) {
+      position = this.element.textContent.length;
+    }
+    this.setCursorPosition(position);
+    this.desiredCaretPosition = -1;
     return true;
   }
 
@@ -1575,7 +1624,7 @@ class MathNode {
    */
   focus(endToFocus) {
     if (this.type.type === knownTypes.atom.type) {
-      this.focusAtom();
+      this.focusAtom(endToFocus);
     }
     if (this.type.type === knownTypes.leftDelimiter.type) {
       return this.focusLeftDelimiter();
@@ -1603,22 +1652,41 @@ class MathNode {
     return false;
   }
 
-  setCursorPosition(/** @type {number}*/ position) {
-    var range = document.createRange();
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    let start = true;
-    if (position >= this.element.textContent.length && position > 0) {
-      range.selectNodeContents(this.element);
-      range.selectNodeContents(this.element);
-      start = false;
-    } else {
-      range.setStart(this.element, position);
+  /** @returns {boolean} whether focused child was found. */
+  focusRestore() {
+    if (this.desiredCaretPosition !== -1) {
+      this.focus(0);
+      return true;
     }
-    range.collapse(start);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    this.positionCaretBeforeKeyEvents = position;
+    this.desiredCaretPosition = -1;
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i].focusRestore()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  setCursorPosition(/** @type {number}*/ position) {
+
+    let range = document.createRange();
+    // range.selectNodeContents(this.element);    
+    let collapseToStart = true;
+    if (position >= this.element.textContent.length) {
+      collapseToStart = false;
+      range.selectNodeContents(this.element);
+    } else if (position > 0) {
+      collapseToStart = false;
+      range.setStart(this.element.childNodes[0], position);
+    } else {
+      collapseToStart = true;
+      range.setStart(this.element.childNodes[0], 0);
+    }
+    console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
+    range.collapse(collapseToStart);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    //    this.element.focus();
   }
 
   toString() {
@@ -1650,6 +1718,12 @@ class MathNode {
     if (this.element !== null) {
       content += `[${this.element.textContent}]`;
     }
+    if (this.focused) {
+      content += ', F';
+    }
+    if (this.desiredCaretPosition !== -1) {
+      content += `, FD[${this.desiredCaretPosition}]`;
+    }
     if (this.boundingBox.width !== 0) {
       content += `, w: ${this.boundingBox.width}`;
     }
@@ -1667,7 +1741,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.atom.type) {
       content += `, caret: ${this.positionCaretBeforeKeyEvents}, `;
-      content += `desiredCaret: ${this.desiredCaretPosition}`;
     }
     result.push(content);
     for (let i = 0; i < this.children.length; i++) {
@@ -1691,7 +1764,14 @@ class MathNode {
   }
 
   toLatexAtom() {
+    if (this.element === null) {
+      return "[null]";
+    }
     return this.element.textContent;
+  }
+
+  toLatexBaseWithExponent() {
+    return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
   }
 
   toLatex() {
@@ -1704,8 +1784,15 @@ class MathNode {
     ) {
       return this.toLatexAtom();
     }
+    if (this.type.type === knownTypes.baseWithExponent.type) {
+      return this.toLatexBaseWithExponent();
+    }
     let toJoin = [];
     for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i] === null) {
+        toJoin.push("[[null]]");
+        continue;
+      }
       toJoin.push(this.children[i].toLatex());
     }
     return toJoin.join("");

@@ -1572,7 +1572,7 @@ class MathNode {
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
-    baseWithExponent.children[1].children[0].desiredCaretPosition = 0;
+    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
     originalParent.replaceChildAtPosition(originalIndexInParent, baseWithExponent);
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
@@ -1600,7 +1600,7 @@ class MathNode {
     if (position > this.element.textContent.length) {
       position = this.element.textContent.length;
     }
-    this.setCursorPosition(position);
+    this.setCaretPosition(position);
     this.desiredCaretPosition = -1;
     return true;
   }
@@ -1667,8 +1667,7 @@ class MathNode {
     return false;
   }
 
-  setCursorPosition(/** @type {number}*/ position) {
-
+  setCaretPosition(/** @type {number}*/ position) {
     let range = document.createRange();
     // range.selectNodeContents(this.element);    
     let collapseToStart = true;

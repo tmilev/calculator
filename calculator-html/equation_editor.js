@@ -1296,7 +1296,6 @@ class MathNode {
       console.log('Unexpected failure to find matching left parenthesis.');
       return false;
     }
-
     let parent = this.parent;
     let startingIndexInParent = this.indexInParent;
     parent.removeChild(Math.max(startingIndexInParent, matchingIndex));
@@ -1324,7 +1323,8 @@ class MathNode {
   /** @returns {boolean} whether backspace was applied */
   applyBackspaceToTheLeft() {
     if (this.parent === null) {
-      console.log('Unexpected null parent while updating backspace.');
+      // We've reached the root node by pushing backspace in the first position.
+      this.focusCancelOnce();
       return false;
     }
     if (this.applyBackspaceToTheLeftNumerator()) {
@@ -1342,7 +1342,28 @@ class MathNode {
     if (this.applyBackspaceToTheLeftHorizontalMathParent()) {
       return true;
     }
+    this.parent.focusCancelOnce();
     return false;
+  }
+
+  /** @returns {boolean} whether backspae was applied */
+  applyBackspaceToTheRightFraction() {
+    if (this.type.type !== knownTypes.fraction.type) {
+      return false;
+    }
+    this.parent.children[this.indexInParent + 1].focusCancelOnce();
+    this.children[1].focus(1);
+    return true;
+  }
+
+  /** @returns {boolean} whether backspae was applied */
+  applyBackspaceToTheRightBaseWithExponent() {
+    if (this.type.type !== knownTypes.baseWithExponent.type) {
+      return false;
+    }
+    this.parent.children[this.indexInParent + 1].focusCancelOnce();
+    this.children[1].focus(1);
+    return true;
   }
 
   /** @returns {boolean} whether backspace was applied */
@@ -1365,6 +1386,12 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheRightDelimiter()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightFraction()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightBaseWithExponent()) {
       return true;
     }
     return false;
@@ -1641,7 +1668,7 @@ class MathNode {
    */
   focus(endToFocus) {
     if (this.type.type === knownTypes.atom.type) {
-      this.focusAtom(endToFocus);
+      return this.focusAtom(endToFocus);
     }
     if (this.type.type === knownTypes.leftDelimiter.type) {
       return this.focusLeftDelimiter();
@@ -1669,13 +1696,27 @@ class MathNode {
     return false;
   }
 
+  /** @returns {boolean} whether focus request was find. */
+  focusCancelOnce() {
+    if (this.desiredCaretPosition !== -1) {
+      this.desiredCaretPosition = -1;
+      return true;
+    }
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i].focusCancelOnce()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** @returns {boolean} whether focused child was found. */
   focusRestore() {
     if (this.desiredCaretPosition !== -1) {
       this.focus(0);
       return true;
     }
-    this.desiredCaretPosition = -1;
+    this.desiredCaretPosition = - 1;
     for (let i = 0; i < this.children.length; i++) {
       if (this.children[i].focusRestore()) {
         return true;

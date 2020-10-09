@@ -1242,7 +1242,7 @@ class MathNode {
 
   /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheLeftDenominator() {
-    if (this.type.type !== knownTypes.numerator.type) {
+    if (this.type.type !== knownTypes.denominator.type) {
       return false;
     }
     return this.applyBackspaceToTheLeftNumeratorOrDenominator();
@@ -1253,7 +1253,7 @@ class MathNode {
     let fraction = this.parent;
     let fractionIndexInParent = fraction.indexInParent;
     let horizontal = fraction.children[0].children[0];
-    horizontal.appendChild(this.children[0]);
+    horizontal.appendChild(fraction.children[1].children[0]);
     horizontal.normalizeHorizontalMath();
     let fractionParent = fraction.parent;
     fractionParent.replaceChildAtPosition(fractionIndexInParent, horizontal);
@@ -1337,7 +1337,7 @@ class MathNode {
       return true;
     }
     if (this.indexInParent === 0) {
-      return parent.applyBackspaceToTheLeft();
+      return this.parent.applyBackspaceToTheLeft();
     }
     if (this.applyBackspaceToTheLeftHorizontalMathParent()) {
       return true;

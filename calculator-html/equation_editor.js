@@ -892,7 +892,7 @@ class MathNode {
         this.makeParenthesesLeft();
         return true;
       case "Backspace":
-        return this.backspace(event);
+        return this.backspace();
       default:
         return false;
     }
@@ -1221,70 +1221,50 @@ class MathNode {
   }
 
   /** @returns{boolean} whether the default should be prevented. */
-  backspace(/** @type {KeyboardEvent} */ event) {
+  backspace() {
     if (
       this.positionCaretBeforeKeyEvents !== 0 ||
       this.type.type !== knownTypes.atom.type
     ) {
       return false;
     }
-    this.applyBackspace();
-    return true;
-  }
-
-  /** @returns {boolean} whether input was reduced */
-  applyBackspaceHorizontalMathParent() {
-    let parent = this.parent;
-    if (parent.type.type !== knownTypes.horizontalMath.type) {
-      return false;
-    }
-    if (this.indexInParent === 0) {
-      parent.applyBackspace();
-      return true;
-    }
-    let indexPrevious = this.indexInParent - 1;
-    let previous = parent.children[indexPrevious];
-    if (previous.type.type === knownTypes.atomImmutable.type) {
-      parent.removeChildRange(indexPrevious, indexPrevious);
-      parent.normalizeHorizontalMath();
-      parent.updateDOM();
-      if (indexPrevious - 1 >= 0) {
-        parent.children[indexPrevious - 1].focus(1);
-      } else {
-        parent.focus(-1);
-      }
-      return;
-    }
-    if (this.type.type === knownTypes.atom.type) {
-      this.desiredCaretPosition = 0;
-    }
-    return previous.applyBackspaceHorizontalMathParent();
+    this.desiredCaretPosition = 0;
+    return this.applyBackspaceToTheLeft();
   }
 
   /** @returns {boolean} whether reduction ocurred. */
-  applyBackspaceFraction() {
-    if (
-      this.type.type === knownTypes.denominator.type ||
-      this.type.type === knownTypes.numerator.type
-    ) {
-      return this.parent.applyBackspaceFraction();
-    }
-    if (this.type.type !== knownTypes.fraction.type) {
+  applyBackspaceToTheLeftNumerator() {
+    if (this.type.type !== knownTypes.numerator.type) {
       return false;
     }
-    let indexInParent = this.indexInParent;
-    let horizontal = this.children[0].children[0];
-    horizontal.appendChild(this.children[1].children[0]);
+    return this.applyBackspaceToTheLeftNumeratorOrDenominator();
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftDenominator() {
+    if (this.type.type !== knownTypes.numerator.type) {
+      return false;
+    }
+    return this.applyBackspaceToTheLeftNumeratorOrDenominator();
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftNumeratorOrDenominator() {
+    let fraction = this.parent;
+    let fractionIndexInParent = fraction.indexInParent;
+    let horizontal = fraction.children[0].children[0];
+    horizontal.appendChild(this.children[0]);
     horizontal.normalizeHorizontalMath();
-    this.parent.replaceChildAtPosition(indexInParent, horizontal);
-    this.parent.normalizeHorizontalMath();
-    this.parent.updateDOM();
-    this.parent.focus(0);
+    let fractionParent = fraction.parent;
+    fractionParent.replaceChildAtPosition(fractionIndexInParent, horizontal);
+    fractionParent.normalizeHorizontalMath();
+    fractionParent.updateDOM();
+    fractionParent.focusRestore();
     return true;
   }
 
   /** @returns {boolean} whether reduction ocurred. */
-  applyBackspaceExponent() {
+  applyBackspaceToTheLeftExponent() {
     if (this.type.type !== knownTypes.exponent.type) {
       return false;
     }
@@ -1304,7 +1284,7 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
-  applyBackspaceParentheses() {
+  applyBackspaceToTheRightDelimiter() {
     if (
       this.type.type !== knownTypes.rightDelimiter.type &&
       this.type.type !== knownTypes.leftDelimiter.type
@@ -1316,6 +1296,7 @@ class MathNode {
       console.log('Unexpected failure to find matching left parenthesis.');
       return false;
     }
+
     let parent = this.parent;
     let startingIndexInParent = this.indexInParent;
     parent.removeChild(Math.max(startingIndexInParent, matchingIndex));
@@ -1326,31 +1307,67 @@ class MathNode {
     return true;
   }
 
-  applyBackspace() {
-    if (this.parent === null) {
-      console.log('Unexpected null parent while updating backspace.');
-      return;
+  /** @returns {boolean} whether backspace was applied */
+  applyBackspaceToTheLeftHorizontalMathParent() {
+    let parent = this.parent;
+    if (parent.type.type !== knownTypes.horizontalMath.type) {
+      return false;
     }
-    if (this.applyBackspaceHorizontalMathParent()) {
-      return;
+    if (this.indexInParent === 0) {
+      return this.parent.applyBackspaceToTheLeft();
     }
-    this.applyBackSpaceNonHorizontalMathParent();
+    let indexPrevious = this.indexInParent - 1;
+    let previous = parent.children[indexPrevious];
+    return previous.applyBackspaceToTheRight();
   }
 
-  applyBackSpaceNonHorizontalMathParent() {
-    if (this.type.type === knownTypes.horizontalMath.type) {
-      this.parent.applyBackspace();
-      return;
+  /** @returns {boolean} whether backspace was applied */
+  applyBackspaceToTheLeft() {
+    if (this.parent === null) {
+      console.log('Unexpected null parent while updating backspace.');
+      return false;
     }
-    if (this.applyBackspaceFraction()) {
-      return;
+    if (this.applyBackspaceToTheLeftNumerator()) {
+      return true;
     }
-    if (this.applyBackspaceExponent()) {
-      return;
+    if (this.applyBackspaceToTheLeftDenominator()) {
+      return true;
     }
-    if (this.applyBackspaceParentheses()) {
-      return;
+    if (this.applyBackspaceToTheLeftExponent()) {
+      return true;
     }
+    if (this.indexInParent === 0) {
+      return parent.applyBackspaceToTheLeft();
+    }
+    if (this.applyBackspaceToTheLeftHorizontalMathParent()) {
+      return true;
+    }
+    return false;
+  }
+
+  /** @returns {boolean} whether backspace was applied */
+  applyBackspaceToTheRightAtomImmutable() {
+    if (this.type.type !== knownTypes.atomImmutable.type) {
+      return false;
+    }
+    let parent = this.parent;
+    parent.children[this.indexInParent + 1].desiredCaretPosition = 0;
+    parent.removeChild(this.indexInParent);
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
+  /** @returns {boolean} whether backspace was applied */
+  applyBackspaceToTheRight() {
+    if (this.applyBackspaceToTheRightAtomImmutable()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheRightDelimiter()) {
+      return true;
+    }
+    return false;
   }
 
   /** Returns the position of the operator.

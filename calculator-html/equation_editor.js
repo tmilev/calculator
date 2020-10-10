@@ -137,12 +137,12 @@ const knownTypes = {
   // Left delimiter (parentheses, bracket, ...)
   leftDelimiter: new MathNodeType({
     "type": "leftDelimiter",
-    "colorImplied": "gray",
+    "colorImplied": "silver",
   }),
   // Right delimiter (parentheses, bracket, ...)
   rightDelimiter: new MathNodeType({
     "type": "rightDelimiter",
-    "colorImplied": "gray",
+    "colorImplied": "silver",
   }),
   // Horizontally laid out math such as "x+2". 
   // The example "x+2" consists of the three elements "x", "+" and 2.
@@ -1117,7 +1117,9 @@ class MathNode {
       if (next.desiredCaretPosition !== -1) {
         current.desiredCaretPosition = current.element.textContent.length + next.desiredCaretPosition;
       }
-      current.element.textContent += next.element.textContent;
+      if (next.element !== null) {
+        current.element.textContent += next.element.textContent;
+      }
       this.removeChildRange(i + 1, i + 1);
       return true;
     }
@@ -1290,6 +1292,13 @@ class MathNode {
     if (matchingIndex === -1) {
       console.log('Unexpected failure to find matching left parenthesis.');
       return false;
+    }
+    if (!this.parent.children[matchingIndex].implied) {
+      this.implied = true;
+      this.parent.focusCancelOnce();
+      this.focus(-1);
+      this.updateDOM();
+      return true;
     }
     let parent = this.parent;
     let startingIndexInParent = this.indexInParent;
@@ -1502,11 +1511,8 @@ class MathNode {
     /**@type {number} */
     indexInsertedRightDelimiter,
   ) {
-    if (indexInsertedRightDelimiter >= this.children.length) {
-      indexInsertedRightDelimiter--;
-    }
     let openDelimiters = 0;
-    for (let i = indexInsertedRightDelimiter; i >= 0; i--) {
+    for (let i = indexInsertedRightDelimiter - 1; i >= 0; i--) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {
         openDelimiters++;
@@ -1514,7 +1520,7 @@ class MathNode {
         openDelimiters--;
       }
       if (openDelimiters < 0) {
-        return i;
+        return i + 1;
       }
     }
     return 0;
@@ -1590,6 +1596,9 @@ class MathNode {
       } else {
         indexLeftDelimiter = oldIndexInParent;
       }
+      if (parent.replaceImpliedLeftDelimiter(indexLeftDelimiter)) {
+        return;
+      }
       indexRightDelimiter = parent.findIndexToInsertRightDelimiter(indexLeftDelimiter);
     } else {
       if (positionOperator === 1) {
@@ -1599,8 +1608,12 @@ class MathNode {
       } else {
         indexRightDelimiter = oldIndexInParent;
       }
+      if (parent.replaceImpliedRightDelimiter(indexRightDelimiter)) {
+        return;
+      }
       indexLeftDelimiter = parent.findIndexToInsertLeftDelimiter(indexRightDelimiter);
     }
+
     parent.insertChildAtPosition(indexRightDelimiter, rightParenthesis);
     parent.insertChildAtPosition(indexLeftDelimiter, leftParenthesis);
     parent.normalizeHorizontalMath();
@@ -1613,11 +1626,82 @@ class MathNode {
     }
   }
 
+  /** @returns{boolean} */
+  replaceImpliedLeftDelimiter(
+    /**@type {number}*/
+    delimiterIndex,
+  ) {
+    let openDelimiters = 0;
+    for (let i = delimiterIndex; i >= 0; i--) {
+      let child = this.children[i];
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        openDelimiters++;
+        continue
+      }
+      if (child.type.type === knownTypes.leftDelimiter.type) {
+        openDelimiters--;
+        if (openDelimiters >= 0) {
+          continue;
+        }
+        if (child.implied) {
+          return this.moveDelimiterMarkExplicit(delimiterIndex, i);
+        }
+        return false;
+      }
+    }
+    return false;
+  }
 
+  /** @returns{boolean} */
+  replaceImpliedRightDelimiter(
+    /**@type {number}*/
+    delimiterIndex,
+  ) {
+    let openDelimiters = 0;
+    for (let i = delimiterIndex; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (child.type.type === knownTypes.leftDelimiter.type) {
+        openDelimiters++;
+        continue
+      }
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        openDelimiters--;
+        if (openDelimiters >= 0) {
+          continue;
+        }
+        if (child.implied) {
+          return this.moveDelimiterMarkExplicit(delimiterIndex, i);
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /** @returns{boolean} */
+  moveDelimiterMarkExplicit(
+    /**@type {number}*/
+    toIndex,
+    /**@type {number}*/
+    fromIndex,
+  ) {
+    let delimiterReplaced = this.children[fromIndex];
+    delimiterReplaced.element = null;
+    this.removeChild(fromIndex);
+    if (toIndex > fromIndex) {
+      toIndex--;
+    }
+    this.insertChildAtPosition(toIndex, delimiterReplaced);
+    delimiterReplaced.implied = false;
+    this.ensureEditableAtoms();
+    this.updateDOM();
+    delimiterReplaced.focus(1);
+    return true;
+  }
 
   ensureEditableAtoms() {
     if (this.type.type !== knownTypes.horizontalMath.type) {
-      console.log('Warning: call ensureEditableAtomToTheRight on non-horizontal math.');
+      console.log("Warning: call ensureEditableAtomToTheRight on non-horizontal math. ");
       return;
     }
     let correctedChildren = [];

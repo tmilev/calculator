@@ -891,6 +891,9 @@ class MathNode {
       case "(":
         this.makeParenthesesLeft();
         return true;
+      case ")":
+        this.makeParenthesesRight();
+        return true;
       case "Backspace":
         return this.backspace();
       default:
@@ -967,6 +970,18 @@ class MathNode {
       return new AtomWithPosition(this.firstAtomToTheRight(), - 1);
     }
     return new AtomWithPosition(null, - 1);
+  }
+
+  /** @returns{MathNode|null} returns sibling, right one if direction is positive, left one otherwise. */
+  siblingAtom(
+    /**@type{number} */
+    direction,
+  ) {
+    if (direction > 0) {
+      return this.firstAtomToTheRight();
+    } else {
+      return this.firstAtomToTheLeft();
+    }
   }
 
   // Returns first MathNode atom that lies to the right of 
@@ -1047,26 +1062,6 @@ class MathNode {
   }
 
   appendChild(/** @type{MathNode} */ child) {
-    let needsNormalization = false;
-    if (
-      child.type.type === knownTypes.horizontalMath.type &&
-      this.type.type === knownTypes.horizontalMath.type
-    ) {
-      needsNormalization = true;
-    }
-    if (needsNormalization) {
-      // Horizontally laid-out math not allowed to contain other 
-      // horizontally laid-out math.
-      // As an example, we give the LaTeX expression a+b+{c+d},
-      // in which the curly braces are not rendered, but give an 
-      // "invisible" grouping. That would not be allowed here;
-      // instead, that expression would have to be normalized to 
-      // a+b+c+d.
-      for (let i = 0; i < child.children.length; i++) {
-        this.appendChild(child.children[i]);
-      }
-      return;
-    }
     if (child.parent !== this && child.parent !== null && child.indexInParent >= 0) {
       child.parent.children[child.indexInParent] = null;
     }
@@ -1457,6 +1452,17 @@ class MathNode {
   }
 
   makeParenthesesLeft() {
+    this.makeParenthesesCommon(true);
+  }
+
+  makeParenthesesRight() {
+    this.makeParenthesesCommon(false);
+  }
+
+  makeParenthesesCommon(
+    /** @type{boolean} */
+    isLeft,
+  ) {
     let positionOperator = this.computePositionOfOperator();
     // Find closest ancestor node that's of type horizontal math.
     let parentAndIndex = this.computeHorizontalMathParent();
@@ -1467,30 +1473,51 @@ class MathNode {
     }
     let oldIndexInParent = parentAndIndex.indexInParent;
     let parent = parentAndIndex.parent;
-    if (parent.children[oldIndexInParent] !== this) {
-      parent.children[oldIndexInParent].doMakeParenthesesLeft(positionOperator);
-    } else {
-      this.doMakeParenthesesLeft(positionOperator);
-    }
+    parent.children[oldIndexInParent].doMakeParenthesesCommon(positionOperator, isLeft);
   }
 
-  findIndexForRightDelimiter(
+  findIndexToInsertRightDelimiter(
     /**@type {number} */
-    startingIndex,
+    indexToInserLeftDelimiter,
   ) {
+    if (indexToInserLeftDelimiter >= this.children.length) {
+      return this.children.length;
+    }
     let openDelimiters = 0;
-    for (let i = startingIndex; i < this.children.length; i++) {
+    for (let i = indexToInserLeftDelimiter; i < this.children.length; i++) {
       let child = this.children[i];
-      if (child.type.type === knownTypes.leftDelimiter.type) {
-        openDelimiters++;
-      } else if (child.type.type === knownTypes.rightDelimiter.type) {
+      if (child.type.type === knownTypes.rightDelimiter.type) {
         openDelimiters--;
+      } else if (child.type.type === knownTypes.leftDelimiter.type) {
+        openDelimiters++;
       }
       if (openDelimiters < 0) {
         return i;
       }
     }
     return this.children.length;
+  }
+
+  findIndexToInsertLeftDelimiter(
+    /**@type {number} */
+    indexInsertedRightDelimiter,
+  ) {
+    if (indexInsertedRightDelimiter >= this.children.length) {
+      indexInsertedRightDelimiter--;
+    }
+    let openDelimiters = 0;
+    for (let i = indexInsertedRightDelimiter; i >= 0; i--) {
+      let child = this.children[i];
+      if (child.type.type === knownTypes.rightDelimiter.type) {
+        openDelimiters++;
+      } else if (child.type.type === knownTypes.leftDelimiter.type) {
+        openDelimiters--;
+      }
+      if (openDelimiters < 0) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   /** @returns {number}*/
@@ -1525,7 +1552,12 @@ class MathNode {
     return -1;
   }
 
-  doMakeParenthesesLeft(positionOperator) {
+  doMakeParenthesesCommon(
+    /**@type {number} */
+    positionOperator,
+    /**@type {boolean} */
+    isLeft,
+  ) {
     let parent = this.parent;
     if (parent.type.type !== knownTypes.horizontalMath.type) {
       console.log('Warning: making parentheses in non-horizontal math.');
@@ -1533,16 +1565,13 @@ class MathNode {
     let oldIndexInParent = this.indexInParent;
     let leftParenthesis = mathNodeFactory.leftParenthesis(
       this.equationEditor,
-      false,
+      !isLeft,
     );
     let rightParenthesis = mathNodeFactory.rightParenthesis(
       this.equationEditor,
-      true,
+      isLeft,
     );
-    let indexLeftDelimiter = -1;
-    if (positionOperator === 1) {
-      indexLeftDelimiter = oldIndexInParent + 1;
-    } else if (positionOperator === 0) {
+    if (positionOperator === 0) {
       let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
       let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
       let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
@@ -1550,18 +1579,41 @@ class MathNode {
       parent.replaceChildAtPositionWithChildren(
         oldIndexInParent, [leftNode, rightNode],
       );
-      indexLeftDelimiter = oldIndexInParent + 1;
-
-    } else {
-      indexLeftDelimiter = oldIndexInParent;
     }
-    parent.insertChildAtPosition(indexLeftDelimiter, leftParenthesis);
-    let indexRightDelimiter = parent.findIndexForRightDelimiter(leftParenthesis.indexInParent + 1);
+    let indexLeftDelimiter = - 1;
+    let indexRightDelimiter = - 1;
+    if (isLeft) {
+      if (positionOperator === 1) {
+        indexLeftDelimiter = oldIndexInParent + 1;
+      } else if (positionOperator === 0) {
+        indexLeftDelimiter = oldIndexInParent + 1;
+      } else {
+        indexLeftDelimiter = oldIndexInParent;
+      }
+      indexRightDelimiter = parent.findIndexToInsertRightDelimiter(indexLeftDelimiter);
+    } else {
+      if (positionOperator === 1) {
+        indexRightDelimiter = oldIndexInParent + 1;
+      } else if (positionOperator === 0) {
+        indexRightDelimiter = oldIndexInParent + 1;
+      } else {
+        indexRightDelimiter = oldIndexInParent;
+      }
+      indexLeftDelimiter = parent.findIndexToInsertLeftDelimiter(indexRightDelimiter);
+    }
     parent.insertChildAtPosition(indexRightDelimiter, rightParenthesis);
+    parent.insertChildAtPosition(indexLeftDelimiter, leftParenthesis);
+    parent.normalizeHorizontalMath();
     parent.ensureEditableAtoms();
     parent.updateDOM();
-    leftParenthesis.focus(1);
+    if (isLeft) {
+      leftParenthesis.focus(1);
+    } else {
+      rightParenthesis.focus(1);
+    }
   }
+
+
 
   ensureEditableAtoms() {
     if (this.type.type !== knownTypes.horizontalMath.type) {
@@ -1609,10 +1661,68 @@ class MathNode {
     fraction.children[1].focus(- 1);
   }
 
+  isEmptyAtom() {
+    if (this.type.type !== knownTypes.atom.type) {
+      return false;
+    }
+    if (this.element === null) {
+      return false;
+    }
+    return this.element.textContent === "";
+  }
+
+  previousHorizontalSibling() {
+    if (this.parent === null) {
+      return null;
+    }
+    if (this.parent.type.type !== knownTypes.horizontalMath.type) {
+      return null;
+    }
+    if (this.indexInParent <= 0) {
+      return null;
+    }
+    return this.parent.children[this.indexInParent - 1];
+  }
+
   makeBaseWithExponent() {
     if (this.parent === null) {
       return;
     }
+    if (this.isEmptyAtom()) {
+      let previous = this.previousHorizontalSibling();
+      if (previous !== null) {
+        previous.makeBaseWithExponent();
+        return;
+      }
+    }
+    if (
+      this.type.type === knownTypes.rightDelimiter.type
+    ) {
+      this.makeBaseWithExponentRightDelimiter();
+      return;
+    }
+    this.makeBaseDefaultWithExponent();
+  }
+
+  makeBaseWithExponentRightDelimiter() {
+    let rightIndex = this.indexInParent;
+    let originalParent = this.parent;
+    let leftIndex = originalParent.findIndexMatchingDelimiter(rightIndex);
+    let base = mathNodeFactory.horizontalMath(this.equationEditor, null);
+    for (let i = leftIndex; i < rightIndex + 1; i++) {
+      base.children.push(originalParent.children[i]);
+    }
+    base.normalizeHorizontalMath();
+    base.ensureEditableAtoms();
+    const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, base);
+    baseWithExponent.children[1].children[0].children[0].desiredCaretPosition = 0;
+    originalParent.replaceChildRangeWithChildren(leftIndex, rightIndex, [baseWithExponent]);
+    originalParent.ensureEditableAtoms();
+    originalParent.updateDOM();
+    originalParent.focusRestore();
+  }
+
+  makeBaseDefaultWithExponent() {
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
     const baseWithExponent = mathNodeFactory.baseWithExponent(this.equationEditor, this);
@@ -1649,16 +1759,6 @@ class MathNode {
     return true;
   }
 
-  focusLeftDelimiter(endToFocus) {
-    if (endToFocus < 0 && this.indexInParent > 0) {
-      return this.parent.children[this.indexInParent - 1].focus(endToFocus);
-    }
-    if (this.indexInParent + 1 < this.parent.children.length) {
-      return this.parent.children[this.indexInParent + 1].focus(endToFocus);
-    }
-    return true;
-  }
-
   /** Focuses the HTMLElement that belongs to the math node.
    * 
    * The endToFocus parameter denotes where the focus should occur.
@@ -1670,16 +1770,10 @@ class MathNode {
     if (this.type.type === knownTypes.atom.type) {
       return this.focusAtom(endToFocus);
     }
-    if (this.type.type === knownTypes.leftDelimiter.type) {
-      return this.focusLeftDelimiter();
-    }
     return this.focusStandard(endToFocus);
   }
 
   focusStandard(endToFocus) {
-    if (this.children.length < 1) {
-      return false;
-    }
     if (endToFocus === 1) {
       for (let i = this.children.length - 1; i >= 0; i--) {
         if (this.children[i].focus(endToFocus)) {
@@ -1693,7 +1787,14 @@ class MathNode {
         }
       }
     }
-    return false;
+    if (endToFocus === 0) {
+      return false;
+    }
+    let sibling = this.siblingAtom(endToFocus);
+    if (sibling === null) {
+      return false;
+    }
+    return sibling.focus(-endToFocus);
   }
 
   /** @returns {boolean} whether focus request was find. */
@@ -1831,6 +1932,20 @@ class MathNode {
     return `{${this.children[0].toLatex()}}^{${this.children[1].toLatex()}}`;
   }
 
+  toLatexLeftDelimiter() {
+    if (this.element === null) {
+      return "[null(]";
+    }
+    return `\\left${this.element.textContent}`;
+  }
+
+  toLatexRightDelimiter() {
+    if (this.element === null) {
+      return "[null)]";
+    }
+    return `\\right${this.element.textContent}`;
+  }
+
   toLatex() {
     if (this.type.type === knownTypes.fraction.type) {
       return this.toLatexFraction();
@@ -1843,6 +1958,12 @@ class MathNode {
     }
     if (this.type.type === knownTypes.baseWithExponent.type) {
       return this.toLatexBaseWithExponent();
+    }
+    if (this.type.type === knownTypes.leftDelimiter.type) {
+      return this.toLatexLeftDelimiter();
+    }
+    if (this.type.type === knownTypes.rightDelimiter.type) {
+      return this.toLatexRightDelimiter();
     }
     let toJoin = [];
     for (let i = 0; i < this.children.length; i++) {

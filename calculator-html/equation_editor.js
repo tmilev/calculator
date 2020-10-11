@@ -694,7 +694,7 @@ class MathNode {
     // For many fonts, the parenteses's middle appears to be below 
     // the middle of the line. We therefore translate the parenthesis up 
     // (negative translation) with a % of its bounding box height.
-    let translateUpPercent = 0.1;
+    let translateUpPercent = 0.15; //0.1;
     this.boundingBox.fractionLineHeight = (1 - translateUpPercent) * this.boundingBox.height * 0.5;
     let translateVertical = - this.boundingBox.height * translateUpPercent;
     this.boundingBox.transformOrigin = "top left";
@@ -894,6 +894,8 @@ class MathNode {
       case ")":
         this.makeParenthesesRight();
         return true;
+      case "Delete":
+        return this.deleteButton();
       case "Backspace":
         return this.backspace();
       default:
@@ -1215,6 +1217,20 @@ class MathNode {
     }
     let offset = window.getSelection().getRangeAt(0).startOffset;
     return offset === this.element.textContent.length;
+  }
+
+  /** @returns{boolean} whether the default should be prevented. */
+  deleteButton() {
+    if (
+      this.positionCaretBeforeKeyEvents !== this.element.textContent.length ||
+      this.type.type !== knownTypes.atom.type
+    ) {
+      return false;
+    }
+    let sibling = this.siblingAtom(1);
+    this.positionCaretBeforeKeyEvents = - 1;
+    sibling.positionCaretBeforeKeyEvents = 0;
+    return sibling.backspace();
   }
 
   /** @returns{boolean} whether the default should be prevented. */
@@ -1632,6 +1648,9 @@ class MathNode {
     delimiterIndex,
   ) {
     let openDelimiters = 0;
+    if (delimiterIndex >= this.children.length) {
+      delimiterIndex = this.children[this.children.length - 1];
+    }
     for (let i = delimiterIndex; i >= 0; i--) {
       let child = this.children[i];
       if (child.type.type === knownTypes.rightDelimiter.type) {

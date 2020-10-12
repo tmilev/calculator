@@ -58,6 +58,7 @@ class MathNodeType {
     this.borderStyle = input["borderStyle"];
     this.borderColor = input["borderColor"];
     this.borderBottom = input["borderBottom"];
+    this.borderTop = input["borderTop"];
   }
 }
 
@@ -88,6 +89,7 @@ const knownTypeDefaults = {
   "borderStyle": "",
   "borderColor": "",
   "borderBottom": "",
+  "borderTop": "",
 };
 
 class ArrowMotionTypes {
@@ -150,7 +152,7 @@ const knownTypes = {
   horizontalMath: new MathNodeType({
     "type": "horizontalMath",
     "whiteSpace": "nowrap",
-    "width": "100%",
+    // "width": "100%",
     "textAlign": "center",
   }),
   // Represents expressions such as "x/y" or "\frac{x}{y}".
@@ -189,6 +191,21 @@ const knownTypes = {
     "type": "exponent",
     "fontSize": 0.75,
     "minHeightScale": 0.75,
+  }),
+  sqrt: new MathNodeType({
+    "type": "sqrt",
+    "width": "auto",
+    "height": "auto",
+  }),
+  sqrtSign: new MathNodeType({
+    "type": "sqrtSign",
+  }),
+  radicalExponentBox: new MathNodeType({
+    "type": "radicalExponentBox",
+  }),
+  radicalUnderBox: new MathNodeType({
+    "type": "radicalUnderBox",
+    "borderTop": "2px solid black",
   }),
 };
 
@@ -253,6 +270,32 @@ class MathNodeFactory {
     fraction.appendChild(numerator);
     fraction.appendChild(denominator);
     return fraction;
+  }
+
+  /** @returns {MathNode} */
+  sqrtSign(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    let result = new MathNode(equationEditor, knownTypes.sqrtSign);
+    result.initialContent = "\u221A";
+    return result;
+  }
+
+  /** @returns {MathNode} */
+  sqrt(
+    /** @type {EquationEditor} */
+    equationEditor,
+  ) {
+    const sqrt = new MathNode(equationEditor, knownTypes.sqrt);
+    const radicalExponentBox = new MathNode(equationEditor, knownTypes.radicalExponentBox);
+    radicalExponentBox.children.push(this.horizontalMath(equationEditor, null));
+    sqrt.children.push(radicalExponentBox);
+    sqrt.children.push(mathNodeFactory.sqrtSign(equationEditor));
+    const underTheRadical = new MathNode(equationEditor, knownTypes.radicalUnderBox);
+    underTheRadical.children.push(mathNodeFactory.horizontalMath(equationEditor, null));
+    sqrt.children.push(underTheRadical);
+    return sqrt;
   }
 
   /** @returns {MathNode} */
@@ -395,8 +438,8 @@ class EquationEditor {
     for (let i = 0; i < eventsToSend.length; i++) {
       let event = new KeyboardEvent(
         eventsToSend[i], {
-          key: key,
-        });
+        key: key,
+      });
       focused.element.dispatchEvent(event);
     }
   }
@@ -502,6 +545,9 @@ class MathNode {
     if (this.type.borderBottom !== "") {
       this.element.style.borderBottom = this.type.borderBottom;
     }
+    if (this.type.borderTop !== "") {
+      this.element.style.borderTop = this.type.borderTop;
+    }
     this.element.style.width = this.type.width;
     this.element.style.height = this.type.height;
     this.element.style.display = this.type.display;
@@ -586,8 +632,9 @@ class MathNode {
     return (
       this.type.type === knownTypes.atom.type ||
       this.type.type === knownTypes.atomImmutable.type ||
-      this.type.type === knownTypes.leftDelimiter ||
-      this.type.type === knownTypes.rightDelimiter
+      this.type.type === knownTypes.leftDelimiter.type ||
+      this.type.type === knownTypes.rightDelimiter.type ||
+      this.type.type === knownTypes.sqrtSign.type
     );
   }
   /** @returns {boolean} */
@@ -675,7 +722,7 @@ class MathNode {
     child.boundingBox.left = (this.boundingBox.width - child.boundingBox.width) / 2;
   }
 
-  verticallyStretch(
+  verticallyStretchParenthesis(
     /** @type {number}*/
     heightToEnclose,
   ) {
@@ -706,9 +753,56 @@ class MathNode {
     this.boundingBox.height = this.children[0].boundingBox.height + 1;
   }
 
+  verticallyStretchSqrt(
+    /** @type {number}*/
+    heightToEnclose,
+  ) {
+    this.element.style.transformOrigin = "top left";
+    this.element.style.transform = "";
+    this.element.style.width = "";
+    this.element.style.height = "";
+    this.element.style.top = "";
+    this.element.style.left = "";
+    this.computeDimensionsAtomic();
+    if (heightToEnclose !== 0) {
+      this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.height;
+      this.boundingBox.height = heightToEnclose;
+    }
+    this.boundingBox.transformOrigin = "top left";
+    this.boundingBox.transform = `matrix(1,0,0,${this.boundingBox.stretchFactor}, 0, 0)`;
+  }
+
+  computeDimensionsSqrt() {
+    let radicalExponentBox = this.children[0];
+    let sqrtSign = this.children[1];
+    let underRadical = this.children[2];
+    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width / 2);
+    // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
+    // The following variable compensates for that.
+    sqrtSign.verticallyStretchSqrt(underRadical.boundingBox.height);
+    let widthSqrtSign = 0.92;
+    underRadical.boundingBox.left = sqrtSign.boundingBox.width * widthSqrtSign + radicalExponentBox.boundingBox.width + extraWidth;
+    this.boundingBox = new BoundingBox();
+    this.boundingBox.height = underRadical.boundingBox.height;
+    this.boundingBox.fractionLineHeight = underRadical.boundingBox.fractionLineHeight;
+  }
+
+  computeDimensionsRadicalUnderBox() {
+    this.computeDimensionsStandard();
+    this.boundingBox.height = this.children[0].boundingBox.height + 1;
+  }
+
   computeDimensions() {
     if (this.isAtomic()) {
       this.computeDimensionsAtomic();
+      return;
+    }
+    if (this.type.type === knownTypes.sqrt.type) {
+      this.computeDimensionsSqrt();
+      return;
+    }
+    if (this.type.type === knownTypes.radicalUnderBox.type) {
+      this.computeDimensionsRadicalUnderBox();
       return;
     }
     if (this.type.type === knownTypes.fraction.type) {
@@ -765,9 +859,9 @@ class MathNode {
         return;
       }
       let currentHeight = enclosedHeights.pop();
-      child.verticallyStretch(currentHeight);
+      child.verticallyStretchParenthesis(currentHeight);
       let leftCounterpart = this.children[indicesOpenedParentheses.pop()];
-      leftCounterpart.verticallyStretch(currentHeight);
+      leftCounterpart.verticallyStretchParenthesis(currentHeight);
     }
     if (enclosedHeights.length > 0) {
       enclosedHeights[enclosedHeights.length - 1] = Math.max(
@@ -893,6 +987,9 @@ class MathNode {
         return true;
       case ")":
         this.makeParenthesesRight();
+        return true;
+      case "s":
+        this.makeSqrt();
         return true;
       case "Delete":
         return this.deleteButton();
@@ -1228,6 +1325,9 @@ class MathNode {
       return false;
     }
     let sibling = this.siblingAtom(1);
+    if (sibling === null) {
+      return false;
+    }
     this.positionCaretBeforeKeyEvents = - 1;
     sibling.positionCaretBeforeKeyEvents = 0;
     return sibling.backspace();
@@ -1482,6 +1582,16 @@ class MathNode {
 
   makeParenthesesRight() {
     this.makeParenthesesCommon(false);
+  }
+
+  makeSqrt() {
+    let parent = this.parent;
+    let oldIndex = this.indexInParent;
+    let sqrt = mathNodeFactory.sqrt(this.equationEditor);
+    parent.insertChildAtPosition(oldIndex + 1, sqrt);
+    parent.ensureEditableAtoms();
+    parent.updateDOM();
+    sqrt.children[2].focusStandard(0);
   }
 
   makeParenthesesCommon(

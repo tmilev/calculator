@@ -765,6 +765,7 @@ class MathNode {
     this.element.style.left = "";
     this.computeDimensionsAtomic();
     if (heightToEnclose !== 0) {
+      heightToEnclose *= 1.3;
       this.boundingBox.stretchFactor = heightToEnclose / this.boundingBox.height;
       this.boundingBox.height = heightToEnclose;
     }

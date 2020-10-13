@@ -382,8 +382,11 @@ class EquationEditor {
     this.selectionStartOffset = -1;
   }
 
-  toString() {
-    return this.rootNode.toHtml(0);
+  toHtml() {
+    let result = `Latex: ${this.rootNode.toLatex()}`;
+    result += `<br>Drawing: ${this.rootNode.toString()}`;
+    result += `<br>Structure: ${this.rootNode.toHtml(0)}`;
+    return result;
   }
 
   sendKeys(
@@ -601,9 +604,9 @@ class MathNode {
     }
     this.fractionLineHeight = 0;
     this.element.setAttribute("mathTagName", this.type.type);
-    /*    this.element.addEventListener("keyup", (e) => {
-          this.handleKeyUp(e);
-        });*/
+    this.element.addEventListener("keyup", (e) => {
+      this.handleKeyUp(e);
+    });
     this.element.addEventListener("keydown", (e) => {
       this.handleKeyDown(e);
     });
@@ -972,6 +975,16 @@ class MathNode {
     }, 0);
   }
 
+  handleKeyUp(
+    /** @type {KeyboardEvent} */
+    event,
+  ) {
+    if (!event.shiftKey) {
+      this.equationEditor.selectionStartOffset = - 1;
+      this.equationEditor.selectionStart = null;
+    }
+  }
+
   /** @returns {boolean} whether default should be prevented. */
   handleKeyDownCases(
     /** @type {KeyboardEvent} */
@@ -1040,26 +1053,28 @@ class MathNode {
     this.equationEditor.selectionStartOffset = this.positionCaretBeforeKeyEvents;
   }
 
+  /** @returns{boolean} whether the default should be prevented. */
   setSelectionEnd(
     /** @type {string} */
     key,
     /** @type {boolean} */
     shiftHeld,
   ) {
-    console.log("DEBUG: insidel set selection end");
+    console.log("DEBUG: inside set selection end");
     if (!shiftHeld) {
-      return;
+      return false;
     }
     let newRange = document.createRange();
     if (key === "ArrowLeft" || key === "ArrowUp") {
       let elementStart = this.element.childNodes[0];
-      newRange.setStart(elementStart, this.element.textContent.length);
+      newRange.setStart(elementStart, this.positionCaretBeforeKeyEvents - 1);
       let elementEnd = this.equationEditor.selectionStart.element.childNodes[0];
       newRange.setEnd(elementEnd, this.equationEditor.selectionStartOffset);
     }
     document.getSelection().removeAllRanges();
     console.log(`DEBUG: And the new selection: ${newRange}`);
     document.getSelection().addRange(newRange);
+    return true;
   }
 
   /** @returns{boolean} whether the default should be prevented. */
@@ -1073,16 +1088,17 @@ class MathNode {
       this.setSelectionStart(key, shiftHeld);
     }
     if (this.arrowAbsorbedByAtom(key)) {
-      this.setSelectionEnd(key, shiftHeld);
-      return false;
+      return this.setSelectionEnd(key, shiftHeld);
     }
     /** @type {AtomWithPosition} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
-      toFocus.element.setSelectionEnd(key, shiftHeld);
-      return true;
+      toFocus.element.positionCaretBeforeKeyEvents = toFocus.element.element.textContent.length + 1;
+      if (toFocus.element.setSelectionEnd(key, shiftHeld)) {
+        return true;
+      }
+      toFocus.element.focus(toFocus.position);
     }
-    toFocus.element.focus(toFocus.position);
     return true;
   }
 
@@ -2260,11 +2276,8 @@ class ParentWithIndex {
   }
 }
 
-
 function writeDebugInfo() {
-  document.getElementById("latex").innerHTML = lastCreatedEquationEditor.rootNode.toLatex();
-  document.getElementById("debugStructure").innerHTML = lastCreatedEquationEditor.rootNode.toString();
-  document.getElementById("debugDimensions").innerHTML = lastCreatedEquationEditor.toString();
+  document.getElementById("debug").innerHTML = lastCreatedEquationEditor.toHtml();
 }
 
 /** @type {EquationEditor|null} */

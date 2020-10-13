@@ -196,12 +196,15 @@ const knownTypes = {
     "type": "sqrt",
     "width": "auto",
     "height": "auto",
+    "margin": "2px",
   }),
   sqrtSign: new MathNodeType({
     "type": "sqrtSign",
   }),
   radicalExponentBox: new MathNodeType({
     "type": "radicalExponentBox",
+    "fontSize": 0.55,
+    "minHeightScale": 0.55,
   }),
   radicalUnderBox: new MathNodeType({
     "type": "radicalUnderBox",
@@ -289,12 +292,12 @@ class MathNodeFactory {
   ) {
     const sqrt = new MathNode(equationEditor, knownTypes.sqrt);
     const radicalExponentBox = new MathNode(equationEditor, knownTypes.radicalExponentBox);
-    radicalExponentBox.children.push(this.horizontalMath(equationEditor, null));
-    sqrt.children.push(radicalExponentBox);
-    sqrt.children.push(mathNodeFactory.sqrtSign(equationEditor));
+    radicalExponentBox.appendChild(this.horizontalMath(equationEditor, null));
+    sqrt.appendChild(radicalExponentBox);
+    sqrt.appendChild(mathNodeFactory.sqrtSign(equationEditor));
     const underTheRadical = new MathNode(equationEditor, knownTypes.radicalUnderBox);
-    underTheRadical.children.push(mathNodeFactory.horizontalMath(equationEditor, null));
-    sqrt.children.push(underTheRadical);
+    underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, null));
+    sqrt.appendChild(underTheRadical);
     return sqrt;
   }
 
@@ -374,6 +377,9 @@ class EquationEditor {
     this.rootNode.externalDOM = this.container;
     this.rootNode.updateDOM();
     lastCreatedEquationEditor = this;
+    /** @type{MathNode|null} */
+    this.selectionStart = null;
+    this.selectionStartOffset = -1;
   }
 
   toString() {
@@ -471,7 +477,7 @@ class MathNode {
     /** @type {EquationEditor} */
     equationEditor,
     /** @type {MathNodeType} */
-    type
+    type,
   ) {
     if (!(equationEditor instanceof EquationEditor)) {
       throw (`Unexpected equation editor ${equationEditor}`);
@@ -507,6 +513,7 @@ class MathNode {
      * or has been implied by a user action, such as parentheses auto-balancing.
      */
     this.implied = false;
+    /** @type {EquationEditor} */
     this.equationEditor = equationEditor;
     this.boundingBox = new BoundingBox();
   }
@@ -637,10 +644,12 @@ class MathNode {
       this.type.type === knownTypes.sqrtSign.type
     );
   }
+
   /** @returns {boolean} */
   isAtomEditable() {
     return this.type.type === knownTypes.atom.type;
   }
+
   hasHorizontalLayout() {
     if (this.type.type === knownTypes.fraction.type) {
       return false;
@@ -776,16 +785,20 @@ class MathNode {
   computeDimensionsSqrt() {
     let radicalExponentBox = this.children[0];
     let sqrtSign = this.children[1];
-    let underRadical = this.children[2];
-    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width / 2);
+    let underTheRadical = this.children[2];
+    // The proportion of the width of the sqrt sign that overlaps with the radical exponent.
+    let sqrtProportionOverlapped = 0.85;
+    let extraWidth = Math.max(0, radicalExponentBox.boundingBox.width - sqrtSign.boundingBox.width * sqrtProportionOverlapped);
     // The top of the sqrt sign may not connect perfectly with the overline of the under-the-radical content.
     // The following variable compensates for that.
-    sqrtSign.verticallyStretchSqrt(underRadical.boundingBox.height);
-    let widthSqrtSign = 0.92;
-    underRadical.boundingBox.left = sqrtSign.boundingBox.width * widthSqrtSign + radicalExponentBox.boundingBox.width + extraWidth;
+    sqrtSign.verticallyStretchSqrt(underTheRadical.boundingBox.height);
+    let widthSqrtSign = 0.99;// 0.92;
+    sqrtSign.boundingBox.left = extraWidth;
+    underTheRadical.boundingBox.left = sqrtSign.boundingBox.left + sqrtSign.boundingBox.width * widthSqrtSign;
     this.boundingBox = new BoundingBox();
-    this.boundingBox.height = underRadical.boundingBox.height;
-    this.boundingBox.fractionLineHeight = underRadical.boundingBox.fractionLineHeight;
+    this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
+    this.boundingBox.fractionLineHeight = underTheRadical.boundingBox.fractionLineHeight;
+    this.boundingBox.width = underTheRadical.boundingBox.left + underTheRadical.boundingBox.width;
   }
 
   computeDimensionsRadicalUnderBox() {
@@ -965,7 +978,9 @@ class MathNode {
     event,
   ) {
     let key = event.key;
+    let shiftHeld = event.shiftKey;
     console.log("DEBUG: handle key down for: " + key);
+    console.log("DEBUG: shiftHeld: " + shiftHeld);
     switch (key) {
       case "/":
         this.makeFractionNumerator();
@@ -982,12 +997,14 @@ class MathNode {
       case "ArrowRight":
       case "ArrowUp":
       case "ArrowDown":
-        return this.arrow(key);
+        return this.arrow(key, shiftHeld);
       case "(":
         this.makeParenthesesLeft();
         return true;
       case ")":
         this.makeParenthesesRight();
+        return true;
+      case "Enter":
         return true;
       case "s":
         this.makeSqrt();
@@ -1015,25 +1032,63 @@ class MathNode {
     }
   }
 
+  setSelectionStart() {
+    if (this.equationEditor.selectionStart !== null) {
+      return;
+    }
+    this.equationEditor.selectionStart = this;
+    this.equationEditor.selectionStartOffset = this.positionCaretBeforeKeyEvents;
+  }
+
+  setSelectionEnd(
+    /** @type {string} */
+    key,
+    /** @type {boolean} */
+    shiftHeld,
+  ) {
+    console.log("DEBUG: insidel set selection end");
+    if (!shiftHeld) {
+      return;
+    }
+    let newRange = document.createRange();
+    if (key === "ArrowLeft" || key === "ArrowUp") {
+      let elementStart = this.element.childNodes[0];
+      newRange.setStart(elementStart, this.element.textContent.length);
+      let elementEnd = this.equationEditor.selectionStart.element.childNodes[0];
+      newRange.setEnd(elementEnd, this.equationEditor.selectionStartOffset);
+    }
+    document.getSelection().removeAllRanges();
+    console.log(`DEBUG: And the new selection: ${newRange}`);
+    document.getSelection().addRange(newRange);
+  }
+
   /** @returns{boolean} whether the default should be prevented. */
   arrow(
     /** @type {string} */
     key,
+    /** @type {boolean} */
+    shiftHeld,
   ) {
+    if (shiftHeld) {
+      this.setSelectionStart(key, shiftHeld);
+    }
     if (this.arrowAbsorbedByAtom(key)) {
+      this.setSelectionEnd(key, shiftHeld);
       return false;
     }
     /** @type {AtomWithPosition} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
-      toFocus.element.focus(toFocus.position);
+      toFocus.element.setSelectionEnd(key, shiftHeld);
+      return true;
     }
+    toFocus.element.focus(toFocus.position);
     return true;
   }
 
   arrowAbsorbedByAtom(
     /** @type {string} */
-    key
+    key,
   ) {
     if (this.type.type !== knownTypes.atom.type) {
       return false;

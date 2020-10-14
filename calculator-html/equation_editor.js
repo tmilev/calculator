@@ -1070,6 +1070,11 @@ class MathNode {
       newRange.setStart(elementStart, this.positionCaretBeforeKeyEvents - 1);
       let elementEnd = this.equationEditor.selectionStart.element.childNodes[0];
       newRange.setEnd(elementEnd, this.equationEditor.selectionStartOffset);
+    } else {
+      let elementStart = this.equationEditor.selectionStart.element.childNodes[0];
+      newRange.setStart(elementStart, this.equationEditor.positionCaretBeforeKeyEvents);
+      let elementEnd = this.element.childNodes[0];
+      newRange.setEnd(elementEnd, this.positionCaretBeforeKeyEvents + 1);
     }
     document.getSelection().removeAllRanges();
     console.log(`DEBUG: And the new selection: ${newRange}`);

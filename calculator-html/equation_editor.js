@@ -1474,6 +1474,23 @@ class MathNode {
   }
 
   /** @returns {boolean} whether reduction ocurred. */
+  applyBackspaceToTheLeftOfSqrtSign() {
+    if (this.type.type !== knownTypes.radicalUnderBox.type) {
+      return false;
+    }
+    let sqrt = this.parent;
+    let indexSqrt = sqrt.indexInParent;
+    let exponent = sqrt.children[0].children[0];
+    this.children[0].children[0].desiredCaretPosition = 0;
+    let parent = sqrt.parent;
+    parent.replaceChildAtPositionWithChildren(indexSqrt, [exponent, sqrt.children[2].children[0]])
+    parent.normalizeHorizontalMath();
+    parent.updateDOM();
+    parent.focusRestore();
+    return true;
+  }
+
+  /** @returns {boolean} whether reduction ocurred. */
   applyBackspaceToTheRightDelimiter() {
     if (
       this.type.type !== knownTypes.rightDelimiter.type &&
@@ -1531,6 +1548,9 @@ class MathNode {
       return true;
     }
     if (this.applyBackspaceToTheLeftExponent()) {
+      return true;
+    }
+    if (this.applyBackspaceToTheLeftOfSqrtSign()) {
       return true;
     }
     if (this.indexInParent === 0) {

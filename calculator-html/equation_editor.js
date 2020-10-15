@@ -359,8 +359,48 @@ class AtomWithPosition {
     /** @type {number} */
     position,
   ) {
+    /** @type {MathNode|null} */
     this.element = element;
+    /** @type {number} */
     this.position = position;
+    if (this.element === null) {
+      this.position = -1;
+    }
+  }
+
+  /** @returns {AtomWithPosition} */
+  leftNeighbor() {
+    if (this.element === null) {
+      return new AtomWithPosition(null, -1);
+    }
+    if (this.position > 0) {
+      return new AtomWithPosition(this.element, this.position - 1);
+    }
+    let resultElement = this.element.firstAtomToTheLeft();
+    if (resultElement === null) {
+      return new AtomWithPosition(null, - 1);
+    }
+    return new AtomWithPosition(resultElement, resultElement.element.textContent.length);
+  }
+
+  /** @returns {AtomWithPosition} */
+  rightNeighbor() {
+    if (this.element === null) {
+      return new AtomWithPosition(null, -1);
+
+    }
+    if (this.position < this.element.element.textContent.length) {
+      return new AtomWithPosition(this.element, this.position + 1);
+    }
+    return new AtomWithPosition(this.element.firstAtomToTheRight(), 0);
+  }
+
+  /** @returns {string} */
+  toString() {
+    if (this.element === null) {
+      return `[null, ${this.position}]`;
+    }
+    return `[${this.element.toString()}, ${this.position}]`;
   }
 }
 
@@ -377,9 +417,9 @@ class EquationEditor {
     this.rootNode.externalDOM = this.container;
     this.rootNode.updateDOM();
     lastCreatedEquationEditor = this;
-    /** @type{MathNode|null} */
-    this.selectionStart = null;
-    this.selectionStartOffset = -1;
+    /** @type{AtomWithPosition} */
+    this.selectionStart = new AtomWithPosition(null, -1);
+    this.selectionEnd = new AtomWithPosition(null, -1);
   }
 
   toHtml() {
@@ -979,9 +1019,9 @@ class MathNode {
     /** @type {KeyboardEvent} */
     event,
   ) {
-    if (!event.shiftKey) {
-      this.equationEditor.selectionStartOffset = - 1;
-      this.equationEditor.selectionStart = null;
+    if (!event.shiftKey && event.key !== "Shift") {
+      this.equationEditor.selectionStart = new AtomWithPosition(null, - 1);
+      this.equationEditor.selectionEnd = new AtomWithPosition(null, - 1);
     }
   }
 
@@ -1046,11 +1086,76 @@ class MathNode {
   }
 
   setSelectionStart() {
-    if (this.equationEditor.selectionStart !== null) {
+    if (this.equationEditor.selectionStart.element !== null) {
       return;
     }
-    this.equationEditor.selectionStart = this;
-    this.equationEditor.selectionStartOffset = this.positionCaretBeforeKeyEvents;
+    this.equationEditor.selectionStart = new AtomWithPosition(this, this.positionCaretBeforeKeyEvents);
+    this.equationEditor.selectionEnd = new AtomWithPosition(this, this.positionCaretBeforeKeyEvents);
+  }
+
+  /** @returns{number[]} The path needed to get from the current node to the root node.*/
+  getPathToRoot() {
+    let reversed = [];
+    let current = this;
+    while (current !== null) {
+      if (current.indexInParent !== -1) {
+        reversed.push(current.indexInParent);
+      }
+      current = current.parent;
+    }
+    return reversed.reverse();
+  }
+
+  /** @returns{boolean} Given two atoms, decides whether this is to the left of the other atom. */
+  isToTheLeftOf(
+    /**@type{MathNode} */ other,
+  ) {
+    let thisPath = this.getPathToRoot();
+    let otherPath = other.getPathToRoot();
+    for (let i = 0; i < thisPath.length; i++) {
+      if (i >= otherPath.length) {
+        // The this element is contained in the other element: this 
+        // is not expected as both elements are required to be atoms and cannot contain one another.
+        console.log(`Element ${this.toString()} is contained in ${other.toString()}, which is not allowed in this function. `);
+        return false;
+      }
+      if (thisPath[i] < otherPath[i]) {
+        return true;
+      }
+      if (thisPath[i] > otherPath[i]) {
+        return false;
+      }
+    }
+    // The two elements are equal.
+    return false;
+  }
+
+  selectBetween(
+    /** @type{AtomWithPosition} */
+    end1,
+    /** @type{AtomWithPosition} */
+    end2,
+  ) {
+    console.log(`DEBUG: select from: ${end1.toString()}, to ${end2.toString()}`);
+    let shouldSwap = end2.element.isToTheLeftOf(end1.element);
+    if (end1.element === end2.element) {
+      shouldSwap = (end2.position < end1.position);
+    }
+    if (shouldSwap) {
+      // Swap the two ends.
+      let end2copy = end2;
+      end2 = end1;
+      end1 = end2copy;
+      console.log(`DEBUG: selection corrected: ${end1.toString()}, to ${end2.toString()}`);
+    }
+    let newRange = document.createRange();
+    let elementStart = end1.element.element.childNodes[0];
+    newRange.setStart(elementStart, end1.position);
+    let elementEnd = end2.element.element.childNodes[0];
+    newRange.setEnd(elementEnd, end2.position);
+    document.getSelection().removeAllRanges();
+    console.log(`DEBUG: And the new selection: ${newRange}`);
+    document.getSelection().addRange(newRange);
   }
 
   /** @returns{boolean} whether the default should be prevented. */
@@ -1064,21 +1169,16 @@ class MathNode {
     if (!shiftHeld) {
       return false;
     }
-    let newRange = document.createRange();
     if (key === "ArrowLeft" || key === "ArrowUp") {
-      let elementStart = this.element.childNodes[0];
-      newRange.setStart(elementStart, this.positionCaretBeforeKeyEvents - 1);
-      let elementEnd = this.equationEditor.selectionStart.element.childNodes[0];
-      newRange.setEnd(elementEnd, this.equationEditor.selectionStartOffset);
+      this.equationEditor.selectionEnd = this.equationEditor.selectionEnd.leftNeighbor();
     } else {
-      let elementStart = this.equationEditor.selectionStart.element.childNodes[0];
-      newRange.setStart(elementStart, this.equationEditor.positionCaretBeforeKeyEvents);
-      let elementEnd = this.element.childNodes[0];
-      newRange.setEnd(elementEnd, this.positionCaretBeforeKeyEvents + 1);
+      this.equationEditor.selectionEnd = this.equationEditor.selectionEnd.rightNeighbor();
     }
-    document.getSelection().removeAllRanges();
-    console.log(`DEBUG: And the new selection: ${newRange}`);
-    document.getSelection().addRange(newRange);
+    this.selectBetween(
+      this.equationEditor.selectionStart,
+      this.equationEditor.selectionEnd,
+    );
+
     return true;
   }
 
@@ -1091,17 +1191,16 @@ class MathNode {
   ) {
     if (shiftHeld) {
       this.setSelectionStart(key, shiftHeld);
+      this.setSelectionEnd(key, shiftHeld);
+      return true;
     }
     if (this.arrowAbsorbedByAtom(key)) {
-      return this.setSelectionEnd(key, shiftHeld);
+      return false;
     }
     /** @type {AtomWithPosition} */
     const toFocus = this.getAtomToFocus(key);
     if (toFocus.element !== null) {
       toFocus.element.positionCaretBeforeKeyEvents = toFocus.element.element.textContent.length + 1;
-      if (toFocus.element.setSelectionEnd(key, shiftHeld)) {
-        return true;
-      }
       toFocus.element.focus(toFocus.position);
     }
     return true;
@@ -1140,10 +1239,10 @@ class MathNode {
       return this.parent.getAtomToFocus(key);
     }
     if (arrowType === arrowMotion.firstAtomToTheLeft) {
-      return new AtomWithPosition(this.firstAtomToTheLeft(), 1);
+      return (new AtomWithPosition(this, 0)).leftNeighbor();
     }
     if (arrowType === arrowMotion.firstAtomToTheRight) {
-      return new AtomWithPosition(this.firstAtomToTheRight(), - 1);
+      return (new AtomWithPosition(this, this.element.textContent.length)).rightNeighbor();
     }
     return new AtomWithPosition(null, - 1);
   }
@@ -2138,7 +2237,6 @@ class MathNode {
 
   setCaretPosition(/** @type {number}*/ position) {
     let range = document.createRange();
-    // range.selectNodeContents(this.element);    
     let collapseToStart = true;
     if (position >= this.element.textContent.length) {
       collapseToStart = false;

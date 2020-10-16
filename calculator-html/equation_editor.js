@@ -259,17 +259,19 @@ class MathNodeFactory {
   }
 
   /** @returns {MathNode} */
-  fractionEmptyDenominator(
+  fraction(
     /** @type {EquationEditor} */
     equationEditor,
     /** @type{MathNode}*/
     numeratorContent,
+    /** @type{MathNode}*/
+    denominatorContent,
   ) {
     const fraction = new MathNode(equationEditor, knownTypes.fraction);
     const numerator = new MathNode(equationEditor, knownTypes.numerator);
     const denominator = new MathNode(equationEditor, knownTypes.denominator);
     numerator.appendChild(this.horizontalMath(equationEditor, numeratorContent));
-    denominator.appendChild(this.horizontalMath(equationEditor, null));
+    denominator.appendChild(this.horizontalMath(equationEditor, denominatorContent));
     fraction.appendChild(numerator);
     fraction.appendChild(denominator);
     return fraction;
@@ -1880,6 +1882,15 @@ class MathNode {
     return -1;
   }
 
+  /**@returns {MathNode[]} */
+  splitAtom() {
+    let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
+    let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
+    let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
+    let rightNode = mathNodeFactory.atom(this.equationEditor, rightContent);
+    return [leftNode, rightNode];
+  }
+
   doMakeParenthesesCommon(
     /**@type {number} */
     positionOperator,
@@ -1900,12 +1911,9 @@ class MathNode {
       isLeft,
     );
     if (positionOperator === 0) {
-      let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
-      let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
-      let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);
-      let rightNode = mathNodeFactory.atom(this.equationEditor, rightContent);
+      let leftAndRight = this.splitAtom();
       parent.replaceChildAtPositionWithChildren(
-        oldIndexInParent, [leftNode, rightNode],
+        oldIndexInParent, leftAndRight,
       );
     }
     let indexLeftDelimiter = - 1;
@@ -2061,13 +2069,22 @@ class MathNode {
     }
     const oldParent = this.parent;
     const oldIndexInParent = this.indexInParent;
-    const fraction = mathNodeFactory.fractionEmptyDenominator(this.equationEditor, this);
-
+    let fraction = null;
+    let childIndexToFocus = 1;
+    if (this.positionCaretBeforeKeyEvents === this.element.textContent.length) {
+      fraction = mathNodeFactory.fraction(this.equationEditor, this, null);
+    } else if (this.positionCaretBeforeKeyEvents === 0) {
+      fraction = mathNodeFactory.fraction(this.equationEditor, null, this);
+      childIndexToFocus = 0;
+    } else {
+      let split = this.splitAtom();
+      fraction = mathNodeFactory.fraction(this.equationEditor, split[0], split[1]);
+    }
     oldParent.replaceChildAtPosition(oldIndexInParent, mathNodeFactory.atom(this.equationEditor, ""));
     oldParent.insertChildAtPosition(oldIndexInParent + 1, fraction);
     oldParent.insertChildAtPosition(oldIndexInParent + 2, mathNodeFactory.atom(this.equationEditor, ""));
     fraction.parent.updateDOM();
-    fraction.children[1].focus(- 1);
+    fraction.children[childIndexToFocus].focus(- 1);
   }
 
   isEmptyAtom() {

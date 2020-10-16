@@ -291,6 +291,8 @@ class MathNodeFactory {
   sqrt(
     /** @type {EquationEditor} */
     equationEditor,
+    /** @type {MathNode|null} */
+    underTheRadicalContent,
   ) {
     const sqrt = new MathNode(equationEditor, knownTypes.sqrt);
     const radicalExponentBox = new MathNode(equationEditor, knownTypes.radicalExponentBox);
@@ -298,7 +300,7 @@ class MathNodeFactory {
     sqrt.appendChild(radicalExponentBox);
     sqrt.appendChild(mathNodeFactory.sqrtSign(equationEditor));
     const underTheRadical = new MathNode(equationEditor, knownTypes.radicalUnderBox);
-    underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, null));
+    underTheRadical.appendChild(mathNodeFactory.horizontalMath(equationEditor, underTheRadicalContent));
     sqrt.appendChild(underTheRadical);
     return sqrt;
   }
@@ -1785,8 +1787,14 @@ class MathNode {
   makeSqrt() {
     let parent = this.parent;
     let oldIndex = this.indexInParent;
-    let sqrt = mathNodeFactory.sqrt(this.equationEditor);
-    parent.insertChildAtPosition(oldIndex + 1, sqrt);
+    let split = this.splitAtom();
+    let sqrt = mathNodeFactory.sqrt(this.equationEditor, split[1]);
+    if (split[0] === null) {
+      parent.replaceChildAtPosition(oldIndex, sqrt);
+    } else {
+      parent.replaceChildAtPosition(oldIndex, split[0]);
+      parent.insertChildAtPosition(oldIndex + 1, sqrt);
+    }
     parent.ensureEditableAtoms();
     parent.updateDOM();
     sqrt.children[2].focusStandard(0);
@@ -1882,8 +1890,14 @@ class MathNode {
     return -1;
   }
 
-  /**@returns {MathNode[]} */
+  /** @returns {MathNode[]} */
   splitAtom() {
+    if (this.positionCaretBeforeKeyEvents === 0) {
+      return [null, this];
+    }
+    if (this.positionCaretBeforeKeyEvents >= this.element.textContent.length) {
+      return [this, null];
+    }
     let leftContent = this.element.textContent.slice(0, this.positionCaretBeforeKeyEvents);
     let rightContent = this.element.textContent.slice(this.positionCaretBeforeKeyEvents, this.element.textContent.length);
     let leftNode = mathNodeFactory.atom(this.equationEditor, leftContent);

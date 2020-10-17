@@ -1275,11 +1275,16 @@ class MathNode {
     if (!shiftHeld) {
       return false;
     }
+    let newSelection = null;
     if (key === "ArrowLeft" || key === "ArrowUp") {
-      this.equationEditor.selectionEnd = this.equationEditor.selectionEnd.leftNeighbor();
+      newSelection = this.equationEditor.selectionEnd.leftNeighbor();
     } else {
-      this.equationEditor.selectionEnd = this.equationEditor.selectionEnd.rightNeighbor();
+      newSelection = this.equationEditor.selectionEnd.rightNeighbor();
     }
+    if (newSelection.element === null) {
+      return false;
+    }
+    this.equationEditor.selectionEnd = newSelection;
     this.selectBetween(
       this.equationEditor.selectionStart,
       this.equationEditor.selectionEnd,

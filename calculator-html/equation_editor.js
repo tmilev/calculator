@@ -127,7 +127,7 @@ const knownTypes = {
     "outline": "0px solid transparent",
     "width": "auto",
     "height": "auto",
-    "minWidth": "2px",
+    "minWidth": "4px",
   }),
   // A non-editable math expression/operator such as "+" or "-".
   atomImmutable: new MathNodeType({
@@ -1123,7 +1123,7 @@ class MathNode {
       case "*":
       case "+":
       case "-":
-        this.makeHorizontalOperator(key);
+        this.makeHorizontalOperatorCorrectInput(key);
         return true;
       case "^":
         this.makeBaseWithExponent();
@@ -1257,10 +1257,8 @@ class MathNode {
       console.log(`DEBUG: selection corrected: ${end1.toString()}, to ${end2.toString()}`);
     }
     let newRange = document.createRange();
-    let elementStart = end1.element.element.childNodes[0];
-    newRange.setStart(elementStart, end1.position);
-    let elementEnd = end2.element.element.childNodes[0];
-    newRange.setEnd(elementEnd, end2.position);
+    end1.element.setRangeStart(newRange, end1.position);
+    end2.element.setRangeEnd(newRange, end2.position);
     document.getSelection().removeAllRanges();
     console.log(`DEBUG: And the new selection: ${newRange}`);
     document.getSelection().addRange(newRange);
@@ -1342,7 +1340,7 @@ class MathNode {
   ) {
     if (arrowType === arrowMotion.parentForward) {
       if (this.parent === null) {
-        return this;
+        return new AtomWithPosition(null, - 1);
       }
       return this.parent.getAtomToFocus(key);
     }
@@ -1596,6 +1594,9 @@ class MathNode {
       i <= toIndex && i >= 0 && i < this.children.length;
       i++
     ) {
+      if (this.children[i] === null) {
+        continue;
+      }
       this.children[i].parent = null;
     }
     // Store all children that need to be shifted down.
@@ -1876,6 +1877,21 @@ class MathNode {
       result.index = result.parent.indexInParent;
     }
     return result;
+  }
+
+  makeHorizontalOperatorCorrectInput(
+    /** @type {string} */
+    contentTransformedToMathSymbol,
+  ) {
+    if (contentTransformedToMathSymbol === "-") {
+      this.makeHorizontalOperator("\u2212");
+      return;
+    }
+    if (contentTransformedToMathSymbol === "*") {
+      this.makeHorizontalOperator("\u00B7");
+      return;
+    }
+    this.makeHorizontalOperator(contentTransformedToMathSymbol);
   }
 
   makeHorizontalOperator(
@@ -2272,6 +2288,7 @@ class MathNode {
       ancestor.appendChild(split.afterSplit[i]);
     }
     ancestor.normalizeHorizontalMath();
+    ancestor.ensureEditableAtoms();
     ancestor.updateDOM();
     fraction.children[1].focus(- 1);
   }
@@ -2441,6 +2458,32 @@ class MathNode {
     return false;
   }
 
+  setRangeStart(
+    /** @type{Range}  */
+    range,
+    /** @type {number} */
+    position,
+  ) {
+    if (this.element.childNodes.length > 0) {
+      range.setStart(this.element.childNodes[0], position);
+    } else {
+      range.setStart(this.element, 0);
+    }
+  }
+
+  setRangeEnd(
+    /** @type{Range}  */
+    range,
+    /** @type {number} */
+    position,
+  ) {
+    if (this.element.childNodes.length > 0) {
+      range.setEnd(this.element.childNodes[0], position);
+    } else {
+      range.setEnd(this.element, 0);
+    }
+  }
+
   setCaretPosition(/** @type {number}*/ position) {
     let range = document.createRange();
     let collapseToStart = true;
@@ -2449,10 +2492,10 @@ class MathNode {
       range.selectNodeContents(this.element);
     } else if (position > 0) {
       collapseToStart = false;
-      range.setStart(this.element.childNodes[0], position);
+      this.setRangeStart(range, position);
     } else {
       collapseToStart = true;
-      range.setStart(this.element.childNodes[0], 0);
+      this.setRangeStart(range, 0)
     }
     console.log(`Position: ${position}, range ${range}, collapseToStart: ${collapseToStart} start offset: ${range.startOffset}, end offset: ${range.endOffset}, text len: ${this.element.textContent.length}`);
     range.collapse(collapseToStart);
